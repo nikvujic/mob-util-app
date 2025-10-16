@@ -1,0 +1,2 @@
+/home/nikvujic/z_code/the_app/android/app/.cxx/Debug/316v6m2r/x86/CMakeFiles/edit_cache.dir
+/home/nikvujic/z_code/the_app/android/app/.cxx/Debug/316v6m2r/x86/CMakeFiles/rebuild_cache.dir
