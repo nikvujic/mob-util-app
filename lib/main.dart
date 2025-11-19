@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:the_app/pages/notes.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // ⬅️ add this
+import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/widgets/bottom_nav.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,7 +20,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Notes App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
+        canvasColor: Colors.black,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const HomeScreen(),
