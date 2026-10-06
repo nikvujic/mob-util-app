@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // ⬅️ add this
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/notes/notes.dart';
+import 'package:the_app/pages/shop/shop.dart';
+import 'package:the_app/pages/todo/todo.dart';
 import 'package:the_app/widgets/bottom_nav.dart';
 
 void main() {
@@ -18,13 +21,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Notes App',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.black,
-        canvasColor: Colors.black,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
+      title: 'The App',
+      theme: AppTheme.dark,
       home: const HomeScreen(),
     );
   }
@@ -38,24 +36,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-  final List<Widget> _pages = [
-    const NotesPage(),
-  ];
+  static const _pages = [NotesPage(), ShopPage(), TodoPage()];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      // IndexedStack keeps every tab alive so scroll position and selection
+      // survive switching tabs. TickerMode marks which tab is visible.
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          for (var i = 0; i < _pages.length; i++)
+            TickerMode(enabled: i == _selectedIndex, child: _pages[i]),
+        ],
+      ),
       bottomNavigationBar: BottomNav(
         selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
+        onItemTapped: (index) => setState(() => _selectedIndex = index),
       ),
     );
   }
