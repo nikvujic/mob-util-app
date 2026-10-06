@@ -1,194 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/note.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
+/// Shows and edits a single note. Pass `noteId: null` to create a new note.
+///
+/// Changes are saved when the page is left (back arrow or system back). A new
+/// note left completely empty is discarded.
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String? noteId;
-  final bool isNew;
 
-  const NoteDetailPage({
-    super.key,
-    required this.noteId,
-    required this.isNew,
-  });
+  const NoteDetailPage({super.key, this.noteId});
 
   @override
   ConsumerState<NoteDetailPage> createState() => _NoteDetailPageState();
 }
 
 class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
-late TextEditingController _titleController;
-  late TextEditingController _contentController;
-  late FocusNode _titleFocusNode;
-  late FocusNode _contentFocusNode;
+  static const _untitled = 'Untitled';
 
-  String? _noteId;
-  bool _isEditing = false;
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
+  final FocusNode _contentFocusNode = FocusNode();
+
+  /// The note being edited; null while creating a new one.
+  Note? _note;
 
   @override
   void initState() {
     super.initState();
-
-    _titleFocusNode = FocusNode();
-    _contentFocusNode = FocusNode();
-
-    if (widget.isNew) {
-      _titleController = TextEditingController(text: 'New Note');
-      _contentController = TextEditingController();
-      _isEditing = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await Future.delayed(const Duration(milliseconds: 120));
-
-        final notifier = ref.read(notesProvider.notifier);
-        final newId = notifier.createNewNote();
-
-        setState(() {
-          _noteId = newId;
-        });
-
-        _contentFocusNode.requestFocus();
-      });
-    } else {
-      final notes = ref.read(notesProvider);
-      final note =
-          notes.firstWhere((n) => n.id == widget.noteId);
-
-      _noteId = note.id;
-
-      _titleController = TextEditingController(text: note.title);
-      _contentController = TextEditingController(text: note.content);
-      _isEditing = false;
-    }
+    final id = widget.noteId;
+    _note = id == null
+        ? null
+        : ref.read(notesProvider).where((n) => n.id == id).firstOrNull;
+    _titleController = TextEditingController(text: _note?.title ?? '');
+    _contentController = TextEditingController(text: _note?.content ?? '');
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
-    _titleFocusNode.dispose();
     _contentFocusNode.dispose();
     super.dispose();
   }
 
-  void _enableEditing({bool focusTitle = false}) {
-    if (!_isEditing) {
-      setState(() {
-        _isEditing = true;
-      });
-    }
+  void _save() {
+    final title = _titleController.text.trim();
+    final content = _contentController.text;
+    final notifier = ref.read(notesProvider.notifier);
+    final note = _note;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (focusTitle) {
-        _titleFocusNode.requestFocus();
-      } else {
-        _contentFocusNode.requestFocus();
-      }
-    });
-  }
-
-  Future<void> _saveAndPop() async {
-    final rawTitle = _titleController.text.trim();
-    final titleText = rawTitle.isEmpty ? 'Untitled' : rawTitle;
-
-    final id = _noteId ?? widget.noteId;
-
-    if (id != null) {
-      ref.read(notesProvider.notifier).updateNote(
-            id,
-            title: titleText,
-            content: _contentController.text,
-          );
-    }
-
-    if (mounted) {
-      Navigator.of(context).pop();
+    if (note == null) {
+      if (title.isEmpty && content.trim().isEmpty) return;
+      notifier.addNote(
+        title: title.isEmpty ? _untitled : title,
+        content: content,
+      );
+    } else {
+      notifier.updateNote(
+        note.id,
+        title: title.isEmpty ? _untitled : title,
+        content: content,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) {
-          _saveAndPop();
-        }
+        if (didPop) _save();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
         appBar: AppBar(
-          backgroundColor: Colors.grey[900],
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: _saveAndPop,
-          ),
-          title: const Text(
-            'Note',
-            style: TextStyle(color: Colors.white),
-          ),
-          centerTitle: true,
+          title: Text(_note == null ? 'New note' : 'Note'),
         ),
         body: Column(
           children: [
-            GestureDetector(
-              onTap: _isEditing
-                  ? null
-                  : () {
-                      _enableEditing(focusTitle: true);
-                    },
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: TextField(
-                  controller: _titleController,
-                  focusNode: _titleFocusNode,
-                  readOnly: !_isEditing,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Title',
-                    hintStyle: TextStyle(color: Colors.white38),
-                  ),
-                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: TextField(
+                key: const Key('noteTitleField'),
+                controller: _titleController,
+                autofocus: _note == null,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.next,
+                onSubmitted: (_) => _contentFocusNode.requestFocus(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Title',
+                  hintStyle: TextStyle(color: AppColors.textHint),
                 ),
               ),
             ),
-
-            const Divider(height: 1, color: Colors.white12),
-
+            const Divider(height: 1, color: AppColors.divider),
             Expanded(
-              child: GestureDetector(
-                onDoubleTap: _isEditing
-                    ? null
-                    : () {
-                        _enableEditing(focusTitle: false);
-                      },
-                behavior: HitTestBehavior.translucent,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: TextField(
-                    controller: _contentController,
-                    focusNode: _contentFocusNode,
-                    readOnly: !_isEditing,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    expands: true,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: '',
-                      hintStyle: TextStyle(color: Colors.white38),
-                    ),
-                    magnifierConfiguration:
-                        TextMagnifierConfiguration.disabled,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: TextField(
+                  key: const Key('noteContentField'),
+                  controller: _contentController,
+                  focusNode: _contentFocusNode,
+                  keyboardType: TextInputType.multiline,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Start writing…',
+                    hintStyle: TextStyle(color: AppColors.textHint),
                   ),
                 ),
               ),

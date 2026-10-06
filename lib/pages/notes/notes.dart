@@ -1,132 +1,219 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/note_detail.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/empty_state.dart';
+import 'package:the_app/widgets/selection.dart';
 
-class NotesPage extends ConsumerWidget {
+class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notes = [...ref.watch(notesProvider)];
-    notes.sort((a, b) => b.modifiedAt.compareTo(a.modifiedAt));
+  ConsumerState<NotesPage> createState() => _NotesPageState();
+}
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Notes', style: TextStyle(color: Colors.white)),
-        surfaceTintColor: Colors.transparent,
-        centerTitle: true,
-        actions: [
-          PopupMenuButton<String>(
-            color: Colors.grey[800],
-            iconColor: Colors.white,
-            onSelected: (value) {
-              if (value == 'export') {
-                // Handle export
-              } else if (value == 'import') {
-                // Handle import
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return const [
-                PopupMenuItem(
-                  value: 'export',
-                  child: Text('Export Notes',
-                      style: TextStyle(color: Colors.white)),
+class _NotesPageState extends ConsumerState<NotesPage> {
+  final SelectionController _selection = SelectionController();
+
+  @override
+  void dispose() {
+    _selection.dispose();
+    super.dispose();
+  }
+
+  void _openNote(String? id) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => NoteDetailPage(noteId: id)),
+    );
+  }
+
+  Future<void> _deleteSelected() async {
+    final confirmed = await showDeleteConfirmDialog(
+      context,
+      count: _selection.count,
+      singular: 'note',
+      plural: 'notes',
+    );
+    if (!confirmed || !mounted) return;
+    ref.read(notesProvider.notifier).removeNotes(_selection.selected);
+    _selection.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notes = ref.watch(notesProvider);
+    ref.listen(notesProvider, (_, next) {
+      _selection.retain(next.map((n) => n.id));
+    });
+
+    return SelectionPopScope(
+      controller: _selection,
+      child: ListenableBuilder(
+        listenable: _selection,
+        builder: (context, _) => Scaffold(
+          appBar: _selection.isActive
+              ? SelectionAppBar(
+                  count: _selection.count,
+                  allSelected: _selection.count == notes.length,
+                  onClose: _selection.clear,
+                  onSelectAll: () =>
+                      _selection.selectAll(notes.map((n) => n.id)),
+                  onDelete: _deleteSelected,
+                )
+              : AppBar(
+                  title: const Text('Notes'),
+                  actions: [
+                    PopupMenuButton<String>(
+                      iconColor: AppColors.textPrimary,
+                      onSelected: (value) {
+                        // TODO: export / import (requirement N8).
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(
+                          value: 'export',
+                          child: Text('Export Notes'),
+                        ),
+                        PopupMenuItem(
+                          value: 'import',
+                          child: Text('Import Notes'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                PopupMenuItem(
-                  value: 'import',
-                  child: Text('Import Notes',
-                      style: TextStyle(color: Colors.white)),
+          body: notes.isEmpty
+              ? const EmptyState(icon: Icons.note_outlined, message: 'No notes')
+              : ReorderableListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  buildDefaultDragHandles: false,
+                  itemCount: notes.length,
+                  // onReorderItem only exists on newer Flutter than we target.
+                  // ignore: deprecated_member_use
+                  onReorder: ref.read(notesProvider.notifier).reorder,
+                  itemBuilder: (context, index) {
+                    final note = notes[index];
+                    return Padding(
+                      key: ValueKey(note.id),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: _NoteTile(
+                        note: note,
+                        index: index,
+                        selectionMode: _selection.isActive,
+                        selected: _selection.isSelected(note.id),
+                        onTap: () => _selection.handleTap(
+                          note.id,
+                          () => _openNote(note.id),
+                        ),
+                        onLongPress: () =>
+                            _selection.handleLongPress(note.id),
+                      ),
+                    );
+                  },
                 ),
-              ];
-            },
-          ),
-        ],
+          floatingActionButton: _selection.isActive
+              ? null
+              : FloatingActionButton(
+                  // Tabs are kept alive side by side; a shared default hero
+                  // tag would clash when a route is pushed.
+                  heroTag: null,
+                  tooltip: 'New note',
+                  onPressed: () => _openNote(null),
+                  child: const Icon(Icons.add),
+                ),
+        ),
       ),
-      body: notes.isEmpty
-          ? const Center(
-              child: Text('No notes',
-                  style: TextStyle(color: Colors.white54, fontSize: 16)),
-            )
-          : Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: ListView.builder(
-                itemCount: notes.length,
-                physics: const RangeMaintainingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final note = notes[index];
+    );
+  }
+}
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Card(
-                      color: Colors.grey[850],
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(6))),
-                      margin: EdgeInsets.zero,
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          hoverColor: Colors.transparent
-                        ),
-                        child: ListTile(
-                          title: Text(note.title,
-                              style: const TextStyle(color: Colors.white)),
-                          subtitle: Text(
-                            _formatModifiedTime(note.modifiedAt),
-                            style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                          ),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => NoteDetailPage(
-                                  noteId: note.id,
-                                  isNew: false,
-                                ),
-                              ),
-                            );
-                          },
-                          onLongPress: () {
-                            ref
-                                .read(notesProvider.notifier)
-                                .removeNote(note.id);
-                          },
-                        ),
+class _NoteTile extends StatelessWidget {
+  final Note note;
+  final int index;
+  final bool selectionMode;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  const _NoteTile({
+    required this.note,
+    required this.index,
+    required this.selectionMode,
+    required this.selected,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectableCard(
+      selected: selected,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      note.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
                       ),
                     ),
-                  );
-                },
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatModifiedTime(note.modifiedAt),
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        shape: const CircleBorder(),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const NoteDetailPage(
-                noteId: null,
-                isNew: true,
+            if (selectionMode)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(
+                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
+                  color: selected ? AppColors.accent : AppColors.textHint,
+                ),
+              )
+            else
+              ReorderableDragStartListener(
+                index: index,
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: AppColors.textHint,
+                    semanticLabel: 'Reorder',
+                  ),
+                ),
               ),
-            ),
-          );
-        },
-        child: const Icon(Icons.add, color: Colors.white),
+          ],
+        ),
       ),
     );
   }
 }
 
 String _formatModifiedTime(DateTime dt) {
-  final y = dt.year;
   final mo = dt.month.toString().padLeft(2, '0');
   final d = dt.day.toString().padLeft(2, '0');
-
   final h = dt.hour.toString().padLeft(2, '0');
   final m = dt.minute.toString().padLeft(2, '0');
-
-  return '$y-$mo-$d  $h:$m';
+  return '${dt.year}-$mo-$d  $h:$m';
 }
