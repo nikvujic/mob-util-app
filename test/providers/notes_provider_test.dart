@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
   late NotesNotifier notifier;
 
-  setUp(() => notifier = NotesNotifier());
+  setUp(() => notifier = NotesNotifier(AppStorage.inMemory()));
 
   List<String> titles() => notifier.state.map((n) => n.title).toList();
 

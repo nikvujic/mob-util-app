@@ -14,7 +14,7 @@ Status legend: ✅ done · 🚧 in progress · ⏳ planned
 | G3 | Reusable UI building blocks instead of per-page copies: confirmation dialog, selection-mode app bar, selectable list tile, empty-state placeholder, text-input sheet. | ✅ |
 | G4 | **Selection mode** works the same way on every list: long-press an item to enter selection mode with that item selected; tap toggles items; the app bar shows the count, *select all*, and *delete*; system back / ✕ exits selection mode; deselecting the last item exits it too. | ✅ |
 | G5 | Deleting is never instant: it always goes through the reusable confirmation dialog, which names how many items will be deleted. | ✅ |
-| G6 | Data survives an app restart (local persistence). | ⏳ not started — data is currently in-memory only (see [BACKLOG.md](BACKLOG.md)) |
+| G6 | Data survives an app restart (local persistence). Every change is saved immediately; note edits are also autosaved while typing and when the app goes to the background. | ✅ |
 
 ## Notes
 
@@ -51,6 +51,12 @@ Status legend: ✅ done · 🚧 in progress · ⏳ planned
 
 - State management: Riverpod (`StateNotifierProvider`), one provider per feature
   in `lib/providers/`.
+- Storage: one JSON file per feature in the app's documents folder
+  (`data/notes.json`, `data/shop.json`), loaded at startup and rewritten after
+  every change (`lib/data/`). Writes go to a temp file that is then renamed
+  over the real one, so a crash never leaves a half-written file. A file that
+  can't be read is moved aside (`*.corrupt-<time>`), never overwritten. Files
+  carry a `version` field for future format changes.
 - Models are immutable value classes in `lib/models/`.
 - Reusable widgets live in `lib/widgets/`; feature pages in `lib/pages/<feature>/`.
 - Every feature ships with provider unit tests and widget tests for its main

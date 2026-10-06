@@ -15,4 +15,12 @@ class ShopItem {
   ShopItem copyWith({bool? toBuy}) {
     return ShopItem(id: id, name: name, toBuy: toBuy ?? this.toBuy);
   }
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'toBuy': toBuy};
+
+  factory ShopItem.fromJson(Map<String, dynamic> json) => ShopItem(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        toBuy: json['toBuy'] as bool,
+      );
 }

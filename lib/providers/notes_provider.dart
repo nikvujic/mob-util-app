@@ -1,10 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/id.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/note.dart';
 
-/// Notes in user-defined display order (index 0 is shown first).
+/// Notes in user-defined display order (index 0 is shown first). Every
+/// change is saved to [AppStorage].
 class NotesNotifier extends StateNotifier<List<Note>> {
-  NotesNotifier() : super([]);
+  NotesNotifier(AppStorage storage) : super(storage.initialNotes) {
+    addListener(storage.saveNotes, fireImmediately: false);
+  }
 
   static const defaultTitle = 'New Note';
 
@@ -56,5 +60,5 @@ class NotesNotifier extends StateNotifier<List<Note>> {
 }
 
 final notesProvider = StateNotifierProvider<NotesNotifier, List<Note>>((ref) {
-  return NotesNotifier();
+  return NotesNotifier(ref.watch(appStorageProvider));
 });

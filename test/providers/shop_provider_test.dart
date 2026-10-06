@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 void main() {
   late ShopNotifier notifier;
 
-  setUp(() => notifier = ShopNotifier());
+  setUp(() => notifier = ShopNotifier(AppStorage.inMemory()));
 
   List<String> toBuy() =>
       notifier.state.where((i) => i.toBuy).map((i) => i.name).toList();

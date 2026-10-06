@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/main.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
@@ -8,7 +9,9 @@ void main() {
   late ProviderContainer container;
 
   Future<void> pumpApp(WidgetTester tester) async {
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [appStorageProvider.overrideWithValue(AppStorage.inMemory())],
+    );
     addTearDown(container.dispose);
     await tester.pumpWidget(
       UncontrolledProviderScope(container: container, child: const MyApp()),
@@ -50,6 +53,32 @@ void main() {
     final note = container.read(notesProvider).single;
     expect(note.title, 'New Note');
     expect(note.content, 'Body only');
+  });
+
+  testWidgets('edits are autosaved while typing', (tester) async {
+    await pumpApp(tester);
+    final id = notes().addNote(title: 'Draft');
+    await tester.pump();
+
+    await tester.tap(find.text('Draft'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+        find.byKey(const Key('noteContentField')), 'Typed text');
+    await tester.pump(const Duration(seconds: 1));
+
+    final note = container.read(notesProvider).firstWhere((n) => n.id == id);
+    expect(note.content, 'Typed text');
+
+    // Clearing the title is not autosaved as "Untitled".
+    await tester.enterText(find.byKey(const Key('noteTitleField')), '');
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      container.read(notesProvider).firstWhere((n) => n.id == id).title,
+      'Draft',
+    );
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('an untouched new note is discarded', (tester) async {

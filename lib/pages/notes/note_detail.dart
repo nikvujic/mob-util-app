@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
@@ -5,9 +7,10 @@ import 'package:the_app/providers/notes_provider.dart';
 
 /// Shows and edits a single note.
 ///
-/// Changes are saved when the page is left (back arrow or system back). A note
-/// created just now ([isNew]) that was left untouched — default title and no
-/// content — is deleted again.
+/// Changes are saved shortly after typing stops, when the app goes to the
+/// background, and when the page is left. A note created just now ([isNew])
+/// that is left untouched — default title and no content — is deleted again
+/// when the page is left.
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String noteId;
   final bool isNew;
@@ -20,10 +23,13 @@ class NoteDetailPage extends ConsumerStatefulWidget {
 
 class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   static const _untitled = 'Untitled';
+  static const _autosaveDelay = Duration(milliseconds: 600);
 
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
+  late final AppLifecycleListener _lifecycleListener;
+  Timer? _autosaveTimer;
 
   @override
   void initState() {
@@ -32,17 +38,40 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         ref.read(notesProvider).where((n) => n.id == widget.noteId).firstOrNull;
     _titleController = TextEditingController(text: note?.title ?? '');
     _contentController = TextEditingController(text: note?.content ?? '');
+    _titleController.addListener(_scheduleAutosave);
+    _contentController.addListener(_scheduleAutosave);
+    _lifecycleListener = AppLifecycleListener(onHide: _autosave);
   }
 
   @override
   void dispose() {
+    _autosaveTimer?.cancel();
+    _lifecycleListener.dispose();
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
     super.dispose();
   }
 
+  void _scheduleAutosave() {
+    _autosaveTimer?.cancel();
+    _autosaveTimer = Timer(_autosaveDelay, _autosave);
+  }
+
+  /// Saves work in progress. Unlike [_save] it never deletes the note, and
+  /// a cleared title is not saved until the user leaves the page.
+  void _autosave() {
+    _autosaveTimer?.cancel();
+    final title = _titleController.text.trim();
+    ref.read(notesProvider.notifier).updateNote(
+          widget.noteId,
+          title: title.isEmpty ? null : title,
+          content: _contentController.text,
+        );
+  }
+
   void _save() {
+    _autosaveTimer?.cancel();
     final title = _titleController.text.trim();
     final content = _contentController.text;
     final notifier = ref.read(notesProvider.notifier);

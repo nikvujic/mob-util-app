@@ -1,15 +1,22 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/pages/todo/todo.dart';
 import 'package:the_app/widgets/bottom_nav.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // File storage is not available in the browser; the web build is only
+  // used for previews.
+  final storage = kIsWeb ? AppStorage.inMemory() : await AppStorage.open();
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [appStorageProvider.overrideWithValue(storage)],
+      child: const MyApp(),
     ),
   );
 }

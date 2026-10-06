@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/main.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
@@ -8,7 +9,9 @@ void main() {
   late ProviderContainer container;
 
   Future<void> pumpShop(WidgetTester tester) async {
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [appStorageProvider.overrideWithValue(AppStorage.inMemory())],
+    );
     addTearDown(container.dispose);
     await tester.pumpWidget(
       UncontrolledProviderScope(container: container, child: const MyApp()),

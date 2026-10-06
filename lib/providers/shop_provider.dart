@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/id.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/shop_item.dart';
 
 /// Shopping list items. A single ordered list; the "To buy" and "Items"
 /// sections are the items filtered by [ShopItem.toBuy], in list order.
+/// Every change is saved to [AppStorage].
 class ShopNotifier extends StateNotifier<List<ShopItem>> {
-  ShopNotifier() : super([]);
+  ShopNotifier(AppStorage storage) : super(storage.initialShopItems) {
+    addListener(storage.saveShopItems, fireImmediately: false);
+  }
 
   /// Adds an item to the top of "To buy". Blank names are ignored.
   void addItem(String name) {
@@ -50,5 +54,5 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
 }
 
 final shopProvider = StateNotifierProvider<ShopNotifier, List<ShopItem>>((ref) {
-  return ShopNotifier();
+  return ShopNotifier(ref.watch(appStorageProvider));
 });
