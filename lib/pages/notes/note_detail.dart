@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
-import 'package:the_app/models/note.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
-/// Shows and edits a single note. Pass `noteId: null` to create a new note.
+/// Shows and edits a single note.
 ///
-/// Changes are saved when the page is left (back arrow or system back). A new
-/// note left completely empty is discarded.
+/// Changes are saved when the page is left (back arrow or system back). A note
+/// created just now ([isNew]) that was left untouched — default title and no
+/// content — is deleted again.
 class NoteDetailPage extends ConsumerStatefulWidget {
-  final String? noteId;
+  final String noteId;
+  final bool isNew;
 
-  const NoteDetailPage({super.key, this.noteId});
+  const NoteDetailPage({super.key, required this.noteId, this.isNew = false});
 
   @override
   ConsumerState<NoteDetailPage> createState() => _NoteDetailPageState();
@@ -24,18 +25,13 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   late final TextEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
 
-  /// The note being edited; null while creating a new one.
-  Note? _note;
-
   @override
   void initState() {
     super.initState();
-    final id = widget.noteId;
-    _note = id == null
-        ? null
-        : ref.read(notesProvider).where((n) => n.id == id).firstOrNull;
-    _titleController = TextEditingController(text: _note?.title ?? '');
-    _contentController = TextEditingController(text: _note?.content ?? '');
+    final note =
+        ref.read(notesProvider).where((n) => n.id == widget.noteId).firstOrNull;
+    _titleController = TextEditingController(text: note?.title ?? '');
+    _contentController = TextEditingController(text: note?.content ?? '');
   }
 
   @override
@@ -50,21 +46,19 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     final title = _titleController.text.trim();
     final content = _contentController.text;
     final notifier = ref.read(notesProvider.notifier);
-    final note = _note;
 
-    if (note == null) {
-      if (title.isEmpty && content.trim().isEmpty) return;
-      notifier.addNote(
-        title: title.isEmpty ? _untitled : title,
-        content: content,
-      );
-    } else {
-      notifier.updateNote(
-        note.id,
-        title: title.isEmpty ? _untitled : title,
-        content: content,
-      );
+    final untouched = (title.isEmpty || title == NotesNotifier.defaultTitle) &&
+        content.trim().isEmpty;
+    if (widget.isNew && untouched) {
+      notifier.removeNotes({widget.noteId});
+      return;
     }
+
+    notifier.updateNote(
+      widget.noteId,
+      title: title.isEmpty ? _untitled : title,
+      content: content,
+    );
   }
 
   @override
@@ -74,9 +68,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         if (didPop) _save();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(_note == null ? 'New note' : 'Note'),
-        ),
+        appBar: AppBar(title: const Text('Note')),
         body: Column(
           children: [
             Padding(
@@ -84,7 +76,6 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
               child: TextField(
                 key: const Key('noteTitleField'),
                 controller: _titleController,
-                autofocus: _note == null,
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.next,
                 onSubmitted: (_) => _contentFocusNode.requestFocus(),
@@ -108,6 +99,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   key: const Key('noteContentField'),
                   controller: _contentController,
                   focusNode: _contentFocusNode,
+                  autofocus: widget.isNew,
                   keyboardType: TextInputType.multiline,
                   textCapitalization: TextCapitalization.sentences,
                   maxLines: null,

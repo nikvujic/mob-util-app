@@ -24,10 +24,17 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     super.dispose();
   }
 
-  void _openNote(String? id) {
+  void _openNote(String id, {bool isNew = false}) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => NoteDetailPage(noteId: id)),
+      MaterialPageRoute(
+        builder: (_) => NoteDetailPage(noteId: id, isNew: isNew),
+      ),
     );
+  }
+
+  void _createNote() {
+    final id = ref.read(notesProvider.notifier).addNote();
+    _openNote(id, isNew: true);
   }
 
   Future<void> _deleteSelected() async {
@@ -120,7 +127,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                   // tag would clash when a route is pushed.
                   heroTag: null,
                   tooltip: 'New note',
-                  onPressed: () => _openNote(null),
+                  onPressed: _createNote,
                   child: const Icon(Icons.add),
                 ),
         ),
@@ -183,26 +190,11 @@ class _NoteTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (selectionMode)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? AppColors.accent : AppColors.textHint,
-                ),
-              )
-            else
-              ReorderableDragStartListener(
-                index: index,
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Icon(
-                    Icons.drag_handle,
-                    color: AppColors.textHint,
-                    semanticLabel: 'Reorder',
-                  ),
-                ),
-              ),
+            ReorderOrSelectIndicator(
+              index: index,
+              selectionMode: selectionMode,
+              selected: selected,
+            ),
           ],
         ),
       ),

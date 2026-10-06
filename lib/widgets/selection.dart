@@ -170,3 +170,42 @@ class SelectableCard extends StatelessWidget {
     );
   }
 }
+
+/// Trailing control for a reorderable, selectable row: a drag handle
+/// normally, a selection indicator while in selection mode.
+class ReorderOrSelectIndicator extends StatelessWidget {
+  final int index;
+  final bool selectionMode;
+  final bool selected;
+
+  const ReorderOrSelectIndicator({
+    super.key,
+    required this.index,
+    required this.selectionMode,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (selectionMode) {
+      return Padding(
+        padding: const EdgeInsets.all(12),
+        child: Icon(
+          selected ? Icons.check_circle : Icons.radio_button_unchecked,
+          color: selected ? AppColors.accent : AppColors.textHint,
+        ),
+      );
+    }
+    return ReorderableDragStartListener(
+      index: index,
+      child: const Padding(
+        padding: EdgeInsets.all(12),
+        child: Icon(
+          Icons.drag_handle,
+          color: AppColors.textHint,
+          semanticLabel: 'Reorder',
+        ),
+      ),
+    );
+  }
+}

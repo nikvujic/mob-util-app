@@ -7,13 +7,13 @@ void main() {
   setUp(() => notifier = ShopNotifier());
 
   List<String> toBuy() =>
-      notifier.state.where((i) => !i.bought).map((i) => i.name).toList();
-  List<String> bought() =>
-      notifier.state.where((i) => i.bought).map((i) => i.name).toList();
+      notifier.state.where((i) => i.toBuy).map((i) => i.name).toList();
+  List<String> stock() =>
+      notifier.state.where((i) => !i.toBuy).map((i) => i.name).toList();
   String idOf(String name) =>
       notifier.state.firstWhere((i) => i.name == name).id;
 
-  test('adds trimmed items to the top of "to buy" and ignores blanks', () {
+  test('adds trimmed items to the top of "To buy" and ignores blanks', () {
     notifier
       ..addItem('Milk')
       ..addItem('  Bread ')
@@ -22,31 +22,41 @@ void main() {
     expect(notifier.state.map((i) => i.id).toSet().length, 2);
   });
 
-  test('toggleBought moves an item to the top of the other section', () {
+  test('toggle moves an item to the top of the other section', () {
     notifier
       ..addItem('Eggs')
       ..addItem('Milk')
       ..addItem('Bread');
 
-    notifier.toggleBought(idOf('Eggs'));
-    notifier.toggleBought(idOf('Bread'));
+    notifier.toggle(idOf('Eggs'));
+    notifier.toggle(idOf('Bread'));
     expect(toBuy(), ['Milk']);
-    expect(bought(), ['Bread', 'Eggs']);
+    expect(stock(), ['Bread', 'Eggs']);
 
-    notifier.toggleBought(idOf('Eggs'));
+    notifier.toggle(idOf('Eggs'));
     expect(toBuy(), ['Eggs', 'Milk']);
-    expect(bought(), ['Bread']);
+    expect(stock(), ['Bread']);
   });
 
-  test('renameItem ignores blank names', () {
-    notifier.addItem('Milk');
-    final id = idOf('Milk');
+  test('reorder only moves items within the given section', () {
+    notifier
+      ..addItem('C')
+      ..addItem('Y')
+      ..addItem('B')
+      ..addItem('X')
+      ..addItem('A');
+    notifier
+      ..toggle(idOf('Y'))
+      ..toggle(idOf('X')); // Items: X, Y
+    expect(toBuy(), ['A', 'B', 'C']);
 
-    notifier.renameItem(id, ' ');
-    expect(toBuy(), ['Milk']);
+    notifier.reorder(toBuy: true, oldIndex: 0, newIndex: 3); // A to bottom
+    expect(toBuy(), ['B', 'C', 'A']);
+    expect(stock(), ['X', 'Y']);
 
-    notifier.renameItem(id, 'Oat milk');
-    expect(toBuy(), ['Oat milk']);
+    notifier.reorder(toBuy: false, oldIndex: 1, newIndex: 0); // Y to top
+    expect(stock(), ['Y', 'X']);
+    expect(toBuy(), ['B', 'C', 'A']);
   });
 
   test('removeItems deletes across both sections', () {
@@ -54,10 +64,10 @@ void main() {
       ..addItem('Eggs')
       ..addItem('Milk')
       ..addItem('Bread');
-    notifier.toggleBought(idOf('Eggs'));
+    notifier.toggle(idOf('Eggs'));
 
     notifier.removeItems({idOf('Eggs'), idOf('Bread')});
     expect(toBuy(), ['Milk']);
-    expect(bought(), isEmpty);
+    expect(stock(), isEmpty);
   });
 }

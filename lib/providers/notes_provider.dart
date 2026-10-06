@@ -6,8 +6,10 @@ import 'package:the_app/models/note.dart';
 class NotesNotifier extends StateNotifier<List<Note>> {
   NotesNotifier() : super([]);
 
+  static const defaultTitle = 'New Note';
+
   /// Creates a note at the top of the list and returns its id.
-  String addNote({required String title, String content = ''}) {
+  String addNote({String title = defaultTitle, String content = ''}) {
     final now = DateTime.now();
     final note = Note(
       id: generateId(),

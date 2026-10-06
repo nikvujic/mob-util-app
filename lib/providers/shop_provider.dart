@@ -2,34 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/id.dart';
 import 'package:the_app/models/shop_item.dart';
 
-/// Shopping list items. A single ordered list; the "to buy" and "bought"
-/// sections are the items filtered by [ShopItem.bought], in list order.
+/// Shopping list items. A single ordered list; the "To buy" and "Items"
+/// sections are the items filtered by [ShopItem.toBuy], in list order.
 class ShopNotifier extends StateNotifier<List<ShopItem>> {
   ShopNotifier() : super([]);
 
-  /// Adds an item to the top of "to buy". Blank names are ignored.
+  /// Adds an item to the top of "To buy". Blank names are ignored.
   void addItem(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
     state = [ShopItem(id: generateId(), name: trimmed), ...state];
   }
 
-  void renameItem(String id, String name) {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) return;
-    state = [
-      for (final item in state)
-        if (item.id == id) item.copyWith(name: trimmed) else item,
-    ];
-  }
-
   /// Moves the item to the other section, placing it at the top.
-  void toggleBought(String id) {
+  void toggle(String id) {
     final index = state.indexWhere((item) => item.id == id);
     if (index == -1) return;
     final item = state[index];
     state = [
-      item.copyWith(bought: !item.bought),
+      item.copyWith(toBuy: !item.toBuy),
       ...state.take(index),
       ...state.skip(index + 1),
     ];
@@ -37,6 +28,24 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
 
   void removeItems(Set<String> ids) {
     state = state.where((item) => !ids.contains(item.id)).toList();
+  }
+
+  /// Reorders within one section. [oldIndex] and [newIndex] are positions
+  /// inside that section and follow `ReorderableListView.onReorder`
+  /// semantics. The other section is left untouched.
+  void reorder({required bool toBuy, required int oldIndex, required int newIndex}) {
+    if (newIndex > oldIndex) newIndex--;
+    if (oldIndex == newIndex) return;
+
+    final section = state.where((i) => i.toBuy == toBuy).toList();
+    section.insert(newIndex, section.removeAt(oldIndex));
+
+    // Put the reordered section back into the slots it occupied.
+    final reordered = section.iterator;
+    state = [
+      for (final item in state)
+        if (item.toBuy == toBuy) (reordered..moveNext()).current else item,
+    ];
   }
 }
 

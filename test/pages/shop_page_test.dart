@@ -35,27 +35,49 @@ void main() {
     expect(find.byType(TextField), findsOneWidget, reason: 'sheet stays open');
   });
 
-  testWidgets('checking an item moves it to Bought and back', (tester) async {
+  testWidgets('tapping an item moves it to Items and back', (tester) async {
     await pumpShop(tester);
     container.read(shopProvider.notifier)
       ..addItem('Milk')
       ..addItem('Bread');
     await tester.pump();
-    expect(find.text('BOUGHT  ·  1'), findsNothing);
+    expect(find.text('ITEMS  ·  1'), findsNothing);
 
-    await tester.tap(find.byType(Checkbox).last); // Milk
+    await tester.tap(find.text('Milk'));
     await tester.pump();
     expect(find.text('TO BUY  ·  1'), findsOneWidget);
-    expect(find.text('BOUGHT  ·  1'), findsOneWidget);
+    expect(find.text('ITEMS  ·  1'), findsOneWidget);
     expect(
       tester.getTopLeft(find.text('Milk')).dy,
-      greaterThan(tester.getTopLeft(find.text('BOUGHT  ·  1')).dy),
+      greaterThan(tester.getTopLeft(find.text('ITEMS  ·  1')).dy),
     );
 
+    // The checkbox does the same as tapping the row.
     await tester.tap(find.byType(Checkbox).last);
     await tester.pump();
     expect(find.text('TO BUY  ·  2'), findsOneWidget);
     expect(container.read(shopProvider).first.name, 'Milk');
+  });
+
+  testWidgets('dragging the handle reorders within a section',
+      (tester) async {
+    await pumpShop(tester);
+    container.read(shopProvider.notifier)
+      ..addItem('C')
+      ..addItem('B')
+      ..addItem('A');
+    await tester.pump();
+
+    final gesture = await tester
+        .startGesture(tester.getCenter(find.byIcon(Icons.drag_handle).first));
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(container.read(shopProvider).map((i) => i.name).first, 'B');
   });
 
   testWidgets('long-press selects and deletes with confirmation',
@@ -77,20 +99,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(shopProvider).map((i) => i.name), ['Bread']);
-  });
-
-  testWidgets('tapping an item name renames it', (tester) async {
-    await pumpShop(tester);
-    container.read(shopProvider.notifier).addItem('Milk');
-    await tester.pump();
-
-    await tester.tap(find.text('Milk'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Oat milk');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Oat milk'), findsOneWidget);
   });
 
   testWidgets('To Do tab shows the placeholder', (tester) async {

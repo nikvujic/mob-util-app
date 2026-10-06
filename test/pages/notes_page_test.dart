@@ -33,7 +33,26 @@ void main() {
         ['Groceries', 'Older']);
   });
 
-  testWidgets('an empty new note is discarded', (tester) async {
+  testWidgets('a new note exists immediately with the default title',
+      (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.byTooltip('New note'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(notesProvider).single.title, 'New Note');
+    expect(find.text('New Note'), findsOneWidget); // title field
+
+    await tester.enterText(
+        find.byKey(const Key('noteContentField')), 'Body only');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    final note = container.read(notesProvider).single;
+    expect(note.title, 'New Note');
+    expect(note.content, 'Body only');
+  });
+
+  testWidgets('an untouched new note is discarded', (tester) async {
     await pumpApp(tester);
     await tester.tap(find.byTooltip('New note'));
     await tester.pumpAndSettle();
@@ -42,6 +61,19 @@ void main() {
 
     expect(container.read(notesProvider), isEmpty);
     expect(find.text('No notes'), findsOneWidget);
+  });
+
+  testWidgets('an existing empty note is not discarded', (tester) async {
+    await pumpApp(tester);
+    notes().addNote();
+    await tester.pump();
+
+    await tester.tap(find.text('New Note'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(container.read(notesProvider), hasLength(1));
   });
 
   testWidgets('the title of an existing note can be edited', (tester) async {

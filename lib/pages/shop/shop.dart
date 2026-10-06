@@ -8,8 +8,8 @@ import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// Shopping list: "To buy" on top, "Bought" below. Checking an item moves it
-/// between the two sections.
+/// Shopping list: "To buy" on top, "Items" (previously bought) below. Tapping
+/// an item moves it between the two sections; each section can be reordered.
 class ShopPage extends ConsumerStatefulWidget {
   const ShopPage({super.key});
 
@@ -38,15 +38,6 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     );
   }
 
-  Future<void> _renameItem(ShopItem item) async {
-    final name = await showTextInputSheet(
-      context,
-      hint: 'Item name',
-      initialValue: item.name,
-    );
-    if (name != null) _notifier.renameItem(item.id, name);
-  }
-
   Future<void> _deleteSelected() async {
     final confirmed = await showDeleteConfirmDialog(
       context,
@@ -59,6 +50,42 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     _selection.clear();
   }
 
+  Widget _section(List<ShopItem> items, {required bool toBuy}) {
+    return SliverReorderableList(
+      itemCount: items.length,
+      // onReorderItem only exists on newer Flutter than we target.
+      // ignore: deprecated_member_use
+      onReorder: (oldIndex, newIndex) => _notifier.reorder(
+        toBuy: toBuy,
+        oldIndex: oldIndex,
+        newIndex: newIndex,
+      ),
+      proxyDecorator: (child, _, __) => Material(
+        type: MaterialType.transparency,
+        elevation: 6,
+        child: child,
+      ),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Padding(
+          key: ValueKey(item.id),
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: _ShopItemTile(
+            item: item,
+            index: index,
+            selectionMode: _selection.isActive,
+            selected: _selection.isSelected(item.id),
+            onTap: () => _selection.handleTap(
+              item.id,
+              () => _notifier.toggle(item.id),
+            ),
+            onLongPress: () => _selection.handleLongPress(item.id),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = ref.watch(shopProvider);
@@ -66,23 +93,8 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       _selection.retain(next.map((i) => i.id));
     });
 
-    final toBuy = items.where((i) => !i.bought).toList();
-    final bought = items.where((i) => i.bought).toList();
-
-    Widget tile(ShopItem item) => Padding(
-          key: ValueKey(item.id),
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: _ShopItemTile(
-            item: item,
-            selected: _selection.isSelected(item.id),
-            onToggleBought: () => _selection.isActive
-                ? _selection.toggle(item.id)
-                : _notifier.toggleBought(item.id),
-            onTap: () =>
-                _selection.handleTap(item.id, () => _renameItem(item)),
-            onLongPress: () => _selection.handleLongPress(item.id),
-          ),
-        );
+    final toBuy = items.where((i) => i.toBuy).toList();
+    final stock = items.where((i) => !i.toBuy).toList();
 
     return SelectionPopScope(
       controller: _selection,
@@ -104,26 +116,29 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                   icon: Icons.shopping_cart_outlined,
                   message: 'Your shopping list is empty',
                 )
-              : ListView(
-                  padding: const EdgeInsets.only(top: 4, bottom: 88),
-                  children: [
+              : CustomScrollView(
+                  slivers: [
                     _SectionHeader(title: 'To buy', count: toBuy.length),
                     if (toBuy.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'All done!',
-                          style: TextStyle(color: AppColors.textMuted),
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            'Nothing to buy',
+                            style: TextStyle(color: AppColors.textMuted),
+                          ),
                         ),
                       ),
-                    ...toBuy.map(tile),
-                    if (bought.isNotEmpty) ...[
-                      _SectionHeader(title: 'Bought', count: bought.length),
-                      ...bought.map(tile),
+                    _section(toBuy, toBuy: true),
+                    if (stock.isNotEmpty) ...[
+                      _SectionHeader(title: 'Items', count: stock.length),
+                      _section(stock, toBuy: false),
                     ],
+                    // Keep the last item clear of the FAB.
+                    const SliverToBoxAdapter(child: SizedBox(height: 88)),
                   ],
                 ),
           floatingActionButton: _selection.isActive
@@ -150,15 +165,17 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(
-        '${title.toUpperCase()}  ·  $count',
-        style: const TextStyle(
-          color: AppColors.accent,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1,
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+        child: Text(
+          '${title.toUpperCase()}  ·  $count',
+          style: const TextStyle(
+            color: AppColors.accent,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+          ),
         ),
       ),
     );
@@ -167,15 +184,17 @@ class _SectionHeader extends StatelessWidget {
 
 class _ShopItemTile extends StatelessWidget {
   final ShopItem item;
+  final int index;
+  final bool selectionMode;
   final bool selected;
-  final VoidCallback onToggleBought;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
   const _ShopItemTile({
     required this.item,
+    required this.index,
+    required this.selectionMode,
     required this.selected,
-    required this.onToggleBought,
     required this.onTap,
     required this.onLongPress,
   });
@@ -191,25 +210,25 @@ class _ShopItemTile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(4),
             child: Checkbox(
-              value: item.bought,
-              onChanged: (_) => onToggleBought(),
+              value: !item.toBuy,
+              onChanged: (_) => onTap(),
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 14, 16, 14),
-              child: Text(
-                item.name,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: item.bought
-                      ? AppColors.textMuted
-                      : AppColors.textPrimary,
-                  decoration: item.bought ? TextDecoration.lineThrough : null,
-                  decorationColor: AppColors.textMuted,
-                ),
+            child: Text(
+              item.name,
+              style: TextStyle(
+                fontSize: 16,
+                color: item.toBuy
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
               ),
             ),
+          ),
+          ReorderOrSelectIndicator(
+            index: index,
+            selectionMode: selectionMode,
+            selected: selected,
           ),
         ],
       ),
