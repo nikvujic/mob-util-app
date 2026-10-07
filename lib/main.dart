@@ -4,7 +4,8 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/pages/shop/shop.dart';
-import 'package:the_app/pages/todo/todo.dart';
+import 'package:the_app/pages/other/other.dart';
+import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/widgets/bottom_nav.dart';
 
 Future<void> main() async {
@@ -40,15 +41,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _pages = [NotesPage(), ShopPage(), TodoPage()];
+  static const _pages = [NotesPage(), ShopPage(), PlannerPage(), OtherPage()];
 
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // IndexedStack keeps every tab alive so scroll position and selection
-      // survive switching tabs. TickerMode marks which tab is visible.
+      // Every section is the bottom of the navigation stack: back on any of
+      // them leaves the app, and pages opened from a section are pushed on
+      // top. IndexedStack keeps every tab alive so scroll position and
+      // selection survive switching tabs; TickerMode marks the visible one.
       body: IndexedStack(
         index: _selectedIndex,
         children: [

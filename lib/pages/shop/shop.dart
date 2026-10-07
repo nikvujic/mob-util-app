@@ -5,6 +5,7 @@ import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
+import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
@@ -110,7 +111,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                       _selection.selectAll(items.map((i) => i.id)),
                   onDelete: _deleteSelected,
                 )
-              : AppBar(title: const Text('Shop')),
+              : const MainAppBar(title: 'Shop'),
           body: items.isEmpty
               ? const EmptyState(
                   icon: Icons.shopping_cart_outlined,

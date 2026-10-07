@@ -19,6 +19,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - Every step that changes the app ends with a release: version bump,
   `CHANGELOG.md` entry, `vX.Y.Z` tag → GitHub Release with the APK
   ([RELEASING.md](RELEASING.md)).
+- **Before the first phone test: set up the release signing key**
+  ([RELEASING.md](RELEASING.md#signing-key-one-time-setup)) so the APK you
+  install can be updated by later releases without losing data. Until then,
+  versions are bumped and logged but not tagged.
 - After a group of steps, a **device checkpoint**: build the APK and try it on
   the phone (listed below where it matters most).
 
@@ -39,7 +43,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 2. [x] **Android only (G9)** — remove the web/iOS/macOS/Linux/Windows
    platform folders and the web code path; stop committing Android native
    build output (`android/app/.cxx/`) and ignore it.
-3. [ ] **Navigation skeleton (G1, G7, G8)** — rename To Do → Planner, add the
+3. [x] **Navigation skeleton (G1, G7, G8)** — rename To Do → Planner, add the
    Other tab (empty), add a Settings page opened from the app bar. Widget
    tests pin down back-button behavior: back on a main section exits; back
    from Settings / a note returns to where we were.

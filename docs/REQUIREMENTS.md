@@ -21,14 +21,14 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| G1 | Bottom navigation with the main sections: **Notes** (default on launch), **Shop**, **Planner**, **Other**. Each keeps its state (scroll position, selection) when switching. | 🚧 Notes, Shop, To Do exist; rename to Planner and add Other |
+| G1 | Bottom navigation with the main sections: **Notes** (default on launch), **Shop**, **Planner**, **Other**. Each keeps its state (scroll position, selection) when switching. | ✅ |
 | G2 | One visual language (dark theme, green accent) defined in `lib/core/theme.dart`; pages don't hard-code colors. | ✅ |
 | G3 | Shared building blocks instead of per-page copies (confirm dialog, selection mode, list rows, empty state, input sheet, …). | ✅ |
 | G4 | **Selection mode** behaves the same on every list: long-press selects, tap toggles, top bar shows count / select all / delete, back or ✕ exits. | ✅ |
 | G5 | Deleting always asks for confirmation through the shared dialog. | ✅ |
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
-| G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, settings, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | 🚧 holds today; must be kept as pages are added, with tests |
-| G8 | **Settings** page, opened from the app bar of any main section. Holds **Security** (master password, section locks), export/import, and future options. | ⏳ |
+| G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, settings, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
+| G8 | **Settings** page, opened from the app bar of any main section. Holds **Security** (master password, section locks), export/import, and future options. | 🚧 page exists; Security and Backup entries are placeholders |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
 
 ## D — Data safety: export / import
@@ -77,7 +77,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| P1 | Tab renamed to **Planner**. | ⏳ |
+| P1 | Tab renamed to **Planner**. | ✅ |
 | P2 | v1: a list of tasks, each with a title and an optional description. Add, open/edit, delete (select mode, as elsewhere). Deleting is how a task is "done". | ⏳ |
 | P3 | Can be locked as a whole section (L5). | ⏳ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | 💭 later |
@@ -92,7 +92,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ⏳ |
+| O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | 🚧 tab exists, no tools yet |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ⏳ |
 
 ---

@@ -6,6 +6,7 @@ import 'package:the_app/pages/notes/note_detail.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
+import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/selection.dart';
 
 class NotesPage extends ConsumerStatefulWidget {
@@ -70,27 +71,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                       _selection.selectAll(notes.map((n) => n.id)),
                   onDelete: _deleteSelected,
                 )
-              : AppBar(
-                  title: const Text('Notes'),
-                  actions: [
-                    PopupMenuButton<String>(
-                      iconColor: AppColors.textPrimary,
-                      onSelected: (value) {
-                        // TODO: export / import (requirement N8).
-                      },
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(
-                          value: 'export',
-                          child: Text('Export Notes'),
-                        ),
-                        PopupMenuItem(
-                          value: 'import',
-                          child: Text('Import Notes'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              : const MainAppBar(title: 'Notes'),
           body: notes.isEmpty
               ? const EmptyState(icon: Icons.note_outlined, message: 'No notes')
               : ReorderableListView.builder(

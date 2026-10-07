@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:the_app/data/app_storage.dart';
-import 'package:the_app/main.dart';
 import 'package:the_app/providers/shop_provider.dart';
+
+import '../helpers.dart';
 
 void main() {
   late ProviderContainer container;
 
   Future<void> pumpShop(WidgetTester tester) async {
-    container = ProviderContainer(
-      overrides: [appStorageProvider.overrideWithValue(AppStorage.inMemory())],
-    );
-    addTearDown(container.dispose);
-    await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const MyApp()),
-    );
-    await tester.tap(find.text('Shop'));
-    await tester.pumpAndSettle();
+    container = await pumpApp(tester);
+    await openTab(tester, 'Shop');
   }
 
   testWidgets('adds several items in a row from the add sheet', (tester) async {
@@ -100,12 +93,5 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(shopProvider).map((i) => i.name), ['Bread']);
-  });
-
-  testWidgets('To Do tab shows the placeholder', (tester) async {
-    await pumpShop(tester);
-    await tester.tap(find.text('To Do').last);
-    await tester.pumpAndSettle();
-    expect(find.text('To-do lists are coming soon'), findsOneWidget);
   });
 }

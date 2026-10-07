@@ -1,28 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:the_app/data/app_storage.dart';
-import 'package:the_app/main.dart';
 import 'package:the_app/providers/notes_provider.dart';
+
+import '../helpers.dart';
 
 void main() {
   late ProviderContainer container;
-
-  Future<void> pumpApp(WidgetTester tester) async {
-    container = ProviderContainer(
-      overrides: [appStorageProvider.overrideWithValue(AppStorage.inMemory())],
-    );
-    addTearDown(container.dispose);
-    await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const MyApp()),
-    );
-  }
 
   NotesNotifier notes() => container.read(notesProvider.notifier);
 
   testWidgets('creating a note with a title adds it to the top',
       (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     notes().addNote(title: 'Older');
     await tester.pump();
 
@@ -39,7 +29,7 @@ void main() {
 
   testWidgets('a new note exists immediately with the default title',
       (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     await tester.tap(find.byTooltip('New note'));
     await tester.pumpAndSettle();
 
@@ -57,7 +47,7 @@ void main() {
   });
 
   testWidgets('edits are autosaved while typing', (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     final id = notes().addNote(title: 'Draft');
     await tester.pump();
 
@@ -83,7 +73,7 @@ void main() {
   });
 
   testWidgets('an untouched new note is discarded', (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     await tester.tap(find.byTooltip('New note'));
     await tester.pumpAndSettle();
     await tester.pageBack();
@@ -94,7 +84,7 @@ void main() {
   });
 
   testWidgets('an existing empty note is not discarded', (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     notes().addNote();
     await tester.pump();
 
@@ -107,7 +97,7 @@ void main() {
   });
 
   testWidgets('the title of an existing note can be edited', (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     notes().addNote(title: 'Old title');
     await tester.pump();
 
@@ -124,7 +114,7 @@ void main() {
 
   testWidgets('long-press selects; delete asks for confirmation',
       (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     notes()
       ..addNote(title: 'A')
       ..addNote(title: 'B')
@@ -162,7 +152,7 @@ void main() {
 
   testWidgets('deselecting the last item or back exits selection mode',
       (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     notes().addNote(title: 'A');
     await tester.pump();
 
@@ -181,7 +171,7 @@ void main() {
   });
 
   testWidgets('dragging the handle reorders notes', (tester) async {
-    await pumpApp(tester);
+    container = await pumpApp(tester);
     notes()
       ..addNote(title: 'C')
       ..addNote(title: 'B')

@@ -27,8 +27,14 @@ class BottomNav extends StatelessWidget {
           label: 'Shop',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.checklist),
-          label: 'To Do',
+          icon: Icon(Icons.event_note_outlined),
+          activeIcon: Icon(Icons.event_note),
+          label: 'Planner',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.apps_outlined),
+          activeIcon: Icon(Icons.apps),
+          label: 'Other',
         ),
       ],
     );
