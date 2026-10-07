@@ -28,7 +28,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G5 | Deleting always asks for confirmation through the shared dialog. | ✅ |
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, settings, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | 🚧 holds today; must be kept as pages are added, with tests |
-| G8 | **Settings** page, opened from the app bar of any main section. Holds master password management, export/import, and future options. | ⏳ |
+| G8 | **Settings** page, opened from the app bar of any main section. Holds **Security** (master password, section locks), export/import, and future options. | ⏳ |
 | G9 | Android only. No web/desktop targets or code paths. | ⏳ |
 
 ## D — Data safety: export / import
@@ -50,18 +50,18 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N3 | Title and body are directly editable; leaving saves; empty title becomes "Untitled". | ✅ |
 | N4 | Long-press → select → delete with confirmation. | ✅ |
 | N5 | **Discard changes.** While editing, changes keep being saved (back, closing the app — nothing is lost), but an *undo* action in the editor restores the note to exactly how it was when it was opened and leaves the editor. For a note created in this session, discarding removes it. Asks for confirmation. | ⏳ |
-| N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password and shows a lock icon in the list. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ⏳ |
+| N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ⏳ |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ⏳ |
 
-## L — Master password & locking
+## L — Security: master password & locking
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| L1 | Settings → **Master password**: set, change (requires current), remove (requires current; decrypts locked items). | ⏳ |
+| L1 | Settings → **Security**: set, change (requires current), remove (requires current; decrypts locked items) the master password. | ⏳ |
 | L2 | The password itself is never stored. A key is derived from it with a slow KDF (Argon2id/PBKDF2 + random salt); only the salt, KDF parameters and a verifier are stored. | ⏳ |
 | L3 | Locked data is encrypted with an authenticated cipher (AES-GCM). Without the password it cannot be read, also not from an export. Forgotten password = locked data is unrecoverable; the setup screen says so clearly. | ⏳ |
-| L4 | **Convenient unlock:** entering the password once unlocks all locked items for the session. The app locks again when it has been in the background for a while (timeout, default to be decided) or when "Lock now" is used. | ⏳ |
-| L5 | The **Planner** section can be locked as a whole (setting); opening it then requires unlocking. | ⏳ |
+| L4 | **Convenient unlock:** entering the password once unlocks everything (locked notes and locked sections). It stays unlocked while the app is in use and while it is briefly in the background (e.g. switching away to copy something). It locks again when the app has been in the background for **5 minutes**, when the app is closed (removed from recent apps), or when "Lock now" is used. | ⏳ |
+| L5 | **Section locks** in Security: per main section (Notes, Shop, Planner, Other) a switch to lock the whole section. Opening a locked section requires unlocking (L4). Only available once a master password is set. | ⏳ |
 | L6 | Unlock with fingerprint as an alternative to typing the password. | 💭 later |
 
 ## S — Shop
@@ -79,8 +79,14 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | P1 | Tab renamed to **Planner**. | ⏳ |
 | P2 | v1: a list of tasks, each with a title and an optional description. Add, open/edit, delete (select mode, as elsewhere). Deleting is how a task is "done". | ⏳ |
-| P3 | Can be locked as a section (L5). | ⏳ |
+| P3 | Can be locked as a whole section (L5). | ⏳ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | 💭 later |
+
+## U — UI polish ("fun but practical")
+
+| # | Requirement | Status |
+|---|-------------|--------|
+| U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
 
 ## O — Other
 

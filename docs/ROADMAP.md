@@ -57,19 +57,20 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 ### Privacy — device checkpoint after this group
 
 8. [ ] **Crypto service + master password (L1–L3)** — key derivation,
-   AES-GCM encrypt/decrypt, verifier; Settings page to set / change / remove
-   the password. Pure-logic first, heavily unit-tested.
-9. [ ] **Session unlock (L4)** — unlock once, auto-lock after time in the
-   background, "Lock now".
+   AES-GCM encrypt/decrypt, verifier; Settings → Security page to set /
+   change / remove the password. Pure-logic first, heavily unit-tested.
+9. [ ] **Session unlock (L4)** — unlock once; stays unlocked through short
+   trips to other apps; locks after 5 min in the background, on app close,
+   or "Lock now".
 10. [ ] **Lock notes (N6, N7, D3)** — lock/unlock a note, encrypted at rest,
     lock icon in the list, route to password setup if none exists. Export
     already carries the stored (encrypted) form, so D3 is verified here.
 
 ### New sections
 
-11. [ ] **Planner v1 (P1, P2)** — tasks with title + description; add, edit,
+11. [ ] **Section locks (L5)** — Security switches to lock whole sections.
+12. [ ] **Planner v1 (P1, P2)** — tasks with title + description; add, edit,
     delete.
-12. [ ] **Planner section lock (L5, P3).**
 13. [ ] **Other → Counters (O1, O2).**
 
 ## Later / ideas
@@ -77,15 +78,18 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - Fingerprint unlock (L6)
 - TimeTune-style scheduler in Planner (P4)
 - Self-hosted cloud backup, e.g. S3-backed (D5)
+- **UI polish (U1)** — once the main features are in: shake on wrong
+  password, hero/slide animations, haptics, clicky counter sounds
 
-## Open questions
+## Decisions
 
-- **L4 — unlock duration.** "When I unlock once, everything is …" was cut
-  off. Assumption until confirmed: everything stays unlocked until the app
-  has been in the background for a few minutes (or "Lock now" is pressed).
-- **N6 — locked note titles.** Assumption: the title stays visible in the
-  list (so you know which note it is) and only the content is encrypted.
-  Alternative: hide the title too and show "Locked note".
+- **L4 — unlock duration:** unlocked until 5 min in the background, app
+  closed (removed from recents), or "Lock now". Short app switches don't
+  relock.
+- **N6 — locked notes:** title stays visible with a small lock icon; only
+  the content is encrypted.
+- **L5 — whole-section locking** is configured per section in
+  Settings → Security, next to the master password.
 
 ## Housekeeping
 
