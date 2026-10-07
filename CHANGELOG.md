@@ -4,6 +4,12 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.3.1] - 2026-10-08
+
+### Fixed
+- Android build failed in 0.3.0: the version-info plugin needed a newer
+  Kotlin than the project uses; now uses a compatible plugin version.
+
 ## [0.3.0] - 2026-10-08
 
 ### Changed
