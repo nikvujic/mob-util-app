@@ -58,6 +58,8 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 4. [x] **Discard changes in a note (N5)** — snapshot when the editor opens,
    undo action restores it (or removes a just-created note), with confirm.
+   - [x] Back asks *Save changes?* (Yes/No, outside tap = Yes); ↶ only
+     for existing notes and keeps you in the editor (N5, N5a).
 5. [ ] **Compact shop rows (S4).**
 
 ### Backup (failsafe) — device checkpoint after this group
@@ -88,6 +90,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 ## Later / ideas
 
+- Undo / redo while typing in a note, e.g. undo a paste (N8)
 - Fingerprint unlock (L6)
 - TimeTune-style scheduler in Planner (P4)
 - Self-hosted cloud backup, e.g. S3-backed (D5)

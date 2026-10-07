@@ -49,9 +49,11 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N2 | Tapping + creates "New Note" at the top and opens it; an untouched new note is removed on leaving. | ✅ |
 | N3 | Title and body are directly editable; leaving saves; empty title becomes "Untitled". | ✅ |
 | N4 | Long-press → select → delete with confirmation. | ✅ |
-| N5 | **Discard changes.** While editing, changes keep being saved (back, closing the app — nothing is lost), but an *undo* action in the editor restores the note to exactly how it was when it was opened and leaves the editor. For a note created in this session, discarding removes it. Asks for confirmation. | ✅ |
+| N5 | **Save or discard on back.** Back after changing something asks *Save changes?* (*Save new note?* for a new one) with **No** (left) and **Yes** (right). Yes — or tapping outside / back on the dialog — saves; No restores the note to how it was when opened, or deletes a new note. Back without changes leaves without asking. Closing or killing the app never asks: edits are always autosaved. | ✅ |
+| N5a | **↶ Discard changes** (existing notes only): restores the note to how it was when opened, without leaving the editor. Asks for confirmation. | ✅ |
 | N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ⏳ |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ⏳ |
+| N8 | **Undo / redo while typing** (e.g. undo a paste), step by step. | 💭 later |
 
 ## L — Security: master password & locking
 

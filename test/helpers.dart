@@ -69,3 +69,15 @@ Future<void> pressBack(WidgetTester tester) async {
   await tester.binding.handlePopRoute();
   await tester.pumpAndSettle();
 }
+
+/// Leaves the note editor with back. If [save] is given, the "Save
+/// changes?" dialog is expected and answered with Yes (true) or No (false).
+Future<void> leaveNote(WidgetTester tester, {bool? save}) async {
+  await tester.pump(); // let pending text changes settle
+  await tester.pageBack();
+  await tester.pumpAndSettle();
+  if (save != null) {
+    await tester.tap(find.text(save ? 'Yes' : 'No'));
+    await tester.pumpAndSettle();
+  }
+}

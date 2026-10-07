@@ -99,3 +99,21 @@ Future<bool> showDeleteConfirmDialog(
     destructive: true,
   );
 }
+
+/// Asks whether to keep changes when leaving an editor. Resolves to `true`
+/// for Yes **and** when the dialog is dismissed (tap outside, back): only an
+/// explicit No throws changes away.
+Future<bool> showSaveChangesDialog(
+  BuildContext context, {
+  String title = 'Save changes?',
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (_) => ConfirmDialog(
+      title: title,
+      confirmLabel: 'Yes',
+      cancelLabel: 'No',
+    ),
+  );
+  return result ?? true;
+}

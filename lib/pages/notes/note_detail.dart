@@ -14,8 +14,10 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 /// that is left untouched — default title and no content — is deleted again
 /// when the page is left.
 ///
-/// "Discard changes" undoes everything done since the page was opened: the
-/// note is restored to that version (or removed, if it was created here).
+/// Leaving with back after changing something asks "Save changes?":
+/// Yes (or tapping outside the dialog) keeps them; No restores the note to
+/// how it was when opened, or deletes a note created here. While editing an
+/// existing note, ↶ restores that version without leaving the page.
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String noteId;
   final bool isNew;
@@ -41,6 +43,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
   /// Set once changes are discarded, so leaving the page saves nothing.
   bool _discarded = false;
+
+  /// Set while [_onBack] handles leaving (asking, saving, closing).
+  bool _leaving = false;
 
   @override
   void initState() {
@@ -107,18 +112,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       _titleController.text != (_original?.title ?? '') ||
       _contentController.text != (_original?.content ?? '');
 
-  Future<void> _discardChanges() async {
-    final confirmed = await showConfirmDialog(
-      context,
-      title: widget.isNew ? 'Discard this note?' : 'Discard changes?',
-      message: widget.isNew
-          ? 'The new note will be deleted.'
-          : 'The note goes back to how it was when you opened it.',
-      confirmLabel: 'Discard',
-      destructive: true,
-    );
-    if (!confirmed || !mounted) return;
-
+  /// Throws away everything done since the page was opened: restores the
+  /// note, or deletes it if it was created here. Nothing is saved after.
+  void _discardAll() {
     _discarded = true;
     _autosaveTimer?.cancel();
     final notifier = ref.read(notesProvider.notifier);
@@ -128,29 +124,78 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     } else {
       notifier.restoreNote(original);
     }
+  }
+
+  /// Back (app bar arrow or system back).
+  Future<void> _onBack() async {
+    if (_leaving) return; // e.g. a second quick tap while the dialog opens
+    _leaving = true;
+    if (_hasChanges) {
+      final save = await showSaveChangesDialog(
+        context,
+        title: widget.isNew ? 'Save new note?' : 'Save changes?',
+      );
+      if (!mounted) return;
+      if (save) {
+        _save();
+      } else {
+        _discardAll();
+      }
+    } else {
+      _save(); // removes an untouched new note
+    }
     Navigator.of(context).pop();
+  }
+
+  /// ↶ in the app bar: undo all edits but keep editing.
+  Future<void> _revertInPlace() async {
+    final original = _original;
+    if (original == null) return;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Discard changes?',
+      message: 'The note goes back to how it was when you opened it.',
+      confirmLabel: 'Discard',
+      destructive: true,
+    );
+    if (!confirmed || !mounted) return;
+
+    _autosaveTimer?.cancel();
+    ref.read(notesProvider.notifier).restoreNote(original);
+    _titleController.text = original.title;
+    _contentController.text = original.content;
+    _autosaveTimer?.cancel(); // the text reset above scheduled one
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      // Back is handled by [_onBack] so it can ask before leaving.
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) _save();
+        if (didPop) {
+          // Popped by other means than back (e.g. the app navigating away):
+          // keep whatever was typed.
+          if (!_leaving) _save();
+          return;
+        }
+        _onBack();
       },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Note'),
           actions: [
-            ListenableBuilder(
-              listenable: Listenable.merge(
-                [_titleController, _contentController],
+            if (!widget.isNew)
+              ListenableBuilder(
+                listenable: Listenable.merge(
+                  [_titleController, _contentController],
+                ),
+                builder: (context, _) => IconButton(
+                  icon: const Icon(Icons.undo),
+                  tooltip: 'Discard changes',
+                  onPressed: _hasChanges ? _revertInPlace : null,
+                ),
               ),
-              builder: (context, _) => IconButton(
-                icon: const Icon(Icons.undo),
-                tooltip: 'Discard changes',
-                onPressed: _hasChanges ? _discardChanges : null,
-              ),
-            ),
           ],
         ),
         body: Column(

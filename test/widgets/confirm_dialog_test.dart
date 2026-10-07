@@ -47,4 +47,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(await result, isFalse);
   });
+
+  group('showSaveChangesDialog', () {
+    Future<Future<bool>> openSave(WidgetTester tester) async {
+      late Future<bool> result;
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => result = showSaveChangesDialog(context),
+            child: const Text('open'),
+          ),
+        ),
+      ));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      return result;
+    }
+
+    testWidgets('Yes saves, No discards', (tester) async {
+      var result = await openSave(tester);
+      await tester.tap(find.text('Yes'));
+      await tester.pumpAndSettle();
+      expect(await result, isTrue);
+
+      result = await openSave(tester);
+      await tester.tap(find.text('No'));
+      await tester.pumpAndSettle();
+      expect(await result, isFalse);
+    });
+
+    testWidgets('dismissing counts as save', (tester) async {
+      final result = await openSave(tester);
+      await tester.tapAt(const Offset(5, 5));
+      await tester.pumpAndSettle();
+      expect(await result, isTrue);
+    });
+
+    testWidgets('No is on the left, Yes on the right', (tester) async {
+      await openSave(tester);
+      expect(
+        tester.getCenter(find.text('No')).dx,
+        lessThan(tester.getCenter(find.text('Yes')).dx),
+      );
+    });
+  });
 }

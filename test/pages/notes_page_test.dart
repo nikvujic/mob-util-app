@@ -20,8 +20,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(
         find.byKey(const Key('noteTitleField')), 'Groceries');
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await leaveNote(tester, save: true);
 
     expect(container.read(notesProvider).map((n) => n.title),
         ['Groceries', 'Older']);
@@ -38,8 +37,7 @@ void main() {
 
     await tester.enterText(
         find.byKey(const Key('noteContentField')), 'Body only');
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await leaveNote(tester, save: true);
 
     final note = container.read(notesProvider).single;
     expect(note.title, 'New Note');
@@ -68,16 +66,14 @@ void main() {
       'Draft',
     );
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await leaveNote(tester, save: true);
   });
 
   testWidgets('an untouched new note is discarded', (tester) async {
     container = await pumpApp(tester);
     await tester.tap(find.byTooltip('New note'));
     await tester.pumpAndSettle();
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await leaveNote(tester);
 
     expect(container.read(notesProvider), isEmpty);
     expect(find.text('No notes'), findsOneWidget);
@@ -90,8 +86,7 @@ void main() {
 
     await tester.tap(find.text('New Note'));
     await tester.pumpAndSettle();
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await leaveNote(tester);
 
     expect(container.read(notesProvider), hasLength(1));
   });
@@ -105,8 +100,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(
         find.byKey(const Key('noteTitleField')), 'New title');
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await leaveNote(tester, save: true);
 
     expect(find.text('New title'), findsOneWidget);
     expect(find.text('Old title'), findsNothing);
