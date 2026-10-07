@@ -4,6 +4,14 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.3.0] - 2026-10-08
+
+### Changed
+- The gear icon and Settings page are replaced by a **menu** (☰, top
+  left on every section) with a **Security** page — master password and
+  section locks arrive in upcoming versions.
+- The app version is shown at the bottom of the menu.
+
 ## [0.2.0] - 2026-10-08
 
 ### Added
