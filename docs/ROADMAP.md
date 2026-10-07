@@ -30,8 +30,8 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 ### Foundation
 
-1. [ ] **CI** — GitHub Actions workflow running `flutter analyze` and
-   `flutter test` on Flutter 3.29.3 for every push. Gives every later step an
+1. [x] **CI** — GitHub Actions workflow running format check,
+   `flutter analyze` and `flutter test` on Flutter 3.29.3 for every push. Gives every later step an
    automatic check (and a green tick on GitHub).
 2. [ ] **Android only (G9)** — remove the web/iOS/macOS/Linux/Windows
    platform folders and the web code path; stop committing Android native
