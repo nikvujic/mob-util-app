@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.4.0] - 2026-10-08
+
+### Added
+- **Discard changes** (↶ in a note's top bar): undoes everything done since
+  the note was opened, even after it was autosaved, and closes the note.
+  A note created in that session is deleted instead. Asks first.
+
 ## [0.3.1] - 2026-10-08
 
 ### Fixed
