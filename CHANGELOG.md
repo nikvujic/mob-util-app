@@ -4,6 +4,17 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.5.0] - 2026-10-08
+
+### Changed
+- **Back from a note asks "Save changes?"** when something was changed
+  (*Save new note?* for a new one). **Yes** — or tapping outside the dialog
+  — keeps the changes; **No** puts the note back as it was, or deletes the
+  new note. Back without changes leaves straight away. Closing the app
+  still saves everything, without asking.
+- **↶** now only appears on existing notes and keeps you in the note after
+  undoing your changes.
+
 ## [0.4.0] - 2026-10-08
 
 ### Added
