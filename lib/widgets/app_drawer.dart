@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/theme.dart';
+import 'package:the_app/pages/security/security.dart';
+
+/// The hamburger menu: app-wide pages, with the app version at the bottom.
+class AppDrawer extends ConsumerWidget {
+  const AppDrawer({super.key});
+
+  /// Closes the drawer, then opens [page] on top of the current section, so
+  /// back returns to that section.
+  void _open(BuildContext context, Widget page) {
+    Scaffold.of(context).closeDrawer();
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Drawer(
+      backgroundColor: AppColors.surface,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
+              child: Text(
+                'The App',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const Divider(height: 1, color: AppColors.divider),
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Security'),
+              onTap: () => _open(context, const SecurityPage()),
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Version ${ref.watch(appVersionProvider)}',
+                style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

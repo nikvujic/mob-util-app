@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/app_info.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/main.dart';
+
+const testAppVersion = '1.2.3 (4)';
+
+/// Opens the hamburger menu from the visible section.
+Future<void> openMenu(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Menu'));
+  await tester.pumpAndSettle();
+}
 
 /// Starts the whole app with in-memory storage and returns its provider
 /// container, so tests can seed and inspect state.
 Future<ProviderContainer> pumpApp(WidgetTester tester) async {
   final container = ProviderContainer(
-    overrides: [appStorageProvider.overrideWithValue(AppStorage.inMemory())],
+    overrides: [
+      appStorageProvider.overrideWithValue(AppStorage.inMemory()),
+      appVersionProvider.overrideWithValue(testAppVersion),
+    ],
   );
   addTearDown(container.dispose);
   await tester.pumpWidget(

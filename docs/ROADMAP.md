@@ -44,9 +44,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
    platform folders and the web code path; stop committing Android native
    build output (`android/app/.cxx/`) and ignore it.
 3. [x] **Navigation skeleton (G1, G7, G8)** — rename To Do → Planner, add the
-   Other tab (empty), add a Settings page opened from the app bar. Widget
+   Other tab (empty), add a menu (hamburger) with a Security page and the
+   app version. Widget
    tests pin down back-button behavior: back on a main section exits; back
-   from Settings / a note returns to where we were.
+   from a menu page / a note returns to where we were.
 
 ### Notes & Shop polish
 
@@ -64,7 +65,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 ### Privacy — device checkpoint after this group
 
 8. [ ] **Crypto service + master password (L1–L3)** — key derivation,
-   AES-GCM encrypt/decrypt, verifier; Settings → Security page to set /
+   AES-GCM encrypt/decrypt, verifier; Menu → Security page to set /
    change / remove the password. Pure-logic first, heavily unit-tested.
 9. [ ] **Session unlock (L4)** — unlock once; stays unlocked through short
    trips to other apps; locks after 5 min in the background, on app close,
@@ -96,7 +97,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - **N6 — locked notes:** title stays visible with a small lock icon; only
   the content is encrypted.
 - **L5 — whole-section locking** is configured per section in
-  Settings → Security, next to the master password.
+  Menu → Security, next to the master password.
 
 ## Housekeeping
 

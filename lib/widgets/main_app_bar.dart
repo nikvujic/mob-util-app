@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:the_app/pages/settings/settings.dart';
 
-/// App bar for the main sections (the bottom-navigation tabs). Gives every
-/// section the same title style and a way into Settings.
+/// App bar for the main sections (the bottom-navigation tabs): the section
+/// title and the hamburger button that opens the app menu.
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
@@ -14,16 +13,15 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      // The menu belongs to the home screen's outer Scaffold (so it covers
+      // the bottom navigation), not to this section's own Scaffold.
+      leading: IconButton(
+        icon: const Icon(Icons.menu),
+        tooltip: 'Menu',
+        onPressed: () =>
+            context.findRootAncestorStateOfType<ScaffoldState>()?.openDrawer(),
+      ),
       title: Text(title),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.settings_outlined),
-          tooltip: 'Settings',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SettingsPage()),
-          ),
-        ),
-      ],
     );
   }
 }

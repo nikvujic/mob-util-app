@@ -23,21 +23,23 @@ void main() {
       expect(exit.exits, 1);
     });
 
-    testWidgets('Settings opened from $tab returns to $tab on back',
+    testWidgets('Security opened from the $tab menu returns to $tab',
         (tester) async {
       final exit = ExitRecorder(tester);
       await pumpApp(tester);
       await openTab(tester, tab);
 
-      await tester.tap(find.byTooltip('Settings'));
+      await openMenu(tester);
+      await tester.tap(find.text('Security'));
       await tester.pumpAndSettle();
-      expect(appBarTitle('Settings'), findsOneWidget);
+      expect(appBarTitle('Security'), findsOneWidget);
 
       await pressBack(tester);
 
       expect(exit.exits, 0);
-      expect(appBarTitle('Settings'), findsNothing);
+      expect(appBarTitle('Security'), findsNothing);
       expect(appBarTitle(tab), findsOneWidget);
+      expect(find.byType(Drawer), findsNothing, reason: 'menu stays closed');
     });
   }
 
@@ -73,13 +75,25 @@ void main() {
     expect(appBarTitle('Notes'), findsOneWidget);
   });
 
-  testWidgets('Settings lists Security and Backup', (tester) async {
+  testWidgets('menu shows Security and the app version', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.byTooltip('Settings'));
-    await tester.pumpAndSettle();
+    await openMenu(tester);
 
     expect(find.text('Security'), findsOneWidget);
-    expect(find.text('Backup'), findsOneWidget);
+    expect(find.text('Version $testAppVersion'), findsOneWidget);
+  });
+
+  testWidgets('back with the menu open closes the menu, not the app',
+      (tester) async {
+    final exit = ExitRecorder(tester);
+    await pumpApp(tester);
+    await openMenu(tester);
+
+    await pressBack(tester);
+
+    expect(exit.exits, 0);
+    expect(find.byType(Drawer), findsNothing);
+    expect(appBarTitle('Notes'), findsOneWidget);
   });
 
   testWidgets('Planner and Other show their placeholders', (tester) async {
