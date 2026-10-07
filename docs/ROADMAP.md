@@ -101,6 +101,12 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 ## Housekeeping
 
+- [ ] The Android toolchain is the one Flutter 3.29 generated (Kotlin
+  1.8.22, AGP 8.1, Gradle 8.3). New plugins must be picked at versions that
+  build with it — e.g. `package_info_plus` 9 needs Kotlin 2.2, so we use
+  8.x. CI's APK job catches mismatches. Upgrade Flutter and the Android
+  toolchain together, as one dedicated step, when plugins start requiring it.
+
 - [ ] Two APIs carry `// ignore: deprecated_member_use` because they are only
   deprecated on newer Flutter (`onReorder`, `TickerMode.of`). Switch to
   `onReorderItem` / `TickerMode.valuesOf` when upgrading Flutter.
