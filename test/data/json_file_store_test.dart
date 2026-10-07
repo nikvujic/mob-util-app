@@ -18,8 +18,14 @@ void main() {
   });
 
   test('round-trips JSON and leaves no temp file behind', () async {
-    await store.write({'a': 1, 'b': [true, 'x']});
-    expect(await store.read(), {'a': 1, 'b': [true, 'x']});
+    await store.write({
+      'a': 1,
+      'b': [true, 'x']
+    });
+    expect(await store.read(), {
+      'a': 1,
+      'b': [true, 'x']
+    });
     expect(File('${store.file.path}.tmp').existsSync(), isFalse);
   });
 

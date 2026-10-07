@@ -28,7 +28,8 @@ void main() {
 
     await tester.tap(find.byTooltip('New note'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('noteTitleField')), 'Groceries');
+    await tester.enterText(
+        find.byKey(const Key('noteTitleField')), 'Groceries');
     await tester.pageBack();
     await tester.pumpAndSettle();
 
@@ -112,7 +113,8 @@ void main() {
 
     await tester.tap(find.text('Old title'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('noteTitleField')), 'New title');
+    await tester.enterText(
+        find.byKey(const Key('noteTitleField')), 'New title');
     await tester.pageBack();
     await tester.pumpAndSettle();
 

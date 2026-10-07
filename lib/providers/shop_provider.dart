@@ -37,7 +37,8 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
   /// Reorders within one section. [oldIndex] and [newIndex] are positions
   /// inside that section and follow `ReorderableListView.onReorder`
   /// semantics. The other section is left untouched.
-  void reorder({required bool toBuy, required int oldIndex, required int newIndex}) {
+  void reorder(
+      {required bool toBuy, required int oldIndex, required int newIndex}) {
     if (newIndex > oldIndex) newIndex--;
     if (oldIndex == newIndex) return;
 

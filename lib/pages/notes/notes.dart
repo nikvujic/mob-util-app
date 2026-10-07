@@ -114,8 +114,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                           note.id,
                           () => _openNote(note.id),
                         ),
-                        onLongPress: () =>
-                            _selection.handleLongPress(note.id),
+                        onLongPress: () => _selection.handleLongPress(note.id),
                       ),
                     );
                   },

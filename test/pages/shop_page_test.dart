@@ -20,8 +20,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('adds several items in a row from the add sheet',
-      (tester) async {
+  testWidgets('adds several items in a row from the add sheet', (tester) async {
     await pumpShop(tester);
     expect(find.text('Your shopping list is empty'), findsOneWidget);
 
@@ -62,8 +61,7 @@ void main() {
     expect(container.read(shopProvider).first.name, 'Milk');
   });
 
-  testWidgets('dragging the handle reorders within a section',
-      (tester) async {
+  testWidgets('dragging the handle reorders within a section', (tester) async {
     await pumpShop(tester);
     container.read(shopProvider.notifier)
       ..addItem('C')
