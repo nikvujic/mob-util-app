@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
@@ -10,9 +9,7 @@ import 'package:the_app/widgets/bottom_nav.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // File storage is not available in the browser; the web build is only
-  // used for previews.
-  final storage = kIsWeb ? AppStorage.inMemory() : await AppStorage.open();
+  final storage = await AppStorage.open();
   runApp(
     ProviderScope(
       overrides: [appStorageProvider.overrideWithValue(storage)],

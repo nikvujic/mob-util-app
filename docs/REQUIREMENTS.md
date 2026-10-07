@@ -29,7 +29,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, settings, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | 🚧 holds today; must be kept as pages are added, with tests |
 | G8 | **Settings** page, opened from the app bar of any main section. Holds **Security** (master password, section locks), export/import, and future options. | ⏳ |
-| G9 | Android only. No web/desktop targets or code paths. | ⏳ |
+| G9 | Android only. No web/desktop targets or code paths. | ✅ |
 
 ## D — Data safety: export / import
 
