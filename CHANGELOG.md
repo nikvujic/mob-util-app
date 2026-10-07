@@ -4,6 +4,20 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.2.0] - 2026-10-08
+
+### Added
+- Settings page, opened from the gear icon on every section (Security and
+  Backup are listed and arrive in upcoming versions).
+- **Other** section, where extra tools such as Counters will live.
+
+### Changed
+- The To Do section is now called **Planner**.
+- The unfinished Export/Import menu on Notes is gone; backup will live in
+  Settings.
+- Back on any main section closes the app; back from Settings or a note
+  returns to where you were.
+
 ## [0.1.0] - 2026-10-07
 
 First tracked release.
