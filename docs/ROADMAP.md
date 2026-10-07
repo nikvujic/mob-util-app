@@ -16,6 +16,9 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - Data safety first: anything touching storage, export/import or encryption
   gets round-trip tests with real files, including failure cases.
 - Commits are authored by Nikola Vujic, unsigned, pushed to `main`.
+- Every step that changes the app ends with a release: version bump,
+  `CHANGELOG.md` entry, `vX.Y.Z` tag → GitHub Release with the APK
+  ([RELEASING.md](RELEASING.md)).
 - After a group of steps, a **device checkpoint**: build the APK and try it on
   the phone (listed below where it matters most).
 

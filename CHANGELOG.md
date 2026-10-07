@@ -1,0 +1,19 @@
+# Changelog
+
+All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
+(see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
+Release with the installable APK.
+
+## [0.1.0] - 2026-10-07
+
+First tracked release.
+
+### Added
+- Notes: create, edit title and body, custom order with drag handles,
+  long-press selection with confirmed delete. New notes start as
+  "New Note" and are removed again if left untouched.
+- Shop: "To buy" and "Items" lists; tap moves an item between them; add
+  several items in a row; drag to reorder; selection with confirmed delete.
+- To Do tab placeholder.
+- All data is saved on the phone after every change; note edits are
+  autosaved while typing and when the app goes to the background.
