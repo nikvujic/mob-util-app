@@ -19,6 +19,11 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - Every step that changes the app ends with a release: version bump,
   `CHANGELOG.md` entry, `vX.Y.Z` tag → GitHub Release with the APK
   ([RELEASING.md](RELEASING.md)).
+- **Waiting on the signing key** (Nikola, one-time; see below). Once the
+  secrets are in: tag the latest version so it becomes the first GitHub
+  Release, then ask whether CI should also keep the APK of every run as a
+  downloadable artifact (handy for quick looks, but debug-signed — can't be
+  updated by real releases).
 - **Before the first phone test: set up the release signing key**
   ([RELEASING.md](RELEASING.md#signing-key-one-time-setup)) so the APK you
   install can be updated by later releases without losing data. Until then,
@@ -51,7 +56,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 ### Notes & Shop polish
 
-4. [ ] **Discard changes in a note (N5)** — snapshot when the editor opens,
+4. [x] **Discard changes in a note (N5)** — snapshot when the editor opens,
    undo action restores it (or removes a just-created note), with confirm.
 5. [ ] **Compact shop rows (S4).**
 

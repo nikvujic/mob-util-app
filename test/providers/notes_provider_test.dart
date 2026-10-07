@@ -51,4 +51,14 @@ void main() {
     notifier.removeNotes({a, c});
     expect(titles(), ['B']);
   });
+
+  test('restoreNote puts back an exact earlier version', () {
+    final id = notifier.addNote(title: 'A', content: 'original');
+    final snapshot = notifier.state.single;
+
+    notifier.updateNote(id, title: 'B', content: 'edited');
+    notifier.restoreNote(snapshot);
+
+    expect(identical(notifier.state.single, snapshot), isTrue);
+  });
 }

@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/note.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// Shows and edits a single note.
 ///
@@ -11,6 +13,9 @@ import 'package:the_app/providers/notes_provider.dart';
 /// background, and when the page is left. A note created just now ([isNew])
 /// that is left untouched — default title and no content — is deleted again
 /// when the page is left.
+///
+/// "Discard changes" undoes everything done since the page was opened: the
+/// note is restored to that version (or removed, if it was created here).
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String noteId;
   final bool isNew;
@@ -31,13 +36,19 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   late final AppLifecycleListener _lifecycleListener;
   Timer? _autosaveTimer;
 
+  /// The note as it was when the page opened, for "Discard changes".
+  Note? _original;
+
+  /// Set once changes are discarded, so leaving the page saves nothing.
+  bool _discarded = false;
+
   @override
   void initState() {
     super.initState();
-    final note =
+    _original =
         ref.read(notesProvider).where((n) => n.id == widget.noteId).firstOrNull;
-    _titleController = TextEditingController(text: note?.title ?? '');
-    _contentController = TextEditingController(text: note?.content ?? '');
+    _titleController = TextEditingController(text: _original?.title ?? '');
+    _contentController = TextEditingController(text: _original?.content ?? '');
     _titleController.addListener(_scheduleAutosave);
     _contentController.addListener(_scheduleAutosave);
     _lifecycleListener = AppLifecycleListener(onHide: _autosave);
@@ -62,6 +73,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// a cleared title is not saved until the user leaves the page.
   void _autosave() {
     _autosaveTimer?.cancel();
+    if (_discarded) return;
     final title = _titleController.text.trim();
     ref.read(notesProvider.notifier).updateNote(
           widget.noteId,
@@ -72,6 +84,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
   void _save() {
     _autosaveTimer?.cancel();
+    if (_discarded) return;
     final title = _titleController.text.trim();
     final content = _contentController.text;
     final notifier = ref.read(notesProvider.notifier);
@@ -90,6 +103,34 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     );
   }
 
+  bool get _hasChanges =>
+      _titleController.text != (_original?.title ?? '') ||
+      _contentController.text != (_original?.content ?? '');
+
+  Future<void> _discardChanges() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: widget.isNew ? 'Discard this note?' : 'Discard changes?',
+      message: widget.isNew
+          ? 'The new note will be deleted.'
+          : 'The note goes back to how it was when you opened it.',
+      confirmLabel: 'Discard',
+      destructive: true,
+    );
+    if (!confirmed || !mounted) return;
+
+    _discarded = true;
+    _autosaveTimer?.cancel();
+    final notifier = ref.read(notesProvider.notifier);
+    final original = _original;
+    if (widget.isNew || original == null) {
+      notifier.removeNotes({widget.noteId});
+    } else {
+      notifier.restoreNote(original);
+    }
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -97,7 +138,21 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         if (didPop) _save();
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Note')),
+        appBar: AppBar(
+          title: const Text('Note'),
+          actions: [
+            ListenableBuilder(
+              listenable: Listenable.merge(
+                [_titleController, _contentController],
+              ),
+              builder: (context, _) => IconButton(
+                icon: const Icon(Icons.undo),
+                tooltip: 'Discard changes',
+                onPressed: _hasChanges ? _discardChanges : null,
+              ),
+            ),
+          ],
+        ),
         body: Column(
           children: [
             Padding(

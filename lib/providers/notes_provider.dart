@@ -43,6 +43,15 @@ class NotesNotifier extends StateNotifier<List<Note>> {
     ];
   }
 
+  /// Puts back an earlier version of a note exactly as it was, including
+  /// its modified time (used to discard edits).
+  void restoreNote(Note snapshot) {
+    state = [
+      for (final note in state)
+        if (note.id == snapshot.id) snapshot else note,
+    ];
+  }
+
   void removeNotes(Set<String> ids) {
     state = state.where((note) => !ids.contains(note.id)).toList();
   }
