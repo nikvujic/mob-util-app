@@ -4,6 +4,16 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.10.0] - 2026-10-08
+
+### Added
+- **Import from file** (Menu → Backup): pick a backup, enter its master
+  password if it's encrypted, see what it holds (date, number of notes and
+  shop items) and confirm to restore it. Files that aren't backups, are
+  damaged, or come from a newer app version are refused with a clear
+  message, and nothing changes. **Undo** right after restoring puts your
+  previous data back.
+
 ## [0.9.0] - 2026-10-08
 
 ### Added
