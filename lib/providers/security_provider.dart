@@ -1,0 +1,78 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/crypto.dart';
+import 'package:the_app/data/app_storage.dart';
+
+/// Rules for choosing a master password.
+abstract final class MasterPasswordRules {
+  static const minLength = 8;
+
+  /// An error message for an unacceptable new password, or null if it's OK.
+  static String? validate(String password) {
+    if (password.length < minLength) {
+      return 'Use at least $minLength characters';
+    }
+    if (password.trim().isEmpty) return 'The password can\'t be only spaces';
+    return null;
+  }
+}
+
+/// Thrown when the current master password given is wrong.
+class WrongPasswordException implements Exception {
+  const WrongPasswordException();
+}
+
+/// The master password (L1–L3). State: its verifier, or null if none is
+/// set. The password itself is never kept — not even in memory after an
+/// operation finishes.
+class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
+  final AppStorage _storage;
+
+  SecurityNotifier(this._storage) : super(_storage.initialMasterPassword) {
+    addListener(_storage.saveMasterPassword, fireImmediately: false);
+  }
+
+  bool get hasMasterPassword => state != null;
+
+  /// Sets the master password. Only when none is set yet.
+  Future<void> setPassword(String password) async {
+    _checkNew(password);
+    if (state != null) throw StateError('A master password is already set');
+    final (verifier, _) = await PasswordVerifier.create(password);
+    state = verifier;
+  }
+
+  /// Replaces the master password. Throws [WrongPasswordException] if
+  /// [current] is wrong (and changes nothing).
+  Future<void> changePassword(String current, String newPassword) async {
+    _checkNew(newPassword);
+    await _unlock(current);
+    final (verifier, _) = await PasswordVerifier.create(newPassword);
+    state = verifier;
+  }
+
+  /// Removes the master password. Throws [WrongPasswordException] if
+  /// [current] is wrong (and changes nothing).
+  Future<void> removePassword(String current) async {
+    await _unlock(current);
+    state = null;
+  }
+
+  /// The key for [password]; throws [WrongPasswordException] if it's wrong.
+  Future<PasswordKey> _unlock(String password) async {
+    final verifier = state;
+    if (verifier == null) throw StateError('No master password is set');
+    final key = await verifier.unlock(password);
+    if (key == null) throw const WrongPasswordException();
+    return key;
+  }
+
+  void _checkNew(String password) {
+    final error = MasterPasswordRules.validate(password);
+    if (error != null) throw ArgumentError(error);
+  }
+}
+
+final securityProvider =
+    StateNotifierProvider<SecurityNotifier, PasswordVerifier?>((ref) {
+  return SecurityNotifier(ref.watch(appStorageProvider));
+});

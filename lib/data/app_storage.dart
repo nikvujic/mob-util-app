@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/json_file_store.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -11,6 +12,8 @@ import 'package:the_app/models/shop_item.dart';
 ///
 ///     <app documents>/data/notes.json  {"version": 1, "notes": [...]}
 ///     <app documents>/data/shop.json   {"version": 1, "items": [...]}
+///     <app documents>/data/security.json
+///         {"version": 1, "masterPassword": {verifier} or null}
 ///
 /// Data is loaded once at startup ([open]) and then saved after every change
 /// by the providers.
@@ -19,24 +22,32 @@ class AppStorage {
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
+  final JsonFileStore? _securityStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
   final List<ShopItem> initialShopItems;
 
+  /// The master password's verifier, or null if none is set.
+  final PasswordVerifier? initialMasterPassword;
+
   AppStorage._(
     this._notesStore,
-    this._shopStore, {
+    this._shopStore,
+    this._securityStore, {
     required this.initialNotes,
     required this.initialShopItems,
+    required this.initialMasterPassword,
   });
 
   /// Storage that keeps nothing (for tests and previews).
   AppStorage.inMemory({
     this.initialNotes = const [],
     this.initialShopItems = const [],
+    this.initialMasterPassword,
   })  : _notesStore = null,
-        _shopStore = null;
+        _shopStore = null,
+        _securityStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -44,31 +55,53 @@ class AppStorage {
         Directory('${(await getApplicationDocumentsDirectory()).path}/data');
     final notesStore = JsonFileStore(File('${dir.path}/notes.json'));
     final shopStore = JsonFileStore(File('${dir.path}/shop.json'));
+    final securityStore = JsonFileStore(File('${dir.path}/security.json'));
 
     return AppStorage._(
       notesStore,
       shopStore,
-      initialNotes: await _load(notesStore, 'notes', Note.fromJson),
-      initialShopItems: await _load(shopStore, 'items', ShopItem.fromJson),
+      securityStore,
+      initialNotes: await _load(
+        notesStore,
+        [],
+        (json) => [
+          for (final e in json['notes'] as List<dynamic>)
+            Note.fromJson(e as Map<String, dynamic>),
+        ],
+      ),
+      initialShopItems: await _load(
+        shopStore,
+        [],
+        (json) => [
+          for (final e in json['items'] as List<dynamic>)
+            ShopItem.fromJson(e as Map<String, dynamic>),
+        ],
+      ),
+      initialMasterPassword: await _load(securityStore, null, (json) {
+        final verifier = json['masterPassword'];
+        return verifier == null
+            ? null
+            : PasswordVerifier.fromJson(verifier as Map<String, dynamic>);
+      }),
     );
   }
 
-  static Future<List<T>> _load<T>(
+  /// Reads [store] with [parse]; [empty] if the file doesn't exist yet.
+  static Future<T> _load<T>(
     JsonFileStore store,
-    String key,
-    T Function(Map<String, dynamic>) fromJson,
+    T empty,
+    T Function(Map<String, dynamic> json) parse,
   ) async {
     try {
       final json = await store.read();
-      if (json == null) return [];
-      final list = (json as Map<String, dynamic>)[key] as List<dynamic>;
-      return [for (final e in list) fromJson(e as Map<String, dynamic>)];
+      if (json == null) return empty;
+      return parse(json as Map<String, dynamic>);
     } catch (e) {
       // Never overwrite data we could not read: move it aside and start
       // empty, so it can still be recovered by hand.
       final moved = await store.quarantine();
       debugPrint('Could not read ${store.file.path} ($e); moved to $moved');
-      return [];
+      return empty;
     }
   }
 
@@ -86,10 +119,18 @@ class AppStorage {
     });
   }
 
+  Future<void> saveMasterPassword(PasswordVerifier? verifier) async {
+    await _securityStore?.write({
+      'version': formatVersion,
+      'masterPassword': verifier?.toJson(),
+    });
+  }
+
   /// Completes when every pending save is on disk.
   Future<void> flush() async {
     await _notesStore?.flush();
     await _shopStore?.flush();
+    await _securityStore?.flush();
   }
 }
 

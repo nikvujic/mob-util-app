@@ -216,3 +216,57 @@ Future<List<int>> open(
     throw const DecryptionException();
   }
 }
+
+/// Checks a password without storing it: holds the key-derivation
+/// parameters and a small box sealed with the derived key. Only the right
+/// password derives a key that opens it.
+class PasswordVerifier {
+  static const _context = 'the-app/password-check';
+
+  final KdfParams params;
+  final SealedBox _check;
+
+  PasswordVerifier._(this.params, this._check);
+
+  /// Makes a verifier for [password] (fresh salt). Also returns the derived
+  /// key, so callers can use it right away without deriving it twice.
+  static Future<(PasswordVerifier, PasswordKey)> create(
+    String password,
+  ) async {
+    final key = await PasswordKey.derive(password, KdfParams.generate());
+    final check = await seal(
+      SecretKeyData.random(length: 16).bytes,
+      key,
+      context: _context,
+    );
+    return (PasswordVerifier._(key.params, check), key);
+  }
+
+  /// The key for [password], or null if it's the wrong password.
+  Future<PasswordKey?> unlock(String password) async {
+    final key = await PasswordKey.derive(password, params);
+    try {
+      await open(_check, key, context: _context);
+      return key;
+    } on DecryptionException {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'kdf': params.toJson(),
+        'check': _check.toJson(),
+      };
+
+  /// Throws [FormatException] if the JSON isn't a verifier.
+  factory PasswordVerifier.fromJson(Map<String, dynamic> json) {
+    final kdf = json['kdf'], check = json['check'];
+    if (kdf is! Map<String, dynamic> || check is! Map<String, dynamic>) {
+      throw const FormatException('Not a password verifier');
+    }
+    return PasswordVerifier._(
+      KdfParams.fromJson(kdf),
+      SealedBox.fromJson(check),
+    );
+  }
+}

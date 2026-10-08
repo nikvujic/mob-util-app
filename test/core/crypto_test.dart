@@ -188,6 +188,41 @@ void main() {
       );
     });
   });
+
+  group('PasswordVerifier', () {
+    test('unlocks with the right password only', () async {
+      final (verifier, key) = await PasswordVerifier.create(password);
+      expect(await verifier.unlock('wrong password'), isNull);
+
+      final unlocked = await verifier.unlock(password);
+      expect(unlocked, isNotNull);
+      // The unlocked key is the same key create() returned.
+      final box = await seal([5], key, context: context);
+      expect(await open(box, unlocked!, context: context), [5]);
+    });
+
+    test('uses the default (strong) parameters and a fresh salt', () async {
+      final (a, _) = await PasswordVerifier.create(password);
+      final (b, _) = await PasswordVerifier.create(password);
+      expect(a.params.memoryKiB, KdfParams.defaultMemoryKiB);
+      expect(a.params.iterations, KdfParams.defaultIterations);
+      expect(a.params.salt, isNot(b.params.salt));
+    });
+
+    test('survives a JSON round trip and never contains the password',
+        () async {
+      final (verifier, _) = await PasswordVerifier.create(password);
+      final json = jsonEncode(verifier.toJson());
+      expect(json, isNot(contains('horse')));
+
+      final back = PasswordVerifier.fromJson(
+        jsonDecode(json) as Map<String, dynamic>,
+      );
+      expect(await back.unlock(password), isNotNull);
+      expect(await back.unlock('nope'), isNull);
+      expect(() => PasswordVerifier.fromJson({}), throwsFormatException);
+    });
+  });
 }
 
 List<int> _hex(String hex) => [
