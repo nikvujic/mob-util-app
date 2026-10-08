@@ -24,7 +24,7 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 | `providers/` | App state (Riverpod notifiers): the rules for changing notes, shop items, … Every change is saved through `data/`. | `core`, `data`, `models` |
 | `data/` | Storage: reading and writing files. The only place that touches `dart:io`. | `core`, `models` |
 | `models/` | Plain immutable value classes with JSON conversion. No Flutter, no imports at all. | — |
-| `core/` | App-wide basics: theme (the only file allowed to define colors), ids, app info. | — |
+| `core/` | App-wide basics: theme (the only file allowed to define colors), ids, app info, encryption (`crypto.dart`). | — |
 
 ## Other rules (also enforced)
 
@@ -34,7 +34,8 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 - No `print()`; use `debugPrint`.
 - Platform plugins are confined: `path_provider` and `file_picker` to
   `data/` (behind small interfaces like `BackupFiles`, so tests can fake
-  them), `package_info_plus` to `main.dart`.
+  them), `package_info_plus` to `main.dart`, `cryptography` to
+  `core/crypto.dart` (the app's only encryption code).
 
 ## Design checks
 

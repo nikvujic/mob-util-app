@@ -25,6 +25,7 @@ const restrictedImports = <String, Set<String>>{
   'dart:io': {'data'},
   'package:path_provider/': {'data'},
   'package:file_picker/': {'data'},
+  'package:cryptography/': {'core'},
   'package:package_info_plus/': {'main'},
   'package:flutter/material.dart': {'main', 'app', 'pages', 'widgets', 'core'},
   'package:flutter/widgets.dart': {'main', 'app', 'pages', 'widgets', 'core'},
