@@ -120,7 +120,15 @@ Small fixes, not urgent; can go out together as one polish release.
     - [ ] 12e Backups with locked notes: carry the wrapped data key;
       import re-seals under this phone's key (or adopts it if none).
 
+- [ ] After 12e: **explain to Nikola in plain terms** how locked notes
+  work (what's encrypted, what the password protects, what backups
+  carry) — he asked for it.
+
 ### One-handed use & touch polish (from the second phone test)
+
+- [x] **Bug:** closing the keyboard (its back key) while adding shop items
+  left the add field hanging over a dimmed page; the sheet now closes
+  with the keyboard.
 
 After locked notes, before section locks.
 

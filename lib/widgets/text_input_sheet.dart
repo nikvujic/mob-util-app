@@ -36,6 +36,29 @@ class _TextInputSheetState extends State<TextInputSheet> {
         );
   final FocusNode _focusNode = FocusNode();
 
+  /// Whether the on-screen keyboard has been shown for this sheet.
+  bool _keyboardShown = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Closing the keyboard (e.g. its back key) means the user is done:
+    // close the sheet too, instead of leaving it hanging over a dimmed
+    // page. Only while this sheet is the top route — if it's already
+    // closing, the keyboard hiding must not close the page below.
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    if (keyboardOpen) {
+      _keyboardShown = true;
+    } else if (_keyboardShown) {
+      _keyboardShown = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final route = ModalRoute.of(context);
+        if (route != null && route.isCurrent) Navigator.of(context).pop();
+      });
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();

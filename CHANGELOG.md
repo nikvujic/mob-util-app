@@ -27,6 +27,8 @@ Release with the installable APK.
 ### Fixed
 - Creating a note no longer makes the notes list jump while the editor
   opens.
+- Closing the keyboard while adding shop items now closes the add field
+  too, instead of leaving it over a dimmed page.
 
 ## [0.10.0] - 2026-10-08
 
