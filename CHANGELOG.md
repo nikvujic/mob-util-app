@@ -4,6 +4,14 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.8.0] - 2026-10-08
+
+### Added
+- **Master password** (Menu → Security): set, change and remove it.
+  It's never stored — only a check value derived from it with Argon2id —
+  so a forgotten password can't be recovered. It will protect locked
+  notes and encrypted backups.
+
 ## [0.7.0] - 2026-10-08
 
 ### Added
