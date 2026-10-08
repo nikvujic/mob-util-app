@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.7.0] - 2026-10-08
+
+### Added
+- **Backup → Export all data** in the menu: saves your notes and shopping
+  list to one file (e.g. `the-app-backup-2026-10-08-0930.json`) wherever
+  you choose — Downloads, Google Drive, … Importing it back comes next.
+
 ## [0.6.0] - 2026-10-08
 
 ### Changed
