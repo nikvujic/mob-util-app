@@ -20,6 +20,11 @@ class NotesPage extends ConsumerStatefulWidget {
 class _NotesPageState extends ConsumerState<NotesPage> {
   final SelectionController _selection = SelectionController();
 
+  /// A note just created and opened: it exists (and is saved) right away,
+  /// but the list only shows it once the editor fully covers the list, so
+  /// the list doesn't visibly shift while the editor slides in.
+  String? _arrivingId;
+
   @override
   void dispose() {
     _selection.dispose();
@@ -36,7 +41,26 @@ class _NotesPageState extends ConsumerState<NotesPage> {
 
   void _createNote() {
     final id = ref.read(notesProvider.notifier).addNote();
-    _openNote(id, isNew: true);
+    setState(() => _arrivingId = id);
+
+    final route = MaterialPageRoute<void>(
+      builder: (_) => NoteDetailPage(noteId: id, isNew: true),
+    );
+    Navigator.of(context).push(route);
+
+    // Reveal the note once the editor is fully open (or its opening was
+    // cancelled).
+    final animation = route.animation!;
+    void reveal(AnimationStatus status) {
+      if (status != AnimationStatus.completed &&
+          status != AnimationStatus.dismissed) {
+        return;
+      }
+      animation.removeStatusListener(reveal);
+      if (mounted && _arrivingId == id) setState(() => _arrivingId = null);
+    }
+
+    animation.addStatusListener(reveal);
   }
 
   Future<void> _deleteSelected() async {
@@ -53,7 +77,10 @@ class _NotesPageState extends ConsumerState<NotesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final notes = ref.watch(notesProvider);
+    final allNotes = ref.watch(notesProvider);
+    final notes = _arrivingId == null
+        ? allNotes
+        : allNotes.where((n) => n.id != _arrivingId).toList();
     ref.listen(notesProvider, (_, next) {
       _selection.retain(next.map((n) => n.id));
     });
@@ -73,34 +100,41 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                   onDelete: _deleteSelected,
                 )
               : const MainAppBar(title: 'Notes'),
-          body: notes.isEmpty
-              ? const EmptyState(icon: Icons.note_outlined, message: 'No notes')
-              : ReorderableListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  buildDefaultDragHandles: false,
-                  itemCount: notes.length,
-                  // onReorderItem only exists on newer Flutter than we target.
-                  // ignore: deprecated_member_use
-                  onReorder: ref.read(notesProvider.notifier).reorder,
-                  itemBuilder: (context, index) {
-                    final note = notes[index];
-                    return Padding(
-                      key: ValueKey(note.id),
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: _NoteTile(
-                        note: note,
-                        index: index,
-                        selectionMode: _selection.isActive,
-                        selected: _selection.isSelected(note.id),
-                        onTap: () => _selection.handleTap(
-                          note.id,
-                          () => _openNote(note.id),
+          // Not interactive while a new note is hidden, so list positions
+          // always match the stored order.
+          body: IgnorePointer(
+            ignoring: _arrivingId != null,
+            child: notes.isEmpty
+                ? const EmptyState(
+                    icon: Icons.note_outlined, message: 'No notes')
+                : ReorderableListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    buildDefaultDragHandles: false,
+                    itemCount: notes.length,
+                    // onReorderItem only exists on newer Flutter than we target.
+                    // ignore: deprecated_member_use
+                    onReorder: ref.read(notesProvider.notifier).reorder,
+                    itemBuilder: (context, index) {
+                      final note = notes[index];
+                      return Padding(
+                        key: ValueKey(note.id),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: _NoteTile(
+                          note: note,
+                          index: index,
+                          selectionMode: _selection.isActive,
+                          selected: _selection.isSelected(note.id),
+                          onTap: () => _selection.handleTap(
+                            note.id,
+                            () => _openNote(note.id),
+                          ),
+                          onLongPress: () =>
+                              _selection.handleLongPress(note.id),
                         ),
-                        onLongPress: () => _selection.handleLongPress(note.id),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+          ),
           floatingActionButton: _selection.isActive
               ? null
               : FloatingActionButton(

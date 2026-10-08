@@ -69,6 +69,35 @@ void main() {
     await leaveNote(tester, save: true);
   });
 
+  testWidgets('a new note joins the list only once the editor covers it',
+      (tester) async {
+    container = await pumpApp(tester);
+    container.read(notesProvider.notifier).addNote(title: 'Older');
+    await tester.pump();
+
+    Finder inList(String text, {bool skipOffstage = true}) => find.descendant(
+          of: find.byType(ReorderableListView, skipOffstage: skipOffstage),
+          matching: find.text(text, skipOffstage: skipOffstage),
+          skipOffstage: skipOffstage,
+        );
+
+    await tester.tap(find.byTooltip('New note'));
+    await tester.pump(); // first frame of the slide-in
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Saved immediately, but not shown in the still-visible list.
+    expect(container.read(notesProvider).first.title, 'New Note');
+    expect(inList('New Note'), findsNothing);
+    expect(inList('Older'), findsOneWidget);
+
+    await tester.pumpAndSettle(); // editor fully open
+    expect(inList('New Note', skipOffstage: false), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('noteContentField')), 'x');
+    await leaveNote(tester, save: true);
+    expect(inList('New Note'), findsOneWidget);
+  });
+
   testWidgets('an untouched new note is discarded', (tester) async {
     container = await pumpApp(tester);
     await tester.tap(find.byTooltip('New note'));
