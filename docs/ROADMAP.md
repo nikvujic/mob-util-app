@@ -20,9 +20,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
   `CHANGELOG.md` entry, then the Release workflow → GitHub Release with
   the APK ([RELEASING.md](RELEASING.md)).
 - Release signing key is set up (2026-10-08); v0.10.0 is the first
-  release. Open question: should CI also keep the APK of every run as a
-  downloadable artifact (quick looks, but debug-signed — can't be updated
-  by real releases)?
+  release, installed and working on the phone.
+- **Releases are started by Nikola** (Actions → Release → Run workflow).
+  Steps end with the version bump and changelog pushed; Claude doesn't
+  start releases unless asked.
 - After a group of steps, a **device checkpoint**: build the APK and try it on
   the phone (listed below where it matters most).
 
@@ -79,6 +80,20 @@ kinds of file.
     asks for the master password for encrypted files. Invalid files never
     touch current data.
 
+### From the first phone test (2026-10-08)
+
+Small fixes, not urgent; can go out together as one polish release.
+
+- [ ] **New note appears in the list before the editor slides in**
+  (visible shift). Create the note so it's saved immediately, but only
+  show it in the list once the editor's transition has finished (N2).
+- [ ] **Save dialog redesign (N5):** clear title / content / actions
+  layout, more square; real buttons **Discard** and **Save** instead of
+  text links; the content explains that edits are saved automatically.
+- [ ] **Double back to exit (G7):** on a main section, the first back
+  shows "Press back again to exit"; a second back within ~2 s closes the
+  app.
+
 ### Locking
 
 11. [ ] **Session unlock (L4)** — unlock once; stays unlocked through short
@@ -105,7 +120,8 @@ kinds of file.
 - TimeTune-style scheduler in Planner (P4)
 - Self-hosted cloud backup, e.g. S3-backed (D5)
 - **UI polish (U1)** — once the main features are in: shake on wrong
-  password, hero/slide animations, haptics, clicky counter sounds
+  password, hero/slide animations, haptics, clicky counter sounds;
+  replace the shop checkboxes with nicer icons (U2)
 
 ## Decisions
 
@@ -118,6 +134,13 @@ kinds of file.
   Menu → Security, next to the master password.
 
 ## Housekeeping
+
+- [ ] GitHub Actions warn that `actions/checkout@v4`, `setup-java@v4` and
+  `action-gh-release@v2` run on deprecated Node 20; move to their current
+  major versions (CI-only change, bundle with a step).
+- [ ] Optional: let the release workflow delete older releases so only
+  the latest APK stays (old APKs can't be installed over a newer version
+  without uninstalling anyway). Waiting on Nikola's go-ahead.
 
 - [ ] The Android toolchain is the one Flutter 3.29 generated (Kotlin
   1.8.22, AGP 8.1, Gradle 8.3). New plugins must be picked at versions that

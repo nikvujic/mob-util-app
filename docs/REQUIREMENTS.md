@@ -27,7 +27,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G4 | **Selection mode** behaves the same on every list: long-press selects, tap toggles, top bar shows count / select all / delete, back or ✕ exits. | ✅ |
 | G5 | Deleting always asks for confirmation through the shared dialog. | ✅ |
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
-| G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
+| G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app — after a confirming second press: the first shows *Press back again to exit* (planned, from the phone test). Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
 | G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | 🚧 menu with Security (master password; section locks to come) and Backup (export); version shown |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
@@ -51,7 +51,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N2 | Tapping + creates "New Note" at the top and opens it; an untouched new note is removed on leaving. | ✅ |
 | N3 | Title and body are directly editable; leaving saves; empty title becomes "Untitled". | ✅ |
 | N4 | Long-press → select → delete with confirmation. | ✅ |
-| N5 | **Save or discard on back.** Back after changing something asks *Save changes?* (*Save new note?* for a new one) with **No** (left) and **Yes** (right). Yes — or tapping outside / back on the dialog — saves; No restores the note to how it was when opened, or deletes a new note. Back without changes leaves without asking. Closing or killing the app never asks: edits are always autosaved. | ✅ |
+| N5 | **Save or discard on back.** Back after changing something asks *Save changes?* (*Save new note?* for a new one) with **No** (left) and **Yes** (right). Yes — or tapping outside / back on the dialog — saves; No restores the note to how it was when opened, or deletes a new note. Back without changes leaves without asking. Closing or killing the app never asks: edits are always autosaved. *(Planned redesign from the phone test: title / content / actions layout, real **Discard** and **Save** buttons, a line explaining that edits are saved automatically.)* | ✅ |
 | N5a | **↶ Discard changes** (existing notes only): restores the note to how it was when opened, without leaving the editor. Asks for confirmation. | ✅ |
 | N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ⏳ |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ⏳ |
@@ -91,6 +91,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | # | Requirement | Status |
 |---|-------------|--------|
 | U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
+| U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |
 
 ## O — Other
 
