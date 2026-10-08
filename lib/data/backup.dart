@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:the_app/core/crypto.dart' hide open;
+import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/shop_item.dart';
 
@@ -23,9 +25,22 @@ class BackupFormatException implements Exception {
 ///       "data": { "notes": [...], "shopItems": [...] }
 ///     }
 ///
-/// [version] goes up whenever the layout changes; [decode] must keep reading
-/// every older version.
+/// An encrypted backup keeps the same header but replaces `data` with the
+/// whole plain document, sealed with a key from the master password:
+///
+///     {
+///       "format": "the-app-backup", "version": 1, "encrypted": true,
+///       "createdAt": "…", "appVersion": "…",
+///       "kdf": {Argon2id parameters}, "sealed": {AES-256-GCM box}
+///     }
+///
+/// [version] goes up whenever the layout changes; [BackupFile.parse] must
+/// keep reading every older version.
 class Backup {
+  /// Authenticated with the encrypted data, so nothing else sealed with the
+  /// same key can be passed off as a backup.
+  static const sealContext = 'the-app/backup';
+
   static const format = 'the-app-backup';
   static const version = 1;
 
@@ -41,32 +56,63 @@ class Backup {
     required this.shopItems,
   });
 
-  /// Suggested file name, e.g. `the-app-backup-2026-10-08-0930.json`
-  /// (local time, so it matches what the user sees).
-  String get fileName {
+  /// Suggested file name, e.g. `the-app-backup-2026-10-08-0930.json` or
+  /// `…-0930-encrypted.json` (local time, so it matches what the user sees).
+  String fileName({bool encrypted = false}) {
     final t = createdAt.toLocal();
     String two(int n) => n.toString().padLeft(2, '0');
     return 'the-app-backup-${t.year}-${two(t.month)}-${two(t.day)}'
-        '-${two(t.hour)}${two(t.minute)}.json';
+        '-${two(t.hour)}${two(t.minute)}${encrypted ? '-encrypted' : ''}.json';
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> _header() => {
         'format': format,
         'version': version,
         'createdAt': createdAt.toUtc().toIso8601String(),
         'appVersion': appVersion,
+      };
+
+  Map<String, dynamic> toJson() => {
+        ..._header(),
         'data': {
           'notes': [for (final n in notes) n.toJson()],
           'shopItems': [for (final i in shopItems) i.toJson()],
         },
       };
 
-  /// The file contents: indented JSON, readable in any text editor.
-  String encode() => const JsonEncoder.withIndent('  ').convert(toJson());
+  static const _indented = JsonEncoder.withIndent('  ');
 
-  /// Reads a backup file. Throws [BackupFormatException] if [source] is not
-  /// a backup this app can read.
+  /// The file contents: indented JSON, readable in any text editor.
+  String encode() => _indented.convert(toJson());
+
+  /// The file contents of an encrypted backup, sealed with [key] (derived
+  /// from the master password). Only the header stays readable.
+  Future<String> encodeEncrypted(PasswordKey key) async {
+    final sealed = await seal(
+      utf8.encode(jsonEncode(toJson())),
+      key,
+      context: sealContext,
+    );
+    return _indented.convert({
+      ..._header(),
+      'encrypted': true,
+      'kdf': key.params.toJson(),
+      'sealed': sealed.toJson(),
+    });
+  }
+
+  /// Reads a plain backup. Throws [BackupFormatException] if [source] is not
+  /// a plain backup this app can read.
   static Backup decode(String source) {
+    final json = _parseHeader(source);
+    if (json['encrypted'] == true) {
+      throw const BackupFormatException('This backup is encrypted.');
+    }
+    return _fromJson(json);
+  }
+
+  /// Parses [source] as JSON and checks the header (format and version).
+  static Map<String, dynamic> _parseHeader(String source) {
     final Object? json;
     try {
       json = jsonDecode(source);
@@ -86,6 +132,10 @@ class Backup {
         'Update the app to restore it.',
       );
     }
+    return json;
+  }
+
+  static Backup _fromJson(Map<String, dynamic> json) {
     try {
       final data = json['data'] as Map<String, dynamic>;
       return Backup(
@@ -104,5 +154,66 @@ class Backup {
       // Wrong types, missing fields, bad dates: all mean a damaged file.
       throw const BackupFormatException('This backup is damaged.');
     }
+  }
+}
+
+/// A backup file as read from disk: either plain (ready to use) or encrypted
+/// (needs the master password it was made with).
+sealed class BackupFile {
+  /// When the backup was made (readable even if encrypted).
+  DateTime get createdAt;
+
+  /// Reads [source]. Throws [BackupFormatException] if it isn't a backup
+  /// this app can read.
+  static BackupFile parse(String source) {
+    final json = Backup._parseHeader(source);
+    if (json['encrypted'] != true) {
+      return PlainBackupFile(Backup._fromJson(json));
+    }
+    try {
+      return EncryptedBackupFile._(
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        kdf: KdfParams.fromJson(json['kdf'] as Map<String, dynamic>),
+        sealed: SealedBox.fromJson(json['sealed'] as Map<String, dynamic>),
+      );
+    } on Object {
+      throw const BackupFormatException('This backup is damaged.');
+    }
+  }
+}
+
+class PlainBackupFile extends BackupFile {
+  final Backup backup;
+
+  PlainBackupFile(this.backup);
+
+  @override
+  DateTime get createdAt => backup.createdAt;
+}
+
+class EncryptedBackupFile extends BackupFile {
+  @override
+  final DateTime createdAt;
+  final KdfParams _kdf;
+  final SealedBox _sealed;
+
+  EncryptedBackupFile._({
+    required this.createdAt,
+    required KdfParams kdf,
+    required SealedBox sealed,
+  })  : _kdf = kdf,
+        _sealed = sealed;
+
+  /// The backup inside, or null if [password] is wrong. Throws
+  /// [BackupFormatException] if the decrypted contents are damaged.
+  Future<Backup?> open(String password) async {
+    final key = await PasswordKey.derive(password, _kdf);
+    final List<int> plain;
+    try {
+      plain = await crypto.open(_sealed, key, context: Backup.sealContext);
+    } on DecryptionException {
+      return null;
+    }
+    return Backup.decode(utf8.decode(plain, allowMalformed: true));
   }
 }

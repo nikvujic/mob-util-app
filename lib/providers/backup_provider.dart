@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -28,13 +29,27 @@ class BackupExporter {
         shopItems: _ref.read(shopProvider),
       );
 
-  /// Writes a snapshot to a file the user picks. Errors (e.g. storage full)
-  /// are passed on to the caller.
+  /// Writes a plain (readable) snapshot to a file the user picks. Errors
+  /// (e.g. storage full) are passed on to the caller.
   Future<ExportResult> export() async {
     final backup = snapshot();
+    return _save(backup.fileName(), backup.encode());
+  }
+
+  /// Like [export], but the file is encrypted with [key] (from the master
+  /// password) and can only be restored with that password.
+  Future<ExportResult> exportEncrypted(PasswordKey key) async {
+    final backup = snapshot();
+    return _save(
+      backup.fileName(encrypted: true),
+      await backup.encodeEncrypted(key),
+    );
+  }
+
+  Future<ExportResult> _save(String fileName, String contents) async {
     final saved = await _ref.read(backupFilesProvider).save(
-          fileName: backup.fileName,
-          bytes: utf8.encode(backup.encode()),
+          fileName: fileName,
+          bytes: utf8.encode(contents),
         );
     return saved ? ExportResult.saved : ExportResult.cancelled;
   }

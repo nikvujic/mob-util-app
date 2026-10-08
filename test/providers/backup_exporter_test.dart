@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
@@ -73,5 +74,26 @@ void main() {
     await exporter().export();
     expect(identical(container.read(notesProvider), notes), isTrue);
     expect(identical(container.read(shopProvider), shop), isTrue);
+  });
+
+  test('exportEncrypted saves a file only the password opens', () async {
+    final key = await PasswordKey.derive(
+      'master password',
+      KdfParams(
+        memoryKiB: 64,
+        iterations: 1,
+        parallelism: 1,
+        salt: KdfParams.generate().salt,
+      ),
+    );
+    expect(await exporter().exportEncrypted(key), ExportResult.saved);
+
+    final file = files.saved.single;
+    expect(file.fileName, 'the-app-backup-2026-10-08-0905-encrypted.json');
+    final parsed =
+        BackupFile.parse(utf8.decode(file.bytes)) as EncryptedBackupFile;
+    final backup = await parsed.open('master password');
+    expect(backup!.notes.map((n) => n.title), ['Second', 'First']);
+    expect(await parsed.open('wrong'), isNull);
   });
 }
