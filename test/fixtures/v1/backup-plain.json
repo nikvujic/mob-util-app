@@ -1,0 +1,36 @@
+{
+  "format": "the-app-backup",
+  "version": 1,
+  "createdAt": "2026-10-08T09:30:00.000Z",
+  "appVersion": "0.10.0 (11)",
+  "data": {
+    "notes": [
+      {
+        "id": "1759906800000000-0",
+        "title": "Groceries",
+        "content": "milk\neggs\nčaj, ćevapi 🥙",
+        "createdAt": "2026-10-08T07:00:00.000Z",
+        "modifiedAt": "2026-10-08T07:30:00.000Z"
+      },
+      {
+        "id": "1759906800000001-0",
+        "title": "Untitled",
+        "content": "",
+        "createdAt": "2026-10-07T00:00:00.000Z",
+        "modifiedAt": "2026-10-07T00:00:00.000Z"
+      }
+    ],
+    "shopItems": [
+      {
+        "id": "s1",
+        "name": "Milk",
+        "toBuy": true
+      },
+      {
+        "id": "s2",
+        "name": "Coffee",
+        "toBuy": false
+      }
+    ]
+  }
+}

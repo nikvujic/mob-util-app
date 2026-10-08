@@ -87,6 +87,11 @@ class AppStorage {
   }
 
   /// Reads [store] with [parse]; [empty] if the file doesn't exist yet.
+  ///
+  /// Every format version this app ever wrote must stay readable here
+  /// (enforced by test/data/storage_compatibility_test.dart). A file from a
+  /// *newer* version — only possible after installing an older app — is not
+  /// misread: like any unreadable file it's moved aside, intact.
   static Future<T> _load<T>(
     JsonFileStore store,
     T empty,
@@ -95,7 +100,12 @@ class AppStorage {
     try {
       final json = await store.read();
       if (json == null) return empty;
-      return parse(json as Map<String, dynamic>);
+      final map = json as Map<String, dynamic>;
+      final version = map['version'];
+      if (version is! int || version < 1 || version > formatVersion) {
+        throw FormatException('Unsupported format version: $version');
+      }
+      return parse(map);
     } catch (e) {
       // Never overwrite data we could not read: move it aside and start
       // empty, so it can still be recovered by hand.

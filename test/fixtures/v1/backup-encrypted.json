@@ -1,0 +1,20 @@
+{
+  "format": "the-app-backup",
+  "version": 1,
+  "createdAt": "2026-10-08T09:30:00.000Z",
+  "appVersion": "0.10.0 (11)",
+  "encrypted": true,
+  "kdf": {
+    "algorithm": "argon2id",
+    "memoryKiB": 19456,
+    "iterations": 2,
+    "parallelism": 1,
+    "salt": "ReZCBFKVismxx2OneuIkqA=="
+  },
+  "sealed": {
+    "cipher": "aes-256-gcm",
+    "nonce": "r/6MK6jyaYwU11Dx",
+    "cipherText": "hjyfWiJw7Q4ww3bzrEmZPnaciC4D92JZR5c26fYDpGY43Kz4IuSrbUaigdULGcdYu5Ol27AN88KLqjHYS9TNFn9YpY2vyEAizM0W9V06+3LYb68i3xTCsT8lq+OAy2ZYDBQaR1AHtXEGzc+mD5U0vecmoXzTyaut/xatyw+rFqo8sxTUboryZ9G+Y36dlrbN1vrvbseDyVo1B+f/GM64rp58DUEtpJN1wq3SOEmf5ogf+W51virnu5BllieBjL1FHMi9QNO8ab9v5v4udGj6odpIa08Q6SZVvLqFsyLRcICxNmSz3fIYUsbCB0cMrdJJ48UPROQMoEz0bdc6O1tisnDiypWIX2QnLLBm7aR75bRygvNuFt/12GQ3RHUvK12Xy82SY5eUr7RxaM/PN466oktwa6dC/fUiIDZxxuULyStgjR2eaBEU7VWik/fk5JcCfkyrzfc10uUegUc0wimnoxOlQ2P9gqCMWwBmfzNilLi8eRY4O5zAv8d2qI39EjL2Le8Z7h7yb78WvKtyxLeHC+Tyr1nUIBhUpf4Yp8C3X7gnTqmSUkATn7X1AyDSAeDYpMgFOdZoO+ENRgbeh+cX/Zaj5E3Elck3OmzGKaS6x1iZTUWOulMKtVH/F/HeqCpt363bvC/W0iAy7dgtFK1UfHusKADHG67U/id+ylngzwPoqaoFuBOki10WYWD+ufyZ",
+    "mac": "p9rcY0amGodpebvBlzTyJQ=="
+  }
+}

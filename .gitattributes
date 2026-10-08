@@ -1,0 +1,2 @@
+# Frozen compatibility fixtures: keep their bytes exactly as written.
+test/fixtures/** -text

@@ -1,0 +1,1 @@
+{"version":1,"masterPassword":{"kdf":{"algorithm":"argon2id","memoryKiB":19456,"iterations":2,"parallelism":1,"salt":"ReZCBFKVismxx2OneuIkqA=="},"check":{"cipher":"aes-256-gcm","nonce":"CxTlWfd3eDTgGqQe","cipherText":"DmN0qojvbKF5r/nr6o7EkQ==","mac":"XGEdb0pFNOCMWoQEyqZi9w=="}}}
