@@ -108,3 +108,18 @@ class FakeBackupFiles implements BackupFiles {
     return Future.value(true);
   }
 }
+
+/// Lets real asynchronous work started by the UI finish (e.g. key
+/// derivation in a background isolate, which the test's fake clock can't
+/// wait for): waits in real time until no progress spinner is left.
+Future<void> settleBusy(WidgetTester tester) async {
+  for (var i = 0; i < 400; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 25)),
+    );
+    // Advance the clock too, so e.g. a closing page's transition finishes.
+    await tester.pump(const Duration(milliseconds: 25));
+    if (find.byType(CircularProgressIndicator).evaluate().isEmpty) break;
+  }
+  await tester.pumpAndSettle();
+}

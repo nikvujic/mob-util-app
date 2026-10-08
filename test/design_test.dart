@@ -60,6 +60,13 @@ void main() {
         await t.tap(find.text('Security'));
         await t.pumpAndSettle();
       },
+      'set master password form': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Security'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Set master password'));
+        await t.pumpAndSettle();
+      },
     };
 
     for (final MapEntry(key: name, value: open) in screens.entries) {

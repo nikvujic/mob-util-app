@@ -74,7 +74,7 @@ kinds of file.
 7. [x] **Crypto core (L2, L3)** — Argon2id key derivation (parameters stored
    with the data), AES-256-GCM seal/open with context binding; checked
    against OpenSSL-generated known answers. No UI.
-8. [ ] **Master password (L1)** — Menu → Security: set / change / remove;
+8. [x] **Master password (L1)** — Menu → Security: set / change / remove;
    only a verifier is stored. Warns that a forgotten password can't be
    recovered.
 9. [ ] **Plain or encrypted export (D2a)** — choice on export; encrypted

@@ -59,3 +59,5 @@ high and ≥20% smaller than note rows). Conventions it relies on:
 - Notifiers save every new state through `AppStorage` (one JSON file per
   feature, crash-safe writes). Storage is loaded once in `main()` and
   injected with a provider override; tests inject in-memory storage.
+- Slow work (key derivation) runs in a background isolate. Widget tests
+  run it for real with `tester.runAsync`, via the `settleBusy` helper.
