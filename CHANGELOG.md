@@ -4,6 +4,14 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.9.0] - 2026-10-08
+
+### Added
+- **Encrypted backups**: Export now asks *Plain file* or *Encrypted file*.
+  An encrypted backup can only be read with your master password (you
+  confirm it when exporting) and is named `…-encrypted.json`. Needs a
+  master password; without one the option points you to Security.
+
 ## [0.8.0] - 2026-10-08
 
 ### Added
