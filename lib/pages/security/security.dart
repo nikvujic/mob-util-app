@@ -62,7 +62,8 @@ class SecurityPage extends ConsumerWidget {
               ),
             ),
             ListTile(
-              leading: Icon(unlocked ? Icons.lock_open_outlined : Icons.lock_outline),
+              leading: Icon(
+                  unlocked ? Icons.lock_open_outlined : Icons.lock_outline),
               title: Text(unlocked ? 'Unlocked' : 'Locked'),
               subtitle: Text(
                 unlocked
