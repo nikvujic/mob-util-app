@@ -13,9 +13,20 @@ Release with the installable APK.
   **Lock now** (in the menu and on the Security page).
 - Encrypted export no longer asks for the password while unlocked.
 
+- **Press back twice to exit**: on a main section, the first back shows
+  "Press back again to exit"; back still closes the menu or leaves
+  selection mode first.
+
 ### Changed
+- **Dialogs redesigned**: clearer title, message and buttons, with squarer
+  corners. Leaving a note now asks with **Discard** and **Save** buttons
+  and says that notes are saved automatically.
 - Data files from a newer app version (only possible after installing an
   older version) are set aside untouched instead of being read.
+
+### Fixed
+- Creating a note no longer makes the notes list jump while the editor
+  opens.
 
 ## [0.10.0] - 2026-10-08
 
