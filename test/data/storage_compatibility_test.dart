@@ -43,6 +43,8 @@ void main() {
       final verifier = storage.initialMasterPassword!;
       expect(await verifier.unlock(password), isNotNull);
       expect(await verifier.unlock('wrong'), isNull);
+      // v1 master passwords had no data key; it's added on first unlock.
+      expect(verifier.hasDataKey, isFalse);
     });
 
     test('nothing was moved aside as unreadable', () async {

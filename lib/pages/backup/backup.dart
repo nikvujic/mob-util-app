@@ -45,7 +45,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   /// for (which also unlocks the session). Null if cancelled.
   Future<PasswordKey?> _masterKey() async {
     final unlocked = ref.read(sessionProvider);
-    if (unlocked != null) return unlocked;
+    if (unlocked != null) return unlocked.passwordKey;
     final verifier = ref.read(securityProvider);
     if (verifier == null) return null;
     final key = await showPasswordPrompt<PasswordKey>(
@@ -55,7 +55,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       confirmLabel: 'Encrypt',
       attempt: verifier.unlock,
     );
-    if (key != null) ref.read(sessionProvider.notifier).unlockWith(key);
+    if (key != null) await ref.read(sessionProvider.notifier).unlockWith(key);
     return key;
   }
 

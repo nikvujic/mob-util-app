@@ -30,7 +30,7 @@ class SecurityPage extends ConsumerWidget {
       confirmLabel: 'Unlock',
       attempt: verifier.unlock,
     );
-    if (key != null) ref.read(sessionProvider.notifier).unlockWith(key);
+    if (key != null) await ref.read(sessionProvider.notifier).unlockWith(key);
   }
 
   @override

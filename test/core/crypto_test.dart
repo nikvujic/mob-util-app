@@ -191,7 +191,7 @@ void main() {
 
   group('PasswordVerifier', () {
     test('unlocks with the right password only', () async {
-      final (verifier, key) = await PasswordVerifier.create(password);
+      final (verifier, key, _) = await PasswordVerifier.create(password);
       expect(await verifier.unlock('wrong password'), isNull);
 
       final unlocked = await verifier.unlock(password);
@@ -202,8 +202,8 @@ void main() {
     });
 
     test('uses the default (strong) parameters and a fresh salt', () async {
-      final (a, _) = await PasswordVerifier.create(password);
-      final (b, _) = await PasswordVerifier.create(password);
+      final (a, _, _) = await PasswordVerifier.create(password);
+      final (b, _, _) = await PasswordVerifier.create(password);
       expect(a.params.memoryKiB, KdfParams.defaultMemoryKiB);
       expect(a.params.iterations, KdfParams.defaultIterations);
       expect(a.params.salt, isNot(b.params.salt));
@@ -211,7 +211,7 @@ void main() {
 
     test('survives a JSON round trip and never contains the password',
         () async {
-      final (verifier, _) = await PasswordVerifier.create(password);
+      final (verifier, _, _) = await PasswordVerifier.create(password);
       final json = jsonEncode(verifier.toJson());
       expect(json, isNot(contains('horse')));
 
@@ -221,6 +221,82 @@ void main() {
       expect(await back.unlock(password), isNotNull);
       expect(await back.unlock('nope'), isNull);
       expect(() => PasswordVerifier.fromJson({}), throwsFormatException);
+    });
+  });
+
+  group('DataKey', () {
+    test('seals and opens data like a password key', () async {
+      final key = DataKey.generate();
+      final box = await seal([1, 2, 3], key, context: context);
+      expect(await open(box, key, context: context), [1, 2, 3]);
+      expect(
+        open(box, DataKey.generate(), context: context),
+        throwsA(isA<DecryptionException>()),
+      );
+    });
+
+    test('wraps and unwraps with the right password key only', () async {
+      final dataKey = DataKey.generate();
+      final params = fastParams();
+      final right = await PasswordKey.derive(password, params);
+      final wrong = await PasswordKey.derive('wrong', params);
+      final wrapped = await dataKey.wrap(right);
+
+      final unwrapped = await DataKey.unwrap(wrapped, right);
+      final box = await seal([9], dataKey, context: context);
+      expect(await open(box, unwrapped!, context: context), [9]);
+      expect(await DataKey.unwrap(wrapped, wrong), isNull);
+    });
+
+    test('a wrapped key is not usable as other sealed data', () async {
+      final key = await fastKey();
+      final wrapped = await DataKey.generate().wrap(key);
+      expect(
+        open(wrapped, key, context: context),
+        throwsA(isA<DecryptionException>()),
+      );
+    });
+  });
+
+  group('PasswordVerifier data key', () {
+    test('create wraps a new data key, or the given one', () async {
+      final (verifier, key, dataKey) = await PasswordVerifier.create(password);
+      expect(verifier.hasDataKey, isTrue);
+      final box = await seal([4], dataKey, context: context);
+      final unwrapped = await verifier.unwrapDataKey(key);
+      expect(await open(box, unwrapped!, context: context), [4]);
+
+      final (other, otherKey, same) =
+          await PasswordVerifier.create('another password', dataKey: dataKey);
+      expect(identical(same, dataKey), isTrue);
+      final again = await other.unwrapDataKey(otherKey);
+      expect(await open(box, again!, context: context), [4]);
+    });
+
+    test('records without a data key still load, and can get one', () async {
+      final (full, key, _) = await PasswordVerifier.create(password);
+      final json = full.toJson()..remove('dataKey');
+      final old = PasswordVerifier.fromJson(
+        jsonDecode(jsonEncode(json)) as Map<String, dynamic>,
+      );
+      expect(old.hasDataKey, isFalse);
+      expect(await old.unwrapDataKey(key), isNull);
+
+      final unlocked = (await old.unlock(password))!;
+      final dataKey = DataKey.generate();
+      final upgraded = await old.withDataKey(dataKey, unlocked);
+      expect(identical(upgraded.params, old.params), isTrue);
+      expect(await upgraded.unwrapDataKey(unlocked), isNotNull);
+    });
+
+    test('the data key survives JSON', () async {
+      final (verifier, key, dataKey) = await PasswordVerifier.create(password);
+      final back = PasswordVerifier.fromJson(
+        jsonDecode(jsonEncode(verifier.toJson())) as Map<String, dynamic>,
+      );
+      final box = await seal([5], dataKey, context: context);
+      final unwrapped = await back.unwrapDataKey(key);
+      expect(await open(box, unwrapped!, context: context), [5]);
     });
   });
 }

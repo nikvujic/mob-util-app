@@ -100,17 +100,25 @@ class KdfParams {
   }
 }
 
-/// A key derived from a password, together with the parameters used, so
-/// data sealed with it records how to derive it again.
-class PasswordKey {
-  final KdfParams params;
+/// A 256-bit key for [seal] and [open]: either a [PasswordKey] or a
+/// [DataKey].
+sealed class CipherKey {
   final SecretKey _key;
 
-  PasswordKey._(this.params, this._key);
+  CipherKey._(this._key);
+}
+
+/// A key derived from a password, together with the parameters used, so
+/// data sealed with it records how to derive it again.
+class PasswordKey extends CipherKey {
+  final KdfParams params;
+
+  PasswordKey._(this.params, SecretKey key) : super._(key);
 
   /// A key from raw bytes, for known-answer tests only.
   @visibleForTesting
-  PasswordKey.fromBytes(this.params, List<int> bytes) : _key = SecretKey(bytes);
+  PasswordKey.fromBytes(this.params, List<int> bytes)
+      : super._(SecretKey(bytes));
 
   /// Derives the key for [password]. Runs in a background isolate because
   /// Argon2id is deliberately slow; the UI stays responsive meanwhile.
@@ -174,6 +182,43 @@ class SealedBox {
   }
 }
 
+/// A random key that encrypts data (e.g. locked notes). It's never stored
+/// in the clear: it's stored *wrapped* (sealed) with a [PasswordKey], so
+/// changing the password only re-wraps this key instead of re-encrypting
+/// everything it protects ("envelope encryption").
+class DataKey extends CipherKey {
+  static const _wrapContext = 'the-app/data-key';
+
+  DataKey._(super.key) : super._();
+
+  /// A new random key.
+  factory DataKey.generate() => DataKey._(SecretKeyData.random(length: 32));
+
+  /// A key from raw bytes, for tests only.
+  @visibleForTesting
+  DataKey.fromBytes(List<int> bytes) : super._(SecretKey(bytes));
+
+  /// This key sealed with [passwordKey], for storing.
+  Future<SealedBox> wrap(PasswordKey passwordKey) async => seal(
+        await _key.extractBytes(),
+        passwordKey,
+        context: _wrapContext,
+      );
+
+  /// The key in [wrapped], or null if [passwordKey] can't open it.
+  static Future<DataKey?> unwrap(
+    SealedBox wrapped,
+    PasswordKey passwordKey,
+  ) async {
+    try {
+      final bytes = await open(wrapped, passwordKey, context: _wrapContext);
+      return bytes.length == 32 ? DataKey._(SecretKey(bytes)) : null;
+    } on DecryptionException {
+      return null;
+    }
+  }
+}
+
 final _aes = AesGcm.with256bits();
 
 /// Encrypts [plaintext] with [key] and a fresh random nonce. [context] is
@@ -181,7 +226,7 @@ final _aes = AesGcm.with256bits();
 /// so data sealed for one purpose can't be passed off as another.
 Future<SealedBox> seal(
   List<int> plaintext,
-  PasswordKey key, {
+  CipherKey key, {
   required String context,
 }) async {
   final box = await _aes.encrypt(
@@ -200,7 +245,7 @@ Future<SealedBox> seal(
 /// was changed, or [context] differs from the one used to seal it.
 Future<List<int>> open(
   SealedBox box,
-  PasswordKey key, {
+  CipherKey key, {
   required String context,
 }) async {
   try {
@@ -217,29 +262,41 @@ Future<List<int>> open(
   }
 }
 
-/// Checks a password without storing it: holds the key-derivation
-/// parameters and a small box sealed with the derived key. Only the right
-/// password derives a key that opens it.
+/// The stored form of the master password: checks a password without
+/// storing it, and holds the [DataKey] wrapped with the password's key.
+///
+/// Records from before data keys existed have none; [unwrapDataKey] then
+/// returns null and the caller adds one with [withDataKey].
 class PasswordVerifier {
   static const _context = 'the-app/password-check';
 
   final KdfParams params;
   final SealedBox _check;
+  final SealedBox? _wrappedDataKey;
 
-  PasswordVerifier._(this.params, this._check);
+  PasswordVerifier._(this.params, this._check, this._wrappedDataKey);
 
-  /// Makes a verifier for [password] (fresh salt). Also returns the derived
-  /// key, so callers can use it right away without deriving it twice.
-  static Future<(PasswordVerifier, PasswordKey)> create(
-    String password,
-  ) async {
+  /// Makes a verifier for [password] (fresh salt) protecting [dataKey], or
+  /// a new data key if none is given (a password change passes the current
+  /// one, so everything it protects stays readable). Also returns the
+  /// derived password key and the data key, so callers needn't derive or
+  /// unwrap them again.
+  static Future<(PasswordVerifier, PasswordKey, DataKey)> create(
+    String password, {
+    DataKey? dataKey,
+  }) async {
     final key = await PasswordKey.derive(password, KdfParams.generate());
     final check = await seal(
       SecretKeyData.random(length: 16).bytes,
       key,
       context: _context,
     );
-    return (PasswordVerifier._(key.params, check), key);
+    final data = dataKey ?? DataKey.generate();
+    return (
+      PasswordVerifier._(key.params, check, await data.wrap(key)),
+      key,
+      data,
+    );
   }
 
   /// The key for [password], or null if it's the wrong password.
@@ -253,20 +310,45 @@ class PasswordVerifier {
     }
   }
 
+  bool get hasDataKey => _wrappedDataKey != null;
+
+  /// The data key, using [passwordKey] from [unlock]. Null if this record
+  /// has no data key yet (or the key doesn't fit).
+  Future<DataKey?> unwrapDataKey(PasswordKey passwordKey) async {
+    final wrapped = _wrappedDataKey;
+    return wrapped == null ? null : DataKey.unwrap(wrapped, passwordKey);
+  }
+
+  /// This verifier with [dataKey] added, wrapped with [passwordKey] (which
+  /// must come from [unlock]). Keeps the same [params], so it's the same
+  /// password.
+  Future<PasswordVerifier> withDataKey(
+    DataKey dataKey,
+    PasswordKey passwordKey,
+  ) async =>
+      PasswordVerifier._(params, _check, await dataKey.wrap(passwordKey));
+
   Map<String, dynamic> toJson() => {
         'kdf': params.toJson(),
         'check': _check.toJson(),
+        if (_wrappedDataKey != null) 'dataKey': _wrappedDataKey.toJson(),
       };
 
   /// Throws [FormatException] if the JSON isn't a verifier.
   factory PasswordVerifier.fromJson(Map<String, dynamic> json) {
     final kdf = json['kdf'], check = json['check'];
-    if (kdf is! Map<String, dynamic> || check is! Map<String, dynamic>) {
+    final dataKey = json['dataKey'];
+    if (kdf is! Map<String, dynamic> ||
+        check is! Map<String, dynamic> ||
+        (dataKey != null && dataKey is! Map<String, dynamic>)) {
       throw const FormatException('Not a password verifier');
     }
     return PasswordVerifier._(
       KdfParams.fromJson(kdf),
       SealedBox.fromJson(check),
+      dataKey == null
+          ? null
+          : SealedBox.fromJson(dataKey as Map<String, dynamic>),
     );
   }
 }

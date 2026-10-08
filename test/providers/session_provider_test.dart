@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -107,12 +110,68 @@ void main() {
   test('unlockWith accepts only a key of the current password', () async {
     await security().setPassword(password);
     final key = await container.read(securityProvider)!.unlock(password);
-    session().unlockWith(key!);
+    expect(await session().unlockWith(key!), isTrue);
     expect(unlocked(), isTrue);
 
     session().lock();
     await security().changePassword(password, 'new password!');
-    session().unlockWith(key); // key of the old password
+    expect(await session().unlockWith(key), isFalse); // old password's key
     expect(unlocked(), isFalse);
+  });
+
+  test('unlocking makes the data key available', () async {
+    await setUpUnlocked();
+    final keys = container.read(sessionProvider)!;
+    final box = await seal([1], keys.dataKey, context: 'test');
+    expect(await open(box, keys.dataKey, context: 'test'), [1]);
+  });
+
+  test('changing the password keeps the same data key', () async {
+    await setUpUnlocked();
+    final box = await seal(
+      [7],
+      container.read(sessionProvider)!.dataKey,
+      context: 'test',
+    );
+
+    await security().changePassword(password, 'new password!');
+    expect(await session().unlock('new password!'), isTrue);
+
+    final dataKey = container.read(sessionProvider)!.dataKey;
+    expect(await open(box, dataKey, context: 'test'), [7]);
+  });
+
+  test('a master password without a data key gets one on first unlock',
+      () async {
+    // A record as written before data keys existed.
+    final (full, _, _) = await PasswordVerifier.create(password);
+    final json = full.toJson()..remove('dataKey');
+    final old = PasswordVerifier.fromJson(
+      jsonDecode(jsonEncode(json)) as Map<String, dynamic>,
+    );
+    container = ProviderContainer(
+      overrides: [
+        appStorageProvider.overrideWithValue(
+          AppStorage.inMemory(initialMasterPassword: old),
+        ),
+        clockProvider.overrideWithValue(() => now),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(await session().unlock(password), isTrue);
+    expect(unlocked(), isTrue, reason: 'adding the key must not lock');
+    expect(container.read(securityProvider)!.hasDataKey, isTrue);
+
+    // The same data key comes back next time.
+    final box = await seal(
+      [3],
+      container.read(sessionProvider)!.dataKey,
+      context: 'test',
+    );
+    session().lock();
+    expect(await session().unlock(password), isTrue);
+    final again = container.read(sessionProvider)!.dataKey;
+    expect(await open(box, again, context: 'test'), [3]);
   });
 }

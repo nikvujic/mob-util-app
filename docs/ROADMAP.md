@@ -104,11 +104,12 @@ Small fixes, not urgent; can go out together as one polish release.
     password only wraps that key (in `security.json`). Changing the
     password re-wraps one key in one atomic write, so a crash can never
     leave notes split between two passwords; backups can carry the wrapped
-    key. Storage format becomes v2 across 12a–12b (**no release between
-    them**; v2 fixtures are frozen at the end of 12b).
-    - [ ] 12a Key hierarchy: data key wrapped by the master password;
-      existing master passwords migrate on first unlock; changing the
-      password keeps the same data key. No UI change.
+    key. Storage format becomes v2 in 12b (sealed note content depends on
+    the data key); v2 fixtures are frozen there.
+    - [x] 12a Key hierarchy: data key wrapped by the master password;
+      existing master passwords get one on first unlock; changing the
+      password keeps the same data key. No UI change. (The optional
+      `dataKey` field is safe under format v1: nothing depends on it yet.)
     - [ ] 12b Note format v2 (sealed content) + lock/unlock/read logic;
       v2 fixtures; v1 still read.
     - [ ] 12c UI: lock icon in the list, lock/unlock (editor menu and

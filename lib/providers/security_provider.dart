@@ -21,8 +21,8 @@ class WrongPasswordException implements Exception {
   const WrongPasswordException();
 }
 
-/// The master password (L1–L3). State: its verifier, or null if none is
-/// set. The password itself is never kept — not even in memory after an
+/// The master password (L1–L3). State: its verifier (which also holds the
+/// wrapped data key), or null if none is set. The password itself is never kept — not even in memory after an
 /// operation finishes.
 class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
   final AppStorage _storage;
@@ -37,17 +37,38 @@ class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
   Future<void> setPassword(String password) async {
     _checkNew(password);
     if (state != null) throw StateError('A master password is already set');
-    final (verifier, _) = await PasswordVerifier.create(password);
+    final (verifier, _, _) = await PasswordVerifier.create(password);
     state = verifier;
   }
 
   /// Replaces the master password. Throws [WrongPasswordException] if
   /// [current] is wrong (and changes nothing).
+  ///
+  /// The data key stays the same — it's only re-wrapped with the new
+  /// password — so everything it protects stays readable, and the change is
+  /// a single write of the security file.
   Future<void> changePassword(String current, String newPassword) async {
     _checkNew(newPassword);
-    await _unlock(current);
-    final (verifier, _) = await PasswordVerifier.create(newPassword);
+    final key = await _unlock(current);
+    final dataKey = await state!.unwrapDataKey(key);
+    final (verifier, _, _) = await PasswordVerifier.create(
+      newPassword,
+      dataKey: dataKey,
+    );
     state = verifier;
+  }
+
+  /// Stores [verifier] if it's the current master password with a data key
+  /// added (see [PasswordVerifier.withDataKey]); used to upgrade records
+  /// from before data keys existed.
+  void addDataKey(PasswordVerifier verifier) {
+    final current = state;
+    if (current != null &&
+        identical(verifier.params, current.params) &&
+        !current.hasDataKey &&
+        verifier.hasDataKey) {
+      state = verifier;
+    }
   }
 
   /// Removes the master password. Throws [WrongPasswordException] if

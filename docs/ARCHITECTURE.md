@@ -52,6 +52,22 @@ high and ≥20% smaller than note rows). Conventions it relies on:
 - Highlights (selection) never change a row's size.
 - Layouts must survive a 2× system font size without overflowing.
 
+## Encryption keys
+
+`core/crypto.dart` is the only encryption code. Keys form a small
+hierarchy (envelope encryption):
+
+- **Password key** — derived from the master password with Argon2id
+  (parameters and salt stored in `security.json`). Never stored.
+- **Data key** — random; encrypts locked notes. Stored only *wrapped*
+  (sealed) with the password key, next to a check value for the password.
+  Changing the password re-wraps this one key in a single atomic write.
+- **Session** (`providers/session_provider.dart`) holds both keys in
+  memory while unlocked; nothing unwrapped is ever written to disk.
+
+Every sealed box is bound to a purpose string (`context`), so data sealed
+for one purpose can't be passed off as another.
+
 ## Back button
 
 The home screen owns the only back handler for the main sections (Flutter
