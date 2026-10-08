@@ -63,31 +63,42 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 5. [x] **Compact shop rows (S4)** — plus architecture rules (test +
    `ARCHITECTURE.md`) and design/accessibility tests for every screen (G10).
 
-### Backup (failsafe) — device checkpoint after this group
+### Backup & privacy — device checkpoint after step 10
+
+Encrypted backups use the master password, so the security basics come
+before import (decided 2026-10-08), and import is written once for both
+kinds of file.
 
 6. [x] **Export (D1, D4)** — one versioned JSON file with all data, saved via
    the Android file picker / share sheet.
-7. [ ] **Import (D2)** — validate, preview counts, confirm, replace. Invalid
-   files never touch current data.
+7. [x] **Crypto core (L2, L3)** — Argon2id key derivation (parameters stored
+   with the data), AES-256-GCM seal/open with context binding; checked
+   against OpenSSL-generated known answers. No UI.
+8. [ ] **Master password (L1)** — Menu → Security: set / change / remove;
+   only a verifier is stored. Warns that a forgotten password can't be
+   recovered.
+9. [ ] **Plain or encrypted export (D2a)** — choice on export; encrypted
+   needs the master password (asks to confirm it until session unlock
+   exists).
+10. [ ] **Import (D2, D2a)** — validate, preview counts, confirm, replace;
+    asks for the master password for encrypted files. Invalid files never
+    touch current data.
 
-### Privacy — device checkpoint after this group
+### Locking
 
-8. [ ] **Crypto service + master password (L1–L3)** — key derivation,
-   AES-GCM encrypt/decrypt, verifier; Menu → Security page to set /
-   change / remove the password. Pure-logic first, heavily unit-tested.
-9. [ ] **Session unlock (L4)** — unlock once; stays unlocked through short
-   trips to other apps; locks after 5 min in the background, on app close,
-   or "Lock now".
-10. [ ] **Lock notes (N6, N7, D3)** — lock/unlock a note, encrypted at rest,
+11. [ ] **Session unlock (L4)** — unlock once; stays unlocked through short
+    trips to other apps; locks after 5 min in the background, on app close,
+    or "Lock now". Encrypted export then needs no typing while unlocked.
+12. [ ] **Lock notes (N6, N7, D3)** — lock/unlock a note, encrypted at rest,
     lock icon in the list, route to password setup if none exists. Export
     already carries the stored (encrypted) form, so D3 is verified here.
 
 ### New sections
 
-11. [ ] **Section locks (L5)** — Security switches to lock whole sections.
-12. [ ] **Planner v1 (P1, P2)** — tasks with title + description; add, edit,
+13. [ ] **Section locks (L5)** — Security switches to lock whole sections.
+14. [ ] **Planner v1 (P1, P2)** — tasks with title + description; add, edit,
     delete.
-13. [ ] **Other → Counters (O1, O2).**
+15. [ ] **Other → Counters (O1, O2).**
 
 ## Later / ideas
 
