@@ -4,6 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.11.0] - 2026-10-08
+
+### Added
+- **Unlock once**: after entering the master password, the app stays
+  unlocked while you use it and during short trips to other apps. It locks
+  again after 5 minutes in the background, when the app is closed, or with
+  **Lock now** (in the menu and on the Security page).
+- Encrypted export no longer asks for the password while unlocked.
+
+### Changed
+- Data files from a newer app version (only possible after installing an
+  older version) are set aside untouched instead of being read.
+
 ## [0.10.0] - 2026-10-08
 
 ### Added
