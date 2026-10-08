@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/note_detail.dart';
@@ -160,7 +161,7 @@ class _NoteTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatModifiedTime(note.modifiedAt),
+                      formatDateTime(note.modifiedAt),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
@@ -180,12 +181,4 @@ class _NoteTile extends StatelessWidget {
       ),
     );
   }
-}
-
-String _formatModifiedTime(DateTime dt) {
-  final mo = dt.month.toString().padLeft(2, '0');
-  final d = dt.day.toString().padLeft(2, '0');
-  final h = dt.hour.toString().padLeft(2, '0');
-  final m = dt.minute.toString().padLeft(2, '0');
-  return '${dt.year}-$mo-$d  $h:$m';
 }

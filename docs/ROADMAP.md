@@ -80,7 +80,7 @@ kinds of file.
 9. [x] **Plain or encrypted export (D2a)** — choice on export; encrypted
    needs the master password (asks to confirm it until session unlock
    exists).
-10. [ ] **Import (D2, D2a)** — validate, preview counts, confirm, replace;
+10. [x] **Import (D2, D2a)** — validate, preview counts, confirm, replace;
     asks for the master password for encrypted files. Invalid files never
     touch current data.
 
@@ -92,6 +92,9 @@ kinds of file.
 12. [ ] **Lock notes (N6, N7, D3)** — lock/unlock a note, encrypted at rest,
     lock icon in the list, route to password setup if none exists. Export
     already carries the stored (encrypted) form, so D3 is verified here.
+    Must also cover restoring onto a phone whose master password differs
+    from the one the locked notes were sealed with (e.g. ask for that
+    password on import and re-seal).
 
 ### New sections
 

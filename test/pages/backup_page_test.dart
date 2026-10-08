@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/backup.dart';
+import 'package:the_app/models/note.dart';
+import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 
@@ -166,11 +169,123 @@ void main() {
     });
   });
 
-  testWidgets('import is shown as coming soon', (tester) async {
-    await openBackup(tester);
-    final tile = tester.widget<ListTile>(
-      find.widgetWithText(ListTile, 'Import from file'),
-    );
-    expect(tile.enabled, isFalse);
+  group('import', () {
+    Backup sample() => Backup(
+          createdAt: DateTime(2026, 10, 8, 9, 30),
+          appVersion: '0.9.0 (10)',
+          notes: [
+            Note(
+              id: 'b1',
+              title: 'Restored note',
+              content: '',
+              createdAt: DateTime(2026, 10, 1),
+              modifiedAt: DateTime(2026, 10, 1),
+            ),
+            Note(
+              id: 'b2',
+              title: 'Second restored',
+              content: '',
+              createdAt: DateTime(2026, 10, 1),
+              modifiedAt: DateTime(2026, 10, 1),
+            ),
+          ],
+          shopItems: const [ShopItem(id: 'i1', name: 'Coffee')],
+        );
+
+    List<String> titles() =>
+        container.read(notesProvider).map((n) => n.title).toList();
+
+    Future<void> tapImport(WidgetTester tester) async {
+      await tester.tap(find.text('Import from file'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows what the backup holds, restores it, and can undo',
+        (tester) async {
+      await openBackup(tester);
+      files.toPick = Uint8List.fromList(utf8.encode(sample().encode()));
+      await tapImport(tester);
+
+      expect(find.text('Restore this backup?'), findsOneWidget);
+      expect(find.textContaining('2 notes · 1 shop item'), findsOneWidget);
+      expect(find.textContaining('2026-10-08'), findsOneWidget);
+      expect(titles(), ['Groceries'], reason: 'nothing changed yet');
+
+      await tester.tap(find.text('Restore'));
+      await tester.pump();
+      await settleBusy(tester);
+      expect(titles(), ['Restored note', 'Second restored']);
+      expect(find.text('Backup restored'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(titles(), ['Groceries']);
+    });
+
+    testWidgets('cancelling the confirmation changes nothing', (tester) async {
+      await openBackup(tester);
+      files.toPick = Uint8List.fromList(utf8.encode(sample().encode()));
+      await tapImport(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(titles(), ['Groceries']);
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('cancelling the file picker does nothing', (tester) async {
+      await openBackup(tester);
+      await tapImport(tester);
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('a file that is not a backup is refused', (tester) async {
+      await openBackup(tester);
+      files.toPick = Uint8List.fromList(utf8.encode('shopping: milk, eggs'));
+      await tapImport(tester);
+
+      expect(find.text('This file is not a backup.'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(titles(), ['Groceries']);
+    });
+
+    testWidgets('an encrypted backup asks for its password first',
+        (tester) async {
+      await openBackup(tester, withPassword: true);
+      final key = await tester.runAsync(
+        () => container.read(securityProvider)!.unlock(password),
+      );
+      final encrypted = await tester.runAsync(
+        () => sample().encodeEncrypted(key!),
+      );
+      files.toPick = Uint8List.fromList(utf8.encode(encrypted!));
+      await tapImport(tester);
+      expect(find.text('Encrypted backup'), findsOneWidget);
+
+      Future<void> tryPassword(String pw) async {
+        await tester.enterText(
+          find.descendant(
+            of: find.byKey(const Key('promptPassword')),
+            matching: find.byType(TextField),
+          ),
+          pw,
+        );
+        await tester.tap(find.text('Open'));
+        await tester.pump();
+        await settleBusy(tester);
+      }
+
+      await tryPassword('wrong password');
+      expect(find.text('Wrong password'), findsOneWidget);
+
+      await tryPassword(password);
+      expect(find.text('Restore this backup?'), findsOneWidget);
+      await tester.tap(find.text('Restore'));
+      await tester.pump();
+      await settleBusy(tester);
+      expect(titles(), ['Restored note', 'Second restored']);
+    });
   });
 }

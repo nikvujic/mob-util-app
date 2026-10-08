@@ -1,8 +1,13 @@
 // Design checks: Android accessibility guidelines on every screen, and the
 // size relationships the requirements ask for. See docs/ARCHITECTURE.md.
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/data/backup.dart';
+import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -20,6 +25,19 @@ void seed(ProviderContainer container) {
     ..addItem('Eggs');
   shop.toggle(container.read(shopProvider).last.id);
 }
+
+/// A fake file picker that returns a small backup when importing.
+FakeBackupFiles pickingBackup() => FakeBackupFiles()
+  ..toPick = Uint8List.fromList(
+    utf8.encode(
+      Backup(
+        createdAt: DateTime(2026, 10, 8),
+        appVersion: '1',
+        notes: const [],
+        shopItems: const [ShopItem(id: 'i', name: 'Tea')],
+      ).encode(),
+    ),
+  );
 
 /// Checks the visible screen against Android's accessibility guidelines.
 Future<void> expectAccessible(WidgetTester tester) async {
@@ -67,6 +85,14 @@ void main() {
         await t.tap(find.text('Export all data'));
         await t.pumpAndSettle();
       },
+      'import preview': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Backup'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Import from file')); // picks [backupFile]
+        await t.pumpAndSettle();
+        expect(find.text('Restore this backup?'), findsOneWidget);
+      },
       'set master password form': (t) async {
         await openMenu(t);
         await t.tap(find.text('Security'));
@@ -79,7 +105,7 @@ void main() {
     for (final MapEntry(key: name, value: open) in screens.entries) {
       testWidgets(name, (tester) async {
         final semantics = tester.ensureSemantics();
-        seed(await pumpApp(tester));
+        seed(await pumpApp(tester, backupFiles: pickingBackup()));
         await tester.pump();
         await open(tester);
         await expectAccessible(tester);

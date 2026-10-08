@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/crypto.dart';
+import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 
 enum _ExportKind { plain, encrypted }
@@ -16,8 +18,26 @@ class BackupPage extends ConsumerStatefulWidget {
   ConsumerState<BackupPage> createState() => _BackupPageState();
 }
 
+/// Result of opening an encrypted backup with the right password: the
+/// backup, or why its (decrypted) contents can't be used.
+typedef _Opened = ({RestorableBackup? backup, String? error});
+
 class _BackupPageState extends ConsumerState<BackupPage> {
   bool _exporting = false;
+  bool _importing = false;
+
+  bool get _busy => _exporting || _importing;
+
+  void _showMessage(String text, {SnackBarAction? action}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+        action: action,
+        // Long enough to reach Undo.
+        duration: Duration(seconds: action == null ? 4 : 10),
+      ),
+    );
+  }
 
   /// Asks for the master password; the key derived from it, or null if
   /// cancelled.
@@ -77,6 +97,86 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     }
   }
 
+  /// Asks for the password an encrypted backup was made with. Null if
+  /// cancelled.
+  Future<_Opened?> _openEncrypted(EncryptedPick file) {
+    return showPasswordPrompt<_Opened>(
+      context,
+      title: 'Encrypted backup',
+      message: 'Enter the master password this backup was made with.',
+      confirmLabel: 'Open',
+      attempt: (password) async {
+        try {
+          final backup = await file.unlock(password);
+          return backup == null ? null : (backup: backup, error: null);
+        } on ImportException catch (e) {
+          return (backup: null, error: e.message);
+        }
+      },
+    );
+  }
+
+  Future<void> _import() async {
+    final importer = ref.read(backupImporterProvider);
+
+    final PickedBackup? file;
+    try {
+      file = await importer.pick();
+    } on ImportException catch (e) {
+      _showMessage(e.message);
+      return;
+    } catch (e, st) {
+      debugPrint('Import failed: $e\n$st');
+      _showMessage("Couldn't open the file.");
+      return;
+    }
+    if (file == null || !mounted) return;
+
+    final RestorableBackup backup;
+    switch (file) {
+      case PlainPick(backup: final plain):
+        backup = plain;
+      case EncryptedPick():
+        final opened = await _openEncrypted(file);
+        if (opened == null || !mounted) return;
+        if (opened.error != null) {
+          _showMessage(opened.error!);
+          return;
+        }
+        backup = opened.backup!;
+    }
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Restore this backup?',
+      message: 'Made ${formatDateTime(backup.createdAt)}\n'
+          '${countOf(backup.noteCount, 'note', 'notes')} · '
+          '${countOf(backup.shopItemCount, 'shop item', 'shop items')}\n\n'
+          'This replaces all notes and shop items currently in the app.',
+      confirmLabel: 'Restore',
+      destructive: true,
+    );
+    if (!confirmed || !mounted) return;
+
+    setState(() => _importing = true);
+    try {
+      final previous = await importer.restore(backup);
+      if (!mounted) return;
+      _showMessage(
+        'Backup restored',
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () => importer.undo(previous),
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('Restore failed: $e\n$st');
+      if (mounted) _showMessage("Couldn't restore the backup.");
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,17 +196,23 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : null,
-            // Disabled while running, so a double tap can't export twice.
-            onTap: _exporting ? null : _export,
+            // Disabled while working, so a double tap can't run twice.
+            onTap: _busy ? null : _export,
           ),
-          const ListTile(
-            enabled: false,
-            leading: Icon(Icons.restore),
-            title: Text('Import from file'),
-            subtitle: Text(
-              'Restore from a backup · coming soon',
+          ListTile(
+            leading: const Icon(Icons.restore),
+            title: const Text('Import from file'),
+            subtitle: const Text(
+              'Restore notes and shop list from a backup',
               style: TextStyle(color: AppColors.textSecondary),
             ),
+            trailing: _importing
+                ? const SizedBox.square(
+                    dimension: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : null,
+            onTap: _busy ? null : _import,
           ),
           const Padding(
             padding: EdgeInsets.all(16),
