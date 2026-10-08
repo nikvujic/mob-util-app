@@ -60,6 +60,13 @@ void main() {
         await t.tap(find.text('Security'));
         await t.pumpAndSettle();
       },
+      'export choice': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Backup'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Export all data'));
+        await t.pumpAndSettle();
+      },
       'set master password form': (t) async {
         await openMenu(t);
         await t.tap(find.text('Security'));

@@ -38,7 +38,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | D1 | **Export** all data (notes, shop, planner, counters, settings needed to read locked data) to one JSON file the user saves anywhere (Downloads, Drive, …) via the Android file picker / share sheet. File name includes the date. | 🚧 notes and shop exported; planner and counters join when they exist |
 | D2 | **Import** a previously exported file: validated first (format, version), shows what it contains, and asks for confirmation before **replacing** current data. Invalid files are rejected without touching current data. | ⏳ |
-| D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | ⏳ |
+| D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | 🚧 export done (asks to confirm the master password until session unlock exists); import next |
 | D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ⏳ |
 | D4 | Export files carry a format version; newer app versions can always import older exports. | 🚧 files carry a format version and newer ones are rejected with a clear message; reading older versions gets tests once a v2 exists |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). | 💭 not now |
@@ -63,7 +63,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | L1 | Menu → **Security**: set, change (requires current), remove (requires current; decrypts locked items) the master password. | ✅ minimum 8 characters |
 | L2 | The password itself is never stored. A key is derived from it with a slow KDF (Argon2id/PBKDF2 + random salt); only the salt, KDF parameters and a verifier are stored. | ✅ Argon2id (verified against OpenSSL); only a verifier is stored |
-| L3 | Locked data is encrypted with an authenticated cipher (AES-GCM). Without the password it cannot be read, also not from an export. Forgotten password = locked data is unrecoverable; the setup screen says so clearly. | 🚧 crypto core done (AES-256-GCM, tamper-detecting) |
+| L3 | Locked data is encrypted with an authenticated cipher (AES-GCM). Without the password it cannot be read, also not from an export. Forgotten password = locked data is unrecoverable; the setup screen says so clearly. | 🚧 used for encrypted backups; locked notes come later |
 | L4 | **Convenient unlock:** entering the password once unlocks everything (locked notes and locked sections). It stays unlocked while the app is in use and while it is briefly in the background (e.g. switching away to copy something). It locks again when the app has been in the background for **5 minutes**, when the app is closed (removed from recent apps), or when "Lock now" is used. | ⏳ |
 | L5 | **Section locks** on the Security page: per main section (Notes, Shop, Planner, Other) a switch to lock the whole section. Opening a locked section requires unlocking (L4). Only available once a master password is set. | ⏳ |
 | L6 | Unlock with fingerprint as an alternative to typing the password. | 💭 later |

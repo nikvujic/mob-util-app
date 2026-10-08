@@ -77,7 +77,7 @@ kinds of file.
 8. [x] **Master password (L1)** — Menu → Security: set / change / remove;
    only a verifier is stored. Warns that a forgotten password can't be
    recovered.
-9. [ ] **Plain or encrypted export (D2a)** — choice on export; encrypted
+9. [x] **Plain or encrypted export (D2a)** — choice on export; encrypted
    needs the master password (asks to confirm it until session unlock
    exists).
 10. [ ] **Import (D2, D2a)** — validate, preview counts, confirm, replace;
