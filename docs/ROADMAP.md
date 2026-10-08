@@ -65,7 +65,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 ### Backup (failsafe) — device checkpoint after this group
 
-6. [ ] **Export (D1, D4)** — one versioned JSON file with all data, saved via
+6. [x] **Export (D1, D4)** — one versioned JSON file with all data, saved via
    the Android file picker / share sheet.
 7. [ ] **Import (D2)** — validate, preview counts, confirm, replace. Invalid
    files never touch current data.

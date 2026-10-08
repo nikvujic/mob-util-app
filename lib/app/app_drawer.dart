@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/security/security.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
@@ -39,6 +40,11 @@ class AppDrawer extends ConsumerWidget {
               leading: const Icon(Icons.lock_outline),
               title: const Text('Security'),
               onTap: () => _open(context, const SecurityPage()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.save_alt),
+              title: const Text('Backup'),
+              onTap: () => _open(context, const BackupPage()),
             ),
             const Spacer(),
             Padding(

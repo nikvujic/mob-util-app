@@ -43,6 +43,22 @@ void main() {
     });
   }
 
+  testWidgets('Backup opened from the menu returns to the section',
+      (tester) async {
+    final exit = ExitRecorder(tester);
+    await pumpApp(tester);
+    await openTab(tester, 'Shop');
+    await openMenu(tester);
+    await tester.tap(find.text('Backup'));
+    await tester.pumpAndSettle();
+    expect(appBarTitle('Backup'), findsOneWidget);
+
+    await pressBack(tester);
+
+    expect(exit.exits, 0);
+    expect(appBarTitle('Shop'), findsOneWidget);
+  });
+
   testWidgets('back from a note returns to the notes list', (tester) async {
     final exit = ExitRecorder(tester);
     final container = await pumpApp(tester);
@@ -75,11 +91,13 @@ void main() {
     expect(appBarTitle('Notes'), findsOneWidget);
   });
 
-  testWidgets('menu shows Security and the app version', (tester) async {
+  testWidgets('menu shows Security, Backup and the app version',
+      (tester) async {
     await pumpApp(tester);
     await openMenu(tester);
 
     expect(find.text('Security'), findsOneWidget);
+    expect(find.text('Backup'), findsOneWidget);
     expect(find.text('Version $testAppVersion'), findsOneWidget);
   });
 

@@ -50,6 +50,11 @@ void main() {
       'planner': (t) => openTab(t, 'Planner'),
       'other': (t) => openTab(t, 'Other'),
       'menu': openMenu,
+      'backup': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Backup'));
+        await t.pumpAndSettle();
+      },
       'security': (t) async {
         await openMenu(t);
         await t.tap(find.text('Security'));

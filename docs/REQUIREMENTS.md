@@ -28,7 +28,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G5 | Deleting always asks for confirmation through the shared dialog. | ✅ |
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
-| G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | 🚧 menu, Security page (placeholder) and version done |
+| G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | 🚧 menu with Security (placeholder) and Backup (export); version shown |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
@@ -36,10 +36,10 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| D1 | **Export** all data (notes, shop, planner, counters, settings needed to read locked data) to one JSON file the user saves anywhere (Downloads, Drive, …) via the Android file picker / share sheet. File name includes the date. | ⏳ |
+| D1 | **Export** all data (notes, shop, planner, counters, settings needed to read locked data) to one JSON file the user saves anywhere (Downloads, Drive, …) via the Android file picker / share sheet. File name includes the date. | 🚧 notes and shop exported; planner and counters join when they exist |
 | D2 | **Import** a previously exported file: validated first (format, version), shows what it contains, and asks for confirmation before **replacing** current data. Invalid files are rejected without touching current data. | ⏳ |
 | D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ⏳ |
-| D4 | Export files carry a format version; newer app versions can always import older exports. | ⏳ |
+| D4 | Export files carry a format version; newer app versions can always import older exports. | 🚧 files carry a format version and newer ones are rejected with a clear message; reading older versions gets tests once a v2 exists |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). | 💭 not now |
 
 ## N — Notes
