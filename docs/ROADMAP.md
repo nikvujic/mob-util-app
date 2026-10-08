@@ -84,13 +84,13 @@ kinds of file.
 
 Small fixes, not urgent; can go out together as one polish release.
 
-- [ ] **New note appears in the list before the editor slides in**
+- [x] **New note appears in the list before the editor slides in**
   (visible shift). Create the note so it's saved immediately, but only
   show it in the list once the editor's transition has finished (N2).
-- [ ] **Save dialog redesign (N5):** clear title / content / actions
+- [x] **Save dialog redesign (N5):** clear title / content / actions
   layout, more square; real buttons **Discard** and **Save** instead of
   text links; the content explains that edits are saved automatically.
-- [ ] **Double back to exit (G7):** on a main section, the first back
+- [x] **Double back to exit (G7):** on a main section, the first back
   shows "Press back again to exit"; a second back within ~2 s closes the
   app.
 

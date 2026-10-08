@@ -52,6 +52,14 @@ high and ≥20% smaller than note rows). Conventions it relies on:
 - Highlights (selection) never change a row's size.
 - Layouts must survive a 2× system font size without overflowing.
 
+## Back button
+
+The home screen owns the only back handler for the main sections (Flutter
+calls every back callback on a screen, so several would all fire). It
+closes an open menu first, then offers back to `BackHandlers` registered by
+pages (selection mode uses `SelectionPopScope`), and only then runs the
+"press back again to exit" logic.
+
 ## State and persistence
 
 - Each feature has one `StateNotifier` holding an immutable list; pages read

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/widgets/back_handlers.dart';
 
 /// Tracks which items of a list are selected.
 ///
@@ -97,12 +98,13 @@ class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Intercepts the system back gesture to leave selection mode instead of
-/// leaving the screen.
+/// Makes system back leave selection mode instead of leaving the screen.
 ///
-/// Only intercepts while the subtree is the visible tab (see `TickerMode` in
-/// `HomeScreen`), so a selection in a hidden tab never blocks back.
-class SelectionPopScope extends StatelessWidget {
+/// Inside a [BackHandlerScope] (the home screen) it registers with the
+/// screen's back logic; otherwise it uses its own [PopScope]. Either way it
+/// only acts while its subtree is the visible tab (see `TickerMode` in
+/// `HomeScreen`), so a selection in a hidden tab never takes back.
+class SelectionPopScope extends StatefulWidget {
   final SelectionController controller;
   final Widget child;
 
@@ -113,20 +115,52 @@ class SelectionPopScope extends StatelessWidget {
   });
 
   @override
+  State<SelectionPopScope> createState() => _SelectionPopScopeState();
+}
+
+class _SelectionPopScopeState extends State<SelectionPopScope> {
+  BackHandlers? _handlers;
+  bool _visible = true;
+
+  bool _handleBack() {
+    if (!_visible || !widget.controller.isActive) return false;
+    widget.controller.clear();
+    return true;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final handlers = BackHandlerScope.maybeOf(context);
+    if (!identical(handlers, _handlers)) {
+      _handlers?.remove(_handleBack);
+      _handlers = handlers?..add(_handleBack);
+    }
+  }
+
+  @override
+  void dispose() {
+    _handlers?.remove(_handleBack);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // TickerMode.valuesOf only exists on newer Flutter than we target.
     // ignore: deprecated_member_use
-    final visible = TickerMode.of(context);
+    _visible = TickerMode.of(context);
+    if (_handlers != null) return widget.child;
+
     return ListenableBuilder(
-      listenable: controller,
+      listenable: widget.controller,
       builder: (context, child) => PopScope(
-        canPop: !(visible && controller.isActive),
+        canPop: !(_visible && widget.controller.isActive),
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) controller.clear();
+          if (!didPop) widget.controller.clear();
         },
         child: child!,
       ),
-      child: child,
+      child: widget.child,
     );
   }
 }

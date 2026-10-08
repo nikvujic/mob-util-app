@@ -13,13 +13,16 @@ void main() {
   });
 
   for (final tab in tabs) {
-    testWidgets('back on $tab closes the app', (tester) async {
+    testWidgets('back twice on $tab closes the app', (tester) async {
       final exit = ExitRecorder(tester);
       await pumpApp(tester);
       await openTab(tester, tab);
 
       await pressBack(tester);
+      expect(exit.exits, 0);
+      expect(find.text('Press back again to exit'), findsOneWidget);
 
+      await pressBack(tester);
       expect(exit.exits, 1);
     });
 
@@ -75,6 +78,22 @@ void main() {
     expect(appBarTitle('Notes'), findsOneWidget);
   });
 
+  testWidgets('a second back after more than 2 seconds asks again',
+      (tester) async {
+    final exit = ExitRecorder(tester);
+    await pumpApp(tester);
+
+    await pressBack(tester);
+    await tester.pump(const Duration(seconds: 2, milliseconds: 100));
+    await pressBack(tester);
+
+    expect(exit.exits, 0);
+    expect(find.text('Press back again to exit'), findsOneWidget);
+
+    await pressBack(tester);
+    expect(exit.exits, 1);
+  });
+
   testWidgets('back in selection mode only leaves selection mode',
       (tester) async {
     final exit = ExitRecorder(tester);
@@ -89,6 +108,12 @@ void main() {
     expect(exit.exits, 0);
     expect(find.textContaining('selected'), findsNothing);
     expect(appBarTitle('Notes'), findsOneWidget);
+    expect(find.text('Press back again to exit'), findsNothing,
+        reason: 'leaving selection mode is not a step towards exiting');
+
+    await pressBack(tester);
+    await pressBack(tester);
+    expect(exit.exits, 1);
   });
 
   testWidgets('menu shows Security, Backup and the app version',
@@ -112,6 +137,7 @@ void main() {
     expect(exit.exits, 0);
     expect(find.byType(Drawer), findsNothing);
     expect(appBarTitle('Notes'), findsOneWidget);
+    expect(find.text('Press back again to exit'), findsNothing);
   });
 
   testWidgets('Planner and Other show their placeholders', (tester) async {
@@ -133,8 +159,9 @@ void main() {
     await tester.pump();
     await openTab(tester, 'Shop');
     await pressBack(tester);
+    expect(find.text('Press back again to exit'), findsOneWidget);
+    await pressBack(tester);
 
     expect(exit.exits, 1);
-    expect(find.byType(BottomNavigationBar), findsOneWidget);
   });
 }
