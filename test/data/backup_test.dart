@@ -43,7 +43,7 @@ void main() {
     test('writes the documented layout', () {
       final json = validJson();
       expect(json['format'], 'the-app-backup');
-      expect(json['version'], 1);
+      expect(json['version'], Backup.version);
       expect(json['createdAt'], created.toUtc().toIso8601String());
       expect(json['appVersion'], '0.7.0 (8)');
       expect((json['data']['notes'] as List).single['title'], 'Kupovina 🛒');
@@ -98,7 +98,7 @@ void main() {
 
     test('rejects backups from a newer app version', () {
       expect(
-        errorFor(validJson()..['version'] = 2),
+        errorFor(validJson()..['version'] = Backup.version + 1),
         contains('newer version of the app'),
       );
     });

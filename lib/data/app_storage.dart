@@ -10,15 +10,18 @@ import 'package:the_app/models/shop_item.dart';
 
 /// Loads and saves all app data. Each feature has its own JSON file:
 ///
-///     <app documents>/data/notes.json  {"version": 1, "notes": [...]}
-///     <app documents>/data/shop.json   {"version": 1, "items": [...]}
+///     <app documents>/data/notes.json  {"version": 2, "notes": [...]}
+///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
 ///     <app documents>/data/security.json
-///         {"version": 1, "masterPassword": {verifier} or null}
+///         {"version": 2, "masterPassword": {verifier} or null}
 ///
 /// Data is loaded once at startup ([open]) and then saved after every change
 /// by the providers.
 class AppStorage {
-  static const formatVersion = 1;
+  /// Version of the files written. History: 1 = first format; 2 = notes
+  /// may be locked (`lockedContent`) and the master password record may
+  /// hold a wrapped data key. Every older version must stay readable.
+  static const formatVersion = 2;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;

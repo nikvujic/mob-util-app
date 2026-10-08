@@ -40,7 +40,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D2 | **Import** a previously exported file: validated first (format, version), shows what it contains, and asks for confirmation before **replacing** current data. Invalid files are rejected without touching current data. | ✅ with Undo right after restoring |
 | D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | ✅ |
 | D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ⏳ |
-| D4 | Export files carry a format version; newer app versions can always import older exports. | 🚧 files carry a format version and newer ones are rejected with a clear message; reading older versions gets tests once a v2 exists |
+| D4 | Export files carry a format version; newer app versions can always import older exports. | 🚧 files carry a format version and newer ones are rejected with a clear message; app data v1 and v2 are read in tests from frozen samples; v2 backups follow with locked-note backups (D3) |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). | 💭 not now |
 
 ## N — Notes
@@ -53,7 +53,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N4 | Long-press → select → delete with confirmation. | ✅ |
 | N5 | **Save or discard on back.** Back after changing something asks *Save changes?* (*Save new note?* for a new one) with **Discard** (left) and **Save** (right) buttons and a line saying notes are saved automatically. Save — or tapping outside / back on the dialog — saves; Discard restores the note to how it was when opened, or deletes a new note. Back without changes leaves without asking. Closing or killing the app never asks: edits are always autosaved. | ✅ |
 | N5a | **↶ Discard changes** (existing notes only): restores the note to how it was when opened, without leaving the editor. Asks for confirmation. | ✅ |
-| N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ⏳ |
+| N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | 🚧 storage and encryption done (content sealed per note); UI next |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ⏳ |
 | N8 | **Undo / redo while typing** (e.g. undo a paste), step by step. | 💭 later |
 | N9 | **Markdown** formatting in notes. Details to be decided with Nikola. | 💭 later |
@@ -64,7 +64,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | L1 | Menu → **Security**: set, change (requires current), remove (requires current; decrypts locked items) the master password. | ✅ minimum 8 characters |
 | L2 | The password itself is never stored. A key is derived from it with a slow KDF (Argon2id/PBKDF2 + random salt); only the salt, KDF parameters and a verifier are stored. | ✅ Argon2id (verified against OpenSSL); only a verifier is stored |
-| L3 | Locked data is encrypted with an authenticated cipher (AES-GCM). Without the password it cannot be read, also not from an export. Forgotten password = locked data is unrecoverable; the setup screen says so clearly. | 🚧 used for encrypted backups; locked notes come later |
+| L3 | Locked data is encrypted with an authenticated cipher (AES-GCM). Without the password it cannot be read, also not from an export. Forgotten password = locked data is unrecoverable; the setup screen says so clearly. | 🚧 used for encrypted backups; locked-note storage done, UI next |
 | L4 | **Convenient unlock:** entering the password once unlocks everything (locked notes and locked sections). It stays unlocked while the app is in use and while it is briefly in the background (e.g. switching away to copy something). It locks again when the app has been in the background for **5 minutes**, when the app is closed (removed from recent apps), or when "Lock now" is used. | ✅ Lock now in the menu and on Security; encrypted export uses the open session |
 | L5 | **Section locks** on the Security page: per main section (Notes, Shop, Planner, Other) a switch to lock the whole section. Opening a locked section requires unlocking (L4). Only available once a master password is set. | ⏳ |
 | L6 | Unlock with fingerprint as an alternative to typing the password. | 💭 later |

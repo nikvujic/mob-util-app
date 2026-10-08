@@ -8,6 +8,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
+import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
   const password = 'fixture password';
@@ -72,6 +73,39 @@ void main() {
     });
   });
 
+  group('v2', () {
+    test('app data loads completely; the locked note opens', () async {
+      final dir = copyOf('test/fixtures/v2/storage');
+      final storage = await AppStorage.open(directory: dir);
+      expect(
+        dir.listSync().map((f) => f.uri.pathSegments.last),
+        isNot(contains(contains('corrupt'))),
+      );
+
+      final notes = storage.initialNotes;
+      expect(notes.map((n) => n.title), ['Groceries', 'Bank 🔒']);
+      expect(notes.first.isLocked, isFalse);
+      expect(notes.first.content, 'milk\neggs\nčaj, ćevapi 🥙');
+      final locked = notes.last;
+      expect(locked.isLocked, isTrue);
+      expect(locked.content, isEmpty);
+      expect(locked.modifiedAt, DateTime(2026, 10, 7, 21, 16, 30, 500));
+
+      expect(
+        storage.initialShopItems.map((i) => '${i.name}:${i.toBuy}'),
+        ['Milk:true', 'Coffee:false'],
+      );
+
+      final verifier = storage.initialMasterPassword!;
+      final passwordKey = (await verifier.unlock(password))!;
+      final dataKey = (await verifier.unwrapDataKey(passwordKey))!;
+      expect(
+        await NotesNotifier(storage).readContent(locked, dataKey),
+        'PIN 4711\nšifra: žuta ćuprija',
+      );
+    });
+  });
+
   test('a file from a newer format is kept aside, not misread', () async {
     final dir = Directory.systemTemp.createTempSync('compat_newer');
     addTearDown(() => dir.deleteSync(recursive: true));
@@ -103,6 +137,12 @@ void main() {
           '60a13aad885197272595c40c3ff4b9dec427abe0db9c9c47ba6fa9467c9522de',
       'test/fixtures/v1/storage/shop.json':
           '7188622d7ea03d5c34f3215938067caf037f3085d17d252c173585420e4b0c6b',
+      'test/fixtures/v2/storage/notes.json':
+          '551f9ec617ceb9cf43e39e113c49bc993347433187abb956733f52655c92d535',
+      'test/fixtures/v2/storage/security.json':
+          '977d67f7aad3bb708b27b54f969c4af5a49323950ae93af0ff9d14a29d4f467b',
+      'test/fixtures/v2/storage/shop.json':
+          '759bf01a1403bed48cdbcdd8324f10eea13bfd96c0ceebe5dea7e5e34a078271',
     };
     for (final MapEntry(key: path, value: hash) in expected.entries) {
       final digest = await Sha256().hash(File(path).readAsBytesSync());

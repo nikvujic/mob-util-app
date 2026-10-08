@@ -19,7 +19,7 @@ class BackupFormatException implements Exception {
 ///
 ///     {
 ///       "format": "the-app-backup",
-///       "version": 1,
+///       "version": 2,
 ///       "createdAt": "2026-10-08T07:30:00.000Z",
 ///       "appVersion": "0.7.0 (8)",
 ///       "data": { "notes": [...], "shopItems": [...] }
@@ -29,7 +29,7 @@ class BackupFormatException implements Exception {
 /// whole plain document, sealed with a key from the master password:
 ///
 ///     {
-///       "format": "the-app-backup", "version": 1, "encrypted": true,
+///       "format": "the-app-backup", "version": 2, "encrypted": true,
 ///       "createdAt": "…", "appVersion": "…",
 ///       "kdf": {Argon2id parameters}, "sealed": {AES-256-GCM box}
 ///     }
@@ -42,7 +42,10 @@ class Backup {
   static const sealContext = 'the-app/backup';
 
   static const format = 'the-app-backup';
-  static const version = 1;
+
+  /// History: 1 = first format; 2 = notes may be locked
+  /// (`lockedContent`).
+  static const version = 2;
 
   final DateTime createdAt;
   final String appVersion;

@@ -66,7 +66,11 @@ hierarchy (envelope encryption):
   memory while unlocked; nothing unwrapped is ever written to disk.
 
 Every sealed box is bound to a purpose string (`context`), so data sealed
-for one purpose can't be passed off as another.
+for one purpose can't be passed off as another. A locked note's content is
+sealed for that note's id, so it can't be moved into a different note; its
+title stays plain text so the list can show it. Only `NotesNotifier`
+seals and opens note content, and plain content of a locked note is never
+accepted (`updateNote` refuses it).
 
 ## Back button
 
