@@ -17,17 +17,12 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
   gets round-trip tests with real files, including failure cases.
 - Commits are authored by Nikola Vujic, unsigned, pushed to `main`.
 - Every step that changes the app ends with a release: version bump,
-  `CHANGELOG.md` entry, `vX.Y.Z` tag → GitHub Release with the APK
-  ([RELEASING.md](RELEASING.md)).
-- **Waiting on the signing key** (Nikola, one-time; see below). Once the
-  secrets are in: tag the latest version so it becomes the first GitHub
-  Release, then ask whether CI should also keep the APK of every run as a
-  downloadable artifact (handy for quick looks, but debug-signed — can't be
-  updated by real releases).
-- **Before the first phone test: set up the release signing key**
-  ([RELEASING.md](RELEASING.md#signing-key-one-time-setup)) so the APK you
-  install can be updated by later releases without losing data. Until then,
-  versions are bumped and logged but not tagged.
+  `CHANGELOG.md` entry, then the Release workflow → GitHub Release with
+  the APK ([RELEASING.md](RELEASING.md)).
+- Release signing key is set up (2026-10-08); v0.10.0 is the first
+  release. Open question: should CI also keep the APK of every run as a
+  downloadable artifact (quick looks, but debug-signed — can't be updated
+  by real releases)?
 - After a group of steps, a **device checkpoint**: build the APK and try it on
   the phone (listed below where it matters most).
 

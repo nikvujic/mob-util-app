@@ -23,16 +23,17 @@ changes are not released on their own.
 1. Bump `version` in `pubspec.yaml`.
 2. Add a section to `CHANGELOG.md`: `## [X.Y.Z] - YYYY-MM-DD` with
    *Added* / *Changed* / *Fixed* lists, written for the user.
-3. Commit (`Release vX.Y.Z`), then tag and push:
-
-   ```sh
-   git tag -a vX.Y.Z -m "vX.Y.Z"
-   git push origin main vX.Y.Z
-   ```
-
-4. The **Release** workflow checks that the tag matches `pubspec.yaml`, runs
-   the tests, builds the APK signed with the release key, and publishes a
-   GitHub Release with the APK and the changelog section as notes.
+3. Commit (`Release vX.Y.Z`) and push to `main`.
+4. Start the release, either way:
+   - **On GitHub** (works from the phone too): *Actions → Release → Run
+     workflow* on `main`. It releases the version in `pubspec.yaml` and
+     creates the `vX.Y.Z` tag; it refuses if that version is already
+     released.
+   - **Or push a tag**: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin
+     vX.Y.Z` (the tag must match `pubspec.yaml`).
+5. The **Release** workflow runs the tests, builds the APK signed with the
+   release key, and publishes a GitHub Release with the APK and the
+   changelog section as notes.
 
 To install: open the release on the phone and download the APK (allow
 installing from the browser once).
