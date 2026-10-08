@@ -4,6 +4,18 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.6.0] - 2026-10-08
+
+### Changed
+- **Compact shop rows**: about 20% more items fit on screen, while every
+  row stays a full-size touch target.
+
+### Fixed
+- Screen readers (TalkBack) now announce shop items with their name and
+  checked state, and announce selected rows in selection mode; drag
+  handles are no longer read out as "Reorder".
+- Selecting a row no longer makes it 2 px taller.
+
 ## [0.5.0] - 2026-10-08
 
 ### Changed
