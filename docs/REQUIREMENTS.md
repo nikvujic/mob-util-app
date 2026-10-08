@@ -56,6 +56,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ⏳ |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ⏳ |
 | N8 | **Undo / redo while typing** (e.g. undo a paste), step by step. | 💭 later |
+| N9 | **Markdown** formatting in notes. Details to be decided with Nikola. | 💭 later |
 
 ## L — Security: master password & locking
 

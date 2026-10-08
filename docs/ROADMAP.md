@@ -116,6 +116,8 @@ Small fixes, not urgent; can go out together as one polish release.
 ## Later / ideas
 
 - Undo / redo while typing in a note, e.g. undo a paste (N8)
+- **Markdown in notes** (N9) — Nikola's idea; ask about the details
+  (editing vs. viewing, which syntax, toggle per note?) before planning
 - Fingerprint unlock (L6)
 - TimeTune-style scheduler in Planner (P4)
 - Self-hosted cloud backup, e.g. S3-backed (D5)
@@ -135,12 +137,10 @@ Small fixes, not urgent; can go out together as one polish release.
 
 ## Housekeeping
 
-- [ ] GitHub Actions warn that `actions/checkout@v4`, `setup-java@v4` and
-  `action-gh-release@v2` run on deprecated Node 20; move to their current
-  major versions (CI-only change, bundle with a step).
-- [ ] Optional: let the release workflow delete older releases so only
-  the latest APK stays (old APKs can't be installed over a newer version
-  without uninstalling anyway). Waiting on Nikola's go-ahead.
+- [x] GitHub Actions Node 20 deprecation: `checkout` and `setup-java` on
+  v5; publishing uses the `gh` CLI instead of a third-party action.
+- [x] Only the latest release is kept (the release workflow deletes older
+  ones; tags stay).
 
 - [ ] The Android toolchain is the one Flutter 3.29 generated (Kotlin
   1.8.22, AGP 8.1, Gradle 8.3). New plugins must be picked at versions that

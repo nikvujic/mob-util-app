@@ -33,7 +33,9 @@ changes are not released on their own.
      vX.Y.Z` (the tag must match `pubspec.yaml`).
 5. The **Release** workflow runs the tests, builds the APK signed with the
    release key, and publishes a GitHub Release with the APK and the
-   changelog section as notes.
+   changelog section as notes. Older releases are deleted, so only the
+   latest APK is on GitHub (an older APK can't be installed over a newer
+   version anyway); tags stay as history.
 
 To install: open the release on the phone and download the APK (allow
 installing from the browser once).
