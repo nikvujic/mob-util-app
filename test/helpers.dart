@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/data/app_storage.dart';
-import 'package:the_app/main.dart';
+import 'package:the_app/app/app.dart';
 
 const testAppVersion = '1.2.3 (4)';
 

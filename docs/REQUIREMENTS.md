@@ -101,6 +101,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 ## Technical notes
 
+Code structure and its enforced rules: [ARCHITECTURE.md](ARCHITECTURE.md).
+
 - Flutter 3.29.x (as on the dev machine; `pubspec.lock` is generated with it).
 - State: Riverpod `StateNotifierProvider`, one provider per feature in
   `lib/providers/`. Models are immutable value classes in `lib/models/`.
