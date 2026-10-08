@@ -24,6 +24,7 @@ const allowedLayerImports = <String, Set<String>>{
 const restrictedImports = <String, Set<String>>{
   'dart:io': {'data'},
   'package:path_provider/': {'data'},
+  'package:file_picker/': {'data'},
   'package:package_info_plus/': {'main'},
   'package:flutter/material.dart': {'main', 'app', 'pages', 'widgets', 'core'},
   'package:flutter/widgets.dart': {'main', 'app', 'pages', 'widgets', 'core'},
@@ -189,6 +190,13 @@ void main() {
     test('restricted packages and relative imports', () {
       expect(importViolations('pages/a/a.dart', ['dart:io']), hasLength(1));
       expect(importViolations('data/x.dart', ['dart:io']), isEmpty);
+      expect(
+        importViolations(
+          'pages/a/a.dart',
+          ['package:file_picker/file_picker.dart'],
+        ),
+        hasLength(1),
+      );
       expect(
         importViolations(
           'providers/p.dart',

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/app/app.dart';
 
 const testAppVersion = '1.2.3 (4)';
@@ -16,11 +19,15 @@ Future<void> openMenu(WidgetTester tester) async {
 
 /// Starts the whole app with in-memory storage and returns its provider
 /// container, so tests can seed and inspect state.
-Future<ProviderContainer> pumpApp(WidgetTester tester) async {
+Future<ProviderContainer> pumpApp(
+  WidgetTester tester, {
+  BackupFiles? backupFiles,
+}) async {
   final container = ProviderContainer(
     overrides: [
       appStorageProvider.overrideWithValue(AppStorage.inMemory()),
       appVersionProvider.overrideWithValue(testAppVersion),
+      backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
     ],
   );
   addTearDown(container.dispose);
@@ -79,5 +86,25 @@ Future<void> leaveNote(WidgetTester tester, {bool? save}) async {
   if (save != null) {
     await tester.tap(find.text(save ? 'Yes' : 'No'));
     await tester.pumpAndSettle();
+  }
+}
+
+/// Stands in for the system "save as" dialog. By default the user "saves";
+/// set [cancel] to simulate closing the dialog, [error] to make saving fail,
+/// or [pending] to keep the dialog open until the test completes it.
+class FakeBackupFiles implements BackupFiles {
+  bool cancel = false;
+  Object? error;
+  Completer<bool>? pending;
+
+  final saved = <({String fileName, Uint8List bytes})>[];
+
+  @override
+  Future<bool> save({required String fileName, required Uint8List bytes}) {
+    if (error != null) return Future.error(error!);
+    if (pending != null) return pending!.future;
+    if (cancel) return Future.value(false);
+    saved.add((fileName: fileName, bytes: bytes));
+    return Future.value(true);
   }
 }

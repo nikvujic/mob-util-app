@@ -32,8 +32,9 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 - Colors come from `AppColors` in `core/theme.dart`; no `Colors.*` (except
   `Colors.transparent`) or `Color(0x…)` anywhere else.
 - No `print()`; use `debugPrint`.
-- Platform plugins are confined: `path_provider` to `data/`,
-  `package_info_plus` to `main.dart`.
+- Platform plugins are confined: `path_provider` and `file_picker` to
+  `data/` (behind small interfaces like `BackupFiles`, so tests can fake
+  them), `package_info_plus` to `main.dart`.
 
 ## Design checks
 
