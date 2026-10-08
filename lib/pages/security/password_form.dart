@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/widgets/password_field.dart';
 
 enum PasswordFormMode {
   set(
@@ -117,7 +118,7 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
   Widget build(BuildContext context) {
     final fields = <Widget>[
       if (_mode.needsCurrent)
-        _PasswordField(
+        PasswordField(
           key: const Key('currentPassword'),
           controller: _current,
           label: 'Current password',
@@ -128,7 +129,7 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
           onSubmitted: _submit,
         ),
       if (_mode.choosesNew) ...[
-        _PasswordField(
+        PasswordField(
           key: const Key('newPassword'),
           controller: _new,
           label: 'New password',
@@ -139,7 +140,7 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
           isNew: true,
           onSubmitted: _submit,
         ),
-        _PasswordField(
+        PasswordField(
           key: const Key('repeatPassword'),
           controller: _repeat,
           label: 'Repeat new password',
@@ -202,70 +203,6 @@ class _Warning extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// A password input with a show/hide toggle. Never auto-corrected or
-/// suggested by the keyboard.
-class _PasswordField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helper;
-  final String? error;
-  final bool enabled;
-  final bool autofocus;
-  final bool isNew;
-  final bool last;
-  final VoidCallback onSubmitted;
-
-  const _PasswordField({
-    super.key,
-    required this.controller,
-    required this.label,
-    required this.onSubmitted,
-    this.helper,
-    this.error,
-    this.enabled = true,
-    this.autofocus = false,
-    this.isNew = false,
-    this.last = false,
-  });
-
-  @override
-  State<_PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<_PasswordField> {
-  bool _visible = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      enabled: widget.enabled,
-      autofocus: widget.autofocus,
-      obscureText: !_visible,
-      autocorrect: false,
-      enableSuggestions: false,
-      autofillHints: [
-        widget.isNew ? AutofillHints.newPassword : AutofillHints.password,
-      ],
-      textInputAction:
-          widget.last ? TextInputAction.done : TextInputAction.next,
-      onSubmitted: widget.last ? (_) => widget.onSubmitted() : null,
-      style: const TextStyle(color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        labelText: widget.label,
-        helperText: widget.helper,
-        errorText: widget.error,
-        border: const OutlineInputBorder(),
-        suffixIcon: IconButton(
-          icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),
-          tooltip: _visible ? 'Hide password' : 'Show password',
-          onPressed: () => setState(() => _visible = !_visible),
-        ),
-      ),
     );
   }
 }
