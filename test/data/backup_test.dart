@@ -114,6 +114,16 @@ void main() {
       (missingField['data']['notes'] as List).first.remove('title');
       expect(errorFor(missingField), damaged);
 
+      final duplicateNote = validJson();
+      final notes = duplicateNote['data']['notes'] as List;
+      notes.add(Map<String, dynamic>.from(notes.first as Map));
+      expect(errorFor(duplicateNote), damaged, reason: 'duplicate note id');
+
+      final duplicateItem = validJson();
+      final items = duplicateItem['data']['shopItems'] as List;
+      items.last['id'] = items.first['id'];
+      expect(errorFor(duplicateItem), damaged, reason: 'duplicate item id');
+
       final wrongType = validJson();
       (wrongType['data']['shopItems'] as List).first['toBuy'] = 'yes';
       expect(errorFor(wrongType), damaged);

@@ -89,13 +89,18 @@ Future<void> leaveNote(WidgetTester tester, {bool? save}) async {
   }
 }
 
-/// Stands in for the system "save as" dialog. By default the user "saves";
-/// set [cancel] to simulate closing the dialog, [error] to make saving fail,
-/// or [pending] to keep the dialog open until the test completes it.
+/// Stands in for the system file dialogs. Saving: by default the user
+/// "saves"; set [cancel] to simulate closing the dialog, [error] to make
+/// saving fail, or [pending] to keep the dialog open until the test
+/// completes it. Picking: returns [toPick] (null = the user cancelled).
 class FakeBackupFiles implements BackupFiles {
   bool cancel = false;
   Object? error;
   Completer<bool>? pending;
+  Uint8List? toPick;
+
+  @override
+  Future<Uint8List?> pick() async => toPick;
 
   final saved = <({String fileName, Uint8List bytes})>[];
 

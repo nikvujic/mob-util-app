@@ -52,6 +52,11 @@ class NotesNotifier extends StateNotifier<List<Note>> {
     ];
   }
 
+  /// Replaces everything (used when restoring a backup).
+  void replaceAll(List<Note> notes) {
+    state = List.unmodifiable(notes);
+  }
+
   void removeNotes(Set<String> ids) {
     state = state.where((note) => !ids.contains(note.id)).toList();
   }

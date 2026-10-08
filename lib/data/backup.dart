@@ -136,9 +136,10 @@ class Backup {
   }
 
   static Backup _fromJson(Map<String, dynamic> json) {
+    final Backup backup;
     try {
       final data = json['data'] as Map<String, dynamic>;
-      return Backup(
+      backup = Backup(
         createdAt: DateTime.parse(json['createdAt'] as String),
         appVersion: json['appVersion'] as String,
         notes: [
@@ -154,6 +155,14 @@ class Backup {
       // Wrong types, missing fields, bad dates: all mean a damaged file.
       throw const BackupFormatException('This backup is damaged.');
     }
+    // Ids must be unique: lists use them as keys, and duplicates would make
+    // the app misbehave after restoring.
+    bool unique(Iterable<String> ids) => ids.toSet().length == ids.length;
+    if (!unique(backup.notes.map((n) => n.id)) ||
+        !unique(backup.shopItems.map((i) => i.id))) {
+      throw const BackupFormatException('This backup is damaged.');
+    }
+    return backup;
   }
 }
 

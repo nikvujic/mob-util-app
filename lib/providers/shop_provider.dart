@@ -30,6 +30,11 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     ];
   }
 
+  /// Replaces everything (used when restoring a backup).
+  void replaceAll(List<ShopItem> items) {
+    state = List.unmodifiable(items);
+  }
+
   void removeItems(Set<String> ids) {
     state = state.where((item) => !ids.contains(item.id)).toList();
   }
