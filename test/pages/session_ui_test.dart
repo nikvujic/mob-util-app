@@ -102,7 +102,7 @@ void main() {
         ),
         password,
       );
-      await tester.tap(find.widgetWithText(TextButton, 'Unlock').last);
+      await tester.tap(find.widgetWithText(FilledButton, 'Unlock'));
       await tester.pump();
       await settleBusy(tester);
 

@@ -50,7 +50,7 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.text('Save changes?'), findsOneWidget);
-      await tester.tap(find.text('Yes'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(appBarTitle('Notes'), findsOneWidget);
@@ -116,7 +116,7 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.text('Save new note?'), findsOneWidget);
-      await tester.tap(find.text('Yes'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
       expect(container.read(notesProvider).single.content, 'Some text');

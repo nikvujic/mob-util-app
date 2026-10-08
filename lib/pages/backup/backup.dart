@@ -6,6 +6,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
+import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 
@@ -244,30 +245,40 @@ class _ExportKindDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     void choose(_ExportKind kind) => Navigator.of(context).pop(kind);
 
-    return SimpleDialog(
-      backgroundColor: AppColors.surface,
-      title: const Text('Export as'),
-      children: [
-        ListTile(
-          leading: const Icon(Icons.description_outlined),
-          title: const Text('Plain file'),
-          subtitle: const Text(
-            'Readable in any text editor — by anyone who has the file',
-            style: TextStyle(color: AppColors.textSecondary),
+    return AppDialog(
+      title: 'Export as',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Plain file'),
+            subtitle: const Text(
+              'Readable in any text editor — by anyone who has the file',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+            onTap: () => choose(_ExportKind.plain),
           ),
-          onTap: () => choose(_ExportKind.plain),
-        ),
-        ListTile(
-          enabled: canEncrypt,
-          leading: const Icon(Icons.lock_outline),
-          title: const Text('Encrypted file'),
-          subtitle: Text(
-            canEncrypt
-                ? 'Only readable with your master password'
-                : 'Set a master password in Security first',
-            style: const TextStyle(color: AppColors.textSecondary),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            enabled: canEncrypt,
+            leading: const Icon(Icons.lock_outline),
+            title: const Text('Encrypted file'),
+            subtitle: Text(
+              canEncrypt
+                  ? 'Only readable with your master password'
+                  : 'Set a master password in Security first',
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            onTap: () => choose(_ExportKind.encrypted),
           ),
-          onTap: () => choose(_ExportKind.encrypted),
+        ],
+      ),
+      actions: [
+        DialogButton(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ],
     );

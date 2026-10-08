@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:the_app/core/theme.dart';
+import 'package:the_app/widgets/app_dialog.dart';
 
 /// A generic yes/no confirmation dialog.
 ///
@@ -25,35 +25,19 @@ class ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.surface,
-      title: Text(
-        title,
-        style: const TextStyle(color: AppColors.textPrimary, fontSize: 18),
-      ),
-      content: message == null
-          ? null
-          : Text(
-              message!,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
+    return AppDialog(
+      title: title,
+      content: message == null ? null : DialogMessage(message!),
       actions: [
-        TextButton(
+        DialogButton(
+          label: cancelLabel,
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(
-            cancelLabel,
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
         ),
-        TextButton(
+        DialogButton(
+          label: confirmLabel,
+          primary: true,
+          danger: destructive,
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(
-            confirmLabel,
-            style: TextStyle(
-              color: destructive ? AppColors.danger : AppColors.accent,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
         ),
       ],
     );
@@ -100,19 +84,32 @@ Future<bool> showDeleteConfirmDialog(
   );
 }
 
-/// Asks whether to keep changes when leaving an editor. Resolves to `true`
-/// for Yes **and** when the dialog is dismissed (tap outside, back): only an
-/// explicit No throws changes away.
+/// Asks whether to keep changes when leaving an editor: **Discard** or
+/// **Save**. Resolves to `true` for Save **and** when the dialog is
+/// dismissed (tap outside, back): only an explicit Discard throws changes
+/// away.
 Future<bool> showSaveChangesDialog(
   BuildContext context, {
   String title = 'Save changes?',
+  String? message,
 }) async {
   final result = await showDialog<bool>(
     context: context,
-    builder: (_) => ConfirmDialog(
+    builder: (context) => AppDialog(
       title: title,
-      confirmLabel: 'Yes',
-      cancelLabel: 'No',
+      content: message == null ? null : DialogMessage(message),
+      actions: [
+        DialogButton(
+          label: 'Discard',
+          danger: true,
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        DialogButton(
+          label: 'Save',
+          primary: true,
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
     ),
   );
   return result ?? true;

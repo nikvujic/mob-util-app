@@ -81,13 +81,14 @@ Future<void> pressBack(WidgetTester tester) async {
 }
 
 /// Leaves the note editor with back. If [save] is given, the "Save
-/// changes?" dialog is expected and answered with Yes (true) or No (false).
+/// changes?" dialog is expected and answered with Save (true) or Discard
+/// (false).
 Future<void> leaveNote(WidgetTester tester, {bool? save}) async {
   await tester.pump(); // let pending text changes settle
   await tester.pageBack();
   await tester.pumpAndSettle();
   if (save != null) {
-    await tester.tap(find.text(save ? 'Yes' : 'No'));
+    await tester.tap(find.text(save ? 'Save' : 'Discard'));
     await tester.pumpAndSettle();
   }
 }

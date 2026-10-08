@@ -98,8 +98,8 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    final cancel = tester.widget<TextButton>(
-      find.widgetWithText(TextButton, 'Cancel'),
+    final cancel = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Cancel'),
     );
     expect(cancel.onPressed, isNull);
 

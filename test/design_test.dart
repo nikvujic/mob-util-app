@@ -61,6 +61,15 @@ void main() {
         await t.tap(find.text('Groceries'));
         await t.pumpAndSettle();
       },
+      'save changes dialog': (t) async {
+        await t.tap(find.text('Groceries'));
+        await t.pumpAndSettle();
+        await t.enterText(find.byKey(const Key('noteContentField')), 'eggs');
+        await t.pump();
+        await t.pageBack();
+        await t.pumpAndSettle();
+        expect(find.text('Save changes?'), findsOneWidget);
+      },
       'shop': (t) => openTab(t, 'Shop'),
       'shop selection mode': (t) async {
         await openTab(t, 'Shop');

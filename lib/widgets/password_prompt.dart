@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:the_app/core/theme.dart';
+import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/password_field.dart';
 
 /// Asks for a password and checks it with [attempt], which returns a result
@@ -86,18 +86,14 @@ class _PasswordPromptDialogState<T extends Object>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_busy,
-      child: AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(widget.title),
+      child: AppDialog(
+        title: widget.title,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (widget.message != null) ...[
-              Text(
-                widget.message!,
-                style: const TextStyle(color: AppColors.textSecondary),
-              ),
+              DialogMessage(widget.message!),
               const SizedBox(height: 16),
             ],
             PasswordField(
@@ -113,24 +109,20 @@ class _PasswordPromptDialogState<T extends Object>
           ],
         ),
         actions: [
-          TextButton(
+          DialogButton(
+            label: 'Cancel',
             onPressed: _busy ? null : () => Navigator.of(context).pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
           ),
-          TextButton(
+          DialogButton(
+            label: widget.confirmLabel,
+            primary: true,
             onPressed: _busy ? null : _submit,
             child: _busy
                 ? const SizedBox.square(
                     dimension: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(
-                    widget.confirmLabel,
-                    style: const TextStyle(color: AppColors.accent),
-                  ),
+                : null,
           ),
         ],
       ),

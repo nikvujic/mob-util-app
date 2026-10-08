@@ -64,14 +64,14 @@ void main() {
       return result;
     }
 
-    testWidgets('Yes saves, No discards', (tester) async {
+    testWidgets('Save saves, Discard discards', (tester) async {
       var result = await openSave(tester);
-      await tester.tap(find.text('Yes'));
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
       expect(await result, isTrue);
 
       result = await openSave(tester);
-      await tester.tap(find.text('No'));
+      await tester.tap(find.text('Discard'));
       await tester.pumpAndSettle();
       expect(await result, isFalse);
     });
@@ -83,12 +83,15 @@ void main() {
       expect(await result, isTrue);
     });
 
-    testWidgets('No is on the left, Yes on the right', (tester) async {
+    testWidgets('Discard on the left, Save on the right, as real buttons',
+        (tester) async {
       await openSave(tester);
       expect(
-        tester.getCenter(find.text('No')).dx,
-        lessThan(tester.getCenter(find.text('Yes')).dx),
+        tester.getCenter(find.text('Discard')).dx,
+        lessThan(tester.getCenter(find.text('Save')).dx),
       );
+      expect(find.widgetWithText(OutlinedButton, 'Discard'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Save'), findsOneWidget);
     });
   });
 }

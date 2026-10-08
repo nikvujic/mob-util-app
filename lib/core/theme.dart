@@ -16,6 +16,19 @@ abstract final class AppColors {
   static const divider = Colors.white12;
 }
 
+/// Shapes used across the app.
+abstract final class AppShapes {
+  /// Dialogs: squarer than Material's default (28 dp) corners.
+  static const dialog = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  );
+
+  /// Buttons inside dialogs, matching the dialog's squarer look.
+  static const button = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+  );
+}
+
 abstract final class AppTheme {
   static ThemeData get dark {
     final colorScheme = ColorScheme.fromSeed(

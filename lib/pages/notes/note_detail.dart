@@ -15,8 +15,8 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 /// when the page is left.
 ///
 /// Leaving with back after changing something asks "Save changes?":
-/// Yes (or tapping outside the dialog) keeps them; No restores the note to
-/// how it was when opened, or deletes a note created here. While editing an
+/// Save (or tapping outside the dialog) keeps them; Discard restores the
+/// note to how it was when opened, or deletes a note created here. While editing an
 /// existing note, ↶ restores that version without leaving the page.
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String noteId;
@@ -134,6 +134,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       final save = await showSaveChangesDialog(
         context,
         title: widget.isNew ? 'Save new note?' : 'Save changes?',
+        message: widget.isNew
+            ? 'New notes are saved automatically. Discard deletes this note.'
+            : 'Your changes are saved automatically. Discard puts the note '
+                'back the way it was.',
       );
       if (!mounted) return;
       if (save) {
