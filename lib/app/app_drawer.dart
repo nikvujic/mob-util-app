@@ -4,6 +4,7 @@ import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/security/security.dart';
+import 'package:the_app/providers/session_provider.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
 class AppDrawer extends ConsumerWidget {
@@ -36,8 +37,20 @@ class AppDrawer extends ConsumerWidget {
               ),
             ),
             const Divider(height: 1, color: AppColors.divider),
+            if (ref.watch(sessionProvider) != null)
+              ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('Lock now'),
+                onTap: () {
+                  ref.read(sessionProvider.notifier).lock();
+                  Scaffold.of(context).closeDrawer();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Locked')),
+                  );
+                },
+              ),
             ListTile(
-              leading: const Icon(Icons.lock_outline),
+              leading: const Icon(Icons.shield_outlined),
               title: const Text('Security'),
               onTap: () => _open(context, const SecurityPage()),
             ),

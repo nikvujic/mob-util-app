@@ -96,7 +96,7 @@ Small fixes, not urgent; can go out together as one polish release.
 
 ### Locking
 
-11. [ ] **Session unlock (L4)** — unlock once; stays unlocked through short
+11. [x] **Session unlock (L4)** — unlock once; stays unlocked through short
     trips to other apps; locks after 5 min in the background, on app close,
     or "Lock now". Encrypted export then needs no typing while unlocked.
 12. [ ] **Lock notes (N6, N7, D3)** — lock/unlock a note, encrypted at rest,

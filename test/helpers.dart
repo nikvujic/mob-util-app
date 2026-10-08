@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/app/app.dart';
@@ -22,12 +23,14 @@ Future<void> openMenu(WidgetTester tester) async {
 Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
   BackupFiles? backupFiles,
+  DateTime Function()? clock,
 }) async {
   final container = ProviderContainer(
     overrides: [
       appStorageProvider.overrideWithValue(AppStorage.inMemory()),
       appVersionProvider.overrideWithValue(testAppVersion),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
+      if (clock != null) clockProvider.overrideWithValue(clock),
     ],
   );
   addTearDown(container.dispose);

@@ -5,6 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 
@@ -39,18 +40,22 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     );
   }
 
-  /// Asks for the master password; the key derived from it, or null if
-  /// cancelled.
-  Future<PasswordKey?> _askMasterPassword() {
+  /// The master password's key: from the unlocked session, or else asked
+  /// for (which also unlocks the session). Null if cancelled.
+  Future<PasswordKey?> _masterKey() async {
+    final unlocked = ref.read(sessionProvider);
+    if (unlocked != null) return unlocked;
     final verifier = ref.read(securityProvider);
-    if (verifier == null) return Future.value();
-    return showPasswordPrompt<PasswordKey>(
+    if (verifier == null) return null;
+    final key = await showPasswordPrompt<PasswordKey>(
       context,
       title: 'Encrypt backup',
       message: "You'll need this password to restore the backup.",
       confirmLabel: 'Encrypt',
       attempt: verifier.unlock,
     );
+    if (key != null) ref.read(sessionProvider.notifier).unlockWith(key);
+    return key;
   }
 
   Future<void> _export() async {
@@ -64,7 +69,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
 
     PasswordKey? key;
     if (kind == _ExportKind.encrypted) {
-      key = await _askMasterPassword();
+      key = await _masterKey();
       if (key == null || !mounted) return;
     }
 

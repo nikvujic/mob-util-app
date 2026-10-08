@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
 
@@ -113,6 +115,30 @@ void main() {
       });
     }
   });
+
+  for (final unlock in [false, true]) {
+    testWidgets(
+        'accessibility guidelines: security with a master password, '
+        '${unlock ? 'unlocked' : 'locked'}', (tester) async {
+      final semantics = tester.ensureSemantics();
+      final container = await pumpApp(tester);
+      await tester.runAsync(() async {
+        await container
+            .read(securityProvider.notifier)
+            .setPassword('master password');
+        if (unlock) {
+          await container
+              .read(sessionProvider.notifier)
+              .unlock('master password');
+        }
+      });
+      await openMenu(tester);
+      await tester.tap(find.text('Security'));
+      await tester.pumpAndSettle();
+      await expectAccessible(tester);
+      semantics.dispose();
+    });
+  }
 
   group('compact shop rows (S4)', () {
     /// The card of the list row showing [text].
