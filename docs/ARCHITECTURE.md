@@ -35,6 +35,21 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 - Platform plugins are confined: `path_provider` to `data/`,
   `package_info_plus` to `main.dart`.
 
+## Design checks
+
+`test/design_test.dart` checks every screen against Android's
+accessibility guidelines — tap targets of at least 48×48 dp, every tap
+target labelled for screen readers, text contrast — and pins what the
+requirements ask of the layout (e.g. shop rows are exactly one tap target
+high and ≥20% smaller than note rows). Conventions it relies on:
+
+- List rows are one screen-reader element: the content is the label, state
+  (checked, selected) is a semantic flag. Drag handles and selection ticks
+  are decorative (`ExcludeSemantics`); reordering is offered to screen
+  readers as the list's "Move up/down" actions.
+- Highlights (selection) never change a row's size.
+- Layouts must survive a 2× system font size without overflowing.
+
 ## State and persistence
 
 - Each feature has one `StateNotifier` holding an immutable list; pages read

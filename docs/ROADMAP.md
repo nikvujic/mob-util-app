@@ -60,7 +60,8 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
    undo action restores it (or removes a just-created note), with confirm.
    - [x] Back asks *Save changes?* (Yes/No, outside tap = Yes); ↶ only
      for existing notes and keeps you in the editor (N5, N5a).
-5. [ ] **Compact shop rows (S4).**
+5. [x] **Compact shop rows (S4)** — plus architecture rules (test +
+   `ARCHITECTURE.md`) and design/accessibility tests for every screen (G10).
 
 ### Backup (failsafe) — device checkpoint after this group
 

@@ -132,7 +132,8 @@ class SelectionPopScope extends StatelessWidget {
 }
 
 /// Card used for list rows that support selection. Highlights itself when
-/// [selected].
+/// [selected], without changing its size, and reports the selection to
+/// screen readers.
 class SelectableCard extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
@@ -147,24 +148,33 @@ class SelectableCard extends StatelessWidget {
     this.onLongPress,
   });
 
+  static const _radius = BorderRadius.all(Radius.circular(6));
+
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      decoration: BoxDecoration(
-        color: selected ? AppColors.cardSelected : AppColors.card,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: selected ? AppColors.accent : Colors.transparent,
+    return Semantics(
+      selected: selected ? true : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.cardSelected : AppColors.card,
+          borderRadius: _radius,
         ),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(6),
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: child,
+        // Drawn on top so the highlight never changes the row's size.
+        foregroundDecoration: BoxDecoration(
+          borderRadius: _radius,
+          border: Border.all(
+            color: selected ? AppColors.accent : Colors.transparent,
+          ),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: _radius,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: child,
+          ),
         ),
       ),
     );
@@ -173,6 +183,10 @@ class SelectableCard extends StatelessWidget {
 
 /// Trailing control for a reorderable, selectable row: a drag handle
 /// normally, a selection indicator while in selection mode.
+///
+/// Both are hidden from screen readers: reordering is offered to them as
+/// "Move up/down" actions by the list, and selection is announced by
+/// [SelectableCard].
 class ReorderOrSelectIndicator extends StatelessWidget {
   final int index;
   final bool selectionMode;
@@ -188,22 +202,22 @@ class ReorderOrSelectIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (selectionMode) {
-      return Padding(
-        padding: const EdgeInsets.all(12),
-        child: Icon(
-          selected ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: selected ? AppColors.accent : AppColors.textHint,
+      return ExcludeSemantics(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Icon(
+            selected ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: selected ? AppColors.accent : AppColors.textHint,
+          ),
         ),
       );
     }
     return ReorderableDragStartListener(
       index: index,
-      child: const Padding(
-        padding: EdgeInsets.all(12),
-        child: Icon(
-          Icons.drag_handle,
-          color: AppColors.textHint,
-          semanticLabel: 'Reorder',
+      child: const ExcludeSemantics(
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Icon(Icons.drag_handle, color: AppColors.textHint),
         ),
       ),
     );

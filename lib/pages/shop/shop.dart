@@ -70,7 +70,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
         final item = items[index];
         return Padding(
           key: ValueKey(item.id),
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: _ShopItemTile.gap / 2),
           child: _ShopItemTile(
             item: item,
             index: index,
@@ -183,7 +183,12 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+/// A compact row (S4): exactly one touch target high, so more of the list
+/// fits on screen than with note rows, without becoming harder to tap.
 class _ShopItemTile extends StatelessWidget {
+  /// Vertical space between rows (note rows use 8).
+  static const gap = 4.0;
+
   final ShopItem item;
   final int index;
   final bool selectionMode;
@@ -202,36 +207,37 @@ class _ShopItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SelectableCard(
-      selected: selected,
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(4),
-            child: Checkbox(
+    // One semantic node for the whole row, so screen readers announce it as
+    // "Milk, checkbox, not checked" — tapping it does what the checkbox does.
+    return MergeSemantics(
+      child: SelectableCard(
+        selected: selected,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Row(
+          children: [
+            Checkbox(
               value: !item.toBuy,
               onChanged: (_) => onTap(),
             ),
-          ),
-          Expanded(
-            child: Text(
-              item.name,
-              style: TextStyle(
-                fontSize: 16,
-                color: item.toBuy
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
+            Expanded(
+              child: Text(
+                item.name,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: item.toBuy
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
+                ),
               ),
             ),
-          ),
-          ReorderOrSelectIndicator(
-            index: index,
-            selectionMode: selectionMode,
-            selected: selected,
-          ),
-        ],
+            ReorderOrSelectIndicator(
+              index: index,
+              selectionMode: selectionMode,
+              selected: selected,
+            ),
+          ],
+        ),
       ),
     );
   }

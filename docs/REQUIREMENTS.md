@@ -30,6 +30,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
 | G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | 🚧 menu, Security page (placeholder) and version done |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
+| G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
 ## D — Data safety: export / import
 
@@ -73,7 +74,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | S1 | Two lists: **To buy** above **Items** (catalog of things bought before). Tapping an item moves it to the other list, to the top. | ✅ |
 | S2 | Items are only a name. + adds to the top of To buy; the input stays open for adding several in a row. | ✅ |
 | S3 | Drag handle on the right reorders within a list. Long-press → select → delete. | ✅ |
-| S4 | **Compact rows** — noticeably smaller than note rows, so more items fit on screen. | ⏳ |
+| S4 | **Compact rows** — noticeably smaller than note rows (one 48 dp touch target high, ≥20% smaller, tighter gaps), so more items fit on screen without becoming harder to tap. | ✅ |
 
 ## P — Planner (currently the "To Do" tab)
 
