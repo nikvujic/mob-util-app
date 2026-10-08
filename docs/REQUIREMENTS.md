@@ -93,6 +93,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |
+| U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ⏳ after locked notes |
 
 ## O — Other
 

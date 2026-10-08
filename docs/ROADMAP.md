@@ -99,12 +99,43 @@ Small fixes, not urgent; can go out together as one polish release.
 11. [x] **Session unlock (L4)** — unlock once; stays unlocked through short
     trips to other apps; locks after 5 min in the background, on app close,
     or "Lock now". Encrypted export then needs no typing while unlocked.
-12. [ ] **Lock notes (N6, N7, D3)** — lock/unlock a note, encrypted at rest,
-    lock icon in the list, route to password setup if none exists. Export
-    already carries the stored (encrypted) form, so D3 is verified here.
-    Must also cover restoring onto a phone whose master password differs
-    from the one the locked notes were sealed with (e.g. ask for that
-    password on import and re-seal).
+12. [~] **Lock notes (N6, N7, D3)** — in sub-steps. Design: *envelope
+    encryption* — a random **data key** encrypts locked notes; the master
+    password only wraps that key (in `security.json`). Changing the
+    password re-wraps one key in one atomic write, so a crash can never
+    leave notes split between two passwords; backups can carry the wrapped
+    key. Storage format becomes v2 across 12a–12b (**no release between
+    them**; v2 fixtures are frozen at the end of 12b).
+    - [ ] 12a Key hierarchy: data key wrapped by the master password;
+      existing master passwords migrate on first unlock; changing the
+      password keeps the same data key. No UI change.
+    - [ ] 12b Note format v2 (sealed content) + lock/unlock/read logic;
+      v2 fixtures; v1 still read.
+    - [ ] 12c UI: lock icon in the list, lock/unlock (editor menu and
+      selection mode), unlock prompt on open, set-up route if no master
+      password.
+    - [ ] 12d Removing the master password unlocks all locked notes first
+      (with confirmation).
+    - [ ] 12e Backups with locked notes: carry the wrapped data key;
+      import re-seals under this phone's key (or adopts it if none).
+
+### One-handed use & touch polish (from the second phone test)
+
+After locked notes, before section locks.
+
+- [ ] **Bigger drag-handle grab area** — keep the icon size, but the whole
+  area around it (full row height, wider) starts a drag.
+- [ ] **Ripple effects** — review: they look off (e.g. clipping, colour,
+  ripple under selection highlight); make them consistent.
+- [ ] **Selection actions at the bottom right** — in selection mode, *select
+  all* and *delete* become two buttons side by side in the lower right
+  (thumb reach), with extra bottom space so the list can scroll clear of
+  them.
+- [ ] **Pull the list down for one-handed reach** (Notes, Shop; others
+  later) — the list can be dragged further down than its top, into an
+  empty space, so the top items come within thumb reach; it always opens
+  at the top and springs back when scrolled back up. Needs a prototype to
+  get the feel right.
 
 ### New sections
 
