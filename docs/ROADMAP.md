@@ -146,7 +146,7 @@ After locked notes, before section locks.
   switched off app-wide but some widgets drew their own; now one plain
   ripple (white 12%) everywhere, clipped to the card; the shop checkbox
   only shows state, so the whole row ripples as one.
-- [ ] **Selection actions at the bottom right** — in selection mode, *select
+- [x] **Selection actions at the bottom right** — in selection mode, *select
   all* and *delete* become two buttons side by side in the lower right
   (thumb reach), with extra bottom space so the list can scroll clear of
   them.

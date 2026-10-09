@@ -105,11 +105,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
           appBar: _selection.isActive
               ? SelectionAppBar(
                   count: _selection.count,
-                  allSelected: _selection.count == items.length,
                   onClose: _selection.clear,
-                  onSelectAll: () =>
-                      _selection.selectAll(items.map((i) => i.id)),
-                  onDelete: _deleteSelected,
                 )
               : const MainAppBar(title: 'Shop'),
           body: items.isEmpty
@@ -138,12 +134,22 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                       _SectionHeader(title: 'Items', count: stock.length),
                       _section(stock, toBuy: false),
                     ],
-                    // Keep the last item clear of the FAB.
-                    const SliverToBoxAdapter(child: SizedBox(height: 88)),
+                    // Keep the last item clear of the buttons.
+                    const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: SelectionActions.listBottomSpace,
+                      ),
+                    ),
                   ],
                 ),
           floatingActionButton: _selection.isActive
-              ? null
+              ? SelectionActions(
+                  allSelected: _selection.count == items.length,
+                  onSelectAll: () =>
+                      _selection.selectAll(items.map((i) => i.id)),
+                  onDeselectAll: _selection.clear,
+                  onDelete: _deleteSelected,
+                )
               : FloatingActionButton(
                   // Tabs are kept alive side by side; a shared default hero
                   // tag would clash when a route is pushed.

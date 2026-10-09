@@ -179,24 +179,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
           appBar: _selection.isActive
               ? SelectionAppBar(
                   count: _selection.count,
-                  allSelected: _selection.count == notes.length,
                   onClose: _selection.clear,
-                  onSelectAll: () =>
-                      _selection.selectAll(notes.map((n) => n.id)),
-                  onDelete: _deleteSelected,
-                  actions: [
-                    _allSelectedLocked(notes)
-                        ? IconButton(
-                            icon: const Icon(Icons.lock_open_outlined),
-                            tooltip: 'Remove lock',
-                            onPressed: _removeLockSelected,
-                          )
-                        : IconButton(
-                            icon: const Icon(Icons.lock_outline),
-                            tooltip: 'Lock',
-                            onPressed: _lockSelected,
-                          ),
-                  ],
                 )
               : const MainAppBar(title: 'Notes'),
           // Not interactive while a new note is hidden, so list positions
@@ -207,7 +190,11 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                 ? const EmptyState(
                     icon: Icons.note_outlined, message: 'No notes')
                 : ReorderableListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    // Room below the last note for the buttons.
+                    padding: const EdgeInsets.only(
+                      top: 4,
+                      bottom: SelectionActions.listBottomSpace,
+                    ),
                     buildDefaultDragHandles: false,
                     itemCount: notes.length,
                     // onReorderItem only exists on newer Flutter than we target.
@@ -235,7 +222,26 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                   ),
           ),
           floatingActionButton: _selection.isActive
-              ? null
+              ? SelectionActions(
+                  allSelected: _selection.count == notes.length,
+                  onSelectAll: () =>
+                      _selection.selectAll(notes.map((n) => n.id)),
+                  onDeselectAll: _selection.clear,
+                  onDelete: _deleteSelected,
+                  extra: [
+                    _allSelectedLocked(notes)
+                        ? SelectionAction(
+                            icon: Icons.lock_open_outlined,
+                            tooltip: 'Remove lock',
+                            onPressed: _removeLockSelected,
+                          )
+                        : SelectionAction(
+                            icon: Icons.lock_outline,
+                            tooltip: 'Lock',
+                            onPressed: _lockSelected,
+                          ),
+                  ],
+                )
               : FloatingActionButton(
                   // Tabs are kept alive side by side; a shared default hero
                   // tag would clash when a route is pushed.

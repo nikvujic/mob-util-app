@@ -24,7 +24,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G1 | Bottom navigation with the main sections: **Notes** (default on launch), **Shop**, **Planner**, **Other**. Each keeps its state (scroll position, selection) when switching. | ✅ |
 | G2 | One visual language (dark theme, green accent) defined in `lib/core/theme.dart`; pages don't hard-code colors. | ✅ |
 | G3 | Shared building blocks instead of per-page copies (confirm dialog, selection mode, list rows, empty state, input sheet, …). | ✅ |
-| G4 | **Selection mode** behaves the same on every list: long-press selects, tap toggles, top bar shows count / select all / delete, back or ✕ exits. | ✅ |
+| G4 | **Selection mode** behaves the same on every list: long-press selects, tap toggles, the top bar shows the count and ✕; the actions (select all, delete, and e.g. lock for notes) are round buttons in the lower right, in thumb reach; back or ✕ exits. | ✅ |
 | G5 | Deleting always asks for confirmation through the shared dialog. | ✅ |
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app — after a confirming second press: the first shows *Press back again to exit*, a second within 2 s exits. Back first closes an open menu or leaves selection mode. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
@@ -94,7 +94,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |
-| U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | 🚧 bigger drag handles and consistent ripples done |
+| U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | 🚧 bigger drag handles, consistent ripples, selection actions at the bottom done; pull-down next |
 
 ## O — Other
 

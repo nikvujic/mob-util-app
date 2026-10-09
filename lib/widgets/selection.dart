@@ -52,25 +52,17 @@ class SelectionController extends ChangeNotifier {
   void handleLongPress(String id) => toggle(id);
 }
 
-/// App bar shown while a list is in selection mode.
+/// App bar shown while a list is in selection mode: ✕ to leave it and the
+/// count. The actions are at the bottom ([SelectionActions]), in thumb
+/// reach.
 class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int count;
-  final bool allSelected;
   final VoidCallback onClose;
-  final VoidCallback onSelectAll;
-  final VoidCallback onDelete;
-
-  /// Extra actions for the selected items, shown before Delete.
-  final List<Widget> actions;
 
   const SelectionAppBar({
     super.key,
     required this.count,
-    required this.allSelected,
     required this.onClose,
-    required this.onSelectAll,
-    required this.onDelete,
-    this.actions = const [],
   });
 
   @override
@@ -86,17 +78,89 @@ class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text('$count selected'),
       centerTitle: false,
-      actions: [
-        IconButton(
-          icon: Icon(allSelected ? Icons.deselect : Icons.select_all),
+    );
+  }
+}
+
+/// One extra action for the selected items (e.g. Lock).
+class SelectionAction {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const SelectionAction({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+}
+
+/// The actions of selection mode as round buttons side by side, for the
+/// lower right corner (use as the page's floating action button): [extra]
+/// ones, then Select all / Deselect all, then Delete at the far right.
+class SelectionActions extends StatelessWidget {
+  /// Space to leave below a list so its last row can scroll clear of the
+  /// buttons (also of the usual + button).
+  static const listBottomSpace = 88.0;
+
+  final bool allSelected;
+  final VoidCallback onSelectAll;
+  final VoidCallback onDeselectAll;
+  final VoidCallback onDelete;
+  final List<SelectionAction> extra;
+
+  const SelectionActions({
+    super.key,
+    required this.allSelected,
+    required this.onSelectAll,
+    required this.onDeselectAll,
+    required this.onDelete,
+    this.extra = const [],
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget button({
+      required IconData icon,
+      required String tooltip,
+      required VoidCallback onPressed,
+      Color background = AppColors.surface,
+      Color foreground = AppColors.textPrimary,
+    }) =>
+        Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: FloatingActionButton(
+            // Several on screen at once (and tabs kept alive side by side):
+            // no shared hero animation.
+            heroTag: null,
+            tooltip: tooltip,
+            backgroundColor: background,
+            foregroundColor: foreground,
+            onPressed: onPressed,
+            child: Icon(icon),
+          ),
+        );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final action in extra)
+          button(
+            icon: action.icon,
+            tooltip: action.tooltip,
+            onPressed: action.onPressed,
+          ),
+        button(
+          icon: allSelected ? Icons.deselect : Icons.select_all,
           tooltip: allSelected ? 'Deselect all' : 'Select all',
-          onPressed: allSelected ? onClose : onSelectAll,
+          onPressed: allSelected ? onDeselectAll : onSelectAll,
         ),
-        ...actions,
-        IconButton(
-          icon: const Icon(Icons.delete_outline, color: AppColors.danger),
+        button(
+          icon: Icons.delete_outline,
           tooltip: 'Delete',
           onPressed: onDelete,
+          background: AppColors.danger,
+          foreground: AppColors.background,
         ),
       ],
     );

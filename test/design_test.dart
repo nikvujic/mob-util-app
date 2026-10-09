@@ -272,6 +272,41 @@ void main() {
     await check('Milk');
   });
 
+  testWidgets('selection actions sit in the lower right, in thumb reach',
+      (tester) async {
+    await seed(await pumpApp(tester));
+    await tester.pump();
+    final screen = tester.getSize(find.byType(MaterialApp));
+
+    for (final (tab, item) in [('Notes', 'Groceries'), ('Shop', 'Milk')]) {
+      await openTab(tester, tab);
+      await tester.longPress(find.text(item));
+      await tester.pumpAndSettle();
+
+      for (final tooltip in ['Select all', 'Delete']) {
+        final button = tester.getCenter(find.byTooltip(tooltip));
+        expect(button.dx, greaterThan(screen.width / 2), reason: tooltip);
+        expect(button.dy, greaterThan(screen.height * 0.75), reason: tooltip);
+        expect(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byTooltip(tooltip),
+          ),
+          findsNothing,
+          reason: '$tooltip is not at the top any more',
+        );
+      }
+      // Delete is the rightmost.
+      expect(
+        tester.getCenter(find.byTooltip('Delete')).dx,
+        greaterThan(tester.getCenter(find.byTooltip('Select all')).dx),
+      );
+
+      await tester.tap(find.byTooltip('Cancel selection'));
+      await tester.pumpAndSettle();
+    }
+  });
+
   group('touch feedback', () {
     /// Presses (without releasing) on [target] inside the row showing
     /// [text], and returns the layer the row's ripple is drawn on.
