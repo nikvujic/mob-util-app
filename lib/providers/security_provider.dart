@@ -88,6 +88,12 @@ class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
     }
   }
 
+  /// Puts [verifier] in place as is, without any checks: only for restoring
+  /// a backup (adopting its master password) and undoing that.
+  void restore(PasswordVerifier? verifier) {
+    state = verifier;
+  }
+
   /// Removes the master password. Throws [WrongPasswordException] if
   /// [current] is wrong, or [LockedDataException] if locked data can't be
   /// unlocked first (and then keeps the password).

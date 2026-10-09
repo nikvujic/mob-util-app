@@ -104,6 +104,36 @@ void main() {
         'PIN 4711\nšifra: žuta ćuprija',
       );
     });
+
+    /// The locked note of a v2 backup opens with the key in its record.
+    Future<void> expectLockedNoteOpens(Backup backup) async {
+      final record = backup.masterPassword!;
+      final dataKey = (await record.unwrapDataKey(
+        (await record.unlock(password))!,
+      ))!;
+      final locked = backup.notes.singleWhere((n) => n.isLocked);
+      expect(
+        await NotesNotifier.openContent(locked, dataKey),
+        'PIN 4711\nšifra: žuta ćuprija',
+      );
+    }
+
+    test('plain backup restores; its locked note opens', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v2/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.notes.map((n) => n.title), ['Groceries', 'Bank 🔒']);
+      expect(file.backup.shopItems, hasLength(2));
+      await expectLockedNoteOpens(file.backup);
+    });
+
+    test('encrypted backup opens; its locked note opens', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v2/backup-encrypted.json').readAsStringSync(),
+      ) as EncryptedBackupFile;
+      expect(await file.open('wrong'), isNull);
+      await expectLockedNoteOpens((await file.open(password))!);
+    });
   });
 
   test('a file from a newer format is kept aside, not misread', () async {
@@ -137,6 +167,10 @@ void main() {
           '60a13aad885197272595c40c3ff4b9dec427abe0db9c9c47ba6fa9467c9522de',
       'test/fixtures/v1/storage/shop.json':
           '7188622d7ea03d5c34f3215938067caf037f3085d17d252c173585420e4b0c6b',
+      'test/fixtures/v2/backup-encrypted.json':
+          '3506088d05c89d7a56ad408e4cd0b0e063ec5929c26841cb76633bef8f83a39c',
+      'test/fixtures/v2/backup-plain.json':
+          'dd8e5281208d99ba28c63a85f6f32d28af3441c94e7ceb577c673005e35c349f',
       'test/fixtures/v2/storage/notes.json':
           '551f9ec617ceb9cf43e39e113c49bc993347433187abb956733f52655c92d535',
       'test/fixtures/v2/storage/security.json':

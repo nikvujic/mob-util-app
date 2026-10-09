@@ -1,0 +1,20 @@
+{
+  "format": "the-app-backup",
+  "version": 2,
+  "createdAt": "2026-10-09T08:00:00.000Z",
+  "appVersion": "0.12.0 (13)",
+  "encrypted": true,
+  "kdf": {
+    "algorithm": "argon2id",
+    "memoryKiB": 19456,
+    "iterations": 2,
+    "parallelism": 1,
+    "salt": "G2ae25g7J4OG6ExywQqdrw=="
+  },
+  "sealed": {
+    "cipher": "aes-256-gcm",
+    "nonce": "J2amGBbDJBD6ukoK",
+    "cipherText": "MNcdJVGHqsg3XckC/9Ot0SoAP6NFpfwA38FP3VYbn1ZcdLQFjyTcei6cQ7rneTku6xPkMoJuPqqrt+1LBc7ThZ0b6Cai1uC+jg1bl2G+xljllxWIW0C8jwv8k3E5mecJwz5K/zkJrEdWuLcdOeGoeqwG1A6zuUcNXfS6+qXhmiHniCy7q33z/29srHSXvbPLRMYclz0GCiGjFj25e02Ol/U2SrYBT4pm3FD8sAADLdUKRyf8OzSir4bFNka154lTL8cfzEpQ3mb2qeXb1/lU/MP+Vght5Rmlh1UjPaEP09fxuWxok7wqjnUnHJIkPtMjTNNAXXXyBM+PxvdiSlHLGGwE05MDsE8/RRcfBH8CgDkfSV/hA1lTqSAo0JSxx8vP7EJuZ6G4aQ3t1R8+bCZpnvDpBjGWY9IH9I5aep9/ODpfCKxrdKMNBIE5gpX/zyTc1Y5K6HrJN6Y7IgYYgCw9pTjNd4cjHbeRyt7rhmpX1l+ZPa+J8X2W9g1qRYZIjCGOotxRBb68s4jC1kicLhKVOlHe509mn63yDJ84ZUD7MSgUBc2TmFkfIcjpa7lVbZwXj4IDXT3DqbXzCNubhTMUE4ESSN4fTR9MBKvL35TvbVtpts64wzdkrARzOXpCQ6H3uT3UMu7IpPIi7Z1urRpsPnNyFEVgOWTE/LQ5wk5Y5mPJe6qQ86SWYbU8gMbqWc5HcM7kECX6fiFpQIhl93uZM8FgTIRz2vALsXbT5P2TZopoqEErHSWZ8svzL4wAhTq0E0RNFajlPshgZ1VDxRBRSwOPR1dV2i+oR6w+9NgMv4PxsWPmWPQh146/bpMItrcdEIE/9twRd14CyMysT6amUGaeIKcd4FCzsFZx7cpmMYzHCvu8RJQmfJBlNKunf6NAKndIGwJiLEFbYiCUvyNtiC/4O+tkqjxa8bJAZl6qL7b8XKroeJB5NcYP5wGIpRLElXVU2Zwwx3kFFRWBqg1oU4DvaostYdfC0vRPr6jWXYVFe/bhrS+dDktBIzSEODpH+9j/Q4oUcz+8sPooKXFXsziHFjmOwroTl8t3QOWbTZNbUPIHehidJSkeQY8gnsegIfwVotUPBHDNk4RqOsAZAp3DW/impEMi7NDAo0nFH8JcG6VVaAZ3vS66Q7JGjRXsFnKyhgGOXiebJ/eeGDZAtJIVdcidtI5N5JTuGM/loE0vKQO55+g3OMrcEyxbMLrfTZOTkJWwP8E+KknA3wGEtHL9U03q/DzFXJm0ikXSTaBiN/aVNF+6y+T4XasLoigEKVyTtfYNybqYU0M7qZxqBT4OqQKWM74d00ownzVmm3XjqAxQQU/cPZQPeXTsFNrK+xf/MxlN4IICGdssQkk0ayoJ++Es/3XwBD9Y8RfPY8OMi4i4s6rzvgOCrlZulA0r5gGBdfLKR9qR0Y+ISqMO4tUq1pBO55o30v02hnqcQYqbB9GrpaBPZjj+lCAA9WJ/kCPo9mdqo+iwM1YmFD7C5KiJdvfGX3VqavGgsT+FQ+0P/V3bLQ==",
+    "mac": "x6c2V0/4zI3Gv09myHTgKw=="
+  }
+}

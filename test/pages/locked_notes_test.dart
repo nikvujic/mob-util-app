@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/app_info.dart';
+import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -28,9 +32,10 @@ void main() {
     List<String> titles = const ['Bank'],
     bool withPassword = true,
     bool locked = false,
+    FakeBackupFiles? files,
   }) async {
     now = DateTime(2026, 10, 8, 12);
-    container = await pumpApp(tester, clock: () => now);
+    container = await pumpApp(tester, clock: () => now, backupFiles: files);
     for (final title in titles.reversed) {
       notes().addNote(title: title, content: '$title text');
     }
@@ -343,5 +348,59 @@ void main() {
     expect(find.text('Master password removed'), findsOneWidget);
     expect(note('Bank').isLocked, isFalse);
     expect(note('Bank').content, 'Bank text');
+  });
+
+  testWidgets("restoring another phone's locked notes asks for its password",
+      (tester) async {
+    const oldPassword = 'old phone password';
+    // A backup from another phone, with a locked note.
+    final oldFiles = FakeBackupFiles();
+    final old = ProviderContainer(
+      overrides: [
+        appStorageProvider.overrideWithValue(AppStorage.inMemory()),
+        appVersionProvider.overrideWithValue('1'),
+        backupFilesProvider.overrideWithValue(oldFiles),
+      ],
+    );
+    addTearDown(old.dispose);
+    await tester.runAsync(() async {
+      await old.read(securityProvider.notifier).setPassword(oldPassword);
+      final keys = await old.read(sessionProvider.notifier).unlock(oldPassword);
+      final id = old
+          .read(notesProvider.notifier)
+          .addNote(title: 'Old bank', content: 'old PIN');
+      await old.read(notesProvider.notifier).lockNote(id, keys!.dataKey);
+      await old.read(backupExporterProvider).export();
+    });
+
+    await start(
+      tester,
+      files: FakeBackupFiles()..toPick = oldFiles.saved.single.bytes,
+    );
+    await openMenu(tester);
+    await tester.tap(find.text('Backup'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Import from file'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1 note (1 locked)'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Restore'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Locked notes'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('promptPassword')), password);
+    await tester.tap(find.text('OK'));
+    await settleBusy(tester);
+    expect(find.text('Wrong password'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('promptPassword')),
+      oldPassword,
+    );
+    await tester.tap(find.text('OK'));
+    await settleBusy(tester);
+
+    expect(find.text('Backup restored'), findsOneWidget);
+    expect(note('Old bank').isLocked, isTrue);
+    expect(await readLocked('Old bank'), 'old PIN', reason: 'our key');
   });
 }

@@ -13,6 +13,7 @@ app still reads every version, so an update can never lose existing data.
   (encrypted with `fixture password`).
 - `v2/storage/` — as v1, plus a **locked note** (`Bank 🔒`, content sealed
   with the data key) and the master password record holding that data
-  key, wrapped (password: `fixture password`). Backup files for v2 are
-  added once the backup layout for locked notes is final (roadmap 12e,
-  same release).
+  key, wrapped (password: `fixture password`).
+- `v2/backup-plain.json`, `v2/backup-encrypted.json` — backups of the v2
+  sample, including the locked note (still encrypted) and the master
+  password record its key needs (password: `fixture password`).

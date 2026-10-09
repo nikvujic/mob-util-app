@@ -134,7 +134,7 @@ void main() {
 
     test('can be undone', () async {
       final undo = await importer().restore(restorable());
-      await importer().undo(undo);
+      await importer().undo(undo!);
 
       expect(noteTitles(), ['Current']);
       expect(itemNames(), ['Bread']);

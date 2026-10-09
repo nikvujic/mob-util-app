@@ -82,6 +82,12 @@ write and waits until it's on disk; only then is the password removed. If
 any note doesn't open, nothing changes. A crash at any point leaves either
 the password or plain notes, never locked notes without a password.
 
+Backups keep locked notes sealed and carry the master password record
+(as in `security.json`) that holds their key. Restoring on a phone without
+a master password adopts that record (saved before the notes); otherwise
+the notes are opened with this phone's key or the backup's, and re-sealed
+under this phone's.
+
 The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.

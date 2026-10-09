@@ -22,8 +22,14 @@ class BackupFormatException implements Exception {
 ///       "version": 2,
 ///       "createdAt": "2026-10-08T07:30:00.000Z",
 ///       "appVersion": "0.7.0 (8)",
-///       "data": { "notes": [...], "shopItems": [...] }
+///       "data": { "notes": [...], "shopItems": [...],
+///                 "masterPassword": {...} }
 ///     }
+///
+/// `masterPassword` (since version 2) is only there if some notes are
+/// locked: it's the master password record (as in `security.json`), which
+/// holds the key of the locked notes, itself encrypted with the password.
+/// Locked notes stay encrypted in every backup, plain or not.
 ///
 /// An encrypted backup keeps the same header but replaces `data` with the
 /// whole plain document, sealed with a key from the master password:
@@ -52,11 +58,15 @@ class Backup {
   final List<Note> notes;
   final List<ShopItem> shopItems;
 
+  /// The master password record the locked notes need, if any are locked.
+  final PasswordVerifier? masterPassword;
+
   const Backup({
     required this.createdAt,
     required this.appVersion,
     required this.notes,
     required this.shopItems,
+    this.masterPassword,
   });
 
   /// Suggested file name, e.g. `the-app-backup-2026-10-08-0930.json` or
@@ -80,6 +90,8 @@ class Backup {
         'data': {
           'notes': [for (final n in notes) n.toJson()],
           'shopItems': [for (final i in shopItems) i.toJson()],
+          if (masterPassword != null)
+            'masterPassword': masterPassword!.toJson(),
         },
       };
 
@@ -153,6 +165,11 @@ class Backup {
           for (final i in data['shopItems'] as List<dynamic>)
             ShopItem.fromJson(i as Map<String, dynamic>),
         ],
+        masterPassword: data['masterPassword'] == null
+            ? null
+            : PasswordVerifier.fromJson(
+                data['masterPassword'] as Map<String, dynamic>,
+              ),
       );
     } on Object {
       // Wrong types, missing fields, bad dates: all mean a damaged file.
@@ -218,7 +235,15 @@ class EncryptedBackupFile extends BackupFile {
 
   /// The backup inside, or null if [password] is wrong. Throws
   /// [BackupFormatException] if the decrypted contents are damaged.
-  Future<Backup?> open(String password) async {
+  Future<Backup?> open(String password) async =>
+      (await openWithKey(password))?.backup;
+
+  /// Like [open], but also returns the key derived from [password]: it
+  /// usually also opens the backup's [Backup.masterPassword] record, as the
+  /// backup was encrypted with that password's key.
+  Future<({Backup backup, PasswordKey key})?> openWithKey(
+    String password,
+  ) async {
     final key = await PasswordKey.derive(password, _kdf);
     final List<int> plain;
     try {
@@ -226,6 +251,7 @@ class EncryptedBackupFile extends BackupFile {
     } on DecryptionException {
       return null;
     }
-    return Backup.decode(utf8.decode(plain, allowMalformed: true));
+    final backup = Backup.decode(utf8.decode(plain, allowMalformed: true));
+    return (backup: backup, key: key);
   }
 }

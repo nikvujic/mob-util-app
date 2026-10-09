@@ -39,8 +39,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D1 | **Export** all data (notes, shop, planner, counters, settings needed to read locked data) to one JSON file the user saves anywhere (Downloads, Drive, …) via the Android file picker / share sheet. File name includes the date. | 🚧 notes and shop exported; planner and counters join when they exist |
 | D2 | **Import** a previously exported file: validated first (format, version), shows what it contains, and asks for confirmation before **replacing** current data. Invalid files are rejected without touching current data. | ✅ with Undo right after restoring |
 | D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | ✅ |
-| D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ⏳ |
-| D4 | Export files carry a format version; newer app versions can always import older exports. | 🚧 files carry a format version and newer ones are rejected with a clear message; app data v1 and v2 are read in tests from frozen samples; v2 backups follow with locked-note backups (D3) |
+| D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ✅ the backup carries the key, encrypted with the password; restoring adopts the backup's master password, or re-locks the notes under this phone's |
+| D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of v1 and v2 are read in tests from frozen samples |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). | 💭 not now |
 
 ## N — Notes

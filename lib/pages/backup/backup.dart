@@ -122,6 +122,47 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     );
   }
 
+  /// Runs [ask] (a prompt during restoring) without the busy indicator:
+  /// the app is waiting for the user then, not working.
+  Future<T?> _asking<T>(Future<T?> Function() ask) async {
+    if (!mounted) return null;
+    setState(() => _importing = false);
+    try {
+      return await ask();
+    } finally {
+      if (mounted) setState(() => _importing = true);
+    }
+  }
+
+  /// Restoring locked notes on a locked app: unlock it first.
+  Future<DataKey?> _askThisAppKey() => _asking(() async {
+        final keys = await showPasswordPrompt<UnlockedKeys>(
+          context,
+          title: 'Unlock',
+          message: 'This backup has locked notes. Enter your master password '
+              'to restore them.',
+          confirmLabel: 'Unlock',
+          attempt: ref.read(sessionProvider.notifier).unlock,
+        );
+        return keys?.dataKey;
+      });
+
+  /// Locked notes from another master password: ask for that one.
+  Future<DataKey?> _askBackupKey(PasswordVerifier record) =>
+      _asking(() => showPasswordPrompt<DataKey>(
+            context,
+            title: 'Locked notes',
+            message:
+                "This backup's locked notes use a different master password. "
+                'Enter the master password the backup was made with; they will '
+                'then open with your current one.',
+            confirmLabel: 'OK',
+            attempt: (password) async {
+              final key = await record.unlock(password);
+              return key == null ? null : record.unwrapDataKey(key);
+            },
+          ));
+
   Future<void> _import() async {
     final importer = ref.read(backupImporterProvider);
 
@@ -156,7 +197,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       context,
       title: 'Restore this backup?',
       message: 'Made ${formatDateTime(backup.createdAt)}\n'
-          '${countOf(backup.noteCount, 'note', 'notes')} · '
+          '${countOf(backup.noteCount, 'note', 'notes')}'
+          '${backup.lockedNoteCount > 0 ? ' (${backup.lockedNoteCount} locked)' : ''}'
+          ' · '
           '${countOf(backup.shopItemCount, 'shop item', 'shop items')}\n\n'
           'This replaces all notes and shop items currently in the app.',
       confirmLabel: 'Restore',
@@ -166,15 +209,24 @@ class _BackupPageState extends ConsumerState<BackupPage> {
 
     setState(() => _importing = true);
     try {
-      final previous = await importer.restore(backup);
-      if (!mounted) return;
+      final previous = await importer.restore(
+        backup,
+        thisAppKey: _askThisAppKey,
+        backupKey: _askBackupKey,
+      );
+      if (previous == null || !mounted) return;
       _showMessage(
-        'Backup restored',
+        previous.adoptedMasterPassword
+            ? "Backup restored. Its master password is now this app's "
+                'master password.'
+            : 'Backup restored',
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () => importer.undo(previous),
         ),
       );
+    } on ImportException catch (e) {
+      if (mounted) _showMessage(e.message);
     } catch (e, st) {
       debugPrint('Restore failed: $e\n$st');
       if (mounted) _showMessage("Couldn't restore the backup.");

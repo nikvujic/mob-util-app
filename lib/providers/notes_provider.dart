@@ -73,7 +73,21 @@ class NotesNotifier extends StateNotifier<List<Note>> {
 
   /// The text of [note]: as is, or decrypted with [key] if it's locked.
   /// Throws [DecryptionException] if [key] can't open it.
-  Future<String> readContent(Note note, DataKey key) async {
+  Future<String> readContent(Note note, DataKey key) => openContent(note, key);
+
+  /// [note] locked with [key], holding [content]. Used to move locked notes
+  /// from a backup under this app's key.
+  static Future<Note> lockedCopy(Note note, String content, DataKey key) async {
+    final box = await seal(
+      utf8.encode(content),
+      key,
+      context: sealContext(note.id),
+    );
+    return note.locked(box.toJson());
+  }
+
+  /// See [readContent]; usable without a notifier.
+  static Future<String> openContent(Note note, DataKey key) async {
     final sealed = note.lockedContent;
     if (sealed == null) return note.content;
     final SealedBox box;

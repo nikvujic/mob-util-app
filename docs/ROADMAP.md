@@ -99,7 +99,7 @@ Small fixes, not urgent; can go out together as one polish release.
 11. [x] **Session unlock (L4)** — unlock once; stays unlocked through short
     trips to other apps; locks after 5 min in the background, on app close,
     or "Lock now". Encrypted export then needs no typing while unlocked.
-12. [~] **Lock notes (N6, N7, D3)** — in sub-steps. Design: *envelope
+12. [x] **Lock notes (N6, N7, D3)** — in sub-steps. Design: *envelope
     encryption* — a random **data key** encrypts locked notes; the master
     password only wraps that key (in `security.json`). Changing the
     password re-wraps one key in one atomic write, so a crash can never
@@ -122,8 +122,9 @@ Small fixes, not urgent; can go out together as one polish release.
     - [x] 12d Removing the master password unlocks all locked notes first
       (the form says how many). All are opened before anything changes and
       saved before the password goes; if one doesn't open, nothing changes.
-    - [ ] 12e Backups with locked notes: carry the wrapped data key;
+    - [x] 12e Backups with locked notes: carry the wrapped data key;
       import re-seals under this phone's key (or adopts it if none).
+      v2 backup fixtures frozen.
 
 - [ ] After 12e: **explain to Nikola in plain terms** how locked notes
   work (what's encrypted, what the password protects, what backups
