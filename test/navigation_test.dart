@@ -140,13 +140,12 @@ void main() {
     expect(find.text('Press back again to exit'), findsNothing);
   });
 
-  testWidgets('Planner opens on today; Other shows its placeholder',
-      (tester) async {
+  testWidgets('Planner opens on today; Other lists its tools', (tester) async {
     await pumpApp(tester);
     await openTab(tester, 'Planner');
     expect(find.textContaining('Today · '), findsOneWidget);
     await openTab(tester, 'Other');
-    expect(find.text('More tools are coming soon'), findsOneWidget);
+    expect(find.text('Counters'), findsOneWidget);
   });
 
   testWidgets('a hidden tab in selection mode does not block back',

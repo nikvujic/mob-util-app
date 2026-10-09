@@ -11,6 +11,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -41,6 +42,9 @@ Future<void> seed(ProviderContainer container) async {
     ..addTask(today, 'Gym')
     ..addTask(today, 'Call the bank');
   planner.toggleDone(container.read(plannerProvider).first.id);
+  container.read(countersProvider.notifier)
+    ..add('Push-ups')
+    ..add('Glasses of water');
 }
 
 /// A fake file picker that returns a small backup when importing.
@@ -113,6 +117,18 @@ void main() {
         await t.pumpAndSettle();
       },
       'other': (t) => openTab(t, 'Other'),
+      'counters': (t) async {
+        await openTab(t, 'Other');
+        await t.tap(find.text('Counters'));
+        await t.pumpAndSettle();
+      },
+      'counters selection mode': (t) async {
+        await openTab(t, 'Other');
+        await t.tap(find.text('Counters'));
+        await t.pumpAndSettle();
+        await t.longPress(find.text('Push-ups'));
+        await t.pumpAndSettle();
+      },
       'menu': openMenu,
       'backup': (t) async {
         await openMenu(t);
@@ -449,6 +465,11 @@ void main() {
     await tester.pump();
     await openTab(tester, 'Shop');
     await openTab(tester, 'Planner');
+    await openTab(tester, 'Other');
+    await tester.tap(find.text('Counters'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await openTab(tester, 'Notes');
     // Layout overflow would have been reported as an exception.
     expect(tester.takeException(), isNull);

@@ -100,8 +100,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | 🚧 tab exists, no tools yet |
-| O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ⏳ |
+| O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
+| O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode |
 
 ---
 
