@@ -30,6 +30,9 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app — after a confirming second press: the first shows *Press back again to exit*, a second within 2 s exits. Back first closes an open menu or leaves selection mode. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
 | G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | ✅ |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
+| G11 | **Actions at the bottom, on the hand's side.** Top bars carry no action buttons except the menu (☰) — page actions are round buttons at the bottom, like selection mode. They sit on the side of the hand in use: bottom right after tapping the right half of the screen (e.g. opening a note from the right side), bottom left after the left half. Content can always scroll clear of them. | ⏳ (round 3) |
+| G12 | **Themes:** Menu → **Themes** page to switch the app's look. The app must first get its colours from a theme instead of fixed constants. | ⏳ (round 3) |
+| G13 | **Back to a section = back to its top:** going to a section (tapping it in the bottom bar) clears any pulled-down space, so the list sits at its normal top. | ⏳ (round 3) |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
 ## D — Data safety: export / import
@@ -56,6 +59,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ✅ an open locked note closes (saved) when the app locks |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ✅ **Remove lock** in the editor menu and selection mode, with confirmation |
 | N8 | **Undo / redo while typing** (e.g. undo a paste), step by step. | 💭 later |
+| N10 | **Editor actions at the bottom (G11):** ↶ *Discard changes* and the ⋮ menu move from the top bar to bottom buttons on the hand's side. *Discard* gets a different icon: ↶ is kept for real undo (N8). The text area scrolls clear of the buttons. | ⏳ (round 3) |
 | N9 | **Markdown** formatting in notes. Details to be decided with Nikola. | 💭 later |
 
 ## L — Security: master password & locking
@@ -86,6 +90,9 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P1 | Tab renamed to **Planner**. | ✅ |
 | P2 | v1 (Nikola's shape): a **to-do list per day**. A scrollable day strip at the bottom picks the day (swipe or tap; today marked, days with tasks dotted); the list above shows that day's tasks; + adds tasks to that day. Tapping a task marks it done (struck through); long-press selects to delete; drag handle reorders. Later: descriptions, editing, moving to another day. | ✅ v1 |
 | P3 | Can be locked as a whole section (L5). | ✅ |
+| P5 | **No Today button** (not needed). | ⏳ (round 3) |
+| P6 | **Day strip shows little of the past:** past days are greyed out and can't be selected; at most the last 3 show, as filler. If an unfinished task is in the past, the strip reaches back to that day (selectable), plus 3 greyed days before it. Future days as now. | ⏳ (round 3) |
+| P7 | **Time blocks** (towards P4, like TimeTune): each day is a timeline; tasks are blocks with a start and an end time, not a checkbox list. A day without tasks shows one big *free time* area. Adding a task starts it at the beginning of free time and ends it 1 hour later; the end can be picked, with quick options 15 / 30 / 60 / 120 min and *end of free time*. Later: colours, notifications, repeating daily. | ⏳ (round 3, needs details) |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | 💭 later |
 
 ## U — UI polish ("fun but practical")
@@ -93,6 +100,9 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | # | Requirement | Status |
 |---|-------------|--------|
 | U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
+| U4 | **Lists snap back to the top:** when scrolling back up after pulling a list down (U3), and only a little empty space is left above the first row, the list settles at its normal top instead of stopping just short. Notes and Shop (all pull-down lists). | ⏳ (round 3) |
+| U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ⏳ (round 3) |
+| U6 | **Counters: vibration and a click sound** on − / +. | ⏳ (round 3) |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 
@@ -101,6 +111,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | # | Requirement | Status |
 |---|-------------|--------|
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
+| O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ⏳ (round 3) |
+| O4 | **"Džoni što ćutiš?"** tool: turns the screen sideways (landscape), shows that text big with a counter under it; holding anywhere on the screen makes it shake and pop and counts up; back leaves (and restores the orientation). | ⏳ (round 3) |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode |
 
 ---

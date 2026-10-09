@@ -171,6 +171,57 @@ After locked notes, before section locks.
     the bottom (Nikola's shape); included in backups (backup format 3).
 15. [x] **Other → Counters (O1, O2).** Included in backups (format 3).
 
+### Round 3 — feedback from using 0.12 (2026-10-09)
+
+Nikola's notes, grouped. Proposed order: small fixes first, then the
+patterns other work builds on (G11, themes), then the bigger features.
+
+**A. Quick fixes**
+- [ ] **U4 Snap back to the top** when scrolling up leaves only a little
+  pulled-down space (all pull-down lists: Notes, Shop, …).
+- [ ] **U5 Drag area a little smaller** (Notes, Shop).
+- [ ] **G13 Going to a section resets its pulled-down space.**
+- [ ] **P5 Remove the planner's Today button.**
+
+**B. Actions at the bottom, on the hand's side (G11)**
+- [ ] Shared bottom action buttons that sit bottom-right or bottom-left
+  depending on which half of the screen was tapped; no action buttons in
+  top bars except ☰.
+- [ ] **N10 Note editor:** Discard (new icon, not ↶) and ⋮ move to the
+  bottom; the text scrolls clear of them.
+- [ ] Apply the side rule to the selection actions too (see questions).
+
+**C. Themes (G12)**
+- [ ] Colours come from the theme (not fixed constants); design checks
+  run on every theme.
+- [ ] Menu → **Themes** page.
+
+**D. Other: tiles, sounds, a new tool**
+- [ ] **O3** Tools as icon tiles from the bottom right.
+- [ ] **U6** Counters: vibration + click sound on − / +.
+- [ ] **O4** "Džoni što ćutiš?" page (landscape, big text, hold to
+  count with shake + pop).
+
+**E. Planner: days and time blocks**
+- [ ] **P6** Day strip: greyed past (max 3), reaching back to the oldest
+  unfinished task.
+- [ ] **P7** Time blocks with free time (needs details first, see
+  questions).
+
+**Open questions (ask before building the part):**
+- G11: does the hand side also apply to selection-mode actions in the
+  lists (side of the long-press)? Do the ✕ in selection mode and the ←
+  on pages like the editor stay in the top bar?
+- O4: one count per hold, or keeps counting while held? Is the count
+  kept (saved) or starts at 0 each time?
+- P7: the day's time range (e.g. 06:00–24:00?); "start of free time" —
+  the first free slot of the day, or the first after now? Can blocks
+  overlap? Is a block still marked done? What happens to the existing
+  v1 tasks (no times) — become blocks at the start of free time?
+- U6: always on, or a switch (sound/vibration) somewhere?
+- G12: which themes to start with (e.g. the current dark green, a pure
+  black/AMOLED one, a light one)?
+
 ## Later / ideas
 
 - Undo / redo while typing in a note, e.g. undo a paste (N8)
