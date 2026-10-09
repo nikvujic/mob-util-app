@@ -110,134 +110,188 @@ void main() {
     });
   });
 
-  group('restoring on a phone without a master password', () {
-    test("takes over the backup's password; the notes open with it", () async {
-      final backup = await exported(await oldPhone());
-      final target = await phone();
+  /// Sets [password] on [phone] after removing [current], if any.
+  Future<void> newPassword(
+    ProviderContainer phone,
+    String password, {
+    String? current,
+  }) async {
+    final security = phone.read(securityProvider.notifier);
+    if (current != null) await security.removePassword(current);
+    await security.setPassword(password);
+    await phone.read(sessionProvider.notifier).unlock(password);
+  }
 
-      final undo = await target.read(backupImporterProvider).restore(backup);
+  /// Whether [password] opens [phone]'s locked "Bank" note.
+  Future<bool> opensBank(ProviderContainer phone, String password) async {
+    final record = phone.read(securityProvider);
+    final key = await record?.unlock(password);
+    if (key == null) return false;
+    final dataKey = (await record!.unwrapDataKey(key))!;
+    return await NotesNotifier.openContent(noteOf(phone, 'Bank'), dataKey) ==
+        'PIN 4711';
+  }
 
-      expect(undo!.adoptedMasterPassword, isTrue);
-      final keys =
-          await target.read(sessionProvider.notifier).unlock(oldPhonePassword);
-      expect(keys, isNotNull);
-      expect(
-        await NotesNotifier.openContent(noteOf(target, 'Bank'), keys!.dataKey),
-        'PIN 4711',
-      );
+  // Every case for both kinds of backup: locked notes travel the same way
+  // in each; an encrypted one only needs a password to open the file, and
+  // that password is then reused instead of asked again.
+  for (final encrypted in [false, true]) {
+    final kind = encrypted ? 'encrypted' : 'plain';
+
+    /// How often restoring asks for the backup's password when its locked
+    /// notes don't fit this phone.
+    final expectedPrompts = encrypted ? 0 : 1;
+
+    Future<RestorableBackup> backupOf(ProviderContainer from) =>
+        exported(from, encrypted: encrypted);
+
+    group('$kind backup, on a phone without a master password', () {
+      test("takes over the backup's password; the notes open with it",
+          () async {
+        final backup = await backupOf(await oldPhone());
+        final target = await phone();
+
+        final undo = await target.read(backupImporterProvider).restore(
+              backup,
+              backupKey: answering(oldPhonePassword),
+            );
+
+        expect(undo!.adoptedMasterPassword, isTrue);
+        expect(backupPrompts, 0);
+        expect(await opensBank(target, oldPhonePassword), isTrue);
+        expect(noteOf(target, 'Plain').content, 'plain text');
+      });
+
+      test('changing that password afterwards keeps the notes readable',
+          () async {
+        final backup = await backupOf(await oldPhone());
+        final target = await phone();
+        await target.read(backupImporterProvider).restore(backup);
+
+        await target
+            .read(securityProvider.notifier)
+            .changePassword(oldPhonePassword, newPhonePassword);
+
+        expect(await opensBank(target, newPhonePassword), isTrue);
+        expect(await opensBank(target, oldPhonePassword), isFalse);
+      });
+
+      test('undo also takes the password away again', () async {
+        final backup = await backupOf(await oldPhone());
+        final target = await phone();
+        target.read(notesProvider.notifier).addNote(title: 'Before');
+        final importer = target.read(backupImporterProvider);
+
+        await importer.undo((await importer.restore(backup))!);
+
+        expect(target.read(securityProvider), isNull);
+        expect(target.read(notesProvider).single.title, 'Before');
+      });
     });
 
-    test('undo also takes the password away again', () async {
-      final backup = await exported(await oldPhone());
-      final target = await phone();
-      target.read(notesProvider.notifier).addNote(title: 'Before');
-      final importer = target.read(backupImporterProvider);
+    group('$kind backup, on the phone it was made on', () {
+      test('with the same password: asks nothing', () async {
+        final old = await oldPhone();
+        final backup = await backupOf(old);
+        old.read(notesProvider.notifier).replaceAll(const []);
 
-      await importer.undo((await importer.restore(backup))!);
+        await old.read(backupImporterProvider).restore(
+              backup,
+              backupKey: answering(oldPhonePassword),
+            );
 
-      expect(target.read(securityProvider), isNull);
-      expect(target.read(notesProvider).single.title, 'Before');
-    });
-  });
+        expect(backupPrompts, 0);
+        expect(await opensBank(old, oldPhonePassword), isTrue);
+      });
 
-  group('restoring on a phone with a master password', () {
-    test('a backup from the same phone needs no other password', () async {
-      final old = await oldPhone();
-      final backup = await exported(old);
-      old.read(notesProvider.notifier).replaceAll(const []);
+      test('after changing the password: asks nothing, opens with the new',
+          () async {
+        final old = await oldPhone();
+        final backup = await backupOf(old);
+        await old
+            .read(securityProvider.notifier)
+            .changePassword(oldPhonePassword, newPhonePassword);
+        await old.read(sessionProvider.notifier).unlock(newPhonePassword);
 
-      await old.read(backupImporterProvider).restore(
-            backup,
-            backupKey: answering(oldPhonePassword),
-          );
+        await old.read(backupImporterProvider).restore(
+              backup,
+              backupKey: answering(oldPhonePassword),
+            );
 
-      expect(backupPrompts, 0);
-      expect(
-        await NotesNotifier.openContent(noteOf(old, 'Bank'), keyOf(old)),
-        'PIN 4711',
-      );
-    });
+        expect(backupPrompts, 0, reason: 'a change keeps the note key');
+        expect(await opensBank(old, newPhonePassword), isTrue);
+      });
 
-    test('asks to unlock this phone first if it is locked', () async {
-      final old = await oldPhone();
-      final backup = await exported(old);
-      old.read(sessionProvider.notifier).lock();
-      var asked = 0;
+      test('after removing it and setting a new one: opens with the new',
+          () async {
+        final old = await oldPhone();
+        final backup = await backupOf(old);
+        await newPassword(old, newPhonePassword, current: oldPhonePassword);
 
-      await old.read(backupImporterProvider).restore(
-        backup,
-        thisAppKey: () async {
-          asked++;
-          return (await old
-                  .read(sessionProvider.notifier)
-                  .unlock(oldPhonePassword))
-              ?.dataKey;
-        },
-      );
+        await old.read(backupImporterProvider).restore(
+              backup,
+              backupKey: answering(oldPhonePassword),
+            );
 
-      expect(asked, 1);
-      expect(noteOf(old, 'Bank').isLocked, isTrue);
-    });
+        expect(backupPrompts, expectedPrompts, reason: 'a new note key');
+        expect(noteOf(old, 'Bank').isLocked, isTrue);
+        expect(await opensBank(old, newPhonePassword), isTrue);
+      });
 
-    test("another phone's notes are re-locked under this phone's key",
-        () async {
-      final backup = await exported(await oldPhone());
-      final target = await phone(password: newPhonePassword);
+      test('while locked: asks to unlock this phone first', () async {
+        final old = await oldPhone();
+        final backup = await backupOf(old);
+        old.read(sessionProvider.notifier).lock();
+        var asked = 0;
 
-      final undo = await target.read(backupImporterProvider).restore(
-            backup,
-            backupKey: answering(oldPhonePassword),
-          );
+        await old.read(backupImporterProvider).restore(
+          backup,
+          thisAppKey: () async {
+            asked++;
+            return (await old
+                    .read(sessionProvider.notifier)
+                    .unlock(oldPhonePassword))
+                ?.dataKey;
+          },
+        );
 
-      expect(backupPrompts, 1);
-      expect(undo!.adoptedMasterPassword, isFalse);
-      final bank = noteOf(target, 'Bank');
-      expect(bank.isLocked, isTrue);
-      expect(
-        await NotesNotifier.openContent(bank, keyOf(target)),
-        'PIN 4711',
-      );
-      expect(noteOf(target, 'Plain').content, 'plain text');
-      // This phone's password stays.
-      expect(
-        await target.read(securityProvider)!.unlock(newPhonePassword),
-        isNotNull,
-      );
+        expect(asked, 1);
+        expect(await opensBank(old, oldPhonePassword), isTrue);
+      });
     });
 
-    test("an encrypted backup's password is used, not asked again", () async {
-      final backup = await exported(await oldPhone(), encrypted: true);
-      final target = await phone(password: newPhonePassword);
+    group('$kind backup, on another phone with its own password', () {
+      test("re-locks the notes under this phone's password", () async {
+        final backup = await backupOf(await oldPhone());
+        final target = await phone(password: newPhonePassword);
 
-      await target.read(backupImporterProvider).restore(
-            backup,
-            backupKey: answering(oldPhonePassword),
-          );
+        final undo = await target.read(backupImporterProvider).restore(
+              backup,
+              backupKey: answering(oldPhonePassword),
+            );
 
-      expect(backupPrompts, 0);
-      expect(
-        await NotesNotifier.openContent(
-          noteOf(target, 'Bank'),
-          keyOf(target),
-        ),
-        'PIN 4711',
-      );
+        expect(backupPrompts, expectedPrompts);
+        expect(undo!.adoptedMasterPassword, isFalse);
+        expect(await opensBank(target, newPhonePassword), isTrue);
+        expect(noteOf(target, 'Plain').content, 'plain text');
+      });
     });
+  }
 
-    test('cancelling a prompt changes nothing', () async {
-      final backup = await exported(await oldPhone());
-      final target = await phone(password: newPhonePassword);
-      target.read(notesProvider.notifier).addNote(title: 'Mine');
-      final before = target.read(notesProvider);
+  test("a forgotten backup password changes nothing (plain backup)", () async {
+    final backup = await exported(await oldPhone());
+    final target = await phone(password: newPhonePassword);
+    target.read(notesProvider.notifier).addNote(title: 'Mine');
+    final before = target.read(notesProvider);
 
-      final undo = await target.read(backupImporterProvider).restore(
-            backup,
-            backupKey: (_) async => null,
-          );
+    // The prompt keeps saying "Wrong password" until the user cancels.
+    final undo = await target.read(backupImporterProvider).restore(
+          backup,
+          backupKey: answering('not the password'),
+        );
 
-      expect(undo, isNull);
-      expect(identical(target.read(notesProvider), before), isTrue);
-    });
+    expect(undo, isNull);
+    expect(identical(target.read(notesProvider), before), isTrue);
   });
 
   test('locked notes without their key are refused, not restored', () async {
