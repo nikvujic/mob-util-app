@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/json_file_store.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -17,6 +18,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
 ///     <app documents>/data/planner.json {"version": 2, "tasks": [...]}
+///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/settings.json
 ///         {"version": 2, "sectionLocks": ["shop", ...]}
 ///
@@ -33,11 +35,13 @@ class AppStorage {
   final JsonFileStore? _securityStore;
   final JsonFileStore? _settingsStore;
   final JsonFileStore? _plannerStore;
+  final JsonFileStore? _countersStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
   final List<ShopItem> initialShopItems;
   final List<PlannerTask> initialPlannerTasks;
+  final List<Counter> initialCounters;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -50,10 +54,12 @@ class AppStorage {
     this._shopStore,
     this._securityStore,
     this._settingsStore,
-    this._plannerStore, {
+    this._plannerStore,
+    this._countersStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
+    required this.initialCounters,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
   });
@@ -63,13 +69,15 @@ class AppStorage {
     this.initialNotes = const [],
     this.initialShopItems = const [],
     this.initialPlannerTasks = const [],
+    this.initialCounters = const [],
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
   })  : _notesStore = null,
         _shopStore = null,
         _securityStore = null,
         _settingsStore = null,
-        _plannerStore = null;
+        _plannerStore = null,
+        _countersStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -80,6 +88,7 @@ class AppStorage {
     final securityStore = JsonFileStore(File('${dir.path}/security.json'));
     final settingsStore = JsonFileStore(File('${dir.path}/settings.json'));
     final plannerStore = JsonFileStore(File('${dir.path}/planner.json'));
+    final countersStore = JsonFileStore(File('${dir.path}/counters.json'));
 
     return AppStorage._(
       notesStore,
@@ -87,6 +96,7 @@ class AppStorage {
       securityStore,
       settingsStore,
       plannerStore,
+      countersStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -115,6 +125,14 @@ class AppStorage {
         (json) => [
           for (final e in json['tasks'] as List<dynamic>)
             PlannerTask.fromJson(e as Map<String, dynamic>),
+        ],
+      ),
+      initialCounters: await _load(
+        countersStore,
+        [],
+        (json) => [
+          for (final e in json['counters'] as List<dynamic>)
+            Counter.fromJson(e as Map<String, dynamic>),
         ],
       ),
       initialSectionLocks: await _load(settingsStore, const {}, (json) {
@@ -184,6 +202,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveCounters(List<Counter> counters) async {
+    await _countersStore?.write({
+      'version': formatVersion,
+      'counters': [for (final c in counters) c.toJson()],
+    });
+  }
+
   Future<void> saveSectionLocks(Set<AppSection> sections) async {
     await _settingsStore?.write({
       'version': formatVersion,
@@ -201,6 +226,7 @@ class AppStorage {
     await _securityStore?.flush();
     await _settingsStore?.flush();
     await _plannerStore?.flush();
+    await _countersStore?.flush();
   }
 }
 
