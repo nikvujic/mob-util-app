@@ -54,7 +54,7 @@ class _PasswordFieldState extends State<PasswordField> {
       textInputAction:
           widget.last ? TextInputAction.done : TextInputAction.next,
       onSubmitted: widget.last ? (_) => widget.onSubmitted() : null,
-      style: const TextStyle(color: AppColors.textPrimary),
+      style: TextStyle(color: context.colors.textPrimary),
       decoration: InputDecoration(
         labelText: widget.label,
         helperText: widget.helper,

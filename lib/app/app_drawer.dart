@@ -20,23 +20,23 @@ class AppDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Drawer(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
               child: Text(
                 'The App',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
             if (ref.watch(sessionProvider) != null)
               ListTile(
                 leading: const Icon(Icons.lock_outline),
@@ -64,8 +64,8 @@ class AppDrawer extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'Version ${ref.watch(appVersionProvider)}',
-                style: const TextStyle(
-                  color: AppColors.textMuted,
+                style: TextStyle(
+                  color: context.colors.textMuted,
                   fontSize: 12,
                 ),
               ),

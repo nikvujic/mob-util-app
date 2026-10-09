@@ -123,10 +123,12 @@ class _BottomActionsState extends State<BottomActions> {
               // side): no shared hero animation.
               heroTag: null,
               tooltip: action.tooltip,
-              backgroundColor:
-                  action.danger ? AppColors.danger : AppColors.surface,
-              foregroundColor:
-                  action.danger ? AppColors.background : AppColors.textPrimary,
+              backgroundColor: action.danger
+                  ? context.colors.danger
+                  : context.colors.surface,
+              foregroundColor: action.danger
+                  ? context.colors.background
+                  : context.colors.textPrimary,
               onPressed: action.menu != null
                   ? () => _openMenu(context, action)
                   : action.onPressed,

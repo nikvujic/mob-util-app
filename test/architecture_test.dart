@@ -103,7 +103,7 @@ List<String> contentViolations(String path, String source) {
     final line = lines[i];
     if (line.trimLeft().startsWith('//')) continue;
     if (path != themeFile && _rawColor.hasMatch(line)) {
-      violations.add('$path:${i + 1}: raw color — use AppColors '
+      violations.add('$path:${i + 1}: raw color — use context.colors '
           '(lib/$themeFile)');
     }
     if (_print.hasMatch(line)) {
@@ -222,7 +222,7 @@ void main() {
         hasLength(1),
       );
       expect(
-        contentViolations('widgets/w.dart', 'color: AppColors.accent,'),
+        contentViolations('widgets/w.dart', 'color: context.colors.accent,'),
         isEmpty,
       );
       expect(

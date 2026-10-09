@@ -1,19 +1,76 @@
 import 'package:flutter/material.dart';
 
-/// Colors used across the app. Pages should reference these instead of
-/// hard-coding values so the look stays consistent.
-abstract final class AppColors {
-  static const background = Colors.black;
-  static const surface = Color(0xFF212121); // grey[900]
-  static const card = Color(0xFF303030); // grey[850]
-  static const cardSelected = Color(0xFF1E3A24);
-  static const accent = Colors.green;
-  static const danger = Color(0xFFE57373); // red[300]
-  static const textPrimary = Colors.white;
-  static const textSecondary = Color(0xFFBDBDBD); // grey[400]
-  static const textMuted = Colors.white54;
-  static const textHint = Colors.white38;
-  static const divider = Colors.white12;
+/// The colours of one theme. Widgets read the active palette with
+/// `context.colors` instead of hard-coding values, so the look stays
+/// consistent and can be switched (G12).
+@immutable
+class AppPalette extends ThemeExtension<AppPalette> {
+  final Color background;
+  final Color surface;
+  final Color card;
+  final Color cardSelected;
+  final Color menu;
+  final Color accent;
+
+  /// Icons and text on [accent] (e.g. the + button).
+  final Color onAccent;
+  final Color danger;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color textHint;
+
+  /// Unselected items in the bottom bar.
+  final Color inactive;
+  final Color divider;
+
+  const AppPalette({
+    required this.background,
+    required this.surface,
+    required this.card,
+    required this.cardSelected,
+    required this.menu,
+    required this.accent,
+    required this.onAccent,
+    required this.danger,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.textHint,
+    required this.inactive,
+    required this.divider,
+  });
+
+  /// Dark with a green accent: the app's original look.
+  static const green = AppPalette(
+    background: Colors.black,
+    surface: Color(0xFF212121), // grey[900]
+    card: Color(0xFF303030), // grey[850]
+    cardSelected: Color(0xFF1E3A24),
+    menu: Color(0xFF424242),
+    accent: Colors.green,
+    onAccent: Colors.white,
+    danger: Color(0xFFE57373), // red[300]
+    textPrimary: Colors.white,
+    textSecondary: Color(0xFFBDBDBD), // grey[400]
+    textMuted: Colors.white54,
+    textHint: Colors.white38,
+    inactive: Colors.grey,
+    divider: Colors.white12,
+  );
+
+  @override
+  AppPalette copyWith() => this;
+
+  @override
+  AppPalette lerp(AppPalette? other, double t) => t < 0.5 ? this : other!;
+}
+
+/// The active palette: `context.colors.accent`. Outside the app's theme
+/// (e.g. a widget shown on its own in a test) it's the original green one.
+extension AppColorsOf on BuildContext {
+  AppPalette get colors =>
+      Theme.of(this).extension<AppPalette>() ?? AppPalette.green;
 }
 
 /// Shapes used across the app.
@@ -30,21 +87,23 @@ abstract final class AppShapes {
 }
 
 abstract final class AppTheme {
-  static ThemeData get dark {
+  /// The app's look with the colours of [palette].
+  static ThemeData of(AppPalette palette) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.accent,
+      seedColor: palette.accent,
       brightness: Brightness.dark,
     ).copyWith(
-      primary: AppColors.accent,
-      surface: AppColors.surface,
-      error: AppColors.danger,
+      primary: palette.accent,
+      surface: palette.surface,
+      error: palette.danger,
     );
 
     return ThemeData(
       brightness: Brightness.dark,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.background,
-      canvasColor: AppColors.background,
+      extensions: [palette],
+      scaffoldBackgroundColor: palette.background,
+      canvasColor: palette.background,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       // No touch ripples anywhere (Nikola: they get in the way). Buttons
       // keep their brief flat pressed shade.
@@ -52,36 +111,39 @@ abstract final class AppTheme {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
       hoverColor: Colors.transparent,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
+      appBarTheme: AppBarTheme(
+        backgroundColor: palette.surface,
+        foregroundColor: palette.textPrimary,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.accent,
-        foregroundColor: Colors.white,
-        shape: CircleBorder(),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: palette.accent,
+        foregroundColor: palette.onAccent,
+        shape: const CircleBorder(),
       ),
-      popupMenuTheme: const PopupMenuThemeData(color: Color(0xFF424242)),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.surface,
+      popupMenuTheme: PopupMenuThemeData(color: palette.menu),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: palette.surface,
         surfaceTintColor: Colors.transparent,
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? AppColors.accent
+              ? palette.accent
               : Colors.transparent,
         ),
-        side: const BorderSide(color: AppColors.textSecondary, width: 1.5),
+        side: BorderSide(color: palette.textSecondary, width: 1.5),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.accent,
-        unselectedItemColor: Colors.grey,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: palette.surface,
+        selectedItemColor: palette.accent,
+        unselectedItemColor: palette.inactive,
         type: BottomNavigationBarType.fixed,
       ),
     );
   }
+
+  /// The original dark green look.
+  static ThemeData get dark => of(AppPalette.green);
 }

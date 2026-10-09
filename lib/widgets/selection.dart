@@ -237,14 +237,14 @@ class SelectableCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: selected ? AppColors.cardSelected : AppColors.card,
+          color: selected ? context.colors.cardSelected : context.colors.card,
           borderRadius: _radius,
         ),
         // Drawn on top so the highlight never changes the row's size.
         foregroundDecoration: BoxDecoration(
           borderRadius: _radius,
           border: Border.all(
-            color: selected ? AppColors.accent : Colors.transparent,
+            color: selected ? context.colors.accent : Colors.transparent,
           ),
         ),
         child: Material(
@@ -305,9 +305,11 @@ class ReorderOrSelectIndicator extends StatelessWidget {
                     selected
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
-                    color: selected ? AppColors.accent : AppColors.textHint,
+                    color: selected
+                        ? context.colors.accent
+                        : context.colors.textHint,
                   )
-                : const Icon(Icons.drag_handle, color: AppColors.textHint),
+                : Icon(Icons.drag_handle, color: context.colors.textHint),
           ),
         ),
       ),

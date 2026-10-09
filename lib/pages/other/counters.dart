@@ -217,15 +217,15 @@ class _CounterCard extends StatelessWidget {
                       counter.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: context.colors.textSecondary,
                         fontSize: 14,
                       ),
                     ),
                     Text(
                       '${counter.value}',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: context.colors.textPrimary,
                         fontSize: 36,
                         fontWeight: FontWeight.w600,
                       ),

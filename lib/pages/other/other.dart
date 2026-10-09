@@ -17,9 +17,9 @@ class OtherPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.exposure_plus_1),
             title: const Text('Counters'),
-            subtitle: const Text(
+            subtitle: Text(
               'Count anything with big − and + buttons',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.colors.textSecondary),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(

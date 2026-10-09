@@ -266,9 +266,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ListTile(
             leading: const Icon(Icons.save_alt),
             title: const Text('Export all data'),
-            subtitle: const Text(
+            subtitle: Text(
               'Save all your data to a file you choose',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.colors.textSecondary),
             ),
             trailing: _exporting
                 ? const SizedBox.square(
@@ -282,9 +282,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ListTile(
             leading: const Icon(Icons.restore),
             title: const Text('Import from file'),
-            subtitle: const Text(
+            subtitle: Text(
               'Restore all your data from a backup',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.colors.textSecondary),
             ),
             trailing: _importing
                 ? const SizedBox.square(
@@ -294,13 +294,13 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                 : null,
             onTap: _busy ? null : _import,
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16),
             child: Text(
               'Keep a backup somewhere other than this phone, such as Google '
               'Drive, so you can restore your data on a new phone or after '
               'reinstalling the app.',
-              style: TextStyle(color: AppColors.textMuted),
+              style: TextStyle(color: context.colors.textMuted),
             ),
           ),
         ],
@@ -328,9 +328,9 @@ class _ExportKindDialog extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.description_outlined),
             title: const Text('Plain file'),
-            subtitle: const Text(
+            subtitle: Text(
               'Readable in any text editor — by anyone who has the file',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.colors.textSecondary),
             ),
             onTap: () => choose(_ExportKind.plain),
           ),
@@ -343,7 +343,7 @@ class _ExportKindDialog extends StatelessWidget {
               canEncrypt
                   ? 'Only readable with your master password'
                   : 'Set a master password in Security first',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.colors.textSecondary),
             ),
             onTap: () => choose(_ExportKind.encrypted),
           ),

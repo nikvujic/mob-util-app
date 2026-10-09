@@ -29,8 +29,10 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 ## Other rules (also enforced)
 
 - Imports are always `package:the_app/...`, never relative.
-- Colors come from `AppColors` in `core/theme.dart`; no `Colors.*` (except
-  `Colors.transparent`) or `Color(0x…)` anywhere else.
+- Colors come from the active theme's palette (`context.colors`, an
+  `AppPalette` defined in `core/theme.dart`); no `Colors.*` (except
+  `Colors.transparent`) or `Color(0x…)` anywhere else, so every screen
+  follows the chosen theme.
 - No `print()`; use `debugPrint`.
 - A feature that opens another feature's page does it by route name
   (`core/routes.dart`); `app/` maps names to pages, so features still never

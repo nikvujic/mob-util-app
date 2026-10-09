@@ -194,8 +194,8 @@ class _DayHeader extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           '$relative${formatDay(day, today: today)}',
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: context.colors.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -246,10 +246,10 @@ class _TaskTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     color: task.done
-                        ? AppColors.textSecondary
-                        : AppColors.textPrimary,
+                        ? context.colors.textSecondary
+                        : context.colors.textPrimary,
                     decoration: task.done ? TextDecoration.lineThrough : null,
-                    decorationColor: AppColors.textSecondary,
+                    decorationColor: context.colors.textSecondary,
                   ),
                 ),
               ),

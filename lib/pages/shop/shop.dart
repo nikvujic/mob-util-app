@@ -116,7 +116,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                   slivers: [
                     _SectionHeader(title: 'To buy', count: toBuy.length),
                     if (toBuy.isEmpty)
-                      const SliverToBoxAdapter(
+                      SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: 16,
@@ -124,7 +124,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                           ),
                           child: Text(
                             'Nothing to buy',
-                            style: TextStyle(color: AppColors.textMuted),
+                            style: TextStyle(color: context.colors.textMuted),
                           ),
                         ),
                       ),
@@ -171,8 +171,8 @@ class _SectionHeader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
         child: Text(
           '${title.toUpperCase()}  ·  $count',
-          style: const TextStyle(
-            color: AppColors.accent,
+          style: TextStyle(
+            color: context.colors.accent,
             fontSize: 12,
             fontWeight: FontWeight.w600,
             letterSpacing: 1,
@@ -231,8 +231,8 @@ class _ShopItemTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     color: item.toBuy
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                        ? context.colors.textPrimary
+                        : context.colors.textSecondary,
                   ),
                 ),
               ),

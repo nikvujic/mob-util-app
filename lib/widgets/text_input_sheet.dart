@@ -100,10 +100,10 @@ class _TextInputSheetState extends State<TextInputSheet> {
               textCapitalization: TextCapitalization.sentences,
               textInputAction:
                   widget.keepOpen ? TextInputAction.send : TextInputAction.done,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.colors.textPrimary),
               decoration: InputDecoration(
                 hintText: widget.hint,
-                hintStyle: const TextStyle(color: AppColors.textHint),
+                hintStyle: TextStyle(color: context.colors.textHint),
                 border: InputBorder.none,
               ),
               // Keep the keyboard up between entries in keepOpen mode.
@@ -115,7 +115,7 @@ class _TextInputSheetState extends State<TextInputSheet> {
             onPressed: _submit,
             child: Text(
               widget.submitLabel,
-              style: const TextStyle(color: AppColors.accent),
+              style: TextStyle(color: context.colors.accent),
             ),
           ),
         ],

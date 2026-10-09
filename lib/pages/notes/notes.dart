@@ -298,10 +298,10 @@ class _NoteTile extends StatelessWidget {
                 Row(
                   children: [
                     if (note.isLocked) ...[
-                      const Icon(
+                      Icon(
                         Icons.lock_outline,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: context.colors.textSecondary,
                         semanticLabel: 'Locked',
                       ),
                       const SizedBox(width: 6),
@@ -311,8 +311,8 @@ class _NoteTile extends StatelessWidget {
                         note.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: context.colors.textPrimary,
                           fontSize: 16,
                         ),
                       ),
@@ -322,8 +322,8 @@ class _NoteTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   formatDateTime(note.modifiedAt),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: context.colors.textSecondary,
                     fontSize: 12,
                   ),
                 ),

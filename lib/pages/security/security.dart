@@ -68,19 +68,19 @@ class SecurityPage extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.password),
               title: const Text('Set master password'),
-              subtitle: const Text(
+              subtitle: Text(
                 'Protects locked notes and encrypted backups',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: context.colors.textSecondary),
               ),
               onTap: () => _open(context, PasswordFormMode.set),
             )
           else ...[
-            const ListTile(
+            ListTile(
               leading: Icon(Icons.verified_user_outlined),
               title: Text('Master password'),
               subtitle: Text(
                 'On',
-                style: TextStyle(color: AppColors.accent),
+                style: TextStyle(color: context.colors.accent),
               ),
             ),
             ListTile(
@@ -92,7 +92,7 @@ class SecurityPage extends ConsumerWidget {
                     ? 'Locks after 5 minutes in the background or when '
                         'the app is closed'
                     : 'Enter the master password once to unlock everything',
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: context.colors.textSecondary),
               ),
               trailing: TextButton(
                 onPressed: unlocked
@@ -112,25 +112,25 @@ class SecurityPage extends ConsumerWidget {
               onTap: () => _open(context, PasswordFormMode.remove),
             ),
           ],
-          const Divider(color: AppColors.divider),
+          Divider(color: context.colors.divider),
           const _SectionHeader('Section locks'),
           if (!hasPassword)
-            const ListTile(
+            ListTile(
               enabled: false,
               leading: Icon(Icons.lock_outline),
               title: Text('Lock whole sections'),
               subtitle: Text(
                 'Set a master password first',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: context.colors.textSecondary),
               ),
             )
           else ...[
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
                 'A locked section opens only while the app is unlocked. '
                 'It hides the section; for encrypted content, lock notes.',
-                style: TextStyle(color: AppColors.textMuted),
+                style: TextStyle(color: context.colors.textMuted),
               ),
             ),
             for (final section in AppSection.values)
@@ -163,8 +163,8 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title,
-        style: const TextStyle(
-          color: AppColors.accent,
+        style: TextStyle(
+          color: context.colors.accent,
           fontWeight: FontWeight.w600,
         ),
       ),

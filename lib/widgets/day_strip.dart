@@ -99,7 +99,7 @@ class _DayStripState extends State<DayStrip> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.colors.surface,
       child: SafeArea(
         top: false,
         child: SizedBox(
@@ -206,20 +206,20 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final filler = onTap == null;
     final color = filler
-        ? AppColors.textHint
+        ? context.colors.textHint
         : selected
-            ? AppColors.background
+            ? context.colors.background
             : isToday
-                ? AppColors.accent
-                : AppColors.textPrimary;
+                ? context.colors.accent
+                : context.colors.textPrimary;
     final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
       child: Material(
-        color: selected ? AppColors.accent : Colors.transparent,
+        color: selected ? context.colors.accent : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: isToday && !selected
-              ? const BorderSide(color: AppColors.accent)
+              ? BorderSide(color: context.colors.accent)
               : BorderSide.none,
         ),
         child: InkWell(

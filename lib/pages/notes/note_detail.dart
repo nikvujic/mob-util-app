@@ -338,19 +338,19 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.next,
                 onSubmitted: (_) => _contentFocusNode.requestFocus(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Title',
-                  hintStyle: TextStyle(color: AppColors.textHint),
+                  hintStyle: TextStyle(color: context.colors.textHint),
                 ),
               ),
             ),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.colors.divider),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -364,14 +364,14 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: context.colors.textPrimary,
                     fontSize: 16,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Start writing…',
-                    hintStyle: TextStyle(color: AppColors.textHint),
+                    hintStyle: TextStyle(color: context.colors.textHint),
                     // The text ends above the buttons, never behind them.
                     contentPadding: EdgeInsets.only(
                       bottom: BottomActions.contentClearance,

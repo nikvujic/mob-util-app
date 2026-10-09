@@ -18,15 +18,15 @@ class AppDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.colors.surface,
       shape: AppShapes.dialog,
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
       actionsPadding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
       title: Text(
         title,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
+        style: TextStyle(
+          color: context.colors.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
@@ -47,7 +47,7 @@ class DialogMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
+      style: TextStyle(color: context.colors.textSecondary, height: 1.4),
     );
   }
 }
@@ -81,8 +81,8 @@ class DialogButton extends StatelessWidget {
         style: danger
             ? FilledButton.styleFrom(
                 shape: AppShapes.button,
-                backgroundColor: AppColors.danger,
-                foregroundColor: AppColors.background,
+                backgroundColor: context.colors.danger,
+                foregroundColor: context.colors.background,
               )
             : FilledButton.styleFrom(shape: AppShapes.button),
         child: content,
@@ -92,9 +92,10 @@ class DialogButton extends StatelessWidget {
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         shape: AppShapes.button,
-        foregroundColor: danger ? AppColors.danger : AppColors.textPrimary,
+        foregroundColor:
+            danger ? context.colors.danger : context.colors.textPrimary,
         side: BorderSide(
-          color: danger ? AppColors.danger : AppColors.textHint,
+          color: danger ? context.colors.danger : context.colors.textHint,
         ),
       ),
       child: content,
