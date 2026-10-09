@@ -12,6 +12,8 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
 
   void setCounterFeedback(bool on) =>
       state = state.copyWith(counterFeedback: on);
+
+  void countDzoni() => state = state.copyWith(dzoniCount: state.dzoniCount + 1);
 }
 
 final preferencesProvider =

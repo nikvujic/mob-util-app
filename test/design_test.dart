@@ -120,12 +120,17 @@ void main() {
       'other': (t) => openTab(t, 'Other'),
       'counters': (t) async {
         await openTab(t, 'Other');
-        await t.tap(find.text('Counters'));
+        await t.tap(find.byTooltip('Counters'));
+        await t.pumpAndSettle();
+      },
+      'dzoni': (t) async {
+        await openTab(t, 'Other');
+        await t.tap(find.byTooltip('Džoni'));
         await t.pumpAndSettle();
       },
       'counters selection mode': (t) async {
         await openTab(t, 'Other');
-        await t.tap(find.text('Counters'));
+        await t.tap(find.byTooltip('Counters'));
         await t.pumpAndSettle();
         await t.longPress(find.text('Push-ups'));
         await t.pumpAndSettle();
@@ -551,7 +556,7 @@ void main() {
     await openTab(tester, 'Shop');
     await openTab(tester, 'Planner');
     await openTab(tester, 'Other');
-    await tester.tap(find.text('Counters'));
+    await tester.tap(find.byTooltip('Counters'));
     await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();

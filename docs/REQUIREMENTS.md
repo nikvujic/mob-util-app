@@ -111,8 +111,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | # | Requirement | Status |
 |---|-------------|--------|
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
-| O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ⏳ (round 3) |
-| O4 | **"Džoni što ćutiš?"** tool: turns the screen sideways (landscape), shows that text big with a counter under it; holding anywhere on the screen makes it shake and pop and counts up by one; the count is saved for good (a hidden reset/set comes later); back leaves (and restores the orientation). | ⏳ (round 3) |
+| O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ✅ |
+| O4 | **"Džoni što ćutiš?"** tool: turns the screen sideways (landscape), shows that text big with a counter under it; holding anywhere on the screen makes it shake and pop and counts up by one; the count is saved for good (a hidden reset/set comes later); back leaves (and restores the orientation). | ✅ |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode |
 
 ---

@@ -21,7 +21,7 @@ void main() {
       container.read(countersProvider.notifier).add(name);
     }
     await openTab(tester, 'Other');
-    await tester.tap(find.text('Counters'));
+    await tester.tap(find.byTooltip('Counters'));
     await tester.pumpAndSettle();
   }
 
@@ -158,7 +158,7 @@ void main() {
       expect(container.read(preferencesProvider).counterFeedback, isFalse);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Counters'));
+      await tester.tap(find.byTooltip('Counters'));
       await tester.pumpAndSettle();
       final calls = recordFeedback(tester);
 

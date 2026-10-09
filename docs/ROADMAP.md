@@ -210,12 +210,14 @@ patterns other work builds on (G11, themes), then the bigger features.
   No light theme (Nikola).
 
 **D. Other: tiles, sounds, a new tool**
-- [ ] **O3** Tools as icon tiles from the bottom right.
+- [x] **O3** Tools as icon tiles from the bottom right.
 - [x] **U6** Counters: vibration + click sound on − / +, switch in
   Menu → Settings. The click is Android's touch sound (follows the
   phone's *Touch sounds* setting); a bundled sound could come later.
-- [ ] **O4** "Džoni što ćutiš?" page (landscape, big text, hold to
-  count with shake + pop).
+- [x] **O4** "Džoni što ćutiš?" page (landscape, big text, hold to
+  count with shake + pop). The count is kept in preferences.json, so
+  it's not in backups yet: add it with the next backup format change.
+  Later: a hidden way to reset or set the count.
 
 **E. Planner: time blocks**
 - [ ] **P7** Time blocks (details settled, see answers below).
