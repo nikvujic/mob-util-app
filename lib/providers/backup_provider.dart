@@ -7,9 +7,11 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -39,6 +41,7 @@ class BackupExporter {
       notes: notes,
       shopItems: _ref.read(shopProvider),
       plannerTasks: _ref.read(plannerProvider),
+      counters: _ref.read(countersProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -97,6 +100,7 @@ class RestorableBackup {
   int get lockedNoteCount => _backup.notes.where((n) => n.isLocked).length;
   int get shopItemCount => _backup.shopItems.length;
   int get plannerTaskCount => _backup.plannerTasks.length;
+  int get counterCount => _backup.counters.length;
 }
 
 /// A picked backup file: plain (ready) or encrypted (needs its password).
@@ -237,7 +241,7 @@ class BackupImporter {
       security.restore(source.masterPassword);
       await _ref.read(appStorageProvider).flush();
     }
-    await _apply(notes, source.shopItems, source.plannerTasks);
+    await _apply(notes, source.shopItems, source.plannerTasks, source.counters);
     return RestoreUndo._(
       previous,
       previousMasterPassword,
@@ -251,6 +255,7 @@ class BackupImporter {
       undo._previous.notes,
       undo._previous.shopItems,
       undo._previous.plannerTasks,
+      undo._previous.counters,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -319,10 +324,12 @@ class BackupImporter {
     List<Note> notes,
     List<ShopItem> shopItems,
     List<PlannerTask> plannerTasks,
+    List<Counter> counters,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
     _ref.read(plannerProvider.notifier).replaceAll(plannerTasks);
+    _ref.read(countersProvider.notifier).replaceAll(counters);
     await _ref.read(appStorageProvider).flush();
   }
 }

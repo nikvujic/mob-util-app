@@ -102,6 +102,10 @@ void main() {
           ('Zubar (dentist)', DateTime(2026, 10, 13), false),
         ],
       );
+      expect(
+        storage.initialCounters.map((c) => (c.name, c.value)),
+        [('Sklekovi (push-ups)', 42), ('Score', -3)],
+      );
 
       final verifier = storage.initialMasterPassword!;
       final passwordKey = (await verifier.unlock(password))!;
@@ -182,6 +186,17 @@ void main() {
     });
   });
 
+  test('v3 backup with counters restores them', () {
+    final file = BackupFile.parse(
+      File('test/fixtures/v3/backup-with-counters.json').readAsStringSync(),
+    ) as PlainBackupFile;
+    expect(
+      file.backup.counters.map((c) => (c.name, c.value)),
+      [('Sklekovi (push-ups)', 42), ('Score', -3)],
+    );
+    expect(file.backup.plannerTasks, hasLength(2));
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -190,6 +205,7 @@ void main() {
       final file =
           BackupFile.parse(File(path).readAsStringSync()) as PlainBackupFile;
       expect(file.backup.plannerTasks, isEmpty, reason: path);
+      expect(file.backup.counters, isEmpty, reason: path);
     }
   });
 
@@ -228,6 +244,10 @@ void main() {
           '3506088d05c89d7a56ad408e4cd0b0e063ec5929c26841cb76633bef8f83a39c',
       'test/fixtures/v2/backup-plain.json':
           'dd8e5281208d99ba28c63a85f6f32d28af3441c94e7ceb577c673005e35c349f',
+      'test/fixtures/v2/storage/counters.json':
+          'aa7cc75ffd4476327da6f0b82a1f6b06e580777033d159ab45311ad989d09a47',
+      'test/fixtures/v3/backup-with-counters.json':
+          '3caa3fc9fe9a61f7055ee2091c9c658eeb75e392aaaa3e6bca6226318b3428ff',
       'test/fixtures/v2/storage/planner.json':
           'a3928ad12d0fe19977f0f049343a1584ec4b954f67dbb946d9eaa19ac608a57e',
       'test/fixtures/v3/backup-encrypted.json':

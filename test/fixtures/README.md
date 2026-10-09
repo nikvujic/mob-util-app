@@ -21,3 +21,6 @@ app still reads every version, so an update can never lose existing data.
   storage format is still 2: it's a new file).
 - `v3/backup-plain.json`, `v3/backup-encrypted.json` — backups with planner
   tasks, a locked note and its key record (password: `fixture password`).
+- `v2/storage/counters.json`, `v3/backup-with-counters.json` — counters
+  (added with them, before v3 was released; the other v3 backups have
+  none, which v3 allows).

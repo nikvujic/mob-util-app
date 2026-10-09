@@ -12,6 +12,7 @@ import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
+import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -156,6 +157,13 @@ void main() {
     source.read(plannerProvider.notifier).toggleDone(
           source.read(plannerProvider).first.id,
         );
+    source.read(countersProvider.notifier)
+      ..add('Push-ups')
+      ..add('Score');
+    source.read(countersProvider.notifier).step(
+          source.read(countersProvider).last.id,
+          -2,
+        );
     await source.read(backupExporterProvider).export();
 
     final target = containerWith(AppStorage.inMemory());
@@ -175,6 +183,10 @@ void main() {
     expect(
       target.read(plannerProvider).map((t) => t.toJson()),
       source.read(plannerProvider).map((t) => t.toJson()),
+    );
+    expect(
+      target.read(countersProvider).map((c) => c.toJson()),
+      source.read(countersProvider).map((c) => c.toJson()),
     );
   });
 

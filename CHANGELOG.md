@@ -11,6 +11,9 @@ Release with the installable APK.
   bottom to pick a day (today is outlined, days with tasks have a dot);
   + adds tasks to that day; tap a task to tick it off. Long-press to
   select and delete; drag to reorder. Included in backups.
+- **Counters** (Other → Counters): named counters with big − and + buttons.
+  Long-press to rename, reset or delete; drag to reorder. Included in
+  backups.
 - **Section locks** (Menu → Security): switch on a lock for Notes, Shop,
   Planner or Other. While the app is locked, a locked section shows a lock
   screen instead of its content; enter the master password to open it.

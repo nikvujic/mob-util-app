@@ -220,9 +220,10 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           '${backup.lockedNoteCount > 0 ? ' (${backup.lockedNoteCount} locked)' : ''}'
           ' · '
           '${countOf(backup.shopItemCount, 'shop item', 'shop items')} · '
-          '${countOf(backup.plannerTaskCount, 'task', 'tasks')}\n\n'
-          'This replaces all notes, shop items and planner tasks currently '
-          'in the app.',
+          '${countOf(backup.plannerTaskCount, 'task', 'tasks')} · '
+          '${countOf(backup.counterCount, 'counter', 'counters')}\n\n'
+          'This replaces all notes, shop items, planner tasks and counters '
+          'currently in the app.',
       confirmLabel: 'Restore',
       destructive: true,
     );
@@ -266,7 +267,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             leading: const Icon(Icons.save_alt),
             title: const Text('Export all data'),
             subtitle: const Text(
-              'Save notes, shop list and planner to a file you choose',
+              'Save all your data to a file you choose',
               style: TextStyle(color: AppColors.textSecondary),
             ),
             trailing: _exporting
@@ -282,7 +283,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             leading: const Icon(Icons.restore),
             title: const Text('Import from file'),
             subtitle: const Text(
-              'Restore notes, shop list and planner from a backup',
+              'Restore all your data from a backup',
               style: TextStyle(color: AppColors.textSecondary),
             ),
             trailing: _importing

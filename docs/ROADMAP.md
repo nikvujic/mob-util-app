@@ -169,7 +169,7 @@ After locked notes, before section locks.
     need unlocking while a section is locked.
 14. [x] **Planner v1 (P1, P2)** — a to-do list per day with a day strip at
     the bottom (Nikola's shape); included in backups (backup format 3).
-15. [ ] **Other → Counters (O1, O2).**
+15. [x] **Other → Counters (O1, O2).** Included in backups (format 3).
 
 ## Later / ideas
 
