@@ -203,9 +203,11 @@ patterns other work builds on (G11, themes), then the bigger features.
   of the buttons.
 
 **C. Themes (G12)**
-- [ ] Colours come from the theme (not fixed constants); design checks
+- [x] Colours come from the theme (not fixed constants); design checks
   run on every theme.
-- [ ] Menu → **Themes** page.
+- [x] Menu → **Themes** page: Green (original), Black (true black for
+  OLED), Clay (warm greys + clay orange, in the spirit of Claude Code).
+  No light theme (Nikola).
 
 **D. Other: tiles, sounds, a new tool**
 - [ ] **O3** Tools as icon tiles from the bottom right.
@@ -220,6 +222,8 @@ patterns other work builds on (G11, themes), then the bigger features.
 - G11: yes, the side rule also applies to selection actions, and ✕ is
   added to them as the last action. Switching sides mirrors side and
   order.
+- U6: on/off with a switch on a Settings page (Menu → Settings).
+- G12: Green, Black, and one like Claude Code's look; no light theme.
 - O4: one count per hold; the count is saved for good. Later: a hidden
   way to reset or set the count.
 - P7: the timeline covers the whole day, 00:00–24:00. **No + button:**
@@ -233,9 +237,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 - P7: can a block be ticked off as done (like the current checkbox), or
   is a block just a time slot? What happens to today's v1 tasks (no
   times) — become blocks at the start of free time?
-- U6: always on, or a switch (sound/vibration) somewhere?
-- G12: which themes to start with (e.g. the current dark green, a pure
-  black/AMOLED one, a light one)?
+
 
 ## Later / ideas
 

@@ -12,8 +12,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color menu;
   final Color accent;
 
-  /// Icons and text on [accent] (e.g. the + button).
+  /// Icons on [accent] (e.g. the + button).
   final Color onAccent;
+
+  /// Text on [accent] (filled buttons), if the generated one isn't
+  /// readable enough on it.
+  final Color? accentText;
   final Color danger;
   final Color textPrimary;
   final Color textSecondary;
@@ -32,6 +36,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.menu,
     required this.accent,
     required this.onAccent,
+    this.accentText,
     required this.danger,
     required this.textPrimary,
     required this.textSecondary,
@@ -59,11 +64,65 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Colors.white12,
   );
 
+  /// True black (pixels off on OLED screens), with the green accent.
+  static const black = AppPalette(
+    background: Colors.black,
+    surface: Colors.black,
+    card: Color(0xFF161616),
+    cardSelected: Color(0xFF10301A),
+    menu: Color(0xFF1E1E1E),
+    accent: Colors.green,
+    onAccent: Colors.white,
+    danger: Color(0xFFE57373),
+    textPrimary: Colors.white,
+    textSecondary: Color(0xFFBDBDBD),
+    textMuted: Colors.white54,
+    textHint: Colors.white38,
+    inactive: Colors.grey,
+    divider: Color(0x24FFFFFF),
+  );
+
+  /// Warm dark greys with a clay-orange accent, in the spirit of Claude
+  /// Code's look.
+  static const clay = AppPalette(
+    background: Color(0xFF1F1E1D),
+    surface: Color(0xFF262624),
+    card: Color(0xFF30302E),
+    cardSelected: Color(0xFF4A3027),
+    menu: Color(0xFF3A3936),
+    accent: Color(0xFFD97757),
+    onAccent: Colors.white,
+    accentText: Color(0xFF1F1E1D),
+    danger: Color(0xFFF28B82),
+    textPrimary: Color(0xFFFAF9F5),
+    textSecondary: Color(0xFFC2C0B6),
+    textMuted: Color(0xFF9C9A92),
+    textHint: Color(0xFF7D7B74),
+    inactive: Color(0xFF8C8A83),
+    divider: Color(0xFF3E3D39),
+  );
+
   @override
   AppPalette copyWith() => this;
 
   @override
   AppPalette lerp(AppPalette? other, double t) => t < 0.5 ? this : other!;
+}
+
+/// The themes to choose from (G12). Their [name] is what's stored.
+enum AppThemeChoice {
+  green('Green', AppPalette.green),
+  black('Black', AppPalette.black),
+  clay('Clay', AppPalette.clay);
+
+  const AppThemeChoice(this.label, this.palette);
+
+  final String label;
+  final AppPalette palette;
+
+  /// The theme stored as [id]; the default one if unknown.
+  static AppThemeChoice fromId(String id) =>
+      values.where((t) => t.name == id).firstOrNull ?? green;
 }
 
 /// The active palette: `context.colors.accent`. Outside the app's theme
@@ -94,6 +153,7 @@ abstract final class AppTheme {
       brightness: Brightness.dark,
     ).copyWith(
       primary: palette.accent,
+      onPrimary: palette.accentText,
       surface: palette.surface,
       error: palette.danger,
     );

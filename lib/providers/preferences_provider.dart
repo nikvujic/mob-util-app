@@ -1,0 +1,20 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/models/preferences.dart';
+
+/// The user's preferences (theme, counter feedback). Saved on change.
+class PreferencesNotifier extends StateNotifier<Preferences> {
+  PreferencesNotifier(AppStorage storage) : super(storage.initialPreferences) {
+    addListener(storage.savePreferences, fireImmediately: false);
+  }
+
+  void setTheme(String theme) => state = state.copyWith(theme: theme);
+
+  void setCounterFeedback(bool on) =>
+      state = state.copyWith(counterFeedback: on);
+}
+
+final preferencesProvider =
+    StateNotifierProvider<PreferencesNotifier, Preferences>(
+  (ref) => PreferencesNotifier(ref.watch(appStorageProvider)),
+);

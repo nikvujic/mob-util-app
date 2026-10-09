@@ -14,6 +14,7 @@ import 'package:the_app/pages/other/other.dart';
 import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/back_handlers.dart';
@@ -21,15 +22,18 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The app shell: theme and the home screen with the main sections.
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = AppThemeChoice.fromId(
+      ref.watch(preferencesProvider.select((p) => p.theme)),
+    );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'The App',
-      theme: AppTheme.dark,
+      theme: AppTheme.of(theme.palette),
       // Tracks which side the user touches, for G11 bottom actions.
       builder: (context, child) => HandTracker(child: child!),
       home: const HomeScreen(),

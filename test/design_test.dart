@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/crypto.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -154,6 +156,11 @@ void main() {
         await t.pumpAndSettle();
         expect(find.text('Restore this backup?'), findsOneWidget);
       },
+      'themes': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Themes'));
+        await t.pumpAndSettle();
+      },
       'set master password form': (t) async {
         await openMenu(t);
         await t.tap(find.text('Security'));
@@ -163,15 +170,20 @@ void main() {
       },
     };
 
-    for (final MapEntry(key: name, value: open) in screens.entries) {
-      testWidgets(name, (tester) async {
-        final semantics = tester.ensureSemantics();
-        await seed(await pumpApp(tester, backupFiles: pickingBackup()));
-        await tester.pump();
-        await open(tester);
-        await expectAccessible(tester);
-        semantics.dispose();
-      });
+    // Every screen in every theme (G12): contrast depends on the palette.
+    for (final theme in AppThemeChoice.values) {
+      for (final MapEntry(key: name, value: open) in screens.entries) {
+        testWidgets('$name (${theme.label})', (tester) async {
+          final semantics = tester.ensureSemantics();
+          final container = await pumpApp(tester, backupFiles: pickingBackup());
+          container.read(preferencesProvider.notifier).setTheme(theme.name);
+          await seed(container);
+          await tester.pump();
+          await open(tester);
+          await expectAccessible(tester);
+          semantics.dispose();
+        });
+      }
     }
   });
 

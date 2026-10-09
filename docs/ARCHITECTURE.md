@@ -99,6 +99,14 @@ The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.
 
+## Themes and preferences
+
+`AppPalette` (in `core/theme.dart`) holds a theme's colours; `AppTheme.of`
+builds the app's look from one, and widgets read it with `context.colors`.
+The chosen theme and other look-and-feel choices are `Preferences`, kept
+in `preferences.json` on the phone (not in backups). The design checks run
+every screen in every theme.
+
 ## Actions at the bottom
 
 Pages put their actions in `BottomActions` (round buttons as the floating

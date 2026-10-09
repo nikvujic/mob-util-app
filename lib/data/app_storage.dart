@@ -9,6 +9,7 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/shop_item.dart';
 
 /// Loads and saves all app data. Each feature has its own JSON file:
@@ -19,6 +20,8 @@ import 'package:the_app/models/shop_item.dart';
 ///         {"version": 2, "masterPassword": {verifier} or null}
 ///     <app documents>/data/planner.json {"version": 2, "tasks": [...]}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
+///     <app documents>/data/preferences.json
+///         {"version": 2, "theme": "green", "counterFeedback": true}
 ///     <app documents>/data/settings.json
 ///         {"version": 2, "sectionLocks": ["shop", ...]}
 ///
@@ -36,12 +39,14 @@ class AppStorage {
   final JsonFileStore? _settingsStore;
   final JsonFileStore? _plannerStore;
   final JsonFileStore? _countersStore;
+  final JsonFileStore? _preferencesStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
   final List<ShopItem> initialShopItems;
   final List<PlannerTask> initialPlannerTasks;
   final List<Counter> initialCounters;
+  final Preferences initialPreferences;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -55,11 +60,13 @@ class AppStorage {
     this._securityStore,
     this._settingsStore,
     this._plannerStore,
-    this._countersStore, {
+    this._countersStore,
+    this._preferencesStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
     required this.initialCounters,
+    required this.initialPreferences,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
   });
@@ -70,6 +77,7 @@ class AppStorage {
     this.initialShopItems = const [],
     this.initialPlannerTasks = const [],
     this.initialCounters = const [],
+    this.initialPreferences = const Preferences(),
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
   })  : _notesStore = null,
@@ -77,7 +85,8 @@ class AppStorage {
         _securityStore = null,
         _settingsStore = null,
         _plannerStore = null,
-        _countersStore = null;
+        _countersStore = null,
+        _preferencesStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -89,6 +98,8 @@ class AppStorage {
     final settingsStore = JsonFileStore(File('${dir.path}/settings.json'));
     final plannerStore = JsonFileStore(File('${dir.path}/planner.json'));
     final countersStore = JsonFileStore(File('${dir.path}/counters.json'));
+    final preferencesStore =
+        JsonFileStore(File('${dir.path}/preferences.json'));
 
     return AppStorage._(
       notesStore,
@@ -97,6 +108,7 @@ class AppStorage {
       settingsStore,
       plannerStore,
       countersStore,
+      preferencesStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -134,6 +146,11 @@ class AppStorage {
           for (final e in json['counters'] as List<dynamic>)
             Counter.fromJson(e as Map<String, dynamic>),
         ],
+      ),
+      initialPreferences: await _load(
+        preferencesStore,
+        const Preferences(),
+        Preferences.fromJson,
       ),
       initialSectionLocks: await _load(settingsStore, const {}, (json) {
         final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
@@ -209,6 +226,13 @@ class AppStorage {
     });
   }
 
+  Future<void> savePreferences(Preferences preferences) async {
+    await _preferencesStore?.write({
+      'version': formatVersion,
+      ...preferences.toJson(),
+    });
+  }
+
   Future<void> saveSectionLocks(Set<AppSection> sections) async {
     await _settingsStore?.write({
       'version': formatVersion,
@@ -227,6 +251,7 @@ class AppStorage {
     await _settingsStore?.flush();
     await _plannerStore?.flush();
     await _countersStore?.flush();
+    await _preferencesStore?.flush();
   }
 }
 

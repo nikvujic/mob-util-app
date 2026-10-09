@@ -4,6 +4,7 @@ import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/security/security.dart';
+import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/session_provider.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
@@ -58,6 +59,11 @@ class AppDrawer extends ConsumerWidget {
               leading: const Icon(Icons.save_alt),
               title: const Text('Backup'),
               onTap: () => _open(context, const BackupPage()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.palette_outlined),
+              title: const Text('Themes'),
+              onTap: () => _open(context, const ThemesPage()),
             ),
             const Spacer(),
             Padding(

@@ -1,0 +1,27 @@
+/// How the user likes the app: look and feel, kept on this phone (not in
+/// backups).
+class Preferences {
+  /// The chosen theme's id (see `AppThemeChoice` in core/theme.dart).
+  final String theme;
+
+  /// Vibration and a click sound on counter buttons (U6).
+  final bool counterFeedback;
+
+  const Preferences({this.theme = 'green', this.counterFeedback = true});
+
+  Preferences copyWith({String? theme, bool? counterFeedback}) => Preferences(
+        theme: theme ?? this.theme,
+        counterFeedback: counterFeedback ?? this.counterFeedback,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'theme': theme,
+        'counterFeedback': counterFeedback,
+      };
+
+  /// Missing values take their defaults, so older files stay readable.
+  factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
+        theme: json['theme'] as String? ?? 'green',
+        counterFeedback: json['counterFeedback'] as bool? ?? true,
+      );
+}

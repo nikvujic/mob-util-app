@@ -31,7 +31,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | ✅ |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
 | G11 | **Actions at the bottom, on the hand's side.** Top bars carry no action buttons except the menu (☰) — page actions are round buttons at the bottom, like selection mode. They sit on the side of the hand in use: bottom right after tapping the right half of the screen (e.g. opening a note from the right side), bottom left after the left half. Content can always scroll clear of them. Selection mode follows the same rule (side of the long-press), with ✕ as its last button; switching sides mirrors side and order. | ✅ ← back stays at the top |
-| G12 | **Themes:** Menu → **Themes** page to switch the app's look. The app must first get its colours from a theme instead of fixed constants. | ⏳ (round 3) |
+| G12 | **Themes:** Menu → **Themes** page to switch the app's look. The app must first get its colours from a theme instead of fixed constants. | ✅ Green, Black, Clay |
 | G13 | **Back to a section = back to its top:** going to a section (tapping it in the bottom bar) clears any pulled-down space, so the list sits at its normal top. | ✅ |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
@@ -102,7 +102,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
 | U4 | **Lists snap back to the top:** when scrolling back up after pulling a list down (U3), and only a little empty space is left above the first row, the list settles at its normal top instead of stopping just short. Notes and Shop (all pull-down lists). | ✅ |
 | U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ✅ |
-| U6 | **Counters: vibration and a click sound** on − / +. | ⏳ (round 3) |
+| U6 | **Counters: vibration and a click sound** on − / +, with an on/off switch in Menu → Settings. | ⏳ (round 3) |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 
