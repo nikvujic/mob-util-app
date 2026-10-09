@@ -14,6 +14,9 @@ Release with the installable APK.
     round buttons in the lower right instead of the top bar.
   - Lists can be pulled down past their top, so the first rows come
     within thumb reach; scroll back up to return.
+- **Shop order**: new items, and items moved back from *Items*, now go to
+  the end of *To buy*, so the list keeps the order you added things in.
+  Bought items still go to the top of *Items*.
 - **Touch feedback**: rows and buttons all show the same plain ripple.
   Tapping a shop item's checkbox now ripples the whole row, like tapping
   the item.

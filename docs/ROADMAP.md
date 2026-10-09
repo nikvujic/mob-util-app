@@ -156,8 +156,9 @@ After locked notes, before section locks.
   at the top and springs back when scrolled back up. Needs a prototype to
   get the feel right. *Prototype in (`PullDownList`): up to 40% of the
   screen height; the list stays where it's let go. Tune on the phone.*
-- [ ] **Shop: new items at the end of *To buy*** (S5) instead of the top,
-  so the list keeps the order things were added in.
+- [x] **Shop: new items at the end of *To buy*** (S5) instead of the top,
+  so the list keeps the order things were added in. Items moved back
+  from *Items* go to the end too.
 
 ### New sections
 

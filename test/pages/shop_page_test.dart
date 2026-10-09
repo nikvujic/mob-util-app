@@ -26,7 +26,8 @@ void main() {
     await tester.tap(find.text('Add'));
     await tester.pump();
 
-    expect(container.read(shopProvider).map((i) => i.name), ['Bread', 'Milk']);
+    // In the order they were added (S5).
+    expect(container.read(shopProvider).map((i) => i.name), ['Milk', 'Bread']);
     expect(find.byType(TextField), findsOneWidget, reason: 'sheet stays open');
   });
 
@@ -52,7 +53,12 @@ void main() {
     await tester.tap(find.byType(Checkbox).last, warnIfMissed: false);
     await tester.pump();
     expect(find.text('TO BUY  ·  2'), findsOneWidget);
-    expect(container.read(shopProvider).first.name, 'Milk');
+    // Back at the end of "To buy" (S5).
+    expect(container.read(shopProvider).map((i) => i.name), ['Bread', 'Milk']);
+    expect(
+      tester.getTopLeft(find.text('Milk')).dy,
+      greaterThan(tester.getTopLeft(find.text('Bread')).dy),
+    );
   });
 
   testWidgets('dragging the handle reorders within a section', (tester) async {

@@ -14,16 +14,29 @@ void main() {
   String idOf(String name) =>
       notifier.state.firstWhere((i) => i.name == name).id;
 
-  test('adds trimmed items to the top of "To buy" and ignores blanks', () {
+  test('adds trimmed items to the end of "To buy" and ignores blanks', () {
     notifier
       ..addItem('Milk')
       ..addItem('  Bread ')
       ..addItem('   ');
-    expect(toBuy(), ['Bread', 'Milk']);
+    expect(toBuy(), ['Milk', 'Bread']);
     expect(notifier.state.map((i) => i.id).toSet().length, 2);
   });
 
-  test('toggle moves an item to the top of the other section', () {
+  test('new items go after everything in "To buy", not among "Items"', () {
+    notifier
+      ..addItem('Milk')
+      ..addItem('Eggs');
+    notifier.toggle(idOf('Milk')); // bought
+    notifier.addItem('Bread');
+
+    expect(toBuy(), ['Eggs', 'Bread']);
+    expect(stock(), ['Milk']);
+  });
+
+  test(
+      'bought items go to the top of "Items"; '
+      'moved back, to the end of "To buy"', () {
     notifier
       ..addItem('Eggs')
       ..addItem('Milk')
@@ -35,17 +48,17 @@ void main() {
     expect(stock(), ['Bread', 'Eggs']);
 
     notifier.toggle(idOf('Eggs'));
-    expect(toBuy(), ['Eggs', 'Milk']);
+    expect(toBuy(), ['Milk', 'Eggs']);
     expect(stock(), ['Bread']);
   });
 
   test('reorder only moves items within the given section', () {
     notifier
-      ..addItem('C')
-      ..addItem('Y')
-      ..addItem('B')
+      ..addItem('A')
       ..addItem('X')
-      ..addItem('A');
+      ..addItem('B')
+      ..addItem('Y')
+      ..addItem('C');
     notifier
       ..toggle(idOf('Y'))
       ..toggle(idOf('X')); // Items: X, Y

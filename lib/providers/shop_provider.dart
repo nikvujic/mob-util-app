@@ -11,23 +11,22 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     addListener(storage.saveShopItems, fireImmediately: false);
   }
 
-  /// Adds an item to the top of "To buy". Blank names are ignored.
+  /// Adds an item at the end of "To buy" (S5), so the list keeps the order
+  /// things were added in. Blank names are ignored.
   void addItem(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;
-    state = [ShopItem(id: generateId(), name: trimmed), ...state];
+    state = [...state, ShopItem(id: generateId(), name: trimmed)];
   }
 
-  /// Moves the item to the other section, placing it at the top.
+  /// Moves the item to the other section: back to "To buy" at its end
+  /// (like a new item), or to "Items" at its top (bought most recently).
   void toggle(String id) {
     final index = state.indexWhere((item) => item.id == id);
     if (index == -1) return;
-    final item = state[index];
-    state = [
-      item.copyWith(toBuy: !item.toBuy),
-      ...state.take(index),
-      ...state.skip(index + 1),
-    ];
+    final moved = state[index].copyWith(toBuy: !state[index].toBuy);
+    final others = [...state.take(index), ...state.skip(index + 1)];
+    state = moved.toBuy ? [...others, moved] : [moved, ...others];
   }
 
   /// Replaces everything (used when restoring a backup).

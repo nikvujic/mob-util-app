@@ -73,11 +73,11 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| S1 | Two lists: **To buy** above **Items** (catalog of things bought before). Tapping an item moves it to the other list, to the top. | ✅ |
-| S2 | Items are only a name. + adds to the top of To buy; the input stays open for adding several in a row. | ✅ |
+| S1 | Two lists: **To buy** above **Items** (catalog of things bought before). Tapping an item moves it to the other list: to the top of *Items*, or to the end of *To buy* (S5). | ✅ |
+| S2 | Items are only a name. + adds to To buy (at the end, S5); the input stays open for adding several in a row. | ✅ |
 | S3 | Drag handle on the right reorders within a list. Long-press → select → delete. | ✅ |
 | S4 | **Compact rows** — noticeably smaller than note rows (one 48 dp touch target high, ≥20% smaller, tighter gaps), so more items fit on screen without becoming harder to tap. | ✅ |
-| S5 | New items are added at the **end** of *To buy* instead of the top (Nikola's request; replaces "to the top" in S2). Whether items moved back from *Items* should also go to the end: ask Nikola when doing it. | ⏳ |
+| S5 | New items, and items moved back from *Items*, go to the **end** of *To buy*, so it keeps the order things were added in (Nikola's request). Bought items still go to the top of *Items*. | ✅ |
 
 ## P — Planner (currently the "To Do" tab)
 

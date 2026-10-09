@@ -30,7 +30,9 @@ Future<void> seed(ProviderContainer container) async {
     ..addItem('Milk')
     ..addItem('Bread')
     ..addItem('Eggs');
-  shop.toggle(container.read(shopProvider).last.id);
+  shop.toggle(
+    container.read(shopProvider).firstWhere((i) => i.name == 'Milk').id,
+  );
 }
 
 /// A fake file picker that returns a small backup when importing.
@@ -203,11 +205,12 @@ void main() {
 
       await openTab(tester, 'Shop');
       final shopRow = tester.getSize(rowOf('Eggs')).height;
-      // Eggs and Bread are adjacent in "To buy".
-      final shopGap = tester.getTopLeft(rowOf('Bread')).dy -
-          tester.getBottomLeft(rowOf('Eggs')).dy;
+      // Bread and Eggs are adjacent in "To buy", in that order.
+      final shopGap = tester.getTopLeft(rowOf('Eggs')).dy -
+          tester.getBottomLeft(rowOf('Bread')).dy;
 
       expect(shopRow, lessThanOrEqualTo(noteRow * 0.8));
+      expect(shopGap, greaterThanOrEqualTo(0), reason: 'rows in this order');
       expect(shopGap, lessThan(noteGap));
     });
 
