@@ -17,6 +17,7 @@ import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/back_handlers.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The app shell: theme and the home screen with the main sections.
 class MyApp extends StatelessWidget {
@@ -63,6 +64,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   int _selectedIndex = 0;
 
+  /// Fired when a section is gone to, so its lists drop any pulled-down
+  /// space (G13).
+  final _sectionShown = [for (final _ in _pages) _Signal()];
+
   /// Lets e.g. selection mode take back before the exit logic.
   final _backHandlers = BackHandlers();
 
@@ -85,6 +90,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
+    for (final signal in _sectionShown) {
+      signal.dispose();
+    }
     _lifecycle.dispose();
     _exitArmed?.cancel();
     super.dispose();
@@ -155,17 +163,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           for (var i = 0; i < _pages.length; i++)
             TickerMode(
               enabled: i == _selectedIndex,
-              child: SectionGate(
-                section: AppSection.values[i],
-                child: _pages[i],
+              child: PullDownReset(
+                signal: _sectionShown[i],
+                child: SectionGate(
+                  section: AppSection.values[i],
+                  child: _pages[i],
+                ),
               ),
             ),
         ],
       ),
       bottomNavigationBar: BottomNav(
         selectedIndex: _selectedIndex,
-        onItemTapped: (index) => setState(() => _selectedIndex = index),
+        onItemTapped: (index) {
+          setState(() => _selectedIndex = index);
+          _sectionShown[index].fire();
+        },
       ),
     );
   }
+}
+
+/// A bare "it happened" signal.
+class _Signal extends ChangeNotifier {
+  void fire() => notifyListeners();
 }

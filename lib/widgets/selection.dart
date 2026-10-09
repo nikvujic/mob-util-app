@@ -307,7 +307,7 @@ class ReorderOrSelectIndicator extends StatelessWidget {
   /// stretch (see [ReorderableRow]), and never less than a touch target.
   /// The icon sits [iconInset] from the right edge; the rest of the area
   /// reaches left of it, towards the thumb.
-  static const width = 80.0;
+  static const width = 72.0;
   static const iconInset = 20.0;
 
   @override

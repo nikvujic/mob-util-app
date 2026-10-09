@@ -177,10 +177,11 @@ Nikola's notes, grouped. Proposed order: small fixes first, then the
 patterns other work builds on (G11, themes), then the bigger features.
 
 **A. Quick fixes**
-- [ ] **U4 Snap back to the top** when scrolling up leaves only a little
+- [x] **U4 Snap back to the top** when scrolling up leaves only a little
   pulled-down space (all pull-down lists: Notes, Shop, …).
-- [ ] **U5 Drag area a little smaller** (Notes, Shop).
-- [ ] **G13 Going to a section resets its pulled-down space.**
+- [x] **U5 Drag area a little smaller** (Notes, Shop): 80 → 72 dp.
+- [x] **G13 Going to a section resets its pulled-down space.** (Coming
+  back from a note keeps it.)
 - [ ] **P5 Remove the planner's Today button.**
 - [ ] **Planner day strip: fast swipes travel far** (it now moves about
   one day per swipe); needed once there's no Today button, to swing back
