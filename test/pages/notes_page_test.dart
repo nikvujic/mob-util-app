@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
@@ -203,6 +204,33 @@ void main() {
 
     final handle = find.byIcon(Icons.drag_handle).first; // A's handle
     final gesture = await tester.startGesture(tester.getCenter(handle));
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(container.read(notesProvider).first.title, 'B');
+  });
+
+  testWidgets('the handle grabs anywhere in its area, not only on the icon',
+      (tester) async {
+    container = await pumpApp(tester);
+    notes()
+      ..addNote(title: 'C')
+      ..addNote(title: 'B')
+      ..addNote(title: 'A');
+    await tester.pump();
+
+    // Near the top edge of A's row, left of the icon: outside the icon's
+    // old 48 dp box, inside the handle area.
+    final row = tester.getRect(
+      find.ancestor(of: find.text('A'), matching: find.byType(SelectableCard)),
+    );
+    final gesture = await tester.startGesture(
+      Offset(row.right - ReorderOrSelectIndicator.width + 6, row.top + 3),
+    );
     for (var i = 0; i < 10; i++) {
       await gesture.moveBy(const Offset(0, 20));
       await tester.pump(const Duration(milliseconds: 16));

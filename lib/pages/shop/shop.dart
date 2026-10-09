@@ -214,29 +214,31 @@ class _ShopItemTile extends StatelessWidget {
         selected: selected,
         onTap: onTap,
         onLongPress: onLongPress,
-        child: Row(
-          children: [
-            Checkbox(
-              value: !item.toBuy,
-              onChanged: (_) => onTap(),
-            ),
-            Expanded(
-              child: Text(
-                item.name,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: item.toBuy
-                      ? AppColors.textPrimary
-                      : AppColors.textSecondary,
+        child: ReorderableRow(
+          content: Row(
+            children: [
+              Checkbox(
+                value: !item.toBuy,
+                onChanged: (_) => onTap(),
+              ),
+              Expanded(
+                child: Text(
+                  item.name,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: item.toBuy
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
-            ),
-            ReorderOrSelectIndicator(
-              index: index,
-              selectionMode: selectionMode,
-              selected: selected,
-            ),
-          ],
+            ],
+          ),
+          indicator: ReorderOrSelectIndicator(
+            index: index,
+            selectionMode: selectionMode,
+            selected: selected,
+          ),
         ),
       ),
     );

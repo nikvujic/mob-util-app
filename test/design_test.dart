@@ -233,6 +233,34 @@ void main() {
     });
   });
 
+  testWidgets('drag handles fill the row height and are easy to grab',
+      (tester) async {
+    await seed(await pumpApp(tester));
+    await tester.pump();
+
+    Future<void> check(String text) async {
+      final row = find.ancestor(
+        of: find.text(text),
+        matching: find.byType(SelectableCard),
+      );
+      final handle = find.descendant(
+        of: row,
+        matching: find.byType(ReorderableDragStartListener),
+      );
+      expect(tester.getSize(handle).height, tester.getSize(row).height,
+          reason: text);
+      expect(
+        tester.getSize(handle).width,
+        greaterThanOrEqualTo(ReorderOrSelectIndicator.width),
+        reason: text,
+      );
+    }
+
+    await check('Groceries');
+    await openTab(tester, 'Shop');
+    await check('Milk');
+  });
+
   testWidgets('a locked note row: same height, lock announced', (tester) async {
     final semantics = tester.ensureSemantics();
     await seed(await pumpApp(tester));

@@ -138,8 +138,8 @@ Small fixes, not urgent; can go out together as one polish release.
 
 After locked notes, before section locks.
 
-- [ ] **Bigger drag-handle grab area** — keep the icon size, but the whole
-  area around it (full row height, wider) starts a drag.
+- [x] **Bigger drag-handle grab area** — keep the icon size, but the whole
+  area around it (full row height, 64 dp wide) starts a drag.
 - [ ] **Ripple effects** — review: they look off (e.g. clipping, colour,
   ripple under selection highlight); make them consistent.
 - [ ] **Selection actions at the bottom right** — in selection mode, *select

@@ -275,56 +275,52 @@ class _NoteTile extends StatelessWidget {
       onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.only(left: 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: ReorderableRow(
+          content: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        if (note.isLocked) ...[
-                          const Icon(
-                            Icons.lock_outline,
-                            size: 16,
-                            color: AppColors.textSecondary,
-                            semanticLabel: 'Locked',
-                          ),
-                          const SizedBox(width: 6),
-                        ],
-                        Flexible(
-                          child: Text(
-                            note.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      formatDateTime(note.modifiedAt),
-                      style: const TextStyle(
+                    if (note.isLocked) ...[
+                      const Icon(
+                        Icons.lock_outline,
+                        size: 16,
                         color: AppColors.textSecondary,
-                        fontSize: 12,
+                        semanticLabel: 'Locked',
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(
+                        note.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  formatDateTime(note.modifiedAt),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
-            ReorderOrSelectIndicator(
-              index: index,
-              selectionMode: selectionMode,
-              selected: selected,
-            ),
-          ],
+          ),
+          indicator: ReorderOrSelectIndicator(
+            index: index,
+            selectionMode: selectionMode,
+            selected: selected,
+          ),
         ),
       ),
     );

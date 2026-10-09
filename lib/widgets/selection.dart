@@ -238,26 +238,57 @@ class ReorderOrSelectIndicator extends StatelessWidget {
     required this.selected,
   });
 
+  /// Width of the area: wider than the icon, so the handle is easy to
+  /// grab with a thumb. It's as tall as the row when the row lets it
+  /// stretch (see [ReorderableRow]), and never less than a touch target.
+  static const width = 64.0;
+
   @override
   Widget build(BuildContext context) {
-    if (selectionMode) {
-      return ExcludeSemantics(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Icon(
-            selected ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: selected ? AppColors.accent : AppColors.textHint,
-          ),
+    final area = ExcludeSemantics(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: width,
+          maxWidth: width,
+          minHeight: kMinInteractiveDimension,
         ),
-      );
-    }
+        child: Center(
+          child: selectionMode
+              ? Icon(
+                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
+                  color: selected ? AppColors.accent : AppColors.textHint,
+                )
+              : const Icon(Icons.drag_handle, color: AppColors.textHint),
+        ),
+      ),
+    );
+    if (selectionMode) return area;
     return ReorderableDragStartListener(
       index: index,
-      child: const ExcludeSemantics(
-        child: Padding(
-          padding: EdgeInsets.all(12),
-          child: Icon(Icons.drag_handle, color: AppColors.textHint),
-        ),
+      // The whole area takes the touch, not just the icon.
+      child: ColoredBox(color: Colors.transparent, child: area),
+    );
+  }
+}
+
+/// A list row's layout: [content], then the drag handle /
+/// selection indicator taking the row's full height.
+class ReorderableRow extends StatelessWidget {
+  final Widget content;
+  final ReorderOrSelectIndicator indicator;
+
+  const ReorderableRow({
+    super.key,
+    required this.content,
+    required this.indicator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [Expanded(child: content), indicator],
       ),
     );
   }
