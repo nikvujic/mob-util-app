@@ -7,6 +7,7 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/json_file_store.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/shop_item.dart';
 
 /// Loads and saves all app data. Each feature has its own JSON file:
@@ -15,6 +16,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
+///     <app documents>/data/planner.json {"version": 2, "tasks": [...]}
 ///     <app documents>/data/settings.json
 ///         {"version": 2, "sectionLocks": ["shop", ...]}
 ///
@@ -30,10 +32,12 @@ class AppStorage {
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
   final JsonFileStore? _settingsStore;
+  final JsonFileStore? _plannerStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
   final List<ShopItem> initialShopItems;
+  final List<PlannerTask> initialPlannerTasks;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -45,9 +49,11 @@ class AppStorage {
     this._notesStore,
     this._shopStore,
     this._securityStore,
-    this._settingsStore, {
+    this._settingsStore,
+    this._plannerStore, {
     required this.initialNotes,
     required this.initialShopItems,
+    required this.initialPlannerTasks,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
   });
@@ -56,12 +62,14 @@ class AppStorage {
   AppStorage.inMemory({
     this.initialNotes = const [],
     this.initialShopItems = const [],
+    this.initialPlannerTasks = const [],
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
   })  : _notesStore = null,
         _shopStore = null,
         _securityStore = null,
-        _settingsStore = null;
+        _settingsStore = null,
+        _plannerStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -71,12 +79,14 @@ class AppStorage {
     final shopStore = JsonFileStore(File('${dir.path}/shop.json'));
     final securityStore = JsonFileStore(File('${dir.path}/security.json'));
     final settingsStore = JsonFileStore(File('${dir.path}/settings.json'));
+    final plannerStore = JsonFileStore(File('${dir.path}/planner.json'));
 
     return AppStorage._(
       notesStore,
       shopStore,
       securityStore,
       settingsStore,
+      plannerStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -99,6 +109,14 @@ class AppStorage {
             ? null
             : PasswordVerifier.fromJson(verifier as Map<String, dynamic>);
       }),
+      initialPlannerTasks: await _load(
+        plannerStore,
+        [],
+        (json) => [
+          for (final e in json['tasks'] as List<dynamic>)
+            PlannerTask.fromJson(e as Map<String, dynamic>),
+        ],
+      ),
       initialSectionLocks: await _load(settingsStore, const {}, (json) {
         final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
         // Unknown sections (from a newer app) are skipped, not fatal.
@@ -159,6 +177,13 @@ class AppStorage {
     });
   }
 
+  Future<void> savePlannerTasks(List<PlannerTask> tasks) async {
+    await _plannerStore?.write({
+      'version': formatVersion,
+      'tasks': [for (final t in tasks) t.toJson()],
+    });
+  }
+
   Future<void> saveSectionLocks(Set<AppSection> sections) async {
     await _settingsStore?.write({
       'version': formatVersion,
@@ -175,6 +200,7 @@ class AppStorage {
     await _shopStore?.flush();
     await _securityStore?.flush();
     await _settingsStore?.flush();
+    await _plannerStore?.flush();
   }
 }
 
