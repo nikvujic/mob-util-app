@@ -30,7 +30,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app — after a confirming second press: the first shows *Press back again to exit*, a second within 2 s exits. Back first closes an open menu or leaves selection mode. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
 | G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | ✅ |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
-| G11 | **Actions at the bottom, on the hand's side.** Top bars carry no action buttons except the menu (☰) — page actions are round buttons at the bottom, like selection mode. They sit on the side of the hand in use: bottom right after tapping the right half of the screen (e.g. opening a note from the right side), bottom left after the left half. Content can always scroll clear of them. | ⏳ (round 3) |
+| G11 | **Actions at the bottom, on the hand's side.** Top bars carry no action buttons except the menu (☰) — page actions are round buttons at the bottom, like selection mode. They sit on the side of the hand in use: bottom right after tapping the right half of the screen (e.g. opening a note from the right side), bottom left after the left half. Content can always scroll clear of them. Selection mode follows the same rule (side of the long-press), with ✕ as its last button; switching sides mirrors side and order. | ⏳ (round 3) |
 | G12 | **Themes:** Menu → **Themes** page to switch the app's look. The app must first get its colours from a theme instead of fixed constants. | ⏳ (round 3) |
 | G13 | **Back to a section = back to its top:** going to a section (tapping it in the bottom bar) clears any pulled-down space, so the list sits at its normal top. | ⏳ (round 3) |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
@@ -92,7 +92,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P3 | Can be locked as a whole section (L5). | ✅ |
 | P5 | **No Today button** (not needed). | ⏳ (round 3) |
 | P6 | **Day strip shows little of the past:** past days are greyed out and can't be selected; at most the last 3 show, as filler. If an unfinished task is in the past, the strip reaches back to that day (selectable), plus 3 greyed days before it. Future days as now. | ⏳ (round 3) |
-| P7 | **Time blocks** (towards P4, like TimeTune): each day is a timeline; tasks are blocks with a start and an end time, not a checkbox list. A day without tasks shows one big *free time* area. Adding a task starts it at the beginning of free time and ends it 1 hour later; the end can be picked, with quick options 15 / 30 / 60 / 120 min and *end of free time*. Later: colours, notifications, repeating daily. | ⏳ (round 3, needs details) |
+| P7 | **Time blocks** (towards P4, like TimeTune): each day is a timeline; tasks are blocks with a start and an end time, not a checkbox list. A day without tasks shows one big *free time* area. Adding a task starts it at the beginning of free time and ends it 1 hour later; the end can be picked, with quick options 15 / 30 / 60 / 120 min and *end of free time*. The timeline is the whole day (00:00–24:00); there's no + button: a new day is one free slot, tapping a free slot adds a task in it (start = slot start, end = 1 h later, a quick option, or the slot's end), splitting it into free / task / free. Blocks never overlap. Later: colours, notifications, repeating daily. | ⏳ (round 3) |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | 💭 later |
 
 ## U — UI polish ("fun but practical")
@@ -112,7 +112,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
 | O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ⏳ (round 3) |
-| O4 | **"Džoni što ćutiš?"** tool: turns the screen sideways (landscape), shows that text big with a counter under it; holding anywhere on the screen makes it shake and pop and counts up; back leaves (and restores the orientation). | ⏳ (round 3) |
+| O4 | **"Džoni što ćutiš?"** tool: turns the screen sideways (landscape), shows that text big with a counter under it; holding anywhere on the screen makes it shake and pop and counts up by one; the count is saved for good (a hidden reset/set comes later); back leaves (and restores the orientation). | ⏳ (round 3) |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode |
 
 ---

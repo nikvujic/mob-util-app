@@ -182,6 +182,10 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [ ] **U5 Drag area a little smaller** (Notes, Shop).
 - [ ] **G13 Going to a section resets its pulled-down space.**
 - [ ] **P5 Remove the planner's Today button.**
+- [ ] **Planner day strip: fast swipes travel far** (it now moves about
+  one day per swipe); needed once there's no Today button, to swing back
+  to the start. Together with **P6** (greyed past, starting at the oldest
+  unfinished task), since that defines where "the start" is.
 
 **B. Actions at the bottom, on the hand's side (G11)**
 - [ ] Shared bottom action buttons that sit bottom-right or bottom-left
@@ -189,7 +193,10 @@ patterns other work builds on (G11, themes), then the bigger features.
   top bars except ☰.
 - [ ] **N10 Note editor:** Discard (new icon, not ↶) and ⋮ move to the
   bottom; the text scrolls clear of them.
-- [ ] Apply the side rule to the selection actions too (see questions).
+- [ ] Apply the side rule to the selection actions too: their side
+  follows the side of the long-press. Selection's ✕ moves down too, as
+  the last button. Switching sides mirrors both the side and the order
+  of the buttons.
 
 **C. Themes (G12)**
 - [ ] Colours come from the theme (not fixed constants); design checks
@@ -202,22 +209,27 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [ ] **O4** "Džoni što ćutiš?" page (landscape, big text, hold to
   count with shake + pop).
 
-**E. Planner: days and time blocks**
-- [ ] **P6** Day strip: greyed past (max 3), reaching back to the oldest
-  unfinished task.
-- [ ] **P7** Time blocks with free time (needs details first, see
-  questions).
+**E. Planner: time blocks**
+- [ ] **P7** Time blocks (details settled, see answers below).
 
-**Open questions (ask before building the part):**
-- G11: does the hand side also apply to selection-mode actions in the
-  lists (side of the long-press)? Do the ✕ in selection mode and the ←
-  on pages like the editor stay in the top bar?
-- O4: one count per hold, or keeps counting while held? Is the count
-  kept (saved) or starts at 0 each time?
-- P7: the day's time range (e.g. 06:00–24:00?); "start of free time" —
-  the first free slot of the day, or the first after now? Can blocks
-  overlap? Is a block still marked done? What happens to the existing
-  v1 tasks (no times) — become blocks at the start of free time?
+**Answers so far (2026-10-09):**
+- G11: yes, the side rule also applies to selection actions, and ✕ is
+  added to them as the last action. Switching sides mirrors side and
+  order.
+- O4: one count per hold; the count is saved for good. Later: a hidden
+  way to reset or set the count.
+- P7: the timeline covers the whole day, 00:00–24:00. **No + button:**
+  a new day is one big free slot; tapping a free slot adds a task in it
+  (start = start of that slot, end = 1 h later or a quick option, up to
+  the end of the slot). Adding 08:00–09:00 to an empty day leaves three
+  blocks: free, the task, free; the next task goes into one of the free
+  slots. **Blocks never overlap.**
+
+**Still open:**
+- G11: does the ← (back) on pages like the editor stay at the top?
+- P7: can a block be ticked off as done (like the current checkbox), or
+  is a block just a time slot? What happens to today's v1 tasks (no
+  times) — become blocks at the start of free time?
 - U6: always on, or a switch (sound/vibration) somewhere?
 - G12: which themes to start with (e.g. the current dark green, a pure
   black/AMOLED one, a light one)?
