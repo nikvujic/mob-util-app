@@ -87,10 +87,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         listenable: _selection,
         builder: (context, _) => Scaffold(
           appBar: _selection.isActive
-              ? SelectionAppBar(
-                  count: _selection.count,
-                  onClose: _selection.clear,
-                )
+              ? SelectionAppBar(count: _selection.count)
               : const MainAppBar(title: 'Planner'),
           body: Column(
             children: [
@@ -160,6 +157,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                       _selection.selectAll(tasks.map((t) => t.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
+                  onClose: _selection.clear,
                 )
               : FloatingActionButton(
                   // Tabs are kept alive side by side; a shared default hero

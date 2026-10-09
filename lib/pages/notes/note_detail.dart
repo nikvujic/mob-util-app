@@ -8,6 +8,7 @@ import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/note_keys.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
+import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// Shows and edits a single note.
@@ -288,41 +289,44 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(locked ? 'Locked note' : 'Note'),
-          actions: [
-            if (!widget.isNew)
-              ListenableBuilder(
-                listenable: Listenable.merge(
-                  [_titleController, _contentController],
-                ),
-                builder: (context, _) => IconButton(
-                  icon: const Icon(Icons.undo),
+        ),
+        // Actions at the bottom, on the side of the hand that opened the
+        // note (G11).
+        floatingActionButton: ListenableBuilder(
+          listenable: Listenable.merge([_titleController, _contentController]),
+          builder: (context, _) => BottomActions(
+            actions: [
+              if (!widget.isNew && _hasChanges)
+                BottomAction(
+                  // Not ↶: that's kept for real undo (N8).
+                  icon: Icons.settings_backup_restore,
                   tooltip: 'Discard changes',
-                  onPressed: _hasChanges ? _revertInPlace : null,
+                  onPressed: _revertInPlace,
                 ),
+              BottomAction(
+                icon: Icons.more_vert,
+                tooltip: 'More',
+                menu: () => [
+                  if (locked)
+                    PopupMenuItem(
+                      value: _removeLock,
+                      child: const ListTile(
+                        leading: Icon(Icons.lock_open_outlined),
+                        title: Text('Remove lock'),
+                      ),
+                    )
+                  else
+                    PopupMenuItem(
+                      value: _lock,
+                      child: const ListTile(
+                        leading: Icon(Icons.lock_outline),
+                        title: Text('Lock note'),
+                      ),
+                    ),
+                ],
               ),
-            PopupMenuButton<VoidCallback>(
-              tooltip: 'More',
-              onSelected: (action) => action(),
-              itemBuilder: (_) => [
-                if (locked)
-                  PopupMenuItem(
-                    value: _removeLock,
-                    child: const ListTile(
-                      leading: Icon(Icons.lock_open_outlined),
-                      title: Text('Remove lock'),
-                    ),
-                  )
-                else
-                  PopupMenuItem(
-                    value: _lock,
-                    child: const ListTile(
-                      leading: Icon(Icons.lock_outline),
-                      title: Text('Lock note'),
-                    ),
-                  ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
         body: Column(
           children: [
@@ -368,6 +372,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                     border: InputBorder.none,
                     hintText: 'Start writing…',
                     hintStyle: TextStyle(color: AppColors.textHint),
+                    // The text ends above the buttons, never behind them.
+                    contentPadding: EdgeInsets.only(
+                      bottom: BottomActions.contentClearance,
+                    ),
                   ),
                 ),
               ),

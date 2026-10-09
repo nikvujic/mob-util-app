@@ -94,10 +94,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
         listenable: _selection,
         builder: (context, _) => Scaffold(
           appBar: _selection.isActive
-              ? SelectionAppBar(
-                  count: _selection.count,
-                  onClose: _selection.clear,
-                )
+              ? SelectionAppBar(count: _selection.count)
               : AppBar(title: const Text('Counters')),
           body: counters.isEmpty
               ? const EmptyState(
@@ -151,6 +148,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                       _selection.selectAll(counters.map((c) => c.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
+                  onClose: _selection.clear,
                   extra: [
                     if (_selection.count == 1)
                       SelectionAction(

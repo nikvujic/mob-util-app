@@ -178,10 +178,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
         listenable: _selection,
         builder: (context, _) => Scaffold(
           appBar: _selection.isActive
-              ? SelectionAppBar(
-                  count: _selection.count,
-                  onClose: _selection.clear,
-                )
+              ? SelectionAppBar(count: _selection.count)
               : const MainAppBar(title: 'Notes'),
           // Not interactive while a new note is hidden, so list positions
           // always match the stored order.
@@ -238,6 +235,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                       _selection.selectAll(notes.map((n) => n.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
+                  onClose: _selection.clear,
                   extra: [
                     _allSelectedLocked(notes)
                         ? SelectionAction(

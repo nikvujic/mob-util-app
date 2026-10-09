@@ -139,17 +139,23 @@ void main() {
     });
   });
 
-  group('↶ in an edited note', () {
-    IconButton undoButton(WidgetTester tester) =>
-        tester.widget<IconButton>(find.widgetWithIcon(IconButton, Icons.undo));
+  group('Discard changes in an edited note', () {
+    final discardButton = find.byTooltip('Discard changes');
 
-    testWidgets('is disabled until something changes', (tester) async {
+    testWidgets('shows once something changed, at the bottom, not as ↶',
+        (tester) async {
       await openExistingNote(tester);
-      expect(undoButton(tester).onPressed, isNull);
+      expect(discardButton, findsNothing);
 
       await tester.enterText(contentField, 'milk, eggs');
       await tester.pump();
-      expect(undoButton(tester).onPressed, isNotNull);
+      expect(discardButton, findsOneWidget);
+      expect(find.byIcon(Icons.undo), findsNothing, reason: '↶ is for undo');
+      expect(
+        find.descendant(of: find.byType(AppBar), matching: discardButton),
+        findsNothing,
+        reason: 'no actions in the top bar',
+      );
     });
 
     testWidgets('restores the note but stays in the editor', (tester) async {
@@ -167,7 +173,7 @@ void main() {
       expect(find.text('milk'), findsOneWidget);
       expect(noteById(id).content, 'milk');
       expect(noteById(id).modifiedAt, original.modifiedAt);
-      expect(undoButton(tester).onPressed, isNull);
+      expect(discardButton, findsNothing);
 
       // Nothing changed any more, so back leaves without asking.
       await leaveNote(tester);

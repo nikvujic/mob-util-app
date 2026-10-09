@@ -97,6 +97,15 @@ The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.
 
+## Actions at the bottom
+
+Pages put their actions in `BottomActions` (round buttons as the floating
+action button), never in the top bar. `HandTracker` (around the whole app)
+notes which half of the screen each touch lands on; when the buttons
+appear they take that side and keep it — bottom right in order, or bottom
+left mirrored. Content leaves `BottomActions.contentClearance` free below
+it, so nothing hides behind them.
+
 ## Back button
 
 The home screen owns the only back handler for the main sections (Flutter

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/back_handlers.dart';
+import 'package:the_app/widgets/bottom_actions.dart';
 
 /// Tracks which items of a list are selected.
 ///
@@ -52,18 +53,13 @@ class SelectionController extends ChangeNotifier {
   void handleLongPress(String id) => toggle(id);
 }
 
-/// App bar shown while a list is in selection mode: ✕ to leave it and the
-/// count. The actions are at the bottom ([SelectionActions]), in thumb
-/// reach.
+/// App bar shown while a list is in selection mode: just the count. The
+/// actions, ✕ included, are at the bottom ([SelectionActions]), on the side
+/// of the hand in use.
 class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int count;
-  final VoidCallback onClose;
 
-  const SelectionAppBar({
-    super.key,
-    required this.count,
-    required this.onClose,
-  });
+  const SelectionAppBar({super.key, required this.count});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -71,11 +67,7 @@ class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.close),
-        tooltip: 'Cancel selection',
-        onPressed: onClose,
-      ),
+      automaticallyImplyLeading: false,
       title: Text('$count selected'),
       centerTitle: false,
     );
@@ -95,18 +87,20 @@ class SelectionAction {
   });
 }
 
-/// The actions of selection mode as round buttons side by side, for the
-/// lower right corner (use as the page's floating action button): [extra]
-/// ones, then Select all / Deselect all, then Delete at the far right.
+/// The actions of selection mode as round buttons at the bottom, on the
+/// side of the long-press that started it (see [BottomActions]): [extra]
+/// ones, Select all / Deselect all, Delete, and ✕ (leave selection mode)
+/// outermost. Use as the page's floating action button.
 class SelectionActions extends StatelessWidget {
   /// Space to leave below a list so its last row can scroll clear of the
   /// buttons (also of the usual + button).
-  static const listBottomSpace = 88.0;
+  static const listBottomSpace = BottomActions.contentClearance;
 
   final bool allSelected;
   final VoidCallback onSelectAll;
   final VoidCallback onDeselectAll;
   final VoidCallback onDelete;
+  final VoidCallback onClose;
   final List<SelectionAction> extra;
 
   const SelectionActions({
@@ -115,52 +109,35 @@ class SelectionActions extends StatelessWidget {
     required this.onSelectAll,
     required this.onDeselectAll,
     required this.onDelete,
+    required this.onClose,
     this.extra = const [],
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget button({
-      required IconData icon,
-      required String tooltip,
-      required VoidCallback onPressed,
-      Color background = AppColors.surface,
-      Color foreground = AppColors.textPrimary,
-    }) =>
-        Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: FloatingActionButton(
-            // Several on screen at once (and tabs kept alive side by side):
-            // no shared hero animation.
-            heroTag: null,
-            tooltip: tooltip,
-            backgroundColor: background,
-            foregroundColor: foreground,
-            onPressed: onPressed,
-            child: Icon(icon),
-          ),
-        );
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return BottomActions(
+      actions: [
         for (final action in extra)
-          button(
+          BottomAction(
             icon: action.icon,
             tooltip: action.tooltip,
             onPressed: action.onPressed,
           ),
-        button(
+        BottomAction(
           icon: allSelected ? Icons.deselect : Icons.select_all,
           tooltip: allSelected ? 'Deselect all' : 'Select all',
           onPressed: allSelected ? onDeselectAll : onSelectAll,
         ),
-        button(
+        BottomAction(
           icon: Icons.delete_outline,
           tooltip: 'Delete',
           onPressed: onDelete,
-          background: AppColors.danger,
-          foreground: AppColors.background,
+          danger: true,
+        ),
+        BottomAction(
+          icon: Icons.close,
+          tooltip: 'Cancel selection',
+          onPressed: onClose,
         ),
       ],
     );

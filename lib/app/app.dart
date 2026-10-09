@@ -17,6 +17,7 @@ import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/back_handlers.dart';
+import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The app shell: theme and the home screen with the main sections.
@@ -29,6 +30,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'The App',
       theme: AppTheme.dark,
+      // Tracks which side the user touches, for G11 bottom actions.
+      builder: (context, child) => HandTracker(child: child!),
       home: const HomeScreen(),
       onGenerateRoute: _route,
     );

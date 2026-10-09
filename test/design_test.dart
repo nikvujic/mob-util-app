@@ -322,7 +322,7 @@ void main() {
     await check('Milk');
   });
 
-  testWidgets('selection actions sit in the lower right, in thumb reach',
+  testWidgets('selection actions sit at the bottom, on the hand\'s side',
       (tester) async {
     await seed(await pumpApp(tester));
     await tester.pump();
@@ -330,29 +330,98 @@ void main() {
 
     for (final (tab, item) in [('Notes', 'Groceries'), ('Shop', 'Milk')]) {
       await openTab(tester, tab);
-      await tester.longPress(find.text(item));
+      final row = tester.getRect(
+        find.ancestor(
+            of: find.text(item), matching: find.byType(SelectableCard)),
+      );
+      for (final right in [true, false]) {
+        // Long-press on the right or the left half of the row.
+        await tester.longPressAt(
+          Offset(right ? row.right - 100 : row.left + 40, row.center.dy),
+        );
+        await tester.pumpAndSettle();
+
+        final buttons = {
+          for (final t in ['Select all', 'Delete', 'Cancel selection'])
+            t: tester.getCenter(find.byTooltip(t)),
+        };
+        for (final MapEntry(key: t, value: c) in buttons.entries) {
+          expect(c.dy, greaterThan(screen.height * 0.75), reason: t);
+          expect(
+            right ? c.dx > screen.width / 2 : c.dx < screen.width / 2,
+            isTrue,
+            reason: '$t on the ${right ? 'right' : 'left'}',
+          );
+          expect(
+            find.descendant(
+              of: find.byType(AppBar),
+              matching: find.byTooltip(t),
+            ),
+            findsNothing,
+            reason: '$t is not in the top bar',
+          );
+        }
+        // ✕ is outermost, then Delete: mirrored on the left.
+        final outward = right ? 1 : -1;
+        expect(
+          outward * buttons['Cancel selection']!.dx,
+          greaterThan(outward * buttons['Delete']!.dx),
+        );
+        expect(
+          outward * buttons['Delete']!.dx,
+          greaterThan(outward * buttons['Select all']!.dx),
+        );
+
+        await tester.tap(find.byTooltip('Cancel selection'));
+        await tester.pumpAndSettle();
+      }
+    }
+  });
+
+  testWidgets(
+      'note editor: actions on the side it was opened from, and '
+      'the text ends above them', (tester) async {
+    await seed(await pumpApp(tester));
+    await tester.pump();
+    final screen = tester.getSize(find.byType(MaterialApp));
+
+    for (final right in [true, false]) {
+      final row = tester.getRect(
+        find.ancestor(
+          of: find.text('Groceries'),
+          matching: find.byType(SelectableCard),
+        ),
+      );
+      await tester.tapAt(
+        Offset(right ? row.right - 100 : row.left + 40, row.center.dy),
+      );
       await tester.pumpAndSettle();
 
-      for (final tooltip in ['Select all', 'Delete']) {
-        final button = tester.getCenter(find.byTooltip(tooltip));
-        expect(button.dx, greaterThan(screen.width / 2), reason: tooltip);
-        expect(button.dy, greaterThan(screen.height * 0.75), reason: tooltip);
-        expect(
-          find.descendant(
-            of: find.byType(AppBar),
-            matching: find.byTooltip(tooltip),
-          ),
-          findsNothing,
-          reason: '$tooltip is not at the top any more',
-        );
-      }
-      // Delete is the rightmost.
+      final more = tester.getRect(find.byTooltip('More'));
+      expect(more.center.dy, greaterThan(screen.height * 0.75));
       expect(
-        tester.getCenter(find.byTooltip('Delete')).dx,
-        greaterThan(tester.getCenter(find.byTooltip('Select all')).dx),
+        right
+            ? more.center.dx > screen.width / 2
+            : more.center.dx < screen.width / 2,
+        isTrue,
+        reason: right ? 'right' : 'left',
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byTooltip('More'),
+        ),
+        findsNothing,
       );
 
-      await tester.tap(find.byTooltip('Cancel selection'));
+      // The editable text area stops above the buttons.
+      final field = find.descendant(
+        of: find.byKey(const Key('noteContentField')),
+        matching: find.byType(EditableText),
+      );
+      expect(tester.getRect(field).bottom, lessThanOrEqualTo(more.top));
+
+      await tester.pageBack();
       await tester.pumpAndSettle();
     }
   });

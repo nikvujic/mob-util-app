@@ -180,6 +180,8 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **U4 Snap back to the top** when scrolling up leaves only a little
   pulled-down space (all pull-down lists: Notes, Shop, …).
 - [x] **U5 Drag area a little smaller** (Notes, Shop): 80 → 72 dp.
+- [ ] **No ripples at all** — the touch ripple feels obstructive; remove
+  it everywhere (replaces the "one plain ripple" decision).
 - [x] **G13 Going to a section resets its pulled-down space.** (Coming
   back from a note keeps it.)
 - [x] **P5 Remove the planner's Today button.**
@@ -189,12 +191,13 @@ patterns other work builds on (G11, themes), then the bigger features.
   unfinished task), since that defines where "the start" is.
 
 **B. Actions at the bottom, on the hand's side (G11)**
-- [ ] Shared bottom action buttons that sit bottom-right or bottom-left
+- [x] Shared bottom action buttons that sit bottom-right or bottom-left
   depending on which half of the screen was tapped; no action buttons in
-  top bars except ☰.
-- [ ] **N10 Note editor:** Discard (new icon, not ↶) and ⋮ move to the
+  top bars except ☰ (← back stays at the top: navigation, with the back
+  gesture as alternative).
+- [x] **N10 Note editor:** Discard (new icon, not ↶) and ⋮ move to the
   bottom; the text scrolls clear of them.
-- [ ] Apply the side rule to the selection actions too: their side
+- [x] Apply the side rule to the selection actions too: their side
   follows the side of the long-press. Selection's ✕ moves down too, as
   the last button. Switching sides mirrors both the side and the order
   of the buttons.
@@ -227,7 +230,6 @@ patterns other work builds on (G11, themes), then the bigger features.
   slots. **Blocks never overlap.**
 
 **Still open:**
-- G11: does the ← (back) on pages like the editor stay at the top?
 - P7: can a block be ticked off as done (like the current checkbox), or
   is a block just a time slot? What happens to today's v1 tasks (no
   times) — become blocks at the start of free time?
