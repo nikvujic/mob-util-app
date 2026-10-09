@@ -86,64 +86,86 @@ class NotesNotifier extends StateNotifier<List<Note>> {
     return utf8.decode(plain);
   }
 
+  /// Encrypted changes run one after another, in the order requested, so
+  /// e.g. a quick series of autosaves can't land out of order.
+  Future<void> _queue = Future.value();
+
+  /// Goes up whenever notes are put back or replaced wholesale; encrypted
+  /// updates requested before that are dropped, so they can't undo it
+  /// (e.g. Discard while an autosave is still sealing).
+  int _resets = 0;
+
+  Future<void> _serially(Future<void> Function() task) {
+    final result = _queue.then((_) => task());
+    _queue = result.catchError((Object _) {});
+    return result;
+  }
+
   /// Locks a note: its content is sealed with [key] and the plain text is
   /// dropped. Doesn't change its modified time.
-  Future<void> lockNote(String id, DataKey key) async {
-    final note = _find(id);
-    if (note == null || note.isLocked) return;
-    final sealed = await _seal(id, note.content, key);
-    final current = _find(id);
-    if (current == null || current.isLocked) return;
-    // Seal what's there now, in case it changed while sealing.
-    _replace(
-      current.locked(
-        current.content == note.content
-            ? sealed
-            : await _seal(id, current.content, key),
-      ),
-    );
-  }
+  Future<void> lockNote(String id, DataKey key) => _serially(() async {
+        final note = _find(id);
+        if (note == null || note.isLocked) return;
+        final sealed = await _seal(id, note.content, key);
+        final current = _find(id);
+        if (current == null || current.isLocked) return;
+        // Seal what's there now, in case it changed while sealing.
+        _replace(
+          current.locked(
+            current.content == note.content
+                ? sealed
+                : await _seal(id, current.content, key),
+          ),
+        );
+      });
 
   /// Unlocks a note for good: its content is stored in the clear again.
   /// Throws [DecryptionException] if [key] can't open it.
-  Future<void> unlockNote(String id, DataKey key) async {
-    final note = _find(id);
-    if (note == null || !note.isLocked) return;
-    final content = await readContent(note, key);
-    final current = _find(id);
-    if (current == null || !current.isLocked) return;
-    _replace(current.unlocked(content));
-  }
+  Future<void> unlockNote(String id, DataKey key) => _serially(() async {
+        final note = _find(id);
+        if (note == null || !note.isLocked) return;
+        final content = await readContent(note, key);
+        final current = _find(id);
+        if (current == null || !current.isLocked) return;
+        _replace(current.unlocked(content));
+      });
 
   /// Updates a locked note: [content] is sealed with [key]. Like
   /// [updateNote], nothing changes (not even the modified time) unless the
   /// title or content actually differ.
+  ///
+  /// If notes are restored, replaced or removed before it's done, this
+  /// update is dropped rather than undoing that.
   Future<void> updateLockedNote(
     String id, {
     String? title,
     String? content,
     required DataKey key,
-  }) async {
-    final note = _find(id);
-    if (note == null || !note.isLocked) return;
-    final titleChanged = title != null && title != note.title;
-    final contentChanged =
-        content != null && content != await readContent(note, key);
-    if (!titleChanged && !contentChanged) return;
+  }) {
+    final resets = _resets;
+    return _serially(() async {
+      if (_resets != resets) return;
+      final note = _find(id);
+      if (note == null || !note.isLocked) return;
+      final titleChanged = title != null && title != note.title;
+      final contentChanged =
+          content != null && content != await readContent(note, key);
+      if (!titleChanged && !contentChanged) return;
 
-    final sealed = contentChanged ? await _seal(id, content, key) : null;
-    final current = _find(id);
-    if (current == null || !current.isLocked) return;
-    final updated = current.copyWith(
-      title: title,
-      modifiedAt: DateTime.now(),
-    );
-    _replace(sealed == null ? updated : updated.locked(sealed));
+      final sealed = contentChanged ? await _seal(id, content, key) : null;
+      if (_resets != resets || !identical(_find(id), note)) return;
+      final updated = note.copyWith(
+        title: title,
+        modifiedAt: DateTime.now(),
+      );
+      _replace(sealed == null ? updated : updated.locked(sealed));
+    });
   }
 
   /// Puts back an earlier version of a note exactly as it was, including
   /// its modified time (used to discard edits).
   void restoreNote(Note snapshot) {
+    _resets++;
     state = [
       for (final note in state)
         if (note.id == snapshot.id) snapshot else note,
@@ -152,10 +174,12 @@ class NotesNotifier extends StateNotifier<List<Note>> {
 
   /// Replaces everything (used when restoring a backup).
   void replaceAll(List<Note> notes) {
+    _resets++;
     state = List.unmodifiable(notes);
   }
 
   void removeNotes(Set<String> ids) {
+    _resets++;
     state = state.where((note) => !ids.contains(note.id)).toList();
   }
 

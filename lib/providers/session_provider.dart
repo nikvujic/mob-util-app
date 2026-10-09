@@ -38,13 +38,14 @@ class SessionNotifier extends StateNotifier<UnlockedKeys?> {
 
   bool get isUnlocked => state != null;
 
-  /// Unlocks with the master password. False if it's wrong or none is set.
-  Future<bool> unlock(String password) async {
+  /// Unlocks with the master password and returns the keys. Null if it's
+  /// wrong or none is set.
+  Future<UnlockedKeys?> unlock(String password) async {
     final verifier = _ref.read(securityProvider);
-    if (verifier == null) return false;
+    if (verifier == null) return null;
     final key = await verifier.unlock(password);
-    if (key == null) return false;
-    return unlockWith(key);
+    if (key == null) return null;
+    return await unlockWith(key) ? state : null;
   }
 
   /// Unlocks with a key the caller already derived from the master

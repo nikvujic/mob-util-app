@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -16,11 +17,14 @@ import 'package:the_app/widgets/selection.dart';
 
 import 'helpers.dart';
 
-/// Seeds a few notes and shop items (in both sections).
-void seed(ProviderContainer container) {
-  container.read(notesProvider.notifier)
+/// Seeds a few notes (one locked) and shop items (in both sections).
+Future<void> seed(ProviderContainer container) async {
+  final notes = container.read(notesProvider.notifier)
+    ..addNote(title: 'Bank', content: 'PIN')
     ..addNote(title: 'Groceries', content: 'milk')
     ..addNote(title: 'Trip plan');
+  final bank = container.read(notesProvider).last.id;
+  await notes.lockNote(bank, DataKey.fromBytes(List.filled(32, 1)));
   final shop = container.read(shopProvider.notifier)
     ..addItem('Milk')
     ..addItem('Bread')
@@ -60,6 +64,21 @@ void main() {
       'note editor': (t) async {
         await t.tap(find.text('Groceries'));
         await t.pumpAndSettle();
+      },
+      'note editor menu': (t) async {
+        await t.tap(find.text('Groceries'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('More'));
+        await t.pumpAndSettle();
+      },
+      'lock needs a master password dialog': (t) async {
+        await t.tap(find.text('Groceries'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('More'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Lock note'));
+        await t.pumpAndSettle();
+        expect(find.text('Set a master password?'), findsOneWidget);
       },
       'save changes dialog': (t) async {
         await t.tap(find.text('Groceries'));
@@ -116,7 +135,7 @@ void main() {
     for (final MapEntry(key: name, value: open) in screens.entries) {
       testWidgets(name, (tester) async {
         final semantics = tester.ensureSemantics();
-        seed(await pumpApp(tester, backupFiles: pickingBackup()));
+        await seed(await pumpApp(tester, backupFiles: pickingBackup()));
         await tester.pump();
         await open(tester);
         await expectAccessible(tester);
@@ -157,7 +176,7 @@ void main() {
         );
 
     Future<void> pumpSeeded(WidgetTester tester) async {
-      seed(await pumpApp(tester));
+      await seed(await pumpApp(tester));
       await tester.pump();
     }
 
@@ -214,9 +233,30 @@ void main() {
     });
   });
 
+  testWidgets('a locked note row: same height, lock announced', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await seed(await pumpApp(tester));
+    await tester.pump();
+    Finder rowOf(String text) => find.ancestor(
+          of: find.text(text),
+          matching: find.byType(SelectableCard),
+        );
+
+    expect(
+      tester.getSize(rowOf('Bank')).height,
+      tester.getSize(rowOf('Groceries')).height,
+    );
+    // One element for screen readers, saying it's locked before the title.
+    expect(
+      tester.getSemantics(find.text('Bank')).label,
+      matches(RegExp(r'^Locked\nBank\n')),
+    );
+    semantics.dispose();
+  });
+
   testWidgets('selection is announced to screen readers', (tester) async {
     final semantics = tester.ensureSemantics();
-    seed(await pumpApp(tester));
+    await seed(await pumpApp(tester));
     await tester.pump();
 
     await tester.longPress(find.text('Groceries'));
@@ -239,7 +279,7 @@ void main() {
   testWidgets('lists cope with a very large system font', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    seed(await pumpApp(tester));
+    await seed(await pumpApp(tester));
     await tester.pump();
     await openTab(tester, 'Shop');
     await openTab(tester, 'Notes');

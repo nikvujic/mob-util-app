@@ -60,6 +60,9 @@ class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onSelectAll;
   final VoidCallback onDelete;
 
+  /// Extra actions for the selected items, shown before Delete.
+  final List<Widget> actions;
+
   const SelectionAppBar({
     super.key,
     required this.count,
@@ -67,6 +70,7 @@ class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onClose,
     required this.onSelectAll,
     required this.onDelete,
+    this.actions = const [],
   });
 
   @override
@@ -88,6 +92,7 @@ class SelectionAppBar extends StatelessWidget implements PreferredSizeWidget {
           tooltip: allSelected ? 'Deselect all' : 'Select all',
           onPressed: allSelected ? onClose : onSelectAll,
         ),
+        ...actions,
         IconButton(
           icon: const Icon(Icons.delete_outline, color: AppColors.danger),
           tooltip: 'Delete',

@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/pages/notes/note_keys.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// Shows and edits a single note.
@@ -16,13 +19,28 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 ///
 /// Leaving with back after changing something asks "Save changes?":
 /// Save (or tapping outside the dialog) keeps them; Discard restores the
-/// note to how it was when opened, or deletes a note created here. While editing an
-/// existing note, ↶ restores that version without leaving the page.
+/// note to how it was when opened, or deletes a note created here. While
+/// editing an existing note, ↶ restores that version without leaving the
+/// page.
+///
+/// A locked note (N6) is opened with its content already decrypted
+/// ([unlocked]); edits are saved encrypted with the same key. If the app
+/// locks while it's open (L4), the note is saved and closed. Locking and
+/// removing the lock (⋮ menu) take effect at once and count as saving:
+/// Discard afterwards goes back only to that point.
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String noteId;
   final bool isNew;
 
-  const NoteDetailPage({super.key, required this.noteId, this.isNew = false});
+  /// For a locked note: its decrypted content and the key to save it with.
+  final ({String content, DataKey key})? unlocked;
+
+  const NoteDetailPage({
+    super.key,
+    required this.noteId,
+    this.isNew = false,
+    this.unlocked,
+  });
 
   @override
   ConsumerState<NoteDetailPage> createState() => _NoteDetailPageState();
@@ -38,8 +56,17 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   late final AppLifecycleListener _lifecycleListener;
   Timer? _autosaveTimer;
 
-  /// The note as it was when the page opened, for "Discard changes".
+  /// The note as it was when the page opened (or was last locked or
+  /// unlocked here), for "Discard changes"; and its text, which for a
+  /// locked note isn't in [Note.content].
   Note? _original;
+  String _originalContent = '';
+
+  /// The key for locked notes, once known.
+  DataKey? _key;
+
+  /// Set when the page closes itself because the app locked.
+  bool _closedByLock = false;
 
   /// Set once changes are discarded, so leaving the page saves nothing.
   bool _discarded = false;
@@ -50,10 +77,11 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   @override
   void initState() {
     super.initState();
-    _original =
-        ref.read(notesProvider).where((n) => n.id == widget.noteId).firstOrNull;
+    _original = _note;
+    _originalContent = widget.unlocked?.content ?? _original?.content ?? '';
+    _key = widget.unlocked?.key;
     _titleController = TextEditingController(text: _original?.title ?? '');
-    _contentController = TextEditingController(text: _original?.content ?? '');
+    _contentController = TextEditingController(text: _originalContent);
     _titleController.addListener(_scheduleAutosave);
     _contentController.addListener(_scheduleAutosave);
     _lifecycleListener = AppLifecycleListener(onHide: _autosave);
@@ -69,6 +97,26 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     super.dispose();
   }
 
+  Note? get _note =>
+      ref.read(notesProvider).where((n) => n.id == widget.noteId).firstOrNull;
+
+  bool get _isLocked => _note?.isLocked ?? false;
+
+  /// Stores the title and text as they are: encrypted if the note is locked.
+  void _write({String? title, required String content}) {
+    final notifier = ref.read(notesProvider.notifier);
+    if (_isLocked) {
+      notifier.updateLockedNote(
+        widget.noteId,
+        title: title,
+        content: content,
+        key: _key!,
+      );
+    } else {
+      notifier.updateNote(widget.noteId, title: title, content: content);
+    }
+  }
+
   void _scheduleAutosave() {
     _autosaveTimer?.cancel();
     _autosaveTimer = Timer(_autosaveDelay, _autosave);
@@ -80,11 +128,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _autosaveTimer?.cancel();
     if (_discarded) return;
     final title = _titleController.text.trim();
-    ref.read(notesProvider.notifier).updateNote(
-          widget.noteId,
-          title: title.isEmpty ? null : title,
-          content: _contentController.text,
-        );
+    _write(
+      title: title.isEmpty ? null : title,
+      content: _contentController.text,
+    );
   }
 
   void _save() {
@@ -101,16 +148,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       return;
     }
 
-    notifier.updateNote(
-      widget.noteId,
-      title: title.isEmpty ? _untitled : title,
-      content: content,
-    );
+    _write(title: title.isEmpty ? _untitled : title, content: content);
   }
 
   bool get _hasChanges =>
       _titleController.text != (_original?.title ?? '') ||
-      _contentController.text != (_original?.content ?? '');
+      _contentController.text != _originalContent;
 
   /// Throws away everything done since the page was opened: restores the
   /// note, or deletes it if it was created here. Nothing is saved after.
@@ -139,7 +182,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             : 'Your changes are saved automatically. Discard puts the note '
                 'back the way it was.',
       );
-      if (!mounted) return;
+      if (!mounted || _closedByLock) return;
       if (save) {
         _save();
       } else {
@@ -167,12 +210,68 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _autosaveTimer?.cancel();
     ref.read(notesProvider.notifier).restoreNote(original);
     _titleController.text = original.title;
-    _contentController.text = original.content;
+    _contentController.text = _originalContent;
     _autosaveTimer?.cancel(); // the text reset above scheduled one
+  }
+
+  /// Makes the current state the one Discard goes back to.
+  void _markSaved() {
+    _original = _note;
+    _originalContent = _contentController.text;
+  }
+
+  /// ⋮ → Lock note: saves, then encrypts the content.
+  Future<void> _lock() async {
+    final key = await lockingKey(context, ref);
+    if (key == null || !mounted) return;
+    _key = key;
+    _autosave();
+    await ref.read(notesProvider.notifier).lockNote(widget.noteId, key);
+    if (!mounted) return;
+    setState(_markSaved);
+  }
+
+  /// ⋮ → Remove lock: saves, then stores the content unencrypted again.
+  Future<void> _removeLock() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Remove lock?',
+      message: 'The note will be stored unencrypted and open without the '
+          'master password.',
+      confirmLabel: 'Remove lock',
+    );
+    if (!confirmed || !mounted) return;
+    _autosave();
+    await ref.read(notesProvider.notifier).unlockNote(widget.noteId, _key!);
+    if (!mounted) return;
+    setState(_markSaved);
+  }
+
+  /// The app locked (L4) while a locked note is open: save it and close,
+  /// together with anything open on top (e.g. a dialog).
+  void _closeBecauseLocked() {
+    if (_closedByLock) return;
+    _closedByLock = true;
+    _save();
+    final route = ModalRoute.of(context);
+    final navigator = Navigator.of(context);
+    navigator.popUntil((r) => r == route);
+    navigator.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final locked = ref.watch(
+      notesProvider.select(
+        (notes) =>
+            notes.where((n) => n.id == widget.noteId).firstOrNull?.isLocked ??
+            false,
+      ),
+    );
+    ref.listen(sessionProvider, (_, keys) {
+      if (keys == null && _isLocked) _closeBecauseLocked();
+    });
+
     return PopScope(
       // Back is handled by [_onBack] so it can ask before leaving.
       canPop: false,
@@ -180,14 +279,14 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         if (didPop) {
           // Popped by other means than back (e.g. the app navigating away):
           // keep whatever was typed.
-          if (!_leaving) _save();
+          if (!_leaving && !_closedByLock) _save();
           return;
         }
         _onBack();
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Note'),
+          title: Text(locked ? 'Locked note' : 'Note'),
           actions: [
             if (!widget.isNew)
               ListenableBuilder(
@@ -200,6 +299,28 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   onPressed: _hasChanges ? _revertInPlace : null,
                 ),
               ),
+            PopupMenuButton<VoidCallback>(
+              tooltip: 'More',
+              onSelected: (action) => action(),
+              itemBuilder: (_) => [
+                if (locked)
+                  PopupMenuItem(
+                    value: _removeLock,
+                    child: const ListTile(
+                      leading: Icon(Icons.lock_open_outlined),
+                      title: Text('Remove lock'),
+                    ),
+                  )
+                else
+                  PopupMenuItem(
+                    value: _lock,
+                    child: const ListTile(
+                      leading: Icon(Icons.lock_outline),
+                      title: Text('Lock note'),
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
         body: Column(

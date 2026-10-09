@@ -195,5 +195,34 @@ void main() {
       expect(reloaded.single.isLocked, isTrue);
       expect(await notifier.readContent(reloaded.single, key), 'PIN 9876');
     });
+
+    test('encrypted updates land in the order they were made', () async {
+      final id = await lockedNote();
+      final first = notifier.updateLockedNote(id, content: 'one', key: key);
+      final second = notifier.updateLockedNote(id, content: 'two', key: key);
+      await Future.wait([first, second]);
+      expect(await notifier.readContent(notifier.state.single, key), 'two');
+    });
+
+    test('an encrypted update never undoes a restore made meanwhile', () async {
+      final id = await lockedNote();
+      final original = notifier.state.single;
+
+      final update = notifier.updateLockedNote(id, content: 'edit', key: key);
+      notifier.restoreNote(original); // e.g. Discard while sealing
+      await update;
+
+      expect(identical(notifier.state.single, original), isTrue);
+    });
+
+    test('a failed unlock does not block later changes', () async {
+      final id = await lockedNote();
+      await expectLater(
+        notifier.unlockNote(id, otherKey),
+        throwsA(isA<DecryptionException>()),
+      );
+      await notifier.unlockNote(id, key);
+      expect(notifier.state.single.content, 'secret');
+    });
   });
 }

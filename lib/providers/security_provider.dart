@@ -33,12 +33,14 @@ class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
 
   bool get hasMasterPassword => state != null;
 
-  /// Sets the master password. Only when none is set yet.
-  Future<void> setPassword(String password) async {
+  /// Sets the master password. Only when none is set yet. Returns its key,
+  /// so the caller can unlock without deriving it again.
+  Future<PasswordKey> setPassword(String password) async {
     _checkNew(password);
     if (state != null) throw StateError('A master password is already set');
-    final (verifier, _, _) = await PasswordVerifier.create(password);
+    final (verifier, key, _) = await PasswordVerifier.create(password);
     state = verifier;
+    return key;
   }
 
   /// Replaces the master password. Throws [WrongPasswordException] if

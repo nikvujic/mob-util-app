@@ -31,7 +31,7 @@ void main() {
 
   Future<void> setUpUnlocked() async {
     await security().setPassword(password);
-    expect(await session().unlock(password), isTrue);
+    expect(await session().unlock(password), isNotNull);
   }
 
   test('starts locked', () {
@@ -39,16 +39,16 @@ void main() {
   });
 
   test('cannot unlock without a master password', () async {
-    expect(await session().unlock(password), isFalse);
+    expect(await session().unlock(password), isNull);
     expect(unlocked(), isFalse);
   });
 
   test('unlocks with the right password only', () async {
     await security().setPassword(password);
-    expect(await session().unlock('wrong password'), isFalse);
+    expect(await session().unlock('wrong password'), isNull);
     expect(unlocked(), isFalse);
 
-    expect(await session().unlock(password), isTrue);
+    expect(await session().unlock(password), isNotNull);
     expect(unlocked(), isTrue);
   });
 
@@ -102,7 +102,7 @@ void main() {
     await security().changePassword(password, 'new password!');
     expect(unlocked(), isFalse);
 
-    expect(await session().unlock('new password!'), isTrue);
+    expect(await session().unlock('new password!'), isNotNull);
     await security().removePassword('new password!');
     expect(unlocked(), isFalse);
   });
@@ -135,7 +135,7 @@ void main() {
     );
 
     await security().changePassword(password, 'new password!');
-    expect(await session().unlock('new password!'), isTrue);
+    expect(await session().unlock('new password!'), isNotNull);
 
     final dataKey = container.read(sessionProvider)!.dataKey;
     expect(await open(box, dataKey, context: 'test'), [7]);
@@ -159,7 +159,7 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    expect(await session().unlock(password), isTrue);
+    expect(await session().unlock(password), isNotNull);
     expect(unlocked(), isTrue, reason: 'adding the key must not lock');
     expect(container.read(securityProvider)!.hasDataKey, isTrue);
 
@@ -170,7 +170,7 @@ void main() {
       context: 'test',
     );
     session().lock();
-    expect(await session().unlock(password), isTrue);
+    expect(await session().unlock(password), isNotNull);
     final again = container.read(sessionProvider)!.dataKey;
     expect(await open(box, again, context: 'test'), [3]);
   });

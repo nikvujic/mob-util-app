@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/note_detail.dart';
+import 'package:the_app/pages/notes/note_keys.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
@@ -31,10 +34,44 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     super.dispose();
   }
 
-  void _openNote(String id, {bool isNew = false}) {
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  /// Opens a note; a locked one is decrypted first, asking for the master
+  /// password if the app is locked.
+  Future<void> _openNote(Note note) async {
+    ({String content, DataKey key})? unlocked;
+    if (note.isLocked) {
+      final key = await unlockNotesKey(
+        context,
+        ref,
+        message: 'Enter the master password to open this note.',
+      );
+      if (!mounted) return;
+      if (key == null) {
+        if (ref.read(securityProvider) == null) {
+          _showMessage('This note is locked, but no master password is set.');
+        }
+        return;
+      }
+      try {
+        final content =
+            await ref.read(notesProvider.notifier).readContent(note, key);
+        unlocked = (content: content, key: key);
+      } on DecryptionException {
+        if (mounted) {
+          _showMessage("This note can't be opened with your master password.");
+        }
+        return;
+      }
+      if (!mounted) return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => NoteDetailPage(noteId: id, isNew: isNew),
+        builder: (_) => NoteDetailPage(noteId: note.id, unlocked: unlocked),
       ),
     );
   }
@@ -63,6 +100,52 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     animation.addStatusListener(reveal);
   }
 
+  /// Selection → Lock: locks every selected note that isn't yet.
+  Future<void> _lockSelected() async {
+    final key = await lockingKey(context, ref);
+    if (key == null || !mounted) return;
+    final notifier = ref.read(notesProvider.notifier);
+    final ids = _selection.selected;
+    for (final id in ids) {
+      await notifier.lockNote(id, key);
+    }
+    if (!mounted) return;
+    _selection.clear();
+    _showMessage('${countOf(ids.length, 'note', 'notes')} locked');
+  }
+
+  /// Selection → Remove lock (only offered when all selected are locked).
+  Future<void> _removeLockSelected() async {
+    final count = _selection.count;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: count == 1 ? 'Remove lock?' : 'Remove lock from $count notes?',
+      message: 'Unlocked notes are stored unencrypted and open without the '
+          'master password.',
+      confirmLabel: 'Remove lock',
+    );
+    if (!confirmed || !mounted) return;
+    final key = await unlockNotesKey(context, ref);
+    if (key == null || !mounted) return;
+    final notifier = ref.read(notesProvider.notifier);
+    var failed = 0;
+    for (final id in _selection.selected) {
+      try {
+        await notifier.unlockNote(id, key);
+      } on DecryptionException {
+        failed++;
+      }
+    }
+    if (!mounted) return;
+    _selection.clear();
+    if (failed > 0) {
+      _showMessage(
+        "Couldn't remove the lock from ${countOf(failed, 'note', 'notes')}: "
+        "your master password doesn't open them.",
+      );
+    }
+  }
+
   Future<void> _deleteSelected() async {
     final confirmed = await showDeleteConfirmDialog(
       context,
@@ -74,6 +157,9 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     ref.read(notesProvider.notifier).removeNotes(_selection.selected);
     _selection.clear();
   }
+
+  bool _allSelectedLocked(List<Note> notes) =>
+      notes.where((n) => _selection.isSelected(n.id)).every((n) => n.isLocked);
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +184,19 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                   onSelectAll: () =>
                       _selection.selectAll(notes.map((n) => n.id)),
                   onDelete: _deleteSelected,
+                  actions: [
+                    _allSelectedLocked(notes)
+                        ? IconButton(
+                            icon: const Icon(Icons.lock_open_outlined),
+                            tooltip: 'Remove lock',
+                            onPressed: _removeLockSelected,
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.lock_outline),
+                            tooltip: 'Lock',
+                            onPressed: _lockSelected,
+                          ),
+                  ],
                 )
               : const MainAppBar(title: 'Notes'),
           // Not interactive while a new note is hidden, so list positions
@@ -126,7 +225,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                           selected: _selection.isSelected(note.id),
                           onTap: () => _selection.handleTap(
                             note.id,
-                            () => _openNote(note.id),
+                            () => _openNote(note),
                           ),
                           onLongPress: () =>
                               _selection.handleLongPress(note.id),
@@ -184,14 +283,29 @@ class _NoteTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      note.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                      ),
+                    Row(
+                      children: [
+                        if (note.isLocked) ...[
+                          const Icon(
+                            Icons.lock_outline,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                            semanticLabel: 'Locked',
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Flexible(
+                          child: Text(
+                            note.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(

@@ -32,6 +32,9 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 - Colors come from `AppColors` in `core/theme.dart`; no `Colors.*` (except
   `Colors.transparent`) or `Color(0x…)` anywhere else.
 - No `print()`; use `debugPrint`.
+- A feature that opens another feature's page does it by route name
+  (`core/routes.dart`); `app/` maps names to pages, so features still never
+  import each other.
 - Platform plugins are confined: `path_provider` and `file_picker` to
   `data/` (behind small interfaces like `BackupFiles`, so tests can fake
   them), `package_info_plus` to `main.dart`, `cryptography` to
@@ -70,7 +73,13 @@ for one purpose can't be passed off as another. A locked note's content is
 sealed for that note's id, so it can't be moved into a different note; its
 title stays plain text so the list can show it. Only `NotesNotifier`
 seals and opens note content, and plain content of a locked note is never
-accepted (`updateNote` refuses it).
+accepted (`updateNote` refuses it). Its encrypted changes run one at a
+time, in order, and one still pending is dropped if the note is restored
+meanwhile (Discard), so it can't undo that.
+
+The note editor gets a locked note's text already decrypted, plus the key
+to save it with; it closes (after saving) when the session locks, so
+decrypted text never stays on screen after locking.
 
 ## Back button
 

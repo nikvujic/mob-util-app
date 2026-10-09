@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/password_field.dart';
 
 enum PasswordFormMode {
@@ -98,7 +99,9 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
     try {
       switch (_mode) {
         case PasswordFormMode.set:
-          await security.setPassword(_new.text);
+          // Just typed twice: no need to ask for it again right away.
+          final key = await security.setPassword(_new.text);
+          await ref.read(sessionProvider.notifier).unlockWith(key);
         case PasswordFormMode.change:
           await security.changePassword(_current.text, _new.text);
         case PasswordFormMode.remove:

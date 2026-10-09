@@ -115,9 +115,10 @@ Small fixes, not urgent; can go out together as one polish release.
       v2 fixtures; v1 still read. A locked note keeps its title in plain
       text; its content is sealed for that note only (can't be swapped
       into another). No UI change.
-    - [ ] 12c UI: lock icon in the list, lock/unlock (editor menu and
+    - [x] 12c UI: lock icon in the list, lock/unlock (editor menu and
       selection mode), unlock prompt on open, set-up route if no master
-      password.
+      password. Setting the master password also unlocks the app; an open
+      locked note is saved and closed when the app locks.
     - [ ] 12d Removing the master password unlocks all locked notes first
       (with confirmation).
     - [ ] 12e Backups with locked notes: carry the wrapped data key;

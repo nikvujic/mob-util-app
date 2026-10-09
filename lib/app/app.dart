@@ -5,10 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/app/app_drawer.dart';
 import 'package:the_app/app/bottom_nav.dart';
+import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/pages/other/other.dart';
 import 'package:the_app/pages/planner/planner.dart';
+import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/back_handlers.dart';
@@ -24,7 +26,20 @@ class MyApp extends StatelessWidget {
       title: 'The App',
       theme: AppTheme.dark,
       home: const HomeScreen(),
+      onGenerateRoute: _route,
     );
+  }
+
+  /// Pages features open by name (see [AppRoutes]). Typed, so callers get
+  /// the page's result back as the right type.
+  static Route<Object?>? _route(RouteSettings settings) {
+    return switch (settings.name) {
+      AppRoutes.setMasterPassword => MaterialPageRoute<String>(
+          settings: settings,
+          builder: (_) => const PasswordFormPage(mode: PasswordFormMode.set),
+        ),
+      _ => null,
+    };
   }
 }
 
