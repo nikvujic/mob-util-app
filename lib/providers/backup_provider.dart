@@ -8,8 +8,10 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -36,6 +38,7 @@ class BackupExporter {
       appVersion: _ref.read(appVersionProvider),
       notes: notes,
       shopItems: _ref.read(shopProvider),
+      plannerTasks: _ref.read(plannerProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -93,6 +96,7 @@ class RestorableBackup {
   int get noteCount => _backup.notes.length;
   int get lockedNoteCount => _backup.notes.where((n) => n.isLocked).length;
   int get shopItemCount => _backup.shopItems.length;
+  int get plannerTaskCount => _backup.plannerTasks.length;
 }
 
 /// A picked backup file: plain (ready) or encrypted (needs its password).
@@ -233,7 +237,7 @@ class BackupImporter {
       security.restore(source.masterPassword);
       await _ref.read(appStorageProvider).flush();
     }
-    await _apply(notes, source.shopItems);
+    await _apply(notes, source.shopItems, source.plannerTasks);
     return RestoreUndo._(
       previous,
       previousMasterPassword,
@@ -243,7 +247,11 @@ class BackupImporter {
 
   /// Puts back the data (and master password) a [restore] replaced.
   Future<void> undo(RestoreUndo undo) async {
-    await _apply(undo._previous.notes, undo._previous.shopItems);
+    await _apply(
+      undo._previous.notes,
+      undo._previous.shopItems,
+      undo._previous.plannerTasks,
+    );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
             undo._previousMasterPassword,
@@ -307,9 +315,14 @@ class BackupImporter {
     }
   }
 
-  Future<void> _apply(List<Note> notes, List<ShopItem> shopItems) async {
+  Future<void> _apply(
+    List<Note> notes,
+    List<ShopItem> shopItems,
+    List<PlannerTask> plannerTasks,
+  ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
+    _ref.read(plannerProvider.notifier).replaceAll(plannerTasks);
     await _ref.read(appStorageProvider).flush();
   }
 }

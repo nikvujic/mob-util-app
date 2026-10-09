@@ -17,3 +17,7 @@ app still reads every version, so an update can never lose existing data.
 - `v2/backup-plain.json`, `v2/backup-encrypted.json` — backups of the v2
   sample, including the locked note (still encrypted) and the master
   password record its key needs (password: `fixture password`).
+- `v2/storage/planner.json` — planner tasks (added with the planner; the
+  storage format is still 2: it's a new file).
+- `v3/backup-plain.json`, `v3/backup-encrypted.json` — backups with planner
+  tasks, a locked note and its key record (password: `fixture password`).

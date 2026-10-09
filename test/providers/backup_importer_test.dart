@@ -13,6 +13,7 @@ import 'package:the_app/models/note.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
@@ -149,6 +150,12 @@ void main() {
     source.read(shopProvider.notifier)
       ..addItem('Milk')
       ..addItem('Eggs');
+    source.read(plannerProvider.notifier)
+      ..addTask(DateTime(2026, 10, 12), 'Gym')
+      ..addTask(DateTime(2026, 10, 13), 'Dentist');
+    source.read(plannerProvider.notifier).toggleDone(
+          source.read(plannerProvider).first.id,
+        );
     await source.read(backupExporterProvider).export();
 
     final target = containerWith(AppStorage.inMemory());
@@ -164,6 +171,10 @@ void main() {
     expect(
       target.read(shopProvider).map((i) => i.toJson()),
       source.read(shopProvider).map((i) => i.toJson()),
+    );
+    expect(
+      target.read(plannerProvider).map((t) => t.toJson()),
+      source.read(plannerProvider).map((t) => t.toJson()),
     );
   });
 

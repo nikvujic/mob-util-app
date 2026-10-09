@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:the_app/core/crypto.dart' hide open;
 import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/shop_item.dart';
 
 /// Thrown when a backup file can't be read. [message] is shown to the user.
@@ -23,7 +24,7 @@ class BackupFormatException implements Exception {
 ///       "createdAt": "2026-10-08T07:30:00.000Z",
 ///       "appVersion": "0.7.0 (8)",
 ///       "data": { "notes": [...], "shopItems": [...],
-///                 "masterPassword": {...} }
+///                 "plannerTasks": [...], "masterPassword": {...} }
 ///     }
 ///
 /// `masterPassword` (since version 2) is only there if some notes are
@@ -50,13 +51,15 @@ class Backup {
   static const format = 'the-app-backup';
 
   /// History: 1 = first format; 2 = notes may be locked
-  /// (`lockedContent`).
-  static const version = 2;
+  /// (`lockedContent`); 3 = planner tasks (`plannerTasks`; older backups
+  /// have none).
+  static const version = 3;
 
   final DateTime createdAt;
   final String appVersion;
   final List<Note> notes;
   final List<ShopItem> shopItems;
+  final List<PlannerTask> plannerTasks;
 
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
@@ -66,6 +69,7 @@ class Backup {
     required this.appVersion,
     required this.notes,
     required this.shopItems,
+    this.plannerTasks = const [],
     this.masterPassword,
   });
 
@@ -90,6 +94,7 @@ class Backup {
         'data': {
           'notes': [for (final n in notes) n.toJson()],
           'shopItems': [for (final i in shopItems) i.toJson()],
+          'plannerTasks': [for (final t in plannerTasks) t.toJson()],
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -165,6 +170,10 @@ class Backup {
           for (final i in data['shopItems'] as List<dynamic>)
             ShopItem.fromJson(i as Map<String, dynamic>),
         ],
+        plannerTasks: [
+          for (final t in data['plannerTasks'] as List<dynamic>? ?? const [])
+            PlannerTask.fromJson(t as Map<String, dynamic>),
+        ],
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(
@@ -179,7 +188,8 @@ class Backup {
     // the app misbehave after restoring.
     bool unique(Iterable<String> ids) => ids.toSet().length == ids.length;
     if (!unique(backup.notes.map((n) => n.id)) ||
-        !unique(backup.shopItems.map((i) => i.id))) {
+        !unique(backup.shopItems.map((i) => i.id)) ||
+        !unique(backup.plannerTasks.map((t) => t.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
     return backup;

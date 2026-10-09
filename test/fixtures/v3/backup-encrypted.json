@@ -1,0 +1,20 @@
+{
+  "format": "the-app-backup",
+  "version": 3,
+  "createdAt": "2026-10-09T15:00:00.000Z",
+  "appVersion": "0.12.0 (13)",
+  "encrypted": true,
+  "kdf": {
+    "algorithm": "argon2id",
+    "memoryKiB": 19456,
+    "iterations": 2,
+    "parallelism": 1,
+    "salt": "G2ae25g7J4OG6ExywQqdrw=="
+  },
+  "sealed": {
+    "cipher": "aes-256-gcm",
+    "nonce": "NUSHyO6mYqTvZ9gr",
+    "cipherText": "Dbw8pVQt97T/dOtAiegdKa2cSE7H2Uq3D0vQSffUwbbpo5VXVPpzXzpTtx+ro51hMLLdTrVh2uwd9CBbR+vLrB6eV9b70Q+WDy/aFHbIe9aFyv0EJhEeDqs4pBwx3pl4LLeshFTv8cmU+Ck1ePdh3KVJvb+DD0mlwCIm/vTDdrYhORHnd8c/T7Zu6kVopomaBm41aEvw9vdcd5i78R7bDLMDvFKNiWfdpbVq1W9YKbDIzTCr0yM6+EsE+688pAyDPRT8AKihqi4pXX9Y7De09tB8NxsAE5k7yUwFL+reUhQ5NmCgwFCGSJqhTg9yFjl2EKP1mv18TqffeSxuQISdXfeTun38v7FM2HE9fr6mghVcKpe/qjaZsyvOX4mR+gi7QrP0MbQyUtBkZTw4akS/9UGUGhfALgZdkB7KYeA1fFnnNjgfIZkXl+6vXCP/qVxlmDBdyhzBif9CMNNoj7JXwmlZ0darxOthmGjHatnCeF2qNjhqiMG9g85LbkRzBkqlG6UuVWDy1kDnQaFOabbGFX+b1aX8fpO1VAIZeTKCAOfS0s5kVY+s3Nm85C8rROcFNKhc3jNk86+1mZ337QbePUzqwinSgp3wriueEEBeoXSnyI1uXESX2nfSPTVuRu8s/z3kdFnwhIl8kl2bNk1OW22ZlyiBrkq7gn+UVehchv3UCU1AC4xCTrst0ykvaaiysiG/jA0cFzPu/plhLHTdPPpirJysZmP1wxf928fKwK6tBfBfL+fRnNNJ8gKCES30YDa42V4XcTqo/wbroXXToqreB6G6KkJxhDYj+hs8nJE9kbKjX0PEwfCY2ohF3SdhljjVs/9m8wZSdgTRhhXXnCXNm84QVz3ofuPFGspL6V9f6m+6VzP24j2ItM0asoT34jSSVvn6ucgdP37+jD88hmeuuPDifzbqPcxAc3x6REc4aMD1ve9aebYWzg/p8+MXPSZEdRF5JsaqHzNmvpU4d7UVr2aAj1y5S2xdT4TknsGrPTNnIPmfBrBgTtxoleL4TbBlQdtC353NIlKNqZzTZjr3J0P/gbTykQHA1AtKDopm0PnER9RziPx3z+Am/Ma6ir1XjrQhiMfBxgvQuDqAB+wi+fBHyJF1Tppf9BJJwjZT3AlIgBOlZPuUhiD46SCooa7HRoagZRXzlHoZ66Ry3qlps55R6Z3qbi7iWbxLUM3QTGxRqFD+8bI6Bq9cdi9FloOtJZri0NMVONnEctiTWNS5fdP7UbXBaHCVjJ5rfdODoE67f5skfjpt5hk5QUNB97K4np/bhjFamcCWxHr3MMlNXh5qe4Jowz88yXoM5aQpi5I6X2/TRt0mK6CvIsCKVbifU9a8NmYvqpJ+7pwNqSPuF/PB/YGvZH0vayO9FrMTaKZhV2MuTCwneqceIq64EovVk/g0NLk5ncLl0Rtg+H80zuc4/lS9HBnFA/Pw1qTvMubpyNwVy1gVy39O/Ou995KV97TyUkZSER8IAPKfWfu2xn9DGvuGfwU3cuUE9gj1RTTuKBhGk6u4H1vTsVtZnfsLrMhs+Yzsr7YyAoJ8aoXNm8GXulensSRk4Co+NKUgkZRjpMB6ehR+RqMYraRn6QqZ4DzbHAdQvMCeXcNTRKckbQtfgEKS5WTIsszRK8B5WK8LS5Ii6Ei7sgvoPQU6RE2anXMvI79U0mxrprWmwUMSZaMOj7815Ph4+w5zyaSYbWDRH2+gdpIXBdZ2QxVKgeMXbW5OTszczSVFLzf1W5bRQTvbe3F5Wiuz1ro=",
+    "mac": "5JobZbJYH+lD4kJqrs0g3g=="
+  }
+}

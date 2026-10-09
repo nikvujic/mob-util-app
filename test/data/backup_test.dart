@@ -103,6 +103,18 @@ void main() {
       );
     });
 
+    test('rejects duplicate planner task ids', () {
+      final json = validJson();
+      final task = {
+        'id': 't1',
+        'title': 'Gym',
+        'day': '2026-10-12',
+        'done': false,
+      };
+      (json['data'] as Map<String, dynamic>)['plannerTasks'] = [task, task];
+      expect(errorFor(json), 'This backup is damaged.');
+    });
+
     test('rejects damaged backups', () {
       const damaged = 'This backup is damaged.';
       expect(errorFor(validJson()..['version'] = 'one'), damaged);

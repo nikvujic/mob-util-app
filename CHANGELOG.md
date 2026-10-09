@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.12.0] - 2026-10-09
 
 ### Added
+- **Planner**: a to-do list per day. Swipe or tap the day strip at the
+  bottom to pick a day (today is outlined, days with tasks have a dot);
+  + adds tasks to that day; tap a task to tick it off. Long-press to
+  select and delete; drag to reorder. Included in backups.
 - **Section locks** (Menu → Security): switch on a lock for Notes, Shop,
   Planner or Other. While the app is locked, a locked section shows a lock
   screen instead of its content; enter the master password to open it.
