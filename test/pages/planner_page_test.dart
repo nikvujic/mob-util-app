@@ -59,7 +59,7 @@ void main() {
     );
   });
 
-  testWidgets('tapping a day shows its tasks; Today goes back', (tester) async {
+  testWidgets('tapping a day shows its tasks', (tester) async {
     await openPlanner(tester);
     planner()
       ..addTask(today, 'Gym')
@@ -79,7 +79,7 @@ void main() {
       reason: 'added to the shown day',
     );
 
-    await tester.tap(find.widgetWithText(TextButton, 'Today'));
+    await tester.tap(dayCell('Thursday 8 October 2026'));
     await tester.pumpAndSettle();
     expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
     expect(find.text('Gym'), findsOneWidget);
@@ -160,5 +160,93 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1 selected'), findsNothing);
+  });
+
+  testWidgets('there is no Today button', (tester) async {
+    await openPlanner(tester);
+    await tester.tap(dayCell('Friday 9 October 2026'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextButton, 'Today'), findsNothing);
+  });
+
+  testWidgets('a fast swipe travels many days, and back to the start',
+      (tester) async {
+    await openPlanner(tester);
+
+    await tester.fling(
+      find.byType(DayStrip),
+      const Offset(-300, 0),
+      3000,
+    );
+    await tester.pumpAndSettle();
+    final header = tester
+        .widgetList<Text>(find.textContaining(', '))
+        .map((t) => t.data!)
+        .firstWhere((t) => RegExp(r'^\w{3}, \d+ \w{3}').hasMatch(t));
+    // Far beyond the week that's visible at once.
+    final shownDay =
+        int.parse(RegExp(r', (\d+) ').firstMatch(header)!.group(1)!);
+    final shownMonth = header.contains('Oct') ? 10 : 11;
+    final distance =
+        DateTime(2026, shownMonth, shownDay).difference(today).inDays;
+    expect(distance, greaterThan(7));
+
+    // And a fast swipe the other way comes back to the start: today.
+    await tester.fling(find.byType(DayStrip), const Offset(300, 0), 3000);
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(DayStrip), const Offset(300, 0), 3000);
+    await tester.pumpAndSettle();
+    expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
+  });
+
+  group('the past (P6)', () {
+    testWidgets('only 3 greyed-out past days, which cannot be selected',
+        (tester) async {
+      await openPlanner(tester);
+
+      expect(dayCell('Wednesday 7 October 2026'), findsNothing,
+          reason: 'greyed-out days are not offered to screen readers');
+      expect(find.text('7'), findsOneWidget, reason: 'but shown');
+      expect(find.text('5'), findsOneWidget);
+      expect(find.text('4'), findsNothing, reason: 'only 3 of them');
+
+      await tester.tap(find.text('7'));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(DayStrip), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
+    });
+
+    testWidgets('reaches back to the oldest unfinished task', (tester) async {
+      await openPlanner(tester);
+      planner()
+        ..addTask(DateTime(2026, 10, 3), 'Unfinished')
+        ..addTask(DateTime(2026, 10, 1), 'Done long ago');
+      planner().toggleDone(
+        container
+            .read(plannerProvider)
+            .firstWhere((t) => t.title == 'Done long ago')
+            .id,
+      );
+      await tester.pump();
+
+      // Back as far as it goes.
+      await tester.fling(find.byType(DayStrip), const Offset(300, 0), 3000);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sat, 3 Oct'), findsOneWidget);
+      expect(find.text('Unfinished'), findsOneWidget);
+      expect(dayCell('Friday 2 October 2026'), findsNothing, reason: 'greyed');
+
+      // Done: the past closes again, back to today.
+      planner().toggleDone(
+        container
+            .read(plannerProvider)
+            .firstWhere((t) => t.title == 'Unfinished')
+            .id,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
+    });
   });
 }

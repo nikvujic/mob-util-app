@@ -182,8 +182,8 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **U5 Drag area a little smaller** (Notes, Shop): 80 → 72 dp.
 - [x] **G13 Going to a section resets its pulled-down space.** (Coming
   back from a note keeps it.)
-- [ ] **P5 Remove the planner's Today button.**
-- [ ] **Planner day strip: fast swipes travel far** (it now moves about
+- [x] **P5 Remove the planner's Today button.**
+- [x] **Planner day strip: fast swipes travel far** (it now moves about
   one day per swipe); needed once there's no Today button, to swing back
   to the start. Together with **P6** (greyed past, starting at the oldest
   unfinished task), since that defines where "the start" is.

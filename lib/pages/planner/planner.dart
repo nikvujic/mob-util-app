@@ -68,8 +68,14 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   @override
   Widget build(BuildContext context) {
     final today = _today;
-    final day = _day ?? today;
     final all = ref.watch(plannerProvider);
+    // The past is reachable only back to the oldest unfinished task (P6).
+    var firstDay = today;
+    for (final t in all) {
+      if (!t.done && t.day.isBefore(firstDay)) firstDay = t.day;
+    }
+    var day = _day ?? today;
+    if (day.isBefore(firstDay)) day = firstDay;
     final tasks = all.where((t) => isSameDay(t.day, day)).toList();
     ref.listen(plannerProvider, (_, next) {
       _selection.retain(next.map((t) => t.id));
@@ -88,11 +94,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               : const MainAppBar(title: 'Planner'),
           body: Column(
             children: [
-              _DayHeader(
-                day: day,
-                today: today,
-                onToday: () => _select(today),
-              ),
+              _DayHeader(day: day, today: today),
               Expanded(
                 child: tasks.isEmpty
                     ? const EmptyState(
@@ -146,6 +148,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           ),
           bottomNavigationBar: DayStrip(
             today: today,
+            firstDay: firstDay,
             selected: day,
             onSelected: _select,
             hasItems: (d) => all.any((t) => isSameDay(t.day, d)),
@@ -172,50 +175,33 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   }
 }
 
-/// The day shown, e.g. "Today · Thu, 9 Oct", and a way back to today.
+/// The day shown, e.g. "Today · Thu, 9 Oct".
 class _DayHeader extends StatelessWidget {
   final DateTime day;
   final DateTime today;
-  final VoidCallback onToday;
 
-  const _DayHeader({
-    required this.day,
-    required this.today,
-    required this.onToday,
-  });
+  const _DayHeader({required this.day, required this.today});
 
   @override
   Widget build(BuildContext context) {
-    final offset = daysBetween(today, day);
-    final relative = switch (offset) {
+    final relative = switch (daysBetween(today, day)) {
       0 => 'Today · ',
       1 => 'Tomorrow · ',
       -1 => 'Yesterday · ',
       _ => '',
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '$relative${formatDay(day, today: today)}',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          '$relative${formatDay(day, today: today)}',
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
-          // Always there, so the header keeps its height.
-          Opacity(
-            opacity: offset == 0 ? 0 : 1,
-            child: TextButton(
-              onPressed: offset == 0 ? null : onToday,
-              child: const Text('Today'),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
