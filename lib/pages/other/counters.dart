@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
@@ -24,6 +26,15 @@ class _CountersPageState extends ConsumerState<CountersPage> {
   final SelectionController _selection = SelectionController();
 
   CountersNotifier get _notifier => ref.read(countersProvider.notifier);
+
+  /// Counts, with a click and a short vibration if switched on (U6).
+  void _step(String id, int by) {
+    if (ref.read(preferencesProvider).counterFeedback) {
+      HapticFeedback.mediumImpact();
+      SystemSound.play(SystemSoundType.click);
+    }
+    _notifier.step(id, by);
+  }
 
   @override
   void dispose() {
@@ -127,7 +138,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                               index: index,
                               selectionMode: _selection.isActive,
                               selected: _selection.isSelected(counter.id),
-                              onStep: (by) => _notifier.step(counter.id, by),
+                              onStep: (by) => _step(counter.id, by),
                               // Counting is done with the buttons; a tap on
                               // the card only matters while selecting.
                               onTap: () =>
@@ -271,7 +282,12 @@ class _StepButton extends StatelessWidget {
       icon: Icon(icon, size: 32),
       tooltip: tooltip,
       onPressed: onPressed,
-      style: IconButton.styleFrom(fixedSize: const Size.square(size)),
+      style: IconButton.styleFrom(
+        fixedSize: const Size.square(size),
+        // The counter plays its own click and vibration, or none if
+        // switched off in Settings (U6).
+        enableFeedback: false,
+      ),
     );
   }
 }

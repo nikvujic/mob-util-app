@@ -156,6 +156,11 @@ void main() {
         await t.pumpAndSettle();
         expect(find.text('Restore this backup?'), findsOneWidget);
       },
+      'settings': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Settings'));
+        await t.pumpAndSettle();
+      },
       'themes': (t) async {
         await openMenu(t);
         await t.tap(find.text('Themes'));

@@ -4,6 +4,7 @@ import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/security/security.dart';
+import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/session_provider.dart';
 
@@ -64,6 +65,11 @@ class AppDrawer extends ConsumerWidget {
               leading: const Icon(Icons.palette_outlined),
               title: const Text('Themes'),
               onTap: () => _open(context, const ThemesPage()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Settings'),
+              onTap: () => _open(context, const SettingsPage()),
             ),
             const Spacer(),
             Padding(

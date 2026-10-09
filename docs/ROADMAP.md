@@ -211,7 +211,9 @@ patterns other work builds on (G11, themes), then the bigger features.
 
 **D. Other: tiles, sounds, a new tool**
 - [ ] **O3** Tools as icon tiles from the bottom right.
-- [ ] **U6** Counters: vibration + click sound on − / +.
+- [x] **U6** Counters: vibration + click sound on − / +, switch in
+  Menu → Settings. The click is Android's touch sound (follows the
+  phone's *Touch sounds* setting); a bundled sound could come later.
 - [ ] **O4** "Džoni što ćutiš?" page (landscape, big text, hold to
   count with shake + pop).
 

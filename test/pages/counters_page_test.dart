@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
@@ -112,5 +114,59 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await tester.pumpAndSettle();
     expect(values(), {'Push-ups': 0, 'Coffee': 0});
+  });
+
+  group('click and vibration (U6)', () {
+    /// Platform calls for haptics and sounds, recorded.
+    List<String> recordFeedback(WidgetTester tester) {
+      final calls = <String>[];
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'HapticFeedback.vibrate' ||
+            call.method == 'SystemSound.play') {
+          calls.add(call.method);
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+      return calls;
+    }
+
+    testWidgets('each − / + clicks and vibrates', (tester) async {
+      await openCounters(tester, names: ['Push-ups']);
+      final calls = recordFeedback(tester);
+
+      await tester.tap(find.byTooltip('Count up Push-ups'));
+      await tester.tap(find.byTooltip('Count down Push-ups'));
+      await tester.pump();
+
+      expect(calls.where((c) => c == 'HapticFeedback.vibrate'), hasLength(2));
+      expect(calls.where((c) => c == 'SystemSound.play'), hasLength(2));
+    });
+
+    testWidgets('switched off in Settings: silent and still', (tester) async {
+      await openCounters(tester, names: ['Push-ups']);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await openMenu(tester);
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Counter click and vibration'));
+      await tester.pumpAndSettle();
+      expect(container.read(preferencesProvider).counterFeedback, isFalse);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Counters'));
+      await tester.pumpAndSettle();
+      final calls = recordFeedback(tester);
+
+      await tester.tap(find.byTooltip('Count up Push-ups'));
+      await tester.pump();
+
+      expect(calls, isEmpty);
+      expect(values(), {'Push-ups': 1}, reason: 'still counts');
+    });
   });
 }
