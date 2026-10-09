@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
@@ -77,7 +78,7 @@ void main() {
     await tester.pump();
 
     Finder inList(String text, {bool skipOffstage = true}) => find.descendant(
-          of: find.byType(ReorderableListView, skipOffstage: skipOffstage),
+          of: find.byType(PullDownList, skipOffstage: skipOffstage),
           matching: find.text(text, skipOffstage: skipOffstage),
           skipOffstage: skipOffstage,
         );

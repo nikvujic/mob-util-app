@@ -150,11 +150,12 @@ After locked notes, before section locks.
   all* and *delete* become two buttons side by side in the lower right
   (thumb reach), with extra bottom space so the list can scroll clear of
   them.
-- [ ] **Pull the list down for one-handed reach** (Notes, Shop; others
+- [x] **Pull the list down for one-handed reach** (Notes, Shop; others
   later) — the list can be dragged further down than its top, into an
   empty space, so the top items come within thumb reach; it always opens
   at the top and springs back when scrolled back up. Needs a prototype to
-  get the feel right.
+  get the feel right. *Prototype in (`PullDownList`): up to 40% of the
+  screen height; the list stays where it's let go. Tune on the phone.*
 - [ ] **Shop: new items at the end of *To buy*** (S5) instead of the top,
   so the list keeps the order things were added in.
 

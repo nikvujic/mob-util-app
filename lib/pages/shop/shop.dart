@@ -6,6 +6,7 @@ import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
@@ -113,7 +114,8 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                   icon: Icons.shopping_cart_outlined,
                   message: 'Your shopping list is empty',
                 )
-              : CustomScrollView(
+              : PullDownList(
+                  bottomSpace: SelectionActions.listBottomSpace,
                   slivers: [
                     _SectionHeader(title: 'To buy', count: toBuy.length),
                     if (toBuy.isEmpty)
@@ -134,12 +136,6 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                       _SectionHeader(title: 'Items', count: stock.length),
                       _section(stock, toBuy: false),
                     ],
-                    // Keep the last item clear of the buttons.
-                    const SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: SelectionActions.listBottomSpace,
-                      ),
-                    ),
                   ],
                 ),
           floatingActionButton: _selection.isActive

@@ -11,6 +11,7 @@ import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
 class NotesPage extends ConsumerStatefulWidget {
@@ -189,36 +190,45 @@ class _NotesPageState extends ConsumerState<NotesPage> {
             child: notes.isEmpty
                 ? const EmptyState(
                     icon: Icons.note_outlined, message: 'No notes')
-                : ReorderableListView.builder(
+                : PullDownList(
                     // Room below the last note for the buttons.
-                    padding: const EdgeInsets.only(
-                      top: 4,
-                      bottom: SelectionActions.listBottomSpace,
-                    ),
-                    buildDefaultDragHandles: false,
-                    itemCount: notes.length,
-                    // onReorderItem only exists on newer Flutter than we target.
-                    // ignore: deprecated_member_use
-                    onReorder: ref.read(notesProvider.notifier).reorder,
-                    itemBuilder: (context, index) {
-                      final note = notes[index];
-                      return Padding(
-                        key: ValueKey(note.id),
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: _NoteTile(
-                          note: note,
-                          index: index,
-                          selectionMode: _selection.isActive,
-                          selected: _selection.isSelected(note.id),
-                          onTap: () => _selection.handleTap(
-                            note.id,
-                            () => _openNote(note),
+                    bottomSpace: SelectionActions.listBottomSpace,
+                    slivers: [
+                      SliverPadding(
+                        padding: const EdgeInsets.only(top: 4),
+                        sliver: SliverReorderableList(
+                          itemCount: notes.length,
+                          // onReorderItem only exists on newer Flutter than
+                          // we target.
+                          // ignore: deprecated_member_use
+                          onReorder: ref.read(notesProvider.notifier).reorder,
+                          proxyDecorator: (child, _, __) => Material(
+                            type: MaterialType.transparency,
+                            elevation: 6,
+                            child: child,
                           ),
-                          onLongPress: () =>
-                              _selection.handleLongPress(note.id),
+                          itemBuilder: (context, index) {
+                            final note = notes[index];
+                            return Padding(
+                              key: ValueKey(note.id),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: _NoteTile(
+                                note: note,
+                                index: index,
+                                selectionMode: _selection.isActive,
+                                selected: _selection.isSelected(note.id),
+                                onTap: () => _selection.handleTap(
+                                  note.id,
+                                  () => _openNote(note),
+                                ),
+                                onLongPress: () =>
+                                    _selection.handleLongPress(note.id),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
           ),
           floatingActionButton: _selection.isActive
