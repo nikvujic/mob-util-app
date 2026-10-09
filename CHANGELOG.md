@@ -4,6 +4,20 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.12.0] - 2026-10-09
+
+### Changed
+- **Easier one-handed use**:
+  - The drag handle reacts on the whole area around it (full row height,
+    wider to the left), not only on the icon.
+  - In selection mode, *Select all*, *Delete* (and *Lock* for notes) are
+    round buttons in the lower right instead of the top bar.
+  - Lists can be pulled down past their top, so the first rows come
+    within thumb reach; scroll back up to return.
+- **Touch feedback**: rows and buttons all show the same plain ripple.
+  Tapping a shop item's checkbox now ripples the whole row, like tapping
+  the item.
+
 ## [0.11.0] - 2026-10-09
 
 ### Added
