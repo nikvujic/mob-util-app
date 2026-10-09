@@ -47,8 +47,9 @@ void main() {
       greaterThan(tester.getTopLeft(find.text('ITEMS  ·  1')).dy),
     );
 
-    // The checkbox does the same as tapping the row.
-    await tester.tap(find.byType(Checkbox).last);
+    // Tapping on the checkbox does the same as tapping the row: the
+    // checkbox only shows the state, the row takes the tap.
+    await tester.tap(find.byType(Checkbox).last, warnIfMissed: false);
     await tester.pump();
     expect(find.text('TO BUY  ·  2'), findsOneWidget);
     expect(container.read(shopProvider).first.name, 'Milk');

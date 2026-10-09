@@ -14,6 +14,9 @@ abstract final class AppColors {
   static const textMuted = Colors.white54;
   static const textHint = Colors.white38;
   static const divider = Colors.white12;
+
+  /// Touch feedback (ripple) on rows and buttons.
+  static const ripple = Color(0x1FFFFFFF); // white, 12%
 }
 
 /// Shapes used across the app.
@@ -46,7 +49,10 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       canvasColor: AppColors.background,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      splashColor: Colors.transparent,
+      // One kind of touch feedback everywhere: the plain Android ripple in
+      // a soft white, without the extra pressed-state shade underneath.
+      splashFactory: InkRipple.splashFactory,
+      splashColor: AppColors.ripple,
       highlightColor: Colors.transparent,
       hoverColor: Colors.transparent,
       appBarTheme: const AppBarTheme(

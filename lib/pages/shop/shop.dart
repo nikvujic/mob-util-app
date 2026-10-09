@@ -217,9 +217,13 @@ class _ShopItemTile extends StatelessWidget {
         child: ReorderableRow(
           content: Row(
             children: [
-              Checkbox(
-                value: !item.toBuy,
-                onChanged: (_) => onTap(),
+              // Shows the state only: a tap anywhere on the row (with one
+              // ripple for the whole row) toggles it.
+              IgnorePointer(
+                child: Checkbox(
+                  value: !item.toBuy,
+                  onChanged: (_) => onTap(),
+                ),
               ),
               Expanded(
                 child: Text(

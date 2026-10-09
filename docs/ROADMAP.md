@@ -141,8 +141,11 @@ After locked notes, before section locks.
 - [x] **Bigger drag-handle grab area** — keep the icon size, but the whole
   area around it (full row height, 80 dp wide, reaching left of the
   icon) starts a drag.
-- [ ] **Ripple effects** — review: they look off (e.g. clipping, colour,
-  ripple under selection highlight); make them consistent.
+- [x] **Ripple effects** — review: they look off (e.g. clipping, colour,
+  ripple under selection highlight); make them consistent. Ripples were
+  switched off app-wide but some widgets drew their own; now one plain
+  ripple (white 12%) everywhere, clipped to the card; the shop checkbox
+  only shows state, so the whole row ripples as one.
 - [ ] **Selection actions at the bottom right** — in selection mode, *select
   all* and *delete* become two buttons side by side in the lower right
   (thumb reach), with extra bottom space so the list can scroll clear of

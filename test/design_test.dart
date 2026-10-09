@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/crypto.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -269,6 +270,64 @@ void main() {
     await check('Groceries');
     await openTab(tester, 'Shop');
     await check('Milk');
+  });
+
+  group('touch feedback', () {
+    /// Presses (without releasing) on [target] inside the row showing
+    /// [text], and returns the layer the row's ripple is drawn on.
+    Future<Object> pressRow(
+      WidgetTester tester,
+      String text, {
+      Finder? target,
+    }) async {
+      final row = find.ancestor(
+        of: find.text(text),
+        matching: find.byType(SelectableCard),
+      );
+      await tester.startGesture(tester.getCenter(target ?? row));
+      await tester.pump(const Duration(milliseconds: 100));
+      return Material.of(
+        tester.element(
+          find.descendant(of: row, matching: find.byType(InkWell)),
+        ),
+      );
+    }
+
+    testWidgets('rows ripple in the app ripple colour', (tester) async {
+      await seed(await pumpApp(tester));
+      await tester.pump();
+      final material = await pressRow(tester, 'Groceries');
+      expect(material, paints..circle());
+
+      final theme = Theme.of(tester.element(find.text('Groceries')));
+      expect(theme.splashColor, AppColors.ripple);
+      expect(theme.splashFactory, InkRipple.splashFactory);
+    });
+
+    testWidgets("a shop row's checkbox gives the row's ripple", (tester) async {
+      await seed(await pumpApp(tester));
+      await openTab(tester, 'Shop');
+      final checkbox = find.descendant(
+        of: find.ancestor(
+          of: find.text('Milk'),
+          matching: find.byType(SelectableCard),
+        ),
+        matching: find.byType(Checkbox),
+      );
+      final material = await pressRow(tester, 'Milk', target: checkbox);
+      expect(material, paints..circle());
+      // The checkbox takes no touches itself, so the ripple is the row's.
+      expect(
+        tester
+            .widget<IgnorePointer>(
+              find
+                  .ancestor(of: checkbox, matching: find.byType(IgnorePointer))
+                  .first,
+            )
+            .ignoring,
+        isTrue,
+      );
+    });
   });
 
   testWidgets('a locked note row: same height, lock announced', (tester) async {
