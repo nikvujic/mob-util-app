@@ -250,10 +250,11 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// The app locked (L4) while a locked note is open: save it and close,
   /// together with anything open on top (e.g. a dialog).
   void _closeBecauseLocked() {
-    if (_closedByLock) return;
+    final route = ModalRoute.of(context);
+    // Already closed (e.g. the whole section locked and closed it).
+    if (_closedByLock || !(route?.isActive ?? false)) return;
     _closedByLock = true;
     _save();
-    final route = ModalRoute.of(context);
     final navigator = Navigator.of(context);
     navigator.popUntil((r) => r == route);
     navigator.pop();

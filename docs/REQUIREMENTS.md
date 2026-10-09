@@ -28,7 +28,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G5 | Deleting always asks for confirmation through the shared dialog. | ✅ |
 | G6 | All data persists locally and is saved on every change; edits in progress are autosaved while typing and when the app goes to the background. | ✅ |
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app — after a confirming second press: the first shows *Press back again to exit*, a second within 2 s exits. Back first closes an open menu or leaves selection mode. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
-| G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | 🚧 menu with Security (master password; section locks to come) and Backup (export); version shown |
+| G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | ✅ |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
@@ -66,7 +66,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | L2 | The password itself is never stored. A key is derived from it with a slow KDF (Argon2id/PBKDF2 + random salt); only the salt, KDF parameters and a verifier are stored. | ✅ Argon2id (verified against OpenSSL); only a verifier is stored |
 | L3 | Locked data is encrypted with an authenticated cipher (AES-GCM). Without the password it cannot be read, also not from an export. Forgotten password = locked data is unrecoverable; the setup screen says so clearly. | ✅ encrypted backups and locked notes |
 | L4 | **Convenient unlock:** entering the password once unlocks everything (locked notes and locked sections). It stays unlocked while the app is in use and while it is briefly in the background (e.g. switching away to copy something). It locks again when the app has been in the background for **5 minutes**, when the app is closed (removed from recent apps), or when "Lock now" is used. | ✅ Lock now in the menu and on Security; encrypted export uses the open session |
-| L5 | **Section locks** on the Security page: per main section (Notes, Shop, Planner, Other) a switch to lock the whole section. Opening a locked section requires unlocking (L4). Only available once a master password is set. | ⏳ |
+| L5 | **Section locks** on the Security page: per main section (Notes, Shop, Planner, Other) a switch to lock the whole section. Opening a locked section requires unlocking (L4). Only available once a master password is set. | ✅ hides the section (no encryption — locked notes are the encrypted option); turning a lock off needs the app unlocked; backups need unlocking while a section is locked |
 | L6 | Unlock with fingerprint as an alternative to typing the password. | 💭 later |
 
 ## S — Shop
@@ -85,7 +85,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | P1 | Tab renamed to **Planner**. | ✅ |
 | P2 | v1: a list of tasks, each with a title and an optional description. Add, open/edit, delete (select mode, as elsewhere). Deleting is how a task is "done". | ⏳ |
-| P3 | Can be locked as a whole section (L5). | ⏳ |
+| P3 | Can be locked as a whole section (L5). | ✅ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | 💭 later |
 
 ## U — UI polish ("fun but practical")

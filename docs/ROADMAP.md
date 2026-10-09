@@ -162,7 +162,11 @@ After locked notes, before section locks.
 
 ### New sections
 
-13. [ ] **Section locks (L5)** — Security switches to lock whole sections.
+13. [x] **Section locks (L5)** — Security switches to lock whole sections.
+    A locked section shows a lock screen while the app is locked (it hides
+    the section; it doesn't encrypt it). Turning a lock off needs the app
+    unlocked; removing the master password removes the locks; backups
+    need unlocking while a section is locked.
 14. [ ] **Planner v1 (P1, P2)** — tasks with title + description; add, edit,
     delete.
 15. [ ] **Other → Counters (O1, O2).**

@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/core/crypto.dart';
+import 'package:the_app/models/app_section.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 
-/// Master password (L1) and section locks (L5, coming later).
+/// Master password (L1) and section locks (L5).
 class SecurityPage extends ConsumerWidget {
   const SecurityPage({super.key});
 
@@ -33,9 +35,29 @@ class SecurityPage extends ConsumerWidget {
     if (key != null) await ref.read(sessionProvider.notifier).unlockWith(key);
   }
 
+  /// Turns a section lock on, or off (which needs the app unlocked).
+  Future<void> _setSectionLock(
+    BuildContext context,
+    WidgetRef ref,
+    AppSection section, {
+    required bool lock,
+  }) async {
+    final locks = ref.read(sectionLocksProvider.notifier);
+    if (lock) {
+      locks.lock(section);
+      return;
+    }
+    if (ref.read(sessionProvider) == null) {
+      await _unlock(context, ref);
+      if (ref.read(sessionProvider) == null) return; // cancelled
+    }
+    locks.unlock(section);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasPassword = ref.watch(securityProvider) != null;
+    final locks = ref.watch(sectionLocksProvider);
     final unlocked = ref.watch(sessionProvider) != null;
 
     return Scaffold(
@@ -91,16 +113,60 @@ class SecurityPage extends ConsumerWidget {
             ),
           ],
           const Divider(color: AppColors.divider),
-          const ListTile(
-            enabled: false,
-            leading: Icon(Icons.lock_outline),
-            title: Text('Section locks'),
-            subtitle: Text(
-              'Lock whole sections · coming soon',
-              style: TextStyle(color: AppColors.textSecondary),
+          const _SectionHeader('Section locks'),
+          if (!hasPassword)
+            const ListTile(
+              enabled: false,
+              leading: Icon(Icons.lock_outline),
+              title: Text('Lock whole sections'),
+              subtitle: Text(
+                'Set a master password first',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            )
+          else ...[
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                'A locked section opens only while the app is unlocked. '
+                'It hides the section; for encrypted content, lock notes.',
+                style: TextStyle(color: AppColors.textMuted),
+              ),
             ),
-          ),
+            for (final section in AppSection.values)
+              SwitchListTile(
+                secondary: Icon(
+                  locks.contains(section)
+                      ? Icons.lock_outline
+                      : Icons.lock_open_outlined,
+                ),
+                title: Text(section.label),
+                value: locks.contains(section),
+                onChanged: (lock) =>
+                    _setSectionLock(context, ref, section, lock: lock),
+              ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: AppColors.accent,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

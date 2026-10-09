@@ -9,8 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/backup.dart';
+import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -170,6 +172,24 @@ void main() {
       semantics.dispose();
     });
   }
+
+  testWidgets('accessibility guidelines: a locked section', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final container = await pumpApp(tester);
+    await tester.runAsync(() async {
+      await container
+          .read(securityProvider.notifier)
+          .setPassword('master password');
+      await container.read(sessionProvider.notifier).unlock('master password');
+    });
+    container.read(sectionLocksProvider.notifier).lock(AppSection.notes);
+    container.read(sessionProvider.notifier).lock();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Notes is locked'), findsOneWidget);
+    await expectAccessible(tester);
+    semantics.dispose();
+  });
 
   group('compact shop rows (S4)', () {
     /// The card of the list row showing [text].

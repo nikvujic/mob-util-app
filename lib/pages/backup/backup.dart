@@ -4,6 +4,7 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/backup_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
@@ -59,7 +60,24 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     return key;
   }
 
+  /// While a section is locked and the app is locked, backups need the
+  /// app unlocked: they'd contain (or replace) that section's data.
+  /// False if the user cancels.
+  Future<bool> _unlockIfSectionsClosed() async {
+    if (!ref.read(anySectionClosedProvider)) return true;
+    final keys = await showPasswordPrompt<UnlockedKeys>(
+      context,
+      title: 'Unlock',
+      message: 'Some sections are locked. Enter the master password to '
+          'back up or restore.',
+      confirmLabel: 'Unlock',
+      attempt: ref.read(sessionProvider.notifier).unlock,
+    );
+    return keys != null;
+  }
+
   Future<void> _export() async {
+    if (!await _unlockIfSectionsClosed() || !mounted) return;
     final kind = await showDialog<_ExportKind>(
       context: context,
       builder: (_) => _ExportKindDialog(
@@ -164,6 +182,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ));
 
   Future<void> _import() async {
+    if (!await _unlockIfSectionsClosed() || !mounted) return;
     final importer = ref.read(backupImporterProvider);
 
     final PickedBackup? file;

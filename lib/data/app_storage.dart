@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/json_file_store.dart';
+import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/shop_item.dart';
 
@@ -14,6 +15,8 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
+///     <app documents>/data/settings.json
+///         {"version": 2, "sectionLocks": ["shop", ...]}
 ///
 /// Data is loaded once at startup ([open]) and then saved after every change
 /// by the providers.
@@ -26,6 +29,7 @@ class AppStorage {
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
+  final JsonFileStore? _settingsStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -34,13 +38,18 @@ class AppStorage {
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
 
+  /// Sections locked behind the master password (L5).
+  final Set<AppSection> initialSectionLocks;
+
   AppStorage._(
     this._notesStore,
     this._shopStore,
-    this._securityStore, {
+    this._securityStore,
+    this._settingsStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialMasterPassword,
+    required this.initialSectionLocks,
   });
 
   /// Storage that keeps nothing (for tests and previews).
@@ -48,9 +57,11 @@ class AppStorage {
     this.initialNotes = const [],
     this.initialShopItems = const [],
     this.initialMasterPassword,
+    this.initialSectionLocks = const {},
   })  : _notesStore = null,
         _shopStore = null,
-        _securityStore = null;
+        _securityStore = null,
+        _settingsStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -59,11 +70,13 @@ class AppStorage {
     final notesStore = JsonFileStore(File('${dir.path}/notes.json'));
     final shopStore = JsonFileStore(File('${dir.path}/shop.json'));
     final securityStore = JsonFileStore(File('${dir.path}/security.json'));
+    final settingsStore = JsonFileStore(File('${dir.path}/settings.json'));
 
     return AppStorage._(
       notesStore,
       shopStore,
       securityStore,
+      settingsStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -85,6 +98,13 @@ class AppStorage {
         return verifier == null
             ? null
             : PasswordVerifier.fromJson(verifier as Map<String, dynamic>);
+      }),
+      initialSectionLocks: await _load(settingsStore, const {}, (json) {
+        final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
+        // Unknown sections (from a newer app) are skipped, not fatal.
+        return {
+          for (final id in ids) AppSection.fromId(id as String),
+        }.whereType<AppSection>().toSet();
       }),
     );
   }
@@ -139,11 +159,22 @@ class AppStorage {
     });
   }
 
+  Future<void> saveSectionLocks(Set<AppSection> sections) async {
+    await _settingsStore?.write({
+      'version': formatVersion,
+      'sectionLocks': [
+        for (final s in AppSection.values)
+          if (sections.contains(s)) s.name,
+      ],
+    });
+  }
+
   /// Completes when every pending save is on disk.
   Future<void> flush() async {
     await _notesStore?.flush();
     await _shopStore?.flush();
     await _securityStore?.flush();
+    await _settingsStore?.flush();
   }
 }
 

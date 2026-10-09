@@ -5,13 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/app/app_drawer.dart';
 import 'package:the_app/app/bottom_nav.dart';
+import 'package:the_app/app/section_gate.dart';
 import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/app_section.dart';
 import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/pages/other/other.dart';
 import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/back_handlers.dart';
 
@@ -52,6 +55,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  /// The page of each section, in [AppSection] order.
   static const _pages = [NotesPage(), ShopPage(), PlannerPage(), OtherPage()];
 
   /// How long after a first back press a second one exits the app.
@@ -113,6 +117,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The app locked while something was open on top of a locked section
+    // (e.g. a note): close it, so nothing of the section stays visible.
+    // Pages save when they're closed.
+    ref.listen(
+      sectionClosedProvider(AppSection.values[_selectedIndex]),
+      (wasClosed, closed) {
+        if (closed && wasClosed == false) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      },
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -137,7 +153,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         index: _selectedIndex,
         children: [
           for (var i = 0; i < _pages.length; i++)
-            TickerMode(enabled: i == _selectedIndex, child: _pages[i]),
+            TickerMode(
+              enabled: i == _selectedIndex,
+              child: SectionGate(
+                section: AppSection.values[i],
+                child: _pages[i],
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: BottomNav(

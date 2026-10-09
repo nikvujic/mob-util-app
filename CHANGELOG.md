@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [0.12.0] - 2026-10-09
 
+### Added
+- **Section locks** (Menu → Security): switch on a lock for Notes, Shop,
+  Planner or Other. While the app is locked, a locked section shows a lock
+  screen instead of its content; enter the master password to open it.
+  Turning a lock off needs the password too. A section lock hides the
+  section — to encrypt content, lock notes.
+
 ### Changed
 - **Easier one-handed use**:
   - The drag handle reacts on the whole area around it (full row height,

@@ -88,6 +88,11 @@ a master password adopts that record (saved before the notes); otherwise
 the notes are opened with this phone's key or the backup's, and re-sealed
 under this phone's.
 
+Section locks (`settings.json`) are a gate in the app shell, not
+encryption: `SectionGate` shows a lock screen instead of the section's
+page while the section is locked and the app is locked, and the home
+screen closes anything open on top of it when that happens.
+
 The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.
