@@ -4,6 +4,34 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.13.0] - 2026-10-09
+
+### Added
+- **Themes** (Menu → Themes): Green (the original look), Black (true
+  black for OLED screens) and Clay (warm greys with a clay-orange accent).
+- **Settings** (Menu → Settings): switch the counters' click and
+  vibration on or off.
+- **Counters click and vibrate** on − and +.
+- **Džoni** in Other: a sideways page with a big question and a count —
+  hold anywhere to count one up.
+
+### Changed
+- **Actions sit at the bottom, on your hand's side.** Selection mode and
+  the note editor show their buttons at the bottom right — or bottom left
+  if you tapped on the left half of the screen to bring them up. Top bars
+  keep only ☰ (or ←). Selection's ✕ is now the outermost bottom button.
+- In the note editor, *Discard changes* has a new icon and only appears
+  once there's something to discard; ⋮ is at the bottom too, and the text
+  ends above the buttons.
+- **Other** shows its tools as icon tiles, starting in the bottom right.
+- **Planner**: a fast swipe on the day strip travels many days; the past
+  is greyed out (only back to the oldest unfinished task); no Today
+  button.
+- Lists settle at the top when you scroll back up close to it, and going
+  to a section puts its list back at the top.
+- The drag handle area is a little smaller.
+- **No touch ripples** anymore.
+
 ## [0.12.0] - 2026-10-09
 
 ### Added
