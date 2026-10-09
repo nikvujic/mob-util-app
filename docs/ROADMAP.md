@@ -180,7 +180,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **U4 Snap back to the top** when scrolling up leaves only a little
   pulled-down space (all pull-down lists: Notes, Shop, …).
 - [x] **U5 Drag area a little smaller** (Notes, Shop): 80 → 72 dp.
-- [ ] **No ripples at all** — the touch ripple feels obstructive; remove
+- [x] **No ripples at all** — the touch ripple feels obstructive; remove
   it everywhere (replaces the "one plain ripple" decision).
 - [x] **G13 Going to a section resets its pulled-down space.** (Coming
   back from a note keeps it.)

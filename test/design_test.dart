@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/crypto.dart';
-import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -428,7 +427,7 @@ void main() {
 
   group('touch feedback', () {
     /// Presses (without releasing) on [target] inside the row showing
-    /// [text], and returns the layer the row's ripple is drawn on.
+    /// [text], and returns the layer a ripple would be drawn on.
     Future<Object> pressRow(
       WidgetTester tester,
       String text, {
@@ -447,18 +446,19 @@ void main() {
       );
     }
 
-    testWidgets('rows ripple in the app ripple colour', (tester) async {
+    testWidgets('pressing a row shows no ripple', (tester) async {
       await seed(await pumpApp(tester));
       await tester.pump();
       final material = await pressRow(tester, 'Groceries');
-      expect(material, paints..circle());
+      expect(material, isNot(paints..circle()));
 
       final theme = Theme.of(tester.element(find.text('Groceries')));
-      expect(theme.splashColor, AppColors.ripple);
-      expect(theme.splashFactory, InkRipple.splashFactory);
+      expect(theme.splashFactory, NoSplash.splashFactory);
     });
 
-    testWidgets("a shop row's checkbox gives the row's ripple", (tester) async {
+    testWidgets(
+        "a shop row's checkbox only shows the state; the row takes "
+        'the tap', (tester) async {
       await seed(await pumpApp(tester));
       await openTab(tester, 'Shop');
       final checkbox = find.descendant(
@@ -469,8 +469,7 @@ void main() {
         matching: find.byType(Checkbox),
       );
       final material = await pressRow(tester, 'Milk', target: checkbox);
-      expect(material, paints..circle());
-      // The checkbox takes no touches itself, so the ripple is the row's.
+      expect(material, isNot(paints..circle()));
       expect(
         tester
             .widget<IgnorePointer>(
