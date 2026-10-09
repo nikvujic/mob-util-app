@@ -167,8 +167,8 @@ After locked notes, before section locks.
     the section; it doesn't encrypt it). Turning a lock off needs the app
     unlocked; removing the master password removes the locks; backups
     need unlocking while a section is locked.
-14. [ ] **Planner v1 (P1, P2)** — tasks with title + description; add, edit,
-    delete.
+14. [~] **Planner v1 (P1, P2)** — a to-do list per day with a day strip at
+    the bottom (Nikola's shape). 1/3 data, 2/3 screen done; 3/3 backups.
 15. [ ] **Other → Counters (O1, O2).**
 
 ## Later / ideas

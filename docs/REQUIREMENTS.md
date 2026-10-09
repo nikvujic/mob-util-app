@@ -84,7 +84,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | # | Requirement | Status |
 |---|-------------|--------|
 | P1 | Tab renamed to **Planner**. | ✅ |
-| P2 | v1: a list of tasks, each with a title and an optional description. Add, open/edit, delete (select mode, as elsewhere). Deleting is how a task is "done". | ⏳ |
+| P2 | v1 (Nikola's shape): a **to-do list per day**. A scrollable day strip at the bottom picks the day (swipe or tap; today marked, days with tasks dotted); the list above shows that day's tasks; + adds tasks to that day. Tapping a task marks it done (struck through); long-press selects to delete; drag handle reorders. Later: descriptions, editing, moving to another day. | ✅ v1 |
 | P3 | Can be locked as a whole section (L5). | ✅ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | 💭 later |
 

@@ -140,10 +140,11 @@ void main() {
     expect(find.text('Press back again to exit'), findsNothing);
   });
 
-  testWidgets('Planner and Other show their placeholders', (tester) async {
+  testWidgets('Planner opens on today; Other shows its placeholder',
+      (tester) async {
     await pumpApp(tester);
     await openTab(tester, 'Planner');
-    expect(find.text('The planner is coming soon'), findsOneWidget);
+    expect(find.textContaining('Today · '), findsOneWidget);
     await openTab(tester, 'Other');
     expect(find.text('More tools are coming soon'), findsOneWidget);
   });
