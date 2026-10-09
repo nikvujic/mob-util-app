@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/providers/security_provider.dart';
 
@@ -93,5 +94,64 @@ void main() {
     await storage.flush();
     storage = await AppStorage.open(directory: dir);
     expect(SecurityNotifier(storage).hasMasterPassword, isFalse);
+  });
+
+  group('removing runs beforeRemove first', () {
+    test('with the data key, while the password is still set', () async {
+      late SecurityNotifier notifier;
+      DataKey? given;
+      var stillSet = false;
+      notifier = SecurityNotifier(
+        AppStorage.inMemory(),
+        beforeRemove: (dataKey) async {
+          given = dataKey;
+          stillSet = notifier.hasMasterPassword;
+        },
+      );
+      await notifier.setPassword(password);
+      final verifier = notifier.state!;
+      final expected = await verifier.unwrapDataKey(
+        (await verifier.unlock(password))!,
+      );
+
+      await notifier.removePassword(password);
+
+      expect(stillSet, isTrue);
+      expect(
+          await seal([1, 2, 3], given!, context: 'c').then(
+            (box) => open(box, expected!, context: 'c'),
+          ),
+          [1, 2, 3],
+          reason: 'the same data key');
+      expect(notifier.hasMasterPassword, isFalse);
+    });
+
+    test('keeps the password if it fails', () async {
+      final notifier = SecurityNotifier(
+        AppStorage.inMemory(),
+        beforeRemove: (_) async => throw const LockedDataException(),
+      );
+      await notifier.setPassword(password);
+
+      await expectLater(
+        notifier.removePassword(password),
+        throwsA(isA<LockedDataException>()),
+      );
+      expect(notifier.hasMasterPassword, isTrue);
+    });
+
+    test('not for a wrong password', () async {
+      var called = false;
+      final notifier = SecurityNotifier(
+        AppStorage.inMemory(),
+        beforeRemove: (_) async => called = true,
+      );
+      await notifier.setPassword(password);
+      await expectLater(
+        notifier.removePassword('wrong password'),
+        throwsA(isA<WrongPasswordException>()),
+      );
+      expect(called, isFalse);
+    });
   });
 }

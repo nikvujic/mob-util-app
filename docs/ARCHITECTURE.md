@@ -77,6 +77,11 @@ accepted (`updateNote` refuses it). Its encrypted changes run one at a
 time, in order, and one still pending is dropped if the note is restored
 meanwhile (Discard), so it can't undo that.
 
+Removing the master password first unlocks every locked note in one
+write and waits until it's on disk; only then is the password removed. If
+any note doesn't open, nothing changes. A crash at any point leaves either
+the password or plain notes, never locked notes without a password.
+
 The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.

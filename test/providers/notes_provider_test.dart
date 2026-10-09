@@ -224,5 +224,37 @@ void main() {
       await notifier.unlockNote(id, key);
       expect(notifier.state.single.content, 'secret');
     });
+
+    test('unlockAll unlocks every locked note in one change', () async {
+      final a = await lockedNote(content: 'one');
+      final b = notifier.addNote(title: 'B', content: 'two');
+      await notifier.lockNote(b, key);
+      notifier.addNote(title: 'Plain', content: 'three');
+      var changes = 0;
+      notifier.addListener((_) => changes++, fireImmediately: false);
+
+      await notifier.unlockAll(key);
+
+      expect(changes, 1);
+      expect(notifier.state.any((n) => n.isLocked), isFalse);
+      expect(
+        notifier.state.map((n) => n.content),
+        containsAll(['one', 'two', 'three']),
+      );
+      expect(notifier.state.firstWhere((n) => n.id == a).title, 'Bank');
+    });
+
+    test('unlockAll changes nothing if one note does not open', () async {
+      await lockedNote();
+      final other = notifier.addNote(title: 'Other', content: 'x');
+      await notifier.lockNote(other, otherKey);
+      final before = notifier.state;
+
+      await expectLater(
+        notifier.unlockAll(key),
+        throwsA(isA<DecryptionException>()),
+      );
+      expect(identical(notifier.state, before), isTrue);
+    });
   });
 }

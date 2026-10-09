@@ -130,6 +130,24 @@ class NotesNotifier extends StateNotifier<List<Note>> {
         _replace(current.unlocked(content));
       });
 
+  /// Unlocks every locked note in a single change (one write), e.g. before
+  /// the master password is removed. Throws [DecryptionException] and
+  /// changes nothing if [key] can't open all of them.
+  Future<void> unlockAll(DataKey key) => _serially(() async {
+        final contents = <String, String>{
+          for (final note in state.where((n) => n.isLocked))
+            note.id: await readContent(note, key),
+        };
+        if (contents.isEmpty) return;
+        state = [
+          for (final note in state)
+            if (note.isLocked && contents.containsKey(note.id))
+              note.unlocked(contents[note.id]!)
+            else
+              note,
+        ];
+      });
+
   /// Updates a locked note: [content] is sealed with [key]. Like
   /// [updateNote], nothing changes (not even the modified time) unless the
   /// title or content actually differ.

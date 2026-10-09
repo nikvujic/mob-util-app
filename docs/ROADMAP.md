@@ -119,8 +119,9 @@ Small fixes, not urgent; can go out together as one polish release.
       selection mode), unlock prompt on open, set-up route if no master
       password. Setting the master password also unlocks the app; an open
       locked note is saved and closed when the app locks.
-    - [ ] 12d Removing the master password unlocks all locked notes first
-      (with confirmation).
+    - [x] 12d Removing the master password unlocks all locked notes first
+      (the form says how many). All are opened before anything changes and
+      saved before the password goes; if one doesn't open, nothing changes.
     - [ ] 12e Backups with locked notes: carry the wrapped data key;
       import re-seals under this phone's key (or adopts it if none).
 

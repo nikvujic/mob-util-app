@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/core/format.dart';
+import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/password_field.dart';
@@ -114,11 +116,21 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
         _busy = false;
         _currentError = 'Wrong password';
       });
+    } on LockedDataException {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _currentError = "Some locked notes can't be opened with this "
+            'password, so it was kept. Nothing was changed.';
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final lockedNotes = _mode == PasswordFormMode.remove
+        ? ref.watch(notesProvider).where((n) => n.isLocked).length
+        : 0;
     final fields = <Widget>[
       if (_mode.needsCurrent)
         PasswordField(
@@ -164,6 +176,13 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (lockedNotes > 0) ...[
+              _Warning(
+                text: '${countOf(lockedNotes, 'locked note', 'locked notes')}'
+                    ' will be unlocked and stored unencrypted.',
+              ),
+              const SizedBox(height: 12),
+            ],
             _Warning(text: _mode.warning),
             const SizedBox(height: 16),
             for (final field in fields) ...[

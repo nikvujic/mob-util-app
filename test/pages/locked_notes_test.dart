@@ -320,4 +320,28 @@ void main() {
       expect(note('Bank').content, 'Bank text');
     });
   });
+
+  testWidgets('removing the master password says it unlocks locked notes',
+      (tester) async {
+    await start(tester, titles: ['Bank', 'Mail']);
+    await seedLocked(tester, 'Bank');
+
+    await openMenu(tester);
+    await tester.tap(find.text('Security'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove master password'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('1 locked note will be unlocked and stored unencrypted.'),
+      findsOneWidget,
+    );
+
+    await tester.enterText(find.byKey(const Key('currentPassword')), password);
+    await tester.tap(find.widgetWithText(FilledButton, 'Remove password'));
+    await settleBusy(tester);
+
+    expect(find.text('Master password removed'), findsOneWidget);
+    expect(note('Bank').isLocked, isFalse);
+    expect(note('Bank').content, 'Bank text');
+  });
 }

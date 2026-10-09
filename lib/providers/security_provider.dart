@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/providers/notes_provider.dart';
 
 /// Rules for choosing a master password.
 abstract final class MasterPasswordRules {
@@ -21,13 +22,27 @@ class WrongPasswordException implements Exception {
   const WrongPasswordException();
 }
 
+/// The master password can't be removed: some locked data can't be opened
+/// with it, so removing it would leave that data unreadable for good.
+class LockedDataException implements Exception {
+  const LockedDataException();
+}
+
+/// Run before the master password is removed, with its data key (null for
+/// a record without one): must unlock everything the key protects and have
+/// it on disk, or throw [LockedDataException].
+typedef BeforeRemovePassword = Future<void> Function(DataKey? dataKey);
+
 /// The master password (L1–L3). State: its verifier (which also holds the
 /// wrapped data key), or null if none is set. The password itself is never kept — not even in memory after an
 /// operation finishes.
 class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
   final AppStorage _storage;
+  final BeforeRemovePassword _beforeRemove;
 
-  SecurityNotifier(this._storage) : super(_storage.initialMasterPassword) {
+  SecurityNotifier(this._storage, {BeforeRemovePassword? beforeRemove})
+      : _beforeRemove = beforeRemove ?? ((_) async {}),
+        super(_storage.initialMasterPassword) {
     addListener(_storage.saveMasterPassword, fireImmediately: false);
   }
 
@@ -74,9 +89,14 @@ class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
   }
 
   /// Removes the master password. Throws [WrongPasswordException] if
-  /// [current] is wrong (and changes nothing).
+  /// [current] is wrong, or [LockedDataException] if locked data can't be
+  /// unlocked first (and then keeps the password).
+  ///
+  /// Everything locked is unlocked and saved *before* the password goes, so
+  /// even a crash in between can't leave data locked without a password.
   Future<void> removePassword(String current) async {
-    await _unlock(current);
+    final key = await _unlock(current);
+    await _beforeRemove(await state!.unwrapDataKey(key));
     state = null;
   }
 
@@ -97,5 +117,22 @@ class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
 
 final securityProvider =
     StateNotifierProvider<SecurityNotifier, PasswordVerifier?>((ref) {
-  return SecurityNotifier(ref.watch(appStorageProvider));
+  final storage = ref.watch(appStorageProvider);
+  return SecurityNotifier(
+    storage,
+    beforeRemove: (dataKey) async {
+      final notes = ref.read(notesProvider.notifier);
+      if (dataKey != null) {
+        try {
+          await notes.unlockAll(dataKey);
+        } on DecryptionException {
+          throw const LockedDataException();
+        }
+      }
+      if (ref.read(notesProvider).any((n) => n.isLocked)) {
+        throw const LockedDataException();
+      }
+      await storage.flush();
+    },
+  );
 });
