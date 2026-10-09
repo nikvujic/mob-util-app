@@ -149,6 +149,8 @@ After locked notes, before section locks.
   empty space, so the top items come within thumb reach; it always opens
   at the top and springs back when scrolled back up. Needs a prototype to
   get the feel right.
+- [ ] **Shop: new items at the end of *To buy*** (S5) instead of the top,
+  so the list keeps the order things were added in.
 
 ### New sections
 
