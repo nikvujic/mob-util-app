@@ -254,6 +254,16 @@ void main() {
         greaterThanOrEqualTo(ReorderOrSelectIndicator.width),
         reason: text,
       );
+      // The icon stays near the right edge; the extra area is to its left.
+      final icon = find.descendant(
+        of: row,
+        matching: find.byIcon(Icons.drag_handle),
+      );
+      expect(
+        tester.getRect(icon).right,
+        tester.getRect(handle).right - ReorderOrSelectIndicator.iconInset,
+        reason: text,
+      );
     }
 
     await check('Groceries');

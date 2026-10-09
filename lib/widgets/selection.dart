@@ -241,7 +241,10 @@ class ReorderOrSelectIndicator extends StatelessWidget {
   /// Width of the area: wider than the icon, so the handle is easy to
   /// grab with a thumb. It's as tall as the row when the row lets it
   /// stretch (see [ReorderableRow]), and never less than a touch target.
-  static const width = 64.0;
+  /// The icon sits [iconInset] from the right edge; the rest of the area
+  /// reaches left of it, towards the thumb.
+  static const width = 80.0;
+  static const iconInset = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -252,13 +255,19 @@ class ReorderOrSelectIndicator extends StatelessWidget {
           maxWidth: width,
           minHeight: kMinInteractiveDimension,
         ),
-        child: Center(
-          child: selectionMode
-              ? Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? AppColors.accent : AppColors.textHint,
-                )
-              : const Icon(Icons.drag_handle, color: AppColors.textHint),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: iconInset),
+            child: selectionMode
+                ? Icon(
+                    selected
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: selected ? AppColors.accent : AppColors.textHint,
+                  )
+                : const Icon(Icons.drag_handle, color: AppColors.textHint),
+          ),
         ),
       ),
     );
