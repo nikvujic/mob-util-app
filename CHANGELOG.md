@@ -4,9 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.11.0] - 2026-10-08
+## [0.11.0] - 2026-10-09
 
 ### Added
+- **Locked notes**: lock a note from its ⋮ menu (or several in selection
+  mode). Its content is stored encrypted with your master password; the
+  title stays visible in the list with a lock icon. Opening it asks for
+  the master password if the app is locked. **Remove lock** turns it back
+  into a normal note. Without a master password, locking first helps you
+  set one.
+- **Backups keep locked notes locked**: they stay encrypted inside every
+  backup file. Restoring on a phone without a master password takes over
+  the backup's; otherwise the backup's password is asked once (not at all
+  for a backup from this phone) and the notes then open with yours.
 - **Unlock once**: after entering the master password, the app stays
   unlocked while you use it and during short trips to other apps. It locks
   again after 5 minutes in the background, when the app is closed, or with
@@ -18,6 +28,9 @@ Release with the installable APK.
   selection mode first.
 
 ### Changed
+- Removing the master password unlocks all locked notes first (the form
+  says how many), so none are ever left without a password.
+- Setting a master password also unlocks the app.
 - **Dialogs redesigned**: clearer title, message and buttons, with squarer
   corners. Leaving a note now asks with **Discard** and **Save** buttons
   and says that notes are saved automatically.
