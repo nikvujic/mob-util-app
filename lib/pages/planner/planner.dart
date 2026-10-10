@@ -16,8 +16,8 @@ import 'package:the_app/widgets/selection.dart';
 
 /// The planner (P2, P7): each day is a timeline from 00:00 to 24:00, with
 /// tasks as blocks of time and the gaps between them as free time. Tapping
-/// free time adds a task there; a block's checkbox ticks it off. The day
-/// strip at the bottom picks the day.
+/// free time adds a task there; tapping a block edits it; its checkbox
+/// ticks it off. The day strip at the bottom picks the day.
 class PlannerPage extends ConsumerStatefulWidget {
   /// Height of one hour on the timeline: a 30-minute block is one touch
   /// target high.
@@ -52,7 +52,16 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   }
 
   Future<void> _addIn(DateTime day, FreeSlot slot) async {
-    final task = await showAddTaskSheet(context, slot);
+    // Today, in free time that's going on now: start at the next full hour
+    // rather than at the (past) start of the free time.
+    final now = _now;
+    int? start;
+    if (daysBetween(dayOf(now), day) == 0) {
+      final minutes = now.hour * 60 + now.minute;
+      final nextHour = (minutes + 59) ~/ 60 * 60;
+      if (slot.start < nextHour && nextHour < slot.end) start = nextHour;
+    }
+    final task = await showAddTaskSheet(context, slot, start: start);
     if (task == null || !mounted) return;
     try {
       ref.read(plannerProvider.notifier).addTask(
@@ -61,6 +70,28 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             start: task.start,
             end: task.end,
           );
+    } on TaskOverlapException {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('That time is taken.')),
+      );
+    }
+  }
+
+  Future<void> _edit(PlannerTask task) async {
+    final notifier = ref.read(plannerProvider.notifier);
+    final changed = await showEditTaskSheet(
+      context,
+      task,
+      notifier.roomFor(task),
+    );
+    if (changed == null || !mounted) return;
+    try {
+      notifier.updateTask(
+        task.id,
+        title: changed.title,
+        start: changed.start,
+        end: changed.end,
+      );
     } on TaskOverlapException {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('That time is taken.')),
@@ -128,6 +159,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                     tasks: timed,
                     selection: _selection,
                     onToggleDone: ref.read(plannerProvider.notifier).toggleDone,
+                    onEdit: _edit,
                     onAdd: _selection.isActive
                         ? null
                         : (slot) => _addIn(day, slot),
@@ -170,6 +202,7 @@ class _Timeline extends StatelessWidget {
   final List<PlannerTask> tasks;
   final SelectionController selection;
   final ValueChanged<String> onToggleDone;
+  final ValueChanged<PlannerTask> onEdit;
 
   /// Null while selecting.
   final ValueChanged<FreeSlot>? onAdd;
@@ -178,6 +211,7 @@ class _Timeline extends StatelessWidget {
     required this.tasks,
     required this.selection,
     required this.onToggleDone,
+    required this.onEdit,
     required this.onAdd,
   });
 
@@ -233,7 +267,7 @@ class _Timeline extends StatelessWidget {
               child: _TaskBlock(
                 task: task,
                 selected: selection.isSelected(task.id),
-                onTap: () => selection.handleTap(task.id, () {}),
+                onTap: () => selection.handleTap(task.id, () => onEdit(task)),
                 onLongPress: () => selection.handleLongPress(task.id),
                 onToggleDone: () => onToggleDone(task.id),
               ),

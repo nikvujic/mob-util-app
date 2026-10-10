@@ -40,6 +40,44 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     state = [...state, task];
   }
 
+  /// Changes a task's title and times. Blank titles keep the old one.
+  /// Throws [TaskOverlapException] if the new time isn't free.
+  void updateTask(
+    String id, {
+    required String title,
+    required int start,
+    required int end,
+  }) {
+    final task = state.firstWhere((t) => t.id == id);
+    final trimmed = title.trim();
+    final updated = PlannerTask(
+      id: id,
+      title: trimmed.isEmpty ? task.title : trimmed,
+      day: task.day,
+      start: start,
+      end: end,
+      done: task.done,
+    );
+    final others = state.where((t) => t.id != id && isSameDay(t.day, task.day));
+    if (!freeSlots(others).any((s) => s.start <= start && end <= s.end)) {
+      throw const TaskOverlapException();
+    }
+    state = [
+      for (final t in state)
+        if (t.id == id) updated else t,
+    ];
+  }
+
+  /// The time [task] could take: the free time around it, up to its
+  /// neighbours (its own time included).
+  FreeSlot roomFor(PlannerTask task) {
+    final others =
+        state.where((t) => t.id != task.id && isSameDay(t.day, task.day));
+    return freeSlots(others).firstWhere(
+      (s) => s.start <= task.start! && task.end! <= s.end,
+    );
+  }
+
   void toggleDone(String id) {
     state = [
       for (final t in state)

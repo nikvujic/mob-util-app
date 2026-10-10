@@ -5,37 +5,75 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/planner_task.dart';
 
-/// What the add sheet returns.
+/// What the task sheet returns.
 typedef NewTask = ({String title, int start, int end});
 
-/// Asks for a new task in the free [slot]: a title, the start (the slot's
-/// start by default) and the end (1 hour later by default; quick options
+/// Asks for a new task in the free [slot]: a title, the start ([start], or
+/// the slot's start) and the end (1 hour later by default; quick options
 /// 15 / 30 / 60 / 120 min and the end of the free time, or a picked time).
 /// Null if dismissed.
-Future<NewTask?> showAddTaskSheet(BuildContext context, FreeSlot slot) {
+Future<NewTask?> showAddTaskSheet(
+  BuildContext context,
+  FreeSlot slot, {
+  int? start,
+}) {
   return showModalBottomSheet<NewTask>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => AddTaskSheet(slot: slot),
+    builder: (_) => TaskSheet(slot: slot, start: start),
   );
 }
 
-class AddTaskSheet extends StatefulWidget {
+/// Edits [task]: its title and times, which can move within [room] (the
+/// free time around it, up to its neighbours). Null if dismissed.
+Future<NewTask?> showEditTaskSheet(
+  BuildContext context,
+  PlannerTask task,
+  FreeSlot room,
+) {
+  return showModalBottomSheet<NewTask>(
+    context: context,
+    isScrollControlled: true,
+    builder: (_) => TaskSheet(
+      slot: room,
+      title: task.title,
+      start: task.start,
+      end: task.end,
+      submitLabel: 'Save',
+    ),
+  );
+}
+
+/// The sheet for adding or editing a task within [slot].
+class TaskSheet extends StatefulWidget {
   /// Quick lengths offered for the end, in minutes.
   static const quickLengths = [15, 30, 60, 120];
 
+  /// The time the task can take: free time (plus the task's own, when
+  /// editing).
   final FreeSlot slot;
+  final String title;
+  final int? start;
+  final int? end;
+  final String submitLabel;
 
-  const AddTaskSheet({super.key, required this.slot});
+  const TaskSheet({
+    super.key,
+    required this.slot,
+    this.title = '',
+    this.start,
+    this.end,
+    this.submitLabel = 'Add',
+  });
 
   @override
-  State<AddTaskSheet> createState() => _AddTaskSheetState();
+  State<TaskSheet> createState() => _TaskSheetState();
 }
 
-class _AddTaskSheetState extends State<AddTaskSheet> {
-  final _title = TextEditingController();
-  late int _start = widget.slot.start;
-  late int _end = math.min(_start + 60, widget.slot.end);
+class _TaskSheetState extends State<TaskSheet> {
+  late final _title = TextEditingController(text: widget.title);
+  late int _start = widget.start ?? widget.slot.start;
+  late int _end = widget.end ?? math.min(_start + 60, widget.slot.end);
 
   @override
   void dispose() {
@@ -134,7 +172,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
               Wrap(
                 spacing: 8,
                 children: [
-                  for (final length in AddTaskSheet.quickLengths)
+                  for (final length in TaskSheet.quickLengths)
                     ChoiceChip(
                       label: Text(
                           length < 60 ? '$length min' : '${length ~/ 60} h'),
@@ -153,8 +191,10 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
-                child:
-                    FilledButton(onPressed: _submit, child: const Text('Add')),
+                child: FilledButton(
+                  onPressed: _submit,
+                  child: Text(widget.submitLabel),
+                ),
               ),
             ],
           ),

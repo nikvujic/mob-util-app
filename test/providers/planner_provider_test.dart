@@ -175,4 +175,51 @@ void main() {
   test('day JSON is a calendar date', () {
     expect(PlannerTask.dayToJson(DateTime(2026, 1, 5)), '2026-01-05');
   });
+
+  group('editing', () {
+    test('changes title and times; blank title keeps the old one', () {
+      planner.addTask(monday, 'Gym', start: at(8), end: at(9));
+      planner.toggleDone(idOf('Gym'));
+
+      planner.updateTask(idOf('Gym'), title: 'Run', start: at(7), end: at(8));
+      var task = planner.state.single;
+      expect((task.title, task.start, task.end), ('Run', at(7), at(8)));
+      expect(task.done, isTrue, reason: 'stays ticked off');
+      expect(task.day, monday);
+
+      planner.updateTask(idOf('Run'), title: '  ', start: at(7), end: at(9));
+      task = planner.state.single;
+      expect((task.title, task.end), ('Run', at(9)));
+    });
+
+    test('can overlap its own old time, never another task', () {
+      planner
+        ..addTask(monday, 'Gym', start: at(8), end: at(9))
+        ..addTask(monday, 'Work', start: at(10), end: at(17));
+
+      planner.updateTask(idOf('Gym'),
+          title: 'Gym', start: at(8.5), end: at(10));
+      expect(
+        () => planner.updateTask(
+          idOf('Gym'),
+          title: 'Gym',
+          start: at(9),
+          end: at(10.5),
+        ),
+        throwsA(isA<TaskOverlapException>()),
+      );
+      expect(planner.state.firstWhere((t) => t.title == 'Gym').end, at(10));
+    });
+
+    test('room: the free time around a task, up to its neighbours', () {
+      planner
+        ..addTask(monday, 'Gym', start: at(8), end: at(9))
+        ..addTask(monday, 'Lunch', start: at(12), end: at(13))
+        ..addTask(monday, 'Work', start: at(14), end: at(17))
+        ..addTask(tuesday, 'Other day', start: at(10), end: at(11));
+
+      final lunch = planner.state.firstWhere((t) => t.title == 'Lunch');
+      expect(planner.roomFor(lunch), (start: at(9), end: at(14)));
+    });
+  });
 }

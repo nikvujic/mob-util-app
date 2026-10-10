@@ -246,6 +246,18 @@ patterns other work builds on (G11, themes), then the bigger features.
 **Still open:**
 
 
+### Round 4 — after 0.13 (2026-10-10)
+
+- [x] **Planner: edit a block** — tap it to change title and times (within
+  the free time around it, up to its neighbours); overlaps refused.
+- [x] **Planner: smarter default start** — on today, in free time that's
+  going on now, a new task starts at the next full hour.
+- [ ] **Forgot master password → reset** (deletes only locked content;
+  normal notes, shop, planner stay).
+- [ ] **Notes: undo / redo while typing** (N8).
+- [ ] **Shop: scroll to an item as it's added.**
+- [ ] **Džoni: hidden reset / set of the count.**
+
 ## Later / ideas
 
 - Undo / redo while typing in a note, e.g. undo a paste (N8)

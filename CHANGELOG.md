@@ -4,6 +4,16 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.14.0] - 2026-10-10
+
+### Added
+- **Edit planner tasks**: tap a block to change its title or times (up to
+  the tasks around it).
+
+### Changed
+- On today, a new planner task starts at the next full hour instead of
+  at the start of the free time.
+
 ## [0.13.0] - 2026-10-10
 
 ### Added

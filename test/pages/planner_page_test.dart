@@ -174,14 +174,56 @@ void main() {
       TextDecoration.lineThrough,
     );
 
-    // Tapping the block itself doesn't tick it.
-    await tester.tap(find.text('Gym'));
-    await tester.pump();
-    expect(container.read(plannerProvider).single.done, isTrue);
-
     await tester.tap(find.byType(Checkbox));
     await tester.pump();
     expect(container.read(plannerProvider).single.done, isFalse);
+  });
+
+  testWidgets('tapping a block edits it: title and times', (tester) async {
+    await openPlanner(tester);
+    add(today, 'Gym'); // 12:00–13:00
+    add(today, 'Work', hour: 14); // 14:00–15:00
+    await tester.pump();
+
+    await tester.tap(find.text('Gym'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(FilledButton, 'Save'), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('taskTitle')))
+          .controller!
+          .text,
+      'Gym',
+    );
+    expect(find.widgetWithText(TextButton, '12:00'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '13:00'), findsOneWidget);
+    expect(container.read(plannerProvider).first.done, isFalse,
+        reason: 'tapping edits, it does not tick off');
+
+    await tester.enterText(find.byKey(const Key('taskTitle')), 'Gym + sauna');
+    // Up to the next task: 14:00.
+    await tester.tap(find.text('Until free time ends'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    final gym = container.read(plannerProvider).first;
+    expect((gym.title, gym.start, gym.end), ('Gym + sauna', 12 * 60, 14 * 60));
+    expect(find.text('12:00–14:00'), findsOneWidget);
+  });
+
+  testWidgets('today, a new task starts at the next full hour, not the past',
+      (tester) async {
+    container =
+        await pumpApp(tester, clock: () => DateTime(2026, 10, 8, 12, 20));
+    await openTab(tester, 'Planner');
+
+    await tester.ensureVisible(free('00:00–24:00'));
+    await tester.pumpAndSettle();
+    await tester.tap(free('00:00–24:00'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextButton, '13:00'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '14:00'), findsOneWidget);
   });
 
   testWidgets('long-press selects; delete removes after confirming',
