@@ -50,7 +50,7 @@ Future<void> editRoutine(
       end: changed.end,
       weekdays: changed.weekdays ?? routine.weekdays,
       until: changed.until,
-      color: routine.color,
+      color: changed.color,
     );
   } on TaskOverlapException {
     messenger
@@ -116,6 +116,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             weekdays: added.weekdays ?? {_weekday},
             from: today,
             until: added.until,
+            color: added.color,
           );
     } on TaskOverlapException {
       ScaffoldMessenger.of(context)
@@ -169,6 +170,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
                       start: r.start,
                       end: r.end,
                       repeats: true,
+                      color: BlockColor.fromName(r.color),
                       onTap: () => editRoutine(context, ref, r),
                     ),
                 ],

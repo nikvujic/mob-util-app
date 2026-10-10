@@ -133,6 +133,28 @@ extension AppColorsOf on BuildContext {
 }
 
 /// Shapes used across the app.
+/// Colours for planner blocks (P9): a muted fill, so the text on it stays
+/// readable, and a bright stripe along the block's edge. The same in every
+/// theme (all are dark).
+enum BlockColor {
+  red('Red', Color(0xFF4A2427), Color(0xFFE57373)),
+  orange('Orange', Color(0xFF4A3121), Color(0xFFFFB74D)),
+  yellow('Yellow', Color(0xFF433D1F), Color(0xFFFFE082)),
+  green('Green', Color(0xFF213F27), Color(0xFF81C784)),
+  blue('Blue', Color(0xFF1F3449), Color(0xFF64B5F6)),
+  purple('Purple', Color(0xFF382A4B), Color(0xFFB39DDB));
+
+  final String label;
+  final Color fill;
+  final Color stripe;
+
+  const BlockColor(this.label, this.fill, this.stripe);
+
+  /// The colour stored as [name], or null (none, or unknown).
+  static BlockColor? fromName(String? name) =>
+      values.where((c) => c.name == name).firstOrNull;
+}
+
 abstract final class AppShapes {
   /// Dialogs: squarer than Material's default (28 dp) corners.
   static const dialog = RoundedRectangleBorder(

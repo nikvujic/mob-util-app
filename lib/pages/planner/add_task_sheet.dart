@@ -14,6 +14,7 @@ typedef NewTask = ({
   int end,
   Set<int>? weekdays,
   DateTime? until,
+  String? color,
 });
 
 /// Whether the sheet asks about repeating.
@@ -94,6 +95,7 @@ Future<NewTask?> showEditRoutineSheet(
       weekdays: routine.weekdays,
       from: routine.from,
       until: routine.until,
+      color: routine.color,
       submitLabel: 'Save',
       onDelete: onDelete,
     ),
@@ -115,6 +117,7 @@ Future<NewTask?> showEditTaskSheet(
       title: task.title,
       start: task.start,
       end: task.end,
+      color: task.color,
       submitLabel: 'Save',
     ),
   );
@@ -148,6 +151,9 @@ class TaskSheet extends StatefulWidget {
   /// closed.
   final VoidCallback? onDelete;
 
+  /// Its colour (P9): a [BlockColor] name, or null.
+  final String? color;
+
   const TaskSheet({
     super.key,
     required this.slot,
@@ -160,6 +166,7 @@ class TaskSheet extends StatefulWidget {
     this.from,
     this.until,
     this.onDelete,
+    this.color,
   });
 
   @override
@@ -174,6 +181,7 @@ class _TaskSheetState extends State<TaskSheet> {
   /// The weekdays it repeats on; empty: it doesn't repeat.
   late Set<int> _weekdays = {...?widget.weekdays};
   late DateTime? _until = widget.until;
+  late BlockColor? _color = BlockColor.fromName(widget.color);
 
   bool get _repeats => _weekdays.isNotEmpty;
 
@@ -230,6 +238,7 @@ class _TaskSheetState extends State<TaskSheet> {
       end: _end,
       weekdays: _repeats ? _weekdays : null,
       until: _repeats ? _until : null,
+      color: _color?.name,
     ));
   }
 
@@ -395,6 +404,11 @@ class _TaskSheetState extends State<TaskSheet> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              _ColourChoice(
+                selected: _color,
+                onSelected: (c) => setState(() => _color = c),
+              ),
               if (widget.repeat != RepeatChoice.never)
                 ..._repeatChoices(context),
               const SizedBox(height: 8),
@@ -447,6 +461,67 @@ class _TimeButton extends StatelessWidget {
         side: BorderSide(color: context.colors.textHint),
       ),
       child: Text(formatMinutes(minutes)),
+    );
+  }
+}
+
+/// The colour row (P9): none, or one of the [BlockColor]s.
+class _ColourChoice extends StatelessWidget {
+  final BlockColor? selected;
+  final ValueChanged<BlockColor?> onSelected;
+
+  const _ColourChoice({required this.selected, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    Widget dot(BlockColor? colour) {
+      final isSelected = colour == selected;
+      return Semantics(
+        button: true,
+        selected: isSelected,
+        label: 'Colour: ${colour?.label ?? 'none'}',
+        excludeSemantics: true,
+        child: InkResponse(
+          onTap: () => onSelected(colour),
+          radius: 24,
+          child: SizedBox.square(
+            dimension: 48,
+            child: Center(
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colour?.stripe ?? Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? colors.textPrimary : colors.textHint,
+                    width: isSelected ? 3 : 1,
+                  ),
+                ),
+                child: colour == null
+                    ? Icon(Icons.block, size: 18, color: colors.textSecondary)
+                    : null,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Text(
+            'Colour',
+            style: TextStyle(color: colors.textSecondary),
+          ),
+        ),
+        dot(null),
+        for (final colour in BlockColor.values) dot(colour),
+      ],
     );
   }
 }

@@ -224,12 +224,17 @@ class SelectableCard extends StatelessWidget {
   final VoidCallback? onLongPress;
   final Widget child;
 
+  /// Its background instead of the usual card colour (e.g. a planner
+  /// block's colour); selected, it's highlighted as usual.
+  final Color? color;
+
   const SelectableCard({
     super.key,
     required this.selected,
     required this.child,
     this.onTap,
     this.onLongPress,
+    this.color,
   });
 
   static const _radius = BorderRadius.all(Radius.circular(6));
@@ -241,7 +246,9 @@ class SelectableCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: selected ? context.colors.cardSelected : context.colors.card,
+          color: selected
+              ? context.colors.cardSelected
+              : color ?? context.colors.card,
           borderRadius: _radius,
         ),
         // Drawn on top so the highlight never changes the row's size.

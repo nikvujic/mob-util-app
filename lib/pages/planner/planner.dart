@@ -82,6 +82,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               weekdays: weekdays,
               from: day,
               until: task.until,
+              color: task.color,
             );
       } else {
         ref.read(plannerProvider.notifier).addTask(
@@ -89,6 +90,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               task.title,
               start: task.start,
               end: task.end,
+              color: task.color,
             );
       }
     } on TaskOverlapException {
@@ -114,6 +116,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         title: changed.title,
         start: changed.start,
         end: changed.end,
+        color: changed.color,
       );
     } on TaskOverlapException {
       _taken();
@@ -199,6 +202,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         title: routine.title,
         start: routine.start,
         end: routine.end,
+        color: routine.color,
         submitLabel: 'Save',
       ),
     );
@@ -211,7 +215,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             changed.title,
             start: changed.start,
             end: changed.end,
-            color: routine.color,
+            color: changed.color,
           );
     } on TaskOverlapException {
       routines.setSkipped(routine.id, day, skipped: false);
@@ -267,6 +271,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           start: task.start!,
           end: task.end!,
           done: task.done,
+          color: BlockColor.fromName(task.color),
           selected: _selection.isSelected(task.id),
           onTap: () => _selection.handleTap(task.id, () => _edit(task)),
           onLongPress: () => _selection.handleLongPress(task.id),
@@ -282,6 +287,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           end: o.routine.end,
           done: o.done,
           repeats: true,
+          color: BlockColor.fromName(o.routine.color),
           onTap: selecting ? () {} : () => _routineTapped(o),
           onToggleDone: () =>
               ref.read(routinesProvider.notifier).toggleDone(o.routine.id, day),

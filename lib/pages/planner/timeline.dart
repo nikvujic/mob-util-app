@@ -16,6 +16,9 @@ class TimelineBlock {
 
   /// A routine: marked ↻.
   final bool repeats;
+
+  /// Its colour (P9), if any.
+  final BlockColor? color;
   final bool selected;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
@@ -31,6 +34,7 @@ class TimelineBlock {
     required this.onTap,
     this.done = false,
     this.repeats = false,
+    this.color,
     this.selected = false,
     this.onLongPress,
     this.onToggleDone,
@@ -233,12 +237,30 @@ class _Block extends StatelessWidget {
             range,
             style: TextStyle(color: colors.textSecondary, fontSize: 12),
           );
+          final color = block.color;
           return SelectableCard(
             selected: block.selected,
+            color: color?.fill,
             onTap: block.onTap,
             onLongPress: block.onLongPress ?? block.onTap,
             child: Stack(
               children: [
+                // A coloured block has a bright stripe on its left edge.
+                if (color != null)
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 4,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: color.stripe,
+                        borderRadius: const BorderRadius.horizontal(
+                          left: Radius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(12, 4, hasCheckbox ? 48 : 12, 4),
                   child: compact

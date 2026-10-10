@@ -67,7 +67,13 @@ Future<void> seed(ProviderContainer container) async {
   final today = designClock();
   final planner = container.read(plannerProvider.notifier)
     ..addTask(today, 'Gym', start: 8 * 60, end: 9 * 60)
-    ..addTask(today, 'Call the bank', start: 10 * 60, end: 11 * 60);
+    ..addTask(
+      today,
+      'Call the bank',
+      start: 10 * 60,
+      end: 11 * 60,
+      color: 'blue', // a coloured block (P9) is checked too
+    );
   planner.toggleDone(container.read(plannerProvider).first.id);
   // A routine (P8), shown on today's timeline next to the tasks.
   container.read(routinesProvider.notifier).add(
@@ -76,6 +82,7 @@ Future<void> seed(ProviderContainer container) async {
         end: 9 * 60 + 45,
         weekdays: {1, 2, 3, 4, 5},
         from: DateTime(2026, 10, 1),
+        color: 'purple',
       );
   container.read(countersProvider.notifier)
     ..add('Push-ups')

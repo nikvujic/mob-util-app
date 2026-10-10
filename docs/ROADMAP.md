@@ -297,7 +297,8 @@ patterns other work builds on (G11, themes), then the bigger features.
   own item (not copies), shown on its days; per-day change / skip / tick;
   a Routines screen with a Mon–Sun strip; Repeat + Until in the add sheet;
   the one-off wins a clash; editing a routine changes past days too.
-- [ ] **Block colours** (P9).
+- [x] **Block colours** (P9): six muted fills with a bright stripe, the
+  same in every theme; picked in the task / routine sheet.
 
 ### Round 6 — after 0.15 (2026-10-10)
 
