@@ -62,6 +62,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ✅ **Remove lock** in the editor menu and selection mode, with confirmation |
 | N8 | **Undo / redo while typing** (e.g. undo a paste), step by step: ↶ and ↷ bottom buttons in the editor, always there and greyed out when there's nothing to undo / redo. A step is a burst of typing up to a 1 s pause, or one big change (a paste, a cut, Discard changes) on its own; title and text share one history. Undone changes are saved like any edit; the history lasts while the note is open. | ✅ |
 | N10 | **Editor actions at the bottom (G11):** ↶ *Discard changes* and the ⋮ menu move from the top bar to bottom buttons on the hand's side. *Discard* gets a different icon: ↶ is kept for real undo (N8). The text area scrolls clear of the buttons. | ✅ |
+| N11 | **Edit the title from the bottom:** the title field is at the top, out of thumb reach, so ⋮ → *Edit title* opens it in a sheet at the bottom, above the keyboard. Like typing in the title (part of undo, saved the same way). | ✅ |
 | N9 | **Markdown** formatting in notes. Details to be decided with Nikola. | 💭 later |
 
 ## L — Security: master password & locking

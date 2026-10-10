@@ -285,6 +285,14 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [ ] **Shop: scroll to an item as it's added.**
 - [ ] **Džoni: hidden reset / set of the count.**
 
+### Round 5 — after 0.14 (2026-10-10)
+
+- [x] **Notes: edit the title from the bottom** (N11) — Nikola: the title
+  is high and hard to reach. ⋮ → *Edit title* opens a sheet at the
+  bottom.
+- [ ] Check whether four bottom buttons in the editor feel crowded
+  (Nikola is trying 0.14); if so, Redo could move into ⋮.
+
 ## Later / ideas
 
 - **Markdown in notes** (N9) — Nikola's idea; ask about the details

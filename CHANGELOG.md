@@ -4,6 +4,12 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.15.0] - unreleased
+
+### Added
+- **Edit title** in the note editor's ⋮ menu: change the title in a sheet
+  at the bottom, within thumb reach.
+
 ## [0.14.0] - 2026-10-10
 
 ### Added

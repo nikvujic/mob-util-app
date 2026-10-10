@@ -12,6 +12,7 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/text_input_sheet.dart';
 
 /// Shows and edits a single note.
 ///
@@ -262,6 +263,16 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _originalContent = _contentController.text;
   }
 
+  /// ⋮ → Edit title: the title field is out of thumb reach (N11).
+  Future<void> _editTitle() async {
+    final title = await showTextInputSheet(
+      context,
+      hint: 'Title',
+      initialValue: _titleController.text,
+    );
+    if (title != null && mounted) _titleController.text = title;
+  }
+
   /// ⋮ → Lock note: saves, then encrypts the content.
   Future<void> _lock() async {
     final key = await lockingKey(context, ref);
@@ -362,6 +373,13 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 icon: Icons.more_vert,
                 tooltip: 'More',
                 menu: () => [
+                  PopupMenuItem(
+                    value: _editTitle,
+                    child: const ListTile(
+                      leading: Icon(Icons.title),
+                      title: Text('Edit title'),
+                    ),
+                  ),
                   if (locked)
                     PopupMenuItem(
                       value: _removeLock,
