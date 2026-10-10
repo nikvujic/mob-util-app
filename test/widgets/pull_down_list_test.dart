@@ -39,8 +39,8 @@ void main() {
   double topOfFirstRow(WidgetTester tester) =>
       tester.getTopLeft(find.text('Row 0', skipOffstage: false)).dy;
 
-  /// The shift in reach mode: 20% of 600.
-  const reach = 600 * PullDownList.reach;
+  /// The shift in reach mode: a share of the 600 dp list, in whole dp.
+  final reach = (600 * PullDownList.reach).floorToDouble();
 
   final list = find.byType(PullDownList);
 
@@ -119,6 +119,30 @@ void main() {
     expect(topOfFirstRow(tester), 0);
   });
 
+  testWidgets(
+      'in reach mode, a small flick the other way snaps back as the finger '
+      'lets go, not after coasting (or on the next touch)', (tester) async {
+    await pumpList(tester, 30);
+    await drag(tester, 60);
+
+    await tester.fling(list, const Offset(0, -20), 400);
+    await tester.pump(); // the snap (or coasting) starts
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(topOfFirstRow(tester), closeTo(0, 1), reason: 'back at the top');
+  });
+
+  testWidgets('in reach mode, a strong flick up the list carries on into it',
+      (tester) async {
+    await pumpList(tester, 30);
+    await drag(tester, 60);
+
+    await tester.fling(list, const Offset(0, -60), 3000);
+    await tester.pumpAndSettle();
+    final position = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(position.position.pixels, greaterThan(reach + 200),
+        reason: 'scrolled on, past the first rows');
+  });
+
   testWidgets('a reset sends a list in reach mode back to its top (G13)',
       (tester) async {
     final reset = ChangeNotifier();
@@ -159,7 +183,7 @@ void main() {
     testWidgets('leaves reach mode when it scrolls', (tester) async {
       await pumpList(tester, 30);
       await drag(tester, 60); // reach mode
-      await reveal(tester, 'Row 12');
+      await reveal(tester, 'Row 10');
       await drag(tester, 1000); // back up: stops at the normal top
       expect(topOfFirstRow(tester), 0);
     });

@@ -289,10 +289,17 @@ patterns other work builds on (G11, themes), then the bigger features.
 ### Round 5 — after 0.14 (2026-10-10)
 
 - [x] **Notes: edit the title from the bottom** (N11) — Nikola: the title
-  is high and hard to reach. ⋮ → *Edit title* opens a sheet at the
-  bottom.
-- [ ] Check whether four bottom buttons in the editor feel crowded
-  (Nikola is trying 0.14); if so, Redo could move into ⋮.
+  is high and hard to reach. A smaller *Edit title* button above the
+  editor's buttons (Nikola's choice) opens a sheet at the bottom.
+- [x] **Reach mode reaches further** (U4): 28% instead of 20% (about one
+  row more), Counters a bit more again.
+- [x] **Reach mode snapped back late:** a small scroll the other way only
+  snapped back on the next touch (the snap waited for a frame nothing
+  asked for); now it snaps as the finger lets go.
+- [x] **Note editor without the ⋮ menu** (N10): it held only *Lock note*
+  and opening it fought with the keyboard. *Lock note* / *Remove lock*
+  is a button; ↶ / ↷ are outermost, under the thumb.
+- [x] **Planner: free time as a block** (P7): transparent, dotted border.
 
 ## Later / ideas
 

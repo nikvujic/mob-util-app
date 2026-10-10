@@ -114,6 +114,8 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                 )
               : PullDownList(
                   bottomSpace: SelectionActions.listBottomSpace,
+                  // Counter rows are big: reach a bit further (U4).
+                  reachShare: 0.35,
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.only(top: 4),

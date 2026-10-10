@@ -13,6 +13,14 @@ Release with the installable APK.
 - Džoni: long-press the title to set or reset the count.
 
 ### Changed
+- **Reach mode reaches further** (about one row more; Counters a bit
+  more again).
+
+### Fixed
+- **Reach mode snaps back as soon as you let go**: a small scroll the
+  other way used to coast, and only snapped back on your next touch.
+
+### Changed
 - **Shop scrolls to each new item** as you add it, so you see it land in
   the list above the add sheet.
 

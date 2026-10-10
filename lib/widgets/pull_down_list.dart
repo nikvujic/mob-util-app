@@ -17,13 +17,18 @@ import 'package:flutter/rendering.dart';
 /// Under a [PullDownReset], the list also returns to its normal top when the
 /// reset fires (e.g. on going to the section again, G13).
 class PullDownList extends StatefulWidget {
-  /// How far the list shifts down in reach mode, as a share of its height.
-  static const reach = 0.2;
+  /// How far the list shifts down in reach mode, as a share of its height
+  /// (about one row more than the first 20%, U4).
+  static const reach = 0.28;
 
   /// How far a pull from the top must go to enter reach mode.
   static const enterDistance = 24.0;
 
   final List<Widget> slivers;
+
+  /// This list's shift in reach mode, as a share of its height (e.g. more
+  /// for big rows).
+  final double reachShare;
 
   /// Space below the last row (e.g. to clear floating buttons).
   final double bottomSpace;
@@ -37,6 +42,7 @@ class PullDownList extends StatefulWidget {
     required this.slivers,
     this.bottomSpace = 0,
     this.cacheExtent,
+    this.reachShare = reach,
   });
 
   /// A plain list of [children] (like a `ListView`), with reach mode.
@@ -45,7 +51,8 @@ class PullDownList extends StatefulWidget {
     required List<Widget> children,
     this.bottomSpace = 0,
   })  : slivers = [SliverList.list(children: children)],
-        cacheExtent = null;
+        cacheExtent = null,
+        reachShare = reach;
 
   /// Scrolls the list around [row] just enough to show it whole, with
   /// [obscuredBottom] of the list's bottom treated as covered (e.g. by a
@@ -105,19 +112,6 @@ class _PullDownListState extends State<PullDownList> {
     if (controller.offset < top) controller.jumpTo(top);
   }
 
-  void _animateTo(double offset) {
-    // After the notification: the scroll that just ended must finish.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final controller = _controller;
-      if (!mounted || controller == null || !controller.hasClients) return;
-      controller.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
-    });
-  }
-
   void _reveal(BuildContext row, double obscuredBottom) {
     final controller = _controller, top = _top;
     final box = row.findRenderObject();
@@ -154,21 +148,28 @@ class _PullDownListState extends State<PullDownList> {
       _gestureStart = offset;
       _gestureFromTop = _inReach || (offset - top).abs() < 0.5;
     } else if (notification is ScrollEndNotification) {
-      if (_inReach) {
-        // Any scroll in reach mode leaves it: back to the normal top, or
-        // on into the list if it was scrolled that far.
-        if (offset > _gestureStart + 0.5) {
-          _inReach = false;
-          if (offset < top) _animateTo(top);
-        }
-      } else if (offset < top - 0.5) {
-        // A pull from the top: far enough enters reach mode, else back.
-        _inReach = top - offset >= PullDownList.enterDistance;
-        _animateTo(_inReach ? 0 : top);
-      }
+      // Where the list came to rest: in the space above its rows means
+      // reach mode (the snap below puts it fully there or not at all).
+      _inReach = offset < top - 0.5;
       _gestureFromTop = false;
     }
     return false;
+  }
+
+  /// Where a list let go of at [pixels] snaps to, or null to scroll on as
+  /// usual. Decided as the finger lets go, so the snap starts at once.
+  double? _snapTarget(double pixels) {
+    final top = _top!;
+    if (_inReach) {
+      // Any scroll the other way leaves reach mode: back to the normal top
+      // (unless it went on into the list).
+      return pixels > _gestureStart + 0.5 && pixels < top ? top : null;
+    }
+    if (_gestureFromTop && pixels < top - 0.5) {
+      // A pull from the top: far enough enters reach mode, else back.
+      return top - pixels >= PullDownList.enterDistance ? 0 : top;
+    }
+    return null;
   }
 
   @override
@@ -176,7 +177,7 @@ class _PullDownListState extends State<PullDownList> {
     return LayoutBuilder(
       builder: (context, box) {
         final top =
-            _top ??= (box.maxHeight * PullDownList.reach).floorToDouble();
+            _top ??= (box.maxHeight * widget.reachShare).floorToDouble();
         final controller =
             _controller ??= ScrollController(initialScrollOffset: top);
         return NotificationListener<ScrollNotification>(
@@ -187,6 +188,7 @@ class _PullDownListState extends State<PullDownList> {
             physics: _ReachPhysics(
               top: top,
               spaceAllowed: () => _spaceAllowed,
+              snapTarget: _snapTarget,
             ),
             slivers: [
               SliverToBoxAdapter(child: SizedBox(height: top)),
@@ -213,14 +215,20 @@ class _PullDownListState extends State<PullDownList> {
 
 /// Scrolls as usual, except that the space above the rows (offsets below
 /// [top]) is a wall unless [spaceAllowed]: scrolling towards the top from
-/// further down stops at the normal top.
+/// further down stops at the normal top. On letting go, snaps to where
+/// [snapTarget] says, unless a fling carries the list on into its rows.
 class _ReachPhysics extends ScrollPhysics {
   final double top;
   final bool Function() spaceAllowed;
+  final double? Function(double pixels) snapTarget;
+
+  /// Quick, without overshoot (critically damped): about 0.15 s.
+  static const _snap = SpringDescription(mass: 1, stiffness: 900, damping: 60);
 
   const _ReachPhysics({
     required this.top,
     required this.spaceAllowed,
+    required this.snapTarget,
     super.parent,
   });
 
@@ -228,6 +236,7 @@ class _ReachPhysics extends ScrollPhysics {
   _ReachPhysics applyTo(ScrollPhysics? ancestor) => _ReachPhysics(
         top: top,
         spaceAllowed: spaceAllowed,
+        snapTarget: snapTarget,
         parent: buildParent(
           const AlwaysScrollableScrollPhysics().applyTo(ancestor),
         ),
@@ -240,6 +249,32 @@ class _ReachPhysics extends ScrollPhysics {
       return position.pixels <= top ? value - position.pixels : value - top;
     }
     return super.applyBoundaryConditions(position, value);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    final usual = super.createBallisticSimulation(position, velocity);
+    final target = snapTarget(position.pixels);
+    if (target == null) return usual;
+    // A fling up the list that would carry on past the top: let it.
+    if (target == top &&
+        usual != null &&
+        usual.x(double.infinity) > top + toleranceFor(position).distance) {
+      return usual;
+    }
+    if ((position.pixels - target).abs() < toleranceFor(position).distance) {
+      return null;
+    }
+    return ScrollSpringSimulation(
+      _snap,
+      position.pixels,
+      target,
+      0,
+      tolerance: toleranceFor(position),
+    );
   }
 }
 
