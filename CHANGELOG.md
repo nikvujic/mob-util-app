@@ -7,6 +7,9 @@ Release with the installable APK.
 ## [0.14.0] - 2026-10-10
 
 ### Added
+- **Undo / redo in notes**: ↶ and ↷ buttons in the editor go back and
+  forward step by step (a burst of typing, or a paste, is one step).
+  Discard changes can be undone too.
 - **Forgot master password?** on the Security page: resets it by deleting
   what it locks (locked notes, and everything in locked sections).
   Everything else stays. The confirmation lists what goes and asks you to

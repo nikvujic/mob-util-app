@@ -62,12 +62,17 @@ class BottomAction {
   /// Destructive (e.g. Delete): shown in red.
   final bool danger;
 
+  /// Shown greyed out and doing nothing when false (e.g. Undo with nothing
+  /// to undo), so the buttons around it keep their places.
+  final bool enabled;
+
   const BottomAction({
     required this.icon,
     required this.tooltip,
     this.onPressed,
     this.menu,
     this.danger = false,
+    this.enabled = true,
   });
 }
 
@@ -126,12 +131,16 @@ class _BottomActionsState extends State<BottomActions> {
               backgroundColor: action.danger
                   ? context.colors.danger
                   : context.colors.surface,
-              foregroundColor: action.danger
-                  ? context.colors.background
-                  : context.colors.textPrimary,
-              onPressed: action.menu != null
-                  ? () => _openMenu(context, action)
-                  : action.onPressed,
+              foregroundColor: !action.enabled
+                  ? context.colors.textHint
+                  : action.danger
+                      ? context.colors.background
+                      : context.colors.textPrimary,
+              onPressed: !action.enabled
+                  ? null
+                  : action.menu != null
+                      ? () => _openMenu(context, action)
+                      : action.onPressed,
               child: Icon(action.icon),
             ),
           ),

@@ -150,7 +150,11 @@ void main() {
       await tester.enterText(contentField, 'milk, eggs');
       await tester.pump();
       expect(discardButton, findsOneWidget);
-      expect(find.byIcon(Icons.undo), findsNothing, reason: '↶ is for undo');
+      expect(
+        find.descendant(of: discardButton, matching: find.byIcon(Icons.undo)),
+        findsNothing,
+        reason: '↶ is for undo (N8)',
+      );
       expect(
         find.descendant(of: find.byType(AppBar), matching: discardButton),
         findsNothing,

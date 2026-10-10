@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/pages/notes/note_history.dart';
 import 'package:the_app/pages/notes/note_keys.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -21,8 +23,8 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 /// Leaving with back after changing something asks "Save changes?":
 /// Save (or tapping outside the dialog) keeps them; Discard restores the
 /// note to how it was when opened, or deletes a note created here. While
-/// editing an existing note, ↶ restores that version without leaving the
-/// page.
+/// editing an existing note, Discard changes restores that version without
+/// leaving the page. ↶ / ↷ undo and redo edits step by step (N8).
 ///
 /// A locked note (N6) is opened with its content already decrypted
 /// ([unlocked]); edits are saved encrypted with the same key. If the app
@@ -57,6 +59,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   late final AppLifecycleListener _lifecycleListener;
   Timer? _autosaveTimer;
 
+  /// Undo / redo (N8).
+  late final NoteHistory _history;
+
+  /// Set while the history itself changes the text (undo, redo, discard).
+  bool _applying = false;
+
   /// The note as it was when the page opened (or was last locked or
   /// unlocked here), for "Discard changes"; and its text, which for a
   /// locked note isn't in [Note.content].
@@ -83,6 +91,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _key = widget.unlocked?.key;
     _titleController = TextEditingController(text: _original?.title ?? '');
     _contentController = TextEditingController(text: _originalContent);
+    _history = NoteHistory(_text, clock: ref.read(clockProvider));
+    _titleController.addListener(_onEdit);
+    _contentController.addListener(_onEdit);
     _titleController.addListener(_scheduleAutosave);
     _contentController.addListener(_scheduleAutosave);
     _lifecycleListener = AppLifecycleListener(onHide: _autosave);
@@ -95,7 +106,34 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _history.dispose();
     super.dispose();
+  }
+
+  NoteText get _text =>
+      (title: _titleController.value, content: _contentController.value);
+
+  void _onEdit() {
+    if (!_applying) _history.changed(_text);
+  }
+
+  /// Shows [text] in the fields (from undo, redo or discard); saved like
+  /// any edit.
+  void _apply(NoteText text) {
+    _applying = true;
+    _titleController.value = text.title;
+    _contentController.value = text.content;
+    _applying = false;
+  }
+
+  void _undo() {
+    final text = _history.undo();
+    if (text != null) _apply(text);
+  }
+
+  void _redo() {
+    final text = _history.redo();
+    if (text != null) _apply(text);
   }
 
   Note? get _note =>
@@ -210,9 +248,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
     _autosaveTimer?.cancel();
     ref.read(notesProvider.notifier).restoreNote(original);
-    _titleController.text = original.title;
-    _contentController.text = _originalContent;
+    _apply((
+      title: TextEditingValue(text: original.title),
+      content: TextEditingValue(text: _originalContent),
+    ));
     _autosaveTimer?.cancel(); // the text reset above scheduled one
+    _history.changed(_text, separate: true); // ↶ brings the edits back
   }
 
   /// Makes the current state the one Discard goes back to.
@@ -293,7 +334,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         // Actions at the bottom, on the side of the hand that opened the
         // note (G11).
         floatingActionButton: ListenableBuilder(
-          listenable: Listenable.merge([_titleController, _contentController]),
+          listenable: Listenable.merge(
+            [_titleController, _contentController, _history],
+          ),
           builder: (context, _) => BottomActions(
             actions: [
               if (!widget.isNew && _hasChanges)
@@ -303,6 +346,18 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   tooltip: 'Discard changes',
                   onPressed: _revertInPlace,
                 ),
+              BottomAction(
+                icon: Icons.undo,
+                tooltip: 'Undo',
+                enabled: _history.canUndo,
+                onPressed: _undo,
+              ),
+              BottomAction(
+                icon: Icons.redo,
+                tooltip: 'Redo',
+                enabled: _history.canRedo,
+                onPressed: _redo,
+              ),
               BottomAction(
                 icon: Icons.more_vert,
                 tooltip: 'More',

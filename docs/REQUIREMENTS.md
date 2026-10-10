@@ -60,7 +60,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N5a | **↶ Discard changes** (existing notes only): restores the note to how it was when opened, without leaving the editor. Asks for confirmation. | ✅ |
 | N6 | **Lock a note** (from the editor menu or selection mode). A locked note's content is stored encrypted with the master password. Its **title stays visible** in the list, with a small lock icon. Opening it requires unlocking (see L). If no master password exists yet, locking first routes to password setup, then returns. | ✅ an open locked note closes (saved) when the app locks |
 | N7 | Unlock a note permanently (remove the lock) — requires the app to be unlocked. | ✅ **Remove lock** in the editor menu and selection mode, with confirmation |
-| N8 | **Undo / redo while typing** (e.g. undo a paste), step by step. | 💭 later |
+| N8 | **Undo / redo while typing** (e.g. undo a paste), step by step: ↶ and ↷ bottom buttons in the editor, always there and greyed out when there's nothing to undo / redo. A step is a burst of typing up to a 1 s pause, or one big change (a paste, a cut, Discard changes) on its own; title and text share one history. Undone changes are saved like any edit; the history lasts while the note is open. | ✅ |
 | N10 | **Editor actions at the bottom (G11):** ↶ *Discard changes* and the ⋮ menu move from the top bar to bottom buttons on the hand's side. *Discard* gets a different icon: ↶ is kept for real undo (N8). The text area scrolls clear of the buttons. | ✅ |
 | N9 | **Markdown** formatting in notes. Details to be decided with Nikola. | 💭 later |
 

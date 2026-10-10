@@ -280,13 +280,13 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Forgot master password → reset** (L7): deletes locked notes and
   the content of locked sections (Nikola chose this, so a section lock
   can't be bypassed by resetting); everything else stays.
-- [ ] **Notes: undo / redo while typing** (N8).
+- [x] **Notes: undo / redo while typing** (N8): ↶ / ↷ in the editor;
+  typing bursts and pastes are steps; Discard can be undone too.
 - [ ] **Shop: scroll to an item as it's added.**
 - [ ] **Džoni: hidden reset / set of the count.**
 
 ## Later / ideas
 
-- Undo / redo while typing in a note, e.g. undo a paste (N8)
 - **Markdown in notes** (N9) — Nikola's idea; ask about the details
   (editing vs. viewing, which syntax, toggle per note?) before planning
 - Fingerprint unlock (L6)
