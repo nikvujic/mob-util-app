@@ -27,6 +27,17 @@ class SettingsPage extends ConsumerWidget {
             onChanged:
                 ref.read(preferencesProvider.notifier).setCounterFeedback,
           ),
+          SwitchListTile(
+            secondary: const Icon(Icons.format_list_numbered),
+            title: const Text('Line numbers in notes'),
+            subtitle: Text(
+              'One per paragraph, beside the text, like a code editor.',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.noteLineNumbers,
+            onChanged:
+                ref.read(preferencesProvider.notifier).setNoteLineNumbers,
+          ),
         ],
       ),
     );

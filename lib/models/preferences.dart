@@ -10,6 +10,9 @@ class Preferences {
   /// The count on the "Džoni" page (O4).
   final int dzoniCount;
 
+  /// Line numbers beside a note's text (N12).
+  final bool noteLineNumbers;
+
   /// Fingerprint unlock (L6): the salt (base64) of the master password
   /// whose key is in the phone's keystore, or null when it's off. Not a
   /// secret; it tells which password the stored key belongs to.
@@ -19,6 +22,7 @@ class Preferences {
     this.theme = 'green',
     this.counterFeedback = true,
     this.dzoniCount = 0,
+    this.noteLineNumbers = true,
     this.fingerprintFor,
   });
 
@@ -26,12 +30,14 @@ class Preferences {
     String? theme,
     bool? counterFeedback,
     int? dzoniCount,
+    bool? noteLineNumbers,
     String? Function()? fingerprintFor,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
         counterFeedback: counterFeedback ?? this.counterFeedback,
         dzoniCount: dzoniCount ?? this.dzoniCount,
+        noteLineNumbers: noteLineNumbers ?? this.noteLineNumbers,
         fingerprintFor:
             fingerprintFor == null ? this.fingerprintFor : fingerprintFor(),
       );
@@ -40,6 +46,7 @@ class Preferences {
         'theme': theme,
         'counterFeedback': counterFeedback,
         'dzoniCount': dzoniCount,
+        'noteLineNumbers': noteLineNumbers,
         if (fingerprintFor != null) 'fingerprintFor': fingerprintFor,
       };
 
@@ -48,6 +55,7 @@ class Preferences {
         theme: json['theme'] as String? ?? 'green',
         counterFeedback: json['counterFeedback'] as bool? ?? true,
         dzoniCount: json['dzoniCount'] as int? ?? 0,
+        noteLineNumbers: json['noteLineNumbers'] as bool? ?? true,
         fingerprintFor: json['fingerprintFor'] as String?,
       );
 }

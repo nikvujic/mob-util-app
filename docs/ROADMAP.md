@@ -291,6 +291,8 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Markdown: hide the symbols except where you're editing** (N9) —
   Nikola expected the `##` to disappear once formatted. Live preview: the
   line with the cursor shows its symbols; other lines don't.
+- [x] **Line numbers in notes** (N12) — Nikola liked the code-editor
+  idea; one number per paragraph, switch in Settings.
 
 ### Round 5 — after 0.14 (2026-10-10)
 

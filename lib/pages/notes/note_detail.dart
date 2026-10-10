@@ -9,9 +9,11 @@ import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/note_history.dart';
 import 'package:the_app/pages/notes/note_keys.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/line_numbers.dart';
 import 'package:the_app/widgets/markdown_text.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
@@ -58,6 +60,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   late final TextEditingController _titleController;
   late final MarkdownEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
+  final _contentScroll = ScrollController();
+
+  /// The text field, for the line numbers (N12) to follow.
+  final _contentFieldKey = GlobalKey();
   late final AppLifecycleListener _lifecycleListener;
   Timer? _autosaveTimer;
 
@@ -113,6 +119,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _contentScroll.dispose();
     _history.dispose();
     super.dispose();
   }
@@ -328,6 +335,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             false,
       ),
     );
+    final lineNumbers =
+        ref.watch(preferencesProvider.select((p) => p.noteLineNumbers));
     ref.listen(sessionProvider, (_, keys) {
       if (keys == null && _isLocked) _closeBecauseLocked();
     });
@@ -421,33 +430,52 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             Divider(height: 1, color: context.colors.divider),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: TextField(
-                  key: const Key('noteContentField'),
-                  controller: _contentController,
-                  focusNode: _contentFocusNode,
-                  autofocus: widget.isNew,
-                  keyboardType: TextInputType.multiline,
-                  textCapitalization: TextCapitalization.sentences,
-                  maxLines: null,
-                  expands: true,
-                  // Enter continues a list (N9).
-                  inputFormatters: const [MarkdownListFormatter()],
-                  textAlignVertical: TextAlignVertical.top,
-                  style: TextStyle(
-                    color: context.colors.textPrimary,
-                    fontSize: 16,
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Start writing…',
-                    hintStyle: TextStyle(color: context.colors.textHint),
-                    // The text ends above the buttons, never behind them.
-                    contentPadding: EdgeInsets.only(
-                      bottom: BottomActions.contentClearance +
-                          BottomActions.aboveClearance,
+                padding: EdgeInsets.fromLTRB(lineNumbers ? 6 : 16, 8, 16, 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Like a code editor (N12).
+                    if (lineNumbers)
+                      LineNumbers(
+                        controller: _contentController,
+                        scroll: _contentScroll,
+                        field: _contentFieldKey,
+                      ),
+                    Expanded(
+                      child: KeyedSubtree(
+                        key: _contentFieldKey,
+                        child: TextField(
+                          key: const Key('noteContentField'),
+                          controller: _contentController,
+                          focusNode: _contentFocusNode,
+                          scrollController: _contentScroll,
+                          autofocus: widget.isNew,
+                          keyboardType: TextInputType.multiline,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: null,
+                          expands: true,
+                          // Enter continues a list (N9).
+                          inputFormatters: const [MarkdownListFormatter()],
+                          textAlignVertical: TextAlignVertical.top,
+                          style: TextStyle(
+                            color: context.colors.textPrimary,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Start writing…',
+                            hintStyle:
+                                TextStyle(color: context.colors.textHint),
+                            // The text ends above the buttons, never behind them.
+                            contentPadding: EdgeInsets.only(
+                              bottom: BottomActions.contentClearance +
+                                  BottomActions.aboveClearance,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),

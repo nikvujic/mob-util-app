@@ -6,6 +6,10 @@ Release with the installable APK.
 
 ## [0.16.0] - unreleased
 
+### Added
+- **Line numbers in notes**, like a code editor (one per paragraph). Turn
+  them off in Settings.
+
 ### Changed
 - **Markdown symbols hide** once formatted: `##`, `**` and the rest only
   show on the line you're editing.

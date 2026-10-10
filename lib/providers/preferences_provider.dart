@@ -13,6 +13,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setCounterFeedback(bool on) =>
       state = state.copyWith(counterFeedback: on);
 
+  void setNoteLineNumbers(bool on) =>
+      state = state.copyWith(noteLineNumbers: on);
+
   /// Sets the Džoni count (restoring a backup).
   void setDzoniCount(int count) => state = state.copyWith(dzoniCount: count);
 
