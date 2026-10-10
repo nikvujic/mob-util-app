@@ -459,13 +459,16 @@ void main() {
         isTrue,
         reason: right ? 'right' : 'left',
       );
-      // Undo / redo outermost, under the thumb; Edit title smaller, above
-      // the outermost one.
-      expect(right ? redo.left > undo.left : redo.left < undo.left, isTrue,
-          reason: 'redo outermost');
-      expect(title.center.dx, closeTo(redo.center.dx, 1));
-      expect(title.bottom, lessThan(redo.top));
-      expect(title.width, lessThan(redo.width));
+      // ↶ ↷ in that order on either side, as a pair outermost, under the
+      // thumb; Edit title smaller, above the outermost button.
+      final lock = tester.getRect(find.byTooltip('Lock note'));
+      expect(undo.left, lessThan(redo.left), reason: '↶ left of ↷');
+      expect(right ? lock.left < undo.left : lock.left > redo.left, isTrue,
+          reason: 'the pair is outermost');
+      final outermost = right ? redo : undo;
+      expect(title.center.dx, closeTo(outermost.center.dx, 1));
+      expect(title.bottom, lessThan(outermost.top));
+      expect(title.width, lessThan(outermost.width));
       expect(
         find.descendant(
           of: find.byType(AppBar),

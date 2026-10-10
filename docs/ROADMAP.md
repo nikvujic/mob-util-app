@@ -291,6 +291,8 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Menu stays open behind its pages** (G16): back from a page opened
   from the menu returns to the menu; back again closes it.
 - [x] **Counters: no ✕ in selection mode** — back already leaves it.
+- [x] **Notes: ↶ ↷ keep their order on the left side too** (Nikola);
+  only their place (outermost) follows the hand.
 
 ### Round 6 — after 0.15 (2026-10-10)
 

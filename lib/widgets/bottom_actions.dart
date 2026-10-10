@@ -87,7 +87,17 @@ class BottomActions extends StatefulWidget {
   /// A smaller button above the row, at its outer end.
   final BottomAction? above;
 
-  const BottomActions({super.key, required this.actions, this.above});
+  /// How many of the last [actions] keep their order on the left side
+  /// too, as a group (e.g. ↶ ↷, which read left to right): the group is
+  /// still outermost, only not reversed.
+  final int keepOrderOfLast;
+
+  const BottomActions({
+    super.key,
+    required this.actions,
+    this.above,
+    this.keepOrderOfLast = 0,
+  });
 
   @override
   State<BottomActions> createState() => _BottomActionsState();
@@ -128,6 +138,17 @@ class _BottomActionsState extends State<BottomActions> {
           );
   }
 
+  /// [buttons] for the left side: reversed, except the last
+  /// [BottomActions.keepOrderOfLast], which lead in their own order.
+  List<Widget> _mirrored(List<Widget> buttons) {
+    final kept = widget.keepOrderOfLast.clamp(0, buttons.length);
+    final split = buttons.length - kept;
+    return [
+      ...buttons.sublist(split),
+      ...buttons.sublist(0, split).reversed,
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final side = _side ??= HandTracker.sideOf(context);
@@ -159,7 +180,7 @@ class _BottomActionsState extends State<BottomActions> {
           Row(
             mainAxisAlignment:
                 right ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: right ? buttons : buttons.reversed.toList(),
+            children: right ? buttons : _mirrored(buttons),
           ),
         ],
       ),

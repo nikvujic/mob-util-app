@@ -10,6 +10,8 @@ Release with the installable APK.
 - **The menu stays open** when you come back from one of its pages; back
   again closes it.
 - Counters: selection mode has no ✕ button any more (back leaves it).
+- Notes: ↶ Undo and ↷ Redo stay in that order when the buttons are on
+  the left.
 
 ## [0.16.0] - 2026-10-10
 

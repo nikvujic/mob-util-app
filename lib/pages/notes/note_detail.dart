@@ -364,6 +364,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             [_titleController, _contentController, _history],
           ),
           builder: (context, _) => BottomActions(
+            // ↶ ↷ read left to right on either side.
+            keepOrderOfLast: 2,
             // Up at the top, the title is out of thumb reach (N11).
             above: BottomAction(
               icon: Icons.title,
