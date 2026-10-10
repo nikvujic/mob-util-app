@@ -35,6 +35,18 @@ void main() {
   /// The free-time area showing [range] ("09:00–24:00").
   Finder free(String range) => find.text('Free · $range');
 
+  testWidgets('the 00:00 label is fully visible at the top of the day',
+      (tester) async {
+    await openPlanner(tester);
+    await tester.ensureVisible(find.text('00:00'));
+    await tester.drag(find.text('00:00'), const Offset(0, 2000)); // to the top
+    await tester.pumpAndSettle();
+
+    final label = tester.getRect(find.text('00:00'));
+    final viewport = tester.getRect(find.byType(SingleChildScrollView));
+    expect(label.top, greaterThanOrEqualTo(viewport.top));
+  });
+
   testWidgets('opens on today: a whole free day, scrolled to around now',
       (tester) async {
     await openPlanner(tester);

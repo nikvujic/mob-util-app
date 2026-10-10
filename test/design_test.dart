@@ -23,6 +23,10 @@ import 'package:the_app/widgets/selection.dart';
 
 import 'helpers.dart';
 
+/// A fixed "now" (Thursday 8 October 2026, 09:00), so every screen looks
+/// the same whenever the tests run (e.g. the planner opens around now).
+DateTime designClock() => DateTime(2026, 10, 8, 9);
+
 /// Seeds a few notes (one locked) and shop items (in both sections).
 Future<void> seed(ProviderContainer container) async {
   final notes = container.read(notesProvider.notifier)
@@ -38,7 +42,7 @@ Future<void> seed(ProviderContainer container) async {
   shop.toggle(
     container.read(shopProvider).firstWhere((i) => i.name == 'Milk').id,
   );
-  final today = DateTime.now();
+  final today = designClock();
   final planner = container.read(plannerProvider.notifier)
     ..addTask(today, 'Gym', start: 8 * 60, end: 9 * 60)
     ..addTask(today, 'Call the bank', start: 10 * 60, end: 11 * 60);
@@ -185,7 +189,8 @@ void main() {
       for (final MapEntry(key: name, value: open) in screens.entries) {
         testWidgets('$name (${theme.label})', (tester) async {
           final semantics = tester.ensureSemantics();
-          final container = await pumpApp(tester, backupFiles: pickingBackup());
+          final container = await pumpApp(tester,
+              backupFiles: pickingBackup(), clock: designClock);
           container.read(preferencesProvider.notifier).setTheme(theme.name);
           await seed(container);
           await tester.pump();
@@ -202,7 +207,7 @@ void main() {
         'accessibility guidelines: security with a master password, '
         '${unlock ? 'unlocked' : 'locked'}', (tester) async {
       final semantics = tester.ensureSemantics();
-      final container = await pumpApp(tester);
+      final container = await pumpApp(tester, clock: designClock);
       await tester.runAsync(() async {
         await container
             .read(securityProvider.notifier)
@@ -223,7 +228,7 @@ void main() {
 
   testWidgets('accessibility guidelines: a locked section', (tester) async {
     final semantics = tester.ensureSemantics();
-    final container = await pumpApp(tester);
+    final container = await pumpApp(tester, clock: designClock);
     await tester.runAsync(() async {
       await container
           .read(securityProvider.notifier)
@@ -247,7 +252,7 @@ void main() {
         );
 
     Future<void> pumpSeeded(WidgetTester tester) async {
-      await seed(await pumpApp(tester));
+      await seed(await pumpApp(tester, clock: designClock));
       await tester.pump();
     }
 
@@ -307,7 +312,7 @@ void main() {
 
   testWidgets('drag handles fill the row height and are easy to grab',
       (tester) async {
-    await seed(await pumpApp(tester));
+    await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
 
     Future<void> check(String text) async {
@@ -345,7 +350,7 @@ void main() {
 
   testWidgets('selection actions sit at the bottom, on the hand\'s side',
       (tester) async {
-    await seed(await pumpApp(tester));
+    await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     final screen = tester.getSize(find.byType(MaterialApp));
 
@@ -402,7 +407,7 @@ void main() {
   testWidgets(
       'note editor: actions on the side it was opened from, and '
       'the text ends above them', (tester) async {
-    await seed(await pumpApp(tester));
+    await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     final screen = tester.getSize(find.byType(MaterialApp));
 
@@ -469,7 +474,7 @@ void main() {
     }
 
     testWidgets('pressing a row shows no ripple', (tester) async {
-      await seed(await pumpApp(tester));
+      await seed(await pumpApp(tester, clock: designClock));
       await tester.pump();
       final material = await pressRow(tester, 'Groceries');
       expect(material, isNot(paints..circle()));
@@ -481,7 +486,7 @@ void main() {
     testWidgets(
         "a shop row's checkbox only shows the state; the row takes "
         'the tap', (tester) async {
-      await seed(await pumpApp(tester));
+      await seed(await pumpApp(tester, clock: designClock));
       await openTab(tester, 'Shop');
       final checkbox = find.descendant(
         of: find.ancestor(
@@ -507,7 +512,7 @@ void main() {
 
   testWidgets('a locked note row: same height, lock announced', (tester) async {
     final semantics = tester.ensureSemantics();
-    await seed(await pumpApp(tester));
+    await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     Finder rowOf(String text) => find.ancestor(
           of: find.text(text),
@@ -528,7 +533,7 @@ void main() {
 
   testWidgets('selection is announced to screen readers', (tester) async {
     final semantics = tester.ensureSemantics();
-    await seed(await pumpApp(tester));
+    await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
 
     await tester.longPress(find.text('Groceries'));
@@ -551,7 +556,7 @@ void main() {
   testWidgets('lists cope with a very large system font', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2.0;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    await seed(await pumpApp(tester));
+    await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     await openTab(tester, 'Shop');
     await openTab(tester, 'Planner');

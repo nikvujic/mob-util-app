@@ -215,7 +215,11 @@ class _Timeline extends StatelessWidget {
     required this.onAdd,
   });
 
-  static double _y(int minutes) => minutes * PlannerPage.hourHeight / 60;
+  /// Space above 00:00, so its label (centred on the line) isn't cut off.
+  static const _topInset = 12.0;
+
+  static double _y(int minutes) =>
+      _topInset + minutes * PlannerPage.hourHeight / 60;
 
   @override
   Widget build(BuildContext context) {
