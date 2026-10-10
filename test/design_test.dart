@@ -48,7 +48,11 @@ Future<void> openForgotPassword(WidgetTester t) async {
 Future<void> seed(ProviderContainer container) async {
   final notes = container.read(notesProvider.notifier)
     ..addNote(title: 'Bank', content: 'PIN')
-    ..addNote(title: 'Groceries', content: 'milk')
+    ..addNote(
+      title: 'Groceries',
+      // Markdown (N9): the styled text is checked too.
+      content: '## Today\n- **milk**\n1. *eggs* ~~tea~~',
+    )
     ..addNote(title: 'Trip plan');
   final bank = container.read(notesProvider).last.id;
   await notes.lockNote(bank, DataKey.fromBytes(List.filled(32, 1)));

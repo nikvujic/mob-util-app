@@ -160,3 +160,13 @@ pages (selection mode uses `SelectionPopScope`), and only then runs the
   injected with a provider override; tests inject in-memory storage.
 - Slow work (key derivation) runs in a background isolate. Widget tests
   run it for real with `tester.runAsync`, via the `settleBusy` helper.
+
+## Markdown in notes (N9)
+
+Notes are stored as plain text; Markdown is only *shown*. `core/markdown.dart`
+splits a note's text into styled runs (headings, list markers, bold,
+italic, strike; the symbols themselves as faint markers) and works out
+list continuation on Enter. `widgets/markdown_text.dart` applies it: a
+`TextEditingController` whose `buildTextSpan` styles the runs (the text is
+never changed, so the cursor, undo and saving work as for plain text), and
+an input formatter for Enter in lists.

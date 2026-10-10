@@ -12,6 +12,7 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/markdown_text.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
 /// Shows and edits a single note.
@@ -91,7 +92,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _originalContent = widget.unlocked?.content ?? _original?.content ?? '';
     _key = widget.unlocked?.key;
     _titleController = TextEditingController(text: _original?.title ?? '');
-    _contentController = TextEditingController(text: _originalContent);
+    // Markdown basics styled as they're typed (N9).
+    _contentController = MarkdownEditingController(text: _originalContent);
     _history = NoteHistory(_text, clock: ref.read(clockProvider));
     _titleController.addListener(_onEdit);
     _contentController.addListener(_onEdit);
@@ -425,6 +427,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   textCapitalization: TextCapitalization.sentences,
                   maxLines: null,
                   expands: true,
+                  // Enter continues a list (N9).
+                  inputFormatters: const [MarkdownListFormatter()],
                   textAlignVertical: TextAlignVertical.top,
                   style: TextStyle(
                     color: context.colors.textPrimary,

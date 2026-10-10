@@ -7,6 +7,9 @@ Release with the installable APK.
 ## [0.15.0] - unreleased
 
 ### Added
+- **Markdown in notes, styled as you type**: `- ` and `1. ` lists (Enter
+  continues them, Enter on an empty item ends the list), `#`–`###`
+  headings, `**bold**`, `*italic*`, `~~strike~~`. Notes stay plain text.
 - **Unlock with fingerprint** (Security): instead of typing the master
   password, wherever the app asks for it. Kept on this phone only, in
   Android's keystore; turns itself off when the master password changes.

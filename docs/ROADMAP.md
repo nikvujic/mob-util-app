@@ -302,14 +302,15 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Planner: free time as a block** (P7): transparent, dotted border.
 - [x] **Džoni: no top bar**; setting the count is a triple tap in the
   top-right corner instead of a long-press on the title.
+- [x] **Markdown in notes** (N9) — Nikola: dynamic, basics only, lists
+  most important, no checkboxes. Styled live in the editor; symbols stay,
+  faint.
 - [x] **Fingerprint unlock** (L6) — via `biometric_storage` (Android
   keystore, fingerprint-bound key). Not tried on a phone before release:
   Nikola to check on 0.15.
 
 ## Later / ideas
 
-- **Markdown in notes** (N9) — Nikola's idea; ask about the details
-  (editing vs. viewing, which syntax, toggle per note?) before planning
 - TimeTune-style scheduler in Planner (P4)
 - Self-hosted cloud backup, e.g. S3-backed (D5)
 - **UI polish (U1)** — once the main features are in: shake on wrong
