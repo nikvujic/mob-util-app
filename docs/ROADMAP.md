@@ -270,6 +270,9 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Theme switch flashed the old theme** on the next page: the theme
   change was animated (200 ms) and the palette switched half-way; now it
   switches at once.
+- [x] **Clay closer to the Claude app** (Nikola: too light, orange off):
+  Anthropic's brand colours — background #141413, accent #C96442, text
+  #FAF9F5 / #B0AEA5. Tune with a screenshot if still off.
 - [ ] **Forgot master password → reset** (deletes only locked content;
   normal notes, shop, planner stay).
 - [ ] **Notes: undo / redo while typing** (N8).
