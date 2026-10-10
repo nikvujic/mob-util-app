@@ -35,6 +35,23 @@ void main() {
     expect(container.read(preferencesProvider).theme, 'clay');
   });
 
+  testWidgets('a new theme shows at once, with no frame of the old one',
+      (tester) async {
+    final container = await pumpApp(tester);
+    await openMenu(tester);
+    await tester.tap(find.text('Security'));
+    await tester.pumpAndSettle();
+
+    container.read(preferencesProvider.notifier).setTheme('clay');
+    await tester.pump(); // one frame
+
+    expect(paletteOf(tester), AppPalette.clay);
+    // Also on the page underneath, when going back to it.
+    await tester.pageBack();
+    await tester.pump();
+    expect(paletteOf(tester), AppPalette.clay);
+  });
+
   group('preferences', () {
     test('default to green with counter feedback on', () {
       const p = Preferences();

@@ -34,6 +34,9 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'The App',
       theme: AppTheme.of(theme.palette),
+      // Switch themes at once: an animated switch showed the old colours
+      // for a moment (Nikola saw the old theme flash on the next page).
+      themeAnimationDuration: Duration.zero,
       // Tracks which side the user touches, for G11 bottom actions.
       builder: (context, child) => HandTracker(child: child!),
       home: const HomeScreen(),

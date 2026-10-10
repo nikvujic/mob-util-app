@@ -267,6 +267,9 @@ patterns other work builds on (G11, themes), then the bigger features.
   letting go; a fixed frame marks the middle slot (Nikola: "fast and
   dynamic", smoother like before).
 - [x] **Planner: 00:00 label cut off** — small inset above the timeline.
+- [x] **Theme switch flashed the old theme** on the next page: the theme
+  change was animated (200 ms) and the palette switched half-way; now it
+  switches at once.
 - [ ] **Forgot master password → reset** (deletes only locked content;
   normal notes, shop, planner stay).
 - [ ] **Notes: undo / redo while typing** (N8).
