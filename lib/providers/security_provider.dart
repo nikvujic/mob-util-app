@@ -106,6 +106,12 @@ class SecurityNotifier extends StateNotifier<PasswordVerifier?> {
     state = null;
   }
 
+  /// Removes the master password without it (L7). Only for
+  /// [PasswordReset], once everything the password protects is deleted.
+  void forgetPassword() {
+    state = null;
+  }
+
   /// The key for [password]; throws [WrongPasswordException] if it's wrong.
   Future<PasswordKey> _unlock(String password) async {
     final verifier = state;

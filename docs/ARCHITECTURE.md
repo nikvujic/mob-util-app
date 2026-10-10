@@ -87,6 +87,11 @@ write and waits until it's on disk; only then is the password removed. If
 any note doesn't open, nothing changes. A crash at any point leaves either
 the password or plain notes, never locked notes without a password.
 
+A forgotten password is reset (`providers/password_reset_provider.dart`)
+the same way round: locked notes and the content of locked sections are
+deleted and on disk first, then the password goes. Section locks clear
+and the session locks as soon as it does.
+
 Backups keep locked notes sealed and carry the master password record
 (as in `security.json`) that holds their key. Restoring on a phone without
 a master password adopts that record (saved before the notes); otherwise

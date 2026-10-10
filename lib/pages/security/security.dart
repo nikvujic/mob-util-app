@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/pages/security/forgot_password.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/providers/password_reset_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -34,6 +36,17 @@ class SecurityPage extends ConsumerWidget {
       attempt: verifier.unlock,
     );
     if (key != null) await ref.read(sessionProvider.notifier).unlockWith(key);
+  }
+
+  /// Resets a forgotten master password (L7), after confirmation.
+  Future<void> _forgot(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final reset = ref.read(passwordResetProvider);
+    if (!await showForgotPasswordDialog(context, reset.plan())) return;
+    await reset.run();
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Master password reset')),
+    );
   }
 
   /// Turns a section lock on, or off (which needs the app unlocked).
@@ -111,6 +124,15 @@ class SecurityPage extends ConsumerWidget {
               leading: const Icon(Icons.no_encryption_outlined),
               title: const Text('Remove master password'),
               onTap: () => _open(context, PasswordFormMode.remove),
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock_reset),
+              title: const Text('Forgot master password?'),
+              subtitle: Text(
+                'Reset it by deleting what it locks',
+                style: TextStyle(color: context.colors.textSecondary),
+              ),
+              onTap: () => _forgot(context, ref),
             ),
           ],
           Divider(color: context.colors.divider),

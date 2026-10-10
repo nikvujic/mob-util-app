@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/app/app.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/backup.dart';
@@ -26,6 +27,22 @@ import 'helpers.dart';
 /// A fixed "now" (Thursday 8 October 2026, 09:00), so every screen looks
 /// the same whenever the tests run (e.g. the planner opens around now).
 DateTime designClock() => DateTime(2026, 10, 8, 9);
+
+/// Sets a master password and opens "Forgot master password?" (L7).
+Future<void> openForgotPassword(WidgetTester t) async {
+  final container = ProviderScope.containerOf(t.element(find.byType(MyApp)));
+  await t.runAsync(
+    () => container.read(securityProvider.notifier).setPassword('password1'),
+  );
+  await openMenu(t);
+  await t.tap(find.text('Security'));
+  await t.pumpAndSettle();
+  final tile = find.text('Forgot master password?');
+  await t.ensureVisible(tile);
+  await t.tap(tile);
+  await t.pumpAndSettle();
+  expect(find.text('Reset master password?'), findsOneWidget);
+}
 
 /// Seeds a few notes (one locked) and shop items (in both sections).
 Future<void> seed(ProviderContainer container) async {
@@ -175,6 +192,7 @@ void main() {
         await t.tap(find.text('Themes'));
         await t.pumpAndSettle();
       },
+      'forgot master password dialog': (t) => openForgotPassword(t),
       'set master password form': (t) async {
         await openMenu(t);
         await t.tap(find.text('Security'));
@@ -551,6 +569,20 @@ void main() {
       containsSemantics(label: 'Bread', isSelected: true),
     );
     semantics.dispose();
+  });
+
+  testWidgets('the forgot password dialog copes with a very large font',
+      (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await seed(await pumpApp(tester, clock: designClock));
+    await tester.pump();
+    await openForgotPassword(tester);
+    expect(tester.takeException(), isNull);
+    // Scrolls to reach the confirmation field.
+    await tester.ensureVisible(find.byKey(const Key('resetConfirm')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('lists cope with a very large system font', (tester) async {

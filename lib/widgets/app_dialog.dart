@@ -8,16 +8,21 @@ class AppDialog extends StatelessWidget {
   final Widget? content;
   final List<Widget> actions;
 
+  /// Lets long content scroll (e.g. with large text).
+  final bool scrollable;
+
   const AppDialog({
     super.key,
     required this.title,
     this.content,
     this.actions = const [],
+    this.scrollable = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: scrollable,
       backgroundColor: context.colors.surface,
       shape: AppShapes.dialog,
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),

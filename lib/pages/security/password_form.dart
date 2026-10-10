@@ -13,7 +13,8 @@ enum PasswordFormMode {
     action: 'Set password',
     done: 'Master password set',
     warning: 'A forgotten master password can\'t be recovered. Locked notes '
-        'and encrypted backups can only be opened with it.',
+        'and encrypted backups can only be opened with it; without it, they '
+        'can only be deleted.',
   ),
   change(
     title: 'Change master password',

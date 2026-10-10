@@ -48,6 +48,14 @@ void main() {
 
   void lockApp() => container.read(sessionProvider.notifier).lock();
 
+  /// Taps the Shop section lock, scrolling to it first.
+  Future<void> tapShopSwitch(WidgetTester tester) async {
+    final shop = find.widgetWithText(SwitchListTile, 'Shop');
+    await tester.ensureVisible(shop);
+    await tester.pumpAndSettle();
+    await tester.tap(shop);
+  }
+
   Future<void> openSecurity(WidgetTester tester) async {
     await openMenu(tester);
     await tester.tap(find.text('Security'));
@@ -75,7 +83,7 @@ void main() {
     await start(tester);
     await openSecurity(tester);
 
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Shop'));
+    await tapShopSwitch(tester);
     await tester.pumpAndSettle();
     expect(locks(), {AppSection.shop});
 
@@ -113,14 +121,14 @@ void main() {
     lockApp();
     await openSecurity(tester);
 
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Shop'));
+    await tapShopSwitch(tester);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('promptPassword')), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(locks(), {AppSection.shop}, reason: 'cancelled');
 
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Shop'));
+    await tapShopSwitch(tester);
     await tester.pumpAndSettle();
     await enterPassword(tester, password);
     expect(locks(), isEmpty);

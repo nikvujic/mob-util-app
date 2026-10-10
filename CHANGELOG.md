@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.14.0] - 2026-10-10
 
 ### Added
+- **Forgot master password?** on the Security page: resets it by deleting
+  what it locks (locked notes, and everything in locked sections).
+  Everything else stays. The confirmation lists what goes and asks you to
+  type RESET.
 - **Edit planner tasks**: tap a block to change its title or times (up to
   the tasks around it).
 

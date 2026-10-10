@@ -277,8 +277,9 @@ patterns other work builds on (G11, themes), then the bigger features.
   Backup, Themes, Settings; an architecture rule flags plain scrolling
   lists in pages, with a short list of explained exceptions.
 - [x] **Swipe right along the bottom bar opens the menu** (G15).
-- [ ] **Forgot master password → reset** (deletes only locked content;
-  normal notes, shop, planner stay).
+- [x] **Forgot master password → reset** (L7): deletes locked notes and
+  the content of locked sections (Nikola chose this, so a section lock
+  can't be bypassed by resetting); everything else stays.
 - [ ] **Notes: undo / redo while typing** (N8).
 - [ ] **Shop: scroll to an item as it's added.**
 - [ ] **Džoni: hidden reset / set of the count.**

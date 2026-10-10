@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/app_section.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
 
@@ -188,5 +191,67 @@ void main() {
 
     expect(appBarTitle('Security'), findsOneWidget);
     expect(security().hasMasterPassword, isFalse);
+  });
+
+  group('forgot master password (L7)', () {
+    Future<void> openForgot(WidgetTester tester) async {
+      final tile = find.text('Forgot master password?');
+      await tester.ensureVisible(tile);
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+    }
+
+    Finder resetButton() => find.widgetWithText(FilledButton, 'Reset');
+    bool resetEnabled(WidgetTester tester) =>
+        tester.widget<FilledButton>(resetButton()).onPressed != null;
+
+    testWidgets('lists what goes and needs RESET typed; Cancel keeps all',
+        (tester) async {
+      container = await pumpApp(tester);
+      await tester.runAsync(() => security().setPassword(password));
+      container.read(shopProvider.notifier)
+        ..addItem('Milk')
+        ..addItem('Bread');
+      container.read(sectionLocksProvider.notifier).lock(AppSection.shop);
+      await openMenu(tester);
+      await tester.tap(find.text('Security'));
+      await tester.pumpAndSettle();
+
+      await openForgot(tester);
+      expect(find.textContaining('Shop (locked section): 2 items'),
+          findsOneWidget);
+      expect(resetEnabled(tester), isFalse);
+      await tester.enterText(find.byKey(const Key('resetConfirm')), 'reset');
+      await tester.pump();
+      expect(resetEnabled(tester), isTrue);
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Cancel'));
+      await tester.pumpAndSettle();
+      expect(security().hasMasterPassword, isTrue);
+      expect(container.read(shopProvider), hasLength(2));
+
+      await openForgot(tester);
+      await tester.enterText(find.byKey(const Key('resetConfirm')), 'RESET');
+      await tester.pump();
+      await tester.tap(resetButton());
+      await tester.pumpAndSettle();
+
+      expect(security().hasMasterPassword, isFalse);
+      expect(container.read(shopProvider), isEmpty);
+      expect(find.text('Master password reset'), findsOneWidget);
+      expect(find.text('Set master password'), findsOneWidget);
+    });
+
+    testWidgets('with nothing locked, says so and resets at once',
+        (tester) async {
+      await openSecurity(tester, withPassword: true);
+      await openForgot(tester);
+      expect(find.textContaining('nothing will be deleted'), findsOneWidget);
+      expect(find.byKey(const Key('resetConfirm')), findsNothing);
+
+      await tester.tap(resetButton());
+      await tester.pumpAndSettle();
+      expect(security().hasMasterPassword, isFalse);
+    });
   });
 }
