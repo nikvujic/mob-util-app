@@ -30,7 +30,7 @@ import 'package:the_app/widgets/text_input_sheet.dart';
 /// A locked note (N6) is opened with its content already decrypted
 /// ([unlocked]); edits are saved encrypted with the same key. If the app
 /// locks while it's open (L4), the note is saved and closed. Locking and
-/// removing the lock (⋮ menu) take effect at once and count as saving:
+/// removing the lock (bottom button) take effect at once and count as saving:
 /// Discard afterwards goes back only to that point.
 class NoteDetailPage extends ConsumerStatefulWidget {
   final String noteId;
@@ -263,7 +263,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _originalContent = _contentController.text;
   }
 
-  /// ⋮ → Edit title: the title field is out of thumb reach (N11).
+  /// Edit title: the title field is out of thumb reach (N11).
   Future<void> _editTitle() async {
     final title = await showTextInputSheet(
       context,
@@ -273,7 +273,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     if (title != null && mounted) _titleController.text = title;
   }
 
-  /// ⋮ → Lock note: saves, then encrypts the content.
+  /// Lock note: saves, then encrypts the content.
   Future<void> _lock() async {
     final key = await lockingKey(context, ref);
     if (key == null || !mounted) return;
@@ -284,7 +284,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     setState(_markSaved);
   }
 
-  /// ⋮ → Remove lock: saves, then stores the content unencrypted again.
+  /// Remove lock: saves, then stores the content unencrypted again.
   Future<void> _removeLock() async {
     final confirmed = await showConfirmDialog(
       context,
@@ -349,14 +349,32 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             [_titleController, _contentController, _history],
           ),
           builder: (context, _) => BottomActions(
+            // Up at the top, the title is out of thumb reach (N11).
+            above: BottomAction(
+              icon: Icons.title,
+              tooltip: 'Edit title',
+              onPressed: _editTitle,
+            ),
             actions: [
+              locked
+                  ? BottomAction(
+                      icon: Icons.lock_open_outlined,
+                      tooltip: 'Remove lock',
+                      onPressed: _removeLock,
+                    )
+                  : BottomAction(
+                      icon: Icons.lock_outline,
+                      tooltip: 'Lock note',
+                      onPressed: _lock,
+                    ),
               if (!widget.isNew && _hasChanges)
                 BottomAction(
-                  // Not ↶: that's kept for real undo (N8).
+                  // Not ↶: that's undo.
                   icon: Icons.settings_backup_restore,
                   tooltip: 'Discard changes',
                   onPressed: _revertInPlace,
                 ),
+              // Outermost, under the thumb.
               BottomAction(
                 icon: Icons.undo,
                 tooltip: 'Undo',
@@ -368,35 +386,6 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 tooltip: 'Redo',
                 enabled: _history.canRedo,
                 onPressed: _redo,
-              ),
-              BottomAction(
-                icon: Icons.more_vert,
-                tooltip: 'More',
-                menu: () => [
-                  PopupMenuItem(
-                    value: _editTitle,
-                    child: const ListTile(
-                      leading: Icon(Icons.title),
-                      title: Text('Edit title'),
-                    ),
-                  ),
-                  if (locked)
-                    PopupMenuItem(
-                      value: _removeLock,
-                      child: const ListTile(
-                        leading: Icon(Icons.lock_open_outlined),
-                        title: Text('Remove lock'),
-                      ),
-                    )
-                  else
-                    PopupMenuItem(
-                      value: _lock,
-                      child: const ListTile(
-                        leading: Icon(Icons.lock_outline),
-                        title: Text('Lock note'),
-                      ),
-                    ),
-                ],
               ),
             ],
           ),
@@ -447,7 +436,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                     hintStyle: TextStyle(color: context.colors.textHint),
                     // The text ends above the buttons, never behind them.
                     contentPadding: EdgeInsets.only(
-                      bottom: BottomActions.contentClearance,
+                      bottom: BottomActions.contentClearance +
+                          BottomActions.aboveClearance,
                     ),
                   ),
                 ),

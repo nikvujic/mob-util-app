@@ -66,10 +66,8 @@ void main() {
   Future<String> readLocked(String title) => notes()
       .readContent(note(title), container.read(sessionProvider)!.dataKey);
 
-  Future<void> menuAction(WidgetTester tester, String label) async {
-    await tester.tap(find.byTooltip('More'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(label));
+  Future<void> editorAction(WidgetTester tester, String label) async {
+    await tester.tap(find.byTooltip(label));
     await tester.pumpAndSettle();
   }
 
@@ -88,7 +86,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(appBarTitle('Note'), findsOneWidget);
 
-    await menuAction(tester, 'Lock note');
+    await editorAction(tester, 'Lock note');
 
     expect(appBarTitle('Locked note'), findsOneWidget);
     expect(note('Bank').isLocked, isTrue);
@@ -222,7 +220,7 @@ void main() {
     await tester.tap(find.text('Bank'));
     await tester.pumpAndSettle();
 
-    await menuAction(tester, 'Remove lock');
+    await editorAction(tester, 'Remove lock');
     expect(find.text('Remove lock?'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Remove lock'));
     await tester.pumpAndSettle();
@@ -238,7 +236,7 @@ void main() {
       await tester.tap(find.text('Bank'));
       await tester.pumpAndSettle();
 
-      await menuAction(tester, 'Lock note');
+      await editorAction(tester, 'Lock note');
       expect(find.text('Set a master password?'), findsOneWidget);
       await tester.tap(find.text('Set password'));
       await tester.pumpAndSettle();
@@ -265,12 +263,12 @@ void main() {
       await tester.tap(find.text('Bank'));
       await tester.pumpAndSettle();
 
-      await menuAction(tester, 'Lock note');
+      await editorAction(tester, 'Lock note');
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(appBarTitle('Note'), findsOneWidget);
 
-      await menuAction(tester, 'Lock note');
+      await editorAction(tester, 'Lock note');
       await tester.tap(find.text('Set password'));
       await tester.pumpAndSettle();
       await tester.pageBack();

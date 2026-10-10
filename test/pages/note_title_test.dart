@@ -31,13 +31,11 @@ void main() {
   }
 
   Future<void> openEditTitle(WidgetTester tester) async {
-    await tester.tap(find.byTooltip('More'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit title'));
+    await tester.tap(find.byTooltip('Edit title'));
     await tester.pumpAndSettle();
   }
 
-  testWidgets('⋮ → Edit title changes the title in a sheet at the bottom',
+  testWidgets('Edit title changes the title in a sheet at the bottom',
       (tester) async {
     final id = await openNote(tester);
     await openEditTitle(tester);

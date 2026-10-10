@@ -102,18 +102,10 @@ void main() {
         await t.tap(find.text('Groceries'));
         await t.pumpAndSettle();
       },
-      'note editor menu': (t) async {
-        await t.tap(find.text('Groceries'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('More'));
-        await t.pumpAndSettle();
-      },
       'lock needs a master password dialog': (t) async {
         await t.tap(find.text('Groceries'));
         await t.pumpAndSettle();
-        await t.tap(find.byTooltip('More'));
-        await t.pumpAndSettle();
-        await t.tap(find.text('Lock note'));
+        await t.tap(find.byTooltip('Lock note'));
         await t.pumpAndSettle();
         expect(find.text('Set a master password?'), findsOneWidget);
       },
@@ -449,19 +441,28 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final more = tester.getRect(find.byTooltip('More'));
-      expect(more.center.dy, greaterThan(screen.height * 0.75));
+      final undo = tester.getRect(find.byTooltip('Undo'));
+      final redo = tester.getRect(find.byTooltip('Redo'));
+      final title = tester.getRect(find.byTooltip('Edit title'));
+      expect(undo.center.dy, greaterThan(screen.height * 0.75));
       expect(
         right
-            ? more.center.dx > screen.width / 2
-            : more.center.dx < screen.width / 2,
+            ? undo.center.dx > screen.width / 2
+            : undo.center.dx < screen.width / 2,
         isTrue,
         reason: right ? 'right' : 'left',
       );
+      // Undo / redo outermost, under the thumb; Edit title smaller, above
+      // the outermost one.
+      expect(right ? redo.left > undo.left : redo.left < undo.left, isTrue,
+          reason: 'redo outermost');
+      expect(title.center.dx, closeTo(redo.center.dx, 1));
+      expect(title.bottom, lessThan(redo.top));
+      expect(title.width, lessThan(redo.width));
       expect(
         find.descendant(
           of: find.byType(AppBar),
-          matching: find.byTooltip('More'),
+          matching: find.byType(FloatingActionButton),
         ),
         findsNothing,
       );
@@ -471,7 +472,7 @@ void main() {
         of: find.byKey(const Key('noteContentField')),
         matching: find.byType(EditableText),
       );
-      expect(tester.getRect(field).bottom, lessThanOrEqualTo(more.top));
+      expect(tester.getRect(field).bottom, lessThanOrEqualTo(title.top));
 
       await tester.pageBack();
       await tester.pumpAndSettle();

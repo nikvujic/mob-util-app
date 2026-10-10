@@ -7,22 +7,22 @@ Release with the installable APK.
 ## [0.15.0] - unreleased
 
 ### Added
-- **Edit title** in the note editor's ⋮ menu: change the title in a sheet
-  at the bottom, within thumb reach.
-
+- **Edit title** button in the note editor: a smaller button above the
+  others opens the title in a sheet at the bottom, within thumb reach.
 - Džoni: long-press the title to set or reset the count.
 
 ### Changed
+- **Note editor buttons**: Lock note (or Remove lock) is a button of its
+  own instead of a ⋮ menu, and ↶ Undo / ↷ Redo sit outermost, under the
+  thumb. Tapping them no longer closes the keyboard.
 - **Reach mode reaches further** (about one row more; Counters a bit
   more again).
+- **Shop scrolls to each new item** as you add it, so you see it land in
+  the list above the add sheet.
 
 ### Fixed
 - **Reach mode snaps back as soon as you let go**: a small scroll the
   other way used to coast, and only snapped back on your next touch.
-
-### Changed
-- **Shop scrolls to each new item** as you add it, so you see it land in
-  the list above the add sheet.
 
 ## [0.14.0] - 2026-10-10
 

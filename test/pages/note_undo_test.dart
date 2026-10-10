@@ -112,4 +112,23 @@ void main() {
     await press(tester, 'Undo');
     expect(content(tester), 'milk, eggs');
   });
+
+  testWidgets('the buttons leave the keyboard up (no menu to open)',
+      (tester) async {
+    await openNote(tester);
+    await type(tester, 'milk, eggs');
+    bool typing() => tester
+        .widget<EditableText>(
+          find.descendant(
+              of: contentField, matching: find.byType(EditableText)),
+        )
+        .focusNode
+        .hasFocus;
+    expect(typing(), isTrue);
+
+    await press(tester, 'Undo');
+    await press(tester, 'Redo');
+    expect(typing(), isTrue);
+    expect(find.byTooltip('More'), findsNothing);
+  });
 }
