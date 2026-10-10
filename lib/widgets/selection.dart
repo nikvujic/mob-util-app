@@ -89,8 +89,8 @@ class SelectionAction {
 
 /// The actions of selection mode as round buttons at the bottom, on the
 /// side of the long-press that started it (see [BottomActions]): [extra]
-/// ones, Select all / Deselect all, Delete, and ✕ (leave selection mode)
-/// outermost. Use as the page's floating action button.
+/// ones, Select all / Deselect all, Delete, and ✕ (leave selection mode,
+/// if [onClose] is given) outermost. Use as the page's floating action button.
 class SelectionActions extends StatelessWidget {
   /// Space to leave below a list so its last row can scroll clear of the
   /// buttons (also of the usual + button).
@@ -100,7 +100,10 @@ class SelectionActions extends StatelessWidget {
   final VoidCallback onSelectAll;
   final VoidCallback onDeselectAll;
   final VoidCallback onDelete;
-  final VoidCallback onClose;
+
+  /// Leaves selection mode (✕); without it there's no ✕, and back alone
+  /// leaves it.
+  final VoidCallback? onClose;
   final List<SelectionAction> extra;
 
   const SelectionActions({
@@ -109,7 +112,7 @@ class SelectionActions extends StatelessWidget {
     required this.onSelectAll,
     required this.onDeselectAll,
     required this.onDelete,
-    required this.onClose,
+    this.onClose,
     this.extra = const [],
   });
 
@@ -134,11 +137,12 @@ class SelectionActions extends StatelessWidget {
           onPressed: onDelete,
           danger: true,
         ),
-        BottomAction(
-          icon: Icons.close,
-          tooltip: 'Cancel selection',
-          onPressed: onClose,
-        ),
+        if (onClose != null)
+          BottomAction(
+            icon: Icons.close,
+            tooltip: 'Cancel selection',
+            onPressed: onClose,
+          ),
       ],
     );
   }

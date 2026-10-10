@@ -90,6 +90,7 @@ void main() {
     lockApp();
     await tester.pageBack();
     await tester.pumpAndSettle();
+    await pressBack(tester); // the menu, still open behind Security
     await openTab(tester, 'Shop');
 
     expect(find.text('Shop is locked'), findsOneWidget);

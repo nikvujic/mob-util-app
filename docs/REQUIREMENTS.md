@@ -35,6 +35,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G13 | **Back to a section = back to its top:** going to a section (tapping it in the bottom bar) clears any pulled-down space, so the list sits at its normal top. | ✅ |
 | G14 | **Reach mode everywhere it helps:** every scrolling list (sections, the menu, Security, Backup, Themes, Settings, …) supports reach mode (U4). Exceptions only where pulling down brings nothing into reach (forms, the planner timeline, bottom-up tiles); enforced by `test/architecture_test.dart`. | ✅ |
 | G15 | **Swipe right along the bottom bar opens the menu** (easier for the right thumb than the left screen edge). | ✅ |
+| G16 | **The menu stays open behind its pages:** a page opened from the menu returns to the open menu on back; a second back closes the menu. | ✅ |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
 ## D — Data safety: export / import
@@ -119,7 +120,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
 | O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ✅ |
 | O4 | **"Džoni što ćutiš?"** tool: turns the screen sideways (landscape), shows that text big with a counter under it; holding anywhere on the screen makes it shake and pop and counts up by one; the count is saved for good; **no top bar** (the whole screen is the page); a **triple tap in the top-right corner** opens a dialog to set the count (or reset it to 0); system back leaves (and restores the orientation). | ✅ |
-| O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode |
+| O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode; selection mode without ✕ (back leaves it) |
 
 ---
 

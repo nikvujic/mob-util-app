@@ -41,8 +41,12 @@ void main() {
 
       expect(exit.exits, 0);
       expect(appBarTitle('Security'), findsNothing);
+      expect(find.byType(Drawer), findsOneWidget, reason: 'back to the menu');
+
+      await pressBack(tester); // closes the menu (G16)
+      expect(exit.exits, 0);
+      expect(find.byType(Drawer), findsNothing);
       expect(appBarTitle(tab), findsOneWidget);
-      expect(find.byType(Drawer), findsNothing, reason: 'menu stays closed');
     });
   }
 
@@ -56,6 +60,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(appBarTitle('Backup'), findsOneWidget);
 
+    await pressBack(tester);
+    expect(find.byType(Drawer), findsOneWidget, reason: 'back to the menu');
     await pressBack(tester);
 
     expect(exit.exits, 0);

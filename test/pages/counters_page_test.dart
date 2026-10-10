@@ -158,6 +158,7 @@ void main() {
       expect(container.read(preferencesProvider).counterFeedback, isFalse);
       await tester.pageBack();
       await tester.pumpAndSettle();
+      await pressBack(tester); // the menu, still open behind Settings
       await tester.tap(find.byTooltip('Counters'));
       await tester.pumpAndSettle();
       final calls = recordFeedback(tester);
@@ -168,5 +169,17 @@ void main() {
       expect(calls, isEmpty);
       expect(values(), {'Push-ups': 1}, reason: 'still counts');
     });
+  });
+
+  testWidgets('selection mode has no ✕: back leaves it', (tester) async {
+    await openCounters(tester, names: ['Push-ups']);
+    await tester.longPress(find.text('Push-ups'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Delete'), findsOneWidget);
+    expect(find.byTooltip('Cancel selection'), findsNothing);
+
+    await pressBack(tester);
+    expect(find.byTooltip('Delete'), findsNothing, reason: 'selection left');
+    expect(find.text('Push-ups'), findsOneWidget, reason: 'still on Counters');
   });
 }

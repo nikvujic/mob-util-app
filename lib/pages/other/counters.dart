@@ -161,7 +161,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                       _selection.selectAll(counters.map((c) => c.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
-                  onClose: _selection.clear,
+                  // No ✕: back leaves selection mode (Nikola).
                   extra: [
                     if (_selection.count == 1)
                       SelectionAction(

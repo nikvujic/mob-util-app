@@ -13,10 +13,9 @@ import 'package:the_app/widgets/pull_down_list.dart';
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
-  /// Closes the drawer, then opens [page] on top of the current section, so
-  /// back returns to that section.
+  /// Opens [page] on top, with the menu left open behind it (G16): back
+  /// returns to the menu, and back again closes it.
   void _open(BuildContext context, Widget page) {
-    Scaffold.of(context).closeDrawer();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
   }
 

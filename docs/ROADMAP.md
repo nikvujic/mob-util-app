@@ -286,6 +286,12 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 7 — after 0.16 (2026-10-10)
+
+- [x] **Menu stays open behind its pages** (G16): back from a page opened
+  from the menu returns to the menu; back again closes it.
+- [x] **Counters: no ✕ in selection mode** — back already leaves it.
+
 ### Round 6 — after 0.15 (2026-10-10)
 
 - [x] **Markdown: hide the symbols except where you're editing** (N9) —
