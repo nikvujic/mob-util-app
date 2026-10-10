@@ -252,6 +252,16 @@ patterns other work builds on (G11, themes), then the bigger features.
   the free time around it, up to its neighbours); overlaps refused.
 - [x] **Planner: smarter default start** — on today, in free time that's
   going on now, a new task starts at the next full hour.
+- [ ] **Pull-down reach, rethought (replaces U3/U4 behaviour):** a *reach
+  mode* rather than a free scroll area. Entering: only by pulling down a
+  list that's already at its top, with a new gesture (scrolling up from
+  further down stops at the normal top). In reach mode the list is
+  shifted down so the first rows are in thumb reach; any scroll the other
+  way leaves the mode and snaps fully back to the top — no half-way
+  positions. A small pull springs back. The shift is half of before (20%
+  of the screen height). (Nikola, after using 0.13: the old snap felt
+  odd, sometimes didn't snap, and sometimes snapped instead of
+  scrolling.)
 - [ ] **Forgot master password → reset** (deletes only locked content;
   normal notes, shop, planner stay).
 - [ ] **Notes: undo / redo while typing** (N8).
