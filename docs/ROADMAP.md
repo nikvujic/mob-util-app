@@ -215,12 +215,18 @@ patterns other work builds on (G11, themes), then the bigger features.
   Menu → Settings. The click is Android's touch sound (follows the
   phone's *Touch sounds* setting); a bundled sound could come later.
 - [x] **O4** "Džoni što ćutiš?" page (landscape, big text, hold to
-  count with shake + pop). The count is kept in preferences.json, so
-  it's not in backups yet: add it with the next backup format change.
+  count with shake + pop). The count is kept in preferences.json and
+  travels in backups (format 4).
   Later: a hidden way to reset or set the count.
 
 **E. Planner: time blocks**
-- [ ] **P7** Time blocks (details settled, see answers below).
+- [x] **P7** Time blocks: each day is a timeline 00:00–24:00; tasks are
+  blocks with a checkbox in the top-right corner; tapping free time adds
+  a task there (start = start of the free time, end 1 h later or a quick
+  option / the end of the free time / a picked time). No overlaps, no +
+  button. Old tasks without times show above the timeline, marked, to
+  delete. planner.json version 3, backups version 4 (with the Džoni
+  count).
 
 **Answers so far (2026-10-09):**
 - G11: yes, the side rule also applies to selection actions, and ✕ is
@@ -238,9 +244,6 @@ patterns other work builds on (G11, themes), then the bigger features.
   slots. **Blocks never overlap.**
 
 **Still open:**
-- P7: can a block be ticked off as done (like the current checkbox), or
-  is a block just a time slot? What happens to today's v1 tasks (no
-  times) — become blocks at the start of free time?
 
 
 ## Later / ideas

@@ -54,8 +54,9 @@ class Backup {
 
   /// History: 1 = first format; 2 = notes may be locked
   /// (`lockedContent`); 3 = planner tasks and counters (`plannerTasks`,
-  /// `counters`; older backups have none).
-  static const version = 3;
+  /// `counters`; older backups have none); 4 = planner tasks have start
+  /// and end times, and the Džoni count (`dzoniCount`).
+  static const version = 4;
 
   final DateTime createdAt;
   final String appVersion;
@@ -63,6 +64,9 @@ class Backup {
   final List<ShopItem> shopItems;
   final List<PlannerTask> plannerTasks;
   final List<Counter> counters;
+
+  /// The count on the Džoni page (O4); 0 in backups from before it.
+  final int dzoniCount;
 
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
@@ -74,6 +78,7 @@ class Backup {
     required this.shopItems,
     this.plannerTasks = const [],
     this.counters = const [],
+    this.dzoniCount = 0,
     this.masterPassword,
   });
 
@@ -100,6 +105,7 @@ class Backup {
           'shopItems': [for (final i in shopItems) i.toJson()],
           'plannerTasks': [for (final t in plannerTasks) t.toJson()],
           'counters': [for (final c in counters) c.toJson()],
+          'dzoniCount': dzoniCount,
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -183,6 +189,7 @@ class Backup {
           for (final c in data['counters'] as List<dynamic>? ?? const [])
             Counter.fromJson(c as Map<String, dynamic>),
         ],
+        dzoniCount: data['dzoniCount'] as int? ?? 0,
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(

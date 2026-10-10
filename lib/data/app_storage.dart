@@ -18,7 +18,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
-///     <app documents>/data/planner.json {"version": 2, "tasks": [...]}
+///     <app documents>/data/planner.json {"version": 3, "tasks": [...]}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -32,6 +32,11 @@ class AppStorage {
   /// may be locked (`lockedContent`) and the master password record may
   /// hold a wrapped data key. Every older version must stay readable.
   static const formatVersion = 2;
+
+  /// Version of `planner.json`, which moves on its own. History: 2 = tasks
+  /// per day; 3 = tasks have start and end times (P7; version 2 tasks have
+  /// none and are still read).
+  static const plannerFormatVersion = 3;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
@@ -134,6 +139,7 @@ class AppStorage {
       initialPlannerTasks: await _load(
         plannerStore,
         [],
+        maxVersion: plannerFormatVersion,
         (json) => [
           for (final e in json['tasks'] as List<dynamic>)
             PlannerTask.fromJson(e as Map<String, dynamic>),
@@ -171,14 +177,15 @@ class AppStorage {
   static Future<T> _load<T>(
     JsonFileStore store,
     T empty,
-    T Function(Map<String, dynamic> json) parse,
-  ) async {
+    T Function(Map<String, dynamic> json) parse, {
+    int maxVersion = formatVersion,
+  }) async {
     try {
       final json = await store.read();
       if (json == null) return empty;
       final map = json as Map<String, dynamic>;
       final version = map['version'];
-      if (version is! int || version < 1 || version > formatVersion) {
+      if (version is! int || version < 1 || version > maxVersion) {
         throw FormatException('Unsupported format version: $version');
       }
       return parse(map);
@@ -214,7 +221,7 @@ class AppStorage {
 
   Future<void> savePlannerTasks(List<PlannerTask> tasks) async {
     await _plannerStore?.write({
-      'version': formatVersion,
+      'version': plannerFormatVersion,
       'tasks': [for (final t in tasks) t.toJson()],
     });
   }

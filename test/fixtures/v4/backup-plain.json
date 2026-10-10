@@ -1,0 +1,94 @@
+{
+  "format": "the-app-backup",
+  "version": 4,
+  "createdAt": "2026-10-10T09:00:00.000Z",
+  "appVersion": "0.14.0 (15)",
+  "data": {
+    "notes": [
+      {
+        "id": "1759906800000000-0",
+        "title": "Groceries",
+        "content": "milk\neggs\nčaj, ćevapi 🥙",
+        "createdAt": "2026-10-08T07:00:00.000Z",
+        "modifiedAt": "2026-10-08T07:30:00.000Z"
+      },
+      {
+        "id": "1759906800000001-0",
+        "title": "Bank 🔒",
+        "content": "",
+        "createdAt": "2026-10-07T21:15:00.000",
+        "modifiedAt": "2026-10-07T21:16:30.500",
+        "lockedContent": {
+          "cipher": "aes-256-gcm",
+          "nonce": "GpzKmOePrTG2Nia2",
+          "cipherText": "qpgfdPIY1a6BO3G7d9FLGxxFHR4mS70o1VjlujD4xg==",
+          "mac": "Sut1KdDKZ0uR5iOR1UgspQ=="
+        }
+      }
+    ],
+    "shopItems": [
+      {
+        "id": "1759906800000010-0",
+        "name": "Milk",
+        "toBuy": true
+      },
+      {
+        "id": "1759906800000011-0",
+        "name": "Coffee",
+        "toBuy": false
+      }
+    ],
+    "plannerTasks": [
+      {
+        "id": "1759906800000040-0",
+        "title": "Teretana (gym)",
+        "day": "2026-10-12",
+        "start": 480,
+        "end": 540,
+        "done": true
+      },
+      {
+        "id": "1759906800000041-0",
+        "title": "Late call",
+        "day": "2026-10-12",
+        "start": 1410,
+        "end": 1440,
+        "done": false
+      }
+    ],
+    "counters": [
+      {
+        "id": "1759906800000030-0",
+        "name": "Sklekovi (push-ups)",
+        "value": 42
+      },
+      {
+        "id": "1759906800000031-0",
+        "name": "Score",
+        "value": -3
+      }
+    ],
+    "dzoniCount": 7,
+    "masterPassword": {
+      "kdf": {
+        "algorithm": "argon2id",
+        "memoryKiB": 19456,
+        "iterations": 2,
+        "parallelism": 1,
+        "salt": "G2ae25g7J4OG6ExywQqdrw=="
+      },
+      "check": {
+        "cipher": "aes-256-gcm",
+        "nonce": "SSUd0c0Psz5L+e4a",
+        "cipherText": "MwjwcjseO5gFWsh/MjUfZQ==",
+        "mac": "8B4XXTbP1J1tYklcQTmWjg=="
+      },
+      "dataKey": {
+        "cipher": "aes-256-gcm",
+        "nonce": "lJHE70jQEZ1UQggl",
+        "cipherText": "Kjp4NdwZH2F8LdO/RF253S8IUcBTV+BrDz6JTTdRGOs=",
+        "mac": "bK2zQc+b9FiCnJfS+d/LjQ=="
+      }
+    }
+  }
+}

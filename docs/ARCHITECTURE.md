@@ -99,6 +99,14 @@ The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.
 
+## Planner timeline
+
+A planner task has a day and, since planner.json version 3, a start and
+an end in minutes from midnight; `freeSlots` gives the gaps of a day, and
+`PlannerNotifier.addTask` refuses overlaps. `planner.json` has its own
+format version (`AppStorage.plannerFormatVersion`), so an older app sets a
+newer planner file aside instead of dropping the times.
+
 ## Themes and preferences
 
 `AppPalette` (in `core/theme.dart`) holds a theme's colours; `AppTheme.of`

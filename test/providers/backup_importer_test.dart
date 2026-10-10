@@ -15,6 +15,7 @@ import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
@@ -152,8 +153,8 @@ void main() {
       ..addItem('Milk')
       ..addItem('Eggs');
     source.read(plannerProvider.notifier)
-      ..addTask(DateTime(2026, 10, 12), 'Gym')
-      ..addTask(DateTime(2026, 10, 13), 'Dentist');
+      ..addTask(DateTime(2026, 10, 12), 'Gym', start: 480, end: 540)
+      ..addTask(DateTime(2026, 10, 13), 'Dentist', start: 840, end: 870);
     source.read(plannerProvider.notifier).toggleDone(
           source.read(plannerProvider).first.id,
         );
@@ -164,6 +165,9 @@ void main() {
           source.read(countersProvider).last.id,
           -2,
         );
+    source.read(preferencesProvider.notifier)
+      ..countDzoni()
+      ..countDzoni();
     await source.read(backupExporterProvider).export();
 
     final target = containerWith(AppStorage.inMemory());
@@ -188,6 +192,7 @@ void main() {
       target.read(countersProvider).map((c) => c.toJson()),
       source.read(countersProvider).map((c) => c.toJson()),
     );
+    expect(target.read(preferencesProvider).dzoniCount, 2);
   });
 
   test('a restore is on disk when it completes', () async {

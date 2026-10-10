@@ -24,3 +24,7 @@ app still reads every version, so an update can never lose existing data.
 - `v2/storage/counters.json`, `v3/backup-with-counters.json` — counters
   (added with them, before v3 was released; the other v3 backups have
   none, which v3 allows).
+- `v3/storage/planner.json` — planner tasks with start and end times
+  (planner.json has its own version, 3; the other files are still 2).
+- `v4/backup-plain.json` — backup with timed planner tasks and the Džoni
+  count.

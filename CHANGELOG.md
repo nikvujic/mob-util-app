@@ -4,9 +4,14 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.13.0] - 2026-10-09
+## [0.13.0] - 2026-10-10
 
 ### Added
+- **Planner time blocks**: each day is a timeline from 00:00 to 24:00.
+  Tap free time to add a task there — it starts where the free time
+  starts and lasts an hour, or pick 15 / 30 min, 1 / 2 h, *until free
+  time ends*, or a time. Tasks never overlap; tick them off with the
+  checkbox in the block's corner. (There's no + button anymore.)
 - **Themes** (Menu → Themes): Green (the original look), Black (true
   black for OLED screens) and Clay (warm greys with a clay-orange accent).
 - **Settings** (Menu → Settings): switch the counters' click and
@@ -24,6 +29,8 @@ Release with the installable APK.
   once there's something to discard; ⋮ is at the bottom too, and the text
   ends above the buttons.
 - **Other** shows its tools as icon tiles, starting in the bottom right.
+- Backups also keep the Džoni count (backup format 4; older backups
+  still restore).
 - **Planner**: a fast swipe on the day strip travels many days; the past
   is greyed out (only back to the oldest unfinished task); no Today
   button.

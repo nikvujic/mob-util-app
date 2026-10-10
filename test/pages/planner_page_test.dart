@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/day_strip.dart';
 
 import '../helpers.dart';
 
-/// The planner (P2): a to-do list per day, picked with the day strip.
+/// The planner (P2, P7): a timeline per day, picked with the day strip.
 void main() {
   late ProviderContainer container;
 
@@ -26,44 +28,83 @@ void main() {
         matching: find.bySemanticsLabel(RegExp(label)),
       );
 
-  Future<void> addTasks(WidgetTester tester, List<String> titles) async {
-    await tester.tap(find.byTooltip('Add task'));
-    await tester.pumpAndSettle();
-    for (final title in titles) {
-      await tester.enterText(find.byType(TextField), title);
-      await tester.tap(find.text('Add'));
-      await tester.pump();
-    }
-    await tester.tapAt(const Offset(10, 10)); // close the sheet
-    await tester.pumpAndSettle();
-  }
+  /// Adds [title] on [day] from [hour]:00 for an hour, directly.
+  void add(DateTime day, String title, {int hour = 12}) =>
+      planner().addTask(day, title, start: hour * 60, end: (hour + 1) * 60);
 
-  testWidgets('opens on today, with nothing planned', (tester) async {
+  /// The free-time area showing [range] ("09:00–24:00").
+  Finder free(String range) => find.text('Free · $range');
+
+  testWidgets('opens on today: a whole free day, scrolled to around now',
+      (tester) async {
     await openPlanner(tester);
 
     expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
-    expect(find.text('Nothing planned'), findsOneWidget);
+    expect(free('00:00–24:00'), findsOneWidget);
+    expect(find.text('12:00'), findsOneWidget, reason: 'it is 12:00 now');
+    expect(find.byTooltip('Add task'), findsNothing, reason: 'no + button');
   });
 
-  testWidgets('+ adds tasks to the shown day, in order', (tester) async {
+  testWidgets('tapping free time adds a task there: from its start, an hour',
+      (tester) async {
     await openPlanner(tester);
-    await addTasks(tester, ['Gym', 'Groceries']);
+    add(today, 'Gym', hour: 11); // 11:00–12:00
+    await tester.pump();
 
+    await tester.tap(free('12:00–24:00'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextButton, '12:00'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, '13:00'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('taskTitle')), 'Lunch');
+    await tester.tap(find.text('30 min'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.pumpAndSettle();
+
+    final lunch =
+        container.read(plannerProvider).firstWhere((t) => t.title == 'Lunch');
+    expect((lunch.day, lunch.start, lunch.end), (today, 12 * 60, 12 * 60 + 30));
+    // The free time splits around it.
+    expect(free('12:30–24:00'), findsOneWidget);
+    expect(find.text('Lunch'), findsOneWidget);
+    expect(find.text('12:00–12:30'), findsOneWidget);
+  });
+
+  testWidgets('quick ends: up to the end of the free time, no further',
+      (tester) async {
+    await openPlanner(tester);
+    add(today, 'Gym', hour: 11); // 11:00–12:00
+    planner().addTask(today, 'Call', start: 12 * 60 + 20, end: 13 * 60);
+    await tester.pump();
+
+    await tester.tap(free('12:00–12:20'));
+    await tester.pumpAndSettle();
+
+    ChoiceChip chip(String label) =>
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, label));
+    expect(chip('15 min').onSelected, isNotNull);
+    expect(chip('30 min').onSelected, isNull, reason: 'beyond 12:20');
+    expect(chip('1 h').onSelected, isNull);
     expect(
-      container.read(plannerProvider).map((t) => (t.title, t.day)),
-      [('Gym', today), ('Groceries', today)],
+      find.widgetWithText(TextButton, '12:20'),
+      findsOneWidget,
+      reason: 'the default hour is cut at the end of the free time',
     );
-    expect(
-      tester.getTopLeft(find.text('Gym')).dy,
-      lessThan(tester.getTopLeft(find.text('Groceries')).dy),
-    );
+
+    await tester.tap(find.text('Until free time ends'));
+    await tester.enterText(find.byKey(const Key('taskTitle')), 'Coffee');
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.pumpAndSettle();
+    final coffee =
+        container.read(plannerProvider).firstWhere((t) => t.title == 'Coffee');
+    expect((coffee.start, coffee.end), (12 * 60, 12 * 60 + 20));
   });
 
   testWidgets('tapping a day shows its tasks', (tester) async {
     await openPlanner(tester);
-    planner()
-      ..addTask(today, 'Gym')
-      ..addTask(tomorrow, 'Dentist');
+    add(today, 'Gym');
+    add(tomorrow, 'Dentist');
     await tester.pump();
 
     await tester.tap(dayCell('Friday 9 October 2026'));
@@ -72,7 +113,11 @@ void main() {
     expect(find.text('Dentist'), findsOneWidget);
     expect(find.text('Gym'), findsNothing);
 
-    await addTasks(tester, ['Call mum']);
+    await tester.tap(free('13:00–24:00'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('taskTitle')), 'Call mum');
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.pumpAndSettle();
     expect(
       container.read(plannerProvider).last.day,
       tomorrow,
@@ -100,19 +145,28 @@ void main() {
 
   testWidgets('days with tasks are marked', (tester) async {
     await openPlanner(tester);
-    planner().addTask(tomorrow, 'Dentist');
+    add(tomorrow, 'Dentist');
     await tester.pump();
 
     expect(dayCell('Friday 9 October 2026, has tasks'), findsOneWidget);
     expect(dayCell('Thursday 8 October 2026, has tasks'), findsNothing);
   });
 
-  testWidgets('tapping a task marks it done, and back', (tester) async {
+  testWidgets('the checkbox in the corner ticks a task off, and back',
+      (tester) async {
     await openPlanner(tester);
-    planner().addTask(today, 'Gym');
+    add(today, 'Gym');
     await tester.pump();
 
-    await tester.tap(find.text('Gym'));
+    final block = tester.getRect(
+      find.ancestor(
+          of: find.text('Gym'), matching: find.byType(SelectableCard)),
+    );
+    final box = tester.getRect(find.byType(Checkbox));
+    expect(box.top - block.top, lessThan(12), reason: 'at the top');
+    expect(block.right - box.right, lessThan(12), reason: 'at the right');
+
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
     expect(container.read(plannerProvider).single.done, isTrue);
     expect(
@@ -120,7 +174,12 @@ void main() {
       TextDecoration.lineThrough,
     );
 
+    // Tapping the block itself doesn't tick it.
     await tester.tap(find.text('Gym'));
+    await tester.pump();
+    expect(container.read(plannerProvider).single.done, isTrue);
+
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
     expect(container.read(plannerProvider).single.done, isFalse);
   });
@@ -128,10 +187,9 @@ void main() {
   testWidgets('long-press selects; delete removes after confirming',
       (tester) async {
     await openPlanner(tester);
-    planner()
-      ..addTask(today, 'Gym')
-      ..addTask(today, 'Groceries')
-      ..addTask(tomorrow, 'Dentist');
+    add(today, 'Gym');
+    add(today, 'Groceries', hour: 13);
+    add(tomorrow, 'Dentist');
     await tester.pump();
 
     await tester.longPress(find.text('Gym'));
@@ -151,7 +209,7 @@ void main() {
 
   testWidgets('changing the day ends selection mode', (tester) async {
     await openPlanner(tester);
-    planner().addTask(today, 'Gym');
+    add(today, 'Gym');
     await tester.pump();
     await tester.longPress(find.text('Gym'));
     await tester.pumpAndSettle();
@@ -160,6 +218,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1 selected'), findsNothing);
+  });
+
+  testWidgets('tasks from the first planner (no time) are marked, deletable',
+      (tester) async {
+    await openPlanner(tester);
+    planner().replaceAll([
+      PlannerTask(id: 'old', title: 'Old task', day: today),
+    ]);
+    await tester.pump();
+
+    expect(find.text('Old task'), findsOneWidget);
+    expect(find.text('No time (from the old planner)'), findsOneWidget);
+
+    await tester.longPress(find.text('Old task'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Delete'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.pumpAndSettle();
+    expect(container.read(plannerProvider), isEmpty);
   });
 
   testWidgets('there is no Today button', (tester) async {
@@ -219,9 +297,8 @@ void main() {
 
     testWidgets('reaches back to the oldest unfinished task', (tester) async {
       await openPlanner(tester);
-      planner()
-        ..addTask(DateTime(2026, 10, 3), 'Unfinished')
-        ..addTask(DateTime(2026, 10, 1), 'Done long ago');
+      add(DateTime(2026, 10, 3), 'Unfinished');
+      add(DateTime(2026, 10, 1), 'Done long ago');
       planner().toggleDone(
         container
             .read(plannerProvider)

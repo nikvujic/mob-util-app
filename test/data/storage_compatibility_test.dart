@@ -8,6 +8,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
+import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
@@ -197,6 +198,47 @@ void main() {
     expect(file.backup.plannerTasks, hasLength(2));
   });
 
+  group('v3 planner / v4 backup (timed tasks)', () {
+    void expectTimed(List<PlannerTask> tasks) {
+      expect(
+        tasks.map((t) => (t.title, t.day, t.start, t.end, t.done)),
+        [
+          ('Teretana (gym)', DateTime(2026, 10, 12), 480, 540, true),
+          ('Late call', DateTime(2026, 10, 12), 1410, 1440, false),
+        ],
+      );
+    }
+
+    test('planner.json with times loads', () async {
+      final dir = copyOf('test/fixtures/v3/storage');
+      final storage = await AppStorage.open(directory: dir);
+      expectTimed(storage.initialPlannerTasks);
+      expect(
+        dir.listSync().map((f) => f.uri.pathSegments.last),
+        isNot(contains(contains('corrupt'))),
+      );
+    });
+
+    test('v4 backup restores timed tasks and the Džoni count', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v4/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectTimed(file.backup.plannerTasks);
+      expect(file.backup.dzoniCount, 7);
+      expect(file.backup.counters, hasLength(2));
+    });
+
+    test('tasks from before times have none (still shown, marked)', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v2/storage'),
+      );
+      expect(
+        storage.initialPlannerTasks.every((t) => !t.hasTime),
+        isTrue,
+      );
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -206,6 +248,7 @@ void main() {
           BackupFile.parse(File(path).readAsStringSync()) as PlainBackupFile;
       expect(file.backup.plannerTasks, isEmpty, reason: path);
       expect(file.backup.counters, isEmpty, reason: path);
+      expect(file.backup.dzoniCount, 0, reason: path);
     }
   });
 
@@ -244,6 +287,10 @@ void main() {
           '3506088d05c89d7a56ad408e4cd0b0e063ec5929c26841cb76633bef8f83a39c',
       'test/fixtures/v2/backup-plain.json':
           'dd8e5281208d99ba28c63a85f6f32d28af3441c94e7ceb577c673005e35c349f',
+      'test/fixtures/v3/storage/planner.json':
+          '2a2c5aaa83ce538d08e4d969612f95d6d5d3acd49687e00b09559d3047f75a0d',
+      'test/fixtures/v4/backup-plain.json':
+          '20376e060b09d9df4f0fcf1758f3af32095be6603dd040abc10a0c111c6e8425',
       'test/fixtures/v2/storage/counters.json':
           'aa7cc75ffd4476327da6f0b82a1f6b06e580777033d159ab45311ad989d09a47',
       'test/fixtures/v3/backup-with-counters.json':

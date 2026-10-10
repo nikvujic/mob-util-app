@@ -40,8 +40,8 @@ Future<void> seed(ProviderContainer container) async {
   );
   final today = DateTime.now();
   final planner = container.read(plannerProvider.notifier)
-    ..addTask(today, 'Gym')
-    ..addTask(today, 'Call the bank');
+    ..addTask(today, 'Gym', start: 8 * 60, end: 9 * 60)
+    ..addTask(today, 'Call the bank', start: 10 * 60, end: 11 * 60);
   planner.toggleDone(container.read(plannerProvider).first.id);
   container.read(countersProvider.notifier)
     ..add('Push-ups')
