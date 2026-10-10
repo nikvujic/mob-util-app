@@ -13,6 +13,10 @@ Release with the installable APK.
 ### Changed
 - On today, a new planner task starts at the next full hour instead of
   at the start of the free time.
+- **Reach mode replaces the pull-down space**: pull a list down when it's
+  already at the top to shift it down (by less than before) so the first
+  rows are in thumb reach; any scroll the other way snaps it back.
+  Scrolling up from further down just stops at the top.
 
 ## [0.13.0] - 2026-10-10
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
+/// Reach mode (U3): pulling a list that's already at its top shifts it
+/// down for thumb reach; any scroll the other way snaps it back.
 void main() {
   /// A 600 dp high list of [count] 60 dp rows (under [reset], if given).
   Future<void> pumpList(
@@ -33,10 +35,19 @@ void main() {
     );
   }
 
+  /// Where row 0's top is (negative when scrolled past it).
   double topOfFirstRow(WidgetTester tester) =>
-      tester.getTopLeft(find.text('Row 0')).dy;
+      tester.getTopLeft(find.text('Row 0', skipOffstage: false)).dy;
 
+  /// The shift in reach mode: 20% of 600.
   const reach = 600 * PullDownList.reach;
+
+  final list = find.byType(PullDownList);
+
+  Future<void> drag(WidgetTester tester, double dy) async {
+    await tester.drag(list, Offset(0, dy));
+    await tester.pumpAndSettle();
+  }
 
   for (final count in [30, 1]) {
     group(count == 1 ? 'a short list' : 'a long list', () {
@@ -45,80 +56,75 @@ void main() {
         expect(topOfFirstRow(tester), 0);
       });
 
-      testWidgets('can be pulled down and stays there', (tester) async {
-        await pumpList(tester, count);
-
-        await tester.drag(find.text('Row 0'), const Offset(0, 150));
-        await tester.pumpAndSettle();
-
-        expect(topOfFirstRow(tester), closeTo(150, 1));
-      });
-
-      testWidgets('is pulled down at most its reach', (tester) async {
-        await pumpList(tester, count);
-
-        await tester.drag(find.text('Row 0'), const Offset(0, 500));
-        await tester.pumpAndSettle();
-
-        expect(topOfFirstRow(tester), closeTo(reach, 1));
-      });
-
-      testWidgets('scrolling back up returns to the normal top',
+      testWidgets('pulling down at the top enters reach mode, which stays',
           (tester) async {
         await pumpList(tester, count);
-        await tester.drag(find.text('Row 0'), const Offset(0, 150));
-        await tester.pumpAndSettle();
+        await drag(tester, 60);
+        expect(topOfFirstRow(tester), reach, reason: 'shifted the full way');
 
-        await tester.drag(find.text('Row 0'), const Offset(0, -150));
-        await tester.pumpAndSettle();
+        // Pulling further does nothing more.
+        await drag(tester, 100);
+        expect(topOfFirstRow(tester), reach);
+      });
 
-        expect(topOfFirstRow(tester), closeTo(0, 1));
+      testWidgets('any scroll the other way leaves it, back to the top',
+          (tester) async {
+        await pumpList(tester, count);
+        await drag(tester, 60);
+
+        await drag(tester, -20);
+        expect(topOfFirstRow(tester), 0);
+      });
+
+      testWidgets('a small pull springs back', (tester) async {
+        await pumpList(tester, count);
+        await drag(tester, PullDownList.enterDistance - 10);
+        expect(topOfFirstRow(tester), 0);
       });
     });
   }
 
-  group('snapping back to the top (U4)', () {
-    // Pulled down at most 240 (40% of 600); snaps within 35% of that (84).
-    testWidgets('scrolling up to just short of the top settles there',
-        (tester) async {
-      await pumpList(tester, 30);
-      await tester.drag(find.text('Row 0'), const Offset(0, 150));
-      await tester.pumpAndSettle();
+  testWidgets(
+      'scrolling to the top from further down stops at the top; '
+      'a new pull then enters reach mode', (tester) async {
+    await pumpList(tester, 30);
+    await drag(tester, -300); // down the list
+    expect(topOfFirstRow(tester), -300);
 
-      await tester.drag(find.text('Row 0'), const Offset(0, -100)); // 50 left
-      await tester.pumpAndSettle();
+    // Back up, with plenty to spare: stops at the normal top.
+    await drag(tester, 500);
+    expect(topOfFirstRow(tester), 0);
 
-      expect(topOfFirstRow(tester), 0);
-    });
+    // A fling up the list from further down stops at the top too.
+    await drag(tester, -300);
+    await tester.fling(list, const Offset(0, 400), 3000);
+    await tester.pumpAndSettle();
+    expect(topOfFirstRow(tester), 0);
 
-    testWidgets('scrolling up a little from far down stays there',
-        (tester) async {
-      await pumpList(tester, 30);
-      await tester.drag(find.text('Row 0'), const Offset(0, 200));
-      await tester.pumpAndSettle();
-
-      await tester.drag(find.text('Row 0'), const Offset(0, -50)); // 150 left
-      await tester.pumpAndSettle();
-
-      expect(topOfFirstRow(tester), closeTo(150, 1));
-    });
-
-    testWidgets('pulling down a little does not snap back', (tester) async {
-      await pumpList(tester, 30);
-      await tester.drag(find.text('Row 0'), const Offset(0, 30));
-      await tester.pumpAndSettle();
-
-      expect(topOfFirstRow(tester), closeTo(30, 1));
-    });
+    // Now at the top: a new pull enters reach mode.
+    await drag(tester, 60);
+    expect(topOfFirstRow(tester), reach);
   });
 
-  testWidgets('a reset sends a pulled-down list back to its top (G13)',
+  testWidgets('in reach mode, scrolling on into the list just scrolls',
+      (tester) async {
+    await pumpList(tester, 30);
+    await drag(tester, 60);
+
+    await drag(tester, -(reach + 200));
+    expect(topOfFirstRow(tester), -200, reason: 'no snap back over it');
+
+    // Out of reach mode: back up stops at the top.
+    await drag(tester, 400);
+    expect(topOfFirstRow(tester), 0);
+  });
+
+  testWidgets('a reset sends a list in reach mode back to its top (G13)',
       (tester) async {
     final reset = ChangeNotifier();
     addTearDown(reset.dispose);
     await pumpList(tester, 30, reset: reset);
-    await tester.drag(find.text('Row 0'), const Offset(0, 200));
-    await tester.pumpAndSettle();
+    await drag(tester, 60);
 
     // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
     reset.notifyListeners();

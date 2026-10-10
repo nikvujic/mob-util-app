@@ -165,7 +165,7 @@ void main() {
     expect(exit.exits, 1);
   });
 
-  testWidgets('going to a section again drops its pulled-down space (G13)',
+  testWidgets('going to a section again leaves reach mode (G13)',
       (tester) async {
     final container = await pumpApp(tester);
     container.read(notesProvider.notifier).addNote(title: 'Groceries');
@@ -175,13 +175,13 @@ void main() {
 
     await tester.drag(find.text('Groceries'), const Offset(0, 150));
     await tester.pumpAndSettle();
-    expect(top(), greaterThan(normal + 100));
+    expect(top(), greaterThan(normal + 50), reason: 'in reach mode');
 
     // Opening a note and coming back keeps it where it was.
     await tester.tap(find.text('Groceries'));
     await tester.pumpAndSettle();
     await leaveNote(tester);
-    expect(top(), greaterThan(normal + 100));
+    expect(top(), greaterThan(normal + 50), reason: 'in reach mode');
 
     await openTab(tester, 'Shop');
     await openTab(tester, 'Notes');

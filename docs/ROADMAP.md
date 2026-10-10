@@ -252,7 +252,7 @@ patterns other work builds on (G11, themes), then the bigger features.
   the free time around it, up to its neighbours); overlaps refused.
 - [x] **Planner: smarter default start** — on today, in free time that's
   going on now, a new task starts at the next full hour.
-- [ ] **Pull-down reach, rethought (replaces U3/U4 behaviour):** a *reach
+- [x] **Pull-down reach, rethought (replaces U3/U4 behaviour):** a *reach
   mode* rather than a free scroll area. Entering: only by pulling down a
   list that's already at its top, with a new gesture (scrolling up from
   further down stops at the normal top). In reach mode the list is

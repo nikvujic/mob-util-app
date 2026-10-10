@@ -100,7 +100,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | # | Requirement | Status |
 |---|-------------|--------|
 | U1 | Small touches that make the app satisfying without getting in the way: shake on a wrong password, meaningful animations (e.g. hero transitions into a note, items sliding between shop lists), haptic feedback, clicky sounds for counters and similar. Each one optional where it could annoy. | 💭 after the main features |
-| U4 | **Lists snap back to the top:** when scrolling back up after pulling a list down (U3), and only a little empty space is left above the first row, the list settles at its normal top instead of stopping just short. Notes and Shop (all pull-down lists). | ✅ |
+| U4 | **Reach mode** (replaces "snap back"): pulling a list that's already at its top, with a new gesture, shifts it down by 20% of the screen so its first rows are within thumb reach; it stays there. Any scroll the other way leaves the mode and snaps fully back to the top. Scrolling towards the top from further down stops at the normal top (doesn't enter). A small pull springs back. | ✅ |
 | U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ✅ |
 | U6 | **Counters: vibration and a click sound** on − / +, with an on/off switch in Menu → Settings. | ✅ the click follows the phone's touch sounds setting |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |

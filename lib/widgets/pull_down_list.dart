@@ -1,26 +1,26 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
-/// A scrolling list that can be pulled down past its top, into empty space,
-/// so its top items come within thumb reach (one-handed use, U3).
+/// A scrolling list with a *reach mode* for one-handed use (U3): pulling
+/// the list down while it's already at its top shifts it down, so its first
+/// rows come within thumb reach.
 ///
-/// It opens at its normal top; the empty space is above it, scrolled out of
-/// view. Pulling down reveals it and the list stays where it's left.
-/// Scrolling back up returns to the normal top, and settles there if it
-/// comes to rest just short of it (U4). Short lists can be pulled too:
-/// they're padded below to at least a screen's height.
+/// - Entering takes a new gesture that starts at the top: scrolling towards
+///   the top from further down stops at the normal top, as usual.
+/// - In reach mode the list stays shifted; any scroll the other way leaves
+///   the mode and the list snaps back to its normal top. There's no
+///   half-way position: a small pull springs back.
+/// - Short lists work the same: they're padded below to a screen's height.
 ///
-/// Under a [PullDownReset], the list also returns to its normal top when
-/// the reset fires (e.g. on going to the section again, G13).
+/// Under a [PullDownReset], the list also returns to its normal top when the
+/// reset fires (e.g. on going to the section again, G13).
 class PullDownList extends StatefulWidget {
-  /// How much of the visible height can be pulled down.
-  static const reach = 0.4;
+  /// How far the list shifts down in reach mode, as a share of its height.
+  static const reach = 0.2;
 
-  /// When scrolling up comes to rest with less than this share of the
-  /// pulled-down space left, the list settles at its normal top.
-  static const snapBack = 0.35;
+  /// How far a pull from the top must go to enter reach mode.
+  static const enterDistance = 24.0;
 
   final List<Widget> slivers;
 
@@ -40,13 +40,20 @@ class PullDownList extends StatefulWidget {
 class _PullDownListState extends State<PullDownList> {
   ScrollController? _controller;
 
-  /// Height of the space above the list. Fixed once known, so the list
-  /// doesn't jump when the visible height changes (e.g. the keyboard).
+  /// Height of the space above the list (the reach-mode shift). Fixed once
+  /// known, so the list doesn't jump when the visible height changes (e.g.
+  /// the keyboard).
   double? _top;
 
-  /// Direction of the user's last scroll: [ScrollDirection.reverse] is
-  /// towards later rows (scrolling "up" through the list).
-  ScrollDirection _lastDirection = ScrollDirection.idle;
+  /// In reach mode: shifted down, first rows in thumb reach.
+  bool _inReach = false;
+
+  /// Whether the current gesture started with the list at its normal top
+  /// (or in reach mode): only then may it move into the space above.
+  bool _gestureFromTop = false;
+
+  /// Where the current gesture started.
+  double _gestureStart = 0;
 
   Listenable? _reset;
 
@@ -67,38 +74,51 @@ class _PullDownListState extends State<PullDownList> {
     super.dispose();
   }
 
-  /// Back to the normal top, if pulled down.
+  /// Back to the normal top, out of reach mode.
   void _toTop() {
+    _inReach = false;
     final controller = _controller, top = _top;
     if (controller == null || top == null || !controller.hasClients) return;
     if (controller.offset < top) controller.jumpTo(top);
   }
 
+  void _animateTo(double offset) {
+    // After the notification: the scroll that just ended must finish.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = _controller;
+      if (!mounted || controller == null || !controller.hasClients) return;
+      controller.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  /// May the list move into the space above its rows right now?
+  bool get _spaceAllowed => _inReach || _gestureFromTop;
+
   bool _onScroll(ScrollNotification notification) {
     if (notification.depth != 0) return false;
-    if (notification is UserScrollNotification &&
-        notification.direction != ScrollDirection.idle) {
-      _lastDirection = notification.direction;
+    final top = _top!, offset = notification.metrics.pixels;
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      _gestureStart = offset;
+      _gestureFromTop = _inReach || (offset - top).abs() < 0.5;
     } else if (notification is ScrollEndNotification) {
-      final top = _top!, offset = notification.metrics.pixels;
-      final gap = top - offset;
-      if (_lastDirection == ScrollDirection.reverse &&
-          gap > 0 &&
-          gap <= top * PullDownList.snapBack) {
-        // After this notification: the scroll that just ended must finish.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final controller = _controller;
-          if (!mounted || controller == null || !controller.hasClients) {
-            return;
-          }
-          controller.animateTo(
-            top,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-          );
-        });
+      if (_inReach) {
+        // Any scroll in reach mode leaves it: back to the normal top, or
+        // on into the list if it was scrolled that far.
+        if (offset > _gestureStart + 0.5) {
+          _inReach = false;
+          if (offset < top) _animateTo(top);
+        }
+      } else if (offset < top - 0.5) {
+        // A pull from the top: far enough enters reach mode, else back.
+        _inReach = top - offset >= PullDownList.enterDistance;
+        _animateTo(_inReach ? 0 : top);
       }
-      _lastDirection = ScrollDirection.idle;
+      _gestureFromTop = false;
     }
     return false;
   }
@@ -115,7 +135,10 @@ class _PullDownListState extends State<PullDownList> {
           onNotification: _onScroll,
           child: CustomScrollView(
             controller: controller,
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: _ReachPhysics(
+              top: top,
+              spaceAllowed: () => _spaceAllowed,
+            ),
             slivers: [
               SliverToBoxAdapter(child: SizedBox(height: top)),
               ...widget.slivers,
@@ -136,6 +159,38 @@ class _PullDownListState extends State<PullDownList> {
         );
       },
     );
+  }
+}
+
+/// Scrolls as usual, except that the space above the rows (offsets below
+/// [top]) is a wall unless [spaceAllowed]: scrolling towards the top from
+/// further down stops at the normal top.
+class _ReachPhysics extends ScrollPhysics {
+  final double top;
+  final bool Function() spaceAllowed;
+
+  const _ReachPhysics({
+    required this.top,
+    required this.spaceAllowed,
+    super.parent,
+  });
+
+  @override
+  _ReachPhysics applyTo(ScrollPhysics? ancestor) => _ReachPhysics(
+        top: top,
+        spaceAllowed: spaceAllowed,
+        parent: buildParent(
+          const AlwaysScrollableScrollPhysics().applyTo(ancestor),
+        ),
+      );
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    if (!spaceAllowed() && value < top && value < position.pixels) {
+      // Moving into the space above: stop at the normal top.
+      return position.pixels <= top ? value - position.pixels : value - top;
+    }
+    return super.applyBoundaryConditions(position, value);
   }
 }
 
