@@ -5,6 +5,7 @@ import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 
 /// Thrown when a backup file can't be read. [message] is shown to the user.
@@ -25,7 +26,8 @@ class BackupFormatException implements Exception {
 ///       "createdAt": "2026-10-08T07:30:00.000Z",
 ///       "appVersion": "0.7.0 (8)",
 ///       "data": { "notes": [...], "shopItems": [...],
-///                 "plannerTasks": [...], "counters": [...],
+///                 "plannerTasks": [...], "routines": {...},
+///                 "counters": [...],
 ///                 "masterPassword": {...} }
 ///     }
 ///
@@ -55,14 +57,18 @@ class Backup {
   /// History: 1 = first format; 2 = notes may be locked
   /// (`lockedContent`); 3 = planner tasks and counters (`plannerTasks`,
   /// `counters`; older backups have none); 4 = planner tasks have start
-  /// and end times, and the Džoni count (`dzoniCount`).
-  static const version = 4;
+  /// and end times, and the Džoni count (`dzoniCount`); 5 = planner
+  /// routines (`routines`, as in `routines.json`) and block colours.
+  static const version = 5;
 
   final DateTime createdAt;
   final String appVersion;
   final List<Note> notes;
   final List<ShopItem> shopItems;
   final List<PlannerTask> plannerTasks;
+
+  /// Planner routines (P8); none in backups from before them.
+  final RoutineBook routines;
   final List<Counter> counters;
 
   /// The count on the Džoni page (O4); 0 in backups from before it.
@@ -77,6 +83,7 @@ class Backup {
     required this.notes,
     required this.shopItems,
     this.plannerTasks = const [],
+    this.routines = RoutineBook.empty,
     this.counters = const [],
     this.dzoniCount = 0,
     this.masterPassword,
@@ -104,6 +111,7 @@ class Backup {
           'notes': [for (final n in notes) n.toJson()],
           'shopItems': [for (final i in shopItems) i.toJson()],
           'plannerTasks': [for (final t in plannerTasks) t.toJson()],
+          'routines': routines.toJson(),
           'counters': [for (final c in counters) c.toJson()],
           'dzoniCount': dzoniCount,
           if (masterPassword != null)
@@ -185,6 +193,9 @@ class Backup {
           for (final t in data['plannerTasks'] as List<dynamic>? ?? const [])
             PlannerTask.fromJson(t as Map<String, dynamic>),
         ],
+        routines: data['routines'] == null
+            ? RoutineBook.empty
+            : RoutineBook.fromJson(data['routines'] as Map<String, dynamic>),
         counters: [
           for (final c in data['counters'] as List<dynamic>? ?? const [])
             Counter.fromJson(c as Map<String, dynamic>),

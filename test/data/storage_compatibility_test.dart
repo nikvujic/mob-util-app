@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
@@ -239,6 +240,49 @@ void main() {
     });
   });
 
+  group('planner v4 / routines v1 / v5 backup (routines, colours)', () {
+    void expectSample(List<PlannerTask> tasks, RoutineBook book) {
+      expect(tasks.map((t) => '${t.title}:${t.color}'),
+          ['Dentist:blue', 'Groceries:null']);
+      expect(book.routines.map((r) => r.title), ['Gym', 'Read 📚']);
+      final gym = book.routines.first;
+      expect((gym.start, gym.end), (1080, 1140));
+      expect(gym.weekdays, {1, 3, 5});
+      expect((gym.from, gym.until, gym.color),
+          (DateTime(2026, 10, 1), null, 'green'));
+      expect(book.routines.last.until, DateTime(2026, 12, 31));
+      final monday = DateTime(2026, 10, 12);
+      expect(book.dayOf('r1', monday)!.skipped, isTrue);
+      expect(book.dayOf('r2', monday)!.done, isTrue);
+    }
+
+    test('planner.json with colours and routines.json load', () async {
+      final dir = copyOf('test/fixtures/v5/storage');
+      final storage = await AppStorage.open(directory: dir);
+      expectSample(storage.initialPlannerTasks, storage.initialRoutines);
+      final names = dir.listSync().map((f) => f.uri.pathSegments.last);
+      expect(names.where((n) => n.contains('corrupt')), isEmpty);
+    });
+
+    test('v5 backup restores tasks and routines', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v5/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.plannerTasks, file.backup.routines);
+    });
+
+    test('older backups and data have no routines', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v4/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.routines.isEmpty, isTrue);
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v3/storage'),
+      );
+      expect(storage.initialRoutines.isEmpty, isTrue);
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -307,6 +351,12 @@ void main() {
           '977d67f7aad3bb708b27b54f969c4af5a49323950ae93af0ff9d14a29d4f467b',
       'test/fixtures/v2/storage/shop.json':
           '759bf01a1403bed48cdbcdd8324f10eea13bfd96c0ceebe5dea7e5e34a078271',
+      'test/fixtures/v5/storage/planner.json':
+          '032c424c3e1e80d13e47caa00edf6f794a3bdbfa11dbad352f42ce417d79ed6b',
+      'test/fixtures/v5/storage/routines.json':
+          '9d4ea183f1974569b55854aec71011324efd98f3d0c154fcf31450de647b99cc',
+      'test/fixtures/v5/backup-plain.json':
+          '334cd0ea01e4a29a0c53eb7fd2c1f32944a085ff3f51c0156da2b2f4eb3c2d2b',
     };
     for (final MapEntry(key: path, value: hash) in expected.entries) {
       final digest = await Sha256().hash(File(path).readAsBytesSync());

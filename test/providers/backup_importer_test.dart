@@ -15,6 +15,7 @@ import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
@@ -168,6 +169,17 @@ void main() {
     source.read(preferencesProvider.notifier)
       ..countDzoni()
       ..countDzoni();
+    final gym = source.read(routinesProvider.notifier).add(
+          title: 'Run',
+          start: 1080,
+          end: 1140,
+          weekdays: {1, 3},
+          from: DateTime(2026, 10, 1),
+          until: DateTime(2026, 12, 31),
+        )!;
+    source.read(routinesProvider.notifier)
+      ..toggleDone(gym, DateTime(2026, 10, 12))
+      ..setSkipped(gym, DateTime(2026, 10, 14), skipped: true);
     await source.read(backupExporterProvider).export();
 
     final target = containerWith(AppStorage.inMemory());
@@ -193,6 +205,10 @@ void main() {
       source.read(countersProvider).map((c) => c.toJson()),
     );
     expect(target.read(preferencesProvider).dzoniCount, 2);
+    expect(
+      target.read(routinesProvider).toJson(),
+      source.read(routinesProvider).toJson(),
+    );
   });
 
   test('a restore is on disk when it completes', () async {

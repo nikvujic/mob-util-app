@@ -28,3 +28,10 @@ app still reads every version, so an update can never lose existing data.
   (planner.json has its own version, 3; the other files are still 2).
 - `v4/backup-plain.json` — backup with timed planner tasks and the Džoni
   count.
+- `v5/storage/planner.json` — planner tasks, one with a colour
+  (planner.json version 4).
+- `v5/storage/routines.json` — routines (version 1): Gym Mon/Wed/Fri
+  18:00–19:00 for good, in green; Read 📚 every day 22:00–23:00 until the
+  end of 2026; on Mon 12 Oct Gym is skipped and Read ticked off.
+- `v5/backup-plain.json` — backup (version 5) with those tasks and
+  routines.

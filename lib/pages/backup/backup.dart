@@ -231,8 +231,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ' · '
           '${countOf(backup.shopItemCount, 'shop item', 'shop items')} · '
           '${countOf(backup.plannerTaskCount, 'task', 'tasks')} · '
+          '${backup.routineCount > 0 ? '${countOf(backup.routineCount, 'routine', 'routines')} · ' : ''}'
           '${countOf(backup.counterCount, 'counter', 'counters')}\n\n'
-          'This replaces all notes, shop items, planner tasks and counters '
+          'This replaces all notes, shop items, planner tasks, routines and counters '
           'currently in the app.',
       confirmLabel: 'Restore',
       destructive: true,

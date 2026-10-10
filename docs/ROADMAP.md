@@ -293,6 +293,11 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Counters: no ✕ in selection mode** — back already leaves it.
 - [x] **Notes: ↶ ↷ keep their order on the left side too** (Nikola);
   only their place (outermost) follows the hand.
+- [ ] **Planner routines** (P8), designed with Nikola: a routine is its
+  own item (not copies), shown on its days; per-day change / skip / tick;
+  a Routines screen with a Mon–Sun strip; Repeat + Until in the add sheet;
+  the one-off wins a clash; editing a routine changes past days too.
+- [ ] **Block colours** (P9).
 
 ### Round 6 — after 0.15 (2026-10-10)
 
@@ -327,7 +332,6 @@ patterns other work builds on (G11, themes), then the bigger features.
 
 ## Later / ideas
 
-- TimeTune-style scheduler in Planner (P4)
 - Self-hosted cloud backup, e.g. S3-backed (D5)
 - **UI polish (U1)** — once the main features are in: shake on wrong
   password, hero/slide animations, haptics, clicky counter sounds;

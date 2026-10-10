@@ -1,0 +1,1 @@
+{"version":1,"routines":[{"id":"r1","title":"Gym","start":1080,"end":1140,"weekdays":[1,3,5],"from":"2026-10-01","color":"green"},{"id":"r2","title":"Read 📚","start":1320,"end":1380,"weekdays":[1,2,3,4,5,6,7],"from":"2026-10-01","until":"2026-12-31"}],"days":[{"routine":"r1","day":"2026-10-12","skipped":true},{"routine":"r2","day":"2026-10-12","done":true}]}

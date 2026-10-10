@@ -10,10 +10,12 @@ import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -42,6 +44,7 @@ class BackupExporter {
       notes: notes,
       shopItems: _ref.read(shopProvider),
       plannerTasks: _ref.read(plannerProvider),
+      routines: _ref.read(routinesProvider),
       counters: _ref.read(countersProvider),
       dzoniCount: _ref.read(preferencesProvider).dzoniCount,
       masterPassword:
@@ -102,6 +105,7 @@ class RestorableBackup {
   int get lockedNoteCount => _backup.notes.where((n) => n.isLocked).length;
   int get shopItemCount => _backup.shopItems.length;
   int get plannerTaskCount => _backup.plannerTasks.length;
+  int get routineCount => _backup.routines.routines.length;
   int get counterCount => _backup.counters.length;
 }
 
@@ -247,6 +251,7 @@ class BackupImporter {
       notes,
       source.shopItems,
       source.plannerTasks,
+      source.routines,
       source.counters,
       source.dzoniCount,
     );
@@ -263,6 +268,7 @@ class BackupImporter {
       undo._previous.notes,
       undo._previous.shopItems,
       undo._previous.plannerTasks,
+      undo._previous.routines,
       undo._previous.counters,
       undo._previous.dzoniCount,
     );
@@ -333,12 +339,14 @@ class BackupImporter {
     List<Note> notes,
     List<ShopItem> shopItems,
     List<PlannerTask> plannerTasks,
+    RoutineBook routines,
     List<Counter> counters,
     int dzoniCount,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
     _ref.read(plannerProvider.notifier).replaceAll(plannerTasks);
+    _ref.read(routinesProvider.notifier).replaceAll(routines);
     _ref.read(countersProvider.notifier).replaceAll(counters);
     _ref.read(preferencesProvider.notifier).setDzoniCount(dzoniCount);
     await _ref.read(appStorageProvider).flush();

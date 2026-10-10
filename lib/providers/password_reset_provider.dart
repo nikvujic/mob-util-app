@@ -3,7 +3,9 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -48,7 +50,8 @@ class PasswordReset {
   int _count(AppSection section) => switch (section) {
         AppSection.notes => _ref.read(notesProvider).length,
         AppSection.shop => _ref.read(shopProvider).length,
-        AppSection.planner => _ref.read(plannerProvider).length,
+        AppSection.planner => _ref.read(plannerProvider).length +
+            _ref.read(routinesProvider).routines.length,
         AppSection.other => _ref.read(countersProvider).length,
       };
 
@@ -70,6 +73,7 @@ class PasswordReset {
     }
     if (locks.contains(AppSection.planner)) {
       _ref.read(plannerProvider.notifier).replaceAll(const []);
+      _ref.read(routinesProvider.notifier).replaceAll(RoutineBook.empty);
     }
     if (locks.contains(AppSection.other)) {
       _ref.read(countersProvider.notifier).replaceAll(const []);

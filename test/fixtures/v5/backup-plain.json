@@ -1,0 +1,77 @@
+{
+  "format": "the-app-backup",
+  "version": 5,
+  "createdAt": "2026-10-10T20:00:00.000Z",
+  "appVersion": "0.17.0 (18)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [
+      {
+        "id": "t1",
+        "title": "Dentist",
+        "day": "2026-10-12",
+        "start": 540,
+        "end": 600,
+        "done": false,
+        "color": "blue"
+      },
+      {
+        "id": "t2",
+        "title": "Groceries",
+        "day": "2026-10-12",
+        "start": 1080,
+        "end": 1110,
+        "done": true
+      }
+    ],
+    "routines": {
+      "routines": [
+        {
+          "id": "r1",
+          "title": "Gym",
+          "start": 1080,
+          "end": 1140,
+          "weekdays": [
+            1,
+            3,
+            5
+          ],
+          "from": "2026-10-01",
+          "color": "green"
+        },
+        {
+          "id": "r2",
+          "title": "Read 📚",
+          "start": 1320,
+          "end": 1380,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "from": "2026-10-01",
+          "until": "2026-12-31"
+        }
+      ],
+      "days": [
+        {
+          "routine": "r1",
+          "day": "2026-10-12",
+          "skipped": true
+        },
+        {
+          "routine": "r2",
+          "day": "2026-10-12",
+          "done": true
+        }
+      ]
+    },
+    "counters": [],
+    "dzoniCount": 0
+  }
+}

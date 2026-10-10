@@ -54,7 +54,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   static String _what(AppSection section, int count) => switch (section) {
         AppSection.notes => countOf(count, 'note', 'notes'),
         AppSection.shop => countOf(count, 'item', 'items'),
-        AppSection.planner => countOf(count, 'task', 'tasks'),
+        AppSection.planner => countOf(count, 'planner item', 'planner items'),
         AppSection.other => countOf(count, 'counter', 'counters'),
       };
 

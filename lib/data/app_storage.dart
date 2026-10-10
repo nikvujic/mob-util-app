@@ -10,6 +10,7 @@ import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
+import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 
 /// Loads and saves all app data. Each feature has its own JSON file:
@@ -18,7 +19,9 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
-///     <app documents>/data/planner.json {"version": 3, "tasks": [...]}
+///     <app documents>/data/planner.json {"version": 4, "tasks": [...]}
+///     <app documents>/data/routines.json
+///         {"version": 1, "routines": [...], "days": [...]}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -35,8 +38,11 @@ class AppStorage {
 
   /// Version of `planner.json`, which moves on its own. History: 2 = tasks
   /// per day; 3 = tasks have start and end times (P7; version 2 tasks have
-  /// none and are still read).
-  static const plannerFormatVersion = 3;
+  /// none and are still read); 4 = tasks may have a colour (P9).
+  static const plannerFormatVersion = 4;
+
+  /// Version of `routines.json` (P8). History: 1 = first format.
+  static const routinesFormatVersion = 1;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
@@ -45,11 +51,13 @@ class AppStorage {
   final JsonFileStore? _plannerStore;
   final JsonFileStore? _countersStore;
   final JsonFileStore? _preferencesStore;
+  final JsonFileStore? _routinesStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
   final List<ShopItem> initialShopItems;
   final List<PlannerTask> initialPlannerTasks;
+  final RoutineBook initialRoutines;
   final List<Counter> initialCounters;
   final Preferences initialPreferences;
 
@@ -66,10 +74,12 @@ class AppStorage {
     this._settingsStore,
     this._plannerStore,
     this._countersStore,
-    this._preferencesStore, {
+    this._preferencesStore,
+    this._routinesStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
+    required this.initialRoutines,
     required this.initialCounters,
     required this.initialPreferences,
     required this.initialMasterPassword,
@@ -81,6 +91,7 @@ class AppStorage {
     this.initialNotes = const [],
     this.initialShopItems = const [],
     this.initialPlannerTasks = const [],
+    this.initialRoutines = RoutineBook.empty,
     this.initialCounters = const [],
     this.initialPreferences = const Preferences(),
     this.initialMasterPassword,
@@ -91,7 +102,8 @@ class AppStorage {
         _settingsStore = null,
         _plannerStore = null,
         _countersStore = null,
-        _preferencesStore = null;
+        _preferencesStore = null,
+        _routinesStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -105,6 +117,7 @@ class AppStorage {
     final countersStore = JsonFileStore(File('${dir.path}/counters.json'));
     final preferencesStore =
         JsonFileStore(File('${dir.path}/preferences.json'));
+    final routinesStore = JsonFileStore(File('${dir.path}/routines.json'));
 
     return AppStorage._(
       notesStore,
@@ -114,6 +127,7 @@ class AppStorage {
       plannerStore,
       countersStore,
       preferencesStore,
+      routinesStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -144,6 +158,12 @@ class AppStorage {
           for (final e in json['tasks'] as List<dynamic>)
             PlannerTask.fromJson(e as Map<String, dynamic>),
         ],
+      ),
+      initialRoutines: await _load(
+        routinesStore,
+        RoutineBook.empty,
+        maxVersion: routinesFormatVersion,
+        RoutineBook.fromJson,
       ),
       initialCounters: await _load(
         countersStore,
@@ -226,6 +246,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveRoutines(RoutineBook book) async {
+    await _routinesStore?.write({
+      'version': routinesFormatVersion,
+      ...book.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': formatVersion,
@@ -259,6 +286,7 @@ class AppStorage {
     await _plannerStore?.flush();
     await _countersStore?.flush();
     await _preferencesStore?.flush();
+    await _routinesStore?.flush();
   }
 }
 

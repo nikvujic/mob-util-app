@@ -172,3 +172,15 @@ never changed, so the cursor, undo and saving work as for plain text), and
 an input formatter for Enter in lists. Formatting symbols are drawn as
 nothing (no width, transparent) except on the lines the cursor is on
 while the field has focus, so the note reads clean but stays editable.
+
+## Planner routines (P8)
+
+A routine (`models/routine.dart`) is one stored item — times, weekdays,
+from / until — never copies on days. `routines.json` holds the routines
+and a `RoutineDay` per routine and day where something happened (ticked
+off or skipped). A day's view is computed: its one-off tasks plus
+`routinesOn(day, …)` (`providers/routines_provider.dart`), which leaves
+out skipped routines and those a one-off task overlaps (the one-off wins).
+`PlannerNotifier` gets the day's routine times through a `busy` callback,
+so a new task can't go over a routine; `RoutinesNotifier` keeps routines
+from overlapping each other on any day they could share.
