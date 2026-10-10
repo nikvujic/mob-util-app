@@ -6,12 +6,24 @@ Release with the installable APK.
 
 ## [0.17.0] - unreleased
 
+### Added
+- **Planner routines**: blocks that repeat every day, on weekdays or on
+  chosen days, for good or until a date. Set Repeat when adding a task,
+  or use the new **Routines** screen (button at the bottom of the
+  planner; a Mon–Sun strip picks the weekday). On a day, tap a routine's
+  block to change it just there, skip that day, or edit the routine;
+  ticking it off counts for that day only. A one-off task already in its
+  way wins that day.
+
 ### Changed
 - **The menu stays open** when you come back from one of its pages; back
   again closes it.
 - Counters: selection mode has no ✕ button any more (back leaves it).
 - Notes: ↶ Undo and ↷ Redo stay in that order when the buttons are on
   the left.
+- Planner: an hour is a little taller, so even a 30-minute block (and
+  its checkbox) is a full touch target; the task sheet's times are
+  outlined buttons, readable in every theme.
 
 ## [0.16.0] - 2026-10-10
 

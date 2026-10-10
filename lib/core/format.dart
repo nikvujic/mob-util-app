@@ -55,6 +55,12 @@ const _monthsLong = [
 /// `Mon`.
 String weekdayShort(DateTime day) => _weekdays[day.weekday - 1];
 
+/// `Mon` for [weekday] 1 ([DateTime.monday]) to 7.
+String weekdayName(int weekday) => _weekdays[weekday - 1];
+
+/// `Monday` for [weekday] 1 ([DateTime.monday]) to 7.
+String weekdayNameLong(int weekday) => _weekdaysLong[weekday - 1];
+
 /// `Thu, 9 Oct` (with the year if it isn't [today]'s).
 String formatDay(DateTime day, {required DateTime today}) =>
     '${weekdayShort(day)}, ${day.day} ${_months[day.month - 1]}'

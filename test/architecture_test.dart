@@ -104,8 +104,12 @@ const plainScrollAllowed = {
   // The day's timeline: opens at the current hour; 00:00 isn't the
   // place everyone needs to reach.
   'pages/planner/planner.dart',
+  // The same timeline, for routines.
+  'pages/planner/routines.dart',
   // A form, used with the keyboard open.
   'pages/security/password_form.dart',
+  // The task sheet: a form with the keyboard open.
+  'pages/planner/add_task_sheet.dart',
   // Tiles fill from the bottom right: already in thumb reach.
   'pages/other/other.dart',
 };

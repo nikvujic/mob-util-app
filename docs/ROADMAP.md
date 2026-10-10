@@ -293,7 +293,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Counters: no ✕ in selection mode** — back already leaves it.
 - [x] **Notes: ↶ ↷ keep their order on the left side too** (Nikola);
   only their place (outermost) follows the hand.
-- [ ] **Planner routines** (P8), designed with Nikola: a routine is its
+- [x] **Planner routines** (P8), designed with Nikola: a routine is its
   own item (not copies), shown on its days; per-day change / skip / tick;
   a Routines screen with a Mon–Sun strip; Repeat + Until in the add sheet;
   the one-off wins a clash; editing a routine changes past days too.

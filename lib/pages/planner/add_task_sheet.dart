@@ -4,23 +4,99 @@ import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/routine.dart';
 
-/// What the task sheet returns.
-typedef NewTask = ({String title, int start, int end});
+/// What the task sheet returns. [weekdays] is set when it repeats (a
+/// routine, P8), with [until] its last day (null: for good).
+typedef NewTask = ({
+  String title,
+  int start,
+  int end,
+  Set<int>? weekdays,
+  DateTime? until,
+});
+
+/// Whether the sheet asks about repeating.
+enum RepeatChoice {
+  /// A plain task.
+  never,
+
+  /// A task that may repeat (becoming a routine).
+  optional,
+
+  /// A routine: it always repeats.
+  always,
+}
 
 /// Asks for a new task in the free [slot]: a title, the start ([start], or
 /// the slot's start) and the end (1 hour later by default; quick options
 /// 15 / 30 / 60 / 120 min and the end of the free time, or a picked time).
 /// Null if dismissed.
+///
+/// [day] is the day it's for: then it can be made to repeat from that day
+/// (Repeat: once, every day, weekdays or chosen days; until a date or for
+/// good).
 Future<NewTask?> showAddTaskSheet(
   BuildContext context,
   FreeSlot slot, {
   int? start,
+  DateTime? day,
 }) {
   return showModalBottomSheet<NewTask>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => TaskSheet(slot: slot, start: start),
+    builder: (_) => TaskSheet(
+      slot: slot,
+      start: start,
+      repeat: day == null ? RepeatChoice.never : RepeatChoice.optional,
+      from: day,
+    ),
+  );
+}
+
+/// Asks for a new routine (P8) in [slot], on [weekday] to begin with,
+/// starting [from]. Null if dismissed.
+Future<NewTask?> showAddRoutineSheet(
+  BuildContext context,
+  FreeSlot slot, {
+  required int weekday,
+  required DateTime from,
+}) {
+  return showModalBottomSheet<NewTask>(
+    context: context,
+    isScrollControlled: true,
+    builder: (_) => TaskSheet(
+      slot: slot,
+      repeat: RepeatChoice.always,
+      weekdays: {weekday},
+      from: from,
+    ),
+  );
+}
+
+/// Edits [routine] within [room]; [onDelete] deletes it (after asking).
+/// Null if dismissed or deleted.
+Future<NewTask?> showEditRoutineSheet(
+  BuildContext context,
+  Routine routine,
+  FreeSlot room, {
+  required VoidCallback onDelete,
+}) {
+  return showModalBottomSheet<NewTask>(
+    context: context,
+    isScrollControlled: true,
+    builder: (_) => TaskSheet(
+      slot: room,
+      title: routine.title,
+      start: routine.start,
+      end: routine.end,
+      repeat: RepeatChoice.always,
+      weekdays: routine.weekdays,
+      from: routine.from,
+      until: routine.until,
+      submitLabel: 'Save',
+      onDelete: onDelete,
+    ),
   );
 }
 
@@ -57,6 +133,21 @@ class TaskSheet extends StatefulWidget {
   final int? end;
   final String submitLabel;
 
+  /// Whether it asks about repeating (P8).
+  final RepeatChoice repeat;
+
+  /// The weekdays it's on, if it repeats.
+  final Set<int>? weekdays;
+
+  /// The first day it's on (repeating starts here); the last can't be
+  /// earlier.
+  final DateTime? from;
+  final DateTime? until;
+
+  /// Shows a Delete button (editing a routine); called once the sheet is
+  /// closed.
+  final VoidCallback? onDelete;
+
   const TaskSheet({
     super.key,
     required this.slot,
@@ -64,6 +155,11 @@ class TaskSheet extends StatefulWidget {
     this.start,
     this.end,
     this.submitLabel = 'Add',
+    this.repeat = RepeatChoice.never,
+    this.weekdays,
+    this.from,
+    this.until,
+    this.onDelete,
   });
 
   @override
@@ -74,6 +170,12 @@ class _TaskSheetState extends State<TaskSheet> {
   late final _title = TextEditingController(text: widget.title);
   late int _start = widget.start ?? widget.slot.start;
   late int _end = widget.end ?? math.min(_start + 60, widget.slot.end);
+
+  /// The weekdays it repeats on; empty: it doesn't repeat.
+  late Set<int> _weekdays = {...?widget.weekdays};
+  late DateTime? _until = widget.until;
+
+  bool get _repeats => _weekdays.isNotEmpty;
 
   @override
   void dispose() {
@@ -122,8 +224,111 @@ class _TaskSheetState extends State<TaskSheet> {
   void _submit() {
     final title = _title.text.trim();
     if (title.isEmpty) return;
-    Navigator.of(context)
-        .pop<NewTask>((title: title, start: _start, end: _end));
+    Navigator.of(context).pop<NewTask>((
+      title: title,
+      start: _start,
+      end: _end,
+      weekdays: _repeats ? _weekdays : null,
+      until: _repeats ? _until : null,
+    ));
+  }
+
+  Future<void> _pickUntil() async {
+    final from = widget.from ?? DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _until ?? from.add(const Duration(days: 30)),
+      firstDate: from,
+      lastDate: DateTime(from.year + 10),
+    );
+    if (picked != null && mounted) setState(() => _until = picked);
+  }
+
+  static const _everyDay = {1, 2, 3, 4, 5, 6, 7};
+  static const _workdays = {1, 2, 3, 4, 5};
+
+  bool _isExactly(Set<int> days) =>
+      _weekdays.length == days.length && _weekdays.containsAll(days);
+
+  /// Repeat: once / every day / weekdays, and the weekdays themselves;
+  /// until: for good or a date.
+  List<Widget> _repeatChoices(BuildContext context) {
+    final colors = context.colors;
+    final firstDay = widget.from?.weekday ?? DateTime.now().weekday;
+    final label = TextStyle(color: colors.textSecondary);
+    return [
+      const SizedBox(height: 8),
+      Text('Repeat', style: label),
+      Wrap(
+        spacing: 8,
+        children: [
+          if (widget.repeat == RepeatChoice.optional)
+            ChoiceChip(
+              label: const Text('Once'),
+              selected: !_repeats,
+              onSelected: (_) => setState(() => _weekdays = {}),
+            ),
+          ChoiceChip(
+            label: const Text('Every day'),
+            selected: _isExactly(_everyDay),
+            onSelected: (_) => setState(() => _weekdays = {..._everyDay}),
+          ),
+          ChoiceChip(
+            label: const Text('Weekdays'),
+            selected: _isExactly(_workdays),
+            onSelected: (_) => setState(() => _weekdays = {..._workdays}),
+          ),
+          if (!_repeats)
+            ChoiceChip(
+              label: const Text('Choose days'),
+              selected: false,
+              onSelected: (_) => setState(() => _weekdays = {firstDay}),
+            ),
+        ],
+      ),
+      if (_repeats) ...[
+        Wrap(
+          spacing: 4,
+          children: [
+            for (var day = 1; day <= 7; day++)
+              FilterChip(
+                label: Text(weekdayName(day)),
+                selected: _weekdays.contains(day),
+                // A routine keeps at least one day.
+                onSelected: (on) => setState(() {
+                  if (on) {
+                    _weekdays = {..._weekdays, day};
+                  } else if (_weekdays.length > 1 ||
+                      widget.repeat == RepeatChoice.optional) {
+                    _weekdays = {..._weekdays}..remove(day);
+                  }
+                }),
+              ),
+          ],
+        ),
+        Wrap(
+          spacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text('Until', style: label),
+            ChoiceChip(
+              label: const Text('Forever'),
+              selected: _until == null,
+              onSelected: (_) => setState(() => _until = null),
+            ),
+            ChoiceChip(
+              label: Text(
+                _until == null
+                    ? 'A date…'
+                    : formatDay(_until!, today: DateTime.now()),
+              ),
+              selected: _until != null,
+              onSelected: (_) => _pickUntil(),
+            ),
+          ],
+        ),
+      ],
+    ];
   }
 
   @override
@@ -134,7 +339,8 @@ class _TaskSheetState extends State<TaskSheet> {
         bottom: MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: SafeArea(
-        child: Padding(
+        // Scrolls when the keyboard leaves too little room.
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -145,28 +351,29 @@ class _TaskSheetState extends State<TaskSheet> {
                 controller: _title,
                 autofocus: true,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(hintText: 'Task'),
+                decoration: InputDecoration(
+                  hintText:
+                      widget.repeat == RepeatChoice.always ? 'Routine' : 'Task',
+                ),
                 onSubmitted: (_) => _submit(),
               ),
               const SizedBox(height: 12),
-              Row(
+              // Wraps (e.g. with a very large font) instead of overflowing.
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     'From',
                     style: TextStyle(color: context.colors.textSecondary),
                   ),
-                  TextButton(
-                    onPressed: _pickStart,
-                    child: Text(formatMinutes(_start)),
-                  ),
+                  _TimeButton(_start, onPressed: _pickStart),
                   Text(
                     'to',
                     style: TextStyle(color: context.colors.textSecondary),
                   ),
-                  TextButton(
-                    onPressed: _pickEnd,
-                    child: Text(formatMinutes(_end)),
-                  ),
+                  _TimeButton(_end, onPressed: _pickEnd),
                 ],
               ),
               Wrap(
@@ -188,18 +395,58 @@ class _TaskSheetState extends State<TaskSheet> {
                   ),
                 ],
               ),
+              if (widget.repeat != RepeatChoice.never)
+                ..._repeatChoices(context),
               const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  onPressed: _submit,
-                  child: Text(widget.submitLabel),
-                ),
+              Wrap(
+                alignment: widget.onDelete == null
+                    ? WrapAlignment.end
+                    : WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (widget.onDelete != null)
+                    TextButton.icon(
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Delete routine'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.colors.danger,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        widget.onDelete!();
+                      },
+                    ),
+                  FilledButton(
+                    onPressed: _submit,
+                    child: Text(widget.submitLabel),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A time to tap and change: outlined, in the main text colour (readable
+/// on every theme's sheet).
+class _TimeButton extends StatelessWidget {
+  final int minutes;
+  final VoidCallback onPressed;
+
+  const _TimeButton(this.minutes, {required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: context.colors.textPrimary,
+        side: BorderSide(color: context.colors.textHint),
+      ),
+      child: Text(formatMinutes(minutes)),
     );
   }
 }

@@ -51,6 +51,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     String title, {
     required int start,
     required int end,
+    String? color,
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return;
@@ -60,6 +61,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       day: day,
       start: start,
       end: end,
+      color: color,
     );
     final dayTasks = _on(day);
     final free = _free(day, dayTasks, dayTasks);

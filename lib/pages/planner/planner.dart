@@ -7,10 +7,12 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
+import 'package:the_app/pages/planner/routines.dart';
+import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
-import 'package:the_app/widgets/dashed_border.dart';
 import 'package:the_app/widgets/day_strip.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -20,9 +22,8 @@ import 'package:the_app/widgets/selection.dart';
 /// free time adds a task there; tapping a block edits it; its checkbox
 /// ticks it off. The day strip at the bottom picks the day.
 class PlannerPage extends ConsumerStatefulWidget {
-  /// Height of one hour on the timeline: a 30-minute block is one touch
-  /// target high.
-  static const hourHeight = 96.0;
+  /// Height of one hour on the timeline.
+  static const hourHeight = PlannerTimeline.hourHeight;
 
   const PlannerPage({super.key});
 
@@ -52,6 +53,12 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     _selection.clear(); // selection is per day
   }
 
+  void _taken([String what = 'That time is taken.']) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(what)));
+  }
+
   Future<void> _addIn(DateTime day, FreeSlot slot) async {
     // Today, in free time that's going on now: start at the next full hour
     // rather than at the (past) start of the free time.
@@ -62,18 +69,33 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       final nextHour = (minutes + 59) ~/ 60 * 60;
       if (slot.start < nextHour && nextHour < slot.end) start = nextHour;
     }
-    final task = await showAddTaskSheet(context, slot, start: start);
+    final task = await showAddTaskSheet(context, slot, start: start, day: day);
     if (task == null || !mounted) return;
     try {
-      ref.read(plannerProvider.notifier).addTask(
-            day,
-            task.title,
-            start: task.start,
-            end: task.end,
-          );
+      final weekdays = task.weekdays;
+      if (weekdays != null) {
+        // Repeats: a routine from this day on (P8).
+        ref.read(routinesProvider.notifier).add(
+              title: task.title,
+              start: task.start,
+              end: task.end,
+              weekdays: weekdays,
+              from: day,
+              until: task.until,
+            );
+      } else {
+        ref.read(plannerProvider.notifier).addTask(
+              day,
+              task.title,
+              start: task.start,
+              end: task.end,
+            );
+      }
     } on TaskOverlapException {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('That time is taken.')),
+      _taken(
+        task.weekdays == null
+            ? 'That time is taken.'
+            : 'Another routine has that time on one of those days.',
       );
     }
   }
@@ -94,10 +116,115 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         end: changed.end,
       );
     } on TaskOverlapException {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('That time is taken.')),
-      );
+      _taken();
     }
+  }
+
+  /// A routine's block on a day: change it just there, skip it there, or
+  /// edit the routine itself (P8).
+  Future<void> _routineTapped(RoutineOccurrence occurrence) async {
+    final routine = occurrence.routine;
+    final choice = await showModalBottomSheet<_RoutineChoice>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(
+                routine.title,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                '${formatMinutes(routine.start)}–${formatMinutes(routine.end)}'
+                ' · a routine',
+              ),
+            ),
+            for (final choice in _RoutineChoice.values)
+              ListTile(
+                leading: Icon(choice.icon),
+                title: Text(choice.label),
+                onTap: () => Navigator.of(context).pop(choice),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    final routines = ref.read(routinesProvider.notifier);
+    switch (choice) {
+      case _RoutineChoice.thisDay:
+        await _changeThisDay(occurrence);
+      case _RoutineChoice.skip:
+        routines.setSkipped(routine.id, occurrence.day, skipped: true);
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text('${routine.title} skipped that day'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () => routines.setSkipped(
+                  routine.id,
+                  occurrence.day,
+                  skipped: false,
+                ),
+              ),
+            ),
+          );
+      case _RoutineChoice.edit:
+        await editRoutine(context, ref, routine);
+    }
+  }
+
+  /// "Change just this day": the routine skips the day, and a one-off
+  /// task takes its place, as changed.
+  Future<void> _changeThisDay(RoutineOccurrence occurrence) async {
+    final routine = occurrence.routine;
+    final day = occurrence.day;
+    final dayTasks =
+        ref.read(plannerProvider).where((t) => isSameDay(t.day, day)).toList();
+    final others = routinesOn(day, ref.read(routinesProvider), dayTasks)
+        .where((o) => o.routine.id != routine.id);
+    final room = freeSlotsAround([
+      for (final t in dayTasks)
+        if (t.hasTime) (start: t.start!, end: t.end!),
+      for (final o in others) (start: o.routine.start, end: o.routine.end),
+    ]).firstWhere((s) => s.start <= routine.start && routine.end <= s.end);
+    final changed = await showModalBottomSheet<NewTask>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => TaskSheet(
+        slot: room,
+        title: routine.title,
+        start: routine.start,
+        end: routine.end,
+        submitLabel: 'Save',
+      ),
+    );
+    if (changed == null || !mounted) return;
+    final routines = ref.read(routinesProvider.notifier);
+    routines.setSkipped(routine.id, day, skipped: true);
+    try {
+      ref.read(plannerProvider.notifier).addTask(
+            day,
+            changed.title,
+            start: changed.start,
+            end: changed.end,
+            color: routine.color,
+          );
+    } on TaskOverlapException {
+      routines.setSkipped(routine.id, day, skipped: false);
+      _taken();
+    }
+  }
+
+  void _openRoutines(DateTime day) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RoutinesPage(weekday: day.weekday),
+      ),
+    );
   }
 
   Future<void> _deleteSelected() async {
@@ -125,12 +252,41 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     var day = _day ?? today;
     if (day.isBefore(firstDay)) day = firstDay;
     final tasks = all.where((t) => isSameDay(t.day, day)).toList();
-    final timed = tasks.where((t) => t.hasTime).toList()
-      ..sort((a, b) => a.start!.compareTo(b.start!));
+    final timed = tasks.where((t) => t.hasTime).toList();
     final untimed = tasks.where((t) => !t.hasTime).toList();
+    final routines = routinesOn(day, ref.watch(routinesProvider), tasks); // P8
     ref.listen(plannerProvider, (_, next) {
       _selection.retain(next.map((t) => t.id));
     });
+    final selecting = _selection.isActive;
+    final blocks = [
+      for (final task in timed)
+        TimelineBlock(
+          id: task.id,
+          title: task.title,
+          start: task.start!,
+          end: task.end!,
+          done: task.done,
+          selected: _selection.isSelected(task.id),
+          onTap: () => _selection.handleTap(task.id, () => _edit(task)),
+          onLongPress: () => _selection.handleLongPress(task.id),
+          onToggleDone: () =>
+              ref.read(plannerProvider.notifier).toggleDone(task.id),
+        ),
+      // Routines aren't selected (they're deleted on the Routines screen).
+      for (final o in routines)
+        TimelineBlock(
+          id: o.routine.id,
+          title: o.routine.title,
+          start: o.routine.start,
+          end: o.routine.end,
+          done: o.done,
+          repeats: true,
+          onTap: selecting ? () {} : () => _routineTapped(o),
+          onToggleDone: () =>
+              ref.read(routinesProvider.notifier).toggleDone(o.routine.id, day),
+        ),
+    ];
 
     // Opens around the current hour (the scroll stays when changing day).
     final timeline = _timeline ??= ScrollController(
@@ -156,14 +312,9 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               Expanded(
                 child: SingleChildScrollView(
                   controller: timeline,
-                  child: _Timeline(
-                    tasks: timed,
-                    selection: _selection,
-                    onToggleDone: ref.read(plannerProvider.notifier).toggleDone,
-                    onEdit: _edit,
-                    onAdd: _selection.isActive
-                        ? null
-                        : (slot) => _addIn(day, slot),
+                  child: PlannerTimeline(
+                    blocks: blocks,
+                    onAdd: selecting ? null : (slot) => _addIn(day, slot),
                   ),
                 ),
               ),
@@ -176,7 +327,6 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             onSelected: _select,
             hasItems: (d) => all.any((t) => isSameDay(t.day, d)),
           ),
-          // No + button: free time on the timeline is where tasks are added.
           floatingActionButton: _selection.isActive
               ? SelectionActions(
                   allSelected: _selection.count == tasks.length,
@@ -186,237 +336,18 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                   onDelete: _deleteSelected,
                   onClose: _selection.clear,
                 )
-              : null,
-        ),
-      ),
-    );
-  }
-}
-
-/// The day's timeline: hour marks, task blocks and free time between them.
-class _Timeline extends StatelessWidget {
-  static const _labelWidth = 56.0;
-
-  /// Free stretches shorter than this aren't offered for adding.
-  static const _minFreeMinutes = 5;
-
-  final List<PlannerTask> tasks;
-  final SelectionController selection;
-  final ValueChanged<String> onToggleDone;
-  final ValueChanged<PlannerTask> onEdit;
-
-  /// Null while selecting.
-  final ValueChanged<FreeSlot>? onAdd;
-
-  const _Timeline({
-    required this.tasks,
-    required this.selection,
-    required this.onToggleDone,
-    required this.onEdit,
-    required this.onAdd,
-  });
-
-  /// Space above 00:00, so its label (centred on the line) isn't cut off.
-  static const _topInset = 12.0;
-
-  static double _y(int minutes) =>
-      _topInset + minutes * PlannerPage.hourHeight / 60;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return SizedBox(
-      // Room below 24:00 so the last hours can scroll clear of buttons.
-      height: _y(PlannerTask.dayMinutes) + BottomActions.contentClearance,
-      child: Stack(
-        children: [
-          for (var hour = 0; hour <= 24; hour++)
-            Positioned(
-              top: _y(hour * 60) - 8,
-              left: 0,
-              right: 0,
-              child: ExcludeSemantics(
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: _labelWidth,
-                      child: Text(
-                        formatMinutes(hour * 60),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: colors.textMuted, fontSize: 12),
-                      ),
+              // No + button: free time on the timeline is where tasks are
+              // added. Routines have their own screen.
+              : BottomActions(
+                  actions: [
+                    BottomAction(
+                      icon: Icons.repeat,
+                      tooltip: 'Routines',
+                      onPressed: () => _openRoutines(day),
                     ),
-                    Expanded(child: Divider(color: colors.divider, height: 16)),
                   ],
                 ),
-              ),
-            ),
-          for (final slot in freeSlots(tasks))
-            if (slot.end - slot.start >= _minFreeMinutes)
-              Positioned(
-                top: _y(slot.start),
-                height: _y(slot.end) - _y(slot.start),
-                left: _labelWidth,
-                right: 8,
-                child: _FreeTime(
-                  slot: slot,
-                  onTap: onAdd == null ? null : () => onAdd!(slot),
-                ),
-              ),
-          for (final task in tasks)
-            Positioned(
-              top: _y(task.start!),
-              height: _y(task.end!) - _y(task.start!),
-              left: _labelWidth,
-              right: 8,
-              child: _TaskBlock(
-                task: task,
-                selected: selection.isSelected(task.id),
-                onTap: () => selection.handleTap(task.id, () => onEdit(task)),
-                onLongPress: () => selection.handleLongPress(task.id),
-                onToggleDone: () => onToggleDone(task.id),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Free time: a see-through block with a dotted border, the size of the
-/// gap; tapping it adds a task there.
-class _FreeTime extends StatelessWidget {
-  /// Corners matching task blocks.
-  static const _radius = 6.0;
-
-  final FreeSlot slot;
-  final VoidCallback? onTap;
-
-  const _FreeTime({required this.slot, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final range = '${formatMinutes(slot.start)}–${formatMinutes(slot.end)}';
-    return Semantics(
-      button: true,
-      label: 'Free time, $range. Add a task',
-      excludeSemantics: true,
-      child: Padding(
-        // The same gap between blocks as task blocks.
-        padding: const EdgeInsets.symmetric(vertical: 1),
-        child: DashedBorder(
-          color: context.colors.textHint,
-          radius: _radius,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(_radius),
-            // Too short for the label: just the dotted block.
-            child: LayoutBuilder(
-              builder: (context, box) => box.maxHeight < 24
-                  ? const SizedBox.expand()
-                  : Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          'Free · $range',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: context.colors.textHint,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-          ),
         ),
-      ),
-    );
-  }
-}
-
-/// A task: a block from its start to its end, with its title and time, and
-/// a checkbox in the top-right corner to tick it off.
-class _TaskBlock extends StatelessWidget {
-  final PlannerTask task;
-  final bool selected;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
-  final VoidCallback onToggleDone;
-
-  const _TaskBlock({
-    required this.task,
-    required this.selected,
-    required this.onTap,
-    required this.onLongPress,
-    required this.onToggleDone,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final range = '${formatMinutes(task.start!)}–${formatMinutes(task.end!)}';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: LayoutBuilder(
-        builder: (context, box) {
-          // Short blocks put everything on one line.
-          final compact = box.maxHeight < 56;
-          final title = Text(
-            task.title,
-            maxLines: compact ? 1 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: task.done ? colors.textSecondary : colors.textPrimary,
-              fontWeight: FontWeight.w600,
-              decoration: task.done ? TextDecoration.lineThrough : null,
-              decorationColor: colors.textSecondary,
-            ),
-          );
-          final time = Text(
-            range,
-            style: TextStyle(color: colors.textSecondary, fontSize: 12),
-          );
-          return SelectableCard(
-            selected: selected,
-            onTap: onTap,
-            onLongPress: onLongPress,
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 48, 4),
-                  child: compact
-                      ? Row(
-                          children: [
-                            Flexible(child: title),
-                            const SizedBox(width: 8),
-                            time,
-                          ],
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [title, time],
-                        ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Checkbox(
-                    value: task.done,
-                    semanticLabel: 'Done: ${task.title}',
-                    materialTapTargetSize: compact
-                        ? MaterialTapTargetSize.shrinkWrap
-                        : MaterialTapTargetSize.padded,
-                    visualDensity: compact ? VisualDensity.compact : null,
-                    onChanged: (_) => onToggleDone(),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
@@ -492,4 +423,16 @@ class _DayHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+/// What can be done with a routine's block on a day (P8).
+enum _RoutineChoice {
+  thisDay('Change just this day', Icons.edit_calendar_outlined),
+  skip('Skip this day', Icons.event_busy_outlined),
+  edit('Edit routine', Icons.repeat);
+
+  final String label;
+  final IconData icon;
+
+  const _RoutineChoice(this.label, this.icon);
 }

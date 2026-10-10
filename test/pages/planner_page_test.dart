@@ -106,8 +106,8 @@ void main() {
 
     await tester.tap(free('12:00–24:00'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(TextButton, '12:00'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '13:00'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '12:00'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Lunch');
     await tester.tap(find.text('30 min'));
@@ -140,7 +140,7 @@ void main() {
     expect(chip('30 min').onSelected, isNull, reason: 'beyond 12:20');
     expect(chip('1 h').onSelected, isNull);
     expect(
-      find.widgetWithText(TextButton, '12:20'),
+      find.widgetWithText(OutlinedButton, '12:20'),
       findsOneWidget,
       reason: 'the default hour is cut at the end of the free time',
     );
@@ -270,8 +270,8 @@ void main() {
           .text,
       'Gym',
     );
-    expect(find.widgetWithText(TextButton, '12:00'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '13:00'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '12:00'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
     expect(container.read(plannerProvider).first.done, isFalse,
         reason: 'tapping edits, it does not tick off');
 
@@ -297,8 +297,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(free('00:00–24:00'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(TextButton, '13:00'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '14:00'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '14:00'), findsOneWidget);
   });
 
   testWidgets('long-press selects; delete removes after confirming',

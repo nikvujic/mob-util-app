@@ -195,6 +195,17 @@ abstract final class AppTheme {
         ),
         side: BorderSide(color: palette.textSecondary, width: 1.5),
       ),
+      // Chips (e.g. the planner's quick times and repeat days): the app's
+      // own colours, so every theme keeps readable labels.
+      chipTheme: ChipThemeData(
+        backgroundColor: palette.card,
+        selectedColor: palette.cardSelected,
+        disabledColor: palette.surface,
+        checkmarkColor: palette.accent,
+        side: BorderSide(color: palette.divider),
+        labelStyle: TextStyle(color: palette.textPrimary),
+        secondaryLabelStyle: TextStyle(color: palette.textPrimary),
+      ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: palette.surface,
         selectedItemColor: palette.accent,

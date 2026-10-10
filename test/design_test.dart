@@ -16,6 +16,7 @@ import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -68,6 +69,14 @@ Future<void> seed(ProviderContainer container) async {
     ..addTask(today, 'Gym', start: 8 * 60, end: 9 * 60)
     ..addTask(today, 'Call the bank', start: 10 * 60, end: 11 * 60);
   planner.toggleDone(container.read(plannerProvider).first.id);
+  // A routine (P8), shown on today's timeline next to the tasks.
+  container.read(routinesProvider.notifier).add(
+        title: 'Stand-up',
+        start: 9 * 60 + 15,
+        end: 9 * 60 + 45,
+        weekdays: {1, 2, 3, 4, 5},
+        from: DateTime(2026, 10, 1),
+      );
   container.read(countersProvider.notifier)
     ..add('Push-ups')
     ..add('Glasses of water');
@@ -129,6 +138,32 @@ void main() {
         await t.pumpAndSettle();
       },
       'planner': (t) => openTab(t, 'Planner'),
+      'routine choices': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.text('Stand-up'));
+        await t.pumpAndSettle();
+        expect(find.text('Skip this day'), findsOneWidget);
+      },
+      'add sheet with repeat': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.textContaining('Free · ').hitTestable().first);
+        await t.pumpAndSettle();
+        await t.tap(find.text('Weekdays'));
+        await t.pumpAndSettle();
+      },
+      'routines screen': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.byTooltip('Routines'));
+        await t.pumpAndSettle();
+      },
+      'routine sheet': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.byTooltip('Routines'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Stand-up').last);
+        await t.pumpAndSettle();
+        expect(find.text('Delete routine'), findsOneWidget);
+      },
       'planner selection mode': (t) async {
         await openTab(t, 'Planner');
         await t.longPress(find.text('Gym'));
@@ -600,6 +635,24 @@ void main() {
     expect(tester.takeException(), isNull);
     // Scrolls to reach the confirmation field.
     await tester.ensureVisible(find.byKey(const Key('resetConfirm')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the task sheet with repeat days copes with a very large font',
+      (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await seed(await pumpApp(tester, clock: designClock));
+    await tester.pump();
+    await openTab(tester, 'Planner');
+    await tester.tap(find.textContaining('Free · ').hitTestable().first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Weekdays'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    // Scrolls to the Add button.
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
