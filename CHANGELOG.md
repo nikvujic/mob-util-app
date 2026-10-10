@@ -4,7 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.15.0] - unreleased
+## [0.16.0] - unreleased
+
+### Changed
+- **Markdown symbols hide** once formatted: `##`, `**` and the rest only
+  show on the line you're editing.
+
+## [0.15.0] - 2026-10-10
 
 ### Added
 - **Markdown in notes, styled as you type**: `- ` and `1. ` lists (Enter

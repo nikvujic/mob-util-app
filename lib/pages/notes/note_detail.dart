@@ -56,7 +56,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   static const _autosaveDelay = Duration(milliseconds: 600);
 
   late final TextEditingController _titleController;
-  late final TextEditingController _contentController;
+  late final MarkdownEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
   late final AppLifecycleListener _lifecycleListener;
   Timer? _autosaveTimer;
@@ -94,6 +94,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleController = TextEditingController(text: _original?.title ?? '');
     // Markdown basics styled as they're typed (N9).
     _contentController = MarkdownEditingController(text: _originalContent);
+    // Markdown symbols show only on the line being edited (N9).
+    _contentFocusNode.addListener(
+      () => _contentController.editing = _contentFocusNode.hasFocus,
+    );
     _history = NoteHistory(_text, clock: ref.read(clockProvider));
     _titleController.addListener(_onEdit);
     _contentController.addListener(_onEdit);

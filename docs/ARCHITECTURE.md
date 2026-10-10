@@ -169,4 +169,6 @@ italic, strike; the symbols themselves as faint markers) and works out
 list continuation on Enter. `widgets/markdown_text.dart` applies it: a
 `TextEditingController` whose `buildTextSpan` styles the runs (the text is
 never changed, so the cursor, undo and saving work as for plain text), and
-an input formatter for Enter in lists.
+an input formatter for Enter in lists. Formatting symbols are drawn as
+nothing (no width, transparent) except on the lines the cursor is on
+while the field has focus, so the note reads clean but stays editable.

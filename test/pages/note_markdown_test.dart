@@ -53,4 +53,18 @@ void main() {
     await tester.pump();
     expect(content(tester).text, '- milk');
   });
+
+  testWidgets('symbols show only while typing in the text', (tester) async {
+    await openNote(tester);
+    final markdown = content(tester) as MarkdownEditingController;
+    expect(markdown.editing, isFalse, reason: 'just opened: reading');
+
+    await tester.tap(contentField);
+    await tester.pump();
+    expect(markdown.editing, isTrue);
+
+    await tester.tap(find.byKey(const Key('noteTitleField')));
+    await tester.pump();
+    expect(markdown.editing, isFalse, reason: 'typing the title instead');
+  });
 }

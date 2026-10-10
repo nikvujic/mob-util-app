@@ -286,6 +286,12 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 6 — after 0.15 (2026-10-10)
+
+- [x] **Markdown: hide the symbols except where you're editing** (N9) —
+  Nikola expected the `##` to disappear once formatted. Live preview: the
+  line with the cursor shows its symbols; other lines don't.
+
 ### Round 5 — after 0.14 (2026-10-10)
 
 - [x] **Notes: edit the title from the bottom** (N11) — Nikola: the title
