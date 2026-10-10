@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/widgets/dashed_border.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/day_strip.dart';
 
@@ -55,6 +56,46 @@ void main() {
     expect(free('00:00–24:00'), findsOneWidget);
     expect(find.text('12:00'), findsOneWidget, reason: 'it is 12:00 now');
     expect(find.byTooltip('Add task'), findsNothing, reason: 'no + button');
+  });
+
+  testWidgets('free time is a dotted block, lined up with task blocks',
+      (tester) async {
+    await openPlanner(tester);
+    add(today, 'Lunch', hour: 12); // 12:00–13:00
+    add(today, 'Nap', hour: 14); // 14:00–15:00
+    await tester.pump();
+
+    final gap = find.ancestor(
+      of: free('13:00–14:00'),
+      matching: find.byType(DashedBorder),
+    );
+    expect(gap, findsOneWidget);
+    final block = tester.getRect(gap);
+    final lunch = tester.getRect(find.ancestor(
+      of: find.text('Lunch'),
+      matching: find.byType(SelectableCard),
+    ));
+    final nap = tester.getRect(find.ancestor(
+      of: find.text('Nap'),
+      matching: find.byType(SelectableCard),
+    ));
+    expect((block.left, block.right), (lunch.left, lunch.right));
+    expect(block.top - lunch.bottom, closeTo(2, 0.5), reason: 'same gaps');
+    expect(nap.top - block.bottom, closeTo(2, 0.5));
+  });
+
+  testWidgets('a short free gap is just the dotted block, no label',
+      (tester) async {
+    await openPlanner(tester);
+    planner()
+      ..addTask(today, 'A', start: 12 * 60, end: 13 * 60)
+      ..addTask(today, 'B', start: 13 * 60 + 10, end: 14 * 60);
+    await tester.pump();
+
+    expect(free('13:00–13:10'), findsNothing);
+    expect(find.bySemanticsLabel('Free time, 13:00–13:10. Add a task'),
+        findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('tapping free time adds a task there: from its start, an hour',

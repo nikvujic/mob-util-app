@@ -10,6 +10,7 @@ import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/dashed_border.dart';
 import 'package:the_app/widgets/day_strip.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -282,7 +283,12 @@ class _Timeline extends StatelessWidget {
   }
 }
 
+/// Free time: a see-through block with a dotted border, the size of the
+/// gap; tapping it adds a task there.
 class _FreeTime extends StatelessWidget {
+  /// Corners matching task blocks.
+  static const _radius = 6.0;
+
   final FreeSlot slot;
   final VoidCallback? onTap;
 
@@ -295,15 +301,34 @@ class _FreeTime extends StatelessWidget {
       button: true,
       label: 'Free time, $range. Add a task',
       excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Text(
-              'Free · $range',
-              style: TextStyle(color: context.colors.textHint, fontSize: 12),
+      child: Padding(
+        // The same gap between blocks as task blocks.
+        padding: const EdgeInsets.symmetric(vertical: 1),
+        child: DashedBorder(
+          color: context.colors.textHint,
+          radius: _radius,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(_radius),
+            // Too short for the label: just the dotted block.
+            child: LayoutBuilder(
+              builder: (context, box) => box.maxHeight < 24
+                  ? const SizedBox.expand()
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          'Free · $range',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: context.colors.textHint,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
             ),
           ),
         ),

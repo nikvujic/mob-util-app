@@ -15,6 +15,8 @@ Release with the installable APK.
 - **Note editor buttons**: Lock note (or Remove lock) is a button of its
   own instead of a ⋮ menu, and ↶ Undo / ↷ Redo sit outermost, under the
   thumb. Tapping them no longer closes the keyboard.
+- **Planner free time is a block too**: see-through, with a dotted
+  border, lined up with the task blocks.
 - **Reach mode reaches further** (about one row more; Counters a bit
   more again).
 - **Shop scrolls to each new item** as you add it, so you see it land in
