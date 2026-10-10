@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 /// Menu → Themes (G12): pick the app's look; it applies at once.
 class ThemesPage extends ConsumerWidget {
@@ -14,7 +15,7 @@ class ThemesPage extends ConsumerWidget {
     );
     return Scaffold(
       appBar: AppBar(title: const Text('Themes')),
-      body: ListView(
+      body: PullDownList.children(
         children: [
           for (final theme in AppThemeChoice.values)
             ListTile(

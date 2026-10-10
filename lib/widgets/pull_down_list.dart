@@ -33,6 +33,13 @@ class PullDownList extends StatefulWidget {
     this.bottomSpace = 0,
   });
 
+  /// A plain list of [children] (like a `ListView`), with reach mode.
+  PullDownList.children({
+    super.key,
+    required List<Widget> children,
+    this.bottomSpace = 0,
+  }) : slivers = [SliverList.list(children: children)];
+
   @override
   State<PullDownList> createState() => _PullDownListState();
 }

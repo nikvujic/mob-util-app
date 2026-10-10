@@ -7,6 +7,7 @@ import 'package:the_app/pages/security/security.dart';
 import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/session_provider.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
 class AppDrawer extends ConsumerWidget {
@@ -27,51 +28,57 @@ class AppDrawer extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
-              child: Text(
-                'The App',
-                style: TextStyle(
-                  color: context.colors.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
+            // The items can be pulled down into thumb reach (reach mode).
+            Expanded(
+              child: PullDownList.children(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
+                    child: Text(
+                      'The App',
+                      style: TextStyle(
+                        color: context.colors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Divider(height: 1, color: context.colors.divider),
+                  if (ref.watch(sessionProvider) != null)
+                    ListTile(
+                      leading: const Icon(Icons.lock_outline),
+                      title: const Text('Lock now'),
+                      onTap: () {
+                        ref.read(sessionProvider.notifier).lock();
+                        Scaffold.of(context).closeDrawer();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Locked')),
+                        );
+                      },
+                    ),
+                  ListTile(
+                    leading: const Icon(Icons.shield_outlined),
+                    title: const Text('Security'),
+                    onTap: () => _open(context, const SecurityPage()),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.save_alt),
+                    title: const Text('Backup'),
+                    onTap: () => _open(context, const BackupPage()),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.palette_outlined),
+                    title: const Text('Themes'),
+                    onTap: () => _open(context, const ThemesPage()),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings_outlined),
+                    title: const Text('Settings'),
+                    onTap: () => _open(context, const SettingsPage()),
+                  ),
+                ],
               ),
             ),
-            Divider(height: 1, color: context.colors.divider),
-            if (ref.watch(sessionProvider) != null)
-              ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: const Text('Lock now'),
-                onTap: () {
-                  ref.read(sessionProvider.notifier).lock();
-                  Scaffold.of(context).closeDrawer();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Locked')),
-                  );
-                },
-              ),
-            ListTile(
-              leading: const Icon(Icons.shield_outlined),
-              title: const Text('Security'),
-              onTap: () => _open(context, const SecurityPage()),
-            ),
-            ListTile(
-              leading: const Icon(Icons.save_alt),
-              title: const Text('Backup'),
-              onTap: () => _open(context, const BackupPage()),
-            ),
-            ListTile(
-              leading: const Icon(Icons.palette_outlined),
-              title: const Text('Themes'),
-              onTap: () => _open(context, const ThemesPage()),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
-              onTap: () => _open(context, const SettingsPage()),
-            ),
-            const Spacer(),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(

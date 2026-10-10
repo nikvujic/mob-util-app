@@ -8,6 +8,7 @@ import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/password_prompt.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 /// Master password (L1) and section locks (L5).
 class SecurityPage extends ConsumerWidget {
@@ -62,7 +63,7 @@ class SecurityPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Security')),
-      body: ListView(
+      body: PullDownList.children(
         children: [
           if (!hasPassword)
             ListTile(

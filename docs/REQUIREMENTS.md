@@ -33,6 +33,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G11 | **Actions at the bottom, on the hand's side.** Top bars carry no action buttons except the menu (☰) — page actions are round buttons at the bottom, like selection mode. They sit on the side of the hand in use: bottom right after tapping the right half of the screen (e.g. opening a note from the right side), bottom left after the left half. Content can always scroll clear of them. Selection mode follows the same rule (side of the long-press), with ✕ as its last button; switching sides mirrors side and order. | ✅ ← back stays at the top |
 | G12 | **Themes:** Menu → **Themes** page to switch the app's look. The app must first get its colours from a theme instead of fixed constants. | ✅ Green, Black, Clay |
 | G13 | **Back to a section = back to its top:** going to a section (tapping it in the bottom bar) clears any pulled-down space, so the list sits at its normal top. | ✅ |
+| G14 | **Reach mode everywhere it helps:** every scrolling list (sections, the menu, Security, Backup, Themes, Settings, …) supports reach mode (U4). Exceptions only where pulling down brings nothing into reach (forms, the planner timeline, bottom-up tiles); enforced by `test/architecture_test.dart`. | ✅ |
+| G15 | **Swipe right along the bottom bar opens the menu** (easier for the right thumb than the left screen edge). | ✅ |
 | G10 | **Accessible**: every screen meets Android's accessibility guidelines (48 dp touch targets, labelled controls for TalkBack, text contrast) and copes with large system font sizes. Checked by `test/design_test.dart`. | ✅ |
 
 ## D — Data safety: export / import

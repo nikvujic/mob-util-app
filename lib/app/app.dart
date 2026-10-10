@@ -69,6 +69,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// The page of each section, in [AppSection] order.
   static const _pages = [NotesPage(), ShopPage(), PlannerPage(), OtherPage()];
 
+  /// How far a swipe right along the bottom bar must go to open the menu.
+  static const menuSwipeDistance = 48.0;
+
+  /// Distance of the current swipe along the bottom bar.
+  double _menuSwipe = 0;
+
   /// How long after a first back press a second one exits the app.
   static const exitWindow = Duration(seconds: 2);
 
@@ -183,12 +189,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: BottomNav(
-        selectedIndex: _selectedIndex,
-        onItemTapped: (index) {
-          setState(() => _selectedIndex = index);
-          _sectionShown[index].fire();
+      // Swiping right along the bottom bar opens the menu: easier to reach
+      // with the right thumb than the left edge of the screen.
+      bottomNavigationBar: GestureDetector(
+        onHorizontalDragStart: (_) => _menuSwipe = 0,
+        onHorizontalDragUpdate: (d) => _menuSwipe += d.primaryDelta ?? 0,
+        onHorizontalDragEnd: (d) {
+          if (_menuSwipe > menuSwipeDistance ||
+              (d.primaryVelocity ?? 0) > 300) {
+            _scaffold.currentState?.openDrawer();
+          }
         },
+        child: BottomNav(
+          selectedIndex: _selectedIndex,
+          onItemTapped: (index) {
+            setState(() => _selectedIndex = index);
+            _sectionShown[index].fire();
+          },
+        ),
       ),
     );
   }

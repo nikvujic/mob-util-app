@@ -37,6 +37,9 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 - A feature that opens another feature's page does it by route name
   (`core/routes.dart`); `app/` maps names to pages, so features still never
   import each other.
+- Scrolling lists in `app/` and `pages/` are `PullDownList` (reach mode),
+  not plain `ListView`s; the few exceptions are listed with a reason in
+  the architecture test.
 - Platform plugins are confined: `path_provider` and `file_picker` to
   `data/` (behind small interfaces like `BackupFiles`, so tests can fake
   them), `package_info_plus` to `main.dart`, `cryptography` to

@@ -92,6 +92,24 @@ List<String> importViolations(String path, Iterable<String> imports) {
   return violations;
 }
 
+/// Scrolling views in app/ and pages/ must be `PullDownList` (reach mode,
+/// U4/G14), except where pulling down doesn't bring anything into reach.
+final _plainScroll = RegExp(
+  r'(?<![A-Za-z_.])(ListView|CustomScrollView|SingleChildScrollView|GridView)'
+  r'(\.\w+)?\(',
+);
+const plainScrollAllowed = {
+  // A centred lock message, not a list.
+  'app/section_gate.dart',
+  // The day's timeline: opens at the current hour; 00:00 isn't the
+  // place everyone needs to reach.
+  'pages/planner/planner.dart',
+  // A form, used with the keyboard open.
+  'pages/security/password_form.dart',
+  // Tiles fill from the bottom right: already in thumb reach.
+  'pages/other/other.dart',
+};
+
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');
 final _print = RegExp(r'(?<![A-Za-z_.])print\(');
 
@@ -108,6 +126,13 @@ List<String> contentViolations(String path, String source) {
     }
     if (_print.hasMatch(line)) {
       violations.add('$path:${i + 1}: print() — use debugPrint');
+    }
+    final layer = layerOf(path);
+    if ((layer == 'app' || layer == 'pages') &&
+        !plainScrollAllowed.contains(path) &&
+        _plainScroll.hasMatch(line)) {
+      violations.add('$path:${i + 1}: plain scrolling list — use '
+          'PullDownList (reach mode), or add an exception with a reason');
     }
   }
   return violations;
@@ -148,7 +173,8 @@ void main() {
     expect(violations, isEmpty, reason: violations.join('\n'));
   });
 
-  test('no raw colors outside the theme, no print()', () {
+  test('no raw colors outside the theme, no print(), lists have reach mode',
+      () {
     final violations = [
       for (final f in files) ...contentViolations(f.path, f.source),
     ];
@@ -232,6 +258,31 @@ void main() {
       expect(contentViolations(themeFile, 'x = Colors.green;'), isEmpty);
       expect(contentViolations('core/c.dart', "print('x');"), hasLength(1));
       expect(contentViolations('core/c.dart', "debugPrint('x');"), isEmpty);
+    });
+
+    test('plain scrolling lists in pages and the app shell', () {
+      expect(
+        contentViolations('pages/a/a.dart', 'body: ListView('),
+        hasLength(1),
+      );
+      expect(
+        contentViolations('app/x.dart', 'child: ListView.builder('),
+        hasLength(1),
+      );
+      expect(
+        contentViolations('pages/a/a.dart', 'body: PullDownList.children('),
+        isEmpty,
+      );
+      expect(
+        contentViolations('widgets/w.dart', 'child: ListView('),
+        isEmpty,
+        reason: 'reusable widgets may build on them',
+      );
+      expect(
+        contentViolations('pages/security/password_form.dart', 'ListView('),
+        isEmpty,
+        reason: 'listed exception',
+      );
     });
   });
 }

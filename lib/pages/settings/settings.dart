@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 /// Menu → Settings: small switches for how the app feels.
 class SettingsPage extends ConsumerWidget {
@@ -12,7 +13,7 @@ class SettingsPage extends ConsumerWidget {
     final preferences = ref.watch(preferencesProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
+      body: PullDownList.children(
         children: [
           SwitchListTile(
             secondary: const Icon(Icons.vibration),

@@ -187,4 +187,37 @@ void main() {
     await openTab(tester, 'Notes');
     expect(top(), normal);
   });
+
+  group('swiping along the bottom bar', () {
+    Finder bar() => find.byType(BottomNavigationBar);
+    bool menuOpen(WidgetTester tester) =>
+        tester.state<ScaffoldState>(find.byType(Scaffold).first).isDrawerOpen;
+
+    testWidgets('to the right opens the menu', (tester) async {
+      await pumpApp(tester);
+      await tester.drag(bar(), const Offset(150, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('Security'), findsOneWidget);
+      expect(menuOpen(tester), isTrue);
+    });
+
+    testWidgets('a short or leftward swipe does not; taps still switch',
+        (tester) async {
+      await pumpApp(tester);
+      await tester.drag(bar(), const Offset(-150, 0));
+      await tester.pumpAndSettle();
+      expect(menuOpen(tester), isFalse);
+
+      await tester.timedDrag(
+        bar(),
+        const Offset(20, 0),
+        const Duration(milliseconds: 500),
+      );
+      await tester.pumpAndSettle();
+      expect(menuOpen(tester), isFalse);
+
+      await openTab(tester, 'Shop');
+      expect(appBarTitle('Shop'), findsOneWidget);
+    });
+  });
 }

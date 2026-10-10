@@ -273,6 +273,10 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Clay closer to the Claude app** (Nikola: too light, orange off):
   Anthropic's brand colours — background #141413, accent #C96442, text
   #FAF9F5 / #B0AEA5. Tune with a screenshot if still off.
+- [x] **Reach mode everywhere it makes sense** (G14): the menu, Security,
+  Backup, Themes, Settings; an architecture rule flags plain scrolling
+  lists in pages, with a short list of explained exceptions.
+- [x] **Swipe right along the bottom bar opens the menu** (G15).
 - [ ] **Forgot master password → reset** (deletes only locked content;
   normal notes, shop, planner stay).
 - [ ] **Notes: undo / redo while typing** (N8).

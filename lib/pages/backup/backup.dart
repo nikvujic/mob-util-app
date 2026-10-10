@@ -10,6 +10,7 @@ import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 enum _ExportKind { plain, encrypted }
 
@@ -261,7 +262,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Backup')),
-      body: ListView(
+      body: PullDownList.children(
         children: [
           ListTile(
             leading: const Icon(Icons.save_alt),

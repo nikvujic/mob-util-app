@@ -15,6 +15,10 @@ Release with the installable APK.
   at the start of the free time.
 - The planner's 00:00 label is no longer cut off at the top of the day.
 - Changing the theme no longer flashes the old one for a moment.
+- **Reach mode in the menu and on every list page** (Security, Backup,
+  Themes, Settings): pull down at the top to bring the first items
+  within reach.
+- **Swipe right along the bottom bar** to open the menu.
 - **Clay** looks more like the Claude app: near-black background and
   Claude's deeper orange.
 - **Planner day strip previews live**: while you swipe, the day in the
