@@ -8,6 +8,7 @@ import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/data/fingerprint_vault.dart';
 import 'package:the_app/app/app.dart';
 
 const testAppVersion = '1.2.3 (4)';
@@ -24,12 +25,16 @@ Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
   BackupFiles? backupFiles,
   DateTime Function()? clock,
+  FingerprintVault? fingerprint,
 }) async {
   final container = ProviderContainer(
     overrides: [
       appStorageProvider.overrideWithValue(AppStorage.inMemory()),
       appVersionProvider.overrideWithValue(testAppVersion),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
+      fingerprintVaultProvider.overrideWithValue(
+        fingerprint ?? FakeFingerprintVault(available: false),
+      ),
       if (clock != null) clockProvider.overrideWithValue(clock),
     ],
   );
@@ -131,4 +136,47 @@ Future<void> settleBusy(WidgetTester tester) async {
     if (find.byType(CircularProgressIndicator).evaluate().isEmpty) break;
   }
   await tester.pumpAndSettle();
+}
+
+/// A fingerprint keystore (L6) for tests: [nextFinger] decides how the
+/// next fingerprint request goes.
+class FakeFingerprintVault implements FingerprintVault {
+  bool available;
+
+  /// What's stored, or null.
+  String? stored;
+
+  /// How the next fingerprint request ends: true matches, false cancels,
+  /// null means the stored key is void (e.g. a new fingerprint enrolled).
+  bool? nextFinger = true;
+
+  /// Fingerprint requests so far.
+  int asked = 0;
+
+  FakeFingerprintVault({this.available = true});
+
+  @override
+  Future<bool> isAvailable() async => available;
+
+  @override
+  Future<bool> store(String secret) async {
+    asked++;
+    if (nextFinger != true) return false;
+    stored = secret;
+    return true;
+  }
+
+  @override
+  Future<VaultRead> read() async {
+    asked++;
+    final secret = stored;
+    return switch (nextFinger) {
+      true when secret != null => VaultOpened(secret),
+      false => const VaultCancelled(),
+      _ => const VaultBroken(),
+    };
+  }
+
+  @override
+  Future<void> clear() async => stored = null;
 }

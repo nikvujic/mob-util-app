@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/security/forgot_password.dart';
 import 'package:the_app/pages/security/password_form.dart';
-import 'package:the_app/core/crypto.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/password_reset_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -11,6 +10,7 @@ import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/providers/fingerprint_provider.dart';
 
 /// Master password (L1) and section locks (L5).
 class SecurityPage extends ConsumerWidget {
@@ -27,15 +27,17 @@ class SecurityPage extends ConsumerWidget {
   }
 
   Future<void> _unlock(BuildContext context, WidgetRef ref) async {
-    final verifier = ref.read(securityProvider);
-    if (verifier == null) return;
-    final key = await showPasswordPrompt<PasswordKey>(
+    if (ref.read(securityProvider) == null) return;
+    await showPasswordPrompt<UnlockedKeys>(
       context,
       title: 'Unlock',
       confirmLabel: 'Unlock',
-      attempt: verifier.unlock,
+      attempt: ref.read(sessionProvider.notifier).unlock,
+      alternative: PromptAlternative.fingerprint(
+        attempt: ref.read(fingerprintProvider.notifier).unlock,
+        isOffered: () => ref.read(fingerprintProvider),
+      ),
     );
-    if (key != null) await ref.read(sessionProvider.notifier).unlockWith(key);
   }
 
   /// Resets a forgotten master password (L7), after confirmation.
@@ -115,6 +117,7 @@ class SecurityPage extends ConsumerWidget {
                 child: Text(unlocked ? 'Lock now' : 'Unlock'),
               ),
             ),
+            _FingerprintTile(unlock: () => _unlock(context, ref)),
             ListTile(
               leading: const Icon(Icons.password),
               title: const Text('Change master password'),
@@ -191,6 +194,68 @@ class _SectionHeader extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
+    );
+  }
+}
+
+/// Turns fingerprint unlock (L6) on or off. Only shown if the phone can
+/// do it.
+class _FingerprintTile extends ConsumerStatefulWidget {
+  /// Asks for the master password, to unlock the app.
+  final Future<void> Function() unlock;
+
+  const _FingerprintTile({required this.unlock});
+
+  @override
+  ConsumerState<_FingerprintTile> createState() => _FingerprintTileState();
+}
+
+class _FingerprintTileState extends ConsumerState<_FingerprintTile> {
+  late final Future<bool> _available =
+      ref.read(fingerprintProvider.notifier).isAvailable();
+
+  Future<void> _set(bool on) async {
+    final fingerprint = ref.read(fingerprintProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    if (!on) {
+      await fingerprint.turnOff();
+      return;
+    }
+    // Storing the key needs it: from the unlocked app.
+    if (ref.read(sessionProvider) == null) {
+      await widget.unlock();
+      if (ref.read(sessionProvider) == null) return; // cancelled
+    }
+    final done = await fingerprint.turnOn();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          done
+              ? 'Fingerprint unlock is on'
+              : 'Fingerprint unlock wasn\'t turned on',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final on = ref.watch(fingerprintProvider);
+    return FutureBuilder<bool>(
+      future: _available,
+      builder: (context, available) {
+        if (available.data != true) return const SizedBox.shrink();
+        return SwitchListTile(
+          secondary: const Icon(Icons.fingerprint),
+          title: const Text('Unlock with fingerprint'),
+          subtitle: Text(
+            'Instead of typing the master password, on this phone',
+            style: TextStyle(color: context.colors.textSecondary),
+          ),
+          value: on,
+          onChanged: _set,
+        );
+      },
     );
   }
 }

@@ -87,6 +87,17 @@ write and waits until it's on disk; only then is the password removed. If
 any note doesn't open, nothing changes. A crash at any point leaves either
 the password or plain notes, never locked notes without a password.
 
+**Fingerprint unlock** (`providers/fingerprint_provider.dart`, L6) keeps
+the *password key* in Android's keystore (`data/fingerprint_vault.dart`,
+via `biometric_storage`): encrypted with a keystore key that needs a
+fingerprint for every use (strong biometrics only) and is voided when a
+new fingerprint is enrolled. A fingerprint gives back the password key,
+which unlocks the session exactly as typing the password would (it must
+unwrap the data key). The password itself is never stored. The salt of
+the password the key belongs to is noted in `preferences.json` (phone
+only, not in backups); when the master password changes, is removed or
+reset, the stored key is cleared. Tests use a fake keystore.
+
 A forgotten password is reset (`providers/password_reset_provider.dart`)
 the same way round: locked notes and the content of locked sections are
 deleted and on disk first, then the password goes. Section locks clear

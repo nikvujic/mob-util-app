@@ -14,6 +14,7 @@ import 'package:the_app/pages/other/other.dart';
 import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
+import 'package:the_app/providers/fingerprint_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -152,6 +153,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       },
     );
+
+    // Kept running, so changing the master password turns fingerprint
+    // unlock off at once (L6).
+    ref.listen(fingerprintProvider, (_, __) {});
 
     return PopScope(
       canPop: false,

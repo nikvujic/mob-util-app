@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.15.0] - unreleased
 
 ### Added
+- **Unlock with fingerprint** (Security): instead of typing the master
+  password, wherever the app asks for it. Kept on this phone only, in
+  Android's keystore; turns itself off when the master password changes.
+  The app now needs Android 6 or newer.
 - **Edit title** button in the note editor: a smaller button above the
   others opens the title in a sheet at the bottom, within thumb reach.
 - Džoni: the page has no top bar; a triple tap in the top-right corner

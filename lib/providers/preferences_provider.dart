@@ -16,6 +16,10 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   /// Sets the Džoni count (restoring a backup).
   void setDzoniCount(int count) => state = state.copyWith(dzoniCount: count);
 
+  /// Which master password's key the fingerprint opens (L6); null: off.
+  void setFingerprintFor(String? salt) =>
+      state = state.copyWith(fingerprintFor: () => salt);
+
   void countDzoni() => state = state.copyWith(dzoniCount: state.dzoniCount + 1);
 }
 

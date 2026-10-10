@@ -1,5 +1,7 @@
 package com.nikvujic.the_app
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity: FlutterActivity()
+// A FragmentActivity: Android's fingerprint prompt (biometric_storage) needs
+// one.
+class MainActivity: FlutterFragmentActivity()

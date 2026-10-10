@@ -11,6 +11,7 @@ import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/providers/fingerprint_provider.dart';
 
 enum _ExportKind { plain, encrypted }
 
@@ -73,6 +74,10 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           'back up or restore.',
       confirmLabel: 'Unlock',
       attempt: ref.read(sessionProvider.notifier).unlock,
+      alternative: PromptAlternative.fingerprint(
+        attempt: ref.read(fingerprintProvider.notifier).unlock,
+        isOffered: () => ref.read(fingerprintProvider),
+      ),
     );
     return keys != null;
   }
@@ -162,6 +167,10 @@ class _BackupPageState extends ConsumerState<BackupPage> {
               'to restore them.',
           confirmLabel: 'Unlock',
           attempt: ref.read(sessionProvider.notifier).unlock,
+          alternative: PromptAlternative.fingerprint(
+            attempt: ref.read(fingerprintProvider.notifier).unlock,
+            isOffered: () => ref.read(fingerprintProvider),
+          ),
         );
         return keys?.dataKey;
       });

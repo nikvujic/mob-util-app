@@ -6,6 +6,7 @@ import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/password_prompt.dart';
+import 'package:the_app/providers/fingerprint_provider.dart';
 
 /// Shows [child] (a main section), or a lock screen while the section is
 /// closed (L5): locked, with the app locked. The section's page isn't
@@ -56,6 +57,10 @@ class SectionGate extends ConsumerWidget {
                   title: 'Unlock',
                   confirmLabel: 'Unlock',
                   attempt: ref.read(sessionProvider.notifier).unlock,
+                  alternative: PromptAlternative.fingerprint(
+                    attempt: ref.read(fingerprintProvider.notifier).unlock,
+                    isOffered: () => ref.read(fingerprintProvider),
+                  ),
                 ),
               ),
             ],

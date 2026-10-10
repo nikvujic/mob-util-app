@@ -120,6 +120,15 @@ class PasswordKey extends CipherKey {
   PasswordKey.fromBytes(this.params, List<int> bytes)
       : super._(SecretKey(bytes));
 
+  /// A key kept in the phone's fingerprint-protected keystore (L6), put
+  /// back together with the current password's [params]. Whether it's
+  /// really that password's key is checked by unwrapping the data key.
+  PasswordKey.restore(this.params, List<int> bytes) : super._(SecretKey(bytes));
+
+  /// The raw key, only for keeping it in the phone's fingerprint-protected
+  /// keystore (L6). Never write it anywhere else.
+  Future<List<int>> exportForKeystore() => _key.extractBytes();
+
   /// Derives the key for [password]. Runs in a background isolate because
   /// Argon2id is deliberately slow; the UI stays responsive meanwhile.
   static Future<PasswordKey> derive(String password, KdfParams params) async {

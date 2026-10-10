@@ -32,7 +32,8 @@ android {
         applicationId = "com.nikvujic.the_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Android 6+: fingerprint unlock (biometric_storage) needs it.
+        minSdk = Math.max(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -60,4 +61,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // The launch and normal themes are AppCompat ones, which the
+    // fingerprint prompt needs (biometric_storage).
+    implementation "androidx.appcompat:appcompat:1.6.1"
 }

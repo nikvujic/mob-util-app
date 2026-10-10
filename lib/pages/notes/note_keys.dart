@@ -6,6 +6,7 @@ import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
+import 'package:the_app/providers/fingerprint_provider.dart';
 
 /// Getting the key for locked notes (N6, N7) from the UI.
 
@@ -27,6 +28,10 @@ Future<DataKey?> unlockNotesKey(
     message: message,
     confirmLabel: 'Unlock',
     attempt: session.unlock,
+    alternative: PromptAlternative.fingerprint(
+      attempt: ref.read(fingerprintProvider.notifier).unlock,
+      isOffered: () => ref.read(fingerprintProvider),
+    ),
   );
   return keys?.dataKey;
 }

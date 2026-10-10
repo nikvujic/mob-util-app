@@ -10,6 +10,7 @@ class PasswordField extends StatefulWidget {
   final String? error;
   final bool enabled;
   final bool autofocus;
+  final FocusNode? focusNode;
 
   /// A password being chosen (vs. one being entered), for autofill.
   final bool isNew;
@@ -28,6 +29,7 @@ class PasswordField extends StatefulWidget {
     this.error,
     this.enabled = true,
     this.autofocus = false,
+    this.focusNode,
     this.isNew = false,
     this.last = false,
   });
@@ -45,6 +47,7 @@ class _PasswordFieldState extends State<PasswordField> {
       controller: widget.controller,
       enabled: widget.enabled,
       autofocus: widget.autofocus,
+      focusNode: widget.focusNode,
       obscureText: !_visible,
       autocorrect: false,
       enableSuggestions: false,
