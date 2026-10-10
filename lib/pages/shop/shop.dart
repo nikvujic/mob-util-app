@@ -22,6 +22,13 @@ class ShopPage extends ConsumerStatefulWidget {
 class _ShopPageState extends ConsumerState<ShopPage> {
   final SelectionController _selection = SelectionController();
 
+  /// The item added last, scrolled into view above the add sheet.
+  String? _addedId;
+  final _addedKey = GlobalKey();
+
+  /// About how much of the list the add sheet covers.
+  static const _sheetHeight = 80.0;
+
   @override
   void dispose() {
     _selection.dispose();
@@ -36,8 +43,21 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       hint: 'Add item',
       submitLabel: 'Add',
       keepOpen: true,
-      onSubmit: _notifier.addItem,
+      onSubmit: _add,
     );
+  }
+
+  /// Adds an item and scrolls to it, so it's seen landing in the list.
+  void _add(String name) {
+    final id = _notifier.addItem(name);
+    if (id == null) return;
+    setState(() => _addedId = id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final row = _addedKey.currentContext;
+      if (row != null && mounted) {
+        PullDownList.reveal(row, obscuredBottom: _sheetHeight);
+      }
+    });
   }
 
   Future<void> _deleteSelected() async {
@@ -73,6 +93,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
           key: ValueKey(item.id),
           padding: const EdgeInsets.symmetric(vertical: _ShopItemTile.gap / 2),
           child: _ShopItemTile(
+            key: item.id == _addedId ? _addedKey : null,
             item: item,
             index: index,
             selectionMode: _selection.isActive,
@@ -113,6 +134,9 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                 )
               : PullDownList(
                   bottomSpace: SelectionActions.listBottomSpace,
+                  // Rows stay built, so a new one can be scrolled to
+                  // wherever the list is (shopping lists are short).
+                  cacheExtent: 10000,
                   slivers: [
                     _SectionHeader(title: 'To buy', count: toBuy.length),
                     if (toBuy.isEmpty)
@@ -197,6 +221,7 @@ class _ShopItemTile extends StatelessWidget {
   final VoidCallback onLongPress;
 
   const _ShopItemTile({
+    super.key,
     required this.item,
     required this.index,
     required this.selectionMode,

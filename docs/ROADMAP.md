@@ -282,7 +282,7 @@ patterns other work builds on (G11, themes), then the bigger features.
   can't be bypassed by resetting); everything else stays.
 - [x] **Notes: undo / redo while typing** (N8): ↶ / ↷ in the editor;
   typing bursts and pastes are steps; Discard can be undone too.
-- [ ] **Shop: scroll to an item as it's added.**
+- [x] **Shop: scroll to an item as it's added** (S6).
 - [ ] **Džoni: hidden reset / set of the count.**
 
 ### Round 5 — after 0.14 (2026-10-10)

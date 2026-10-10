@@ -132,4 +132,36 @@ void main() {
 
     expect(topOfFirstRow(tester), 0);
   });
+
+  group('reveal', () {
+    Future<void> reveal(WidgetTester tester, String row) async {
+      PullDownList.reveal(
+        tester.element(find.text(row, skipOffstage: false)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('scrolls a row below the screen up into view, just enough',
+        (tester) async {
+      await pumpList(tester, 30);
+      await reveal(tester, 'Row 12'); // 720–780: just below the 600 dp list
+      expect(tester.getBottomLeft(find.text('Row 12')).dy, 600);
+    });
+
+    testWidgets('scrolls back to a row above, but not into the reach space',
+        (tester) async {
+      await pumpList(tester, 30);
+      await drag(tester, -300);
+      await reveal(tester, 'Row 0');
+      expect(topOfFirstRow(tester), 0);
+    });
+
+    testWidgets('leaves reach mode when it scrolls', (tester) async {
+      await pumpList(tester, 30);
+      await drag(tester, 60); // reach mode
+      await reveal(tester, 'Row 12');
+      await drag(tester, 1000); // back up: stops at the normal top
+      expect(topOfFirstRow(tester), 0);
+    });
+  });
 }

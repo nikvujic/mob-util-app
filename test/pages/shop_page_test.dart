@@ -145,4 +145,67 @@ void main() {
       expect(appBarTitle('Shop'), findsOneWidget);
     });
   });
+
+  group('a new item is scrolled into view above the add sheet', () {
+    /// Adds [name] from the add sheet (opening it if needed).
+    Future<void> addFromSheet(WidgetTester tester, String name) async {
+      if (find.byType(TextField).evaluate().isEmpty) {
+        await tester.tap(find.byTooltip('Add item'));
+        await tester.pumpAndSettle();
+      }
+      await tester.enterText(find.byType(TextField), name);
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+    }
+
+    /// Whether [name]'s row is on screen and not under the sheet.
+    void expectInView(WidgetTester tester, String name) {
+      final row = tester.getRect(find.text(name));
+      final sheet = tester.getRect(find.byType(TextField));
+      expect(row.top, greaterThanOrEqualTo(0), reason: '$name below the top');
+      expect(row.bottom, lessThanOrEqualTo(sheet.top),
+          reason: '$name above the sheet');
+    }
+
+    testWidgets('from the top of a long list', (tester) async {
+      await pumpShop(tester);
+      final shop = container.read(shopProvider.notifier);
+      for (var i = 0; i < 30; i++) {
+        shop.addItem('Item $i');
+      }
+      await tester.pump();
+
+      await addFromSheet(tester, 'Coffee');
+      expectInView(tester, 'Coffee');
+      await addFromSheet(tester, 'Tea');
+      expectInView(tester, 'Tea');
+    });
+
+    testWidgets('from further down, among bought items', (tester) async {
+      await pumpShop(tester);
+      final shop = container.read(shopProvider.notifier);
+      for (var i = 0; i < 30; i++) {
+        shop.toggle(shop.addItem('Bought $i')!);
+      }
+      shop.addItem('Bread');
+      await tester.pump();
+      await tester.drag(find.text('Bread'), const Offset(0, -1200));
+      await tester.pumpAndSettle();
+      expect(find.text('Bread'), findsNothing, reason: 'scrolled past');
+
+      await addFromSheet(tester, 'Coffee');
+      expectInView(tester, 'Coffee');
+    });
+
+    testWidgets('a row already in view doesn\'t move the list', (tester) async {
+      await pumpShop(tester);
+      container.read(shopProvider.notifier).addItem('Milk');
+      await tester.pump();
+      final before = tester.getTopLeft(find.text('Milk'));
+
+      await addFromSheet(tester, 'Bread');
+      expect(tester.getTopLeft(find.text('Milk')), before);
+      expectInView(tester, 'Bread');
+    });
+  });
 }

@@ -12,11 +12,14 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
   }
 
   /// Adds an item at the end of "To buy" (S5), so the list keeps the order
-  /// things were added in. Blank names are ignored.
-  void addItem(String name) {
+  /// things were added in, and returns its id. Blank names are ignored
+  /// (null).
+  String? addItem(String name) {
     final trimmed = name.trim();
-    if (trimmed.isEmpty) return;
-    state = [...state, ShopItem(id: generateId(), name: trimmed)];
+    if (trimmed.isEmpty) return null;
+    final item = ShopItem(id: generateId(), name: trimmed);
+    state = [...state, item];
+    return item.id;
   }
 
   /// Moves the item to the other section: back to "To buy" at its end

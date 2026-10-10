@@ -86,6 +86,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | S3 | Drag handle on the right reorders within a list. Long-press → select → delete. | ✅ |
 | S4 | **Compact rows** — noticeably smaller than note rows (one 48 dp touch target high, ≥20% smaller, tighter gaps), so more items fit on screen without becoming harder to tap. | ✅ |
 | S5 | New items, and items moved back from *Items*, go to the **end** of *To buy*, so it keeps the order things were added in (Nikola's request). Bought items still go to the top of *Items*. | ✅ |
+| S6 | **A new item scrolls into view** as it's added: the list moves just enough to show it above the add sheet (from anywhere in the list), and not at all if it's already in view. | ✅ |
 
 ## P — Planner (currently the "To Do" tab)
 

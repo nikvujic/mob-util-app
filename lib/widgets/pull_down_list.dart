@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// A scrolling list with a *reach mode* for one-handed use (U3): pulling
 /// the list down while it's already at its top shifts it down, so its first
@@ -27,10 +28,15 @@ class PullDownList extends StatefulWidget {
   /// Space below the last row (e.g. to clear floating buttons).
   final double bottomSpace;
 
+  /// How far beyond the screen rows are built (see
+  /// [ScrollView.cacheExtent]); larger keeps rows ready for [reveal].
+  final double? cacheExtent;
+
   const PullDownList({
     super.key,
     required this.slivers,
     this.bottomSpace = 0,
+    this.cacheExtent,
   });
 
   /// A plain list of [children] (like a `ListView`), with reach mode.
@@ -38,7 +44,17 @@ class PullDownList extends StatefulWidget {
     super.key,
     required List<Widget> children,
     this.bottomSpace = 0,
-  }) : slivers = [SliverList.list(children: children)];
+  })  : slivers = [SliverList.list(children: children)],
+        cacheExtent = null;
+
+  /// Scrolls the list around [row] just enough to show it whole, with
+  /// [obscuredBottom] of the list's bottom treated as covered (e.g. by a
+  /// sheet). Leaves reach mode if needed; never moves into its space.
+  static void reveal(BuildContext row, {double obscuredBottom = 0}) {
+    row
+        .findAncestorStateOfType<_PullDownListState>()
+        ?._reveal(row, obscuredBottom);
+  }
 
   @override
   State<PullDownList> createState() => _PullDownListState();
@@ -102,6 +118,32 @@ class _PullDownListState extends State<PullDownList> {
     });
   }
 
+  void _reveal(BuildContext row, double obscuredBottom) {
+    final controller = _controller, top = _top;
+    final box = row.findRenderObject();
+    if (controller == null || top == null || box == null) return;
+    if (!controller.hasClients || !box.attached) return;
+    final viewport = RenderAbstractViewport.of(box);
+    final position = controller.position;
+    final atTop = viewport.getOffsetToReveal(box, 0).offset;
+    final atBottom =
+        viewport.getOffsetToReveal(box, 1).offset + obscuredBottom;
+    final double target;
+    if (position.pixels > atTop) {
+      target = atTop;
+    } else if (position.pixels < atBottom) {
+      target = atBottom;
+    } else {
+      return; // already in view
+    }
+    _inReach = false;
+    controller.animateTo(
+      target.clamp(top, math.max(top, position.maxScrollExtent)),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
+  }
+
   /// May the list move into the space above its rows right now?
   bool get _spaceAllowed => _inReach || _gestureFromTop;
 
@@ -142,6 +184,7 @@ class _PullDownListState extends State<PullDownList> {
           onNotification: _onScroll,
           child: CustomScrollView(
             controller: controller,
+            cacheExtent: widget.cacheExtent,
             physics: _ReachPhysics(
               top: top,
               spaceAllowed: () => _spaceAllowed,
