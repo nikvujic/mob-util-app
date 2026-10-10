@@ -126,8 +126,7 @@ class _PullDownListState extends State<PullDownList> {
     final viewport = RenderAbstractViewport.of(box);
     final position = controller.position;
     final atTop = viewport.getOffsetToReveal(box, 0).offset;
-    final atBottom =
-        viewport.getOffsetToReveal(box, 1).offset + obscuredBottom;
+    final atBottom = viewport.getOffsetToReveal(box, 1).offset + obscuredBottom;
     final double target;
     if (position.pixels > atTop) {
       target = atTop;

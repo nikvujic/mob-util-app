@@ -10,6 +10,8 @@ Release with the installable APK.
 - **Edit title** in the note editor's ⋮ menu: change the title in a sheet
   at the bottom, within thumb reach.
 
+- Džoni: long-press the title to set or reset the count.
+
 ### Changed
 - **Shop scrolls to each new item** as you add it, so you see it land in
   the list above the add sheet.

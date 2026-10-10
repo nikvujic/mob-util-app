@@ -149,6 +149,14 @@ void main() {
         await t.tap(find.byTooltip('Džoni'));
         await t.pumpAndSettle();
       },
+      'dzoni set count dialog': (t) async {
+        await openTab(t, 'Other');
+        await t.tap(find.byTooltip('Džoni'));
+        await t.pumpAndSettle();
+        await t.longPress(find.text('Džoni'));
+        await t.pumpAndSettle();
+        expect(find.text('Set count'), findsOneWidget);
+      },
       'counters selection mode': (t) async {
         await openTab(t, 'Other');
         await t.tap(find.byTooltip('Counters'));
