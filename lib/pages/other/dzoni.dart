@@ -3,13 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 
 /// "Džoni što ćutiš?" (O4): sideways, big text and a count under it.
 /// Holding anywhere counts one up with a shake and a pop. The count is
-/// kept for good; long-pressing the title sets it (or resets it to 0).
+/// kept for good; a triple tap in the top-right corner sets it (or resets
+/// it to 0). No top bar: system back leaves.
 class DzoniPage extends ConsumerStatefulWidget {
   static const text = 'Džoni što ćutiš?';
 
@@ -49,6 +51,24 @@ class _DzoniPageState extends ConsumerState<DzoniPage>
     _bump.forward(from: 0);
   }
 
+  /// The corner that, tapped three times, sets the count.
+  static const cornerSize = 72.0;
+
+  /// The taps in the corner, three within this long open the dialog.
+  static const tripleTapWindow = Duration(milliseconds: 800);
+  final _cornerTaps = <DateTime>[];
+
+  void _cornerTapped() {
+    final now = ref.read(clockProvider)();
+    _cornerTaps
+      ..add(now)
+      ..removeWhere((t) => now.difference(t) > tripleTapWindow);
+    if (_cornerTaps.length >= 3) {
+      _cornerTaps.clear();
+      _setCount();
+    }
+  }
+
   Future<void> _setCount() async {
     final count = await showDialog<int>(
       context: context,
@@ -65,62 +85,77 @@ class _DzoniPageState extends ConsumerState<DzoniPage>
   Widget build(BuildContext context) {
     final count = ref.watch(preferencesProvider.select((p) => p.dzoniCount));
     return Scaffold(
-      appBar: AppBar(
-        title: Semantics(
-          onLongPressHint: 'Set the count',
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onLongPress: _setCount,
-            // A full touch target, though the text is smaller.
-            child: const SizedBox(
-              height: kToolbarHeight,
-              child: Center(widthFactor: 1, child: Text('Džoni')),
+      body: Stack(
+        children: [
+          Positioned.fill(child: _counter(count)),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: SafeArea(
+              child: Semantics(
+                // Screen readers get it as one action.
+                button: true,
+                label: 'Set the count',
+                onTap: _setCount,
+                excludeSemantics: true,
+                child: GestureDetector(
+                  key: const Key('dzoniCorner'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _cornerTapped,
+                  // It covers the page here: holding still counts.
+                  onLongPress: _count,
+                  child: const SizedBox.square(dimension: cornerSize),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onLongPress: _count,
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _bump,
-            builder: (context, child) {
-              final t = _bump.value;
-              // A few quick shakes that fade out, and a pop that settles.
-              final shake = (1 - t) * 0.08 * math.sin(t * 6 * 2 * math.pi);
-              final pop = 1 + 0.25 * math.sin(t * math.pi);
-              return Transform.rotate(
-                angle: shake,
-                child: Transform.scale(scale: pop, child: child),
-              );
-            },
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      DzoniPage.text,
-                      style: TextStyle(
-                        color: context.colors.textPrimary,
-                        fontSize: 56,
-                        fontWeight: FontWeight.w800,
-                      ),
+    );
+  }
+
+  Widget _counter(int count) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: _count,
+      child: Center(
+        child: AnimatedBuilder(
+          animation: _bump,
+          builder: (context, child) {
+            final t = _bump.value;
+            // A few quick shakes that fade out, and a pop that settles.
+            final shake = (1 - t) * 0.08 * math.sin(t * 6 * 2 * math.pi);
+            final pop = 1 + 0.25 * math.sin(t * math.pi);
+            return Transform.rotate(
+              angle: shake,
+              child: Transform.scale(scale: pop, child: child),
+            );
+          },
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    DzoniPage.text,
+                    style: TextStyle(
+                      color: context.colors.textPrimary,
+                      fontSize: 56,
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '$count',
-                      style: TextStyle(
-                        color: context.colors.accent,
-                        fontSize: 72,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '$count',
+                    style: TextStyle(
+                      color: context.colors.accent,
+                      fontSize: 72,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

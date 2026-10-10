@@ -9,7 +9,8 @@ Release with the installable APK.
 ### Added
 - **Edit title** button in the note editor: a smaller button above the
   others opens the title in a sheet at the bottom, within thumb reach.
-- Džoni: long-press the title to set or reset the count.
+- Džoni: the page has no top bar; a triple tap in the top-right corner
+  sets or resets the count.
 
 ### Changed
 - **Note editor buttons**: Lock note (or Remove lock) is a button of its

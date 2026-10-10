@@ -300,6 +300,8 @@ patterns other work builds on (G11, themes), then the bigger features.
   and opening it fought with the keyboard. *Lock note* / *Remove lock*
   is a button; ↶ / ↷ are outermost, under the thumb.
 - [x] **Planner: free time as a block** (P7): transparent, dotted border.
+- [x] **Džoni: no top bar**; setting the count is a triple tap in the
+  top-right corner instead of a long-press on the title.
 
 ## Later / ideas
 

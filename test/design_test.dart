@@ -145,7 +145,10 @@ void main() {
         await openTab(t, 'Other');
         await t.tap(find.byTooltip('Džoni'));
         await t.pumpAndSettle();
-        await t.longPress(find.text('Džoni'));
+        for (var i = 0; i < 3; i++) {
+          await t.tap(find.byKey(const Key('dzoniCorner')));
+          await t.pump(const Duration(milliseconds: 100));
+        }
         await t.pumpAndSettle();
         expect(find.text('Set count'), findsOneWidget);
       },

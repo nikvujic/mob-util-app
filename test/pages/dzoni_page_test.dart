@@ -71,28 +71,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(preferencesProvider).dzoniCount, 2);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    expect(find.byType(AppBar), findsNothing, reason: 'no top bar');
+    await pressBack(tester);
     expect(orientations.last, isEmpty, reason: 'back to any orientation');
     expect(find.byTooltip('Džoni'), findsOneWidget);
   });
 
-  group('setting the count (long-press the title)', () {
-    Future<void> openSetCount(WidgetTester tester) async {
+  group('setting the count (triple tap in the top-right corner)', () {
+    late DateTime now;
+    final corner = find.byKey(const Key('dzoniCorner'));
+
+    Future<void> openPage(WidgetTester tester) async {
       recordOrientations(tester);
-      container = await pumpApp(tester);
+      now = DateTime(2026, 10, 10, 12);
+      container = await pumpApp(tester, clock: () => now);
       container.read(preferencesProvider.notifier).setDzoniCount(42);
       await openTab(tester, 'Other');
       await tester.tap(find.byTooltip('Džoni'));
       await tester.pumpAndSettle();
-      await tester.longPress(find.text('Džoni'));
+    }
+
+    /// Taps the corner [times] times, [gap] apart.
+    Future<void> tapCorner(WidgetTester tester, int times,
+        {Duration gap = const Duration(milliseconds: 150)}) async {
+      for (var i = 0; i < times; i++) {
+        now = now.add(gap);
+        await tester.tap(corner);
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       await tester.pumpAndSettle();
+    }
+
+    Future<void> openSetCount(WidgetTester tester) async {
+      await openPage(tester);
+      await tapCorner(tester, 3);
     }
 
     int count() => container.read(preferencesProvider).dzoniCount;
     final field = find.byKey(const Key('dzoniCount'));
 
-    testWidgets('sets the count typed in', (tester) async {
+    testWidgets('the corner is the top right of the screen', (tester) async {
+      await openPage(tester);
+      final size = tester.getSize(find.byType(MaterialApp));
+      final rect = tester.getRect(corner);
+      expect(rect.right, size.width);
+      expect(rect.top, lessThan(50));
+      expect(rect.width, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('one or two taps, or slow ones, do nothing', (tester) async {
+      await openPage(tester);
+      await tapCorner(tester, 2);
+      expect(find.text('Set count'), findsNothing);
+      await tapCorner(tester, 3, gap: const Duration(milliseconds: 600));
+      expect(find.text('Set count'), findsNothing);
+      expect(count(), 42, reason: 'taps never count');
+    });
+
+    testWidgets('three quick taps open it; sets the count typed in',
+        (tester) async {
       await openSetCount(tester);
       expect(tester.widget<TextField>(field).controller!.text, '42');
 
@@ -127,14 +164,14 @@ void main() {
       expect(count(), 42);
     });
 
-    testWidgets('holding the page still counts, not the dialog',
+    testWidgets('holding the page still counts, even in the corner',
         (tester) async {
-      await openSetCount(tester);
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
+      await openPage(tester);
       await tester.longPress(find.text('42'));
       await tester.pumpAndSettle();
-      expect(count(), 43);
+      await tester.longPress(corner);
+      await tester.pumpAndSettle();
+      expect(count(), 44);
       expect(find.text('Set count'), findsNothing);
     });
   });
