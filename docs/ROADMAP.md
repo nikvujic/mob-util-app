@@ -262,6 +262,11 @@ patterns other work builds on (G11, themes), then the bigger features.
   of the screen height). (Nikola, after using 0.13: the old snap felt
   odd, sometimes didn't snap, and sometimes snapped instead of
   scrolling.)
+- [x] **Planner day strip: live preview** — the day in the middle is
+  selected while swiping (header and timeline follow), not only on
+  letting go; a fixed frame marks the middle slot (Nikola: "fast and
+  dynamic", smoother like before).
+- [x] **Planner: 00:00 label cut off** — small inset above the timeline.
 - [ ] **Forgot master password → reset** (deletes only locked content;
   normal notes, shop, planner stay).
 - [ ] **Notes: undo / redo while typing** (N8).

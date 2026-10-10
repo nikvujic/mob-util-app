@@ -155,6 +155,28 @@ void main() {
     expect(find.text('Sat, 10 Oct'), findsOneWidget);
   });
 
+  testWidgets('swiping previews days live, before letting go', (tester) async {
+    await openPlanner(tester);
+    add(tomorrow, 'Dentist');
+    await tester.pump();
+    final cell = tester.getSize(dayCell('Thursday 8 October 2026')).width;
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(DayStrip)),
+    );
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(Offset(-cell / 10, 0));
+      await tester.pump();
+    }
+    // Still holding: tomorrow is in the middle and already shown.
+    expect(find.text('Tomorrow · Fri, 9 Oct'), findsOneWidget);
+    expect(find.text('Dentist'), findsOneWidget);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('Tomorrow · Fri, 9 Oct'), findsOneWidget);
+  });
+
   testWidgets('days with tasks are marked', (tester) async {
     await openPlanner(tester);
     add(tomorrow, 'Dentist');

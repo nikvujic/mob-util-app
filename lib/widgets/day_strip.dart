@@ -3,8 +3,9 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 
 /// A horizontal strip of days, a week wide. Swiping scrolls freely (a fast
-/// swipe travels far) and then snaps a day into the middle, which becomes
-/// the selected day; tapping a day selects it too. Today is outlined, and
+/// swipe travels far) and snaps a day into the middle. The day in the
+/// middle (framed) is the selected one, live while swiping, so the page
+/// previews each day as it passes; tapping a day brings it there. Today is outlined, and
 /// days that have something on them ([hasItems]) get a dot.
 ///
 /// It starts at [firstDay]; the 3 days before it are shown greyed out as
@@ -65,9 +66,16 @@ class _DayStripState extends State<DayStrip> {
     );
   }
 
+  /// Live: whichever day is in the middle is the selected one, also while
+  /// swiping, so the page can preview each day as it passes.
   bool _onScroll(ScrollNotification notification) {
-    if (notification is ScrollEndNotification && _extent > 0) {
-      final index = (notification.metrics.pixels / _extent).round();
+    if (_extent > 0 &&
+        (notification is ScrollUpdateNotification ||
+            notification is ScrollEndNotification)) {
+      final index = (notification.metrics.pixels / _extent)
+          .round()
+          .clamp(0, _dayCount - 1)
+          .toInt();
       final day = addDays(widget.firstDay, index);
       if (daysBetween(day, widget.selected) != 0) widget.onSelected(day);
     }
@@ -111,7 +119,7 @@ class _DayStripState extends State<DayStrip> {
                 initialScrollOffset: _offsetOf(_indexOf(widget.selected)),
               );
               const filler = DayStrip.fillerDays;
-              return NotificationListener<ScrollNotification>(
+              final list = NotificationListener<ScrollNotification>(
                 onNotification: _onScroll,
                 child: ListView.builder(
                   controller: controller,
@@ -133,6 +141,36 @@ class _DayStripState extends State<DayStrip> {
                     );
                   },
                 ),
+              );
+              // A fixed frame on the middle slot: the day there is (or is
+              // about to be) the selected one.
+              return Stack(
+                children: [
+                  list,
+                  Positioned(
+                    left: filler * _extent,
+                    width: _extent,
+                    top: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 1,
+                          vertical: 4,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: context.colors.accent,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),

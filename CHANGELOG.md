@@ -14,6 +14,8 @@ Release with the installable APK.
 - On today, a new planner task starts at the next full hour instead of
   at the start of the free time.
 - The planner's 00:00 label is no longer cut off at the top of the day.
+- **Planner day strip previews live**: while you swipe, the day in the
+  middle (now framed) is shown at once, not only when you let go.
 - **Reach mode replaces the pull-down space**: pull a list down when it's
   already at the top to shift it down (by less than before) so the first
   rows are in thumb reach; any scroll the other way snaps it back.
