@@ -357,7 +357,9 @@ task)
   (P13).
 - [ ] Better icons for the Other tiles (custom SVGs).
 - [ ] Shop: icons instead of checkboxes (U2).
-- [ ] Password reset dialog: no flash when Reset becomes enabled.
+- [x] Password reset dialog: no flash when Reset becomes enabled (the
+  label faded in from grey over the new red; dialog buttons now change at
+  once).
 
 **F. Later**
 - [ ] A new feature for **routines** — Nikola will explain when we get

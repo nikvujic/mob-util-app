@@ -83,8 +83,7 @@ void main() {
     expect(sheet, findsNothing);
   });
 
-  testWidgets('a block is at least 5 minutes, and it says so',
-      (tester) async {
+  testWidgets('a block is at least 5 minutes, and it says so', (tester) async {
     await openAddSheet(tester);
     // Pick 12:02 as the end of a block starting at 12:00.
     await tester.tap(find.widgetWithText(OutlinedButton, '13:00'));

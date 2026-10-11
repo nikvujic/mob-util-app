@@ -77,6 +77,11 @@ class DialogButton extends StatelessWidget {
     this.child,
   });
 
+  /// Becoming enabled (e.g. Reset once RESET is typed), the label takes
+  /// its colour at once, like the fill: faded in, it showed grey on the
+  /// new fill first, which flashed (Nikola).
+  static const _noFade = Duration.zero;
+
   @override
   Widget build(BuildContext context) {
     final content = child ?? Text(label);
@@ -88,8 +93,12 @@ class DialogButton extends StatelessWidget {
                 shape: AppShapes.button,
                 backgroundColor: context.colors.danger,
                 foregroundColor: context.colors.background,
+                animationDuration: _noFade,
               )
-            : FilledButton.styleFrom(shape: AppShapes.button),
+            : FilledButton.styleFrom(
+                shape: AppShapes.button,
+                animationDuration: _noFade,
+              ),
         child: content,
       );
     }

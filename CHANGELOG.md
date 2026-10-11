@@ -43,6 +43,8 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- The Reset button in *Forgot password* no longer flashes when it
+  becomes available.
 - Planner: a long-pressed block now shows as selected (it was selected,
   but didn't look it until something else redrew the day).
 - **Counters click again**: the app plays its own click; Android's touch

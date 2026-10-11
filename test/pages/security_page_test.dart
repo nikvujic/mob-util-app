@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -245,6 +246,13 @@ void main() {
       await tester.enterText(find.byKey(const Key('resetConfirm')), 'reset');
       await tester.pump();
       expect(resetEnabled(tester), isTrue);
+      // The label takes its colour at once, with the red fill, instead of
+      // fading in from the disabled grey (which flashed).
+      final colors = tester.element(resetButton()).colors;
+      expect(
+        DefaultTextStyle.of(tester.element(find.text('Reset'))).style.color,
+        colors.background,
+      );
 
       await tester.tap(find.widgetWithText(OutlinedButton, 'Cancel'));
       await tester.pumpAndSettle();
