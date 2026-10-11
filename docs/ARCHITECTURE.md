@@ -126,6 +126,16 @@ an end in minutes from midnight; `freeSlots` gives the gaps of a day, and
 format version (`AppStorage.plannerFormatVersion`), so an older app sets a
 newer planner file aside instead of dropping the times.
 
+## Android's own backup
+
+The app keeps Android's Auto Backup on (the default, decided with Nikola):
+if Google backup is on in the phone's settings, Android copies the app's
+files to a hidden area of the Google account, end-to-end encrypted with
+the phone's screen lock (Android 9+), and puts them back when the app is
+installed again. It's a safety net beside the app's own export. The
+fingerprint key doesn't move with it (it lives in the phone's keystore);
+fingerprint unlock is just turned on again.
+
 ## Themes and preferences
 
 `AppPalette` (in `core/theme.dart`) holds a theme's colours; `AppTheme.of`
