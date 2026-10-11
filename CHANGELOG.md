@@ -39,6 +39,8 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Planner: a long-pressed block now shows as selected (it was selected,
+  but didn't look it until something else redrew the day).
 - **Counters click again**: the app plays its own click; Android's touch
   sound (which it used before) is off on most phones.
 

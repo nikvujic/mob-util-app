@@ -354,6 +354,27 @@ void main() {
     );
   });
 
+  testWidgets('a long-pressed block shows as selected, and back off',
+      (tester) async {
+    await openPlanner(tester);
+    add(today, 'Gym');
+    await tester.pump();
+    bool selected() => tester
+        .widget<SelectableCard>(find.ancestor(
+          of: find.text('Gym'),
+          matching: find.byType(SelectableCard),
+        ))
+        .selected;
+
+    await tester.longPress(find.text('Gym'));
+    await tester.pumpAndSettle();
+    expect(selected(), isTrue);
+
+    await tester.tap(find.text('Gym'));
+    await tester.pumpAndSettle();
+    expect(selected(), isFalse);
+  });
+
   testWidgets('changing the day ends selection mode', (tester) async {
     await openPlanner(tester);
     add(today, 'Gym');

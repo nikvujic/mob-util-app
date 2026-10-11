@@ -41,8 +41,20 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   DateTime get _now => ref.read(clockProvider)();
 
   @override
+  void initState() {
+    super.initState();
+    // The blocks are built from the selection too, outside the
+    // ListenableBuilder below: rebuild them all when it changes.
+    _selection.addListener(_rebuild);
+  }
+
+  void _rebuild() => setState(() {});
+
+  @override
   void dispose() {
-    _selection.dispose();
+    _selection
+      ..removeListener(_rebuild)
+      ..dispose();
     _timeline?.dispose();
     super.dispose();
   }
