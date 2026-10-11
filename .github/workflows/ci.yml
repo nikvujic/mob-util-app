@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Gradle 8.3 (android/gradle/wrapper) needs Java 17.
+      # Gradle 8.7 (android/gradle/wrapper) needs Java 17.
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
