@@ -355,7 +355,9 @@ task)
   target) → Large (15 min) → Extra large (5 min), remembered. No pinch
   (two fingers, against the one-hand rule). Blocks are at least 5 min
   (P13).
-- [ ] Better icons for the Other tiles (custom SVGs).
+- [x] Better icons for the Other tiles (custom SVGs in `assets/icons/`):
+  tally marks for Counters, a speech bubble with a question mark for
+  Džoni.
 - [x] Shop: icons instead of checkboxes (U2): a cart to buy, a tick
   when bought.
 - [x] Password reset dialog: no flash when Reset becomes enabled (the

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round">
+  <!-- Tally marks: four strokes and a fifth across them. -->
+  <path d="M13 12v24M20 12v24M27 12v24M34 12v24"/>
+  <path d="M8 31L40 17"/>
+</svg>

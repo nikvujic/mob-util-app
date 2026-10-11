@@ -136,6 +136,10 @@ timeline zoom too (`plannerZoom`, a `TimelineZoom` name; `PlannerTimeline`
 takes the zoom, and `zoomAction` is its button). The design checks run
 every screen in every theme.
 
+Custom icons (the Other tiles) are SVGs in `assets/icons/`, drawn in
+black and tinted with the theme's accent when shown (`flutter_svg`), so
+they follow every theme like the built-in icons.
+
 ## Actions at the bottom
 
 Pages put their actions in `BottomActions` (round buttons as the floating

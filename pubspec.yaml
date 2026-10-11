@@ -42,6 +42,7 @@ dependencies:
   biometric_storage: 5.0.1
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
+  flutter_svg: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Custom icons (the Other tiles), drawn in black and tinted in the app.
+  assets:
+    - assets/icons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
