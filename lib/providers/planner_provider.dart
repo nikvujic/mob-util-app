@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/id.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/planner_task.dart';
-import 'package:the_app/providers/routines_provider.dart';
 
 /// Thrown when a task would overlap another one on its day.
 class TaskOverlapException implements Exception {
@@ -12,35 +11,20 @@ class TaskOverlapException implements Exception {
 /// Planner tasks (P2, P7): blocks of time on days. Every change is saved to
 /// [AppStorage].
 ///
-/// Tasks never overlap each other, nor the routines shown on their day
-/// ([busy], P8).
+/// Tasks never overlap each other. Routines don't get in their way: a task
+/// and a routine may share time, side by side (P12).
 class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
-  /// Times taken on a day besides its tasks (its routines), given the
-  /// day's tasks (which a routine gives way to).
-  final List<TimeSpan> Function(DateTime day, List<PlannerTask> dayTasks) _busy;
-
-  PlannerNotifier(
-    AppStorage storage, {
-    List<TimeSpan> Function(DateTime day, List<PlannerTask> dayTasks)? busy,
-  })  : _busy = busy ?? ((_, __) => const []),
-        super(storage.initialPlannerTasks) {
+  PlannerNotifier(AppStorage storage) : super(storage.initialPlannerTasks) {
     addListener(storage.savePlannerTasks, fireImmediately: false);
   }
 
   List<PlannerTask> _on(DateTime day) =>
       state.where((t) => isSameDay(t.day, day)).toList();
 
-  /// The free time on [day] with [tasks] there, around its routines too.
-  /// [dayTasks] are all the day's tasks, which routines give way to.
-  List<FreeSlot> _free(
-    DateTime day,
-    Iterable<PlannerTask> tasks,
-    List<PlannerTask> dayTasks,
-  ) =>
-      freeSlotsAround([
+  /// The time free of [tasks].
+  static List<FreeSlot> _free(Iterable<PlannerTask> tasks) => freeSlotsAround([
         for (final t in tasks)
           if (t.hasTime) (start: t.start!, end: t.end!),
-        ..._busy(day, dayTasks),
       ]);
 
   /// Adds a task on [day] from [start] to [end] (minutes from midnight).
@@ -65,8 +49,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       color: color,
       remind: remind,
     );
-    final dayTasks = _on(day);
-    final free = _free(day, dayTasks, dayTasks);
+    final free = _free(_on(day));
     if (!free.any((s) => s.start <= start && end <= s.end)) {
       throw const TaskOverlapException();
     }
@@ -95,10 +78,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       color: color,
       remind: remind,
     );
-    final dayTasks = _on(task.day);
-    final others = dayTasks.where((t) => t.id != id);
-    // Routines this task keeps away stay away while it's edited.
-    final free = _free(task.day, others, dayTasks);
+    final free = _free(_on(task.day).where((t) => t.id != id));
     if (!free.any((s) => s.start <= start && end <= s.end)) {
       throw const TaskOverlapException();
     }
@@ -108,15 +88,15 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     ];
   }
 
-  /// The time [task] could take: the free time around it, up to its
-  /// neighbours (its own time included).
-  FreeSlot roomFor(PlannerTask task) {
-    final dayTasks = _on(task.day);
-    final others = dayTasks.where((t) => t.id != task.id);
-    return _free(task.day, others, dayTasks).firstWhere(
-      (s) => s.start <= task.start! && task.end! <= s.end,
-    );
-  }
+  /// The time [task] could take: up to the tasks around it (its own time
+  /// included); routines don't count (P12).
+  FreeSlot roomFor(PlannerTask task) =>
+      _free(_on(task.day).where((t) => t.id != task.id)).firstWhere(
+        (s) => s.start <= task.start! && task.end! <= s.end,
+      );
+
+  /// The stretches of [day] free of tasks (routines don't count, P12).
+  List<FreeSlot> freeOn(DateTime day) => _free(_on(day));
 
   void toggleDone(String id) {
     state = [
@@ -140,11 +120,5 @@ bool isSameDay(DateTime a, DateTime b) =>
 
 final plannerProvider =
     StateNotifierProvider<PlannerNotifier, List<PlannerTask>>(
-  (ref) => PlannerNotifier(
-    ref.watch(appStorageProvider),
-    busy: (day, dayTasks) => [
-      for (final o in routinesOn(day, ref.read(routinesProvider), dayTasks))
-        (start: o.routine.start, end: o.routine.end),
-    ],
-  ),
+  (ref) => PlannerNotifier(ref.watch(appStorageProvider)),
 );

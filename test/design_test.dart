@@ -75,11 +75,11 @@ Future<void> seed(ProviderContainer container) async {
       color: 'blue', // a coloured block (P9) is checked too
     );
   planner.toggleDone(container.read(plannerProvider).first.id);
-  // A routine (P8), shown on today's timeline next to the tasks.
+  // A routine (P8), sharing time with a task: side by side (P12).
   container.read(routinesProvider.notifier).add(
         title: 'Stand-up',
-        start: 9 * 60 + 15,
-        end: 9 * 60 + 45,
+        start: 10 * 60 + 30,
+        end: 11 * 60 + 30,
         weekdays: {1, 2, 3, 4, 5},
         from: DateTime(2026, 10, 1),
         color: 'purple',
@@ -654,7 +654,7 @@ void main() {
     await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     await openTab(tester, 'Planner');
-    final free = find.text('Free · 11:00–24:00');
+    final free = find.text('Free · 11:30–24:00');
     await tester.ensureVisible(free);
     await tester.pumpAndSettle();
     await tester.tap(free);

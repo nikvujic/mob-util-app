@@ -147,7 +147,7 @@ void main() {
       reason: 'the default hour is cut at the end of the free time',
     );
 
-    await tester.tap(find.text('Until free time ends'));
+    await tester.tap(find.text('Until the next task'));
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Coffee');
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
@@ -307,7 +307,7 @@ void main() {
 
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Gym + sauna');
     // Up to the next task: 14:00.
-    await tester.tap(find.text('Until free time ends'));
+    await tester.tap(find.text('Until the next task'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();

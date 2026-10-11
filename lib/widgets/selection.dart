@@ -227,6 +227,10 @@ class SelectableCard extends StatelessWidget {
   /// block's colour); selected, it's highlighted as usual.
   final Color? color;
 
+  /// Its outline, if not a rounded rectangle (e.g. a planner block that
+  /// narrows beside another, P12). Taps outside it go through.
+  final OutlinedBorder? shape;
+
   const SelectableCard({
     super.key,
     required this.selected,
@@ -234,35 +238,40 @@ class SelectableCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.color,
+    this.shape,
   });
 
-  static const _radius = BorderRadius.all(Radius.circular(6));
+  static const _rounded = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(6)),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
+    final shape = this.shape ?? _rounded;
+    final card = Semantics(
       selected: selected ? true : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        decoration: BoxDecoration(
+        decoration: ShapeDecoration(
           color: selected
               ? context.colors.cardSelected
               : color ?? context.colors.card,
-          borderRadius: _radius,
+          shape: shape,
         ),
         // Drawn on top so the highlight never changes the row's size.
-        foregroundDecoration: BoxDecoration(
-          borderRadius: _radius,
+        foregroundDecoration: ShapeDecoration(
           // Clearly marked (Nikola): a thick accent outline.
-          border: Border.all(
-            color: selected ? context.colors.accent : Colors.transparent,
-            width: 2.5,
+          shape: shape.copyWith(
+            side: BorderSide(
+              color: selected ? context.colors.accent : Colors.transparent,
+              width: 2.5,
+            ),
           ),
         ),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            borderRadius: _radius,
+            customBorder: shape,
             onTap: onTap,
             onLongPress: onLongPress,
             child: child,
@@ -270,6 +279,8 @@ class SelectableCard extends StatelessWidget {
         ),
       ),
     );
+    if (this.shape == null) return card;
+    return ClipPath(clipper: ShapeBorderClipper(shape: shape), child: card);
   }
 }
 

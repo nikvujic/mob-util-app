@@ -32,19 +32,24 @@ enum RepeatChoice {
   always,
 }
 
-/// Asks for a new task in the free [slot]: a title, the start ([start], or
-/// the slot's start) and the end (1 hour later by default; quick options
-/// 15 / 30 / 60 / 120 min and the end of the free time, or a picked time).
-/// Null if dismissed.
+/// Asks for a new task within [slot] (the time free of other tasks): a
+/// title, the start ([start], or the slot's start) and the end ([end], or
+/// 1 hour later; quick options 15 / 30 / 60 / 120 min and up to the next
+/// task, or a picked time). [note] says why the times aren't the ones
+/// asked for, if they had to change. Null if dismissed.
 ///
 /// [day] is the day it's for: then it can be made to repeat from that day
 /// (Repeat: once, every day, weekdays or chosen days; until a date or for
-/// good).
+/// good), and while it repeats its times stay within [repeatSlot] (the
+/// time free of routines).
 Future<NewTask?> showAddTaskSheet(
   BuildContext context,
   FreeSlot slot, {
   int? start,
+  int? end,
   DateTime? day,
+  FreeSlot? repeatSlot,
+  String? note,
 }) {
   return showModalBottomSheet<NewTask>(
     context: context,
@@ -53,9 +58,12 @@ Future<NewTask?> showAddTaskSheet(
     enableDrag: false,
     builder: (_) => TaskSheet(
       slot: slot,
+      repeatSlot: repeatSlot,
       start: start,
+      end: end,
       repeat: day == null ? RepeatChoice.never : RepeatChoice.optional,
       from: day,
+      note: note,
     ),
   );
 }
@@ -144,6 +152,13 @@ class TaskSheet extends StatefulWidget {
   /// The time the task can take: free time (plus the task's own, when
   /// editing).
   final FreeSlot slot;
+
+  /// The time it can take while it repeats, if not [slot] (a task and a
+  /// routine may share time, P12, so their free time differs).
+  final FreeSlot? repeatSlot;
+
+  /// Why [start] / [end] aren't the times asked for, shown under them.
+  final String? note;
   final String title;
   final int? start;
   final int? end;
@@ -173,6 +188,8 @@ class TaskSheet extends StatefulWidget {
   const TaskSheet({
     super.key,
     required this.slot,
+    this.repeatSlot,
+    this.note,
     this.title = '',
     this.start,
     this.end,
@@ -214,16 +231,33 @@ class _TaskSheetState extends State<TaskSheet> {
 
   bool get _repeats => _weekdays.isNotEmpty;
 
+  /// The time it can take now: a routine's free time differs from a
+  /// task's (P12).
+  FreeSlot get _room =>
+      _repeats ? widget.repeatSlot ?? widget.slot : widget.slot;
+
+  /// Sets the weekdays it repeats on (none: it doesn't), keeping the times
+  /// within the room that comes with that, and saying so if they change.
+  void _setWeekdays(Set<int> weekdays) => setState(() {
+        _weekdays = weekdays;
+        final room = _room;
+        if (room.start <= _start && _end <= room.end) return;
+        final length = _end - _start;
+        _start = _start.clamp(room.start, room.end - 1);
+        _end = math.min(_start + length, room.end);
+        _adjusted = 'Now ${formatMinutes(_start)}–${formatMinutes(_end)}: '
+            '${_repeats ? 'a routine' : 'a task'} is there too.';
+      });
+
   @override
   void dispose() {
     _title.dispose();
     super.dispose();
   }
 
-  /// A 24-hour time picker, kept within the free slot. Null if cancelled.
-  /// Why the last picked time was changed to fit, shown under the times
-  /// (instead of changing it quietly); null if it fit.
-  String? _adjusted;
+  /// Why the times were changed to fit, shown under them (instead of
+  /// changing them quietly); null if they fit.
+  late String? _adjusted = widget.note;
 
   /// A 24-hour time picker. Null if cancelled; 00:00 as an [end] is
   /// midnight at the end of the day.
@@ -245,7 +279,7 @@ class _TaskSheetState extends State<TaskSheet> {
   Future<void> _pickStart() async {
     final picked = await _pickTime(_start);
     if (picked == null || !mounted) return;
-    final slot = widget.slot;
+    final slot = _room;
     setState(() {
       final length = _end - _start;
       _start = picked.clamp(slot.start, slot.end - 1);
@@ -265,7 +299,7 @@ class _TaskSheetState extends State<TaskSheet> {
   Future<void> _pickEnd() async {
     final picked = await _pickTime(_end, end: true);
     if (picked == null || !mounted) return;
-    final slot = widget.slot;
+    final slot = _room;
     setState(() {
       _end = picked.clamp(_start + 1, slot.end);
       _adjusted = picked > slot.end
@@ -280,14 +314,23 @@ class _TaskSheetState extends State<TaskSheet> {
   /// Whether anything differs from how the sheet opened.
   bool get _changed =>
       _title.text != widget.title ||
-      _start != (widget.start ?? widget.slot.start) ||
+      _start != _initialStart ||
       _end != _initialEnd ||
       !_sameDays(_weekdays, widget.weekdays ?? const {}) ||
       _until != widget.until ||
       _color?.name != widget.color ||
       _remind != widget.remind;
 
-  late final int _initialEnd = _end;
+  /// The times it opened with.
+  late final int _initialStart;
+  late final int _initialEnd;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialStart = _start;
+    _initialEnd = _end;
+  }
 
   static bool _sameDays(Set<int> a, Set<int> b) =>
       a.length == b.length && a.containsAll(b);
@@ -370,23 +413,23 @@ class _TaskSheetState extends State<TaskSheet> {
             ChoiceChip(
               label: const Text('Once'),
               selected: !_repeats,
-              onSelected: (_) => setState(() => _weekdays = {}),
+              onSelected: (_) => _setWeekdays({}),
             ),
           ChoiceChip(
             label: const Text('Every day'),
             selected: _isExactly(_everyDay),
-            onSelected: (_) => setState(() => _weekdays = {..._everyDay}),
+            onSelected: (_) => _setWeekdays({..._everyDay}),
           ),
           ChoiceChip(
             label: const Text('Weekdays'),
             selected: _isExactly(_workdays),
-            onSelected: (_) => setState(() => _weekdays = {..._workdays}),
+            onSelected: (_) => _setWeekdays({..._workdays}),
           ),
           if (!_repeats)
             ChoiceChip(
               label: const Text('Choose days'),
               selected: false,
-              onSelected: (_) => setState(() => _weekdays = {firstDay}),
+              onSelected: (_) => _setWeekdays({firstDay}),
             ),
         ],
       ),
@@ -399,14 +442,14 @@ class _TaskSheetState extends State<TaskSheet> {
                 label: Text(weekdayName(day)),
                 selected: _weekdays.contains(day),
                 // A routine keeps at least one day.
-                onSelected: (on) => setState(() {
+                onSelected: (on) {
                   if (on) {
-                    _weekdays = {..._weekdays, day};
+                    _setWeekdays({..._weekdays, day});
                   } else if (_weekdays.length > 1 ||
                       widget.repeat == RepeatChoice.optional) {
-                    _weekdays = {..._weekdays}..remove(day);
+                    _setWeekdays({..._weekdays}..remove(day));
                   }
-                }),
+                },
               ),
           ],
         ),
@@ -437,7 +480,7 @@ class _TaskSheetState extends State<TaskSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final slotEnd = widget.slot.end;
+    final slotEnd = _room.end;
     final media = MediaQuery.of(context);
     // A fixed share of the room above the keyboard: the fields scroll (with
     // reach mode, so pulling down brings the top ones into thumb reach)
@@ -533,7 +576,15 @@ class _TaskSheetState extends State<TaskSheet> {
                                       : null,
                                 ),
                               ChoiceChip(
-                                label: const Text('Until free time ends'),
+                                // Up to what's next of the same kind: a
+                                // task and a routine may share time (P12).
+                                label: Text(
+                                  slotEnd == PlannerTask.dayMinutes
+                                      ? 'Until midnight'
+                                      : _repeats
+                                          ? 'Until the next routine'
+                                          : 'Until the next task',
+                                ),
                                 selected: _end == slotEnd,
                                 onSelected: (_) =>
                                     setState(() => _end = slotEnd),

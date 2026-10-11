@@ -179,11 +179,21 @@ A routine (`models/routine.dart`) is one stored item — times, weekdays,
 from / until — never copies on days. `routines.json` holds the routines
 and a `RoutineDay` per routine and day where something happened (ticked
 off or skipped). A day's view is computed: its one-off tasks plus
-`routinesOn(day, …)` (`providers/routines_provider.dart`), which leaves
-out skipped routines and those a one-off task overlaps (the one-off wins).
-`PlannerNotifier` gets the day's routine times through a `busy` callback,
-so a new task can't go over a routine; `RoutinesNotifier` keeps routines
-from overlapping each other on any day they could share.
+`routinesOn(day, book)` (`providers/routines_provider.dart`), which
+leaves out skipped routines.
+
+Two kinds, two rules (P12): `PlannerNotifier` keeps tasks from
+overlapping each other, `RoutinesNotifier` keeps routines from
+overlapping each other on any day they could share; a task and a routine
+may overlap. So at most one of each is at any moment, and the timeline
+(`pages/planner/timeline.dart`) cuts each block into pieces
+(`blockPieces`): full width alone, half width while the other kind is
+there (task left, routine right). A block is one `SelectableCard` whose
+`shape` (`_PiecesBorder`) is the union of its pieces, rounded on outer
+corners only; the shape also limits where it takes taps. Free time is
+time with neither; a task's room (`PlannerNotifier.roomFor` / `freeOn`)
+only counts tasks, and the add sheet switches to the routines' room
+while Repeat is on.
 
 ## Reminders (P10)
 

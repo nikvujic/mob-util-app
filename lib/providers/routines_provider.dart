@@ -173,26 +173,14 @@ class RoutineOccurrence {
 }
 
 /// The routines shown on [day]: those that fall on it and aren't skipped
-/// there. Where a one-off task in [dayTasks] already is, the one-off wins
-/// and the routine stays away that day (P8).
-List<RoutineOccurrence> routinesOn(
-  DateTime day,
-  RoutineBook book,
-  Iterable<PlannerTask> dayTasks,
-) {
-  final tasks = [
-    for (final t in dayTasks)
-      if (t.hasTime) t,
-  ];
-  return [
-    for (final r in book.routines)
-      if (r.occursOn(day) &&
-          !(book.dayOf(r.id, day)?.skipped ?? false) &&
-          !tasks.any((t) => t.start! < r.end && r.start < t.end!))
-        RoutineOccurrence(
-          r,
-          day,
-          done: book.dayOf(r.id, day)?.done ?? false,
-        ),
-  ]..sort((a, b) => a.routine.start.compareTo(b.routine.start));
-}
+/// there. One-off tasks don't push them away: a one-off and a routine may
+/// share time, side by side (P12).
+List<RoutineOccurrence> routinesOn(DateTime day, RoutineBook book) => [
+      for (final r in book.routines)
+        if (r.occursOn(day) && !(book.dayOf(r.id, day)?.skipped ?? false))
+          RoutineOccurrence(
+            r,
+            day,
+            done: book.dayOf(r.id, day)?.done ?? false,
+          ),
+    ]..sort((a, b) => a.routine.start.compareTo(b.routine.start));

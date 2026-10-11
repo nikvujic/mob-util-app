@@ -37,12 +37,7 @@ void main() {
       )!;
 
   List<String> shownOn(DateTime day) => [
-        for (final o in routinesOn(
-          day,
-          book(),
-          container.read(plannerProvider).where((t) => isSameDay(t.day, day)),
-        ))
-          o.routine.title,
+        for (final o in routinesOn(day, book())) o.routine.title,
       ];
 
   test('a routine shows on its weekdays, from its first day, until its last',
@@ -107,32 +102,61 @@ void main() {
     expect(book().routines, hasLength(2));
   });
 
-  test('a one-off task already there wins: the routine stays away that day',
-      () {
-    planner().addTask(monday, 'Dentist', start: at(17.5), end: at(18.5));
-    gym();
-    expect(shownOn(monday), isEmpty);
-    expect(shownOn(wednesday), ['Gym'], reason: 'only that day');
-  });
+  group('a task and a routine may share time (P12)', () {
+    test('a routine shows where a task already is', () {
+      planner().addTask(monday, 'Dentist', start: at(17.5), end: at(18.5));
+      gym();
+      expect(shownOn(monday), ['Gym']);
+    });
 
-  test('new one-off tasks can\'t go over a routine', () {
-    gym();
-    expect(
-      () => planner().addTask(monday, 'X', start: at(18.5), end: at(20)),
-      throwsA(isA<TaskOverlapException>()),
-    );
-    // Next to it is fine, and so is a day without it.
-    planner()
-      ..addTask(monday, 'Dinner', start: at(19), end: at(20))
-      ..addTask(tuesday, 'X', start: at(18.5), end: at(20));
-  });
+    test('a task can go over a routine, but not over another task', () {
+      gym();
+      planner().addTask(monday, 'Call', start: at(18.5), end: at(20));
+      expect(shownOn(monday), ['Gym'], reason: 'side by side');
+      expect(
+        () => planner().addTask(monday, 'X', start: at(19.5), end: at(21)),
+        throwsA(isA<TaskOverlapException>()),
+        reason: 'two tasks never share time',
+      );
+    });
 
-  test('editing a task that keeps a routine away doesn\'t clash with it', () {
-    planner().addTask(monday, 'Dentist', start: at(17.5), end: at(18.5));
-    gym();
-    final id = container.read(plannerProvider).single.id;
-    planner().updateTask(id, title: 'Doctor', start: at(17.5), end: at(18.5));
-    expect(container.read(plannerProvider).single.title, 'Doctor');
+    test('editing a task can move it over a routine', () {
+      gym();
+      planner().addTask(monday, 'Dentist', start: at(16), end: at(17));
+      final id = container.read(plannerProvider).single.id;
+      planner().updateTask(id, title: 'Dentist', start: at(17), end: at(19));
+      expect(container.read(plannerProvider).single.end, at(19));
+    });
+
+    test('a task\'s room reaches past routines, up to the next task', () {
+      gym();
+      planner()
+        ..addTask(monday, 'Lunch', start: at(12), end: at(13))
+        ..addTask(monday, 'Film', start: at(20), end: at(22));
+      final lunch =
+          container.read(plannerProvider).firstWhere((t) => t.title == 'Lunch');
+      expect(planner().roomFor(lunch), (start: 0, end: at(20)));
+      expect(planner().freeOn(monday), [
+        (start: 0, end: at(12)),
+        (start: at(13), end: at(20)),
+        (start: at(22), end: at(24)),
+      ]);
+    });
+
+    test('routines still never overlap each other', () {
+      planner().addTask(monday, 'Dentist', start: at(17), end: at(19));
+      gym();
+      expect(
+        () => routines().add(
+          title: 'Run',
+          start: at(18.5),
+          end: at(20),
+          weekdays: {DateTime.monday},
+          from: monday,
+        ),
+        throwsA(isA<TaskOverlapException>()),
+      );
+    });
   });
 
   test('ticking off and skipping count for one day only', () {

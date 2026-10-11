@@ -69,7 +69,22 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       final nextHour = (minutes + 59) ~/ 60 * 60;
       if (slot.start < nextHour && nextHour < slot.end) start = nextHour;
     }
-    final task = await showAddTaskSheet(context, slot, start: start, day: day);
+    start ??= slot.start;
+    // Free time is free of both kinds; past it, a task may go on beside a
+    // routine and a routine beside a task (P12).
+    bool around(FreeSlot room) =>
+        room.start <= slot.start && slot.end <= room.end;
+    final routines = routinesOn(day, ref.read(routinesProvider));
+    final task = await showAddTaskSheet(
+      context,
+      ref.read(plannerProvider.notifier).freeOn(day).firstWhere(around),
+      repeatSlot: freeSlotsAround([
+        for (final o in routines) (start: o.routine.start, end: o.routine.end),
+      ]).firstWhere(around),
+      start: start,
+      end: math.min(start + 60, slot.end),
+      day: day,
+    );
     if (task == null || !mounted) return;
     try {
       final weekdays = task.weekdays;
@@ -132,6 +147,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   /// edit the routine itself (P8).
   Future<void> _routineTapped(RoutineOccurrence occurrence) async {
     final routine = occurrence.routine;
+    final beside = _besideRoutine(occurrence);
     final choice = await showModalBottomSheet<_RoutineChoice>(
       context: context,
       builder: (context) => SafeArea(
@@ -149,11 +165,20 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               ),
             ),
             for (final choice in _RoutineChoice.values)
-              ListTile(
-                leading: Icon(choice.icon),
-                title: Text(choice.label),
-                onTap: () => Navigator.of(context).pop(choice),
-              ),
+              if (choice.needsRoom && beside == null)
+                // Tasks fill the routine's whole time: no room for another.
+                ListTile(
+                  enabled: false,
+                  leading: Icon(choice.icon),
+                  title: Text(choice.label),
+                  subtitle: const Text('Tasks fill that time'),
+                )
+              else
+                ListTile(
+                  leading: Icon(choice.icon),
+                  title: Text(choice.label),
+                  onTap: () => Navigator.of(context).pop(choice),
+                ),
           ],
         ),
       ),
@@ -162,7 +187,9 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final routines = ref.read(routinesProvider.notifier);
     switch (choice) {
       case _RoutineChoice.thisDay:
-        await _changeThisDay(occurrence);
+        await _changeThisDay(occurrence, beside!);
+      case _RoutineChoice.alongside:
+        await _addAlongside(occurrence, beside!);
       case _RoutineChoice.skip:
         routines.setSkipped(routine.id, occurrence.day, skipped: true);
         ScaffoldMessenger.of(context)
@@ -185,29 +212,55 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     }
   }
 
+  /// Where a task can go beside [occurrence]'s routine (P12): the time free
+  /// of tasks that shares the most of the routine's, and the routine's time
+  /// fitted into it ([note] says how, if it had to change). Null if tasks
+  /// fill all of the routine's time.
+  _Beside? _besideRoutine(RoutineOccurrence occurrence) {
+    final routine = occurrence.routine;
+    FreeSlot? best;
+    var most = 0;
+    final free = ref.read(plannerProvider.notifier).freeOn(occurrence.day);
+    for (final room in free) {
+      final int shared =
+          math.min(room.end, routine.end) - math.max(room.start, routine.start);
+      if (shared > most) {
+        best = room;
+        most = shared;
+      }
+    }
+    if (best == null) return null;
+    final start = math.max(routine.start, best.start);
+    final end = math.min(routine.end, best.end);
+    return (
+      room: best,
+      start: start,
+      end: end,
+      note: start == routine.start && end == routine.end
+          ? null
+          : 'Now ${formatMinutes(start)}–${formatMinutes(end)}: a task is '
+              'there too.',
+    );
+  }
+
   /// "Change just this day": the routine skips the day, and a one-off
   /// task takes its place, as changed.
-  Future<void> _changeThisDay(RoutineOccurrence occurrence) async {
+  Future<void> _changeThisDay(
+    RoutineOccurrence occurrence,
+    _Beside beside,
+  ) async {
     final routine = occurrence.routine;
     final day = occurrence.day;
-    final dayTasks =
-        ref.read(plannerProvider).where((t) => isSameDay(t.day, day)).toList();
-    final others = routinesOn(day, ref.read(routinesProvider), dayTasks)
-        .where((o) => o.routine.id != routine.id);
-    final room = freeSlotsAround([
-      for (final t in dayTasks)
-        if (t.hasTime) (start: t.start!, end: t.end!),
-      for (final o in others) (start: o.routine.start, end: o.routine.end),
-    ]).firstWhere((s) => s.start <= routine.start && routine.end <= s.end);
     final changed = await showModalBottomSheet<NewTask>(
       context: context,
       isScrollControlled: true,
       enableDrag: false,
       builder: (_) => TaskSheet(
-        slot: room,
+        slot: beside.room,
         title: routine.title,
-        start: routine.start,
-        end: routine.end,
+        start: beside.start,
+        end: beside.end,
+        note: beside.note,
         color: routine.color,
         remind: routine.remind,
         submitLabel: 'Save',
@@ -228,6 +281,34 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       await allowReminders(context, ref, changed.remind);
     } on TaskOverlapException {
       routines.setSkipped(routine.id, day, skipped: false);
+      _taken();
+    }
+  }
+
+  /// A one-off task at the same time as a routine, side by side (P12).
+  Future<void> _addAlongside(
+    RoutineOccurrence occurrence,
+    _Beside beside,
+  ) async {
+    final task = await showAddTaskSheet(
+      context,
+      beside.room,
+      start: beside.start,
+      end: beside.end,
+      note: beside.note,
+    );
+    if (task == null || !mounted) return;
+    try {
+      ref.read(plannerProvider.notifier).addTask(
+            occurrence.day,
+            task.title,
+            start: task.start,
+            end: task.end,
+            color: task.color,
+            remind: task.remind,
+          );
+      await allowReminders(context, ref, task.remind);
+    } on TaskOverlapException {
       _taken();
     }
   }
@@ -267,7 +348,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final tasks = all.where((t) => isSameDay(t.day, day)).toList();
     final timed = tasks.where((t) => t.hasTime).toList();
     final untimed = tasks.where((t) => !t.hasTime).toList();
-    final routines = routinesOn(day, ref.watch(routinesProvider), tasks); // P8
+    final routines = routinesOn(day, ref.watch(routinesProvider)); // P8
     ref.listen(plannerProvider, (_, next) {
       _selection.retain(next.map((t) => t.id));
     });
@@ -441,14 +522,24 @@ class _DayHeader extends StatelessWidget {
   }
 }
 
-/// What can be done with a routine's block on a day (P8).
+/// What can be done with a routine's block on a day (P8, P12).
 enum _RoutineChoice {
-  thisDay('Change just this day', Icons.edit_calendar_outlined),
+  thisDay('Change just this day', Icons.edit_calendar_outlined,
+      needsRoom: true),
+  alongside('Add a task alongside', Icons.add, needsRoom: true),
   skip('Skip this day', Icons.event_busy_outlined),
   edit('Edit routine', Icons.repeat);
 
   final String label;
   final IconData icon;
 
-  const _RoutineChoice(this.label, this.icon);
+  /// Whether it makes a one-off task at the routine's time, which needs
+  /// time free of tasks there.
+  final bool needsRoom;
+
+  const _RoutineChoice(this.label, this.icon, {this.needsRoom = false});
 }
+
+/// Where a task can go beside a routine: [room] free of tasks, the
+/// routine's time fitted into it, and why it changed ([note]), if it did.
+typedef _Beside = ({FreeSlot room, int start, int end, String? note});

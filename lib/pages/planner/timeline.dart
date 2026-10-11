@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
@@ -45,8 +46,50 @@ class TimelineBlock {
   });
 }
 
+/// A stretch of a block's time: [shared] while a block of the other kind (a
+/// routine beside a task, or the other way round) is there too.
+typedef BlockPiece = ({int start, int end, bool shared});
+
+/// [block]'s time cut where a block of the other kind among [blocks] starts
+/// or ends beside it (P12). Blocks of the same kind never overlap, so at
+/// most two share any moment: the task on the left, the routine on the
+/// right; alone, a block takes the full width.
+List<BlockPiece> blockPieces(
+  TimelineBlock block,
+  Iterable<TimelineBlock> blocks,
+) {
+  final others = [
+    for (final b in blocks)
+      if (b.repeats != block.repeats &&
+          b.start < block.end &&
+          block.start < b.end)
+        b,
+  ];
+  final cuts = {
+    block.start,
+    block.end,
+    for (final o in others) ...[
+      if (block.start < o.start) o.start,
+      if (o.end < block.end) o.end,
+    ],
+  }.toList()
+    ..sort();
+  final pieces = <BlockPiece>[];
+  for (var i = 0; i + 1 < cuts.length; i++) {
+    final (start, end) = (cuts[i], cuts[i + 1]);
+    final shared = others.any((o) => o.start < end && start < o.end);
+    if (pieces.isNotEmpty && pieces.last.shared == shared) {
+      pieces.last = (start: pieces.last.start, end: end, shared: shared);
+    } else {
+      pieces.add((start: start, end: end, shared: shared));
+    }
+  }
+  return pieces;
+}
+
 /// A day's timeline (P7): hour marks from 00:00 to 24:00, [blocks] and the
 /// free time between them, which can be tapped to add something there.
+/// A task and a routine at the same time sit side by side (P12).
 class PlannerTimeline extends StatelessWidget {
   /// Height of one hour: a 30-minute block (less the gap between
   /// blocks) is one touch target (48 dp) high.
@@ -130,7 +173,7 @@ class PlannerTimeline extends StatelessWidget {
               height: _y(block.end) - _y(block.start),
               left: _labelWidth,
               right: 8,
-              child: _Block(block),
+              child: _Block(block, pieces: blockPieces(block, blocks)),
             ),
         ],
       ),
@@ -196,10 +239,36 @@ class _FreeTime extends StatelessWidget {
 
 /// A block from its start to its end, with its title and time (↻ for a
 /// routine), and a checkbox in the top-right corner to tick it off.
+///
+/// Beside a block of the other kind it narrows to its half (a task left, a
+/// routine right) and widens again where it goes on alone: one shape,
+/// made of its [pieces] (P12). The title, time and checkbox go in the
+/// tallest piece.
 class _Block extends StatelessWidget {
   final TimelineBlock block;
+  final List<BlockPiece> pieces;
 
-  const _Block(this.block);
+  const _Block(this.block, {required this.pieces});
+
+  /// [pieces] as rectangles in the block's box of [size] (already inset
+  /// by half the gap above and below): side by side, the gap between them
+  /// too; none between a block's own pieces.
+  List<Rect> _rects(Size size) {
+    const perMinute = PlannerTimeline.hourHeight / 60;
+    const gap = PlannerTimeline.gap;
+    double y(int minutes) =>
+        ((minutes - block.start) * perMinute - gap / 2).clamp(0.0, size.height);
+    final half = size.width / 2;
+    return [
+      for (final piece in pieces)
+        Rect.fromLTRB(
+          !piece.shared || !block.repeats ? 0 : half + gap / 2,
+          y(piece.start),
+          !piece.shared || block.repeats ? size.width : half - gap / 2,
+          y(piece.end),
+        ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,8 +279,16 @@ class _Block extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: PlannerTimeline.gap / 2),
       child: LayoutBuilder(
         builder: (context, box) {
+          final rects = _rects(box.biggest);
+          // The tallest piece; of equal ones, the widest.
+          final content = rects.reduce(
+            (a, b) => b.height > a.height ||
+                    (b.height == a.height && b.width > a.width)
+                ? b
+                : a,
+          );
           // Short blocks put everything on one line.
-          final compact = box.maxHeight < 56;
+          final compact = content.height < 56;
           final text = Text(
             block.title,
             maxLines: compact ? 1 : 2,
@@ -243,9 +320,13 @@ class _Block extends StatelessWidget {
           final time = Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                range,
-                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+              Flexible(
+                child: Text(
+                  range,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                ),
               ),
               if (block.reminds)
                 Padding(
@@ -263,57 +344,61 @@ class _Block extends StatelessWidget {
           return SelectableCard(
             selected: block.selected,
             color: color?.fill,
+            shape: _PiecesBorder(rects),
             onTap: block.onTap,
             onLongPress: block.onLongPress ?? block.onTap,
             child: Stack(
               children: [
                 // A coloured block has a bright stripe on its left edge.
                 if (color != null)
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 4,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: color.stripe,
-                        borderRadius: const BorderRadius.horizontal(
-                          left: Radius.circular(6),
-                        ),
+                  for (final rect in rects)
+                    Positioned(
+                      left: rect.left,
+                      top: rect.top,
+                      height: rect.height,
+                      width: 4,
+                      child: ColoredBox(color: color.stripe),
+                    ),
+                Positioned.fromRect(
+                  rect: content,
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            12, 4, hasCheckbox ? 48 : 12, 4),
+                        child: compact
+                            ? Row(
+                                children: [
+                                  Flexible(child: title),
+                                  const SizedBox(width: 8),
+                                  Flexible(child: time),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [title, time],
+                              ),
                       ),
-                    ),
-                  ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(12, 4, hasCheckbox ? 48 : 12, 4),
-                  child: compact
-                      ? Row(
-                          children: [
-                            Flexible(child: title),
-                            const SizedBox(width: 8),
-                            time,
-                          ],
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [title, time],
+                      if (hasCheckbox)
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Checkbox(
+                            value: block.done,
+                            semanticLabel: 'Done: ${block.title}',
+                            // A full touch target where the block has room.
+                            materialTapTargetSize: content.height < 48
+                                ? MaterialTapTargetSize.shrinkWrap
+                                : MaterialTapTargetSize.padded,
+                            visualDensity: content.height < 48
+                                ? VisualDensity.compact
+                                : null,
+                            onChanged: (_) => block.onToggleDone!(),
+                          ),
                         ),
-                ),
-                if (hasCheckbox)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Checkbox(
-                      value: block.done,
-                      semanticLabel: 'Done: ${block.title}',
-                      // A full touch target where the block has room.
-                      materialTapTargetSize: box.maxHeight < 48
-                          ? MaterialTapTargetSize.shrinkWrap
-                          : MaterialTapTargetSize.padded,
-                      visualDensity:
-                          box.maxHeight < 48 ? VisualDensity.compact : null,
-                      onChanged: (_) => block.onToggleDone!(),
-                    ),
+                    ],
                   ),
+                ),
               ],
             ),
           );
@@ -321,4 +406,78 @@ class _Block extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The outline of a block made of [rects] stacked top to bottom (see
+/// [_Block]): rounded on its outer corners only, so its pieces read as one.
+class _PiecesBorder extends OutlinedBorder {
+  static const _radius = Radius.circular(6);
+
+  /// Within the painted box, from its top left.
+  final List<Rect> rects;
+
+  const _PiecesBorder(this.rects, {super.side});
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
+
+  @override
+  _PiecesBorder copyWith({BorderSide? side}) =>
+      _PiecesBorder(rects, side: side ?? this.side);
+
+  @override
+  ShapeBorder scale(double t) => _PiecesBorder(rects, side: side.scale(t));
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    Path? outline;
+    for (final (i, r) in rects.indexed) {
+      if (r.isEmpty) continue;
+      final above = i > 0 ? rects[i - 1] : null;
+      final below = i + 1 < rects.length ? rects[i + 1] : null;
+      // A corner is outside unless the piece next to it covers it.
+      Radius corner(Rect? next, {required bool left}) => next == null ||
+              next.isEmpty ||
+              (left ? next.left > r.left : next.right < r.right)
+          ? _radius
+          : Radius.zero;
+      final piece = Path()
+        ..addRRect(RRect.fromRectAndCorners(
+          r.shift(rect.topLeft),
+          topLeft: corner(above, left: true),
+          topRight: corner(above, left: false),
+          bottomLeft: corner(below, left: true),
+          bottomRight: corner(below, left: false),
+        ));
+      outline = outline == null
+          ? piece
+          : Path.combine(PathOperation.union, outline, piece);
+    }
+    return outline ?? Path();
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
+      getOuterPath(rect, textDirection: textDirection);
+
+  /// The outline drawn inside the shape (it never changes its size).
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none || side.width == 0) return;
+    final outline = getOuterPath(rect);
+    canvas
+      ..save()
+      ..clipPath(outline)
+      ..drawPath(outline, side.toPaint()..strokeWidth = side.width * 2)
+      ..restore();
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _PiecesBorder &&
+      other.side == side &&
+      listEquals(other.rects, rects);
+
+  @override
+  int get hashCode => Object.hash(side, Object.hashAll(rects));
 }

@@ -102,7 +102,7 @@ void main() {
     ]);
   });
 
-  test('a one-off task in a routine\'s place reminds instead of it', () {
+  test('a task and a routine at the same time both remind', () {
     final gym = Routine(
       id: 'gym',
       title: 'Gym',
@@ -115,10 +115,10 @@ void main() {
     );
     final reminders = planReminders(
       now: now,
-      tasks: [task('Dinner out', from: 18, to: 20)],
+      tasks: [task('Call mum', from: 18, to: 20, remind: 10)],
       routines: RoutineBook(routines: [gym]),
     );
-    expect(reminders, isEmpty, reason: 'the task has no reminder');
+    expect([for (final r in reminders) r.title], ['Call mum', 'Gym']);
   });
 
   test('with the Planner locked, titles are left out', () {

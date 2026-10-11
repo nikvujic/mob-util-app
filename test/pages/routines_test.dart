@@ -111,8 +111,7 @@ void main() {
     final task = container.read(plannerProvider).single;
     expect((task.title, task.start, task.end), ('Gym (short)', at(18), 1110));
     expect(container.read(routinesProvider).dayOf(id, today)!.skipped, isTrue);
-    expect(routinesOn(tomorrow, container.read(routinesProvider), const []),
-        hasLength(1),
+    expect(routinesOn(tomorrow, container.read(routinesProvider)), hasLength(1),
         reason: 'other days keep it');
   });
 

@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [0.18.0] - unreleased
 
+### Added
+- **A task and a routine can share time**: side by side, the task on
+  the left and the routine on the right; where one goes on alone it
+  takes the full width. Tapping a routine has a new *Add a task
+  alongside*. (Before, a task pushed the routine off that day.) Two
+  tasks, or two routines, still can't overlap. The quick end in the
+  sheet now reads *Until the next task* (or routine, or midnight).
+
 ### Changed
 - **Notes open for viewing**: tap the text to edit it there. Back (or
   closing the keyboard) while editing goes back to viewing; back again

@@ -332,15 +332,22 @@ Confirmed working on the phone: **fingerprint unlock**.
 
 **D. Planner: a one-off and a routine at the same time** (one focused
 task)
-- [ ] Replace "the one-off wins": a one-off task and a routine may share
+- [x] Replace "the one-off wins": a one-off task and a routine may share
   time — at most **one of each** at any moment. Where they overlap they
   sit side by side (one-off left, routine right); where one goes on
   alone it widens to full width, drawn as the same block continuing
   (blended, no gap). Example: medicine at 11:00 as a routine, whatever
-  else is there.
-  To work out: adding a one-off where a routine is (and vice versa),
-  free time, reminders and ticks for both, very short overlaps, and the
-  rules for one-off vs one-off and routine vs routine (still never).
+  else is there. Worked out (P12):
+  - one-off vs one-off and routine vs routine: still never;
+  - free time is time with neither; a task added there may reach over
+    routines up to the next task; set to repeat, it keeps clear of
+    routines and says so if its times change;
+  - tapping a routine offers **Add a task alongside**; it and *Change
+    just this day* fit around tasks already there (and say so), and are
+    off when tasks fill the routine's time;
+  - reminders and ticks: each on its own;
+  - very short overlaps: a block's title, time and checkbox go in its
+    tallest piece (zoom, E, makes short pieces readable).
 
 **E. Visuals**
 - [ ] **Timeline zoom** (Nikola's pick for short blocks, which cut off

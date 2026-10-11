@@ -54,16 +54,12 @@ List<Reminder> planReminders({
 
   for (var i = 0; i <= reminderDays; i++) {
     final day = addDays(today, i);
-    final dayTasks = [
-      for (final t in tasks)
-        if (isSameDay(t.day, day)) t,
-    ];
-    for (final t in dayTasks) {
-      if (t.hasTime && !t.done && t.remind != null) {
+    for (final t in tasks) {
+      if (isSameDay(t.day, day) && t.hasTime && !t.done && t.remind != null) {
         add(day, t.title, t.start!, t.end!, t.remind!);
       }
     }
-    for (final o in routinesOn(day, routines, dayTasks)) {
+    for (final o in routinesOn(day, routines)) {
       final r = o.routine;
       if (!o.done && r.remind != null) {
         add(day, r.title, r.start, r.end, r.remind!);
