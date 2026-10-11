@@ -458,6 +458,34 @@ void main() {
     expect(container.read(plannerProvider), isEmpty);
   });
 
+  testWidgets('left open overnight, it shows the new today on return',
+      (tester) async {
+    var clock = DateTime(2026, 10, 8, 23, 50);
+    container = await pumpApp(tester, clock: () => clock);
+    await openTab(tester, 'Planner');
+    expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
+
+    // The phone sleeps; the next morning the app comes back.
+    for (final state in [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    clock = DateTime(2026, 10, 9, 7);
+    for (final state in [
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('Today · Fri, 9 Oct'), findsOneWidget);
+  });
+
   testWidgets('there is no Today button', (tester) async {
     await openPlanner(tester);
     await tester.tap(dayCell('Friday 9 October 2026'));

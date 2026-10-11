@@ -52,6 +52,8 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Planner: left open overnight, it still showed yesterday as today until
+  something changed. It now catches up when the app comes back.
 - Notes: pressing Enter at the very start of a note works again.
 - Notes: if the app locked while *Save changes?* was open (with Notes
   locked), it could end on a black screen. It now saves and goes back to

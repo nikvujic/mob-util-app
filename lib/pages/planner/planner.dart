@@ -45,12 +45,18 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     // The blocks are built from the selection too, outside the
     // ListenableBuilder below: rebuild them all when it changes.
     _selection.addListener(_rebuild);
+    _lifecycle = AppLifecycleListener(onResume: _rebuild);
   }
+
+  /// "Today" is worked out when building: build again when the app comes
+  /// back (e.g. the next morning, the app still open since last night).
+  late final AppLifecycleListener _lifecycle;
 
   void _rebuild() => setState(() {});
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _selection
       ..removeListener(_rebuild)
       ..dispose();

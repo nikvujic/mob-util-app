@@ -108,6 +108,10 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
   late int _weekday = widget.weekday;
   late final ScrollController _timeline;
 
+  /// Builds again when the app comes back: today (which routines have
+  /// ended) may have moved on.
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
@@ -117,10 +121,12 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
           TimelineZoom.fromName(ref.read(preferencesProvider).plannerZoom)
               .hourHeight,
     );
+    _lifecycle = AppLifecycleListener(onResume: () => setState(() {}));
   }
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _timeline.dispose();
     super.dispose();
   }
