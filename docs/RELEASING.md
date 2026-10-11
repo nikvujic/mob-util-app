@@ -23,6 +23,8 @@ changes are not released on their own.
 **Who runs it (agreed with Nikola):** Claude does, but only after asking
 Nikola ("Release vX.Y.Z now?") and getting a yes, every time. A yes covers
 that one release only.
+After it's published, Claude gives Nikola the link and a **checklist of
+what to test** in that version (from its CHANGELOG section).
 
 1. Bump `version` in `pubspec.yaml`.
 2. Add a section to `CHANGELOG.md`: `## [X.Y.Z] - YYYY-MM-DD` with

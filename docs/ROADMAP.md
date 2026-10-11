@@ -286,6 +286,100 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 11 — Nikola's notes, evening of 2026-10-11
+
+Sorted from one long message. Order of work is at the end.
+
+**A. Planner: the sheet and tapping blocks**
+- [ ] **Save / Add greyed out** until the title is valid (not blank).
+- [ ] **No autofocus on the title when editing** (tapping a small block
+  just to see what it is shouldn't open the keyboard). Adding still
+  focuses it.
+- [ ] **Tapping a task shows it first** (like a routine): its title,
+  time, colour and reminder, with options (Edit, Delete, …); only Edit
+  opens the sheet. (P15)
+
+**B. Planner: colours**
+- [ ] **More colours** in the palette.
+- [ ] **Defaults:** new tasks are **blue**; routines get their own default
+  (to choose, see questions).
+
+**C. Planner: reminders, redesigned** (replaces the see-through block)
+- [ ] A reminder is a **small mark on the timeline's left edge**, by the
+  hour labels, at its time; nothing covers the blocks.
+- [ ] **Tapping it** shows a bubble that looks like a block, with its
+  title, time and a checkbox (ticking deletes it, with undo) and
+  Edit / Delete.
+- [ ] **Reminders close together merge** into one mark (with a count);
+  tapping it lists them, each tickable. (P14 updated)
+
+**D. Planner: a "now" line** across the timeline at the current time,
+  today only, moving with the clock. (P16)
+
+**E. Notifications**
+- [ ] **Make them solid** (P17): they must arrive with the app open, in
+  the background, swiped away, the screen off and the phone locked, and
+  after a restart. Check: exact alarms (and the permission on Android
+  12+), Doze, battery optimisation (ask to be exempt if needed), boot
+  rescheduling, notifications while the app is in front, and what the
+  phone maker's battery savers do. Test each state on the phone.
+- [ ] **Notification settings** in Settings (P18): sound (Android lets a
+  channel's sound be chosen in its system settings; offer that, or a few
+  channels), and the notification's **colour**: the block's colour where
+  it has one, else the accent; or set per reminder.
+
+**F. Toasts** (the messages at the bottom, e.g. Undo): restyle them to
+  match the app (rounded, themed colours, spacing, clear action). (U7)
+
+**G. Leaving a page clears its state**: selection mode ends and the
+  planner goes back to today when switching tabs (a note was still
+  selected on coming back). (G18)
+
+**H. Notes: empty notes go away** — a note with no title ("Untitled")
+  and no content (only spaces / new lines) is removed on leaving, even
+  after editing; if something changed, back still asks first, so the
+  change can be discarded. (N14)
+
+**I. Shop: quantities** (S7)
+- [ ] A small button on the right of each item toggles **none → count →
+  weight**. Count: − / + by 1 (default 1). Weight in grams with smart
+  − / + steps (no typing). Each kind remembers its value when toggled
+  away and back. Shown but not editable in the bought list.
+- [ ] Weight steps: reach common amounts like 80 g or 280 g, not 267 g
+  (proposal in questions).
+
+**J. Counters, expanded** (O2/O5)
+- [ ] Adding a counter offers options: **step**, **colour**, **min**,
+  **max** (and more later).
+- [ ] Better style: margins, rounder corners.
+
+**K. Džoni back, configurable** (O4, instead of removed)
+- [ ] **Five taps in the top-right corner** open its settings: the text
+  and the count.
+- [ ] **Hide the status bar** while it's open.
+- [ ] Fix: on back the page **disappears before the screen turns back
+  upright**; turn first, then close.
+
+**L. New page: medicine tracker** (O6) — Nikola takes a pill every
+  morning and notes it in a sheet; make that one tap. Design to agree
+  (see questions).
+
+**M. Later**
+- [ ] **Data-safety sweep** (D6): everything that could lose data
+  (storage, updates, restore, locks, crashes, phone changes), how safe
+  export is, and when cloud saving should come in.
+- [ ] **Cloud save** (D5): the server is **typed in** (connection
+  details entered in the app), never hard-coded.
+
+**N. Ideas for more Other pages** — listed under *Later / ideas*.
+
+**Process**
+- [x] After a release Nikola confirmed, Claude runs it and gives a
+  **checklist of what to test** (docs/RELEASING.md).
+
+**Suggested order:** G and H (small, annoying now) → A and B → C, D →
+E (notifications, needs phone testing) → F → I → J → K → L; M later.
+
 ### Round 10 — Nikola's notes on 0.18.0 (2026-10-11)
 - [x] **Remove the timeline zoom** (P13): a 5-minute block looked bad and
   zooming didn't help.
@@ -448,6 +542,26 @@ task)
   Nikola to check on 0.15.
 
 ## Later / ideas
+
+- **More Other pages** (for later, from Round 11):
+  - **Timer / stopwatch / intervals** (e.g. cooking, workouts, pomodoro),
+    big one-handed buttons, ring at the end.
+  - **Days since / until**: "days since I started", "days until the
+    trip"; tiles with a number.
+  - **Habit tracker**: tick a habit per day, streaks and a month grid
+    (the medicine tracker could be its first use).
+  - **Weight / measurements log**: a number per day with a small chart.
+  - **Workout log**: exercises with sets × reps × weight, last time's
+    numbers shown.
+  - **Quick expense log**: amount + category, a month's total; no bank
+    links.
+  - **Packing / checklist templates**: reusable lists (trip, gym bag)
+    ticked off and reset.
+  - **Birthdays & dates**: yearly dates with a reminder a few days
+    before.
+  - **Decision helper**: pick a random item from a list, or flip a coin /
+    roll dice.
+  - **Unit / cooking converter**: grams ↔ cups, °C ↔ °F, etc.
 
 - Self-hosted cloud backup, e.g. S3-backed (D5)
 - **UI polish (U1)** — once the main features are in: shake on wrong

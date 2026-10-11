@@ -30,6 +30,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | G7 | **Navigation stack.** Each main section is the bottom of the stack: system back on a main section closes the app — after a confirming second press: the first shows *Press back again to exit*, a second within 2 s exits. Back first closes an open menu or leaves selection mode. Anything opened from a section (a note, a menu page, a sub-page under Other) is pushed on top, and back returns exactly to where the user was. | ✅ covered by `test/navigation_test.dart` |
 | G8 | **Menu** (hamburger, top-left on every main section): **Security** page (master password, section locks), later **Backup** (export/import) and other app-wide options. The app version is shown at the bottom of the menu. | ✅ |
 | G17 | **Menu header:** *Lock now* is an icon button at the top right of the menu, in a fixed header row (special actions; doesn't scroll with the list). Items: Security, Themes, Backup, Settings. | ✅ |
+| G18 | **Leaving a page clears its state**: switching tabs ends selection mode and takes the planner back to today. | 💭 Round 11 |
 | G9 | Android only. No web/desktop targets or code paths. | ✅ |
 | G11 | **Actions at the bottom, on the hand's side.** Top bars carry no action buttons except the menu (☰) — page actions are round buttons at the bottom, like selection mode. They sit on the side of the hand in use: bottom right after tapping the right half of the screen (e.g. opening a note from the right side), bottom left after the left half. Content can always scroll clear of them. Selection mode follows the same rule (side of the long-press), with ✕ as its last button; switching sides mirrors side and order. | ✅ ← back stays at the top |
 | G12 | **Themes:** Menu → **Themes** page to switch the app's look. The app must first get its colours from a theme instead of fixed constants. | ✅ Green, Black, Clay |
@@ -48,7 +49,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | ✅ |
 | D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ✅ the backup carries the key, encrypted with the password; restoring adopts the backup's master password, or re-locks the notes under this phone's |
 | D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v6) are read in tests from frozen samples |
-| D5 | Cloud backup to a self-hosted service (e.g. S3-backed). | 💭 not now |
+| D5 | Cloud backup to a self-hosted service (e.g. S3-backed). The server is **typed in** (connection details entered in the app), never hard-coded. | 💭 not now |
+| D6 | **Data-safety sweep**: everything that could lose data (storage, updates, restore, locks, crashes, phone changes), how safe export is, and when cloud saving should come. | 💭 later |
 
 ## N — Notes
 
@@ -67,6 +69,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | N11 | **Edit the title from the bottom:** the title field is at the top, out of thumb reach, so a smaller *Edit title* button sits above the row of editor buttons, on the hand's side; it opens the title in a sheet at the bottom, above the keyboard. The title changes **live** as it's typed there, and may be left empty (saved as "Untitled" on leaving). Part of undo. | ✅ |
 | N12 | **Line numbers in notes**, like a code editor: a thin, faint margin left of the text with one number per paragraph (a line between two Enters; a wrapped paragraph keeps one number), level with its first row, scrolling with the text. On by default; Settings has a switch. | ✅ |
 | N13 | **View first, then edit:** an existing note opens for viewing (no keyboard, Markdown symbols hidden, list items shown with a dot •). Tapping the text (or title) edits right there. While editing, the phone's **back** — or closing the keyboard — goes back to viewing; back while viewing leaves as before (asking to save if changed). The ← arrow in the top bar always leaves. A new note opens ready to type. | ✅ |
+| N14 | **Empty notes go away**: no title ("Untitled") and no content (only spaces / new lines) → removed on leaving, even after editing. If something changed, back still asks first, so changes can be discarded. | 💭 Round 11 |
 | N9 | **Markdown, live while typing** (basics only; always on): the note stays plain text, the editor styles it as you type. **Lists** matter most: `- ` bullets and `1. ` numbered lists; Enter continues the list (next number), Enter on an empty item ends it. Also `#`/`##`/`###` headings, `**bold**`, `*italic*`, `~~strike~~`. Formatting symbols (`##`, `**`, `*`, `~~`) are **hidden except on the line being edited** (live preview, like Obsidian), shown muted there; when not typing, all are hidden. List markers stay visible, in the accent colour. No checkboxes. | ✅ |
 
 ## L — Security: master password & locking
@@ -91,6 +94,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | S4 | **Compact rows** — noticeably smaller than note rows (one 48 dp touch target high, ≥20% smaller, tighter gaps), so more items fit on screen without becoming harder to tap. | ✅ |
 | S5 | New items, and items moved back from *Items*, go to the **end** of *To buy*, so it keeps the order things were added in (Nikola's request). Bought items still go to the top of *Items*. | ✅ |
 | S6 | **A new item scrolls into view** as it's added: the list moves just enough to show it above the add sheet (from anywhere in the list), and not at all if it's already in view. | ✅ |
+| S7 | **Quantities**: a small button on each item toggles none → count → weight. Count − / + by 1 (default 1); weight in grams with smart − / + steps (common amounts like 80 g, 280 g; no typing). Each remembers its value. Read-only in the bought list. | 💭 Round 11 |
 
 ## P — Planner (currently the "To Do" tab)
 
@@ -108,7 +112,12 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P11 | **The add / edit sheet** follows reach mode (pulling down shifts the form towards the thumb, never closes it) and can't be dragged closed. A fixed row at the bottom holds **Close** (✕) and Add / Save. Closing with changes asks *Discard changes?* (Cancel / Discard); system back on that question counts as Discard. | ✅ |
 | P12 | **A one-off and a routine at the same time** (replaces "the one-off wins"). Tasks never overlap tasks and routines never overlap routines, but a task and a routine may: at most one of each at any moment. Where they share time they sit **side by side, task left, routine right**; where one goes on alone it takes the full width, drawn as the same block continuing (one shape, no gap). Each ticks off and reminds on its own. Free time is time with neither. Adding from free time, a task may reach over routines up to the next task ("Until the next task"); set to repeat, it stays clear of routines instead, and the sheet says so if its times had to change. Tapping a routine also offers **Add a task alongside**; it and *Change just this day* use the routine's time, fitted around tasks already there (said under the times), and are off when tasks fill it. | ✅ |
 | P13 | ~~Timeline zoom~~ (removed, Round 10). **Short blocks stretch the timeline:** every block is at least one touch target high (like a 30-minute block); where a shorter one is, the timeline is taller there (that hour takes more room than others), so nothing is squeezed. A block is **at least 5 minutes**; the sheet says so if a picked time had to change for it. | ✅ |
-| P14 | **Reminders** (Nikola: like a one-off reminder or to-do): a title at a **time with no end**, on one day. Drawn as a short see-through block that floats over whatever is there (it takes no time: free time and blocks are unchanged). Added with a **bell button** at the bottom of the planner (title and time). Notifies **at its time** (no "before" options). **Ticking it off deletes it** (with undo); unticked, it stays on its day, and the day strip reaches back to it like an unfinished task. Tapping it edits or deletes it. In backups. | ✅ |
+| P14 | **Reminders** (Nikola: like a one-off reminder or to-do): a title at a **time with no end**, on one day. Drawn as a short see-through block that floats over whatever is there (it takes no time: free time and blocks are unchanged). Added with a **bell button** at the bottom of the planner (title and time). Notifies **at its time** (no "before" options). **Ticking it off deletes it** (with undo); unticked, it stays on its day, and the day strip reaches back to it like an unfinished task. Tapping it edits or deletes it. In backups. | ✅ Round 11: redesign to a mark on the left edge; tap shows a block-like bubble; close ones merge into one mark that lists them. |
+| P15 | **Tapping a task shows it first** (like a routine): title, time, colour, reminder and options; Edit opens the sheet. Editing doesn't focus the title (no keyboard just to look). Add / Save stay greyed out until the title is valid. | 💭 Round 11 |
+| P16 | **A "now" line** across today's timeline at the current time, moving with the clock. | 💭 Round 11 |
+| P17 | **Notifications always arrive**: app open, in the background, swiped away, screen off, phone locked, after a restart (exact alarms, Doze, battery optimisation, boot). | 💭 Round 11 |
+| P18 | **Notification settings** (in Settings): the sound, and the colour (the block's colour, or set per reminder). | 💭 Round 11 |
+| P19 | **More block colours**; new tasks default to blue, routines to their own default. | 💭 Round 11 |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | ✅ via P7–P9 |
 
 ## U — UI polish ("fun but practical")
@@ -119,6 +128,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | U4 | **Reach mode** (replaces "snap back"): pulling a list that's already at its top, with a new gesture, shifts it down by 28% of the list's height (about one row more than the first 20%; a bit more on Counters, whose rows are bigger) so its first rows are within thumb reach; it stays there. Any scroll the other way leaves the mode and snaps fully back to the top **as soon as the finger lets go** (not on the next touch). Scrolling towards the top from further down stops at the normal top (doesn't enter). A small pull springs back. | ✅ |
 | U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ✅ |
 | U6 | **Counters: vibration and a click sound** on − / +, with an on/off switch in Menu → Settings. | ✅ the app's own click sound (Android's touch sound is often switched off, so it was silent — Nikola); follows the system volume, none in silent mode |
+| U7 | **Toasts** (messages at the bottom, with Undo) styled to match the app: rounded, themed, clear action. | 💭 Round 11 |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test): a cart (accent) while an item is to buy, a quiet tick once bought. Still announced as checked / not checked. | ✅ |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 
@@ -128,8 +138,10 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
 | O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ✅ |
-| O4 | ~~"Džoni što ćutiš?" page~~ — removed (Nikola: out of place in a public app others may build). | ❌ removed |
+| O4 | **Džoni page, configurable**: sideways, big text and a count; holding counts up. **Five taps in the top-right corner** open its settings (the text and the count). Hides the status bar; on back it turns upright before closing. (Removed in 0.19 work, coming back configurable.) | 💭 Round 11 |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode; selection mode without ✕ (back leaves it) |
+| O5 | **Counters, expanded**: options when adding — step, colour, min, max; nicer style (margins, rounder corners). | 💭 Round 11 |
+| O6 | **Medicine tracker**: mark the daily pill taken in one tap instead of a sheet. | 💭 to design |
 
 ---
 
