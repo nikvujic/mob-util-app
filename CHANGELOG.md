@@ -7,6 +7,12 @@ Release with the installable APK.
 ## [0.19.0] - unreleased
 
 ### Changed
+- Planner: tapping a task shows what it is first (time, colour,
+  reminder) with Edit and Delete (with Undo), like a routine; editing
+  doesn't open the keyboard straight away.
+- Planner: Add / Save stay greyed out until there's a title.
+- Planner: four more colours (teal, pink, brown, grey); new tasks start
+  blue and new routines purple.
 - Notes: a note with no title and nothing in it goes away when you
   leave it, also one that was emptied by editing (back still asks first,
   so the change can be discarded).

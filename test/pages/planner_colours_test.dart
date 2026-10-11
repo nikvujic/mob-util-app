@@ -38,16 +38,18 @@ void main() {
     await openPlanner(tester);
     await tapText(tester, 'Free · 00:00–24:00');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Dentist');
-    await tester.tap(find.bySemanticsLabel('Colour: Blue'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel('Colour: Green'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
-    expect(container.read(plannerProvider).single.color, 'blue');
-    expect(background(tester, 'Dentist'), BlockColor.blue.fill);
+    expect(container.read(plannerProvider).single.color, 'green');
+    expect(background(tester, 'Dentist'), BlockColor.green.fill);
 
     // Back to no colour.
     await tapText(tester, 'Dentist');
+    await tapText(tester, 'Edit');
     await tester.tap(find.bySemanticsLabel('Colour: none'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));

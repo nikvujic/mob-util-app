@@ -74,6 +74,7 @@ Future<NewTask?> showAddTaskSheet(
       repeat: day == null ? RepeatChoice.never : RepeatChoice.optional,
       from: day,
       note: note,
+      color: BlockColor.taskDefault.name,
     ),
   );
 }
@@ -98,6 +99,7 @@ Future<NewTask?> showAddRoutineSheet(
       repeat: RepeatChoice.always,
       weekdays: {weekday},
       from: from,
+      color: BlockColor.routineDefault.name,
     ),
   );
 }
@@ -157,6 +159,14 @@ Future<NewTask?> showEditTaskSheet(
     ),
   );
 }
+
+/// A block's reminder in words (P10): Off, At start, 10 min before, …
+String remindLabel(int? minutes) => switch (minutes) {
+      null => 'Off',
+      0 => 'At start',
+      60 => '1 h before',
+      final m => '$m min before',
+    };
 
 /// The whole day: a reminder can go at any time (P14).
 const FreeSlot _wholeDay = (start: 0, end: PlannerTask.dayMinutes);
@@ -280,17 +290,16 @@ class _TaskSheetState extends State<TaskSheet> {
   late Set<int> _weekdays = {...?widget.weekdays};
   late DateTime? _until = widget.until;
   late BlockColor? _color = BlockColor.fromName(widget.color);
+
+  /// Set once a colour is picked: until then, a new block's colour
+  /// follows whether it repeats (P19).
+  bool _colourPicked = false;
   late int? _remind = widget.remind;
 
   /// Reminder choices (P10): minutes before the start; null: off.
   static const _reminders = <int?>[null, 0, 5, 10, 15, 30, 60];
 
-  static String _remindLabel(int? minutes) => switch (minutes) {
-        null => 'Off',
-        0 => 'At start',
-        60 => '1 h before',
-        final m => '$m min before',
-      };
+  static String _remindLabel(int? minutes) => remindLabel(minutes);
 
   bool get _repeats => _weekdays.isNotEmpty;
 
@@ -311,7 +320,14 @@ class _TaskSheetState extends State<TaskSheet> {
   /// Sets the weekdays it repeats on (none: it doesn't), keeping the times
   /// within the room that comes with that, and saying so if they change.
   void _setWeekdays(Set<int> weekdays) => setState(() {
+        final repeated = _repeats;
         _weekdays = weekdays;
+        // A new block's default colour: blue for a task, purple for a
+        // routine (P19), unless one was picked.
+        if (widget.title.isEmpty && !_colourPicked && repeated != _repeats) {
+          _color =
+              _repeats ? BlockColor.routineDefault : BlockColor.taskDefault;
+        }
         _fit();
       });
 
@@ -613,7 +629,9 @@ class _TaskSheetState extends State<TaskSheet> {
                           TextField(
                             key: const Key('taskTitle'),
                             controller: _title,
-                            autofocus: true,
+                            // Only when adding: tapping a block to edit it
+                            // shouldn't open the keyboard (P15).
+                            autofocus: widget.title.isEmpty,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               hintText: widget.point
@@ -704,7 +722,10 @@ class _TaskSheetState extends State<TaskSheet> {
                             const SizedBox(height: 8),
                             _ColourChoice(
                               selected: _color,
-                              onSelected: (c) => setState(() => _color = c),
+                              onSelected: (c) => setState(() {
+                                _color = c;
+                                _colourPicked = true;
+                              }),
                             ),
                             const SizedBox(height: 4),
                             Wrap(
@@ -762,7 +783,8 @@ class _TaskSheetState extends State<TaskSheet> {
                         ),
                       const Spacer(),
                       FilledButton(
-                        onPressed: _submit,
+                        // Greyed out until there's a title (P15).
+                        onPressed: _title.text.trim().isEmpty ? null : _submit,
                         child: Text(widget.submitLabel),
                       ),
                     ],

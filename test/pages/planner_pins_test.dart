@@ -40,6 +40,7 @@ void main() {
     expect(find.text('to'), findsNothing, reason: 'no end');
     expect(find.text('Remind'), findsNothing, reason: 'it is the reminder');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Call mum');
+    await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
@@ -117,6 +118,7 @@ void main() {
     await tester.tap(find.text('Call mum'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Call dad');
+    await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
     expect(container.read(pinsProvider).single.title, 'Call dad');

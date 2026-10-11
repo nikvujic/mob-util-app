@@ -141,14 +141,22 @@ enum BlockColor {
   orange('Orange', Color(0xFF4A3121), Color(0xFFFFB74D)),
   yellow('Yellow', Color(0xFF433D1F), Color(0xFFFFE082)),
   green('Green', Color(0xFF213F27), Color(0xFF81C784)),
+  teal('Teal', Color(0xFF1C3D3A), Color(0xFF4DB6AC)),
   blue('Blue', Color(0xFF1F3449), Color(0xFF64B5F6)),
-  purple('Purple', Color(0xFF382A4B), Color(0xFFB39DDB));
+  purple('Purple', Color(0xFF382A4B), Color(0xFFB39DDB)),
+  pink('Pink', Color(0xFF4A2338), Color(0xFFF48FB1)),
+  brown('Brown', Color(0xFF3D3029), Color(0xFFBCAAA4)),
+  grey('Grey', Color(0xFF2F3337), Color(0xFFB0BEC5));
 
   final String label;
   final Color fill;
   final Color stripe;
 
   const BlockColor(this.label, this.fill, this.stripe);
+
+  /// New tasks and routines start with these (P19).
+  static const taskDefault = blue;
+  static const routineDefault = purple;
 
   /// The colour stored as [name], or null (none, or unknown).
   static BlockColor? fromName(String? name) =>

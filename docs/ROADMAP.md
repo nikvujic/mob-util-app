@@ -290,7 +290,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 
 Sorted from one long message. Order of work is at the end.
 
-**A. Planner: the sheet and tapping blocks**
+**A. Planner: the sheet and tapping blocks** ✅
 - [ ] **Save / Add greyed out** until the title is valid (not blank).
 - [ ] **No autofocus on the title when editing** (tapping a small block
   just to see what it is shouldn't open the keyboard). Adding still
@@ -299,7 +299,7 @@ Sorted from one long message. Order of work is at the end.
   time, colour and reminder, with options (Edit, Delete, …); only Edit
   opens the sheet. (P15)
 
-**B. Planner: colours**
+**B. Planner: colours** ✅
 - [ ] **More colours** in the palette.
 - [ ] **Defaults:** new tasks are **blue**, new routines **purple**.
 
@@ -388,7 +388,7 @@ Sorted from one long message. Order of work is at the end.
 
 **Chunks** (small, one at a time; each can be released on its own):
 1. [x] G + H — switching tabs clears state; empty notes go away.
-2. [ ] A + B — the planner sheet and tapping a task; colours.
+2. [x] A + B — the planner sheet and tapping a task; colours.
 3. [ ] D — the "now" line.
 4. [ ] C — reminders as marks on the timeline.
 5. [ ] E1 — notifications: check every state, fix what's missing; a

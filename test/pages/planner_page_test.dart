@@ -112,6 +112,7 @@ void main() {
     expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Lunch');
+    await tester.pump();
     await tester.tap(find.text('30 min'));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
@@ -149,6 +150,7 @@ void main() {
 
     await tester.tap(find.text('Until the next task'));
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Coffee');
+    await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
     final coffee =
@@ -189,6 +191,8 @@ void main() {
           matching: find.byType(SelectableCard),
         ))
         .onTap!();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
 
     // Pick 11:01 as the end: kept within its 3 minutes, no error.
@@ -249,6 +253,7 @@ void main() {
     await tester.tap(free('13:00–24:00'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Call mum');
+    await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
     expect(
@@ -342,6 +347,10 @@ void main() {
 
     await tester.tap(find.text('Gym'));
     await tester.pumpAndSettle();
+    // What it is first (P15): title, time, then Edit.
+    expect(find.text('12:00–13:00'), findsWidgets);
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
     expect(find.widgetWithText(FilledButton, 'Save'), findsOneWidget);
     expect(
       tester
@@ -356,6 +365,7 @@ void main() {
         reason: 'tapping edits, it does not tick off');
 
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Gym + sauna');
+    await tester.pump();
     // Up to the next task: 14:00.
     await tester.tap(find.text('Until the next task'));
     await tester.pump();
@@ -365,6 +375,27 @@ void main() {
     final gym = container.read(plannerProvider).first;
     expect((gym.title, gym.start, gym.end), ('Gym + sauna', 12 * 60, 14 * 60));
     expect(find.text('12:00–14:00'), findsOneWidget);
+  });
+
+  testWidgets('a task\'s menu shows what it is; Delete has Undo (P15)',
+      (tester) async {
+    await openPlanner(tester);
+    planner().addTask(today, 'Dentist',
+        start: 12 * 60, end: 13 * 60, color: 'teal', remind: 10);
+    await tester.pump();
+
+    await tester.tap(find.text('Dentist'));
+    await tester.pumpAndSettle();
+    expect(find.text('12:00–13:00 · reminds 10 min before'), findsOneWidget);
+
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    expect(container.read(plannerProvider), isEmpty);
+    expect(find.text('Dentist deleted'), findsOneWidget);
+
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(container.read(plannerProvider).single.title, 'Dentist');
   });
 
   testWidgets('today, a new task starts at the next full hour, not the past',

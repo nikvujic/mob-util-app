@@ -64,6 +64,7 @@ void main() {
     await openPlanner(tester);
     await tapText(tester, 'Free · 00:00–24:00');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Read');
+    await tester.pump();
     await tapIn(tester, find.text('Every day'));
     await tester.pump();
     await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
@@ -103,6 +104,7 @@ void main() {
     await tapText(tester, 'Gym');
     await tapText(tester, 'Change just this day');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Gym (short)');
+    await tester.pump();
     await tester.tap(find.text('30 min'));
     await tester.pump();
     await tapIn(tester, find.widgetWithText(FilledButton, 'Save'));
@@ -123,6 +125,7 @@ void main() {
     await tapText(tester, 'Gym');
     await tapText(tester, 'Edit routine');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Run');
+    await tester.pump();
     await tapIn(tester, find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
 
@@ -215,6 +218,7 @@ void main() {
       await openRoutines(tester);
       await tapText(tester, 'Free · 00:00–24:00');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Walk');
+      await tester.pump();
       await tapIn(tester, find.widgetWithText(FilterChip, 'Sat'));
       await tester.pump();
       await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
@@ -243,6 +247,17 @@ void main() {
       expect(find.text('Gym'), findsNothing);
     });
 
+    testWidgets('a new routine is purple unless another colour is picked',
+        (tester) async {
+      await openRoutines(tester);
+      await tapText(tester, 'Free · 00:00–24:00');
+      await tester.enterText(find.byKey(const Key('taskTitle')), 'Walk');
+      await tester.pump();
+      await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
+      await tester.pumpAndSettle();
+      expect(container.read(routinesProvider).routines.single.color, 'purple');
+    });
+
     testWidgets(
         'ticking a day another routine has moves the times clear, and says so',
         (tester) async {
@@ -260,6 +275,7 @@ void main() {
       // new routine (00:00–01:00) would meet Swim there.
       await tapText(tester, 'Free · 00:00–24:00');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Walk');
+      await tester.pump();
       await tapIn(tester, find.widgetWithText(FilterChip, 'Fri'));
       await tester.pump();
       expect(

@@ -154,6 +154,12 @@ void main() {
         await t.pumpAndSettle();
       },
       'planner': (t) => openTab(t, 'Planner'),
+      'task menu': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.text('Call the bank'));
+        await t.pumpAndSettle();
+        expect(find.text('Edit'), findsOneWidget);
+      },
       'routine choices': (t) async {
         await openTab(t, 'Planner');
         await t.tap(find.text('Stand-up'));

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/providers/planner_provider.dart';
 
@@ -101,6 +103,72 @@ void main() {
       tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
       'Ends at 12:05: it takes at least 5 minutes.',
     );
+  });
+
+  testWidgets('Add is greyed out until there is a title (P15)', (tester) async {
+    await openAddSheet(tester);
+    bool enabled() => tester.widget<FilledButton>(addButton).onPressed != null;
+    expect(enabled(), isFalse);
+    await tester.enterText(titleField, '   ');
+    await tester.pump();
+    expect(enabled(), isFalse, reason: 'spaces are not a title');
+    await tester.enterText(titleField, 'Lunch');
+    await tester.pump();
+    expect(enabled(), isTrue);
+  });
+
+  testWidgets('adding focuses the title; editing does not (P15)',
+      (tester) async {
+    await openAddSheet(tester);
+    expect(tester.widget<TextField>(titleField).autofocus, isTrue);
+    await close(tester);
+
+    await tester.tap(find.text('Gym'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(titleField).autofocus, isFalse);
+  });
+
+  group('default colours (P19)', () {
+    BlockColor? picked(WidgetTester tester) => BlockColor.values
+        .where((c) => tester
+            .getSemantics(find.bySemanticsLabel('Colour: ${c.label}'))
+            .hasFlag(SemanticsFlag.isSelected))
+        .firstOrNull;
+
+    testWidgets('a new task is blue; set to repeat it turns purple',
+        (tester) async {
+      await openAddSheet(tester);
+      expect(picked(tester), BlockColor.blue);
+      await tester.ensureVisible(find.text('Every day'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Every day'));
+      await tester.pump();
+      expect(picked(tester), BlockColor.purple);
+      await tester.tap(find.text('Once'));
+      await tester.pump();
+      expect(picked(tester), BlockColor.blue);
+    });
+
+    testWidgets('a picked colour stays when it is set to repeat',
+        (tester) async {
+      await openAddSheet(tester);
+      await tester.tap(find.bySemanticsLabel('Colour: Teal'));
+      await tester.pump();
+      await tester.ensureVisible(find.text('Every day'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Every day'));
+      await tester.pump();
+      expect(picked(tester), BlockColor.teal);
+    });
+
+    testWidgets('more colours to pick from', (tester) async {
+      await openAddSheet(tester);
+      for (final name in ['Teal', 'Pink', 'Brown', 'Grey']) {
+        expect(find.bySemanticsLabel('Colour: $name'), findsOneWidget);
+      }
+    });
   });
 
   group('with changes', () {

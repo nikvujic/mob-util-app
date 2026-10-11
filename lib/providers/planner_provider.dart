@@ -114,6 +114,18 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     state = state.where((t) => !ids.contains(t.id)).toList();
   }
 
+  /// Puts back a task that was deleted (undo). Throws
+  /// [TaskOverlapException] if its time was taken meanwhile.
+  void restoreTask(PlannerTask task) {
+    if (state.any((t) => t.id == task.id)) return;
+    if (task.hasTime &&
+        !_free(_on(task.day))
+            .any((s) => s.start <= task.start! && task.end! <= s.end)) {
+      throw const TaskOverlapException();
+    }
+    state = [...state, task];
+  }
+
   /// Replaces everything (used when restoring a backup).
   void replaceAll(List<PlannerTask> tasks) {
     state = List.unmodifiable(tasks);

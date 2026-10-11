@@ -141,14 +141,13 @@ void main() {
 
       await tester.tapAt(Offset(work.left + 30, shared));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(FilledButton, 'Save'), findsOneWidget,
-          reason: 'the left half is the task');
-      await tester.tap(find.byTooltip('Close'));
-      await tester.pumpAndSettle();
+      expect(find.text('Edit'), findsOneWidget,
+          reason: 'the left half is the task (its menu)');
+      await pressBack(tester);
 
       await tester.tapAt(Offset(work.right - 60, alone));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(FilledButton, 'Save'), findsOneWidget,
+      expect(find.text('Edit'), findsOneWidget,
           reason: 'alone, the task takes the full width');
     });
 
@@ -175,6 +174,7 @@ void main() {
       expect(find.widgetWithText(OutlinedButton, '10:00'), findsOneWidget,
           reason: 'an hour by default, within the free time');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Work');
+      await tester.pump();
       await tester.tap(find.text('Until the next task'));
       await tester.pump();
       await tester.tap(find.widgetWithText(FilledButton, 'Add'));
@@ -219,6 +219,7 @@ void main() {
       expect(find.widgetWithText(OutlinedButton, '11:00'), findsOneWidget);
       expect(find.widgetWithText(OutlinedButton, '11:30'), findsOneWidget);
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Call');
+      await tester.pump();
       await tester.tap(find.widgetWithText(FilledButton, 'Add'));
       await tester.pumpAndSettle();
 

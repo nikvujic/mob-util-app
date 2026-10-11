@@ -166,6 +166,59 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     }
   }
 
+  /// A task's block: what it is first, then Edit or Delete (P15), like a
+  /// routine's.
+  Future<void> _taskTapped(PlannerTask task) async {
+    final choice = await showModalBottomSheet<_TaskChoice>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _BlockHeader(
+              title: task.title,
+              start: task.start!,
+              end: task.end!,
+              color: BlockColor.fromName(task.color),
+              remind: task.remind,
+            ),
+            for (final choice in _TaskChoice.values)
+              ListTile(
+                leading: Icon(choice.icon),
+                title: Text(choice.label),
+                onTap: () => Navigator.of(context).pop(choice),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    switch (choice) {
+      case _TaskChoice.edit:
+        await _edit(task);
+      case _TaskChoice.delete:
+        final planner = ref.read(plannerProvider.notifier)
+          ..removeTasks({task.id});
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text('${task.title} deleted'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  try {
+                    planner.restoreTask(task);
+                  } on TaskOverlapException {
+                    _taken();
+                  }
+                },
+              ),
+            ),
+          );
+    }
+  }
+
   Future<void> _edit(PlannerTask task) async {
     final notifier = ref.read(plannerProvider.notifier);
     final changed = await showEditTaskSheet(
@@ -200,15 +253,13 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              title: Text(
-                routine.title,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                '${formatMinutes(routine.start)}–${formatMinutes(routine.end)}'
-                ' · a routine',
-              ),
+            _BlockHeader(
+              title: routine.title,
+              start: routine.start,
+              end: routine.end,
+              color: BlockColor.fromName(routine.color),
+              remind: routine.remind,
+              routine: true,
             ),
             for (final choice in _RoutineChoice.values)
               if (choice.needsRoom && beside == null)
@@ -466,7 +517,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           color: BlockColor.fromName(task.color),
           reminds: task.remind != null,
           selected: _selection.isSelected(task.id),
-          onTap: () => _selection.handleTap(task.id, () => _edit(task)),
+          onTap: () => _selection.handleTap(task.id, () => _taskTapped(task)),
           onLongPress: () => _selection.handleLongPress(task.id),
           // While selecting, nothing ticks (as with reminders).
           onToggleDone: selecting
@@ -643,6 +694,65 @@ class _DayHeader extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// What can be done with a task's block (P15).
+enum _TaskChoice {
+  edit('Edit', Icons.edit_outlined),
+  delete('Delete', Icons.delete_outline);
+
+  final String label;
+  final IconData icon;
+
+  const _TaskChoice(this.label, this.icon);
+}
+
+/// The top of a block's menu: its colour, title, time and reminder.
+class _BlockHeader extends StatelessWidget {
+  final String title;
+  final int start;
+  final int end;
+  final BlockColor? color;
+  final int? remind;
+  final bool routine;
+
+  const _BlockHeader({
+    required this.title,
+    required this.start,
+    required this.end,
+    required this.color,
+    required this.remind,
+    this.routine = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final colour = color;
+    return ListTile(
+      leading: colour == null
+          ? null
+          : ExcludeSemantics(
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: colour.stripe,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(
+        [
+          '${formatMinutes(start)}–${formatMinutes(end)}',
+          if (routine) 'a routine',
+          if (remind != null) 'reminds ${remindLabel(remind).toLowerCase()}',
+        ].join(' · '),
+        style: TextStyle(color: colors.textSecondary),
       ),
     );
   }
