@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/format.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/reminders_provider.dart';
@@ -46,6 +48,38 @@ void main() {
     );
     expect(reminders.first.body, 'Now · 13:00–14:00');
     expect(reminders.last.body, 'In 10 min · 15:00–16:00');
+  });
+
+  test('the planner\'s reminders (P14) notify at their time', () {
+    PlannerPin pin(String title, DateTime day, num hours) =>
+        PlannerPin(id: title, title: title, day: day, time: at(hours));
+    final reminders = planReminders(
+      now: now,
+      tasks: const [],
+      routines: RoutineBook.empty,
+      pins: [
+        pin('Call mum', today, 12.5),
+        pin('Past', today, 11.5),
+        pin('Bins', DateTime(2026, 10, 9), 20),
+        pin('Too far ahead', addDays(today, reminderDays + 1), 9),
+      ],
+    );
+    expect(
+      reminders
+          .map((r) => '${r.at.day} ${r.at.hour}:${r.at.minute} ${r.title}'),
+      ['8 12:30 Call mum', '9 20:0 Bins'],
+    );
+    expect(reminders.first.body, 'Reminder · 12:30');
+
+    final hidden = planReminders(
+      now: now,
+      tasks: const [],
+      routines: RoutineBook.empty,
+      pins: [pin('Call mum', today, 12.5)],
+      hideTitles: true,
+    );
+    expect((hidden.single.title, hidden.single.body),
+        ('Planner', 'A reminder at 12:30'));
   });
 
   test('a reminder can fall on the day before', () {

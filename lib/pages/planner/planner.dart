@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/pages/planner/routines.dart';
 import 'package:the_app/pages/planner/timeline.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
@@ -329,6 +331,49 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     }
   }
 
+  /// Adds a reminder (P14) on [day]: today from the next full hour,
+  /// other days from 09:00.
+  Future<void> _addPin(DateTime day) async {
+    final now = _now;
+    final time = daysBetween(dayOf(now), day) == 0
+        ? math.min((now.hour + 1) * 60, PlannerTask.dayMinutes - 5)
+        : 9 * 60;
+    final pin = await showAddPinSheet(context, time: time);
+    if (pin == null || !mounted) return;
+    ref.read(pinsProvider.notifier).add(day, pin.title, time: pin.start);
+    await allowReminders(context, ref, 0);
+  }
+
+  Future<void> _editPin(PlannerPin pin) async {
+    final pins = ref.read(pinsProvider.notifier);
+    final changed = await showEditPinSheet(
+      context,
+      pin,
+      onDelete: () => _removePin(pin, 'deleted'),
+    );
+    if (changed == null || !mounted) return;
+    pins.update(pin.id, title: changed.title, time: changed.start);
+  }
+
+  /// Ticking a reminder off deletes it (Nikola), with undo.
+  void _pinDone(PlannerPin pin) => _removePin(pin, 'done');
+
+  void _removePin(PlannerPin pin, String what) {
+    final pins = ref.read(pinsProvider.notifier);
+    final removed = pins.remove(pin.id);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${pin.title}: $what'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => pins.restore(removed),
+          ),
+        ),
+      );
+  }
+
   void _openRoutines(DateTime day) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -354,10 +399,15 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final now = _now;
     final today = dayOf(now);
     final all = ref.watch(plannerProvider);
-    // The past is reachable only back to the oldest unfinished task (P6).
+    final allPins = ref.watch(pinsProvider);
+    // The past is reachable only back to the oldest unfinished task (P6),
+    // or reminder (P14: ticked off, they're gone).
     var firstDay = today;
     for (final t in all) {
       if (!t.done && t.day.isBefore(firstDay)) firstDay = t.day;
+    }
+    for (final p in allPins) {
+      if (p.day.isBefore(firstDay)) firstDay = p.day;
     }
     var day = _day ?? today;
     if (day.isBefore(firstDay)) day = firstDay;
@@ -365,6 +415,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final timed = tasks.where((t) => t.hasTime).toList();
     final untimed = tasks.where((t) => !t.hasTime).toList();
     final routines = routinesOn(day, ref.watch(routinesProvider)); // P8
+    final pins = allPins.where((p) => isSameDay(p.day, day)).toList();
     ref.listen(plannerProvider, (_, next) {
       _selection.retain(next.map((t) => t.id));
     });
@@ -431,6 +482,16 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                     zoom: zoom,
                     blocks: blocks,
                     onAdd: selecting ? null : (slot) => _addIn(day, slot),
+                    pins: [
+                      for (final pin in pins)
+                        TimelinePin(
+                          id: pin.id,
+                          title: pin.title,
+                          time: pin.time,
+                          onTap: selecting ? null : () => _editPin(pin),
+                          onDone: selecting ? null : () => _pinDone(pin),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -441,7 +502,9 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             firstDay: firstDay,
             selected: day,
             onSelected: _select,
-            hasItems: (d) => all.any((t) => isSameDay(t.day, d)),
+            hasItems: (d) =>
+                all.any((t) => isSameDay(t.day, d)) ||
+                allPins.any((p) => isSameDay(p.day, d)),
           ),
           floatingActionButton: _selection.isActive
               ? SelectionActions(
@@ -452,7 +515,8 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                   onDelete: _deleteSelected,
                 )
               // No + button: free time on the timeline is where tasks are
-              // added. Routines have their own screen.
+              // added. Routines have their own screen; reminders (P14) are
+              // added here, outermost.
               : BottomActions(
                   actions: [
                     zoomAction(ref, timeline),
@@ -460,6 +524,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                       icon: Icons.repeat,
                       tooltip: 'Routines',
                       onPressed: () => _openRoutines(day),
+                    ),
+                    BottomAction(
+                      icon: Icons.add_alert_outlined,
+                      tooltip: 'Add reminder',
+                      onPressed: () => _addPin(day),
                     ),
                   ],
                 ),

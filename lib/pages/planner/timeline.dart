@@ -48,6 +48,27 @@ class TimelineBlock {
   });
 }
 
+/// A reminder on a [PlannerTimeline] (P14): a time, no end.
+class TimelinePin {
+  final String id;
+  final String title;
+  final int time;
+
+  /// Null while selecting.
+  final VoidCallback? onTap;
+
+  /// Ticks it off (which deletes it); null while selecting.
+  final VoidCallback? onDone;
+
+  const TimelinePin({
+    required this.id,
+    required this.title,
+    required this.time,
+    this.onTap,
+    this.onDone,
+  });
+}
+
 /// A stretch of a block's time: [shared] while a block of the other kind (a
 /// routine beside a task, or the other way round) is there too.
 typedef BlockPiece = ({int start, int end, bool shared});
@@ -177,13 +198,34 @@ class PlannerTimeline extends StatelessWidget {
 
   final TimelineZoom zoom;
 
+  /// Reminders (P14), drawn over everything at their time.
+  final List<TimelinePin> pins;
+
+  /// A reminder's height at every zoom: one touch target.
+  static const pinHeight = 48.0;
+
   const PlannerTimeline({
     super.key,
     required this.blocks,
     required this.onAdd,
     this.adds = 'a task',
     this.zoom = TimelineZoom.normal,
+    this.pins = const [],
   });
+
+  /// Where each reminder goes: at its time, or just below the one before
+  /// if they'd cover each other.
+  List<(TimelinePin, double)> _pinPlaces() {
+    final sorted = [...pins]..sort((a, b) => a.time.compareTo(b.time));
+    final places = <(TimelinePin, double)>[];
+    var free = 0.0;
+    for (final pin in sorted) {
+      final top = _y(pin.time) > free ? _y(pin.time) : free;
+      places.add((pin, top));
+      free = top + pinHeight + gap;
+    }
+    return places;
+  }
 
   /// Where [minutes] past midnight is on the timeline at [zoom].
   static double offsetOf(int minutes, TimelineZoom zoom) =>
@@ -249,6 +291,15 @@ class PlannerTimeline extends StatelessWidget {
                 pieces: blockPieces(block, blocks),
                 hourHeight: zoom.hourHeight,
               ),
+            ),
+          for (final (pin, top) in _pinPlaces())
+            Positioned(
+              top: top,
+              height: pinHeight,
+              // Indented, so what's under it still shows on the left.
+              left: _labelWidth + 24,
+              right: 8,
+              child: _Pin(pin),
             ),
         ],
       ),
@@ -483,6 +534,69 @@ class _Block extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// A reminder (P14): a short see-through block with a dashed outline, a
+/// bell, its title and time, and a checkbox that ticks it off.
+class _Pin extends StatelessWidget {
+  static const _radius = 6.0;
+
+  final TimelinePin pin;
+
+  const _Pin(this.pin);
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DashedBorder(
+      color: colors.accent,
+      radius: _radius,
+      child: Material(
+        // See-through: what's under it shows a little.
+        color: colors.background.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(_radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(_radius),
+          onTap: pin.onTap,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.notifications_none,
+                  size: 18,
+                  color: colors.accent,
+                  semanticLabel: 'Reminder',
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    pin.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  formatMinutes(pin.time),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                ),
+                Checkbox(
+                  value: false,
+                  semanticLabel: 'Done: ${pin.title}',
+                  onChanged: pin.onDone == null ? null : (_) => pin.onDone!(),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

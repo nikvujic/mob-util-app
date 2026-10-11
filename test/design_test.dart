@@ -14,6 +14,7 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
@@ -84,6 +85,10 @@ Future<void> seed(ProviderContainer container) async {
         from: DateTime(2026, 10, 1),
         color: 'purple',
       );
+  // A reminder (P14), over the task and routine.
+  container
+      .read(pinsProvider.notifier)
+      .add(today, 'Call mum', time: 10 * 60 + 40);
   container.read(countersProvider.notifier)
     ..add('Push-ups')
     ..add('Glasses of water');

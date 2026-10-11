@@ -5,8 +5,10 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -20,12 +22,14 @@ const reminderDays = 14;
 const maxReminders = 400;
 
 /// The reminders due after [now] for the next [reminderDays] days: tasks
-/// and routines with a reminder, not ticked off (nor skipped). With
-/// [hideTitles] (the Planner section is locked), titles are left out.
+/// and routines with a reminder, not ticked off (nor skipped), and the
+/// planner's own reminders ([pins], P14) at their time. With [hideTitles]
+/// (the Planner section is locked), titles are left out.
 List<Reminder> planReminders({
   required DateTime now,
   required List<PlannerTask> tasks,
   required RoutineBook routines,
+  List<PlannerPin> pins = const [],
   bool hideTitles = false,
 }) {
   final reminders = <Reminder>[];
@@ -66,12 +70,24 @@ List<Reminder> planReminders({
       }
     }
   }
+  final last = addDays(today, reminderDays + 1);
+  for (final pin in pins) {
+    final at = DateTime(pin.day.year, pin.day.month, pin.day.day, 0, pin.time);
+    if (!at.isAfter(now) || !at.isBefore(last)) continue;
+    final time = formatMinutes(pin.time);
+    reminders.add(
+      hideTitles
+          ? Reminder(at: at, title: 'Planner', body: 'A reminder at $time')
+          : Reminder(at: at, title: pin.title, body: 'Reminder · $time'),
+    );
+  }
   reminders.sort((a, b) => a.at.compareTo(b.at));
   return reminders.take(maxReminders).toList();
 }
 
 /// Keeps the phone's scheduled reminders in step with the planner (P10):
-/// plans them again whenever tasks, routines or the Planner's lock change,
+/// plans them again whenever tasks, routines, reminders or the Planner's
+/// lock change,
 /// and on [refresh] (e.g. when the app comes back).
 class ReminderPlanner {
   final Ref _ref;
@@ -82,6 +98,7 @@ class ReminderPlanner {
     _ref.onDispose(() => _disposed = true);
     _ref.listen(plannerProvider, (_, __) => _soon());
     _ref.listen(routinesProvider, (_, __) => _soon());
+    _ref.listen(pinsProvider, (_, __) => _soon());
     _ref.listen(sectionLocksProvider, (_, __) => _soon());
     _ref.listen(securityProvider, (_, __) => _soon());
     _soon();
@@ -110,6 +127,7 @@ class ReminderPlanner {
             now: _ref.read(clockProvider)(),
             tasks: _ref.read(plannerProvider),
             routines: _ref.read(routinesProvider),
+            pins: _ref.read(pinsProvider),
             hideTitles: hide,
           ),
         );

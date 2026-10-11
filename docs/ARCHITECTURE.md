@@ -201,6 +201,16 @@ time with neither; a task's room (`PlannerNotifier.roomFor` / `freeOn`)
 only counts tasks, and the add sheet switches to the routines' room
 while Repeat is on.
 
+## Planner reminders (P14)
+
+A reminder (`models/planner_pin.dart`, "pin" in code) is a title at a time
+on one day, with no end, kept in `pins.json` by `PinsNotifier`. It isn't
+a block: it takes no time, so free time and the overlap rules ignore it,
+and `PlannerTimeline` draws it last (`TimelinePin`), over everything, one
+touch target high at every zoom, cascading when two would cover each
+other. Ticking it off deletes it (`remove` / `restore` for undo).
+`planReminders` notifies at its time.
+
 ## Reminders (P10)
 
 `planReminders` (`providers/reminders_provider.dart`) works out, purely

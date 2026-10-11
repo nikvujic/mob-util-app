@@ -5,6 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 
@@ -144,6 +145,45 @@ Future<NewTask?> showEditTaskSheet(
   );
 }
 
+/// The whole day: a reminder can go at any time (P14).
+const FreeSlot _wholeDay = (start: 0, end: PlannerTask.dayMinutes);
+
+/// Asks for a new reminder (P14): a title and a time ([time] to begin
+/// with). Its `start` is the time. Null if dismissed.
+Future<NewTask?> showAddPinSheet(BuildContext context, {required int time}) {
+  return showModalBottomSheet<NewTask>(
+    context: context,
+    isScrollControlled: true,
+    // Pulling down is reach mode, not closing (✕ closes).
+    enableDrag: false,
+    builder: (_) => TaskSheet(slot: _wholeDay, start: time, point: true),
+  );
+}
+
+/// Edits [pin]'s title and time; [onDelete] deletes it. Null if dismissed
+/// or deleted.
+Future<NewTask?> showEditPinSheet(
+  BuildContext context,
+  PlannerPin pin, {
+  required VoidCallback onDelete,
+}) {
+  return showModalBottomSheet<NewTask>(
+    context: context,
+    isScrollControlled: true,
+    // Pulling down is reach mode, not closing (✕ closes).
+    enableDrag: false,
+    builder: (_) => TaskSheet(
+      slot: _wholeDay,
+      title: pin.title,
+      start: pin.time,
+      point: true,
+      submitLabel: 'Save',
+      onDelete: onDelete,
+      deleteLabel: 'Delete',
+    ),
+  );
+}
+
 /// The sheet for adding or editing a task within [slot].
 class TaskSheet extends StatefulWidget {
   /// Quick lengths offered for the end, in minutes.
@@ -179,6 +219,13 @@ class TaskSheet extends StatefulWidget {
   /// closed.
   final VoidCallback? onDelete;
 
+  /// The Delete button's label.
+  final String deleteLabel;
+
+  /// A reminder (P14): just a title and a time ("At"), no end, colour,
+  /// remind or repeat. What it returns has its end at its start.
+  final bool point;
+
   /// Its colour (P9): a [BlockColor] name, or null.
   final String? color;
 
@@ -199,6 +246,8 @@ class TaskSheet extends StatefulWidget {
     this.from,
     this.until,
     this.onDelete,
+    this.deleteLabel = 'Delete routine',
+    this.point = false,
     this.color,
     this.remind,
   });
@@ -381,7 +430,7 @@ class _TaskSheetState extends State<TaskSheet> {
     Navigator.of(context).pop<NewTask>((
       title: title,
       start: _start,
-      end: _end,
+      end: widget.point ? _start : _end,
       weekdays: _repeats ? _weekdays : null,
       until: _repeats ? _until : null,
       color: _color?.name,
@@ -521,9 +570,11 @@ class _TaskSheetState extends State<TaskSheet> {
                             autofocus: true,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
-                              hintText: widget.repeat == RepeatChoice.always
-                                  ? 'Routine'
-                                  : 'Task',
+                              hintText: widget.point
+                                  ? 'Reminder'
+                                  : widget.repeat == RepeatChoice.always
+                                      ? 'Routine'
+                                      : 'Task',
                             ),
                             onSubmitted: (_) => _submit(),
                           ),
@@ -535,17 +586,19 @@ class _TaskSheetState extends State<TaskSheet> {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
-                                'From',
+                                widget.point ? 'At' : 'From',
                                 style: TextStyle(
                                     color: context.colors.textSecondary),
                               ),
                               _TimeButton(_start, onPressed: _pickStart),
-                              Text(
-                                'to',
-                                style: TextStyle(
-                                    color: context.colors.textSecondary),
-                              ),
-                              _TimeButton(_end, onPressed: _pickEnd),
+                              if (!widget.point) ...[
+                                Text(
+                                  'to',
+                                  style: TextStyle(
+                                      color: context.colors.textSecondary),
+                                ),
+                                _TimeButton(_end, onPressed: _pickEnd),
+                              ],
                             ],
                           ),
                           if (_adjusted != null)
@@ -570,62 +623,65 @@ class _TaskSheetState extends State<TaskSheet> {
                                 ],
                               ),
                             ),
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              for (final length in TaskSheet.quickLengths)
+                          // A reminder is just a title and a time (P14).
+                          if (!widget.point) ...[
+                            Wrap(
+                              spacing: 8,
+                              children: [
+                                for (final length in TaskSheet.quickLengths)
+                                  ChoiceChip(
+                                    label: Text(length < 60
+                                        ? '$length min'
+                                        : '${length ~/ 60} h'),
+                                    selected: _end == _start + length,
+                                    onSelected: _start + length <= slotEnd
+                                        ? (_) => setState(
+                                            () => _end = _start + length)
+                                        : null,
+                                  ),
                                 ChoiceChip(
-                                  label: Text(length < 60
-                                      ? '$length min'
-                                      : '${length ~/ 60} h'),
-                                  selected: _end == _start + length,
-                                  onSelected: _start + length <= slotEnd
-                                      ? (_) =>
-                                          setState(() => _end = _start + length)
-                                      : null,
-                                ),
-                              ChoiceChip(
-                                // Up to what's next of the same kind: a
-                                // task and a routine may share time (P12).
-                                label: Text(
-                                  slotEnd == PlannerTask.dayMinutes
-                                      ? 'Until midnight'
-                                      : _repeats
-                                          ? 'Until the next routine'
-                                          : 'Until the next task',
-                                ),
-                                selected: _end == slotEnd,
-                                onSelected: (_) =>
-                                    setState(() => _end = slotEnd),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          _ColourChoice(
-                            selected: _color,
-                            onSelected: (c) => setState(() => _color = c),
-                          ),
-                          const SizedBox(height: 4),
-                          Wrap(
-                            spacing: 8,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                'Remind',
-                                style: TextStyle(
-                                    color: context.colors.textSecondary),
-                              ),
-                              for (final minutes in _reminders)
-                                ChoiceChip(
-                                  label: Text(_remindLabel(minutes)),
-                                  selected: _remind == minutes,
+                                  // Up to what's next of the same kind: a
+                                  // task and a routine may share time (P12).
+                                  label: Text(
+                                    slotEnd == PlannerTask.dayMinutes
+                                        ? 'Until midnight'
+                                        : _repeats
+                                            ? 'Until the next routine'
+                                            : 'Until the next task',
+                                  ),
+                                  selected: _end == slotEnd,
                                   onSelected: (_) =>
-                                      setState(() => _remind = minutes),
+                                      setState(() => _end = slotEnd),
                                 ),
-                            ],
-                          ),
-                          if (widget.repeat != RepeatChoice.never)
-                            ..._repeatChoices(context),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            _ColourChoice(
+                              selected: _color,
+                              onSelected: (c) => setState(() => _color = c),
+                            ),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 8,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(
+                                  'Remind',
+                                  style: TextStyle(
+                                      color: context.colors.textSecondary),
+                                ),
+                                for (final minutes in _reminders)
+                                  ChoiceChip(
+                                    label: Text(_remindLabel(minutes)),
+                                    selected: _remind == minutes,
+                                    onSelected: (_) =>
+                                        setState(() => _remind = minutes),
+                                  ),
+                              ],
+                            ),
+                            if (widget.repeat != RepeatChoice.never)
+                              ..._repeatChoices(context),
+                          ],
                         ],
                       ),
                     ),
@@ -648,7 +704,7 @@ class _TaskSheetState extends State<TaskSheet> {
                         Flexible(
                           child: TextButton.icon(
                             icon: const Icon(Icons.delete_outline),
-                            label: const Text('Delete routine'),
+                            label: Text(widget.deleteLabel),
                             style: TextButton.styleFrom(
                               foregroundColor: context.colors.danger,
                             ),

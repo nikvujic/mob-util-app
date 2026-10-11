@@ -365,14 +365,14 @@ task)
   once).
 
 **F. Later**
-- [ ] **Point items** (Nikola, after E; he meant reminders, not routines):
+- [x] **Point items** (Nikola, after E; he meant reminders, not routines):
   something like a one-off reminder or to-do on the timeline — a time but
   **no end**, a small block that "hovers" there as a temporary reminder,
   not a long-running task. Agreed (P14): a short see-through block over
   the timeline; a bell button adds one; notifies at its time only;
   ticking it off deletes it; unticked, it stays on its day.
   - [x] Model, storage (`pins.json` v1), backups (v6, `plannerPins`)
-  - [ ] Timeline, adding / editing, ticking off, notifications
+  - [x] Timeline, adding / editing, ticking off, notifications
 - [x] Unclear note "(This is just so markdown)": Nikola doesn't recall;
   only the set-password part was meant, and it's done.
 
