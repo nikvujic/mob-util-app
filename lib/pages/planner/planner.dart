@@ -202,6 +202,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final changed = await showModalBottomSheet<NewTask>(
       context: context,
       isScrollControlled: true,
+      enableDrag: false,
       builder: (_) => TaskSheet(
         slot: room,
         title: routine.title,

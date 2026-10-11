@@ -26,6 +26,9 @@ Release with the installable APK.
   blocks with a reminder; when a picked time had to change to fit, the
   sheet says why.
 - Selected items have a much clearer outline everywhere.
+- Planner sheet: it no longer closes when dragged down; pulling down
+  brings the form into thumb reach. A ✕ at the bottom closes it, and if
+  something changed it asks first (back on that question discards).
 
 ### Fixed
 - **Counters click again**: the app plays its own click; Android's touch

@@ -321,11 +321,14 @@ Confirmed working on the phone: **fingerprint unlock**.
   leaves; only the system back steps out of editing first.
 
 **C. Planner sheet (add / edit a block)**
-- [ ] Reach mode in the sheet: pulling down shifts the content into thumb
+- [x] Reach mode in the sheet: pulling down shifts the content into thumb
   reach instead of closing the sheet.
-- [ ] A close button (the sheet no longer closes by dragging it down).
-- [ ] Closing with changes asks to confirm (title + message, Cancel /
-  Close). Unlike notes, **back again counts as Close**.
+- [x] A close button (the sheet no longer closes by dragging it down).
+  Close and Add / Save stay in a fixed row at the bottom; the form
+  scrolls above it.
+- [x] Closing with changes asks to confirm ("Discard changes?", Cancel /
+  Discard). Unlike notes, **back again counts as Discard**; tapping
+  outside the dialog does nothing.
 
 **D. Planner: a one-off and a routine at the same time** (one focused
 task)

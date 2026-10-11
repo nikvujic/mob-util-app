@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/widgets/app_dialog.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 
@@ -47,6 +49,8 @@ Future<NewTask?> showAddTaskSheet(
   return showModalBottomSheet<NewTask>(
     context: context,
     isScrollControlled: true,
+    // Pulling down is reach mode, not closing (✕ closes).
+    enableDrag: false,
     builder: (_) => TaskSheet(
       slot: slot,
       start: start,
@@ -67,6 +71,8 @@ Future<NewTask?> showAddRoutineSheet(
   return showModalBottomSheet<NewTask>(
     context: context,
     isScrollControlled: true,
+    // Pulling down is reach mode, not closing (✕ closes).
+    enableDrag: false,
     builder: (_) => TaskSheet(
       slot: slot,
       repeat: RepeatChoice.always,
@@ -87,6 +93,8 @@ Future<NewTask?> showEditRoutineSheet(
   return showModalBottomSheet<NewTask>(
     context: context,
     isScrollControlled: true,
+    // Pulling down is reach mode, not closing (✕ closes).
+    enableDrag: false,
     builder: (_) => TaskSheet(
       slot: room,
       title: routine.title,
@@ -114,6 +122,8 @@ Future<NewTask?> showEditTaskSheet(
   return showModalBottomSheet<NewTask>(
     context: context,
     isScrollControlled: true,
+    // Pulling down is reach mode, not closing (✕ closes).
+    enableDrag: false,
     builder: (_) => TaskSheet(
       slot: room,
       title: task.title,
@@ -181,7 +191,8 @@ class TaskSheet extends StatefulWidget {
 }
 
 class _TaskSheetState extends State<TaskSheet> {
-  late final _title = TextEditingController(text: widget.title);
+  late final _title = TextEditingController(text: widget.title)
+    ..addListener(() => setState(() {})); // canPop follows the changes
   late int _start = widget.start ?? widget.slot.start;
   late int _end = widget.end ?? math.min(_start + 60, widget.slot.end);
 
@@ -264,6 +275,52 @@ class _TaskSheetState extends State<TaskSheet> {
                   'starts.'
               : null;
     });
+  }
+
+  /// Whether anything differs from how the sheet opened.
+  bool get _changed =>
+      _title.text != widget.title ||
+      _start != (widget.start ?? widget.slot.start) ||
+      _end != _initialEnd ||
+      !_sameDays(_weekdays, widget.weekdays ?? const {}) ||
+      _until != widget.until ||
+      _color?.name != widget.color ||
+      _remind != widget.remind;
+
+  late final int _initialEnd = _end;
+
+  static bool _sameDays(Set<int> a, Set<int> b) =>
+      a.length == b.length && a.containsAll(b);
+
+  /// Closes, asking first if something was changed. In that question,
+  /// back counts as "Discard" (Nikola), unlike a note's "Save changes?".
+  Future<void> _close() async {
+    if (!_changed) {
+      Navigator.of(context).pop();
+      return;
+    }
+    final discard = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AppDialog(
+        title: 'Discard changes?',
+        content: const DialogMessage('What you changed here won\'t be kept.'),
+        actions: [
+          DialogButton(
+            label: 'Cancel',
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          DialogButton(
+            label: 'Discard',
+            primary: true,
+            danger: true,
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+    // Back (null) closes too.
+    if ((discard ?? true) && mounted) Navigator.of(context).pop();
   }
 
   void _submit() {
@@ -381,136 +438,174 @@ class _TaskSheetState extends State<TaskSheet> {
   @override
   Widget build(BuildContext context) {
     final slotEnd = widget.slot.end;
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      child: SafeArea(
-        // Scrolls when the keyboard leaves too little room.
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+    final media = MediaQuery.of(context);
+    // A fixed share of the room above the keyboard: the fields scroll (with
+    // reach mode, so pulling down brings the top ones into thumb reach)
+    // and the buttons stay at the bottom.
+    final room =
+        media.size.height - media.viewInsets.bottom - media.padding.top;
+    return PopScope(
+      canPop: !_changed,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _close();
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+        child: SizedBox(
+          height: room * 0.8,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                key: const Key('taskTitle'),
-                controller: _title,
-                autofocus: true,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText:
-                      widget.repeat == RepeatChoice.always ? 'Routine' : 'Task',
+              Expanded(
+                child: PullDownList.children(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextField(
+                            key: const Key('taskTitle'),
+                            controller: _title,
+                            autofocus: true,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              hintText: widget.repeat == RepeatChoice.always
+                                  ? 'Routine'
+                                  : 'Task',
+                            ),
+                            onSubmitted: (_) => _submit(),
+                          ),
+                          const SizedBox(height: 12),
+                          // Wraps (e.g. with a very large font) instead of overflowing.
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                'From',
+                                style: TextStyle(
+                                    color: context.colors.textSecondary),
+                              ),
+                              _TimeButton(_start, onPressed: _pickStart),
+                              Text(
+                                'to',
+                                style: TextStyle(
+                                    color: context.colors.textSecondary),
+                              ),
+                              _TimeButton(_end, onPressed: _pickEnd),
+                            ],
+                          ),
+                          if (_adjusted != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 4),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    size: 18,
+                                    color: context.colors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      _adjusted!,
+                                      key: const Key('timeAdjusted'),
+                                      style: TextStyle(
+                                          color: context.colors.textPrimary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              for (final length in TaskSheet.quickLengths)
+                                ChoiceChip(
+                                  label: Text(length < 60
+                                      ? '$length min'
+                                      : '${length ~/ 60} h'),
+                                  selected: _end == _start + length,
+                                  onSelected: _start + length <= slotEnd
+                                      ? (_) =>
+                                          setState(() => _end = _start + length)
+                                      : null,
+                                ),
+                              ChoiceChip(
+                                label: const Text('Until free time ends'),
+                                selected: _end == slotEnd,
+                                onSelected: (_) =>
+                                    setState(() => _end = slotEnd),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          _ColourChoice(
+                            selected: _color,
+                            onSelected: (c) => setState(() => _color = c),
+                          ),
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                'Remind',
+                                style: TextStyle(
+                                    color: context.colors.textSecondary),
+                              ),
+                              for (final minutes in _reminders)
+                                ChoiceChip(
+                                  label: Text(_remindLabel(minutes)),
+                                  selected: _remind == minutes,
+                                  onSelected: (_) =>
+                                      setState(() => _remind = minutes),
+                                ),
+                            ],
+                          ),
+                          if (widget.repeat != RepeatChoice.never)
+                            ..._repeatChoices(context),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                onSubmitted: (_) => _submit(),
               ),
-              const SizedBox(height: 12),
-              // Wraps (e.g. with a very large font) instead of overflowing.
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    'From',
-                    style: TextStyle(color: context.colors.textSecondary),
-                  ),
-                  _TimeButton(_start, onPressed: _pickStart),
-                  Text(
-                    'to',
-                    style: TextStyle(color: context.colors.textSecondary),
-                  ),
-                  _TimeButton(_end, onPressed: _pickEnd),
-                ],
-              ),
-              if (_adjusted != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4, bottom: 4),
+              Divider(height: 1, color: context.colors.divider),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 18,
-                        color: context.colors.textSecondary,
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        tooltip: 'Close',
+                        onPressed: _close,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          _adjusted!,
-                          key: const Key('timeAdjusted'),
-                          style: TextStyle(color: context.colors.textPrimary),
+                      if (widget.onDelete != null)
+                        Flexible(
+                          child: TextButton.icon(
+                            icon: const Icon(Icons.delete_outline),
+                            label: const Text('Delete routine'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: context.colors.danger,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              widget.onDelete!();
+                            },
+                          ),
                         ),
+                      const Spacer(),
+                      FilledButton(
+                        onPressed: _submit,
+                        child: Text(widget.submitLabel),
                       ),
                     ],
                   ),
                 ),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final length in TaskSheet.quickLengths)
-                    ChoiceChip(
-                      label: Text(
-                          length < 60 ? '$length min' : '${length ~/ 60} h'),
-                      selected: _end == _start + length,
-                      onSelected: _start + length <= slotEnd
-                          ? (_) => setState(() => _end = _start + length)
-                          : null,
-                    ),
-                  ChoiceChip(
-                    label: const Text('Until free time ends'),
-                    selected: _end == slotEnd,
-                    onSelected: (_) => setState(() => _end = slotEnd),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              _ColourChoice(
-                selected: _color,
-                onSelected: (c) => setState(() => _color = c),
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    'Remind',
-                    style: TextStyle(color: context.colors.textSecondary),
-                  ),
-                  for (final minutes in _reminders)
-                    ChoiceChip(
-                      label: Text(_remindLabel(minutes)),
-                      selected: _remind == minutes,
-                      onSelected: (_) => setState(() => _remind = minutes),
-                    ),
-                ],
-              ),
-              if (widget.repeat != RepeatChoice.never)
-                ..._repeatChoices(context),
-              const SizedBox(height: 8),
-              Wrap(
-                alignment: widget.onDelete == null
-                    ? WrapAlignment.end
-                    : WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  if (widget.onDelete != null)
-                    TextButton.icon(
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text('Delete routine'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: context.colors.danger,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        widget.onDelete!();
-                      },
-                    ),
-                  FilledButton(
-                    onPressed: _submit,
-                    child: Text(widget.submitLabel),
-                  ),
-                ],
               ),
             ],
           ),

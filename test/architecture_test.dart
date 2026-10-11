@@ -108,8 +108,6 @@ const plainScrollAllowed = {
   'pages/planner/routines.dart',
   // A form, used with the keyboard open.
   'pages/security/password_form.dart',
-  // The task sheet: a form with the keyboard open.
-  'pages/planner/add_task_sheet.dart',
   // Tiles fill from the bottom right: already in thumb reach.
   'pages/other/other.dart',
 };
