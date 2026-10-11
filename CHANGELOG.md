@@ -52,6 +52,9 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Planner notifications: two quick changes could leave a notification
+  for something already ticked off or deleted. They're now planned one
+  at a time.
 - Planner: adding a task in the last minutes before another one no
   longer makes a block shorter than 5 minutes, and an old short block
   can be edited without its times getting stuck.

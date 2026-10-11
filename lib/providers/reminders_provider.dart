@@ -116,10 +116,38 @@ class ReminderPlanner {
   Future<bool> requestPermission() =>
       _ref.read(reminderSchedulerProvider).requestPermission();
 
-  /// Plans and schedules the reminders now.
-  Future<void> refresh() async {
+  /// The refresh running now, if any.
+  Future<void>? _running;
+
+  /// Something changed while [_running]: plan once more when it's done.
+  bool _again = false;
+
+  /// Plans and schedules the reminders now. One at a time: scheduling
+  /// cancels everything and then adds reminders one by one, so two at once
+  /// could leave the older one's reminders behind (e.g. for a deleted
+  /// task). A refresh asked for meanwhile runs right after.
+  Future<void> refresh() {
     _pending = false;
-    if (_disposed) return;
+    if (_running != null) {
+      _again = true;
+      return _running!;
+    }
+    return _running = _refreshUntilDone();
+  }
+
+  Future<void> _refreshUntilDone() async {
+    try {
+      do {
+        _again = false;
+        if (_disposed) return;
+        await _plan();
+      } while (_again);
+    } finally {
+      _running = null;
+    }
+  }
+
+  Future<void> _plan() async {
     final hide = _ref.read(sectionLocksProvider).contains(AppSection.planner) &&
         _ref.read(securityProvider) != null;
     await _ref.read(reminderSchedulerProvider).replaceAll(
