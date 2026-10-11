@@ -20,6 +20,10 @@ changes are not released on their own.
 
 ## Making a release
 
+**Who runs it (agreed with Nikola):** Claude does, but only after asking
+Nikola ("Release vX.Y.Z now?") and getting a yes, every time. A yes covers
+that one release only.
+
 1. Bump `version` in `pubspec.yaml`.
 2. Add a section to `CHANGELOG.md`: `## [X.Y.Z] - YYYY-MM-DD` with
    *Added* / *Changed* / *Fixed* lists, written for the user.
