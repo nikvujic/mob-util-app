@@ -203,20 +203,25 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     );
   }
 
+  /// A note with no title ("Untitled" counts as none) and nothing but
+  /// spaces and new lines in it: removed on leaving (N14).
+  static bool _isEmpty(String title, String content) {
+    final t = title.trim();
+    return (t.isEmpty || t == NotesNotifier.defaultTitle) &&
+        content.trim().isEmpty;
+  }
+
+  /// Saves on leaving; an empty note, new or not, is removed instead
+  /// (N14).
   void _save() {
     _autosaveTimer?.cancel();
     if (_discarded) return;
     final title = _titleController.text.trim();
     final content = _contentController.text;
-    final notifier = ref.read(notesProvider.notifier);
-
-    final untouched = (title.isEmpty || title == NotesNotifier.defaultTitle) &&
-        content.trim().isEmpty;
-    if (widget.isNew && untouched) {
-      notifier.removeNotes({widget.noteId});
+    if (_isEmpty(title, content)) {
+      ref.read(notesProvider.notifier).removeNotes({widget.noteId});
       return;
     }
-
     _write(title: title.isEmpty ? _untitled : title, content: content);
   }
 
@@ -231,7 +236,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _autosaveTimer?.cancel();
     final notifier = ref.read(notesProvider.notifier);
     final original = _original;
-    if (widget.isNew || original == null) {
+    if (widget.isNew ||
+        original == null ||
+        _isEmpty(original.title, _originalContent)) {
       notifier.removeNotes({widget.noteId});
     } else {
       notifier.restoreNote(original);
@@ -258,7 +265,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         _discardAll();
       }
     } else {
-      _save(); // removes an untouched new note
+      _save(); // removes an empty note
     }
     // A section lock can close everything above the home screen while the
     // dialog is open (taking this page with it): then there's nothing left

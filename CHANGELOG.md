@@ -7,6 +7,9 @@ Release with the installable APK.
 ## [0.19.0] - unreleased
 
 ### Changed
+- Notes: a note with no title and nothing in it goes away when you
+  leave it, also one that was emptied by editing (back still asks first,
+  so the change can be discarded).
 - Switching tabs ends selection mode, and coming back to the Planner
   shows today (a selection or a picked day used to linger).
 - Planner: a short block (say a 5-minute shower) is now drawn full size,

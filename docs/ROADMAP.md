@@ -334,7 +334,7 @@ Sorted from one long message. Order of work is at the end.
   planner goes back to today when switching tabs (a note was still
   selected on coming back). (G18)
 
-**H. Notes: empty notes go away** — a note with no title ("Untitled")
+**H. Notes: empty notes go away** ✅ — a note with no title ("Untitled")
   and no content (only spaces / new lines) is removed on leaving, even
   after editing; if something changed, back still asks first, so the
   change can be discarded. (N14)
@@ -387,7 +387,7 @@ Sorted from one long message. Order of work is at the end.
   **checklist of what to test** (docs/RELEASING.md).
 
 **Chunks** (small, one at a time; each can be released on its own):
-1. [ ] G + H — switching tabs clears state; empty notes go away.
+1. [x] G + H — switching tabs clears state; empty notes go away.
 2. [ ] A + B — the planner sheet and tapping a task; colours.
 3. [ ] D — the "now" line.
 4. [ ] C — reminders as marks on the timeline.

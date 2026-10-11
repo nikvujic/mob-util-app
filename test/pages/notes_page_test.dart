@@ -110,16 +110,44 @@ void main() {
     expect(find.text('No notes'), findsOneWidget);
   });
 
-  testWidgets('an existing empty note is not discarded', (tester) async {
+  testWidgets('an existing empty note goes away on leaving (N14)',
+      (tester) async {
     container = await pumpApp(tester);
-    notes().addNote();
+    notes().addNote(content: '  \n\n ');
     await tester.pump();
 
     await tester.tap(find.text('New Note'));
     await tester.pumpAndSettle();
     await leaveNote(tester);
 
-    expect(container.read(notesProvider), hasLength(1));
+    expect(container.read(notesProvider), isEmpty);
+  });
+
+  group('a note emptied by editing (N14)', () {
+    Future<void> emptyIt(WidgetTester tester) async {
+      container = await pumpApp(tester);
+      notes().addNote(title: 'Shopping', content: 'milk');
+      await tester.pump();
+      await tester.tap(find.text('Shopping'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('noteTitleField')), '');
+      await tester.enterText(find.byKey(const Key('noteContentField')), ' \n ');
+      await tester.pump();
+    }
+
+    testWidgets('saved: it goes away', (tester) async {
+      await emptyIt(tester);
+      await leaveNote(tester, save: true);
+      expect(container.read(notesProvider), isEmpty);
+      expect(find.text('No notes'), findsOneWidget);
+    });
+
+    testWidgets('discarded: it stays as it was', (tester) async {
+      await emptyIt(tester);
+      await leaveNote(tester, save: false);
+      final note = container.read(notesProvider).single;
+      expect((note.title, note.content), ('Shopping', 'milk'));
+    });
   });
 
   testWidgets('the title of an existing note can be edited', (tester) async {
