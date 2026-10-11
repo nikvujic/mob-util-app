@@ -70,14 +70,33 @@ void main() {
     testWidgets('offers Lock now only while unlocked', (tester) async {
       await start(tester);
       await openMenu(tester);
-      await tester.tap(find.text('Lock now'));
+      await tester.tap(find.byTooltip('Lock now'));
       await tester.pumpAndSettle();
 
       expect(unlocked(), isFalse);
       expect(find.text('Locked'), findsOneWidget); // snackbar
       await openMenu(tester);
-      expect(find.text('Lock now'), findsNothing);
+      expect(find.byTooltip('Lock now'), findsNothing);
     });
+  });
+
+  testWidgets('Lock now sits top right of the menu and doesn\'t scroll',
+      (tester) async {
+    await start(tester);
+    await openMenu(tester);
+    final drawer = tester.getRect(find.byType(Drawer));
+    final lock = tester.getRect(find.byTooltip('Lock now'));
+    expect(lock.center.dx, greaterThan(drawer.center.dx), reason: 'right');
+    expect(lock.top, lessThan(drawer.top + 80), reason: 'top');
+
+    // Pulling the list down (reach mode) doesn't move it.
+    await tester.drag(find.text('Security'), const Offset(0, 200));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byTooltip('Lock now')), lock);
+
+    // Themes now comes before Backup.
+    expect(tester.getTopLeft(find.text('Themes')).dy,
+        lessThan(tester.getTopLeft(find.text('Backup')).dy));
   });
 
   group('Security page', () {

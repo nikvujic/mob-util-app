@@ -136,6 +136,27 @@ void main() {
     });
   });
 
+  testWidgets('the keyboard\'s next key goes to the next field',
+      (tester) async {
+    await openSecurity(tester);
+    await tester.tap(find.text('Set master password'));
+    await tester.pumpAndSettle();
+    bool focused(String key) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.byKey(Key(key)),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .focusNode
+        .hasFocus;
+    expect(focused('newPassword'), isTrue);
+
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pumpAndSettle();
+    expect(focused('repeatPassword'), isTrue);
+  });
+
   testWidgets('password fields are hidden until shown', (tester) async {
     await openSecurity(tester);
     await tester.tap(find.text('Set master password'));

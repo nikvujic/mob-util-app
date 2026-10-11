@@ -63,10 +63,14 @@ class _PasswordFieldState extends State<PasswordField> {
         helperText: widget.helper,
         errorText: widget.error,
         border: const OutlineInputBorder(),
-        suffixIcon: IconButton(
-          icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),
-          tooltip: _visible ? 'Hide password' : 'Show password',
-          onPressed: () => setState(() => _visible = !_visible),
+        // Out of the focus order, so the keyboard's "next" goes on to the
+        // next field rather than to this button. Tapping it still works.
+        suffixIcon: ExcludeFocus(
+          child: IconButton(
+            icon: Icon(_visible ? Icons.visibility_off : Icons.visibility),
+            tooltip: _visible ? 'Hide password' : 'Show password',
+            onPressed: () => setState(() => _visible = !_visible),
+          ),
         ),
       ),
     );

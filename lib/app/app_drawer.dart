@@ -27,12 +27,12 @@ class AppDrawer extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // The items can be pulled down into thumb reach (reach mode).
-            Expanded(
-              child: PullDownList.children(
+            // A fixed header with the special actions (doesn't scroll).
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+              child: Row(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  Expanded(
                     child: Text(
                       'The App',
                       style: TextStyle(
@@ -42,12 +42,11 @@ class AppDrawer extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Divider(height: 1, color: context.colors.divider),
                   if (ref.watch(sessionProvider) != null)
-                    ListTile(
-                      leading: const Icon(Icons.lock_outline),
-                      title: const Text('Lock now'),
-                      onTap: () {
+                    IconButton(
+                      icon: const Icon(Icons.lock_outline),
+                      tooltip: 'Lock now',
+                      onPressed: () {
                         ref.read(sessionProvider.notifier).lock();
                         Scaffold.of(context).closeDrawer();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -55,20 +54,28 @@ class AppDrawer extends ConsumerWidget {
                         );
                       },
                     ),
+                ],
+              ),
+            ),
+            Divider(height: 1, color: context.colors.divider),
+            // The items can be pulled down into thumb reach (reach mode).
+            Expanded(
+              child: PullDownList.children(
+                children: [
                   ListTile(
                     leading: const Icon(Icons.shield_outlined),
                     title: const Text('Security'),
                     onTap: () => _open(context, const SecurityPage()),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.save_alt),
-                    title: const Text('Backup'),
-                    onTap: () => _open(context, const BackupPage()),
-                  ),
-                  ListTile(
                     leading: const Icon(Icons.palette_outlined),
                     title: const Text('Themes'),
                     onTap: () => _open(context, const ThemesPage()),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.save_alt),
+                    title: const Text('Backup'),
+                    onTap: () => _open(context, const BackupPage()),
                   ),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined),
