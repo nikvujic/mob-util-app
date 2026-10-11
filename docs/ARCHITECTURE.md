@@ -141,9 +141,7 @@ fingerprint unlock is just turned on again.
 `AppPalette` (in `core/theme.dart`) holds a theme's colours; `AppTheme.of`
 builds the app's look from one, and widgets read it with `context.colors`.
 The chosen theme and other look-and-feel choices are `Preferences`, kept
-in `preferences.json` on the phone (not in backups), the planner's
-timeline zoom too (`plannerZoom`, a `TimelineZoom` name; `PlannerTimeline`
-takes the zoom, and `zoomAction` is its button). The design checks run
+in `preferences.json` on the phone (not in backups). The design checks run
 every screen in every theme.
 
 Custom icons (the Other tiles) are SVGs in `assets/icons/`, drawn in
@@ -211,13 +209,22 @@ time with neither; a task's room (`PlannerNotifier.roomFor` / `freeOn`)
 only counts tasks, and the add sheet switches to the routines' room
 while Repeat is on.
 
+## The timeline's scale (Round 10)
+
+`TimeScale` (`pages/planner/timeline.dart`) maps minutes to heights: an
+hour is `hourHeight`, but every block gets at least `minBlockHeight` (a
+touch target), so a short block stretches the stretch of the day it's in
+(that hour is taller) instead of being squeezed. Everything on the
+timeline (hour lines, free time, blocks and their pieces, reminders)
+goes through the same scale.
+
 ## Planner reminders (P14)
 
 A reminder (`models/planner_pin.dart`, "pin" in code) is a title at a time
 on one day, with no end, kept in `pins.json` by `PinsNotifier`. It isn't
 a block: it takes no time, so free time and the overlap rules ignore it,
 and `PlannerTimeline` draws it last (`TimelinePin`), over everything, one
-touch target high at every zoom, cascading when two would cover each
+touch target high, cascading when two would cover each
 other. Ticking it off deletes it (`remove` / `restore` for undo).
 `planReminders` notifies at its time.
 

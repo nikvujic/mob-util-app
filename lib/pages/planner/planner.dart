@@ -473,10 +473,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         ),
     ];
 
-    final zoom = watchZoom(ref);
     // Opens around the current hour (the scroll stays when changing day).
     final timeline = _timeline ??= ScrollController(
-      initialScrollOffset: math.max(0, now.hour - 1) * zoom.hourHeight,
+      initialScrollOffset:
+          PlannerTimeline.scaleFor(blocks).y(math.max(0, now.hour - 1) * 60),
     );
 
     return SelectionPopScope(
@@ -499,7 +499,6 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                 child: SingleChildScrollView(
                   controller: timeline,
                   child: PlannerTimeline(
-                    zoom: zoom,
                     blocks: blocks,
                     onAdd: selecting ? null : (slot) => _addIn(day, slot),
                     pins: [
@@ -539,7 +538,6 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               // added here, outermost.
               : BottomActions(
                   actions: [
-                    zoomAction(ref, timeline),
                     BottomAction(
                       icon: Icons.repeat,
                       tooltip: 'Routines',

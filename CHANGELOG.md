@@ -6,7 +6,13 @@ Release with the installable APK.
 
 ## [0.19.0] - unreleased
 
+### Changed
+- Planner: a short block (say a 5-minute shower) is now drawn full size,
+  and its hour on the timeline gets a bit taller to make room, instead
+  of the block being squeezed.
+
 ### Removed
+- The planner's zoom button: short blocks no longer need it.
 - The Džoni page in Other. Its count is no longer kept; older backups that
   have it still restore.
 

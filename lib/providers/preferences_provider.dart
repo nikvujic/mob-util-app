@@ -19,9 +19,6 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   /// Which master password's key the fingerprint opens (L6); null: off.
   void setFingerprintFor(String? salt) =>
       state = state.copyWith(fingerprintFor: () => salt);
-
-  /// The planner timeline's size (a `TimelineZoom` name).
-  void setPlannerZoom(String zoom) => state = state.copyWith(plannerZoom: zoom);
 }
 
 final preferencesProvider =

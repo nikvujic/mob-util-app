@@ -287,9 +287,9 @@ patterns other work builds on (G11, themes), then the bigger features.
   title.
 
 ### Round 10 — Nikola's notes on 0.18.0 (2026-10-11)
-- [ ] **Remove the timeline zoom** (P13): a 5-minute block looked bad and
+- [x] **Remove the timeline zoom** (P13): a 5-minute block looked bad and
   zooming didn't help.
-- [ ] **Blocks have a minimum height** (one touch target, like a
+- [x] **Blocks have a minimum height** (one touch target, like a
   30-minute block). A shorter block isn't squeezed: the timeline
   **stretches there** instead, so e.g. 11:00–12:00 with a 5-minute shower
   in it is a bit taller than other hours. The timeline is a visual

@@ -85,6 +85,10 @@ Future<void> seed(ProviderContainer container) async {
         from: DateTime(2026, 10, 1),
         color: 'purple',
       );
+  // A 5-minute block: it stretches its hour (Round 10).
+  container
+      .read(plannerProvider.notifier)
+      .addTask(today, 'Pills', start: 20 * 60, end: 20 * 60 + 5);
   // A reminder (P14), over the task and routine.
   container
       .read(pinsProvider.notifier)
@@ -150,19 +154,6 @@ void main() {
         await t.pumpAndSettle();
       },
       'planner': (t) => openTab(t, 'Planner'),
-      'planner zoomed in all the way': (t) async {
-        await openTab(t, 'Planner');
-        await t.tap(find.byTooltip('Zoom: Normal'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Zoom: Large'));
-        await t.pumpAndSettle();
-        // The block's top, with its checkbox, at the top of the view.
-        await t.ensureVisible(find.ancestor(
-          of: find.text('Stand-up'),
-          matching: find.byType(SelectableCard),
-        ));
-        await t.pumpAndSettle();
-      },
       'routine choices': (t) async {
         await openTab(t, 'Planner');
         await t.tap(find.text('Stand-up'));
@@ -647,7 +638,7 @@ void main() {
     await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     await openTab(tester, 'Planner');
-    final free = find.text('Free · 11:30–24:00');
+    final free = find.text('Free · 11:30–20:00');
     await tester.ensureVisible(free);
     await tester.pumpAndSettle();
     await tester.tap(free);
