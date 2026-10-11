@@ -365,10 +365,13 @@ task)
   once).
 
 **F. Later**
-- [ ] A new feature for **routines** — Nikola will explain when we get
-  to it.
-- [ ] Unclear note "(This is just so markdown)" after the set-password
-  note: asked; if forgotten, only the set-password part is done.
+- [ ] **Point items** (Nikola, after E; he meant reminders, not routines):
+  something like a one-off reminder or to-do on the timeline — a time but
+  **no end**, a small block that "hovers" there as a temporary reminder,
+  not a long-running task. Design to agree before building (name, how to
+  add, notification, ticking, carrying over, repeating).
+- [x] Unclear note "(This is just so markdown)": Nikola doesn't recall;
+  only the set-password part was meant, and it's done.
 
 ### Round 8 — reminders (2026-10-11)
 
