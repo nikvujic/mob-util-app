@@ -286,6 +286,16 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 10 — Nikola's notes on 0.18.0 (2026-10-11)
+- [ ] **Remove the timeline zoom** (P13): a 5-minute block looked bad and
+  zooming didn't help.
+- [ ] **Blocks have a minimum height** (one touch target, like a
+  30-minute block). A shorter block isn't squeezed: the timeline
+  **stretches there** instead, so e.g. 11:00–12:00 with a 5-minute shower
+  in it is a bit taller than other hours. The timeline is a visual
+  representation, not to scale everywhere. (Blocks stay at least
+  5 minutes long.)
+
 ### Housekeeping (2026-10-11, after 0.18.0)
 - [x] Removed the Džoni page (O4): the repo is public and anyone building
   it gets the app, so it didn't belong. Its count is no longer kept in
