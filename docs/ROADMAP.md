@@ -286,6 +286,14 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Housekeeping (2026-10-11, after 0.18.0)
+- [x] Removed the Džoni page (O4): the repo is public and anyone building
+  it gets the app, so it didn't belong. Its count is no longer kept in
+  preferences or backups; older files that have it still load (ignored).
+- [x] Checked the repo and its history for private data: no keys,
+  passwords or personal details (the signing key is only in GitHub
+  secrets).
+
 ### Round 9 — Nikola's notes after using 0.17 (2026-10-11)
 
 Confirmed working on the phone: **fingerprint unlock**.

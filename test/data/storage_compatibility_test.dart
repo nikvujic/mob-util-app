@@ -221,12 +221,11 @@ void main() {
       );
     });
 
-    test('v4 backup restores timed tasks and the Džoni count', () {
+    test('v4 backup restores timed tasks', () {
       final file = BackupFile.parse(
         File('test/fixtures/v4/backup-plain.json').readAsStringSync(),
       ) as PlainBackupFile;
       expectTimed(file.backup.plannerTasks);
-      expect(file.backup.dzoniCount, 7);
       expect(file.backup.counters, hasLength(2));
     });
 
@@ -329,7 +328,6 @@ void main() {
           BackupFile.parse(File(path).readAsStringSync()) as PlainBackupFile;
       expect(file.backup.plannerTasks, isEmpty, reason: path);
       expect(file.backup.counters, isEmpty, reason: path);
-      expect(file.backup.dzoniCount, 0, reason: path);
     }
   });
 

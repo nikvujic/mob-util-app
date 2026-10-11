@@ -18,7 +18,6 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
-import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -49,7 +48,6 @@ class BackupExporter {
       routines: _ref.read(routinesProvider),
       plannerPins: _ref.read(pinsProvider),
       counters: _ref.read(countersProvider),
-      dzoniCount: _ref.read(preferencesProvider).dzoniCount,
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -258,7 +256,6 @@ class BackupImporter {
       source.routines,
       source.plannerPins,
       source.counters,
-      source.dzoniCount,
     );
     return RestoreUndo._(
       previous,
@@ -276,7 +273,6 @@ class BackupImporter {
       undo._previous.routines,
       undo._previous.plannerPins,
       undo._previous.counters,
-      undo._previous.dzoniCount,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -348,7 +344,6 @@ class BackupImporter {
     RoutineBook routines,
     List<PlannerPin> plannerPins,
     List<Counter> counters,
-    int dzoniCount,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -356,7 +351,6 @@ class BackupImporter {
     _ref.read(routinesProvider.notifier).replaceAll(routines);
     _ref.read(pinsProvider.notifier).replaceAll(plannerPins);
     _ref.read(countersProvider.notifier).replaceAll(counters);
-    _ref.read(preferencesProvider.notifier).setDzoniCount(dzoniCount);
     await _ref.read(appStorageProvider).flush();
   }
 }

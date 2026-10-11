@@ -17,7 +17,6 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
-import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
@@ -167,9 +166,6 @@ void main() {
           source.read(countersProvider).last.id,
           -2,
         );
-    source.read(preferencesProvider.notifier)
-      ..countDzoni()
-      ..countDzoni();
     final gym = source.read(routinesProvider.notifier).add(
           title: 'Run',
           start: 1080,
@@ -208,7 +204,6 @@ void main() {
       target.read(countersProvider).map((c) => c.toJson()),
       source.read(countersProvider).map((c) => c.toJson()),
     );
-    expect(target.read(preferencesProvider).dzoniCount, 2);
     expect(
       target.read(routinesProvider).toJson(),
       source.read(routinesProvider).toJson(),

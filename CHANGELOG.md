@@ -4,6 +4,12 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.19.0] - unreleased
+
+### Removed
+- The Džoni page in Other. Its count is no longer kept; older backups that
+  have it still restore.
+
 ## [0.18.0] - 2026-10-11
 
 ### Added

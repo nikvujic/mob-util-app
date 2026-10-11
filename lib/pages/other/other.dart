@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/other/counters.dart';
-import 'package:the_app/pages/other/dzoni.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 
 /// Lists additional tools as square icon tiles, filled in from the bottom
@@ -16,11 +15,6 @@ class OtherPage extends StatelessWidget {
       icon: 'assets/icons/counters.svg',
       label: 'Counters',
       page: () => const CountersPage(),
-    ),
-    (
-      icon: 'assets/icons/dzoni.svg',
-      label: 'Džoni',
-      page: () => const DzoniPage(),
     ),
   ];
 

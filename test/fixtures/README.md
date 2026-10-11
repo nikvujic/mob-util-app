@@ -27,7 +27,7 @@ app still reads every version, so an update can never lose existing data.
 - `v3/storage/planner.json` — planner tasks with start and end times
   (planner.json has its own version, 3; the other files are still 2).
 - `v4/backup-plain.json` — backup with timed planner tasks and the Džoni
-  count.
+  count (that page is gone; the count is now ignored).
 - `v5/storage/planner.json` — planner tasks, one with a colour
   (planner.json version 4).
 - `v5/storage/routines.json` — routines (version 1): Gym Mon/Wed/Fri

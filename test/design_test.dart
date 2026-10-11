@@ -200,22 +200,6 @@ void main() {
         await t.tap(find.byTooltip('Counters'));
         await t.pumpAndSettle();
       },
-      'dzoni': (t) async {
-        await openTab(t, 'Other');
-        await t.tap(find.byTooltip('Džoni'));
-        await t.pumpAndSettle();
-      },
-      'dzoni set count dialog': (t) async {
-        await openTab(t, 'Other');
-        await t.tap(find.byTooltip('Džoni'));
-        await t.pumpAndSettle();
-        for (var i = 0; i < 3; i++) {
-          await t.tap(find.byKey(const Key('dzoniCorner')));
-          await t.pump(const Duration(milliseconds: 100));
-        }
-        await t.pumpAndSettle();
-        expect(find.text('Set count'), findsOneWidget);
-      },
       'counters selection mode': (t) async {
         await openTab(t, 'Other');
         await t.tap(find.byTooltip('Counters'));

@@ -16,17 +16,12 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setNoteLineNumbers(bool on) =>
       state = state.copyWith(noteLineNumbers: on);
 
-  /// Sets the Džoni count (restoring a backup).
-  void setDzoniCount(int count) => state = state.copyWith(dzoniCount: count);
-
   /// Which master password's key the fingerprint opens (L6); null: off.
   void setFingerprintFor(String? salt) =>
       state = state.copyWith(fingerprintFor: () => salt);
 
   /// The planner timeline's size (a `TimelineZoom` name).
   void setPlannerZoom(String zoom) => state = state.copyWith(plannerZoom: zoom);
-
-  void countDzoni() => state = state.copyWith(dzoniCount: state.dzoniCount + 1);
 }
 
 final preferencesProvider =

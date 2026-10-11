@@ -1,14 +1,11 @@
 /// How the user likes the app: look and feel, kept on this phone (not in
-/// backups, except the Džoni count).
+/// backups).
 class Preferences {
   /// The chosen theme's id (see `AppThemeChoice` in core/theme.dart).
   final String theme;
 
   /// Vibration and a click sound on counter buttons (U6).
   final bool counterFeedback;
-
-  /// The count on the "Džoni" page (O4).
-  final int dzoniCount;
 
   /// Line numbers beside a note's text (N12).
   final bool noteLineNumbers;
@@ -24,7 +21,6 @@ class Preferences {
   const Preferences({
     this.theme = 'green',
     this.counterFeedback = true,
-    this.dzoniCount = 0,
     this.noteLineNumbers = true,
     this.fingerprintFor,
     this.plannerZoom = 'normal',
@@ -33,7 +29,6 @@ class Preferences {
   Preferences copyWith({
     String? theme,
     bool? counterFeedback,
-    int? dzoniCount,
     bool? noteLineNumbers,
     String? Function()? fingerprintFor,
     String? plannerZoom,
@@ -41,7 +36,6 @@ class Preferences {
       Preferences(
         theme: theme ?? this.theme,
         counterFeedback: counterFeedback ?? this.counterFeedback,
-        dzoniCount: dzoniCount ?? this.dzoniCount,
         noteLineNumbers: noteLineNumbers ?? this.noteLineNumbers,
         fingerprintFor:
             fingerprintFor == null ? this.fingerprintFor : fingerprintFor(),
@@ -51,7 +45,6 @@ class Preferences {
   Map<String, dynamic> toJson() => {
         'theme': theme,
         'counterFeedback': counterFeedback,
-        'dzoniCount': dzoniCount,
         'noteLineNumbers': noteLineNumbers,
         if (fingerprintFor != null) 'fingerprintFor': fingerprintFor,
         'plannerZoom': plannerZoom,
@@ -61,7 +54,6 @@ class Preferences {
   factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
         theme: json['theme'] as String? ?? 'green',
         counterFeedback: json['counterFeedback'] as bool? ?? true,
-        dzoniCount: json['dzoniCount'] as int? ?? 0,
         noteLineNumbers: json['noteLineNumbers'] as bool? ?? true,
         fingerprintFor: json['fingerprintFor'] as String?,
         plannerZoom: json['plannerZoom'] as String? ?? 'normal',
