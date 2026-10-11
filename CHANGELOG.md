@@ -52,6 +52,11 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Planner: adding a task in the last minutes before another one no
+  longer makes a block shorter than 5 minutes, and an old short block
+  can be edited without its times getting stuck.
+- Planner: a reminder can be at any minute, up to 23:59.
+- Planner: while selecting, checkboxes don't tick anything.
 - The Reset button in *Forgot password* no longer flashes when it
   becomes available.
 - Planner: a long-pressed block now shows as selected (it was selected,

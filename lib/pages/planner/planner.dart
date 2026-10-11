@@ -78,7 +78,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     if (daysBetween(dayOf(now), day) == 0) {
       final minutes = now.hour * 60 + now.minute;
       final nextHour = (minutes + 59) ~/ 60 * 60;
-      if (slot.start < nextHour && nextHour < slot.end) start = nextHour;
+      // Only if a block still fits after it.
+      if (slot.start < nextHour &&
+          nextHour + PlannerTask.minMinutes <= slot.end) {
+        start = nextHour;
+      }
     }
     start ??= slot.start;
     // Free time is free of both kinds; past it, a task may go on beside a
@@ -336,7 +340,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   Future<void> _addPin(DateTime day) async {
     final now = _now;
     final time = daysBetween(dayOf(now), day) == 0
-        ? math.min((now.hour + 1) * 60, PlannerTask.dayMinutes - 5)
+        ? math.min((now.hour + 1) * 60, PlannerTask.dayMinutes - 1)
         : 9 * 60;
     final pin = await showAddPinSheet(context, time: time);
     if (pin == null || !mounted) return;
@@ -433,8 +437,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           selected: _selection.isSelected(task.id),
           onTap: () => _selection.handleTap(task.id, () => _edit(task)),
           onLongPress: () => _selection.handleLongPress(task.id),
-          onToggleDone: () =>
-              ref.read(plannerProvider.notifier).toggleDone(task.id),
+          // While selecting, nothing ticks (as with reminders).
+          onToggleDone: selecting
+              ? () {}
+              : () => ref.read(plannerProvider.notifier).toggleDone(task.id),
         ),
       // Routines aren't selected (they're deleted on the Routines screen).
       for (final o in routines)
@@ -448,8 +454,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           color: BlockColor.fromName(o.routine.color),
           reminds: o.routine.remind != null,
           onTap: selecting ? () {} : () => _routineTapped(o),
-          onToggleDone: () =>
-              ref.read(routinesProvider.notifier).toggleDone(o.routine.id, day),
+          onToggleDone: selecting
+              ? () {}
+              : () => ref
+                  .read(routinesProvider.notifier)
+                  .toggleDone(o.routine.id, day),
         ),
     ];
 

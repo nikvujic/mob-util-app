@@ -54,6 +54,25 @@ void main() {
     );
   });
 
+  testWidgets('it can be at any minute, 23:59 too', (tester) async {
+    await openPlanner(tester);
+    await tester.tap(find.byTooltip('Add reminder'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(OutlinedButton, '11:00'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), '23');
+    await tester.enterText(fields.at(1), '59');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(OutlinedButton, '23:59'), findsOneWidget);
+    expect(find.byKey(const Key('timeAdjusted')), findsNothing,
+        reason: 'a reminder has no length');
+  });
+
   testWidgets('it takes no time: free time and tasks stay as they are',
       (tester) async {
     await openPlanner(tester);

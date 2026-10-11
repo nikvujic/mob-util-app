@@ -156,6 +156,56 @@ void main() {
     expect((coffee.start, coffee.end), (12 * 60, 12 * 60 + 20));
   });
 
+  testWidgets('now near the end of free time: no block under 5 minutes',
+      (tester) async {
+    container =
+        await pumpApp(tester, clock: () => DateTime(2026, 10, 8, 13, 30));
+    await openTab(tester, 'Planner');
+    planner()
+      ..addTask(today, 'A', start: 12 * 60, end: 13 * 60 + 20)
+      ..addTask(today, 'B', start: 14 * 60 + 3, end: 15 * 60);
+    await tester.pump();
+
+    // The next full hour (14:00) leaves 3 minutes: start at 13:20 instead.
+    await tester.tap(free('13:20–14:03'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(OutlinedButton, '13:20'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '14:03'), findsOneWidget);
+  });
+
+  testWidgets('an old block shorter than 5 minutes can still be edited',
+      (tester) async {
+    await openPlanner(tester);
+    planner().replaceAll([
+      PlannerTask(id: 'a', title: 'A', day: today, start: 600, end: 660),
+      PlannerTask(id: 'b', title: 'Short', day: today, start: 660, end: 663),
+      PlannerTask(id: 'c', title: 'C', day: today, start: 663, end: 720),
+    ]);
+    await tester.pump();
+    // Too short to aim at: tap it as a screen reader would.
+    tester
+        .widget<SelectableCard>(find.ancestor(
+          of: find.text('Short'),
+          matching: find.byType(SelectableCard),
+        ))
+        .onTap!();
+    await tester.pumpAndSettle();
+
+    // Pick 11:01 as the end: kept within its 3 minutes, no error.
+    await tester.tap(find.widgetWithText(OutlinedButton, '11:03'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), '11');
+    await tester.enterText(fields.at(1), '01');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.widgetWithText(OutlinedButton, '11:03'), findsOneWidget);
+  });
+
   testWidgets('a picked time that doesn\'t fit is changed, and it says so',
       (tester) async {
     await openPlanner(tester);

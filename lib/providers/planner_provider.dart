@@ -29,7 +29,8 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
 
   /// Adds a task on [day] from [start] to [end] (minutes from midnight).
   /// Blank titles are ignored. Throws [TaskOverlapException] if the time
-  /// isn't free: tasks never overlap.
+  /// isn't free: tasks never overlap; [ArgumentError] if it's shorter than
+  /// [PlannerTask.minMinutes].
   void addTask(
     DateTime day,
     String title, {
@@ -40,6 +41,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return;
+    PlannerTask.checkLength(start, end);
     final task = PlannerTask(
       id: generateId(),
       title: trimmed,
@@ -67,6 +69,9 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     int? remind,
   }) {
     final task = state.firstWhere((t) => t.id == id);
+    if (start != task.start || end != task.end) {
+      PlannerTask.checkLength(start, end);
+    }
     final trimmed = title.trim();
     final updated = PlannerTask(
       id: id,

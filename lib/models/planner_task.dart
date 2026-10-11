@@ -8,6 +8,14 @@ class PlannerTask {
   /// largest zoom, 5 minutes is one touch target high).
   static const minMinutes = 5;
 
+  /// Throws [ArgumentError] if [start]–[end] is shorter than [minMinutes]
+  /// (new or changed times; older, shorter blocks stay as they were).
+  static void checkLength(int start, int end) {
+    if (end - start < minMinutes) {
+      throw ArgumentError('Shorter than $minMinutes minutes: $start–$end');
+    }
+  }
+
   final String id;
   final String title;
 

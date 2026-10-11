@@ -37,6 +37,27 @@ void main() {
     expect((groceries.start, groceries.end), (18 * 60, 18 * 60 + 30));
   });
 
+  test('a new or moved block is at least 5 minutes; old short ones stay', () {
+    expect(
+      () => planner.addTask(monday, 'Pills', start: at(8), end: at(8) + 3),
+      throwsArgumentError,
+    );
+    planner.addTask(monday, 'Pills', start: at(8), end: at(8) + 5);
+    expect(
+      () => planner.updateTask(idOf('Pills'),
+          title: 'Pills', start: at(8), end: at(8) + 4),
+      throwsArgumentError,
+    );
+
+    // A 3-minute block from before the rule can still be renamed.
+    planner.replaceAll([
+      PlannerTask(
+          id: 'old', title: 'Old', day: monday, start: at(9), end: at(9) + 3),
+    ]);
+    planner.updateTask('old', title: 'Older', start: at(9), end: at(9) + 3);
+    expect(planner.state.single.title, 'Older');
+  });
+
   test('tasks never overlap', () {
     planner.addTask(monday, 'Gym', start: at(8), end: at(9));
 

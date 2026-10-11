@@ -41,6 +41,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return null;
+    PlannerTask.checkLength(start, end);
     final routine = Routine(
       id: generateId(),
       title: trimmed,
@@ -74,6 +75,9 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     int? remind,
   }) {
     final old = _find(id);
+    if (start != old.start || end != old.end) {
+      PlannerTask.checkLength(start, end);
+    }
     final trimmed = title.trim();
     final routine = old.copyWith(
       title: trimmed.isEmpty ? old.title : trimmed,
