@@ -576,30 +576,21 @@ void main() {
       expect(theme.splashFactory, NoSplash.splashFactory);
     });
 
-    testWidgets(
-        "a shop row's checkbox only shows the state; the row takes "
-        'the tap', (tester) async {
+    testWidgets("a shop row's icon only shows the state; the row takes the tap",
+        (tester) async {
       await seed(await pumpApp(tester, clock: designClock));
       await openTab(tester, 'Shop');
-      final checkbox = find.descendant(
+      final icon = find.descendant(
         of: find.ancestor(
-          of: find.text('Milk'),
+          of: find.text('Bread'),
           matching: find.byType(SelectableCard),
         ),
-        matching: find.byType(Checkbox),
+        matching: find.byKey(const Key('shopState')),
       );
-      final material = await pressRow(tester, 'Milk', target: checkbox);
+      expect(tester.widget<Icon>(icon).icon, Icons.shopping_cart_outlined,
+          reason: 'to buy: a cart');
+      final material = await pressRow(tester, 'Bread', target: icon);
       expect(material, isNot(paints..circle()));
-      expect(
-        tester
-            .widget<IgnorePointer>(
-              find
-                  .ancestor(of: checkbox, matching: find.byType(IgnorePointer))
-                  .first,
-            )
-            .ignoring,
-        isTrue,
-      );
     });
   });
 

@@ -118,7 +118,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | U4 | **Reach mode** (replaces "snap back"): pulling a list that's already at its top, with a new gesture, shifts it down by 28% of the list's height (about one row more than the first 20%; a bit more on Counters, whose rows are bigger) so its first rows are within thumb reach; it stays there. Any scroll the other way leaves the mode and snaps fully back to the top **as soon as the finger lets go** (not on the next touch). Scrolling towards the top from further down stops at the normal top (doesn't enter). A small pull springs back. | ✅ |
 | U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ✅ |
 | U6 | **Counters: vibration and a click sound** on − / +, with an on/off switch in Menu → Settings. | ✅ the app's own click sound (Android's touch sound is often switched off, so it was silent — Nikola); follows the system volume, none in silent mode |
-| U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test). | 💭 with the design pass |
+| U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test): a cart (accent) while an item is to buy, a quiet tick once bought. Still announced as checked / not checked. | ✅ |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 
 ## O — Other

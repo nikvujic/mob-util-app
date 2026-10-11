@@ -356,7 +356,8 @@ task)
   (two fingers, against the one-hand rule). Blocks are at least 5 min
   (P13).
 - [ ] Better icons for the Other tiles (custom SVGs).
-- [ ] Shop: icons instead of checkboxes (U2).
+- [x] Shop: icons instead of checkboxes (U2): a cart to buy, a tick
+  when bought.
 - [x] Password reset dialog: no flash when Reset becomes enabled (the
   label faded in from grey over the new red; dialog buttons now change at
   once).

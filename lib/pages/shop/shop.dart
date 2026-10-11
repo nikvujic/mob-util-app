@@ -261,7 +261,7 @@ class _ShopItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // One semantic node for the whole row, so screen readers announce it as
-    // "Milk, checkbox, not checked" — tapping it does what the checkbox does.
+    // "Milk, not checked" — tapping it toggles it.
     return MergeSemantics(
       child: SelectableCard(
         selected: selected,
@@ -270,12 +270,22 @@ class _ShopItemTile extends StatelessWidget {
         child: ReorderableRow(
           content: Row(
             children: [
-              // Shows the state only: a tap anywhere on the row (with one
-              // ripple for the whole row) toggles it.
-              IgnorePointer(
-                child: Checkbox(
-                  value: !item.toBuy,
-                  onChanged: (_) => onTap(),
+              // Shows the state only (U2): a cart while it's to buy, a
+              // tick once it's bought. A tap anywhere on the row (with
+              // one ripple for the whole row) toggles it; screen readers
+              // hear a checkbox.
+              Semantics(
+                checked: !item.toBuy,
+                child: SizedBox.square(
+                  dimension: kMinInteractiveDimension,
+                  child: Icon(
+                    item.toBuy ? Icons.shopping_cart_outlined : Icons.check,
+                    key: const Key('shopState'),
+                    size: 22,
+                    color: item.toBuy
+                        ? context.colors.accent
+                        : context.colors.textSecondary,
+                  ),
                 ),
               ),
               Expanded(

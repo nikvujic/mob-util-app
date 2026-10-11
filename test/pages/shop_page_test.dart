@@ -49,9 +49,14 @@ void main() {
       greaterThan(tester.getTopLeft(find.text('ITEMS  ·  1')).dy),
     );
 
-    // Tapping on the checkbox does the same as tapping the row: the
-    // checkbox only shows the state, the row takes the tap.
-    await tester.tap(find.byType(Checkbox).last, warnIfMissed: false);
+    // Tapping on the state icon does the same as tapping the row: the
+    // icon only shows the state, the row takes the tap.
+    expect(
+      tester.widget<Icon>(find.byKey(const Key('shopState')).last).icon,
+      Icons.check,
+      reason: 'bought: a tick',
+    );
+    await tester.tap(find.byKey(const Key('shopState')).last);
     await tester.pump();
     expect(find.text('TO BUY  ·  2'), findsOneWidget);
     // Back at the end of "To buy" (S5).

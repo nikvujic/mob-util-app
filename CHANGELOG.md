@@ -31,6 +31,8 @@ Release with the installable APK.
 - *Edit title* changes the title as you type, and it can be left empty.
 - Selection mode has no ✕ button anywhere: back, or deselecting all,
   leaves it.
+- Shop: a cart icon marks what's to buy and a tick what's bought,
+  instead of checkboxes.
 - Shop: the select button first selects the list you started in, then
   both lists, then nothing.
 - Planner: more space between blocks that touch (an hour is a bit
