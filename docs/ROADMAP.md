@@ -305,10 +305,10 @@ Confirmed working on the phone: **fingerprint unlock**.
   select **everything** (both sections) → deselect all. (Confirmed.)
 - [x] Counters: no click sound — find out why (the phone's touch-sound
   setting, or play our own sound).
-- [ ] Planner: more space between touching blocks (now a thin line).
-- [ ] Planner: an icon on blocks that have a reminder.
-- [ ] Planner: selected blocks must be obvious (a clear mark).
-- [ ] Planner: when an edited time had to be changed to fit (it would
+- [x] Planner: more space between touching blocks (now a thin line).
+- [x] Planner: an icon on blocks that have a reminder.
+- [x] Planner: selected blocks must be obvious (a clear mark).
+- [x] Planner: when an edited time had to be changed to fit (it would
   overlap), say so instead of quietly changing it.
 
 **B. Notes: view mode first**

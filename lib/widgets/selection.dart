@@ -253,8 +253,10 @@ class SelectableCard extends StatelessWidget {
         // Drawn on top so the highlight never changes the row's size.
         foregroundDecoration: BoxDecoration(
           borderRadius: _radius,
+          // Clearly marked (Nikola): a thick accent outline.
           border: Border.all(
             color: selected ? context.colors.accent : Colors.transparent,
+            width: 2.5,
           ),
         ),
         child: Material(

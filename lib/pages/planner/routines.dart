@@ -199,6 +199,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
                       end: r.end,
                       repeats: true,
                       color: BlockColor.fromName(r.color),
+                      reminds: r.remind != null,
                       onTap: () => editRoutine(context, ref, r),
                     ),
                 ],

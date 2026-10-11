@@ -19,6 +19,9 @@ class TimelineBlock {
 
   /// Its colour (P9), if any.
   final BlockColor? color;
+
+  /// Whether it has a reminder (P10): shown with a bell.
+  final bool reminds;
   final bool selected;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
@@ -35,6 +38,7 @@ class TimelineBlock {
     this.done = false,
     this.repeats = false,
     this.color,
+    this.reminds = false,
     this.selected = false,
     this.onLongPress,
     this.onToggleDone,
@@ -46,7 +50,10 @@ class TimelineBlock {
 class PlannerTimeline extends StatelessWidget {
   /// Height of one hour: a 30-minute block (less the gap between
   /// blocks) is one touch target (48 dp) high.
-  static const hourHeight = 100.0;
+  static const hourHeight = 108.0;
+
+  /// Space between blocks that touch (half above, half below each).
+  static const gap = 6.0;
 
   static const _labelWidth = 56.0;
 
@@ -153,7 +160,7 @@ class _FreeTime extends StatelessWidget {
       excludeSemantics: true,
       child: Padding(
         // The same gap between blocks as the blocks have.
-        padding: const EdgeInsets.symmetric(vertical: 1),
+        padding: const EdgeInsets.symmetric(vertical: PlannerTimeline.gap / 2),
         child: DashedBorder(
           color: context.colors.textHint,
           radius: _radius,
@@ -200,7 +207,7 @@ class _Block extends StatelessWidget {
     final range = '${formatMinutes(block.start)}–${formatMinutes(block.end)}';
     final hasCheckbox = block.onToggleDone != null;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
+      padding: const EdgeInsets.symmetric(vertical: PlannerTimeline.gap / 2),
       child: LayoutBuilder(
         builder: (context, box) {
           // Short blocks put everything on one line.
@@ -233,9 +240,24 @@ class _Block extends StatelessWidget {
                   ],
                 )
               : text;
-          final time = Text(
-            range,
-            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+          final time = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                range,
+                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+              ),
+              if (block.reminds)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Icon(
+                    Icons.notifications_none,
+                    size: 14,
+                    color: colors.textSecondary,
+                    semanticLabel: 'Reminder',
+                  ),
+                ),
+            ],
           );
           final color = block.color;
           return SelectableCard(

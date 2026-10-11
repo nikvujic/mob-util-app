@@ -210,7 +210,13 @@ class _TaskSheetState extends State<TaskSheet> {
   }
 
   /// A 24-hour time picker, kept within the free slot. Null if cancelled.
-  Future<int?> _pickTime(int initial, {required int min, required int max}) {
+  /// Why the last picked time was changed to fit, shown under the times
+  /// (instead of changing it quietly); null if it fit.
+  String? _adjusted;
+
+  /// A 24-hour time picker. Null if cancelled; 00:00 as an [end] is
+  /// midnight at the end of the day.
+  Future<int?> _pickTime(int initial, {bool end = false}) {
     return showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: initial ~/ 60 % 24, minute: initial % 60),
@@ -220,31 +226,44 @@ class _TaskSheetState extends State<TaskSheet> {
       ),
     ).then((time) {
       if (time == null) return null;
-      var minutes = time.hour * 60 + time.minute;
-      // 00:00 as an end means midnight at the end of the day.
-      if (minutes == 0 && min > 0) minutes = PlannerTask.dayMinutes;
-      return minutes.clamp(min, max);
+      final minutes = time.hour * 60 + time.minute;
+      return end && minutes == 0 ? PlannerTask.dayMinutes : minutes;
     });
   }
 
   Future<void> _pickStart() async {
-    final start = await _pickTime(
-      _start,
-      min: widget.slot.start,
-      max: widget.slot.end - 1,
-    );
-    if (start == null || !mounted) return;
+    final picked = await _pickTime(_start);
+    if (picked == null || !mounted) return;
+    final slot = widget.slot;
     setState(() {
       final length = _end - _start;
-      _start = start;
-      _end = math.min(_start + length, widget.slot.end);
+      _start = picked.clamp(slot.start, slot.end - 1);
+      _end = math.min(_start + length, slot.end);
+      _adjusted = picked < slot.start
+          ? 'Starts at ${formatMinutes(_start)}: what\'s before ends then.'
+          : picked >= slot.end
+              ? 'Starts at ${formatMinutes(_start)}: what\'s after starts '
+                  'at ${formatMinutes(slot.end)}.'
+              : _start + length > slot.end
+                  ? 'Ends at ${formatMinutes(_end)}: what\'s after starts '
+                      'then.'
+                  : null;
     });
   }
 
   Future<void> _pickEnd() async {
-    final end = await _pickTime(_end, min: _start + 1, max: widget.slot.end);
-    if (end == null || !mounted) return;
-    setState(() => _end = end);
+    final picked = await _pickTime(_end, end: true);
+    if (picked == null || !mounted) return;
+    final slot = widget.slot;
+    setState(() {
+      _end = picked.clamp(_start + 1, slot.end);
+      _adjusted = picked > slot.end
+          ? 'Ends at ${formatMinutes(_end)}: what\'s after starts then.'
+          : picked <= _start
+              ? 'Ends at ${formatMinutes(_end)}: it has to end after it '
+                  'starts.'
+              : null;
+    });
   }
 
   void _submit() {
@@ -404,6 +423,27 @@ class _TaskSheetState extends State<TaskSheet> {
                   _TimeButton(_end, onPressed: _pickEnd),
                 ],
               ),
+              if (_adjusted != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 18,
+                        color: context.colors.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _adjusted!,
+                          key: const Key('timeAdjusted'),
+                          style: TextStyle(color: context.colors.textPrimary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Wrap(
                 spacing: 8,
                 children: [

@@ -59,6 +59,8 @@ void main() {
     await tester.pump();
     expect(reminders.scheduled.single.title, 'Dentist');
     expect(reminders.scheduled.single.at, DateTime(2026, 10, 8, 14, 50));
+    expect(find.byIcon(Icons.notifications_none), findsOneWidget,
+        reason: 'a bell on blocks with a reminder');
 
     container
         .read(plannerProvider.notifier)

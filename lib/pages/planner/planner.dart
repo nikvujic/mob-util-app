@@ -280,6 +280,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           end: task.end!,
           done: task.done,
           color: BlockColor.fromName(task.color),
+          reminds: task.remind != null,
           selected: _selection.isSelected(task.id),
           onTap: () => _selection.handleTap(task.id, () => _edit(task)),
           onLongPress: () => _selection.handleLongPress(task.id),
@@ -296,6 +297,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           done: o.done,
           repeats: true,
           color: BlockColor.fromName(o.routine.color),
+          reminds: o.routine.remind != null,
           onTap: selecting ? () {} : () => _routineTapped(o),
           onToggleDone: () =>
               ref.read(routinesProvider.notifier).toggleDone(o.routine.id, day),

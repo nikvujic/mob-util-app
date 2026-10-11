@@ -654,7 +654,10 @@ void main() {
     await seed(await pumpApp(tester, clock: designClock));
     await tester.pump();
     await openTab(tester, 'Planner');
-    await tester.tap(find.textContaining('Free · ').hitTestable().first);
+    final free = find.text('Free · 11:00–24:00');
+    await tester.ensureVisible(free);
+    await tester.pumpAndSettle();
+    await tester.tap(free);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Weekdays'));
     await tester.pumpAndSettle();

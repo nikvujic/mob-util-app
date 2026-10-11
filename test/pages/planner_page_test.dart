@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/widgets/dashed_border.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -80,8 +81,9 @@ void main() {
       matching: find.byType(SelectableCard),
     ));
     expect((block.left, block.right), (lunch.left, lunch.right));
-    expect(block.top - lunch.bottom, closeTo(2, 0.5), reason: 'same gaps');
-    expect(nap.top - block.bottom, closeTo(2, 0.5));
+    expect(block.top - lunch.bottom, closeTo(PlannerTimeline.gap, 0.5),
+        reason: 'same gaps');
+    expect(nap.top - block.bottom, closeTo(PlannerTimeline.gap, 0.5));
   });
 
   testWidgets('a short free gap is just the dotted block, no label',
@@ -152,6 +154,34 @@ void main() {
     final coffee =
         container.read(plannerProvider).firstWhere((t) => t.title == 'Coffee');
     expect((coffee.start, coffee.end), (12 * 60, 12 * 60 + 20));
+  });
+
+  testWidgets('a picked time that doesn\'t fit is changed, and it says so',
+      (tester) async {
+    await openPlanner(tester);
+    add(today, 'Gym', hour: 11); // 11:00–12:00
+    planner().addTask(today, 'Call', start: 12 * 60 + 20, end: 13 * 60);
+    await tester.pump();
+    await tester.tap(free('12:00–12:20'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('timeAdjusted')), findsNothing);
+
+    // Pick 13:00 as the end, typed into the time picker.
+    await tester.tap(find.widgetWithText(OutlinedButton, '12:20'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), '13');
+    await tester.enterText(fields.at(1), '00');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(OutlinedButton, '12:20'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
+      'Ends at 12:20: what\'s after starts then.',
+    );
   });
 
   testWidgets('tapping a day shows its tasks', (tester) async {

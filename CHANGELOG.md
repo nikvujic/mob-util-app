@@ -17,6 +17,11 @@ Release with the installable APK.
   leaves it.
 - Shop: the select button first selects the list you started in, then
   both lists, then nothing.
+- Planner: more space between blocks that touch (an hour is a bit
+  taller, so a 30-minute block is still a full touch target); a bell on
+  blocks with a reminder; when a picked time had to change to fit, the
+  sheet says why.
+- Selected items have a much clearer outline everywhere.
 
 ### Fixed
 - **Counters click again**: the app plays its own click; Android's touch
