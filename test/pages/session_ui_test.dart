@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/backup.dart';
+import 'package:the_app/models/app_section.dart';
+import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 
@@ -78,6 +81,33 @@ void main() {
       await openMenu(tester);
       expect(find.byTooltip('Lock now'), findsNothing);
     });
+  });
+
+  testWidgets(
+      'locking while "Save changes?" is open saves and keeps the app '
+      '(Notes locked)', (tester) async {
+    await start(tester);
+    container.read(sectionLocksProvider.notifier).lock(AppSection.notes);
+    final id = container
+        .read(notesProvider.notifier)
+        .addNote(title: 'Shopping', content: 'milk');
+    await tester.pump();
+    await tester.tap(find.text('Shopping'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('noteContentField')), 'eggs');
+    await tester.pump();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Save changes?'), findsOneWidget);
+
+    container.read(sessionProvider.notifier).lock();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(BottomNavigationBar), findsOneWidget,
+        reason: 'the home screen stays');
+    final note = container.read(notesProvider).firstWhere((n) => n.id == id);
+    expect(note.content, 'eggs');
   });
 
   testWidgets('Lock now sits top right of the menu and doesn\'t scroll',

@@ -49,7 +49,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
       hint: 'Counter name',
       submitLabel: 'Add',
     );
-    if (name != null) _notifier.add(name);
+    if (name != null && mounted) _notifier.add(name);
   }
 
   Future<void> _renameSelected() async {

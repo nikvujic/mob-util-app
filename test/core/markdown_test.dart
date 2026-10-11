@@ -96,6 +96,11 @@ void main() {
           '${edit.text.substring(edit.cursor)}';
     }
 
+    test('Enter at the very start does nothing special (and no error)', () {
+      expect(enter('|- milk'), isNull);
+      expect(enter('|hello'), isNull);
+    });
+
     test('continues bullets, with the same symbol and indent', () {
       expect(enter('- milk|'), '- milk\n- |');
       expect(enter('* milk|'), '* milk\n* |');

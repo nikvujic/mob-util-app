@@ -164,7 +164,9 @@ ListEdit? continueList(String text, int cursor) {
   if (cursor < 1 || cursor > text.length || text[cursor - 1] != '\n') {
     return null;
   }
-  final lineStart = text.lastIndexOf('\n', cursor - 2) + 1;
+  // At the very start there's no line before (and lastIndexOf can't
+  // start at -1).
+  final lineStart = cursor < 2 ? 0 : text.lastIndexOf('\n', cursor - 2) + 1;
   final line = text.substring(lineStart, cursor - 1);
 
   final String next;

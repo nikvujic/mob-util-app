@@ -37,6 +37,14 @@ class NotesNotifier extends StateNotifier<List<Note>> {
     if (content != null && _find(id)?.isLocked == true) {
       throw StateError('Locked note $id: use updateLockedNote');
     }
+    // Nothing changed (e.g. the autosave after only moving the cursor):
+    // no new state, so nothing is written.
+    final note = _find(id);
+    if (note == null ||
+        ((title == null || title == note.title) &&
+            (content == null || content == note.content))) {
+      return;
+    }
     state = [
       for (final note in state)
         if (note.id == id &&

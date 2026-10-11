@@ -76,7 +76,7 @@ class _DzoniPageState extends ConsumerState<DzoniPage>
         ref.read(preferencesProvider).dzoniCount,
       ),
     );
-    if (count != null) {
+    if (count != null && mounted) {
       ref.read(preferencesProvider.notifier).setDzoniCount(count);
     }
   }

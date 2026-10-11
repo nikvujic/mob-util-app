@@ -35,8 +35,11 @@ void main() {
     final id = notifier.addNote(title: 'A');
     final before = notifier.state.single;
 
+    final list = notifier.state;
     notifier.updateNote(id, title: 'A', content: '');
     expect(identical(notifier.state.single, before), isTrue);
+    expect(identical(notifier.state, list), isTrue,
+        reason: 'no change, no new state: nothing is written');
 
     notifier.updateNote(id, title: 'Renamed');
     expect(notifier.state.single.title, 'Renamed');

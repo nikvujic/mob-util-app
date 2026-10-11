@@ -52,6 +52,11 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Notes: pressing Enter at the very start of a note works again.
+- Notes: if the app locked while *Save changes?* was open (with Notes
+  locked), it could end on a black screen. It now saves and goes back to
+  the lock screen.
+- Notes: only moving the cursor no longer rewrites the notes file.
 - Planner notifications: two quick changes could leave a notification
   for something already ticked off or deleted. They're now planned one
   at a time.

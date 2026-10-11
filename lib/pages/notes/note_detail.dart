@@ -260,7 +260,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     } else {
       _save(); // removes an untouched new note
     }
-    Navigator.of(context).pop();
+    // A section lock can close everything above the home screen while the
+    // dialog is open (taking this page with it): then there's nothing left
+    // to pop here, and popping would remove the home screen.
+    if (ModalRoute.of(context)?.isCurrent ?? false) {
+      Navigator.of(context).pop();
+    }
   }
 
   /// ↶ in the app bar: undo all edits but keep editing.

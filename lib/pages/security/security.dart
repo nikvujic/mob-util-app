@@ -224,7 +224,7 @@ class _FingerprintTileState extends ConsumerState<_FingerprintTile> {
     // Storing the key needs it: from the unlocked app.
     if (ref.read(sessionProvider) == null) {
       await widget.unlock();
-      if (ref.read(sessionProvider) == null) return; // cancelled
+      if (!mounted || ref.read(sessionProvider) == null) return; // cancelled
     }
     final done = await fingerprint.turnOn();
     messenger.showSnackBar(
