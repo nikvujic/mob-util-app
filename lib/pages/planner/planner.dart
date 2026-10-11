@@ -95,13 +95,18 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     // routine and a routine beside a task (P12).
     bool around(FreeSlot room) =>
         room.start <= slot.start && slot.end <= room.end;
-    final routines = routinesOn(day, ref.read(routinesProvider));
     final task = await showAddTaskSheet(
       context,
       ref.read(plannerProvider.notifier).freeOn(day).firstWhere(around),
-      repeatSlot: freeSlotsAround([
-        for (final o in routines) (start: o.routine.start, end: o.routine.end),
-      ]).firstWhere(around),
+      // Set to repeat: clear of every routine it would share a day with.
+      repeatRoom: (weekdays, until, {required start, required end}) =>
+          ref.read(routinesProvider.notifier).roomAround(
+                weekdays: weekdays,
+                from: day,
+                until: until,
+                start: start,
+                end: end,
+              ),
       start: start,
       end: math.min(start + 60, slot.end),
       day: day,

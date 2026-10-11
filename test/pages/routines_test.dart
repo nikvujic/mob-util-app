@@ -131,6 +131,45 @@ void main() {
     expect(find.text('Run'), findsOneWidget);
   });
 
+  testWidgets('editing: a newly ticked day that clashes moves the times',
+      (tester) async {
+    await openPlanner(tester);
+    addGym(); // every day 18–19
+    routines().add(
+      title: 'Swim',
+      start: at(8),
+      end: at(9),
+      weekdays: {DateTime.thursday},
+      from: today,
+    );
+    routines().add(
+      title: 'Run',
+      start: at(8.5),
+      end: at(9.5),
+      weekdays: {DateTime.friday},
+      from: today,
+    );
+    await showDay(tester, 'Friday 9 October');
+
+    await tapText(tester, 'Run');
+    await tapText(tester, 'Edit routine');
+    await tapIn(tester, find.widgetWithText(FilterChip, 'Thu'));
+    await tester.pump();
+    expect(
+      tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
+      'Now 09:00–10:00: a routine is there too.',
+    );
+    await tapIn(tester, find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    final run = container
+        .read(routinesProvider)
+        .routines
+        .firstWhere((r) => r.title == 'Run');
+    expect(run.start, at(9), reason: 'saved, not lost to a clash');
+    expect(run.weekdays, {DateTime.thursday, DateTime.friday});
+  });
+
   testWidgets('ticking a routine off counts for that day only', (tester) async {
     await openPlanner(tester);
     final id = addGym();
@@ -204,7 +243,9 @@ void main() {
       expect(find.text('Gym'), findsNothing);
     });
 
-    testWidgets('routines can\'t overlap on a day they share', (tester) async {
+    testWidgets(
+        'ticking a day another routine has moves the times clear, and says so',
+        (tester) async {
       await openRoutines(tester);
       routines().add(
         title: 'Swim',
@@ -215,21 +256,24 @@ void main() {
       );
       await tester.pump();
 
-      // Thursday's free time starts at 00:00, and with Friday ticked too
-      // the new routine (00:00–01:00) would meet Swim there.
+      // Thursday's free time starts at 00:00; with Friday ticked too, the
+      // new routine (00:00–01:00) would meet Swim there.
       await tapText(tester, 'Free · 00:00–24:00');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Walk');
       await tapIn(tester, find.widgetWithText(FilterChip, 'Fri'));
       await tester.pump();
+      expect(
+        tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
+        'Now 01:00–02:00: a routine is there too.',
+      );
       await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Another routine has that time on one of those days.'),
-        findsOneWidget,
-      );
-      expect(container.read(routinesProvider).routines.map((r) => r.title),
-          ['Swim']);
+      final walk = container
+          .read(routinesProvider)
+          .routines
+          .firstWhere((r) => r.title == 'Walk');
+      expect((walk.start, walk.end), (at(1), at(2)));
     });
   });
 }

@@ -52,6 +52,15 @@ Future<void> editRoutine(
     routine,
     routines.roomFor(routine),
     onDelete: () => delete = true,
+    repeatRoom: (weekdays, until, {required start, required end}) =>
+        routines.roomAround(
+      weekdays: weekdays,
+      from: routine.from,
+      until: until,
+      start: start,
+      end: end,
+      except: routine.id,
+    ),
   );
   if (!context.mounted) return;
   if (delete) {
@@ -140,6 +149,14 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
       slot,
       weekday: _weekday,
       from: today,
+      room: (weekdays, until, {required start, required end}) =>
+          ref.read(routinesProvider.notifier).roomAround(
+                weekdays: weekdays,
+                from: today,
+                until: until,
+                start: start,
+                end: end,
+              ),
     );
     if (added == null || !mounted) return;
     try {

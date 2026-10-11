@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/id.dart';
 import 'package:the_app/data/app_storage.dart';
@@ -151,15 +153,58 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
 
   /// The time [routine] could take on all its weekdays: the free time
   /// around it, up to the nearest other routine on any of them.
-  FreeSlot roomFor(Routine routine) {
-    final others = [
-      for (final r in state.routines)
-        if (r.id != routine.id && r.sharesDaysWith(routine))
-          (start: r.start, end: r.end),
-    ];
-    return freeSlotsAround(others).firstWhere(
-      (s) => s.start <= routine.start && routine.end <= s.end,
+  FreeSlot roomFor(Routine routine) => roomAround(
+        weekdays: routine.weekdays,
+        from: routine.from,
+        until: routine.until,
+        start: routine.start,
+        end: routine.end,
+        except: routine.id,
+      );
+
+  /// The time a routine on [weekdays], [from] [until], could take around
+  /// [start]–[end]: the stretch free of every other routine (but
+  /// [except]) it could share a day with, skipped days and ones starting
+  /// later included. If [start]–[end] isn't all free, the stretch with the
+  /// most of it (or the next one), so the times can be fitted into it.
+  FreeSlot roomAround({
+    required Set<int> weekdays,
+    required DateTime from,
+    DateTime? until,
+    required int start,
+    required int end,
+    String? except,
+  }) {
+    final probe = Routine(
+      id: except ?? '',
+      title: '',
+      start: start,
+      end: end,
+      weekdays: weekdays,
+      from: from,
+      until: until,
     );
+    final free = freeSlotsAround([
+      for (final r in state.routines)
+        if (r.id != except && r.sharesDaysWith(probe))
+          (start: r.start, end: r.end),
+    ]).where((s) => s.end - s.start >= PlannerTask.minMinutes).toList();
+    FreeSlot? best;
+    var most = 0;
+    for (final slot in free) {
+      final int shared = math.min(slot.end, end) - math.max(slot.start, start);
+      if (shared > most) {
+        best = slot;
+        most = shared;
+      }
+    }
+    return best ??
+        free.firstWhere(
+          (s) => s.start >= start,
+          orElse: () => free.isEmpty
+              ? (start: start, end: end) // nothing free: as it was
+              : free.last,
+        );
   }
 }
 

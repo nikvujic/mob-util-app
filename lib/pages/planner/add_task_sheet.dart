@@ -21,6 +21,15 @@ typedef NewTask = ({
   int? remind,
 });
 
+/// The time a repeating block (a routine) on [weekdays], until [until]
+/// (null: for good), could take around [start]–[end].
+typedef RepeatRoom = FreeSlot Function(
+  Set<int> weekdays,
+  DateTime? until, {
+  required int start,
+  required int end,
+});
+
 /// Whether the sheet asks about repeating.
 enum RepeatChoice {
   /// A plain task.
@@ -41,15 +50,15 @@ enum RepeatChoice {
 ///
 /// [day] is the day it's for: then it can be made to repeat from that day
 /// (Repeat: once, every day, weekdays or chosen days; until a date or for
-/// good), and while it repeats its times stay within [repeatSlot] (the
-/// time free of routines).
+/// good), and while it repeats its times stay within [repeatRoom] (the
+/// time free of the routines it would share a day with).
 Future<NewTask?> showAddTaskSheet(
   BuildContext context,
   FreeSlot slot, {
   int? start,
   int? end,
   DateTime? day,
-  FreeSlot? repeatSlot,
+  RepeatRoom? repeatRoom,
   String? note,
 }) {
   return showModalBottomSheet<NewTask>(
@@ -59,7 +68,7 @@ Future<NewTask?> showAddTaskSheet(
     enableDrag: false,
     builder: (_) => TaskSheet(
       slot: slot,
-      repeatSlot: repeatSlot,
+      repeatRoom: repeatRoom,
       start: start,
       end: end,
       repeat: day == null ? RepeatChoice.never : RepeatChoice.optional,
@@ -76,6 +85,7 @@ Future<NewTask?> showAddRoutineSheet(
   FreeSlot slot, {
   required int weekday,
   required DateTime from,
+  RepeatRoom? room,
 }) {
   return showModalBottomSheet<NewTask>(
     context: context,
@@ -84,6 +94,7 @@ Future<NewTask?> showAddRoutineSheet(
     enableDrag: false,
     builder: (_) => TaskSheet(
       slot: slot,
+      repeatRoom: room,
       repeat: RepeatChoice.always,
       weekdays: {weekday},
       from: from,
@@ -98,6 +109,7 @@ Future<NewTask?> showEditRoutineSheet(
   Routine routine,
   FreeSlot room, {
   required VoidCallback onDelete,
+  RepeatRoom? repeatRoom,
 }) {
   return showModalBottomSheet<NewTask>(
     context: context,
@@ -106,6 +118,7 @@ Future<NewTask?> showEditRoutineSheet(
     enableDrag: false,
     builder: (_) => TaskSheet(
       slot: room,
+      repeatRoom: repeatRoom,
       title: routine.title,
       start: routine.start,
       end: routine.end,
@@ -193,9 +206,10 @@ class TaskSheet extends StatefulWidget {
   /// editing).
   final FreeSlot slot;
 
-  /// The time it can take while it repeats, if not [slot] (a task and a
-  /// routine may share time, P12, so their free time differs).
-  final FreeSlot? repeatSlot;
+  /// The time it can take while it repeats, if not [slot]: free of the
+  /// routines it would share a day with, so it depends on the weekdays and
+  /// end date chosen (and a task and a routine may share time, P12).
+  final RepeatRoom? repeatRoom;
 
   /// Why [start] / [end] aren't the times asked for, shown under them.
   final String? note;
@@ -235,7 +249,7 @@ class TaskSheet extends StatefulWidget {
   const TaskSheet({
     super.key,
     required this.slot,
-    this.repeatSlot,
+    this.repeatRoom,
     this.note,
     this.title = '',
     this.start,
@@ -290,22 +304,29 @@ class _TaskSheetState extends State<TaskSheet> {
 
   /// The time it can take now: a routine's free time differs from a
   /// task's (P12).
-  FreeSlot get _room =>
-      _repeats ? widget.repeatSlot ?? widget.slot : widget.slot;
+  FreeSlot get _room => _repeats && widget.repeatRoom != null
+      ? widget.repeatRoom!(_weekdays, _until, start: _start, end: _end)
+      : widget.slot;
 
   /// Sets the weekdays it repeats on (none: it doesn't), keeping the times
   /// within the room that comes with that, and saying so if they change.
   void _setWeekdays(Set<int> weekdays) => setState(() {
         _weekdays = weekdays;
-        final room = _room;
-        if (room.start <= _start && _end <= room.end) return;
-        final length = _end - _start;
-        final min = _minIn(room);
-        _start = _start.clamp(room.start, room.end - min);
-        _end = (_start + length).clamp(_start + min, room.end);
-        _adjusted = 'Now ${formatMinutes(_start)}–${formatMinutes(_end)}: '
-            '${_repeats ? 'a routine' : 'a task'} is there too.';
+        _fit();
       });
+
+  /// Keeps the times within [_room] (which changes with the weekdays and
+  /// end date), saying so if they had to change. Call within setState.
+  void _fit() {
+    final room = _room;
+    if (room.start <= _start && _end <= room.end) return;
+    final length = _end - _start;
+    final min = _minIn(room);
+    _start = _start.clamp(room.start, room.end - min);
+    _end = (_start + length).clamp(_start + min, room.end);
+    _adjusted = 'Now ${formatMinutes(_start)}–${formatMinutes(_end)}: '
+        '${_repeats ? 'a routine' : 'a task'} is there too.';
+  }
 
   @override
   void dispose() {
@@ -463,7 +484,12 @@ class _TaskSheetState extends State<TaskSheet> {
       firstDate: from,
       lastDate: DateTime(from.year + 10),
     );
-    if (picked != null && mounted) setState(() => _until = picked);
+    if (picked != null && mounted) {
+      setState(() {
+        _until = picked;
+        _fit();
+      });
+    }
   }
 
   static const _everyDay = {1, 2, 3, 4, 5, 6, 7};
@@ -536,7 +562,10 @@ class _TaskSheetState extends State<TaskSheet> {
             ChoiceChip(
               label: const Text('Forever'),
               selected: _until == null,
-              onSelected: (_) => setState(() => _until = null),
+              onSelected: (_) => setState(() {
+                _until = null;
+                _fit();
+              }),
             ),
             ChoiceChip(
               label: Text(

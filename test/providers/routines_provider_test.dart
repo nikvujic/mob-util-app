@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/planner_provider.dart';
@@ -222,6 +223,35 @@ void main() {
       );
     final gymRoutine = book().routines.first;
     expect(routines().roomFor(gymRoutine), (start: at(13), end: at(20)));
+  });
+
+  test('room around times: follows the weekdays and dates asked about', () {
+    gym(); // Mon/Wed/Fri 18–19, for good
+    routines().add(
+      title: 'Later',
+      start: at(18),
+      end: at(19),
+      weekdays: {DateTime.tuesday},
+      from: DateTime(2026, 11, 3), // starts in November
+    );
+    FreeSlot around({required Set<int> on, DateTime? until}) =>
+        routines().roomAround(
+          weekdays: on,
+          from: monday,
+          until: until,
+          start: at(18.5),
+          end: at(19.5),
+        );
+
+    expect(around(on: {DateTime.thursday}), (start: 0, end: at(24)));
+    // Monday has Gym: the free time with most of 18:30–19:30 is after it.
+    expect(around(on: {DateTime.monday}), (start: at(19), end: at(24)));
+    // A routine that starts later counts too, unless this one ends first.
+    expect(around(on: {DateTime.tuesday}), (start: at(19), end: at(24)));
+    expect(
+      around(on: {DateTime.tuesday}, until: DateTime(2026, 10, 31)),
+      (start: 0, end: at(24)),
+    );
   });
 
   test('a blank title adds nothing', () {

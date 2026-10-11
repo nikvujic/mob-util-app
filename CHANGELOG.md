@@ -52,6 +52,10 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Planner: ticking another weekday (or changing the end date) in a
+  routine's sheet now moves its times clear of other routines on those
+  days and says so. Before, the clash only showed after saving, and the
+  changes were lost.
 - If the phone can't save (e.g. its storage is full), removing, changing
   or resetting the master password now stops and says so, instead of
   going ahead with data that wasn't saved.
