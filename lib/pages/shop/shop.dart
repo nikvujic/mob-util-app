@@ -60,6 +60,34 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     });
   }
 
+  /// The select button cycles (Nikola): all of the section where selecting
+  /// started → everything (both sections) → nothing.
+  SelectionAction _selectStep(List<ShopItem> toBuy, List<ShopItem> stock) {
+    final selected = _selection.selected;
+    final startedInToBuy = toBuy.any((i) => i.id == selected.first);
+    final section = startedInToBuy ? toBuy : stock;
+    final all = [...toBuy, ...stock];
+    if (all.every((i) => selected.contains(i.id))) {
+      return SelectionAction(
+        icon: Icons.deselect,
+        tooltip: 'Deselect all',
+        onPressed: _selection.clear,
+      );
+    }
+    if (section.every((i) => selected.contains(i.id))) {
+      return SelectionAction(
+        icon: Icons.select_all,
+        tooltip: 'Select both lists',
+        onPressed: () => _selection.selectAll(all.map((i) => i.id)),
+      );
+    }
+    return SelectionAction(
+      icon: Icons.checklist,
+      tooltip: startedInToBuy ? 'Select all to buy' : 'Select all items',
+      onPressed: () => _selection.selectAll(section.map((i) => i.id)),
+    );
+  }
+
   Future<void> _deleteSelected() async {
     final confirmed = await showDeleteConfirmDialog(
       context,
@@ -166,6 +194,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                       _selection.selectAll(items.map((i) => i.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
+                  select: _selectStep(toBuy, stock),
                 )
               : FloatingActionButton(
                   // Tabs are kept alive side by side; a shared default hero

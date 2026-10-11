@@ -434,9 +434,14 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        // Shop's select button cycles ("Select all items", "Select both
+        // lists", …).
+        final select = find.byWidgetPredicate(
+          (w) => w is Tooltip && (w.message ?? '').startsWith('Select '),
+        );
         final buttons = {
-          for (final t in ['Select all', 'Delete'])
-            t: tester.getCenter(find.byTooltip(t)),
+          'Select all': tester.getCenter(select),
+          'Delete': tester.getCenter(find.byTooltip('Delete')),
         };
         for (final MapEntry(key: t, value: c) in buttons.entries) {
           expect(c.dy, greaterThan(screen.height * 0.75), reason: t);

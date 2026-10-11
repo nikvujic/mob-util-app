@@ -15,6 +15,12 @@ Release with the installable APK.
 - *Edit title* changes the title as you type, and it can be left empty.
 - Selection mode has no ✕ button anywhere: back, or deselecting all,
   leaves it.
+- Shop: the select button first selects the list you started in, then
+  both lists, then nothing.
+
+### Fixed
+- **Counters click again**: the app plays its own click; Android's touch
+  sound (which it used before) is off on most phones.
 
 ## [0.17.0] - 2026-10-11
 

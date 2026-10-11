@@ -104,6 +104,10 @@ class SelectionActions extends StatelessWidget {
 
   final List<SelectionAction> extra;
 
+  /// Replaces the Select all / Deselect all button (e.g. Shop's
+  /// section-first cycle).
+  final SelectionAction? select;
+
   const SelectionActions({
     super.key,
     required this.allSelected,
@@ -111,6 +115,7 @@ class SelectionActions extends StatelessWidget {
     required this.onDeselectAll,
     required this.onDelete,
     this.extra = const [],
+    this.select,
   });
 
   @override
@@ -124,9 +129,12 @@ class SelectionActions extends StatelessWidget {
             onPressed: action.onPressed,
           ),
         BottomAction(
-          icon: allSelected ? Icons.deselect : Icons.select_all,
-          tooltip: allSelected ? 'Deselect all' : 'Select all',
-          onPressed: allSelected ? onDeselectAll : onSelectAll,
+          icon:
+              select?.icon ?? (allSelected ? Icons.deselect : Icons.select_all),
+          tooltip:
+              select?.tooltip ?? (allSelected ? 'Deselect all' : 'Select all'),
+          onPressed:
+              select?.onPressed ?? (allSelected ? onDeselectAll : onSelectAll),
         ),
         BottomAction(
           icon: Icons.delete_outline,

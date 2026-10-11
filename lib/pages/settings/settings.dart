@@ -19,8 +19,8 @@ class SettingsPage extends ConsumerWidget {
             secondary: const Icon(Icons.vibration),
             title: const Text('Counter click and vibration'),
             subtitle: Text(
-              'On − and +. The click follows the phone\'s touch sounds '
-              'setting.',
+              'On − and +. The click follows the phone\'s volume (none in '
+              'silent mode).',
               style: TextStyle(color: context.colors.textSecondary),
             ),
             value: preferences.counterFeedback,

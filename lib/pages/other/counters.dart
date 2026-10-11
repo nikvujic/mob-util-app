@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/format.dart';
+import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/providers/counters_provider.dart';
@@ -31,7 +32,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
   void _step(String id, int by) {
     if (ref.read(preferencesProvider).counterFeedback) {
       HapticFeedback.mediumImpact();
-      SystemSound.play(SystemSoundType.click);
+      AppSound.click();
     }
     _notifier.step(id, by);
   }

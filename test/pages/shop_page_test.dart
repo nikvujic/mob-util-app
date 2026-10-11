@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
@@ -207,5 +208,62 @@ void main() {
       expect(tester.getTopLeft(find.text('Milk')), before);
       expectInView(tester, 'Bread');
     });
+  });
+
+  testWidgets(
+      'the select button cycles: the section, then both lists, then none',
+      (tester) async {
+    await pumpShop(tester);
+    final shop = container.read(shopProvider.notifier);
+    for (final name in ['Milk', 'Bread', 'Salt', 'Tea']) {
+      shop.addItem(name);
+    }
+    shop
+      ..toggle(container.read(shopProvider)[2].id) // Salt bought
+      ..toggle(container.read(shopProvider)[3].id); // Tea bought
+    await tester.pump();
+    Set<String> selected() => {
+          for (final i in container.read(shopProvider))
+            if (tester
+                .widget<SelectableCard>(find.ancestor(
+                  of: find.text(i.name),
+                  matching: find.byType(SelectableCard),
+                ))
+                .selected)
+              i.name,
+        };
+
+    await tester.longPress(find.text('Milk'));
+    await tester.pumpAndSettle();
+    expect(selected(), {'Milk'});
+
+    await tester.tap(find.byTooltip('Select all to buy'));
+    await tester.pumpAndSettle();
+    expect(selected(), {'Milk', 'Bread'}, reason: 'its section first');
+
+    await tester.tap(find.byTooltip('Select both lists'));
+    await tester.pumpAndSettle();
+    expect(selected(), {'Milk', 'Bread', 'Salt', 'Tea'});
+
+    await tester.tap(find.byTooltip('Deselect all'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Delete'), findsNothing, reason: 'selection left');
+  });
+
+  testWidgets('starting in Items, the select button picks Items first',
+      (tester) async {
+    await pumpShop(tester);
+    final shop = container.read(shopProvider.notifier)
+      ..addItem('Milk')
+      ..addItem('Salt')
+      ..addItem('Tea');
+    shop
+      ..toggle(container.read(shopProvider)[1].id)
+      ..toggle(container.read(shopProvider)[2].id);
+    await tester.pump();
+
+    await tester.longPress(find.text('Tea'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Select all items'), findsOneWidget);
   });
 }

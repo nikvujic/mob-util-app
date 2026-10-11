@@ -301,9 +301,9 @@ Confirmed working on the phone: **fingerprint unlock**.
   empty title is allowed there.
 - [x] No ✕ in selection mode anywhere (Notes, Shop, …): select all /
   deselect all (and back) already leave it.
-- [ ] Shop: the select button cycles: select all **in the section** →
+- [x] Shop: the select button cycles: select all **in the section** →
   select **everything** (both sections) → deselect all. (Confirmed.)
-- [ ] Counters: no click sound — find out why (the phone's touch-sound
+- [x] Counters: no click sound — find out why (the phone's touch-sound
   setting, or play our own sound).
 - [ ] Planner: more space between touching blocks (now a thin line).
 - [ ] Planner: an icon on blocks that have a reminder.

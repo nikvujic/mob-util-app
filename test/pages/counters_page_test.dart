@@ -122,15 +122,19 @@ void main() {
       final calls = <String>[];
       final messenger = tester.binding.defaultBinaryMessenger;
       messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-        if (call.method == 'HapticFeedback.vibrate' ||
-            call.method == 'SystemSound.play') {
-          calls.add(call.method);
-        }
+        if (call.method == 'HapticFeedback.vibrate') calls.add(call.method);
         return null;
       });
-      addTearDown(
-        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
-      );
+      // The app's own click (not Android's touch sound, often off).
+      const sound = MethodChannel('the_app/sound');
+      messenger.setMockMethodCallHandler(sound, (call) async {
+        calls.add('click');
+        return null;
+      });
+      addTearDown(() {
+        messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        messenger.setMockMethodCallHandler(sound, null);
+      });
       return calls;
     }
 
@@ -143,7 +147,9 @@ void main() {
       await tester.pump();
 
       expect(calls.where((c) => c == 'HapticFeedback.vibrate'), hasLength(2));
-      expect(calls.where((c) => c == 'SystemSound.play'), hasLength(2));
+      expect(calls.where((c) => c == 'click'), hasLength(2));
+      // Not Android's touch sound, which is silent with touch sounds off.
+      expect(calls, isNot(contains('SystemSound.play')));
     });
 
     testWidgets('switched off in Settings: silent and still', (tester) async {
