@@ -201,11 +201,14 @@ void main() {
     });
   });
 
-  testWidgets('system back with changes asks too', (tester) async {
+  testWidgets('system back with changes asks too, once out of editing',
+      (tester) async {
     await openExistingNote(tester);
     await tester.enterText(contentField, 'milk, eggs');
     await tester.pump();
 
+    await pressBack(tester); // stops editing (N13)
+    expect(find.text('Save changes?'), findsNothing);
     await pressBack(tester);
 
     expect(find.text('Save changes?'), findsOneWidget);

@@ -312,11 +312,13 @@ Confirmed working on the phone: **fingerprint unlock**.
   overlap), say so instead of quietly changing it.
 
 **B. Notes: view mode first**
-- [ ] A note opens **for viewing**; tapping the text goes into editing
+- [x] A note opens **for viewing**; tapping the text goes into editing
   there.
-- [ ] Back while editing → view; back in view → as now (save / leave).
-- [ ] Closing the keyboard (back) while editing → view.
-- [ ] In view, list items show a real dot (•) instead of `-`.
+- [x] Back while editing → view; back in view → as now (save / leave).
+- [x] Closing the keyboard (back) while editing → view.
+- [x] In view, list items show a real dot (•) instead of `-` (and while
+  editing, on every line but the one being edited). The ← arrow always
+  leaves; only the system back steps out of editing first.
 
 **C. Planner sheet (add / edit a block)**
 - [ ] Reach mode in the sheet: pulling down shifts the content into thumb

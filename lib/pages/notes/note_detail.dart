@@ -60,6 +60,21 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   late final TextEditingController _titleController;
   late final MarkdownEditingController _contentController;
   final FocusNode _contentFocusNode = FocusNode();
+  final FocusNode _titleFocusNode = FocusNode();
+
+  /// The keyboard's height when last built: it closing while editing goes
+  /// back to viewing (N13).
+  double _keyboard = 0;
+
+  /// Editing (a field has focus) rather than viewing (N13).
+  bool get _editing => _contentFocusNode.hasFocus || _titleFocusNode.hasFocus;
+
+  /// Back to viewing: no keyboard, Markdown symbols hidden.
+  void _stopEditing() {
+    _contentFocusNode.unfocus();
+    _titleFocusNode.unfocus();
+  }
+
   final _contentScroll = ScrollController();
 
   /// The text field, for the line numbers (N12) to follow.
@@ -119,6 +134,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _titleFocusNode.dispose();
     _contentScroll.dispose();
     _history.dispose();
     super.dispose();
@@ -337,6 +353,16 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     );
     final lineNumbers =
         ref.watch(preferencesProvider.select((p) => p.noteLineNumbers));
+    // The keyboard closed (its back key) while editing: back to viewing.
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    if (keyboard == 0 && _keyboard > 0 && _editing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && MediaQuery.viewInsetsOf(context).bottom == 0) {
+          _stopEditing();
+        }
+      });
+    }
+    _keyboard = keyboard;
     ref.listen(sessionProvider, (_, keys) {
       if (keys == null && _isLocked) _closeBecauseLocked();
     });
@@ -351,10 +377,18 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
           if (!_leaving && !_closedByLock) _save();
           return;
         }
+        // Editing: back goes to viewing first (N13).
+        if (_editing) {
+          _stopEditing();
+          return;
+        }
         _onBack();
       },
       child: Scaffold(
         appBar: AppBar(
+          // The arrow always leaves (asking to save if changed); only the
+          // system back steps out of editing first (N13).
+          leading: BackButton(onPressed: _onBack),
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -428,6 +462,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
               child: TextField(
                 key: const Key('noteTitleField'),
                 controller: _titleController,
+                focusNode: _titleFocusNode,
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.next,
                 onSubmitted: (_) => _contentFocusNode.requestFocus(),

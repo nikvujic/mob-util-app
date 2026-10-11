@@ -95,9 +95,9 @@ class MarkdownEditingController extends TextEditingController {
       const TextStyle(decoration: TextDecoration.underline),
     );
     final revealed = _revealed();
-    bool shown(MdRun run) =>
-        run.role != MdRole.marker ||
-        (run.start >= revealed.start && run.end <= revealed.end);
+    bool onRevealedLine(MdRun run) =>
+        run.start >= revealed.start && run.end <= revealed.end;
+    bool shown(MdRun run) => run.role != MdRole.marker || onRevealedLine(run);
     final spans = <TextSpan>[];
     for (final run in markdownRuns(text)) {
       final style = shown(run) ? look(run) : _hidden;
@@ -110,12 +110,19 @@ class MarkdownEditingController extends TextEditingController {
         run.end,
       }.toList()
         ..sort();
+      // A bullet's "-" (or * / +) shows as a dot, except on the line being
+      // edited (N13). One character for one, so positions stay the same.
+      final bullet = run.role == MdRole.listMarker &&
+          !onRevealedLine(run) &&
+          '-*+'.contains(text[run.start]);
       for (var i = 0; i < cuts.length - 1; i++) {
         final from = cuts[i], to = cuts[i + 1];
         final inWord = from >= composing.start && to <= composing.end;
+        var piece = text.substring(from, to);
+        if (bullet && from == run.start) piece = '•${piece.substring(1)}';
         spans.add(
           TextSpan(
-            text: text.substring(from, to),
+            text: piece,
             style: inWord
                 ? style.copyWith(
                     decoration: underline.decoration,

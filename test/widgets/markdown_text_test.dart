@@ -42,12 +42,14 @@ void main() {
   testWidgets('shows exactly the text, styled', (tester) async {
     const text = '## Shopping\n- **milk**\n1. *eggs* ~~tea~~';
     await pumpField(tester, text);
-    expect(spans(tester).map((s) => s.text).join(), text);
+    // The same text, except a bullet's "-" shows as a dot (N13).
+    expect(spans(tester).map((s) => s.text).join(),
+        text.replaceFirst('\n- ', '\n• '));
 
     final palette = AppPalette.green;
     expect(spanOf(tester, 'Shopping').style!.fontSize, greaterThan(16));
     expect(spanOf(tester, 'milk').style!.fontWeight, FontWeight.w700);
-    expect(spanOf(tester, '- ').style!.color, palette.accent);
+    expect(spanOf(tester, '• ').style!.color, palette.accent);
     expect(spanOf(tester, 'eggs').style!.fontStyle, FontStyle.italic);
     expect(spanOf(tester, 'tea').style!.decoration, TextDecoration.lineThrough);
   });
@@ -63,7 +65,7 @@ void main() {
     await tester.pump();
     final milk = spanOf(tester, 'milk');
     expect(milk.style!.decoration, TextDecoration.underline);
-    expect(spans(tester).map((s) => s.text).join(), '- milk');
+    expect(spans(tester).map((s) => s.text).join(), '• milk');
   });
 
   testWidgets('Enter continues a list; on an empty item it ends it',
@@ -100,11 +102,13 @@ void main() {
 
     testWidgets('not typing: all hidden; list markers stay', (tester) async {
       await pumpField(tester, text);
-      expect(spans(tester).map((s) => s.text).join(), text, reason: 'kept');
+      expect(spans(tester).map((s) => s.text).join(),
+          text.replaceFirst('\n- ', '\n• '),
+          reason: 'kept, a bullet shown as a dot');
       expect(hidden(spanOf(tester, '## ')), isTrue);
       expect(spans(tester).where((s) => s.text == '**').every(hidden), isTrue);
-      expect(hidden(spanOf(tester, '- ')), isFalse);
-      expect(spanOf(tester, '- ').style!.color, AppPalette.green.accent);
+      expect(hidden(spanOf(tester, '• ')), isFalse);
+      expect(spanOf(tester, '• ').style!.color, AppPalette.green.accent);
     });
 
     testWidgets('typing: the cursor\'s line shows them, muted', (tester) async {
@@ -143,5 +147,19 @@ void main() {
       expect(x(3) - x(0), lessThan(1), reason: '"## " is invisible');
       expect(x(8) - x(3), greaterThan(20), reason: '"Title" is not');
     });
+  });
+
+  testWidgets('a bullet is a dot, except on the line being edited',
+      (tester) async {
+    await pumpField(tester, '- milk\n* eggs\n1. one');
+    String shown() => spans(tester).map((s) => s.text).join();
+    expect(shown(), '• milk\n• eggs\n1. one', reason: 'numbers stay');
+
+    controller
+      ..editing = true
+      ..selection = const TextSelection.collapsed(offset: 3); // in milk
+    await tester.pump();
+    expect(shown(), '- milk\n• eggs\n1. one');
+    expect(controller.text, '- milk\n* eggs\n1. one', reason: 'unchanged');
   });
 }

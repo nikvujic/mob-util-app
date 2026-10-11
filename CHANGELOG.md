@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.18.0] - unreleased
 
 ### Changed
+- **Notes open for viewing**: tap the text to edit it there. Back (or
+  closing the keyboard) while editing goes back to viewing; back again
+  leaves. The ← arrow at the top always leaves.
+- List bullets show as dots (•), except on the line you're editing.
 - Menu: *Lock now* is an icon at the top right (it stays put), and
   *Themes* comes before *Backup*.
 - Setting a password: the keyboard's next key goes to the next field.
