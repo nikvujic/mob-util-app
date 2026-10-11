@@ -94,7 +94,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | S4 | **Compact rows** — noticeably smaller than note rows (one 48 dp touch target high, ≥20% smaller, tighter gaps), so more items fit on screen without becoming harder to tap. | ✅ |
 | S5 | New items, and items moved back from *Items*, go to the **end** of *To buy*, so it keeps the order things were added in (Nikola's request). Bought items still go to the top of *Items*. | ✅ |
 | S6 | **A new item scrolls into view** as it's added: the list moves just enough to show it above the add sheet (from anywhere in the list), and not at all if it's already in view. | ✅ |
-| S7 | **Quantities**: a small button on each item toggles none → count → weight. Count − / + by 1 (default 1); weight in grams with smart − / + steps (common amounts like 80 g, 280 g; no typing). Each remembers its value. Read-only in the bought list. | 💭 Round 11 |
+| S7 | **Quantities**: a small button on each item toggles none → count → weight. Count − / + by 1 (default 1); weight in grams, − / + through common amounts (default 200 g), and tapping the weight types an exact amount (may be below 1 g). Each remembers its value. Read-only in the bought list. | 💭 Round 11 |
 
 ## P — Planner (currently the "To Do" tab)
 
@@ -117,7 +117,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P16 | **A "now" line** across today's timeline at the current time, moving with the clock. | 💭 Round 11 |
 | P17 | **Notifications always arrive**: app open, in the background, swiped away, screen off, phone locked, after a restart (exact alarms, Doze, battery optimisation, boot). | 💭 Round 11 |
 | P18 | **Notification settings** (in Settings): the sound, and the colour (the block's colour, or set per reminder). | 💭 Round 11 |
-| P19 | **More block colours**; new tasks default to blue, routines to their own default. | 💭 Round 11 |
+| P19 | **More block colours**; new tasks default to blue, routines to purple. | 💭 Round 11 |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | ✅ via P7–P9 |
 
 ## U — UI polish ("fun but practical")
@@ -138,10 +138,10 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 |---|-------------|--------|
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
 | O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ✅ |
-| O4 | **Džoni page, configurable**: sideways, big text and a count; holding counts up. **Five taps in the top-right corner** open its settings (the text and the count). Hides the status bar; on back it turns upright before closing. (Removed in 0.19 work, coming back configurable.) | 💭 Round 11 |
+| O4 | **Džoni page, configurable**: sideways, big text and a count; holding counts up. **Five taps in the top-right corner** open its settings (the text, default "Add text here!", and the count). Holding longer inflates and shakes the page, then it pops and counts. Hides the status bar; on back it turns upright before closing. (Removed in 0.19 work, coming back configurable.) | 💭 Round 11 |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode; selection mode without ✕ (back leaves it) |
 | O5 | **Counters, expanded**: options when adding — step, colour, min, max; nicer style (margins, rounder corners). | 💭 Round 11 |
-| O6 | **Medicine tracker**: mark the daily pill taken in one tap instead of a sheet. | 💭 to design |
+| O6 | **Medicine tracker**: medicines with doses a day, times, from / until (or forever); a clear "taken today" view, one tap per dose (several doses shown as 1 of 2 …); history per day with the time each dose was marked. | 💭 Round 11 |
 
 ---
 

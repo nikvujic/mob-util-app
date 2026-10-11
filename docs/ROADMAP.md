@@ -301,8 +301,7 @@ Sorted from one long message. Order of work is at the end.
 
 **B. Planner: colours**
 - [ ] **More colours** in the palette.
-- [ ] **Defaults:** new tasks are **blue**; routines get their own default
-  (to choose, see questions).
+- [ ] **Defaults:** new tasks are **blue**, new routines **purple**.
 
 **C. Planner: reminders, redesigned** (replaces the see-through block)
 - [ ] A reminder is a **small mark on the timeline's left edge**, by the
@@ -345,8 +344,10 @@ Sorted from one long message. Order of work is at the end.
   weight**. Count: − / + by 1 (default 1). Weight in grams with smart
   − / + steps (no typing). Each kind remembers its value when toggled
   away and back. Shown but not editable in the bought list.
-- [ ] Weight steps: reach common amounts like 80 g or 280 g, not 267 g
-  (proposal in questions).
+- [ ] Weight: − / + jump through a list of **common amounts** (e.g. 50,
+  80, 100, 150, 200, 250, 280, 300, 400, 500, 750 g, 1 / 1.5 / 2 kg …);
+  **default 200 g**. **Tapping the weight** opens a quick edit to type an
+  exact amount (a number, may be below 1 g).
 
 **J. Counters, expanded** (O2/O5)
 - [ ] Adding a counter offers options: **step**, **colour**, **min**,
@@ -355,14 +356,22 @@ Sorted from one long message. Order of work is at the end.
 
 **K. Džoni back, configurable** (O4, instead of removed)
 - [ ] **Five taps in the top-right corner** open its settings: the text
-  and the count.
+  (default **"Add text here!"**, Nikola sets his own on the phone) and
+  the count.
+- [ ] **Better count animation**: while holding (a bit longer than now)
+  the page **inflates and shakes**, then **pops** when it counts.
 - [ ] **Hide the status bar** while it's open.
 - [ ] Fix: on back the page **disappears before the screen turns back
   upright**; turn first, then close.
 
 **L. New page: medicine tracker** (O6) — Nikola takes a pill every
-  morning and notes it in a sheet; make that one tap. Design to agree
-  (see questions).
+  morning and notes it in a sheet; make that one tap. Agreed shape (all
+  of it combined):
+  - Add medicines, each with **how many** (doses a day), **when** (times),
+    from a date **until a date or forever**.
+  - A clear **"taken today"** view: one tap per dose, with medicines taken
+    more than once a day showing each dose (e.g. 1 of 2).
+  - **History**: each day, and the time each dose was marked taken.
 
 **M. Later**
 - [ ] **Data-safety sweep** (D6): everything that could lose data
