@@ -23,7 +23,7 @@ import 'package:the_app/providers/storage_status_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/back_handlers.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
-import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/widgets/section_reset.dart';
 
 /// The app shell: theme and the home screen with the main sections.
 class MyApp extends ConsumerWidget {
@@ -211,15 +211,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       drawer: const AppDrawer(),
       // Every section is the bottom of the navigation stack: back on any of
       // them leaves the app (after a confirming second press), and pages
-      // opened from a section are pushed on top. IndexedStack keeps every tab alive so scroll position and
-      // selection survive switching tabs; TickerMode marks the visible one.
+      // opened from a section are pushed on top. IndexedStack keeps every
+      // tab alive; TickerMode marks the visible one. Switching tabs resets
+      // both the section left and the one shown (SectionReset): lists to
+      // their top, selection off, the planner on today (G13, G18).
       body: IndexedStack(
         index: _selectedIndex,
         children: [
           for (var i = 0; i < _pages.length; i++)
             TickerMode(
               enabled: i == _selectedIndex,
-              child: PullDownReset(
+              child: SectionReset(
                 signal: _sectionShown[i],
                 child: SectionGate(
                   section: AppSection.values[i],
@@ -243,7 +245,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: BottomNav(
           selectedIndex: _selectedIndex,
           onItemTapped: (index) {
+            final left = _selectedIndex;
             setState(() => _selectedIndex = index);
+            if (left != index) _sectionShown[left].fire();
             _sectionShown[index].fire();
           },
         ),

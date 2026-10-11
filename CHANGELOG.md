@@ -7,6 +7,8 @@ Release with the installable APK.
 ## [0.19.0] - unreleased
 
 ### Changed
+- Switching tabs ends selection mode, and coming back to the Planner
+  shows today (a selection or a picked day used to linger).
 - Planner: a short block (say a 5-minute shower) is now drawn full size,
   and its hour on the timeline gets a bit taller to make room, instead
   of the block being squeezed.

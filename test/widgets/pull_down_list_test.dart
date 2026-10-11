@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/widgets/section_reset.dart';
 
 /// Reach mode (U3): pulling a list that's already at its top shifts it
 /// down for thumb reach; any scroll the other way snaps it back.
@@ -26,9 +27,8 @@ void main() {
         home: Scaffold(
           body: SizedBox(
             height: 600,
-            child: reset == null
-                ? list
-                : PullDownReset(signal: reset, child: list),
+            child:
+                reset == null ? list : SectionReset(signal: reset, child: list),
           ),
         ),
       ),

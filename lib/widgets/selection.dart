@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/back_handlers.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
+import 'package:the_app/widgets/section_reset.dart';
 
 /// Tracks which items of a list are selected.
 ///
@@ -147,7 +148,9 @@ class SelectionActions extends StatelessWidget {
   }
 }
 
-/// Makes system back leave selection mode instead of leaving the screen.
+/// Makes system back leave selection mode instead of leaving the screen,
+/// and ends selection mode when its section is switched to or away from
+/// ([SectionReset], G18).
 ///
 /// Inside a [BackHandlerScope] (the home screen) it registers with the
 /// screen's back logic; otherwise it uses its own [PopScope]. Either way it
@@ -170,6 +173,9 @@ class SelectionPopScope extends StatefulWidget {
 class _SelectionPopScopeState extends State<SelectionPopScope> {
   BackHandlers? _handlers;
   bool _visible = true;
+  Listenable? _sectionReset;
+
+  void _clear() => widget.controller.clear();
 
   bool _handleBack() {
     if (!_visible || !widget.controller.isActive) return false;
@@ -185,10 +191,16 @@ class _SelectionPopScopeState extends State<SelectionPopScope> {
       _handlers?.remove(_handleBack);
       _handlers = handlers?..add(_handleBack);
     }
+    final reset = SectionReset.maybeOf(context);
+    if (!identical(reset, _sectionReset)) {
+      _sectionReset?.removeListener(_clear);
+      _sectionReset = reset?..addListener(_clear);
+    }
   }
 
   @override
   void dispose() {
+    _sectionReset?.removeListener(_clear);
     _handlers?.remove(_handleBack);
     super.dispose();
   }

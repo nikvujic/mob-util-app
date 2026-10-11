@@ -17,6 +17,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/day_strip.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
+import 'package:the_app/widgets/section_reset.dart';
 import 'package:the_app/widgets/selection.dart';
 
 /// The planner (P2, P7): each day is a timeline from 00:00 to 24:00, with
@@ -54,8 +55,27 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
 
   void _rebuild() => setState(() {});
 
+  /// Fires when the Planner tab is switched to or away from (G18).
+  Listenable? _sectionReset;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reset = SectionReset.maybeOf(context);
+    if (!identical(reset, _sectionReset)) {
+      _sectionReset?.removeListener(_backToToday);
+      _sectionReset = reset?..addListener(_backToToday);
+    }
+  }
+
+  /// Coming back to the Planner shows today, not the day picked before.
+  void _backToToday() {
+    if (_day != null) setState(() => _day = null);
+  }
+
   @override
   void dispose() {
+    _sectionReset?.removeListener(_backToToday);
     _lifecycle.dispose();
     _selection
       ..removeListener(_rebuild)

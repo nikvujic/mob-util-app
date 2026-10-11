@@ -330,7 +330,7 @@ Sorted from one long message. Order of work is at the end.
 **F. Toasts** (the messages at the bottom, e.g. Undo): restyle them to
   match the app (rounded, themed colours, spacing, clear action). (U7)
 
-**G. Leaving a page clears its state**: selection mode ends and the
+**G. Leaving a page clears its state** ✅: selection mode ends and the
   planner goes back to today when switching tabs (a note was still
   selected on coming back). (G18)
 

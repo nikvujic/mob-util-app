@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/widgets/day_strip.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import 'helpers.dart';
 
@@ -169,6 +171,42 @@ void main() {
     await pressBack(tester);
 
     expect(exit.exits, 1);
+  });
+
+  testWidgets('switching tabs ends selection mode (G18)', (tester) async {
+    final container = await pumpApp(tester);
+    container.read(notesProvider.notifier).addNote(title: 'Groceries');
+    await tester.pump();
+    await tester.longPress(find.text('Groceries'));
+    await tester.pump();
+    expect(find.text('1 selected'), findsOneWidget);
+
+    await openTab(tester, 'Shop');
+    await openTab(tester, 'Notes');
+
+    expect(find.text('1 selected'), findsNothing);
+    expect(find.byType(SelectableCard), findsOneWidget);
+    expect(
+      tester.widget<SelectableCard>(find.byType(SelectableCard)).selected,
+      isFalse,
+    );
+  });
+
+  testWidgets('coming back to the Planner shows today again (G18)',
+      (tester) async {
+    await pumpApp(tester, clock: () => DateTime(2026, 10, 8, 12));
+    await openTab(tester, 'Planner');
+    await tester.tap(find.descendant(
+      of: find.byType(DayStrip),
+      matching: find.bySemanticsLabel(RegExp('Friday 9 October')),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Tomorrow · Fri, 9 Oct'), findsOneWidget);
+
+    await openTab(tester, 'Notes');
+    await openTab(tester, 'Planner');
+
+    expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
   });
 
   testWidgets('going to a section again leaves reach mode (G13)',

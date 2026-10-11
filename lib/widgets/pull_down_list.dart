@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:the_app/widgets/section_reset.dart';
 
 /// A scrolling list with a *reach mode* for one-handed use (U3): pulling
 /// the list down while it's already at its top shifts it down, so its first
@@ -14,7 +15,7 @@ import 'package:flutter/rendering.dart';
 ///   half-way position: a small pull springs back.
 /// - Short lists work the same: they're padded below to a screen's height.
 ///
-/// Under a [PullDownReset], the list also returns to its normal top when the
+/// Under a [SectionReset], the list also returns to its normal top when the
 /// reset fires (e.g. on going to the section again, G13).
 class PullDownList extends StatefulWidget {
   /// How far the list shifts down in reach mode, as a share of its height
@@ -90,7 +91,7 @@ class _PullDownListState extends State<PullDownList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reset = PullDownReset.maybeOf(context);
+    final reset = SectionReset.maybeOf(context);
     if (!identical(reset, _reset)) {
       _reset?.removeListener(_toTop);
       _reset = reset?..addListener(_toTop);
@@ -276,18 +277,4 @@ class _ReachPhysics extends ScrollPhysics {
       tolerance: toleranceFor(position),
     );
   }
-}
-
-/// Sends [PullDownList]s below it back to their normal top whenever
-/// [signal] fires (e.g. the home screen fires it on going to a section).
-class PullDownReset extends InheritedWidget {
-  final Listenable signal;
-
-  const PullDownReset({super.key, required this.signal, required super.child});
-
-  static Listenable? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<PullDownReset>()?.signal;
-
-  @override
-  bool updateShouldNotify(PullDownReset old) => signal != old.signal;
 }
