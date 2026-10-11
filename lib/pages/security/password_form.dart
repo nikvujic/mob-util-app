@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -116,6 +117,13 @@ class _PasswordFormPageState extends ConsumerState<PasswordFormPage> {
       setState(() {
         _busy = false;
         _currentError = 'Wrong password';
+      });
+    } on StorageWriteException {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _currentError = "Couldn't save on the phone (is its storage full?), "
+            'so the password was kept as it was.';
       });
     } on LockedDataException {
       if (!mounted) return;

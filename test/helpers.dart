@@ -28,6 +28,7 @@ Future<ProviderContainer> pumpApp(
   DateTime Function()? clock,
   FingerprintVault? fingerprint,
   FakeReminderScheduler? reminders,
+  List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
     overrides: [
@@ -41,6 +42,7 @@ Future<ProviderContainer> pumpApp(
         reminders ?? FakeReminderScheduler(),
       ),
       if (clock != null) clockProvider.overrideWithValue(clock),
+      ...overrides,
     ],
   );
   addTearDown(container.dispose);

@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
-import 'package:the_app/models/routine.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -51,7 +52,8 @@ class PasswordReset {
         AppSection.notes => _ref.read(notesProvider).length,
         AppSection.shop => _ref.read(shopProvider).length,
         AppSection.planner => _ref.read(plannerProvider).length +
-            _ref.read(routinesProvider).routines.length,
+            _ref.read(routinesProvider).routines.length +
+            _ref.read(pinsProvider).length,
         AppSection.other => _ref.read(countersProvider).length,
       };
 
@@ -74,6 +76,7 @@ class PasswordReset {
     if (locks.contains(AppSection.planner)) {
       _ref.read(plannerProvider.notifier).replaceAll(const []);
       _ref.read(routinesProvider.notifier).replaceAll(RoutineBook.empty);
+      _ref.read(pinsProvider.notifier).replaceAll(const []);
     }
     if (locks.contains(AppSection.other)) {
       _ref.read(countersProvider.notifier).replaceAll(const []);

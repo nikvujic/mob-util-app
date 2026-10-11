@@ -306,7 +306,26 @@ class AppStorage {
     });
   }
 
-  /// Completes when every pending save is on disk.
+  /// The files that couldn't be read at startup and were set aside (the
+  /// app started without their data), e.g. `notes.json`.
+  List<String> get unreadable => [
+        for (final store in [
+          _notesStore,
+          _shopStore,
+          _securityStore,
+          _settingsStore,
+          _plannerStore,
+          _countersStore,
+          _preferencesStore,
+          _routinesStore,
+          _pinsStore,
+        ])
+          if (store != null && store.unreadable)
+            store.file.uri.pathSegments.last,
+      ];
+
+  /// Completes when every pending save is on disk. Throws
+  /// [StorageWriteException] if one couldn't be saved.
   Future<void> flush() async {
     await _notesStore?.flush();
     await _shopStore?.flush();

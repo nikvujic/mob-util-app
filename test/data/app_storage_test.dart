@@ -64,6 +64,7 @@ void main() {
     final storage = await AppStorage.open(directory: dir);
     expect(storage.initialNotes, isEmpty);
     expect(file.existsSync(), isFalse);
+    expect(storage.unreadable, ['notes.json'], reason: 'the app says so');
 
     final backups = dir
         .listSync()

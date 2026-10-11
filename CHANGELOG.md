@@ -52,6 +52,13 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- If the phone can't save (e.g. its storage is full), removing, changing
+  or resetting the master password now stops and says so, instead of
+  going ahead with data that wasn't saved.
+- Data that can't be read at startup is still kept aside (never
+  overwritten), and now the app says which.
+- Resetting a forgotten password with the Planner locked also deletes its
+  reminders.
 - Planner: left open overnight, it still showed yesterday as today until
   something changed. It now catches up when the app comes back.
 - Notes: pressing Enter at the very start of a note works again.

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/data/json_file_store.dart';
 
 void main() {
@@ -42,5 +43,20 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('not json');
     expect(store.read(), throwsFormatException);
+  });
+
+  test('a failed write is reported by flush, until one succeeds', () async {
+    await store.write({'n': 1});
+    // A folder where the temporary file goes: writing fails.
+    final blocker = Directory('${store.file.path}.tmp')..createSync();
+
+    await store.write({'n': 2}); // doesn't throw: the app keeps running
+    await expectLater(store.flush(), throwsA(isA<StorageWriteException>()));
+    expect(await store.read(), {'n': 1}, reason: 'the old version stays');
+
+    blocker.deleteSync();
+    await store.write({'n': 3});
+    await store.flush();
+    expect(await store.read(), {'n': 3});
   });
 }

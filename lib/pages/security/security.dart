@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/security/forgot_password.dart';
 import 'package:the_app/pages/security/password_form.dart';
@@ -45,7 +46,17 @@ class SecurityPage extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final reset = ref.read(passwordResetProvider);
     if (!await showForgotPasswordDialog(context, reset.plan())) return;
-    await reset.run();
+    try {
+      await reset.run();
+    } on StorageWriteException {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text("Couldn't save on the phone (is its storage full?), "
+              'so the master password was kept.'),
+        ),
+      );
+      return;
+    }
     messenger.showSnackBar(
       const SnackBar(content: Text('Master password reset')),
     );

@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/password_reset_provider.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -121,6 +123,36 @@ void main() {
 
     expect(notesOnDisk, isNot(contains('Bank')));
     expect(shopOnDisk, isNot(contains('Milk')));
+  });
+
+  test('a locked Planner loses its reminders too', () async {
+    await seed(locked: {AppSection.planner});
+    container
+        .read(pinsProvider.notifier)
+        .add(DateTime(2026, 10, 12), 'Call mum', time: 630);
+    expect(reset().plan().sections, {AppSection.planner: 2});
+
+    await reset().run();
+
+    expect(container.read(plannerProvider), isEmpty);
+    expect(container.read(pinsProvider), isEmpty);
+  });
+
+  test('if the deletions can\'t be saved, the password stays', () async {
+    await seed(locked: {AppSection.shop});
+    await container.read(appStorageProvider).flush();
+    // A folder where the shop's temporary file goes: its save fails.
+    Directory('${dir.path}/shop.json.tmp').createSync();
+
+    await expectLater(reset().run(), throwsA(isA<StorageWriteException>()));
+
+    expect(container.read(securityProvider), isNotNull);
+    expect(file('shop.json'), contains('Milk'), reason: 'not saved');
+    // Once it can be saved again, it is.
+    Directory('${dir.path}/shop.json.tmp').deleteSync();
+    container.read(shopProvider.notifier).addItem('Bread');
+    await container.read(appStorageProvider).flush();
+    expect(file('shop.json'), contains('Bread'));
   });
 
   test('with nothing locked, the plan deletes nothing', () async {

@@ -19,6 +19,8 @@ import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
+import 'package:the_app/providers/storage_status_provider.dart';
+import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/back_handlers.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
@@ -108,6 +110,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _lifecycle; // start listening
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tellUnreadable());
+  }
+
+  /// Says so if some data couldn't be read at startup (the app started
+  /// without it, keeping the file aside rather than overwriting it).
+  void _tellUnreadable() {
+    final files = ref.read(unreadableFilesProvider);
+    if (files.isEmpty || !mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (context) => AppDialog(
+        title: "Some data couldn't be read",
+        content: DialogMessage(
+          '${files.join(', ')} could not be read, so the app started '
+          'without ${files.length == 1 ? 'it' : 'them'}. The file was kept '
+          "aside, not overwritten. Restoring a backup brings the data back.",
+        ),
+        actions: [
+          DialogButton(
+            label: 'OK',
+            primary: true,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
