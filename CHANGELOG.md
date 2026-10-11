@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.18.0] - unreleased
+## [0.18.0] - 2026-10-11
 
 ### Added
 - **A task and a routine can share time**: side by side, the task on
