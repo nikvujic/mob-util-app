@@ -10,8 +10,31 @@ import 'package:the_app/models/routine.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+
+/// After a reminder was set ([remind] not null): makes sure notifications
+/// may be shown, asking Android if needed (P10), and says so if not.
+Future<void> allowReminders(
+  BuildContext context,
+  WidgetRef ref,
+  int? remind,
+) async {
+  if (remind == null) return;
+  final messenger = ScaffoldMessenger.of(context);
+  if (await ref.read(reminderPlannerProvider).requestPermission()) return;
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Notifications are off for this app, so reminders won\'t show. '
+          'They can be turned on in Android\'s settings.',
+        ),
+      ),
+    );
+}
 
 /// Edits [routine] everywhere it's on (P8), or deletes it after asking.
 Future<void> editRoutine(
@@ -51,7 +74,9 @@ Future<void> editRoutine(
       weekdays: changed.weekdays ?? routine.weekdays,
       until: changed.until,
       color: changed.color,
+      remind: changed.remind,
     );
+    if (context.mounted) await allowReminders(context, ref, changed.remind);
   } on TaskOverlapException {
     messenger
       ..hideCurrentSnackBar()
@@ -117,8 +142,11 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             from: today,
             until: added.until,
             color: added.color,
+            remind: added.remind,
           );
+      await allowReminders(context, ref, added.remind);
     } on TaskOverlapException {
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(

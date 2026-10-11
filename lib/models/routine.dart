@@ -23,6 +23,9 @@ class Routine {
   /// Its colour (P9): a [BlockColor] name, or null for the default.
   final String? color;
 
+  /// Minutes before its start to remind (P10; 0: at the start), or null.
+  final int? remind;
+
   Routine({
     required this.id,
     required this.title,
@@ -32,6 +35,7 @@ class Routine {
     required DateTime from,
     DateTime? until,
     this.color,
+    this.remind,
   })  : weekdays = Set.unmodifiable(weekdays),
         from = DateTime(from.year, from.month, from.day),
         until = until == null
@@ -45,6 +49,9 @@ class Routine {
     }
     if (this.until != null && this.until!.isBefore(this.from)) {
       throw ArgumentError('Ends before it starts');
+    }
+    if (remind != null && remind! < 0) {
+      throw ArgumentError('Invalid reminder: $remind');
     }
   }
 
@@ -73,6 +80,7 @@ class Routine {
     DateTime? from,
     DateTime? Function()? until,
     String? Function()? color,
+    int? Function()? remind,
   }) =>
       Routine(
         id: id,
@@ -83,6 +91,7 @@ class Routine {
         from: from ?? this.from,
         until: until == null ? this.until : until(),
         color: color == null ? this.color : color(),
+        remind: remind == null ? this.remind : remind(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -94,6 +103,7 @@ class Routine {
         'from': PlannerTask.dayToJson(from),
         if (until != null) 'until': PlannerTask.dayToJson(until!),
         if (color != null) 'color': color,
+        if (remind != null) 'remind': remind,
       };
 
   factory Routine.fromJson(Map<String, dynamic> json) => Routine(
@@ -107,6 +117,7 @@ class Routine {
             ? null
             : PlannerTask.dayFromJson(json['until']),
         color: json['color'] as String?,
+        remind: json['remind'] as int?,
       );
 }
 

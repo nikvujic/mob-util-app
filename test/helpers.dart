@@ -9,6 +9,7 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
+import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/app/app.dart';
 
 const testAppVersion = '1.2.3 (4)';
@@ -26,6 +27,7 @@ Future<ProviderContainer> pumpApp(
   BackupFiles? backupFiles,
   DateTime Function()? clock,
   FingerprintVault? fingerprint,
+  FakeReminderScheduler? reminders,
 }) async {
   final container = ProviderContainer(
     overrides: [
@@ -34,6 +36,9 @@ Future<ProviderContainer> pumpApp(
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
       fingerprintVaultProvider.overrideWithValue(
         fingerprint ?? FakeFingerprintVault(available: false),
+      ),
+      reminderSchedulerProvider.overrideWithValue(
+        reminders ?? FakeReminderScheduler(),
       ),
       if (clock != null) clockProvider.overrideWithValue(clock),
     ],
@@ -179,4 +184,25 @@ class FakeFingerprintVault implements FingerprintVault {
 
   @override
   Future<void> clear() async => stored = null;
+}
+
+/// Records the reminders the app schedules (P10), instead of showing them.
+class FakeReminderScheduler implements ReminderScheduler {
+  /// What's scheduled now.
+  List<Reminder> scheduled = const [];
+
+  /// Whether notifications are allowed; [asked] counts the requests.
+  bool allowed = true;
+  int asked = 0;
+
+  @override
+  Future<bool> requestPermission() async {
+    asked++;
+    return allowed;
+  }
+
+  @override
+  Future<void> replaceAll(List<Reminder> reminders) async {
+    scheduled = List.of(reminders);
+  }
 }

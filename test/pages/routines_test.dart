@@ -33,6 +33,16 @@ void main() {
         from: today,
       )!;
 
+  /// Taps [finder], scrolling to it first (e.g. inside the task sheet).
+  Future<void> tapIn(WidgetTester tester, Finder finder) async {
+    // Let typing's "keep the cursor in view" scroll happen first.
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
   Future<void> tapText(WidgetTester tester, String text) async {
     await tester.ensureVisible(find.text(text).first);
     await tester.pumpAndSettle();
@@ -54,9 +64,9 @@ void main() {
     await openPlanner(tester);
     await tapText(tester, 'Free · 00:00–24:00');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Read');
-    await tester.tap(find.text('Every day'));
+    await tapIn(tester, find.text('Every day'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
     expect(container.read(plannerProvider), isEmpty, reason: 'no one-off');
@@ -95,7 +105,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Gym (short)');
     await tester.tap(find.text('30 min'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tapIn(tester, find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
 
     final task = container.read(plannerProvider).single;
@@ -114,7 +124,7 @@ void main() {
     await tapText(tester, 'Gym');
     await tapText(tester, 'Edit routine');
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Run');
-    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tapIn(tester, find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
 
     expect(container.read(routinesProvider).routines.single.title, 'Run');
@@ -167,9 +177,9 @@ void main() {
       await openRoutines(tester);
       await tapText(tester, 'Free · 00:00–24:00');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Walk');
-      await tester.tap(find.widgetWithText(FilterChip, 'Sat'));
+      await tapIn(tester, find.widgetWithText(FilterChip, 'Sat'));
       await tester.pump();
-      await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+      await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
       await tester.pumpAndSettle();
 
       final walk = container.read(routinesProvider).routines.single;
@@ -185,10 +195,10 @@ void main() {
       await tester.pump();
 
       await tapText(tester, 'Gym');
-      await tester.tap(find.text('Delete routine'));
+      await tapIn(tester, find.text('Delete routine'));
       await tester.pumpAndSettle();
       expect(find.text('Delete routine?'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tapIn(tester, find.widgetWithText(FilledButton, 'Delete'));
       await tester.pumpAndSettle();
 
       expect(container.read(routinesProvider).routines, isEmpty);
@@ -210,9 +220,9 @@ void main() {
       // the new routine (00:00–01:00) would meet Swim there.
       await tapText(tester, 'Free · 00:00–24:00');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Walk');
-      await tester.tap(find.widgetWithText(FilterChip, 'Fri'));
+      await tapIn(tester, find.widgetWithText(FilterChip, 'Fri'));
       await tester.pump();
-      await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+      await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
       await tester.pumpAndSettle();
 
       expect(

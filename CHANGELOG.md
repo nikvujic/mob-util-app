@@ -14,6 +14,10 @@ Release with the installable APK.
   block to change it just there, skip that day, or edit the routine;
   ticking it off counts for that day only. A one-off task already in its
   way wins that day.
+- **Planner reminders**: in the task or routine sheet, *Remind* at the
+  start or 5–60 minutes before. A notification with the title and time
+  (only "Planner" and the time while the Planner section is locked).
+  Notifications permission is asked the first time.
 - **Block colours** in the planner: pick one of six colours (or none) in
   the task or routine sheet; the block gets a tinted background and a
   coloured stripe.

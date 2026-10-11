@@ -37,6 +37,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     required DateTime from,
     DateTime? until,
     String? color,
+    int? remind,
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return null;
@@ -49,6 +50,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
       from: from,
       until: until,
       color: color,
+      remind: remind,
     );
     _checkFree(routine);
     state = RoutineBook(
@@ -69,6 +71,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     required Set<int> weekdays,
     required DateTime? until,
     String? color,
+    int? remind,
   }) {
     final old = _find(id);
     final trimmed = title.trim();
@@ -79,6 +82,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
       weekdays: weekdays,
       until: () => until,
       color: () => color,
+      remind: () => remind,
     );
     _checkFree(routine);
     state = RoutineBook(

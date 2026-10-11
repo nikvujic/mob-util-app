@@ -15,6 +15,7 @@ typedef NewTask = ({
   Set<int>? weekdays,
   DateTime? until,
   String? color,
+  int? remind,
 });
 
 /// Whether the sheet asks about repeating.
@@ -96,6 +97,7 @@ Future<NewTask?> showEditRoutineSheet(
       from: routine.from,
       until: routine.until,
       color: routine.color,
+      remind: routine.remind,
       submitLabel: 'Save',
       onDelete: onDelete,
     ),
@@ -118,6 +120,7 @@ Future<NewTask?> showEditTaskSheet(
       start: task.start,
       end: task.end,
       color: task.color,
+      remind: task.remind,
       submitLabel: 'Save',
     ),
   );
@@ -154,6 +157,9 @@ class TaskSheet extends StatefulWidget {
   /// Its colour (P9): a [BlockColor] name, or null.
   final String? color;
 
+  /// Minutes before its start to remind (P10), or null for none.
+  final int? remind;
+
   const TaskSheet({
     super.key,
     required this.slot,
@@ -167,6 +173,7 @@ class TaskSheet extends StatefulWidget {
     this.until,
     this.onDelete,
     this.color,
+    this.remind,
   });
 
   @override
@@ -182,6 +189,17 @@ class _TaskSheetState extends State<TaskSheet> {
   late Set<int> _weekdays = {...?widget.weekdays};
   late DateTime? _until = widget.until;
   late BlockColor? _color = BlockColor.fromName(widget.color);
+  late int? _remind = widget.remind;
+
+  /// Reminder choices (P10): minutes before the start; null: off.
+  static const _reminders = <int?>[null, 0, 5, 10, 15, 30, 60];
+
+  static String _remindLabel(int? minutes) => switch (minutes) {
+        null => 'Off',
+        0 => 'At start',
+        60 => '1 h before',
+        final m => '$m min before',
+      };
 
   bool get _repeats => _weekdays.isNotEmpty;
 
@@ -239,6 +257,7 @@ class _TaskSheetState extends State<TaskSheet> {
       weekdays: _repeats ? _weekdays : null,
       until: _repeats ? _until : null,
       color: _color?.name,
+      remind: _remind,
     ));
   }
 
@@ -408,6 +427,23 @@ class _TaskSheetState extends State<TaskSheet> {
               _ColourChoice(
                 selected: _color,
                 onSelected: (c) => setState(() => _color = c),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    'Remind',
+                    style: TextStyle(color: context.colors.textSecondary),
+                  ),
+                  for (final minutes in _reminders)
+                    ChoiceChip(
+                      label: Text(_remindLabel(minutes)),
+                      selected: _remind == minutes,
+                      onSelected: (_) => setState(() => _remind = minutes),
+                    ),
+                ],
               ),
               if (widget.repeat != RepeatChoice.never)
                 ..._repeatChoices(context),

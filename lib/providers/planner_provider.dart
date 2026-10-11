@@ -52,6 +52,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     required int start,
     required int end,
     String? color,
+    int? remind,
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return;
@@ -62,6 +63,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       start: start,
       end: end,
       color: color,
+      remind: remind,
     );
     final dayTasks = _on(day);
     final free = _free(day, dayTasks, dayTasks);
@@ -79,6 +81,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     required int start,
     required int end,
     String? color,
+    int? remind,
   }) {
     final task = state.firstWhere((t) => t.id == id);
     final trimmed = title.trim();
@@ -90,6 +93,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       end: end,
       done: task.done,
       color: color,
+      remind: remind,
     );
     final dayTasks = _on(task.day);
     final others = dayTasks.where((t) => t.id != id);

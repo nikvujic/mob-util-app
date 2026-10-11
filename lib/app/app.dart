@@ -16,6 +16,7 @@ import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/providers/fingerprint_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/back_handlers.dart';
@@ -96,7 +97,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Tells the session when the app leaves and comes back, for auto-lock.
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
     onHide: () => ref.read(sessionProvider.notifier).appHidden(),
-    onShow: () => ref.read(sessionProvider.notifier).appShown(),
+    onShow: () {
+      ref.read(sessionProvider.notifier).appShown();
+      // Reminders are planned two weeks ahead: top them up (P10).
+      ref.read(reminderPlannerProvider).refresh();
+    },
   );
 
   @override
@@ -157,6 +162,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Kept running, so changing the master password turns fingerprint
     // unlock off at once (L6).
     ref.listen(fingerprintProvider, (_, __) {});
+    // Kept running, so reminders follow every planner change (P10).
+    ref.listen(reminderPlannerProvider, (_, __) {});
 
     return PopScope(
       canPop: false,

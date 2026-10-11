@@ -184,3 +184,14 @@ out skipped routines and those a one-off task overlaps (the one-off wins).
 `PlannerNotifier` gets the day's routine times through a `busy` callback,
 so a new task can't go over a routine; `RoutinesNotifier` keeps routines
 from overlapping each other on any day they could share.
+
+## Reminders (P10)
+
+`planReminders` (`providers/reminders_provider.dart`) works out, purely
+from tasks and routines, the reminders due in the next 14 days.
+`ReminderPlanner` runs it again on every planner, routine or lock change
+and when the app comes back, and hands the result to a
+`ReminderScheduler` (`data/reminder_scheduler.dart`): on the phone,
+flutter_local_notifications with exact alarms, which survive a restart;
+in tests, a fake that records them. Scheduling everything anew each time
+keeps it simple and keeps routines reminding indefinitely.

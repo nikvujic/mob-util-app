@@ -83,6 +83,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               from: day,
               until: task.until,
               color: task.color,
+              remind: task.remind,
             );
       } else {
         ref.read(plannerProvider.notifier).addTask(
@@ -91,8 +92,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               start: task.start,
               end: task.end,
               color: task.color,
+              remind: task.remind,
             );
       }
+      await allowReminders(context, ref, task.remind);
     } on TaskOverlapException {
       _taken(
         task.weekdays == null
@@ -117,7 +120,9 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         start: changed.start,
         end: changed.end,
         color: changed.color,
+        remind: changed.remind,
       );
+      await allowReminders(context, ref, changed.remind);
     } on TaskOverlapException {
       _taken();
     }
@@ -203,6 +208,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         start: routine.start,
         end: routine.end,
         color: routine.color,
+        remind: routine.remind,
         submitLabel: 'Save',
       ),
     );
@@ -216,7 +222,9 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             start: changed.start,
             end: changed.end,
             color: changed.color,
+            remind: changed.remind,
           );
+      await allowReminders(context, ref, changed.remind);
     } on TaskOverlapException {
       routines.setSkipped(routine.id, day, skipped: false);
       _taken();

@@ -286,6 +286,14 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 8 — reminders (2026-10-11)
+
+- [x] **Planner reminders** (P10), choices made while Nikola couldn't
+  build (adjustable): per block Off / at start / 5–60 min before;
+  titles hidden while the Planner is locked; planned two weeks ahead.
+  Android build moved to AGP 8.6 / Gradle 8.7 / Java 11 with desugaring
+  for flutter_local_notifications.
+
 ### Round 7 — after 0.16 (2026-10-10)
 
 - [x] **Menu stays open behind its pages** (G16): back from a page opened

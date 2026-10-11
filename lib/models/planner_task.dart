@@ -21,6 +21,10 @@ class PlannerTask {
   /// Its colour (P9): a [BlockColor] name, or null for the default.
   final String? color;
 
+  /// Minutes before its start to remind (P10; 0: at the start), or null
+  /// for no reminder.
+  final int? remind;
+
   PlannerTask({
     required this.id,
     required this.title,
@@ -29,7 +33,11 @@ class PlannerTask {
     this.end,
     this.done = false,
     this.color,
+    this.remind,
   }) : day = DateTime(day.year, day.month, day.day) {
+    if (remind != null && remind! < 0) {
+      throw ArgumentError('Invalid reminder: $remind');
+    }
     if ((start == null) != (end == null) ||
         (start != null &&
             (start! < 0 || end! > dayMinutes || start! >= end!))) {
@@ -48,6 +56,7 @@ class PlannerTask {
         end: end,
         done: done ?? this.done,
         color: color,
+        remind: remind,
       );
 
   /// `2026-10-09`: a calendar date, the same in every time zone.
@@ -72,6 +81,7 @@ class PlannerTask {
         if (end != null) 'end': end,
         'done': done,
         if (color != null) 'color': color,
+        if (remind != null) 'remind': remind,
       };
 
   factory PlannerTask.fromJson(Map<String, dynamic> json) => PlannerTask(
@@ -82,6 +92,7 @@ class PlannerTask {
         end: json['end'] as int?,
         done: json['done'] as bool,
         color: json['color'] as String?,
+        remind: json['remind'] as int?,
       );
 }
 
