@@ -235,7 +235,6 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                       _selection.selectAll(notes.map((n) => n.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
-                  onClose: _selection.clear,
                   extra: [
                     _allSelectedLocked(notes)
                         ? SelectionAction(

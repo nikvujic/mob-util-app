@@ -35,7 +35,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Edit title changes the title in a sheet at the bottom',
+  testWidgets('Edit title: a sheet at the bottom, the title changes live',
       (tester) async {
     final id = await openNote(tester);
     await openEditTitle(tester);
@@ -46,16 +46,17 @@ void main() {
         reason: 'within thumb reach');
     expect(tester.widget<TextField>(sheetField).controller!.text, 'Shopping');
 
-    await tester.enterText(sheetField, '  Groceries ');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    await tester.enterText(sheetField, 'Groceries');
+    await tester.pump();
+    expect(title(tester), 'Groceries', reason: 'live, before Done');
 
-    expect(title(tester), 'Groceries');
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextInputSheet), findsNothing);
     await tester.pump(const Duration(seconds: 1)); // autosave
     expect(
       container.read(notesProvider).firstWhere((n) => n.id == id).title,
       'Groceries',
-      reason: 'saved like typing in the title',
     );
 
     await tester.tap(find.byTooltip('Undo'));
@@ -63,19 +64,25 @@ void main() {
     expect(title(tester), 'Shopping');
   });
 
-  testWidgets('closing the sheet, or a blank title, changes nothing',
+  testWidgets('an empty title is fine there; saved as Untitled on leaving',
       (tester) async {
-    await openNote(tester);
+    final id = await openNote(tester);
     await openEditTitle(tester);
-    await tester.enterText(sheetField, '   ');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect(title(tester), 'Shopping');
+    await tester.enterText(sheetField, '');
+    await tester.pump();
+    expect(title(tester), '');
 
-    await openEditTitle(tester);
-    await tester.tapAt(const Offset(5, 5)); // outside the sheet
+    await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    expect(title(tester), 'Shopping');
-    expect(find.byTooltip('Discard changes'), findsNothing);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    if (find.text('Save changes?').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+    }
+    expect(
+      container.read(notesProvider).firstWhere((n) => n.id == id).title,
+      'Untitled',
+    );
   });
 }

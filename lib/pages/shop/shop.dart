@@ -166,7 +166,6 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                       _selection.selectAll(items.map((i) => i.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
-                  onClose: _selection.clear,
                 )
               : FloatingActionButton(
                   // Tabs are kept alive side by side; a shared default hero

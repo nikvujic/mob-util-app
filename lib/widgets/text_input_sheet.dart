@@ -14,6 +14,10 @@ class TextInputSheet extends StatefulWidget {
   final bool keepOpen;
   final ValueChanged<String>? onSubmit;
 
+  /// Edits this text directly, live (e.g. a note's title), instead of
+  /// returning a new one; it may be left empty.
+  final TextEditingController? controller;
+
   const TextInputSheet({
     super.key,
     required this.hint,
@@ -21,6 +25,7 @@ class TextInputSheet extends StatefulWidget {
     this.submitLabel = 'Save',
     this.keepOpen = false,
     this.onSubmit,
+    this.controller,
   });
 
   @override
@@ -28,12 +33,12 @@ class TextInputSheet extends StatefulWidget {
 }
 
 class _TextInputSheetState extends State<TextInputSheet> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialValue)
+  late final TextEditingController _controller = widget.controller ??
+      (TextEditingController(text: widget.initialValue)
         ..selection = TextSelection(
           baseOffset: 0,
           extentOffset: widget.initialValue.length,
-        );
+        ));
   final FocusNode _focusNode = FocusNode();
 
   /// Whether the on-screen keyboard has been shown for this sheet.
@@ -61,12 +66,17 @@ class _TextInputSheetState extends State<TextInputSheet> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _submit() {
+    // Edited live: nothing to hand back.
+    if (widget.controller != null) {
+      Navigator.of(context).pop();
+      return;
+    }
     final text = _controller.text.trim();
     if (text.isEmpty) {
       if (!widget.keepOpen) Navigator.of(context).pop();
@@ -133,6 +143,7 @@ Future<String?> showTextInputSheet(
   String submitLabel = 'Save',
   bool keepOpen = false,
   ValueChanged<String>? onSubmit,
+  TextEditingController? controller,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -143,6 +154,7 @@ Future<String?> showTextInputSheet(
       submitLabel: submitLabel,
       keepOpen: keepOpen,
       onSubmit: onSubmit,
+      controller: controller,
     ),
   );
 }

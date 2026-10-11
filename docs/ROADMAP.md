@@ -291,15 +291,15 @@ patterns other work builds on (G11, themes), then the bigger features.
 Confirmed working on the phone: **fingerprint unlock**.
 
 **A. Quick fixes**
-- [ ] Menu: *Lock now* becomes an icon button at the top right of the
+- [x] Menu: *Lock now* becomes an icon button at the top right of the
   menu header (a fixed row of special actions; doesn't scroll).
-- [ ] Menu: *Themes* above *Backup*.
-- [ ] Set password: the keyboard's return key moves to the next field.
-- [ ] Notes: a lock icon next to "Note" in the top bar instead of
+- [x] Menu: *Themes* above *Backup*.
+- [x] Set password: the keyboard's return key moves to the next field.
+- [x] Notes: a lock icon next to "Note" in the top bar instead of
   "Locked note".
-- [ ] Notes: *Edit title* changes the title live while typing, and an
+- [x] Notes: *Edit title* changes the title live while typing, and an
   empty title is allowed there.
-- [ ] No ✕ in selection mode anywhere (Notes, Shop, …): select all /
+- [x] No ✕ in selection mode anywhere (Notes, Shop, …): select all /
   deselect all (and back) already leave it.
 - [ ] Shop: the select button cycles: select all **in the section** →
   select **everything** (both sections) → deselect all. (Confirmed.)

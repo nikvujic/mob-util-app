@@ -348,7 +348,6 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                       _selection.selectAll(tasks.map((t) => t.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
-                  onClose: _selection.clear,
                 )
               // No + button: free time on the timeline is where tasks are
               // added. Routines have their own screen.

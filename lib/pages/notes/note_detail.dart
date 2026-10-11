@@ -277,14 +277,14 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   }
 
   /// Edit title: the title field is out of thumb reach (N11).
-  Future<void> _editTitle() async {
-    final title = await showTextInputSheet(
-      context,
-      hint: 'Title',
-      initialValue: _titleController.text,
-    );
-    if (title != null && mounted) _titleController.text = title;
-  }
+  /// The title changes as it's typed, and may be left empty (saved as
+  /// "Untitled" on leaving, like clearing it at the top).
+  Future<void> _editTitle() => showTextInputSheet(
+        context,
+        hint: 'Title',
+        submitLabel: 'Done',
+        controller: _titleController,
+      );
 
   /// Lock note: saves, then encrypts the content.
   Future<void> _lock() async {
@@ -355,7 +355,21 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(locked ? 'Locked note' : 'Note'),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Note'),
+              if (locked)
+                const Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Icon(
+                    Icons.lock_outline,
+                    size: 18,
+                    semanticLabel: 'Locked',
+                  ),
+                ),
+            ],
+          ),
         ),
         // Actions at the bottom, on the side of the hand that opened the
         // note (G11).

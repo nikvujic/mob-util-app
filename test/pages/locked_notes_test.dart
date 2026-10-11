@@ -79,6 +79,12 @@ void main() {
 
   Finder lockIcon() => find.byIcon(Icons.lock_outline);
 
+  /// The editor's top bar of a locked note: "Note" with a lock icon.
+  Finder lockedNoteBar() => find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byIcon(Icons.lock_outline),
+      );
+
   testWidgets('lock from the editor: title stays, content is encrypted',
       (tester) async {
     await start(tester);
@@ -88,7 +94,7 @@ void main() {
 
     await editorAction(tester, 'Lock note');
 
-    expect(appBarTitle('Locked note'), findsOneWidget);
+    expect(lockedNoteBar(), findsOneWidget);
     expect(note('Bank').isLocked, isTrue);
     expect(note('Bank').content, isEmpty);
     expect(await readLocked('Bank'), 'Bank text');
@@ -148,7 +154,7 @@ void main() {
       expect(find.text('Wrong password'), findsOneWidget);
 
       await enterPassword(tester, password);
-      expect(appBarTitle('Locked note'), findsOneWidget);
+      expect(lockedNoteBar(), findsOneWidget);
       expect(find.text('Bank text'), findsOneWidget);
       expect(unlocked(), isTrue, reason: 'unlocks the app too');
     });
@@ -252,7 +258,7 @@ void main() {
 
       // Back in the note, now locked, without asking for the password again.
       expect(find.byKey(const Key('promptPassword')), findsNothing);
-      expect(appBarTitle('Locked note'), findsOneWidget);
+      expect(lockedNoteBar(), findsOneWidget);
       expect(find.text('Master password set'), findsOneWidget);
       expect(unlocked(), isTrue);
       expect(note('Bank').isLocked, isTrue);

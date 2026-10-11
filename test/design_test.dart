@@ -435,7 +435,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final buttons = {
-          for (final t in ['Select all', 'Delete', 'Cancel selection'])
+          for (final t in ['Select all', 'Delete'])
             t: tester.getCenter(find.byTooltip(t)),
         };
         for (final MapEntry(key: t, value: c) in buttons.entries) {
@@ -454,19 +454,15 @@ void main() {
             reason: '$t is not in the top bar',
           );
         }
-        // ✕ is outermost, then Delete: mirrored on the left.
+        // Delete is outermost: mirrored on the left. No ✕.
         final outward = right ? 1 : -1;
-        expect(
-          outward * buttons['Cancel selection']!.dx,
-          greaterThan(outward * buttons['Delete']!.dx),
-        );
         expect(
           outward * buttons['Delete']!.dx,
           greaterThan(outward * buttons['Select all']!.dx),
         );
+        expect(find.byTooltip('Cancel selection'), findsNothing);
 
-        await tester.tap(find.byTooltip('Cancel selection'));
-        await tester.pumpAndSettle();
+        await pressBack(tester); // leaves selection mode
       }
     }
   });

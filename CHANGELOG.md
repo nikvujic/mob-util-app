@@ -4,7 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.17.0] - unreleased
+## [0.18.0] - unreleased
+
+### Changed
+- Menu: *Lock now* is an icon at the top right (it stays put), and
+  *Themes* comes before *Backup*.
+- Setting a password: the keyboard's next key goes to the next field.
+- A locked note shows a lock icon next to "Note" instead of "Locked
+  note".
+- *Edit title* changes the title as you type, and it can be left empty.
+- Selection mode has no ✕ button anywhere: back, or deselecting all,
+  leaves it.
+
+## [0.17.0] - 2026-10-11
 
 ### Added
 - **Planner routines**: blocks that repeat every day, on weekdays or on
