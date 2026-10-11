@@ -142,8 +142,9 @@ enum TimelineZoom {
 }
 
 /// The saved timeline zoom; rebuilds when it changes.
-TimelineZoom watchZoom(WidgetRef ref) =>
-    TimelineZoom.fromName(ref.watch(preferencesProvider).plannerZoom);
+TimelineZoom watchZoom(WidgetRef ref) => TimelineZoom.fromName(
+      ref.watch(preferencesProvider.select((p) => p.plannerZoom)),
+    );
 
 /// The zoom button (a bottom action): the next size, keeping the time in
 /// the middle of [timeline] where it is.

@@ -52,6 +52,7 @@ Release with the installable APK.
   something changed it asks first (back on that question discards).
 
 ### Fixed
+- Planner notifications show a proper bell icon instead of a grey blob.
 - Planner: ticking another weekday (or changing the end date) in a
   routine's sheet now moves its times clear of other routines on those
   days and says so. Before, the clash only showed after saving, and the

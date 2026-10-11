@@ -47,7 +47,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D2 | **Import** a previously exported file: validated first (format, version), shows what it contains, and asks for confirmation before **replacing** current data. Invalid files are rejected without touching current data. | ✅ with Undo right after restoring |
 | D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | ✅ |
 | D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ✅ the backup carries the key, encrypted with the password; restoring adopts the backup's master password, or re-locks the notes under this phone's |
-| D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v3) are read in tests from frozen samples |
+| D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v6) are read in tests from frozen samples |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). | 💭 not now |
 
 ## N — Notes

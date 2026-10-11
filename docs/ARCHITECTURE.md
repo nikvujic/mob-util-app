@@ -19,7 +19,7 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
 |-------|------------------|------------|
 | `main.dart` | Startup: load storage and app info, then run the app with them. | `app`, `core`, `data` |
 | `app/` | The app shell: `MyApp`, home screen, bottom navigation, the menu. | `core`, `models`, `providers`, `pages`, `widgets` |
-| `pages/<feature>/` | One folder per feature (notes, shop, planner, other, security). A feature never imports another feature — shared UI goes to `widgets/`. | `core`, `models`, `providers`, `widgets` |
+| `pages/<feature>/` | One folder per feature (notes, shop, planner, other, security, backup, settings). A feature never imports another feature — shared UI goes to `widgets/`. | `core`, `models`, `providers`, `widgets` |
 | `widgets/` | Reusable, feature-agnostic UI: dialogs, selection mode, empty state, app bars, input sheet. | `core` |
 | `providers/` | App state (Riverpod notifiers): the rules for changing notes, shop items, … Every change is saved through `data/`. | `core`, `data`, `models` |
 | `data/` | Storage: reading and writing files. The only place that touches `dart:io`. | `core`, `models` |

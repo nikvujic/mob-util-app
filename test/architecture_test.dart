@@ -27,6 +27,10 @@ const restrictedImports = <String, Set<String>>{
   'package:file_picker/': {'data'},
   'package:cryptography/': {'core'},
   'package:package_info_plus/': {'main'},
+  'package:biometric_storage/': {'data'},
+  'package:flutter_local_notifications/': {'data'},
+  'package:timezone/': {'data'},
+  'package:flutter_svg/': {'pages'},
   'package:flutter/material.dart': {'main', 'app', 'pages', 'widgets', 'core'},
   'package:flutter/widgets.dart': {'main', 'app', 'pages', 'widgets', 'core'},
   'package:flutter/': {'main', 'app', 'pages', 'widgets', 'core', 'data'},
@@ -140,7 +144,9 @@ List<String> contentViolations(String path, String source) {
   return violations;
 }
 
-final _importLine = RegExp(r'''^import\s+'([^']+)'.*;''', multiLine: true);
+/// An import or export, with either quotes.
+final _importLine =
+    RegExp(r'''^(?:import|export)\s+['"]([^'"]+)['"].*;''', multiLine: true);
 
 void main() {
   final files = Directory('lib')
@@ -238,6 +244,36 @@ void main() {
         hasLength(1),
       );
       expect(importViolations('pages/a/a.dart', ['../b.dart']), hasLength(1));
+    });
+
+    test('platform plugins stay in their layer', () {
+      expect(
+        importViolations(
+          'pages/a/a.dart',
+          ['package:flutter_local_notifications/x.dart'],
+        ),
+        hasLength(1),
+      );
+      expect(
+        importViolations('providers/p.dart', ['package:timezone/x.dart']),
+        hasLength(1),
+      );
+      expect(
+        importViolations('data/d.dart', ['package:biometric_storage/x.dart']),
+        isEmpty,
+      );
+    });
+
+    test('exports and double quotes are checked like imports', () {
+      final found = _importLine
+          .allMatches('export "package:the_app/data/x.dart";\n'
+              "import 'package:the_app/core/y.dart';")
+          .map((m) => m.group(1))
+          .toList();
+      expect(found, [
+        'package:the_app/data/x.dart',
+        'package:the_app/core/y.dart',
+      ]);
     });
 
     test('raw colors and print()', () {
