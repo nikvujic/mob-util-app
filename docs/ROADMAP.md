@@ -286,7 +286,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
-### Round 9 — Nikola's notes after using 0.16 (2026-10-11)
+### Round 9 — Nikola's notes after using 0.17 (2026-10-11)
 
 Confirmed working on the phone: **fingerprint unlock**.
 
@@ -302,7 +302,7 @@ Confirmed working on the phone: **fingerprint unlock**.
 - [ ] No ✕ in selection mode anywhere (Notes, Shop, …): select all /
   deselect all (and back) already leave it.
 - [ ] Shop: the select button cycles: select all **in the section** →
-  select **everything** (both sections) → deselect all.
+  select **everything** (both sections) → deselect all. (Confirmed.)
 - [ ] Counters: no click sound — find out why (the phone's touch-sound
   setting, or play our own sound).
 - [ ] Planner: more space between touching blocks (now a thin line).
@@ -338,17 +338,19 @@ task)
   rules for one-off vs one-off and routine vs routine (still never).
 
 **E. Visuals**
-- [ ] Short blocks (15 min) cut off the checkbox — Nikola to pick from
-  the suggestions.
+- [ ] **Timeline zoom** (Nikola's pick for short blocks, which cut off
+  the checkbox): one bottom button cycling Normal (30 min = one touch
+  target) → Large (15 min) → Extra large (5 min), remembered. No pinch
+  (two fingers, against the one-hand rule). Blocks are at least 5 min.
 - [ ] Better icons for the Other tiles (custom SVGs).
 - [ ] Shop: icons instead of checkboxes (U2).
 - [ ] Password reset dialog: no flash when Reset becomes enabled.
 
 **F. Later**
-- [ ] A new block feature Nikola calls "reminders" — he'll explain when
-  we get to it.
-- [ ] Unclear note to ask about: "(This is just so markdown)" after the
-  set-password note.
+- [ ] A new feature for **routines** — Nikola will explain when we get
+  to it.
+- [ ] Unclear note "(This is just so markdown)" after the set-password
+  note: asked; if forgotten, only the set-password part is done.
 
 ### Round 8 — reminders (2026-10-11)
 
