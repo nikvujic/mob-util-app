@@ -10,8 +10,10 @@ import 'package:the_app/models/routine.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
+import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// After a reminder was set ([remind] not null): makes sure notifications
@@ -111,8 +113,9 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
     super.initState();
     final now = ref.read(clockProvider)();
     _timeline = ScrollController(
-      initialScrollOffset:
-          math.max(0, now.hour - 1) * PlannerTimeline.hourHeight,
+      initialScrollOffset: math.max(0, now.hour - 1) *
+          TimelineZoom.fromName(ref.read(preferencesProvider).plannerZoom)
+              .hourHeight,
     );
   }
 
@@ -167,8 +170,12 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             (r.until == null || !r.until!.isBefore(today)))
           r,
     ];
+    final zoom = watchZoom(ref);
     return Scaffold(
       appBar: AppBar(title: const Text('Routines')),
+      floatingActionButton: BottomActions(
+        actions: [zoomAction(ref, _timeline)],
+      ),
       body: Column(
         children: [
           Padding(
@@ -189,6 +196,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             child: SingleChildScrollView(
               controller: _timeline,
               child: PlannerTimeline(
+                zoom: zoom,
                 adds: 'a routine',
                 blocks: [
                   for (final r in shown)

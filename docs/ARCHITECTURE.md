@@ -131,7 +131,9 @@ newer planner file aside instead of dropping the times.
 `AppPalette` (in `core/theme.dart`) holds a theme's colours; `AppTheme.of`
 builds the app's look from one, and widgets read it with `context.colors`.
 The chosen theme and other look-and-feel choices are `Preferences`, kept
-in `preferences.json` on the phone (not in backups). The design checks run
+in `preferences.json` on the phone (not in backups), the planner's
+timeline zoom too (`plannerZoom`, a `TimelineZoom` name; `PlannerTimeline`
+takes the zoom, and `zoomAction` is its button). The design checks run
 every screen in every theme.
 
 ## Actions at the bottom

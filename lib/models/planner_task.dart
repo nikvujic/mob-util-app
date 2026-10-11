@@ -4,6 +4,10 @@ class PlannerTask {
   /// Minutes in a day: times run from 0 (00:00) to this (24:00).
   static const dayMinutes = 24 * 60;
 
+  /// The shortest a new block (task or routine) can be (Nikola: at the
+  /// largest zoom, 5 minutes is one touch target high).
+  static const minMinutes = 5;
+
   final String id;
   final String title;
 

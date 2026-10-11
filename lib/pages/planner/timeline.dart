@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/dashed_border.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -87,21 +89,80 @@ List<BlockPiece> blockPieces(
   return pieces;
 }
 
+/// How tall a [PlannerTimeline] is (Nikola: short blocks were too small to
+/// read or tick). One bottom button cycles through them, no pinch (two
+/// fingers, against the one-hand rule); the choice is remembered.
+enum TimelineZoom {
+  /// A 30-minute block is one touch target high.
+  normal(1, 'Normal', labelEvery: 60),
+
+  /// A 15-minute block is.
+  large(2, 'Large', labelEvery: 30),
+
+  /// A 5-minute block (the shortest there is) is.
+  extraLarge(6, 'Extra large', labelEvery: 15);
+
+  final int _factor;
+  final String label;
+
+  /// Minutes between time labels.
+  final int labelEvery;
+
+  const TimelineZoom(this._factor, this.label, {required this.labelEvery});
+
+  double get hourHeight => PlannerTimeline.hourHeight * _factor;
+
+  /// The next size, round to the first.
+  TimelineZoom get next => values[(index + 1) % values.length];
+
+  /// The zoom saved as [name]; normal if unknown.
+  static TimelineZoom fromName(String? name) =>
+      values.firstWhere((z) => z.name == name, orElse: () => normal);
+}
+
+/// The saved timeline zoom; rebuilds when it changes.
+TimelineZoom watchZoom(WidgetRef ref) =>
+    TimelineZoom.fromName(ref.watch(preferencesProvider).plannerZoom);
+
+/// The zoom button (a bottom action): the next size, keeping the time in
+/// the middle of [timeline] where it is.
+BottomAction zoomAction(WidgetRef ref, ScrollController timeline) {
+  final zoom = watchZoom(ref);
+  final next = zoom.next;
+  return BottomAction(
+    icon: next == TimelineZoom.normal ? Icons.zoom_out : Icons.zoom_in,
+    tooltip: 'Zoom: ${zoom.label}',
+    onPressed: () {
+      ref.read(preferencesProvider.notifier).setPlannerZoom(next.name);
+      if (!timeline.hasClients) return;
+      final before = timeline.position;
+      final middle = before.pixels + before.viewportDimension / 2;
+      // The minute in the middle, as a share of an hour's height.
+      final hours =
+          (middle - PlannerTimeline.offsetOf(0, zoom)) / zoom.hourHeight;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!timeline.hasClients) return;
+        final after = timeline.position;
+        final y = PlannerTimeline.offsetOf(0, next) + hours * next.hourHeight;
+        timeline.jumpTo((y - after.viewportDimension / 2)
+            .clamp(after.minScrollExtent, after.maxScrollExtent));
+      });
+    },
+  );
+}
+
 /// A day's timeline (P7): hour marks from 00:00 to 24:00, [blocks] and the
 /// free time between them, which can be tapped to add something there.
 /// A task and a routine at the same time sit side by side (P12).
 class PlannerTimeline extends StatelessWidget {
-  /// Height of one hour: a 30-minute block (less the gap between
-  /// blocks) is one touch target (48 dp) high.
+  /// Height of one hour at normal zoom: a 30-minute block (less the gap
+  /// between blocks) is one touch target (48 dp) high.
   static const hourHeight = 108.0;
 
   /// Space between blocks that touch (half above, half below each).
   static const gap = 6.0;
 
   static const _labelWidth = 56.0;
-
-  /// Free stretches shorter than this aren't offered for adding.
-  static const _minFreeMinutes = 5;
 
   /// Space above 00:00, so its label (centred on the line) isn't cut off.
   static const _topInset = 12.0;
@@ -114,14 +175,21 @@ class PlannerTimeline extends StatelessWidget {
   /// What adding in free time makes, for screen readers ("a task").
   final String adds;
 
+  final TimelineZoom zoom;
+
   const PlannerTimeline({
     super.key,
     required this.blocks,
     required this.onAdd,
     this.adds = 'a task',
+    this.zoom = TimelineZoom.normal,
   });
 
-  static double _y(int minutes) => _topInset + minutes * hourHeight / 60;
+  /// Where [minutes] past midnight is on the timeline at [zoom].
+  static double offsetOf(int minutes, TimelineZoom zoom) =>
+      _topInset + minutes * zoom.hourHeight / 60;
+
+  double _y(int minutes) => offsetOf(minutes, zoom);
 
   @override
   Widget build(BuildContext context) {
@@ -131,9 +199,12 @@ class PlannerTimeline extends StatelessWidget {
       height: _y(PlannerTask.dayMinutes) + BottomActions.contentClearance,
       child: Stack(
         children: [
-          for (var hour = 0; hour <= 24; hour++)
+          // Hours, and in between when zoomed in.
+          for (var minutes = 0;
+              minutes <= PlannerTask.dayMinutes;
+              minutes += zoom.labelEvery)
             Positioned(
-              top: _y(hour * 60) - 8,
+              top: _y(minutes) - 8,
               left: 0,
               right: 0,
               child: ExcludeSemantics(
@@ -142,7 +213,7 @@ class PlannerTimeline extends StatelessWidget {
                     SizedBox(
                       width: _labelWidth,
                       child: Text(
-                        formatMinutes(hour * 60),
+                        formatMinutes(minutes),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: colors.textMuted, fontSize: 12),
                       ),
@@ -155,7 +226,7 @@ class PlannerTimeline extends StatelessWidget {
           for (final slot in freeSlotsAround([
             for (final b in blocks) (start: b.start, end: b.end),
           ]))
-            if (slot.end - slot.start >= _minFreeMinutes)
+            if (slot.end - slot.start >= PlannerTask.minMinutes)
               Positioned(
                 top: _y(slot.start),
                 height: _y(slot.end) - _y(slot.start),
@@ -173,7 +244,11 @@ class PlannerTimeline extends StatelessWidget {
               height: _y(block.end) - _y(block.start),
               left: _labelWidth,
               right: 8,
-              child: _Block(block, pieces: blockPieces(block, blocks)),
+              child: _Block(
+                block,
+                pieces: blockPieces(block, blocks),
+                hourHeight: zoom.hourHeight,
+              ),
             ),
         ],
       ),
@@ -247,14 +322,19 @@ class _FreeTime extends StatelessWidget {
 class _Block extends StatelessWidget {
   final TimelineBlock block;
   final List<BlockPiece> pieces;
+  final double hourHeight;
 
-  const _Block(this.block, {required this.pieces});
+  const _Block(
+    this.block, {
+    required this.pieces,
+    required this.hourHeight,
+  });
 
   /// [pieces] as rectangles in the block's box of [size] (already inset
   /// by half the gap above and below): side by side, the gap between them
   /// too; none between a block's own pieces.
   List<Rect> _rects(Size size) {
-    const perMinute = PlannerTimeline.hourHeight / 60;
+    final perMinute = hourHeight / 60;
     const gap = PlannerTimeline.gap;
     double y(int minutes) =>
         ((minutes - block.start) * perMinute - gap / 2).clamp(0.0, size.height);

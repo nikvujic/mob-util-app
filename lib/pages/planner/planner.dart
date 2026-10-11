@@ -22,9 +22,6 @@ import 'package:the_app/widgets/selection.dart';
 /// free time adds a task there; tapping a block edits it; its checkbox
 /// ticks it off. The day strip at the bottom picks the day.
 class PlannerPage extends ConsumerStatefulWidget {
-  /// Height of one hour on the timeline.
-  static const hourHeight = PlannerTimeline.hourHeight;
-
   const PlannerPage({super.key});
 
   @override
@@ -234,6 +231,8 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     var most = 0;
     final free = ref.read(plannerProvider.notifier).freeOn(occurrence.day);
     for (final room in free) {
+      // Too short for any block.
+      if (room.end - room.start < PlannerTask.minMinutes) continue;
       final int shared =
           math.min(room.end, routine.end) - math.max(room.start, routine.start);
       if (shared > most) {
@@ -242,8 +241,13 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       }
     }
     if (best == null) return null;
-    final start = math.max(routine.start, best.start);
-    final end = math.min(routine.end, best.end);
+    // The routine's time within the room, at least the shortest block.
+    var start = math.max(routine.start, best.start);
+    var end = math.min(routine.end, best.end);
+    if (end - start < PlannerTask.minMinutes) {
+      end = math.min(start + PlannerTask.minMinutes, best.end);
+      start = end - PlannerTask.minMinutes;
+    }
     return (
       room: best,
       start: start,
@@ -398,9 +402,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         ),
     ];
 
+    final zoom = watchZoom(ref);
     // Opens around the current hour (the scroll stays when changing day).
     final timeline = _timeline ??= ScrollController(
-      initialScrollOffset: math.max(0, now.hour - 1) * PlannerPage.hourHeight,
+      initialScrollOffset: math.max(0, now.hour - 1) * zoom.hourHeight,
     );
 
     return SelectionPopScope(
@@ -423,6 +428,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                 child: SingleChildScrollView(
                   controller: timeline,
                   child: PlannerTimeline(
+                    zoom: zoom,
                     blocks: blocks,
                     onAdd: selecting ? null : (slot) => _addIn(day, slot),
                   ),
@@ -449,6 +455,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               // added. Routines have their own screen.
               : BottomActions(
                   actions: [
+                    zoomAction(ref, timeline),
                     BottomAction(
                       icon: Icons.repeat,
                       tooltip: 'Routines',

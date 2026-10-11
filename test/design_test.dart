@@ -145,6 +145,19 @@ void main() {
         await t.pumpAndSettle();
       },
       'planner': (t) => openTab(t, 'Planner'),
+      'planner zoomed in all the way': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.byTooltip('Zoom: Normal'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Zoom: Large'));
+        await t.pumpAndSettle();
+        // The block's top, with its checkbox, at the top of the view.
+        await t.ensureVisible(find.ancestor(
+          of: find.text('Stand-up'),
+          matching: find.byType(SelectableCard),
+        ));
+        await t.pumpAndSettle();
+      },
       'routine choices': (t) async {
         await openTab(t, 'Planner');
         await t.tap(find.text('Stand-up'));

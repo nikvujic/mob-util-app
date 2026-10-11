@@ -83,6 +83,27 @@ void main() {
     expect(sheet, findsNothing);
   });
 
+  testWidgets('a block is at least 5 minutes, and it says so',
+      (tester) async {
+    await openAddSheet(tester);
+    // Pick 12:02 as the end of a block starting at 12:00.
+    await tester.tap(find.widgetWithText(OutlinedButton, '13:00'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pumpAndSettle();
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), '12');
+    await tester.enterText(fields.at(1), '02');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(OutlinedButton, '12:05'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
+      'Ends at 12:05: it takes at least 5 minutes.',
+    );
+  });
+
   group('with changes', () {
     Future<void> edit(WidgetTester tester) async {
       await tester.enterText(titleField, 'Lunch');

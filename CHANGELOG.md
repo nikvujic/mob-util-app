@@ -13,6 +13,10 @@ Release with the installable APK.
   alongside*. (Before, a task pushed the routine off that day.) Two
   tasks, or two routines, still can't overlap. The quick end in the
   sheet now reads *Until the next task* (or routine, or midnight).
+- **Planner zoom**: a button at the bottom (also on Routines) makes the
+  timeline bigger in two steps, so even a 5-minute block can be read and
+  ticked, then back to normal. It's remembered. Blocks are now at least
+  5 minutes long.
 
 ### Changed
 - **Notes open for viewing**: tap the text to edit it there. Back (or

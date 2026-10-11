@@ -23,6 +23,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setFingerprintFor(String? salt) =>
       state = state.copyWith(fingerprintFor: () => salt);
 
+  /// The planner timeline's size (a `TimelineZoom` name).
+  void setPlannerZoom(String zoom) => state = state.copyWith(plannerZoom: zoom);
+
   void countDzoni() => state = state.copyWith(dzoniCount: state.dzoniCount + 1);
 }
 

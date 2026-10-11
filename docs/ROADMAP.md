@@ -350,10 +350,11 @@ task)
     tallest piece (zoom, E, makes short pieces readable).
 
 **E. Visuals**
-- [ ] **Timeline zoom** (Nikola's pick for short blocks, which cut off
+- [x] **Timeline zoom** (Nikola's pick for short blocks, which cut off
   the checkbox): one bottom button cycling Normal (30 min = one touch
   target) → Large (15 min) → Extra large (5 min), remembered. No pinch
-  (two fingers, against the one-hand rule). Blocks are at least 5 min.
+  (two fingers, against the one-hand rule). Blocks are at least 5 min
+  (P13).
 - [ ] Better icons for the Other tiles (custom SVGs).
 - [ ] Shop: icons instead of checkboxes (U2).
 - [ ] Password reset dialog: no flash when Reset becomes enabled.

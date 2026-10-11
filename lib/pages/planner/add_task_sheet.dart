@@ -231,6 +231,9 @@ class _TaskSheetState extends State<TaskSheet> {
 
   bool get _repeats => _weekdays.isNotEmpty;
 
+  /// The shortest a block can be.
+  static const _min = PlannerTask.minMinutes;
+
   /// The time it can take now: a routine's free time differs from a
   /// task's (P12).
   FreeSlot get _room =>
@@ -243,8 +246,8 @@ class _TaskSheetState extends State<TaskSheet> {
         final room = _room;
         if (room.start <= _start && _end <= room.end) return;
         final length = _end - _start;
-        _start = _start.clamp(room.start, room.end - 1);
-        _end = math.min(_start + length, room.end);
+        _start = _start.clamp(room.start, room.end - _min);
+        _end = (_start + length).clamp(_start + _min, room.end);
         _adjusted = 'Now ${formatMinutes(_start)}–${formatMinutes(_end)}: '
             '${_repeats ? 'a routine' : 'a task'} is there too.';
       });
@@ -282,17 +285,20 @@ class _TaskSheetState extends State<TaskSheet> {
     final slot = _room;
     setState(() {
       final length = _end - _start;
-      _start = picked.clamp(slot.start, slot.end - 1);
-      _end = math.min(_start + length, slot.end);
+      _start = picked.clamp(slot.start, slot.end - _min);
+      _end = (_start + length).clamp(_start + _min, slot.end);
       _adjusted = picked < slot.start
           ? 'Starts at ${formatMinutes(_start)}: what\'s before ends then.'
           : picked >= slot.end
               ? 'Starts at ${formatMinutes(_start)}: what\'s after starts '
                   'at ${formatMinutes(slot.end)}.'
-              : _start + length > slot.end
-                  ? 'Ends at ${formatMinutes(_end)}: what\'s after starts '
-                      'then.'
-                  : null;
+              : picked > slot.end - _min
+                  ? 'Starts at ${formatMinutes(_start)}: it takes at least '
+                      '$_min minutes.'
+                  : _start + length > slot.end
+                      ? 'Ends at ${formatMinutes(_end)}: what\'s after starts '
+                          'then.'
+                      : null;
     });
   }
 
@@ -301,13 +307,16 @@ class _TaskSheetState extends State<TaskSheet> {
     if (picked == null || !mounted) return;
     final slot = _room;
     setState(() {
-      _end = picked.clamp(_start + 1, slot.end);
+      _end = picked.clamp(_start + _min, slot.end);
       _adjusted = picked > slot.end
           ? 'Ends at ${formatMinutes(_end)}: what\'s after starts then.'
           : picked <= _start
               ? 'Ends at ${formatMinutes(_end)}: it has to end after it '
                   'starts.'
-              : null;
+              : picked < _start + _min
+                  ? 'Ends at ${formatMinutes(_end)}: it takes at least '
+                      '$_min minutes.'
+                  : null;
     });
   }
 

@@ -18,12 +18,16 @@ class Preferences {
   /// secret; it tells which password the stored key belongs to.
   final String? fingerprintFor;
 
+  /// The planner timeline's size: a `TimelineZoom` name.
+  final String plannerZoom;
+
   const Preferences({
     this.theme = 'green',
     this.counterFeedback = true,
     this.dzoniCount = 0,
     this.noteLineNumbers = true,
     this.fingerprintFor,
+    this.plannerZoom = 'normal',
   });
 
   Preferences copyWith({
@@ -32,6 +36,7 @@ class Preferences {
     int? dzoniCount,
     bool? noteLineNumbers,
     String? Function()? fingerprintFor,
+    String? plannerZoom,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -40,6 +45,7 @@ class Preferences {
         noteLineNumbers: noteLineNumbers ?? this.noteLineNumbers,
         fingerprintFor:
             fingerprintFor == null ? this.fingerprintFor : fingerprintFor(),
+        plannerZoom: plannerZoom ?? this.plannerZoom,
       );
 
   Map<String, dynamic> toJson() => {
@@ -48,6 +54,7 @@ class Preferences {
         'dzoniCount': dzoniCount,
         'noteLineNumbers': noteLineNumbers,
         if (fingerprintFor != null) 'fingerprintFor': fingerprintFor,
+        'plannerZoom': plannerZoom,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -57,5 +64,6 @@ class Preferences {
         dzoniCount: json['dzoniCount'] as int? ?? 0,
         noteLineNumbers: json['noteLineNumbers'] as bool? ?? true,
         fingerprintFor: json['fingerprintFor'] as String?,
+        plannerZoom: json['plannerZoom'] as String? ?? 'normal',
       );
 }
