@@ -1,0 +1,40 @@
+{
+  "format": "the-app-backup",
+  "version": 6,
+  "createdAt": "2026-10-11T12:00:00.000Z",
+  "appVersion": "0.18.0 (19)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [
+      {
+        "id": "t1",
+        "title": "Work",
+        "day": "2026-10-12",
+        "start": 540,
+        "end": 720,
+        "done": false
+      }
+    ],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [
+      {
+        "id": "p1",
+        "title": "Call mum",
+        "day": "2026-10-12",
+        "time": 630
+      },
+      {
+        "id": "p2",
+        "title": "Take out the bins 🗑",
+        "day": "2026-10-13",
+        "time": 1200
+      }
+    ],
+    "counters": [],
+    "dzoniCount": 0
+  }
+}

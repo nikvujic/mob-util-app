@@ -8,6 +8,7 @@ import 'package:the_app/data/json_file_store.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/routine.dart';
@@ -22,6 +23,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/planner.json {"version": 4, "tasks": [...]}
 ///     <app documents>/data/routines.json
 ///         {"version": 1, "routines": [...], "days": [...]}
+///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -44,6 +46,9 @@ class AppStorage {
   /// Version of `routines.json` (P8). History: 1 = first format.
   static const routinesFormatVersion = 1;
 
+  /// Version of `pins.json` (P14). History: 1 = first format.
+  static const pinsFormatVersion = 1;
+
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
@@ -52,12 +57,14 @@ class AppStorage {
   final JsonFileStore? _countersStore;
   final JsonFileStore? _preferencesStore;
   final JsonFileStore? _routinesStore;
+  final JsonFileStore? _pinsStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
   final List<ShopItem> initialShopItems;
   final List<PlannerTask> initialPlannerTasks;
   final RoutineBook initialRoutines;
+  final List<PlannerPin> initialPins;
   final List<Counter> initialCounters;
   final Preferences initialPreferences;
 
@@ -75,11 +82,13 @@ class AppStorage {
     this._plannerStore,
     this._countersStore,
     this._preferencesStore,
-    this._routinesStore, {
+    this._routinesStore,
+    this._pinsStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
     required this.initialRoutines,
+    required this.initialPins,
     required this.initialCounters,
     required this.initialPreferences,
     required this.initialMasterPassword,
@@ -92,6 +101,7 @@ class AppStorage {
     this.initialShopItems = const [],
     this.initialPlannerTasks = const [],
     this.initialRoutines = RoutineBook.empty,
+    this.initialPins = const [],
     this.initialCounters = const [],
     this.initialPreferences = const Preferences(),
     this.initialMasterPassword,
@@ -103,7 +113,8 @@ class AppStorage {
         _plannerStore = null,
         _countersStore = null,
         _preferencesStore = null,
-        _routinesStore = null;
+        _routinesStore = null,
+        _pinsStore = null;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -118,6 +129,7 @@ class AppStorage {
     final preferencesStore =
         JsonFileStore(File('${dir.path}/preferences.json'));
     final routinesStore = JsonFileStore(File('${dir.path}/routines.json'));
+    final pinsStore = JsonFileStore(File('${dir.path}/pins.json'));
 
     return AppStorage._(
       notesStore,
@@ -128,6 +140,7 @@ class AppStorage {
       countersStore,
       preferencesStore,
       routinesStore,
+      pinsStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -164,6 +177,15 @@ class AppStorage {
         RoutineBook.empty,
         maxVersion: routinesFormatVersion,
         RoutineBook.fromJson,
+      ),
+      initialPins: await _load(
+        pinsStore,
+        [],
+        maxVersion: pinsFormatVersion,
+        (json) => [
+          for (final e in json['pins'] as List<dynamic>)
+            PlannerPin.fromJson(e as Map<String, dynamic>),
+        ],
       ),
       initialCounters: await _load(
         countersStore,
@@ -253,6 +275,13 @@ class AppStorage {
     });
   }
 
+  Future<void> savePins(List<PlannerPin> pins) async {
+    await _pinsStore?.write({
+      'version': pinsFormatVersion,
+      'pins': [for (final p in pins) p.toJson()],
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': formatVersion,
@@ -287,6 +316,7 @@ class AppStorage {
     await _countersStore?.flush();
     await _preferencesStore?.flush();
     await _routinesStore?.flush();
+    await _pinsStore?.flush();
   }
 }
 

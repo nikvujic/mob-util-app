@@ -9,11 +9,13 @@ import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -45,6 +47,7 @@ class BackupExporter {
       shopItems: _ref.read(shopProvider),
       plannerTasks: _ref.read(plannerProvider),
       routines: _ref.read(routinesProvider),
+      plannerPins: _ref.read(pinsProvider),
       counters: _ref.read(countersProvider),
       dzoniCount: _ref.read(preferencesProvider).dzoniCount,
       masterPassword:
@@ -106,6 +109,7 @@ class RestorableBackup {
   int get shopItemCount => _backup.shopItems.length;
   int get plannerTaskCount => _backup.plannerTasks.length;
   int get routineCount => _backup.routines.routines.length;
+  int get pinCount => _backup.plannerPins.length;
   int get counterCount => _backup.counters.length;
 }
 
@@ -252,6 +256,7 @@ class BackupImporter {
       source.shopItems,
       source.plannerTasks,
       source.routines,
+      source.plannerPins,
       source.counters,
       source.dzoniCount,
     );
@@ -269,6 +274,7 @@ class BackupImporter {
       undo._previous.shopItems,
       undo._previous.plannerTasks,
       undo._previous.routines,
+      undo._previous.plannerPins,
       undo._previous.counters,
       undo._previous.dzoniCount,
     );
@@ -340,6 +346,7 @@ class BackupImporter {
     List<ShopItem> shopItems,
     List<PlannerTask> plannerTasks,
     RoutineBook routines,
+    List<PlannerPin> plannerPins,
     List<Counter> counters,
     int dzoniCount,
   ) async {
@@ -347,6 +354,7 @@ class BackupImporter {
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
     _ref.read(plannerProvider.notifier).replaceAll(plannerTasks);
     _ref.read(routinesProvider.notifier).replaceAll(routines);
+    _ref.read(pinsProvider.notifier).replaceAll(plannerPins);
     _ref.read(countersProvider.notifier).replaceAll(counters);
     _ref.read(preferencesProvider.notifier).setDzoniCount(dzoniCount);
     await _ref.read(appStorageProvider).flush();

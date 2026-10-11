@@ -35,3 +35,8 @@ app still reads every version, so an update can never lose existing data.
   end of 2026; on Mon 12 Oct Gym is skipped and Read ticked off.
 - `v5/backup-plain.json` — backup (version 5) with those tasks and
   routines.
+- `v6/storage/pins.json` — planner reminders (P14, version 1): "Call mum"
+  on Mon 12 Oct at 10:30 and "Take out the bins 🗑" on Tue 13 Oct at
+  20:00.
+- `v6/backup-plain.json` — backup (version 6) with one task (Work) and
+  those reminders.

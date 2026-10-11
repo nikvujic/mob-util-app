@@ -14,6 +14,7 @@ import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -180,6 +181,9 @@ void main() {
     source.read(routinesProvider.notifier)
       ..toggleDone(gym, DateTime(2026, 10, 12))
       ..setSkipped(gym, DateTime(2026, 10, 14), skipped: true);
+    source
+        .read(pinsProvider.notifier)
+        .add(DateTime(2026, 10, 12), 'Call mum', time: 630);
     await source.read(backupExporterProvider).export();
 
     final target = containerWith(AppStorage.inMemory());
@@ -208,6 +212,10 @@ void main() {
     expect(
       target.read(routinesProvider).toJson(),
       source.read(routinesProvider).toJson(),
+    );
+    expect(
+      target.read(pinsProvider).map((p) => p.toJson()),
+      source.read(pinsProvider).map((p) => p.toJson()),
     );
   });
 

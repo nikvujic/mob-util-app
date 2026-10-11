@@ -8,6 +8,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -283,6 +284,42 @@ void main() {
     });
   });
 
+  group('pins v1 / v6 backup (reminders)', () {
+    void expectSample(List<PlannerPin> pins) {
+      expect(
+        pins.map((p) => '${p.title} ${p.day.day}/${p.day.month} ${p.time}'),
+        ['Call mum 12/10 630', 'Take out the bins 🗑 13/10 1200'],
+      );
+    }
+
+    test('pins.json loads', () async {
+      final dir = copyOf('test/fixtures/v6/storage');
+      final storage = await AppStorage.open(directory: dir);
+      expectSample(storage.initialPins);
+      final names = dir.listSync().map((f) => f.uri.pathSegments.last);
+      expect(names.where((n) => n.contains('corrupt')), isEmpty);
+    });
+
+    test('v6 backup restores reminders with the tasks', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v6/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.plannerPins);
+      expect(file.backup.plannerTasks.single.title, 'Work');
+    });
+
+    test('older backups and data have no reminders', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v5/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.plannerPins, isEmpty);
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v5/storage'),
+      );
+      expect(storage.initialPins, isEmpty);
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -357,6 +394,10 @@ void main() {
           '9d4ea183f1974569b55854aec71011324efd98f3d0c154fcf31450de647b99cc',
       'test/fixtures/v5/backup-plain.json':
           '334cd0ea01e4a29a0c53eb7fd2c1f32944a085ff3f51c0156da2b2f4eb3c2d2b',
+      'test/fixtures/v6/storage/pins.json':
+          'a4462a5a94d563eccfb85a17d059949d61b8c94343ae37eb804d42f381c0258f',
+      'test/fixtures/v6/backup-plain.json':
+          'fb141bdd6b34ef8791a9ed76d42cd85335f95fe37a94a900716af07d8a569627',
     };
     for (final MapEntry(key: path, value: hash) in expected.entries) {
       final digest = await Sha256().hash(File(path).readAsBytesSync());

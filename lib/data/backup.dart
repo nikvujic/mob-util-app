@@ -4,6 +4,7 @@ import 'package:the_app/core/crypto.dart' hide open;
 import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -27,6 +28,7 @@ class BackupFormatException implements Exception {
 ///       "appVersion": "0.7.0 (8)",
 ///       "data": { "notes": [...], "shopItems": [...],
 ///                 "plannerTasks": [...], "routines": {...},
+///                 "plannerPins": [...],
 ///                 "counters": [...],
 ///                 "masterPassword": {...} }
 ///     }
@@ -58,8 +60,9 @@ class Backup {
   /// (`lockedContent`); 3 = planner tasks and counters (`plannerTasks`,
   /// `counters`; older backups have none); 4 = planner tasks have start
   /// and end times, and the Džoni count (`dzoniCount`); 5 = planner
-  /// routines (`routines`, as in `routines.json`) and block colours.
-  static const version = 5;
+  /// routines (`routines`, as in `routines.json`) and block colours;
+  /// 6 = planner reminders (`plannerPins`, P14).
+  static const version = 6;
 
   final DateTime createdAt;
   final String appVersion;
@@ -69,6 +72,9 @@ class Backup {
 
   /// Planner routines (P8); none in backups from before them.
   final RoutineBook routines;
+
+  /// Planner reminders (P14); none in backups from before them.
+  final List<PlannerPin> plannerPins;
   final List<Counter> counters;
 
   /// The count on the Džoni page (O4); 0 in backups from before it.
@@ -84,6 +90,7 @@ class Backup {
     required this.shopItems,
     this.plannerTasks = const [],
     this.routines = RoutineBook.empty,
+    this.plannerPins = const [],
     this.counters = const [],
     this.dzoniCount = 0,
     this.masterPassword,
@@ -112,6 +119,7 @@ class Backup {
           'shopItems': [for (final i in shopItems) i.toJson()],
           'plannerTasks': [for (final t in plannerTasks) t.toJson()],
           'routines': routines.toJson(),
+          'plannerPins': [for (final p in plannerPins) p.toJson()],
           'counters': [for (final c in counters) c.toJson()],
           'dzoniCount': dzoniCount,
           if (masterPassword != null)
@@ -196,6 +204,10 @@ class Backup {
         routines: data['routines'] == null
             ? RoutineBook.empty
             : RoutineBook.fromJson(data['routines'] as Map<String, dynamic>),
+        plannerPins: [
+          for (final p in data['plannerPins'] as List<dynamic>? ?? const [])
+            PlannerPin.fromJson(p as Map<String, dynamic>),
+        ],
         counters: [
           for (final c in data['counters'] as List<dynamic>? ?? const [])
             Counter.fromJson(c as Map<String, dynamic>),
@@ -217,6 +229,7 @@ class Backup {
     if (!unique(backup.notes.map((n) => n.id)) ||
         !unique(backup.shopItems.map((i) => i.id)) ||
         !unique(backup.plannerTasks.map((t) => t.id)) ||
+        !unique(backup.plannerPins.map((p) => p.id)) ||
         !unique(backup.counters.map((c) => c.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
