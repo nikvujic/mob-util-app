@@ -286,6 +286,70 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 9 — Nikola's notes after using 0.16 (2026-10-11)
+
+Confirmed working on the phone: **fingerprint unlock**.
+
+**A. Quick fixes**
+- [ ] Menu: *Lock now* becomes an icon button at the top right of the
+  menu header (a fixed row of special actions; doesn't scroll).
+- [ ] Menu: *Themes* above *Backup*.
+- [ ] Set password: the keyboard's return key moves to the next field.
+- [ ] Notes: a lock icon next to "Note" in the top bar instead of
+  "Locked note".
+- [ ] Notes: *Edit title* changes the title live while typing, and an
+  empty title is allowed there.
+- [ ] No ✕ in selection mode anywhere (Notes, Shop, …): select all /
+  deselect all (and back) already leave it.
+- [ ] Shop: the select button cycles: select all **in the section** →
+  select **everything** (both sections) → deselect all.
+- [ ] Counters: no click sound — find out why (the phone's touch-sound
+  setting, or play our own sound).
+- [ ] Planner: more space between touching blocks (now a thin line).
+- [ ] Planner: an icon on blocks that have a reminder.
+- [ ] Planner: selected blocks must be obvious (a clear mark).
+- [ ] Planner: when an edited time had to be changed to fit (it would
+  overlap), say so instead of quietly changing it.
+
+**B. Notes: view mode first**
+- [ ] A note opens **for viewing**; tapping the text goes into editing
+  there.
+- [ ] Back while editing → view; back in view → as now (save / leave).
+- [ ] Closing the keyboard (back) while editing → view.
+- [ ] In view, list items show a real dot (•) instead of `-`.
+
+**C. Planner sheet (add / edit a block)**
+- [ ] Reach mode in the sheet: pulling down shifts the content into thumb
+  reach instead of closing the sheet.
+- [ ] A close button (the sheet no longer closes by dragging it down).
+- [ ] Closing with changes asks to confirm (title + message, Cancel /
+  Close). Unlike notes, **back again counts as Close**.
+
+**D. Planner: a one-off and a routine at the same time** (one focused
+task)
+- [ ] Replace "the one-off wins": a one-off task and a routine may share
+  time — at most **one of each** at any moment. Where they overlap they
+  sit side by side (one-off left, routine right); where one goes on
+  alone it widens to full width, drawn as the same block continuing
+  (blended, no gap). Example: medicine at 11:00 as a routine, whatever
+  else is there.
+  To work out: adding a one-off where a routine is (and vice versa),
+  free time, reminders and ticks for both, very short overlaps, and the
+  rules for one-off vs one-off and routine vs routine (still never).
+
+**E. Visuals**
+- [ ] Short blocks (15 min) cut off the checkbox — Nikola to pick from
+  the suggestions.
+- [ ] Better icons for the Other tiles (custom SVGs).
+- [ ] Shop: icons instead of checkboxes (U2).
+- [ ] Password reset dialog: no flash when Reset becomes enabled.
+
+**F. Later**
+- [ ] A new block feature Nikola calls "reminders" — he'll explain when
+  we get to it.
+- [ ] Unclear note to ask about: "(This is just so markdown)" after the
+  set-password note.
+
 ### Round 8 — reminders (2026-10-11)
 
 - [x] **Planner reminders** (P10), choices made while Nikola couldn't
