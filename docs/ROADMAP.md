@@ -386,8 +386,21 @@ Sorted from one long message. Order of work is at the end.
 - [x] After a release Nikola confirmed, Claude runs it and gives a
   **checklist of what to test** (docs/RELEASING.md).
 
-**Suggested order:** G and H (small, annoying now) → A and B → C, D →
-E (notifications, needs phone testing) → F → I → J → K → L; M later.
+**Chunks** (small, one at a time; each can be released on its own):
+1. [ ] G + H — switching tabs clears state; empty notes go away.
+2. [ ] A + B — the planner sheet and tapping a task; colours.
+3. [ ] D — the "now" line.
+4. [ ] C — reminders as marks on the timeline.
+5. [ ] E1 — notifications: check every state, fix what's missing; a
+   phone test list.
+6. [ ] E2 — notification settings (sound, colour).
+7. [ ] F — toasts.
+8. [ ] I — shop quantities.
+9. [ ] J — counters options and style.
+10. [ ] K — Džoni back, configurable.
+11. [ ] L — medicine tracker (model and storage, then the page).
+12. [ ] New Other pages, one per chunk (see *Later / ideas*).
+M (data-safety sweep, cloud) later.
 
 ### Round 10 — Nikola's notes on 0.18.0 (2026-10-11)
 - [x] **Remove the timeline zoom** (P13): a 5-minute block looked bad and
@@ -552,7 +565,16 @@ task)
 
 ## Later / ideas
 
-- **More Other pages** (for later, from Round 11):
+- **Other pages Nikola picked** (Round 11; each starts empty, no
+  sample data):
+  - **Birthdays & yearly dates**, with a reminder before.
+  - **Coin flip**.
+  - **Recipes**.
+  - **Workout log**.
+  - **Days since / until**.
+  - **Life percentage**: enter the year born and an expected last year;
+    shows how much has passed, visually.
+- **More Other pages** (ideas offered in Round 11):
   - **Timer / stopwatch / intervals** (e.g. cooking, workouts, pomodoro),
     big one-handed buttons, ring at the end.
   - **Days since / until**: "days since I started", "days until the
