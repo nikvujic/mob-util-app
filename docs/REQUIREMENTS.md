@@ -51,6 +51,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v7) are read in tests from frozen samples |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). The server is **typed in** (connection details entered in the app), never hard-coded. | 💭 not now |
 | D6 | **Data-safety sweep**: everything that could lose data (storage, updates, restore, locks, crashes, phone changes), how safe export is, and when cloud saving should come. | 💭 later |
+| D7 | **Clear data per section** (Settings): pick Notes, Shop, Planner and/or Other and clear everything in them, after typing RESET and, with a master password set, entering it. | 💭 Round 12 |
+| D8 | **Surviving an uninstall**: data outside the app (automatic export to a folder the user picks, or cloud) so deleting the app doesn't lose it. | 💭 later |
 
 ## N — Notes
 
@@ -130,6 +132,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ✅ |
 | U6 | **Counters: vibration and a click sound** on − / +, with an on/off switch in Menu → Settings. | ✅ the app's own click sound (Android's touch sound is often switched off, so it was silent — Nikola); follows the system volume, none in silent mode |
 | U7 | **Toasts** (messages at the bottom, with Undo) styled to match the app: rounded, themed, clear action. | 💭 Round 11 |
+| U8 | **No button flashes** when it turns on (label and fill change together), for every button in the app, enforced in the theme. | 💭 Round 12 |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test): a cart (accent) while an item is to buy, a quiet tick once bought. Still announced as checked / not checked. | ✅ |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 
@@ -143,6 +146,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode; selection mode without ✕ (back leaves it) |
 | O5 | **Counters, expanded**: options when adding — step, colour, min, max; nicer style (margins, rounder corners). | 💭 Round 11 |
 | O6 | **Medicine tracker**: medicines with doses a day, times, from / until (or forever); a clear "taken today" view, one tap per dose (several doses shown as 1 of 2 …); history per day with the time each dose was marked. | 💭 Round 11 |
+| O7 | **Lock each Other page on its own** (like section locks). | 💭 later |
 
 ---
 

@@ -286,6 +286,25 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Round 12 — Nikola's notes on 0.19.0 (2026-10-12)
+- [ ] **No button flashes when it turns on, anywhere, now and later**
+  (seen on the planner sheet's Add): one rule in the app's theme for
+  every button kind, checked by a test.
+- [ ] **Planner sheet buttons:** no ✕ (back closes, still asking about
+  changes); editing a routine has a plain **Delete** on the left.
+- [ ] **Short blocks show one line of description** (their time is
+  beside the title, so there's room below), down to the smallest block.
+- [ ] **Clear data** in Settings (Z1): pick sections (Notes, Shop,
+  Planner, Other) and clear everything in them, after typing RESET and,
+  with a master password set, entering it. For clearing test data.
+- [ ] Later: **lock each Other page on its own** (like section locks).
+- [ ] Later (with E2): **default notification sounds** for tasks,
+  routines and reminders separately.
+- [ ] Later (with D6): **what if the app is deleted?** Uninstalling
+  deletes the app's files; ways to survive it: Android's backup (on, see
+  ARCHITECTURE), exports, an automatic export to a folder the user picks
+  (outside the app, so it stays), cloud save (D5).
+
 ### Round 11 — Nikola's notes, evening of 2026-10-11
 
 Sorted from one long message. Order of work is at the end.
