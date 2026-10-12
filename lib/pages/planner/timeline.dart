@@ -507,27 +507,23 @@ class _Block extends StatelessWidget {
                         child: compact
                             // The time beside the title leaves a line
                             // below for the description (Round 12).
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Flexible(child: title),
-                                      const SizedBox(width: 8),
-                                      Flexible(child: time),
-                                    ],
-                                  ),
-                                  if (block.description != null)
-                                    Expanded(
-                                      child: _FittedLines(
+                            ? _TopThenRest(
+                                top: Row(
+                                  children: [
+                                    Flexible(child: title),
+                                    const SizedBox(width: 8),
+                                    Flexible(child: time),
+                                  ],
+                                ),
+                                rest: block.description == null
+                                    ? null
+                                    : _FittedLines(
                                         block.description!,
                                         style: TextStyle(
                                           color: colors.textSecondary,
                                           fontSize: 12,
                                         ),
                                       ),
-                                    ),
-                                ],
                               )
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -642,6 +638,42 @@ class _Pin extends StatelessWidget {
 
 /// [text] in as many whole lines as fit the height it's given (none if
 /// not even one does), the last one ending in "…" if it's cut.
+/// [top], then [rest] in whatever height is left below it (none if [top]
+/// takes it all), so a short block never overflows.
+class _TopThenRest extends StatelessWidget {
+  final Widget top;
+  final Widget? rest;
+
+  const _TopThenRest({required this.top, this.rest});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomMultiChildLayout(
+      delegate: _TopThenRestLayout(),
+      children: [
+        LayoutId(id: #top, child: top),
+        if (rest != null) LayoutId(id: #rest, child: rest!),
+      ],
+    );
+  }
+}
+
+class _TopThenRestLayout extends MultiChildLayoutDelegate {
+  @override
+  void performLayout(Size size) {
+    final top = layoutChild(#top, BoxConstraints.loose(size));
+    positionChild(#top, Offset.zero);
+    if (hasChild(#rest)) {
+      final left = (size.height - top.height).clamp(0.0, size.height);
+      layoutChild(#rest, BoxConstraints.loose(Size(size.width, left)));
+      positionChild(#rest, Offset(0, top.height));
+    }
+  }
+
+  @override
+  bool shouldRelayout(_TopThenRestLayout oldDelegate) => false;
+}
+
 class _FittedLines extends StatelessWidget {
   final String text;
   final TextStyle style;
