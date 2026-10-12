@@ -294,7 +294,7 @@ medicine tracker is in. In this order:
 1. **Main pages:** now line (D), reminders as marks (C), toasts (F),
    shop quantities (I).
 2. **The three Other pages:** counters (J), Džoni configurable (K, with
-   the inflate-and-shake hold), medicine tracker (L).
+   the inflate-and-shake hold; it gets a **new name**, Nikola picks), medicine tracker (L).
 3. **Security & data:** a lock for each Other page (O7); Clear data per
    Other page, not only "Other" as a whole (D7 follow-up, once Other has
    more than counters); the data-loss and error sweep (D6); surviving an
@@ -303,7 +303,11 @@ medicine tracker is in. In this order:
 4. **Notifications:** reliability (E1), then settings with default
    sounds per kind and colours (E2).
 5. **UI improvements:** pictures for the Other pages and other visual
-   polish; the app's name and icon.
+   polish. The name stays **The App** (Nikola's master app for
+   everything: later maybe controls for his other services and
+   connectors to his projects). The icon: an **8-bit pixel character**,
+   our own (in the spirit of Claude Code's little space invader, not a
+   copy of it).
 6. **Release v1.0.0.** Before it: every stored format has its frozen
    fixtures and backups carry all new data (medicine, Džoni's settings,
    counter options, quantities), so nothing made with v1 is ever lost on
