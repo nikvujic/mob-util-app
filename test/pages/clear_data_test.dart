@@ -112,7 +112,7 @@ void main() {
       (tester) async {
     await openClearData(tester, withPassword: true);
     await pick(tester, 'shop');
-    await pick(tester, 'other');
+    await pick(tester, 'counters');
     await confirm(tester);
     expect(find.byKey(const Key('promptPassword')), findsOneWidget);
 

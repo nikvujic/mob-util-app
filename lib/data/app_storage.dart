@@ -8,6 +8,7 @@ import 'package:the_app/data/json_file_store.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
@@ -24,6 +25,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/routines.json
 ///         {"version": 2, "routines": [...], "days": [...]}
 ///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
+///     <app documents>/data/layout.json {"version": 1, "other": [ids]}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -51,6 +53,10 @@ class AppStorage {
   /// Version of `pins.json` (P14). History: 1 = first format.
   static const pinsFormatVersion = 1;
 
+  /// Version of `layout.json` (O9): where the pages go. History: 1 =
+  /// first format (Other's order).
+  static const layoutFormatVersion = 1;
+
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
   static const shopFormatVersion = 3;
@@ -64,6 +70,7 @@ class AppStorage {
   final JsonFileStore? _preferencesStore;
   final JsonFileStore? _routinesStore;
   final JsonFileStore? _pinsStore;
+  final JsonFileStore? _layoutStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -73,6 +80,7 @@ class AppStorage {
   final List<PlannerPin> initialPins;
   final List<Counter> initialCounters;
   final Preferences initialPreferences;
+  final PageLayout initialLayout;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -89,7 +97,8 @@ class AppStorage {
     this._countersStore,
     this._preferencesStore,
     this._routinesStore,
-    this._pinsStore, {
+    this._pinsStore,
+    this._layoutStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -97,6 +106,7 @@ class AppStorage {
     required this.initialPins,
     required this.initialCounters,
     required this.initialPreferences,
+    required this.initialLayout,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
   });
@@ -110,6 +120,7 @@ class AppStorage {
     this.initialPins = const [],
     this.initialCounters = const [],
     this.initialPreferences = const Preferences(),
+    PageLayout? initialLayout,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
   })  : _notesStore = null,
@@ -120,7 +131,9 @@ class AppStorage {
         _countersStore = null,
         _preferencesStore = null,
         _routinesStore = null,
-        _pinsStore = null;
+        _pinsStore = null,
+        _layoutStore = null,
+        initialLayout = initialLayout ?? PageLayout.initial;
 
   /// Opens storage in [directory], or in the app's documents folder.
   static Future<AppStorage> open({Directory? directory}) async {
@@ -136,6 +149,7 @@ class AppStorage {
         JsonFileStore(File('${dir.path}/preferences.json'));
     final routinesStore = JsonFileStore(File('${dir.path}/routines.json'));
     final pinsStore = JsonFileStore(File('${dir.path}/pins.json'));
+    final layoutStore = JsonFileStore(File('${dir.path}/layout.json'));
 
     return AppStorage._(
       notesStore,
@@ -147,6 +161,7 @@ class AppStorage {
       preferencesStore,
       routinesStore,
       pinsStore,
+      layoutStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -206,6 +221,12 @@ class AppStorage {
         preferencesStore,
         const Preferences(),
         Preferences.fromJson,
+      ),
+      initialLayout: await _load(
+        layoutStore,
+        PageLayout.initial,
+        maxVersion: layoutFormatVersion,
+        PageLayout.fromJson,
       ),
       initialSectionLocks: await _load(settingsStore, const {}, (json) {
         final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
@@ -289,6 +310,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveLayout(PageLayout layout) async {
+    await _layoutStore?.write({
+      'version': layoutFormatVersion,
+      ...layout.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': formatVersion,
@@ -326,6 +354,7 @@ class AppStorage {
           _preferencesStore,
           _routinesStore,
           _pinsStore,
+          _layoutStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -343,6 +372,7 @@ class AppStorage {
     await _preferencesStore?.flush();
     await _routinesStore?.flush();
     await _pinsStore?.flush();
+    await _layoutStore?.flush();
   }
 }
 

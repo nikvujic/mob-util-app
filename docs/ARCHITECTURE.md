@@ -247,3 +247,25 @@ and when the app comes back, and hands the result to a
 flutter_local_notifications with exact alarms, which survive a restart;
 in tests, a fake that records them. Scheduling everything anew each time
 keeps it simple and keeps routines reminding indefinitely.
+
+## Pages as a system (O9)
+
+Other's pages are listed once, in `models/other_tool.dart` (`OtherTool`).
+Each value's `name` is a stable id: it's what's stored, so a page is never
+renamed there, only its label. Everything that lists pages reads them from
+there, and a new page has to be added to a few exhaustive switches, so it
+doesn't compile until it's complete:
+
+- `pages/other/tools.dart` — its icon and page;
+- `providers/section_data_provider.dart` — how many things it holds and
+  how to clear them (Settings → Clear data lists Other page by page; a
+  locked Other section is cleared page by page on a password reset).
+
+Where pages go is `PageLayout` (`layout.json`, its own version): Other's
+order as page ids. Unknown ids are dropped and pages missing from it are
+added at the end, so a new page needs no change to stored data. It's a
+setting, like the theme, so it isn't in backups. The quick-access menu,
+sections in Other and per-page locks (O10, O7) are meant to be more fields
+of the layout and lists of the same ids, not a rework. Each page keeps its
+data in its own file and, in backups, under its own key.
+

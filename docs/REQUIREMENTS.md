@@ -151,8 +151,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | O5 | **Counters, expanded**: options when adding — step, colour, min, max; nicer style (margins, rounder corners). | 💭 Round 11 |
 | O6 | **Medicine tracker**: medicines with doses a day, times, from / until (or forever); a clear "taken today" view, one tap per dose (several doses shown as 1 of 2 …); history per day with the time each dose was marked. | 💭 Round 11 |
 | O7 | **Lock each Other page on its own** (like section locks). | 💭 later |
-| O8 | **Arrange Other**: hold a tile and drag it to change the order; kept across restarts. | 💭 v1 |
-| O9 | **Pages as a system** (architecture, before v1): every page is registered once (id, name, icon, page, its data, lockable); Other, Clear data, page locks, backups and later the quick-access menu all read from that list, and the arrangement is stored as page ids, so new pages and new places to put them need no rework. | 💭 v1 |
+| O8 | **Arrange Other**: hold a tile and drag it to change the order (it takes a tile's place as soon as it's over it); kept across restarts. Screen readers get *Move earlier* / *Move later*. | ✅ (to try once Other has a second page) |
+| O9 | **Pages as a system** (architecture, before v1): every page is registered once (id, name, icon, page, its data, lockable); Other, Clear data, page locks, backups and later the quick-access menu all read from that list, and the arrangement is stored as page ids, so new pages and new places to put them need no rework. | ✅ see ARCHITECTURE "Pages as a system" |
 | O10 | **Page organizer** (v2): a quick-access menu opened from the right side, with the pages picked for it; maybe sections in Other; maybe rename Other; later pages to control Nikola's servers and connectors to his projects. | 💭 v2 |
 
 ---

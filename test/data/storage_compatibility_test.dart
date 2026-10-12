@@ -10,6 +10,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -382,6 +383,14 @@ void main() {
       expectSample(file.backup.shopItems);
     });
 
+    test('layout.json (Other\'s order, O9) loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v8/storage'),
+      );
+      expect(storage.initialLayout.other.first, OtherTool.counters);
+      expect(storage.unreadable, isEmpty);
+    });
+
     test('older shop items have none', () async {
       final storage = await AppStorage.open(
         directory: copyOf('test/fixtures/v2/storage'),
@@ -480,6 +489,8 @@ void main() {
           '833cc85385498b4ee601e343f9b7a04aefec2a30c6e3d680997ee86f6754d2a4',
       'test/fixtures/v8/backup-plain.json':
           '70a4f3dc35e9ef3a315b3a6c7d195b6aa3eb1183e51db186f765b3c420860742',
+      'test/fixtures/v8/storage/layout.json':
+          'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };
     for (final MapEntry(key: path, value: hash) in expected.entries) {
       final digest = await Sha256().hash(File(path).readAsBytesSync());

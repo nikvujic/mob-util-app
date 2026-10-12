@@ -295,11 +295,11 @@ medicine tracker is in. In this order:
    shop quantities (I) ✅, **checkboxes in notes** (N15; Nikola changed his
    mind, they're in v1) ✅.
    Also done: **no flash of a locked page on coming back** (L8).
-2. **Pages as a system first** (O9), so nothing big changes after v1:
+2. ✅ **Pages as a system first** (O9), so nothing big changes after v1:
    one registry of pages (id, name, icon, page, its data, lockable);
    the arrangement stored as page ids (unknown ids ignored, new pages
    added at the end); each page's data in its own store and in backups
-   under its id. Then **arrange Other** by holding a tile and dragging
+   under its id. ✅ Then **arrange Other** by holding a tile and dragging
    (O8).
    **The three Other pages:** counters (J), Džoni configurable (K, with
    the inflate-and-shake hold; renamed **Placard**, Nikola's pick), medicine tracker (L).
