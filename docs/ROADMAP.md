@@ -334,10 +334,10 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 Chunks, in order (each its own commit; release when a few are in):
 
 **1. Quick fixes**
-- [ ] Planner sheet: the clash line looks like the info line (icon +
+- [x] Planner sheet: the clash line looks like the info line (icon +
   text), only red; **Find a free time** is a real button, left-aligned
   with the rest.
-- [ ] Planner sheet: ticking a weekday that clashes makes the line
+- [x] Planner sheet: ticking a weekday that clashes makes the line
   appear and **pushes the form down** (the chip just tapped scrolls out
   of view): keep what's under the finger in place.
 - [x] Notes checkboxes: the empty box sits too high next to the text and

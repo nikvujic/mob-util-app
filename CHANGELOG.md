@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.23.0] - unreleased
 
 ### Fixed
+- Planner sheet: ticking a weekday that clashes no longer pushes the
+  form down (the chip you tapped stays where it was). The clash line
+  looks like the info line, in red, and **Find a free time** is a real
+  button.
 - Notes: the ticked checkbox showed as a white emoji, and the empty one
   sat higher; both are now drawn the same, in the accent, without a jump
   when ticking.

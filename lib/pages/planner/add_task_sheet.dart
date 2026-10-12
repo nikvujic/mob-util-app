@@ -323,9 +323,32 @@ class _TaskSheetState extends State<TaskSheet> {
       ? widget.repeatRoom!(_weekdays, _until, start: _start, end: _end)
       : widget.slot;
 
+  /// The line under the times (why they changed, or that they clash).
+  final _noticeKey = GlobalKey();
+
+  /// Runs [change] (picking days below the times), keeping what's below
+  /// the line under the times where it is: the line can appear or go with
+  /// the days, and would otherwise push the chip just tapped out of view
+  /// (Nikola). The form scrolls by however much the line changed.
+  void _keepBelow(VoidCallback change) {
+    final before = _noticeKey.currentContext?.size?.height ?? 0;
+    setState(change);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _noticeKey.currentContext;
+      if (context == null || !mounted) return;
+      final delta = (context.size?.height ?? 0) - before;
+      final position = Scrollable.maybeOf(context)?.position;
+      if (delta == 0 || position == null) return;
+      position.jumpTo(
+        (position.pixels + delta)
+            .clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+    });
+  }
+
   /// Sets the weekdays it repeats on (none: it doesn't). The times stay
   /// as they are, even if they now clash ([_clashes]).
-  void _setWeekdays(Set<int> weekdays) => setState(() {
+  void _setWeekdays(Set<int> weekdays) => _keepBelow(() {
         final repeated = _repeats;
         _weekdays = weekdays;
         // A new block's default colour: blue for a task, purple for a
@@ -513,7 +536,7 @@ class _TaskSheetState extends State<TaskSheet> {
       lastDate: DateTime(from.year + 10),
     );
     if (picked != null && mounted) {
-      setState(() {
+      _keepBelow(() {
         _until = picked;
         _adjusted = null;
       });
@@ -590,7 +613,7 @@ class _TaskSheetState extends State<TaskSheet> {
             ChoiceChip(
               label: const Text('Forever'),
               selected: _until == null,
-              onSelected: (_) => setState(() {
+              onSelected: (_) => _keepBelow(() {
                 _until = null;
                 _adjusted = null;
               }),
@@ -693,51 +716,41 @@ class _TaskSheetState extends State<TaskSheet> {
                               ],
                             ],
                           ),
-                          if (clashes)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  Text(
-                                    _repeats
+                          // Kept in place when it changes because of the
+                          // days picked below (see [_keepBelow]).
+                          KeyedSubtree(
+                            key: _noticeKey,
+                            child: clashes
+                                ? _Notice(
+                                    text: _repeats
                                         ? 'A routine is there on one of '
                                             'these days.'
                                         : 'Another task is there.',
-                                    key: const Key('timeClash'),
-                                    style:
-                                        TextStyle(color: context.colors.danger),
-                                  ),
-                                  TextButton(
-                                    key: const Key('fitTime'),
-                                    onPressed: _fit,
-                                    child: const Text('Find a free time'),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else if (_adjusted != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4, bottom: 4),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    size: 18,
-                                    color: context.colors.textSecondary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      _adjusted!,
-                                      key: const Key('timeAdjusted'),
-                                      style: TextStyle(
-                                          color: context.colors.textPrimary),
+                                    textKey: const Key('timeClash'),
+                                    danger: true,
+                                    // A real button, in line with the rest.
+                                    action: OutlinedButton.icon(
+                                      key: const Key('fitTime'),
+                                      onPressed: _fit,
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor:
+                                            context.colors.textPrimary,
+                                        side: BorderSide(
+                                          color: context.colors.textHint,
+                                        ),
+                                      ),
+                                      icon: const Icon(Icons.auto_fix_high,
+                                          size: 18),
+                                      label: const Text('Find a free time'),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                  )
+                                : _adjusted != null
+                                    ? _Notice(
+                                        text: _adjusted!,
+                                        textKey: const Key('timeAdjusted'),
+                                      )
+                                    : const SizedBox.shrink(),
+                          ),
                           // A reminder is just a title and a time (P14).
                           if (!widget.point) ...[
                             Wrap(
@@ -872,6 +885,60 @@ class _TimeButton extends StatelessWidget {
         side: BorderSide(color: clash ? colors.danger : colors.textHint),
       ),
       child: Text(formatMinutes(minutes)),
+    );
+  }
+}
+
+/// A line under the times: why they changed (info), or that they clash
+/// (red, the same look), with an [action] under it, at the left.
+class _Notice extends StatelessWidget {
+  final String text;
+  final Key textKey;
+  final bool danger;
+  final Widget? action;
+
+  const _Notice({
+    required this.text,
+    required this.textKey,
+    this.danger = false,
+    this.action,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final colour = danger ? colors.danger : colors.textSecondary;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4, bottom: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                danger ? Icons.error_outline : Icons.info_outline,
+                size: 18,
+                color: colour,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  text,
+                  key: textKey,
+                  style: TextStyle(
+                    color: danger ? colors.danger : colors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (action != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: action,
+            ),
+        ],
+      ),
     );
   }
 }

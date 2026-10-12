@@ -238,6 +238,51 @@ void main() {
     expect(find.byKey(const Key('timeClash')), findsNothing);
   });
 
+  testWidgets('a clash line that appears doesn\'t move the chip just tapped',
+      (tester) async {
+    await openPlanner(tester);
+    routines().add(
+      title: 'Late',
+      start: at(23.5),
+      end: at(23.5) + 29,
+      weekdays: {DateTime.friday},
+      from: today,
+    );
+    routines().add(
+      title: 'Mine',
+      start: at(23.5),
+      end: at(23.5) + 29,
+      weekdays: {DateTime.thursday},
+      from: today,
+    );
+    await tester.pump();
+    await tapText(tester, 'Mine');
+    await tapText(tester, 'Edit routine');
+    final fri = find.widgetWithText(FilterChip, 'Fri');
+    await tester.ensureVisible(fri);
+    await tester.pumpAndSettle();
+    final before = tester.getCenter(fri);
+
+    await tester.tap(fri);
+    await tester.pump(); // the line appears
+    await tester.pump(); // and the form makes up for it
+    expect(find.byKey(const Key('timeClash')), findsOneWidget);
+    expect(tester.getCenter(fri).dy, moreOrLessEquals(before.dy, epsilon: 1),
+        reason: 'still under the finger (Nikola)');
+
+    // The line: red, with its icon; the button at the form's left.
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    final button = find.byKey(const Key('fitTime'));
+    expect(tester.widget(button), isA<OutlinedButton>());
+    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
+    expect(
+        tester.getTopLeft(button).dx,
+        moreOrLessEquals(
+            tester.getTopLeft(find.byKey(const Key('taskTitle'))).dx,
+            epsilon: 1));
+  });
+
   testWidgets('ticking a routine off counts for that day only', (tester) async {
     await openPlanner(tester);
     final id = addGym();
