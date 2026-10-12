@@ -4,6 +4,22 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.24.0] - unreleased
+
+### Fixed
+- Notes: the lines level with the buttons at the bottom were hidden
+  (e.g. after redo they looked missing), and tapping there jumped the
+  text. Now nothing covers the text, taps beside the buttons reach it,
+  and the line you're on scrolls up clear of the buttons.
+- Planner: the hour labels have their margin from the screen's edge
+  back.
+
+### Changed
+- No tooltip pops up when holding a button (e.g. − in the shop).
+- Notes: no magnifier lens while selecting text.
+- Medicine: a dose missed late in the evening keeps the red dot until
+  02:00.
+
 ## [0.23.0] - 2026-10-12
 
 ### Added

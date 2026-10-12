@@ -60,7 +60,8 @@ void main() {
     final visible = numbers(tester).length;
     expect(visible, lessThan(60), reason: 'only those on screen');
 
-    await tester.drag(contentField, const Offset(0, -500));
+    await tester.drag(
+        find.byKey(const Key('noteContentScroll')), const Offset(0, -500));
     await tester.pumpAndSettle();
     expect(numbers(tester).first, greaterThan(1));
     expect(gutter(tester).painted.first.y,

@@ -164,4 +164,16 @@ void main() {
     await tester.pump();
     expect(milk().toBuy, isTrue);
   });
+
+  testWidgets('holding − or + shows no tooltip (Round 15)', (tester) async {
+    await openShop(tester);
+    await tester.tap(kind);
+    await tester.pump();
+    await openAmount(tester);
+    for (final label in ['Less', 'More']) {
+      await tester.longPress(find.byTooltip(label));
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsNothing, reason: label);
+    }
+  });
 }

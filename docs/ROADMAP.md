@@ -334,19 +334,20 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 Chunks, in order (each its own commit; release when a few are in):
 
 **1. Quick fixes**
-- [ ] Planner: the hour labels sit on the very edge of the screen; give
+- [x] Planner: the hour labels sit on the very edge of the screen; give
   them their small margin back, even if the timeline gets a bit
   narrower.
-- [ ] Shop: holding − (and + ) shows a tooltip; no tooltips on long
-  press on buttons that are pressed often (find the similar cases).
-- [ ] Notes: holding to select text shows a magnifier lens; none.
-- [ ] Notes editor: the action row over the text (Checkbox, Edit title)
+- [x] Shop: holding − (and + ) shows a tooltip; no tooltips on long
+  press on buttons that are pressed often (find the similar cases). Done
+  for every button, in the theme (screen readers still get the name).
+- [x] Notes: holding to select text shows a magnifier lens; none.
+- [x] Notes editor: the action row over the text (Checkbox, Edit title)
   has a background that **hides the lines under it** and catches taps
   there (seen after redo: the restored "F" lines looked missing, and
   tapping where they were made the scroll jump). Transparent, taps go
   through to the text, and the line being edited is kept scrolled above
   the actions.
-- [ ] Medicine dot: a dose still counts as due until **02:00** the next
+- [x] Medicine dot: a dose still counts as due until **02:00** the next
   day (a dose at 23:30 that's missed still shows when going to bed).
 - Discarded: the cut-off note on tapping a stacked reminder (a
   mistake).

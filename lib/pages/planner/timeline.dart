@@ -195,7 +195,10 @@ class PlannerTimeline extends StatelessWidget {
   /// Space between blocks that touch (half above, half below each).
   static const gap = 6.0;
 
-  static const _labelWidth = 56.0;
+  /// The hour labels' column: a small margin from the screen's edge, then
+  /// the time (Round 15: they had sat right on the edge).
+  static const _labelWidth = 64.0;
+  static const _labelInset = 12.0;
 
   /// Space above 00:00, so its label (centred on the line) isn't cut off.
   static const _topInset = 12.0;
@@ -287,8 +290,9 @@ class PlannerTimeline extends StatelessWidget {
               child: ExcludeSemantics(
                 child: Row(
                   children: [
-                    SizedBox(
+                    Container(
                       width: _labelWidth,
+                      padding: const EdgeInsets.only(left: _labelInset),
                       // Left, leaving room for reminder marks on the right.
                       child: Text(
                         formatMinutes(minutes),

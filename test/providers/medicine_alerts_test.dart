@@ -152,6 +152,24 @@ void main() {
       }
     });
 
+    test("yesterday's still count until 02:00 (Round 15)", () {
+      final late = Medicine(
+        id: 'l',
+        name: 'Late',
+        times: [23 * 60 + 30],
+        from: DateTime(2026, 10, 1),
+      );
+      final book = MedicineBook(medicines: [late]);
+      expect(doseDue(book, DateTime(2026, 10, 13, 1, 59)), isTrue);
+      expect(doseDue(book, DateTime(2026, 10, 13, 2)), isFalse);
+      final marked = MedicineBook(medicines: [
+        late
+      ], taken: [
+        DoseTaken(medicine: 'l', day: today, dose: 0),
+      ]);
+      expect(doseDue(marked, DateTime(2026, 10, 13, 1)), isFalse);
+    });
+
     test('only for medicines on today', () {
       final ended = Medicine(
         id: 'e',

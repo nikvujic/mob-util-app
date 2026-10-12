@@ -78,6 +78,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
   final _contentScroll = ScrollController();
 
+  /// Room below the text, so its end can scroll clear of the buttons.
+  static const _clearance =
+      BottomActions.contentClearance + BottomActions.aboveClearance;
+
   /// The text field, for the line numbers (N12) to follow.
   final _contentFieldKey = GlobalKey();
   late final AppLifecycleListener _lifecycleListener;
@@ -500,6 +504,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: TextField(
                 key: const Key('noteTitleField'),
+                magnifierConfiguration: TextMagnifierConfiguration.disabled,
                 controller: _titleController,
                 focusNode: _titleFocusNode,
                 textCapitalization: TextCapitalization.sentences,
@@ -532,37 +537,58 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                         field: _contentFieldKey,
                       ),
                     Expanded(
-                      child: KeyedSubtree(
-                        key: _contentFieldKey,
-                        // Tapping a checkbox ticks it (N15).
-                        child: CheckboxTaps(
-                          controller: _contentController,
-                          child: TextField(
-                            key: const Key('noteContentField'),
-                            controller: _contentController,
-                            focusNode: _contentFocusNode,
-                            scrollController: _contentScroll,
-                            autofocus: widget.isNew,
-                            keyboardType: TextInputType.multiline,
-                            textCapitalization: TextCapitalization.sentences,
-                            maxLines: null,
-                            expands: true,
-                            // Enter continues a list (N9).
-                            inputFormatters: const [MarkdownListFormatter()],
-                            textAlignVertical: TextAlignVertical.top,
-                            style: TextStyle(
-                              color: context.colors.textPrimary,
-                              fontSize: 16,
-                            ),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Start writing…',
-                              hintStyle:
-                                  TextStyle(color: context.colors.textHint),
-                              // The text ends above the buttons, never behind them.
-                              contentPadding: EdgeInsets.only(
-                                bottom: BottomActions.contentClearance +
-                                    BottomActions.aboveClearance,
+                      // The text scrolls with room below it, so its end can
+                      // rise above the buttons; nothing covers it, and taps
+                      // between the buttons reach it (Round 15: padding
+                      // inside the field hid the lines under it).
+                      child: LayoutBuilder(
+                        builder: (context, box) => SingleChildScrollView(
+                          key: const Key('noteContentScroll'),
+                          controller: _contentScroll,
+                          padding: const EdgeInsets.only(bottom: _clearance),
+                          child: ConstrainedBox(
+                            // At least the page tall: a tap anywhere below
+                            // short text still starts typing.
+                            constraints:
+                                BoxConstraints(minHeight: box.maxHeight),
+                            child: KeyedSubtree(
+                              key: _contentFieldKey,
+                              // Tapping a checkbox ticks it (N15).
+                              child: CheckboxTaps(
+                                controller: _contentController,
+                                child: TextField(
+                                  key: const Key('noteContentField'),
+                                  controller: _contentController,
+                                  focusNode: _contentFocusNode,
+                                  autofocus: widget.isNew,
+                                  keyboardType: TextInputType.multiline,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  maxLines: null,
+                                  // No magnifier while selecting (Round 15).
+                                  magnifierConfiguration:
+                                      TextMagnifierConfiguration.disabled,
+                                  // The line typed on stays above the
+                                  // buttons.
+                                  scrollPadding: const EdgeInsets.fromLTRB(
+                                      20, 20, 20, _clearance + 20),
+                                  // Enter continues a list (N9).
+                                  inputFormatters: const [
+                                    MarkdownListFormatter(),
+                                  ],
+                                  style: TextStyle(
+                                    color: context.colors.textPrimary,
+                                    fontSize: 16,
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: 'Start writing…',
+                                    hintStyle: TextStyle(
+                                      color: context.colors.textHint,
+                                    ),
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

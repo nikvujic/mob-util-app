@@ -301,6 +301,11 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       extensions: [palette],
       scaffoldBackgroundColor: palette.background,
+      // No tooltip pops up on a long press (Round 15: seen holding − in
+      // the shop). The message still names the button for screen readers.
+      tooltipTheme: const TooltipThemeData(
+        triggerMode: TooltipTriggerMode.manual,
+      ),
       canvasColor: palette.background,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       // No touch ripples anywhere (Nikola: they get in the way). Buttons

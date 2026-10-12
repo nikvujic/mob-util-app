@@ -120,6 +120,8 @@ const plainScrollAllowed = {
   'pages/planner/pin_menu.dart',
   // A sideways strip of days inside a page that has reach mode.
   'pages/hub/medicine_calendar.dart',
+  // A note's text while editing: a pull would move the text being typed.
+  'pages/notes/note_detail.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

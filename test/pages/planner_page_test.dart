@@ -700,4 +700,11 @@ void main() {
       expect(find.widgetWithText(OutlinedButton, '16:30'), findsOneWidget);
     });
   });
+
+  testWidgets('the hour labels keep a margin from the screen edge (Round 15)',
+      (tester) async {
+    await openPlanner(tester);
+    final label = find.text('12:00').first;
+    expect(tester.getTopLeft(label).dx, greaterThanOrEqualTo(12));
+  });
 }
