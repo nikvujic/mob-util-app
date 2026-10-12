@@ -65,14 +65,14 @@ List<Reminder> planMedicineReminders({
 /// when going to bed.
 const dueOverMidnight = 120;
 
-/// Only the day before's doses from this time on (minutes past midnight)
-/// count after midnight (Round 17: at 00:50, the day's 11:00–22:00 doses
-/// had kept the dot).
-const lateDoseFrom = 23 * 60;
+/// Only the day before's doses from this time on (minutes past midnight,
+/// 22:00 itself included) count after midnight (Round 17: at 00:50, the
+/// day's earlier doses had kept the dot).
+const lateDoseFrom = 22 * 60;
 
 /// Whether one of the doses due by [now] isn't marked (O13): today's whose
 /// time has come, and before [dueOverMidnight] also yesterday's late ones
-/// (from [lateDoseFrom]).
+/// (from [lateDoseFrom], 22:00).
 bool doseDue(MedicineBook book, DateTime now) {
   final today = dayOf(now);
   final minutes = now.hour * 60 + now.minute;

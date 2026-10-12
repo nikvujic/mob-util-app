@@ -170,18 +170,24 @@ void main() {
       expect(doseDue(marked, DateTime(2026, 10, 13, 1)), isFalse);
     });
 
-    test("only yesterday's from 23:00 (Round 17)", () {
-      // Nikola at 00:50: doses from 11:00 to 22:00 kept the dot.
+    test("only yesterday's from 22:00 (Round 17)", () {
+      // Nikola at 00:50: doses from 11:00 to 21:00 kept the dot.
       final day = Medicine(
         id: 'd',
         name: 'Day',
-        times: [11 * 60, 22 * 60],
+        times: [11 * 60, 21 * 60 + 59],
         from: DateTime(2026, 10, 1),
       );
-      expect(
-          doseDue(
-              MedicineBook(medicines: [day]), DateTime(2026, 10, 13, 0, 50)),
-          isFalse);
+      final at = DateTime(2026, 10, 13, 0, 50);
+      expect(doseDue(MedicineBook(medicines: [day]), at), isFalse);
+      // 22:00 itself counts.
+      final ten = Medicine(
+        id: 't',
+        name: 'Ten',
+        times: [22 * 60],
+        from: DateTime(2026, 10, 1),
+      );
+      expect(doseDue(MedicineBook(medicines: [ten]), at), isTrue);
     });
 
     test('only for medicines on today', () {

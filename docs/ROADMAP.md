@@ -333,7 +333,7 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 
 **1. Quick fixes**
 - [x] Medicine dot: at 00:50 it showed for yesterday's 11:00–22:00
-  doses. Only yesterday's doses at **23:00 or later** keep it until
+  doses. Only yesterday's doses at **22:00 or later** (Nikola changed it from 23:00) keep it until
   02:00.
 - [x] Planner: the hour labels' margin smaller (about 6).
 - [x] Medicine: the vibration on ticking follows the gulp (two soft
@@ -343,6 +343,9 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 - [x] Check every place the Round 14–16 timeline features should be
   (tap position, reach mode…), not just the planner: the Routines
   screen still lacks reach mode.
+
+- [x] Introduction: room at the bottom so Delete doesn't cover the last
+  lines (the phone's own bar wasn't counted on pages opened on top).
 
 **2. Placard**
 - [x] The pop looks odd: find out why and improve it (the inflating is

@@ -68,6 +68,29 @@ void main() {
     expect(isNew, findsNothing, reason: 'read');
   });
 
+  testWidgets(
+      "scrolled to the end, Delete covers no text, above the phone's "
+      'own bar too (Round 17)', (tester) async {
+    // A 48 dp navigation bar (the view's padding is in physical pixels).
+    tester.view.padding =
+        FakeViewPadding(bottom: 48 * tester.view.devicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    await start(tester);
+    await open(tester);
+    final list = find.byType(CustomScrollView);
+    for (var i = 0; i < 10; i++) {
+      await tester.drag(list, const Offset(0, -3000));
+      await tester.pumpAndSettle();
+    }
+    final textBottom =
+        tester.getBottomLeft(find.byKey(const Key('introductionText'))).dy;
+    // On a phone the button floats above the bar: its height, its margin
+    // and the bar must all fit under the text.
+    final button = tester.getSize(find.byTooltip('Delete introduction'));
+    final screen = tester.getSize(find.byType(MaterialApp)).height;
+    expect(screen - textBottom, greaterThanOrEqualTo(button.height + 16 + 48));
+  });
+
   testWidgets('deleted after asking, with undo; the menu brings it back',
       (tester) async {
     await start(tester);

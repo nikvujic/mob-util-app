@@ -284,7 +284,7 @@ A Hub page can ask for attention with a red dot on its tile
 `providers/hub_dots_provider.dart`); the Hub tab shows one when any page
 does, even while the Hub is locked (it tells nothing of what's inside).
 Medicine's dot is a dose due today and not marked, or yesterday's from
-23:00 until 02:00 (`medicineDotProvider`).
+22:00 until 02:00 (`medicineDotProvider`).
 Nothing changes in the data when a dose comes due, so the home screen
 looks again every 30 seconds and when the app comes back.
 

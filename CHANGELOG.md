@@ -8,7 +8,9 @@ Release with the installable APK.
 
 ### Fixed
 - Medicine: the red dot showed after midnight for any dose missed the
-  day before; now only for doses at 23:00 or later (until 02:00).
+  day before; now only for doses at 22:00 or later (until 02:00).
+- Pages opened on top (like the Introduction) leave room for the phone's
+  own bar too, so their last lines scroll clear of the buttons.
 
 ### Changed
 - Medicine: a dose whose time has come and isn't taken shows in **red**.
