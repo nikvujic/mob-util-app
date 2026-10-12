@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.19.0] - unreleased
+## [0.19.0] - 2026-10-12
 
 ### Added
 - Planner: tasks and routines can have a **description**. It shows on
