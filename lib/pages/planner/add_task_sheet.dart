@@ -322,8 +322,8 @@ class _TaskSheetState extends State<TaskSheet> {
       ? widget.repeatRoom!(_weekdays, _until, start: _start, end: _end)
       : widget.slot;
 
-  /// Sets the weekdays it repeats on (none: it doesn't), keeping the times
-  /// within the room that comes with that, and saying so if they change.
+  /// Sets the weekdays it repeats on (none: it doesn't). The times stay
+  /// as they are, even if they now clash ([_clashes]).
   void _setWeekdays(Set<int> weekdays) => setState(() {
         final repeated = _repeats;
         _weekdays = weekdays;
@@ -333,20 +333,33 @@ class _TaskSheetState extends State<TaskSheet> {
           _color =
               _repeats ? BlockColor.routineDefault : BlockColor.taskDefault;
         }
-        _fit();
+        _adjusted = null;
       });
 
-  /// Keeps the times within [_room] (which changes with the weekdays and
-  /// end date), saying so if they had to change. Call within setState.
-  void _fit() {
+  /// Whether the times run into something (they're outside [_room], which
+  /// changes with the weekdays and end date). They're kept as picked —
+  /// never moved by themselves (Nikola) — shown in red, with Save off and
+  /// a button to [_fit] them.
+  bool get _clashes {
+    if (widget.point) return false;
+    final room = _room;
+    return _start < room.start || _end > room.end;
+  }
+
+  /// "Find a free time": moves the times into [_room] and says where.
+  void _fit() => setState(() {
+        _fitInRoom();
+        _adjusted = 'Now ${formatMinutes(_start)}–${formatMinutes(_end)}: '
+            '${_repeats ? 'a routine' : 'a task'} was there.';
+      });
+
+  void _fitInRoom() {
     final room = _room;
     if (room.start <= _start && _end <= room.end) return;
     final length = _end - _start;
     final min = _minIn(room);
     _start = _start.clamp(room.start, room.end - min);
     _end = (_start + length).clamp(_start + min, room.end);
-    _adjusted = 'Now ${formatMinutes(_start)}–${formatMinutes(_end)}: '
-        '${_repeats ? 'a routine' : 'a task'} is there too.';
   }
 
   @override
@@ -389,43 +402,33 @@ class _TaskSheetState extends State<TaskSheet> {
       });
       return;
     }
-    final slot = _room;
+    // Kept as picked, even into something else ([_clashes]); only the
+    // day's end and the shortest length move it.
     setState(() {
       final length = _end - _start;
-      final min = _minIn(slot);
-      _start = picked.clamp(slot.start, slot.end - min);
-      _end = (_start + length).clamp(_start + min, slot.end);
-      _adjusted = picked < slot.start
-          ? 'Starts at ${formatMinutes(_start)}: what\'s before ends then.'
-          : picked >= slot.end
-              ? 'Starts at ${formatMinutes(_start)}: what\'s after starts '
-                  'at ${formatMinutes(slot.end)}.'
-              : picked > slot.end - min
-                  ? 'Starts at ${formatMinutes(_start)}: it takes at least '
-                      '$min minutes.'
-                  : _start + length > slot.end
-                      ? 'Ends at ${formatMinutes(_end)}: what\'s after starts '
-                          'then.'
-                      : null;
+      const day = PlannerTask.dayMinutes;
+      _start = picked.clamp(0, day - _min);
+      _end = (_start + length).clamp(_start + _min, day);
+      _adjusted = picked > day - _min
+          ? 'Starts at ${formatMinutes(_start)}: it takes at least '
+              '$_min minutes.'
+          : null;
     });
   }
 
   Future<void> _pickEnd() async {
     final picked = await _pickTime(_end, end: true);
     if (picked == null || !mounted) return;
-    final slot = _room;
     setState(() {
-      final min = _minIn(slot);
-      _end = picked.clamp(_start + min, slot.end);
-      _adjusted = picked > slot.end
-          ? 'Ends at ${formatMinutes(_end)}: what\'s after starts then.'
-          : picked <= _start
-              ? 'Ends at ${formatMinutes(_end)}: it has to end after it '
-                  'starts.'
-              : picked < _start + min
-                  ? 'Ends at ${formatMinutes(_end)}: it takes at least '
-                      '$min minutes.'
-                  : null;
+      const min = _min;
+      _end = picked.clamp(_start + min, PlannerTask.dayMinutes);
+      _adjusted = picked <= _start
+          ? 'Ends at ${formatMinutes(_end)}: it has to end after it '
+              'starts.'
+          : picked < _start + min
+              ? 'Ends at ${formatMinutes(_end)}: it takes at least '
+                  '$min minutes.'
+              : null;
     });
   }
 
@@ -487,7 +490,7 @@ class _TaskSheetState extends State<TaskSheet> {
 
   void _submit() {
     final title = _title.text.trim();
-    if (title.isEmpty) return;
+    if (title.isEmpty || _clashes) return;
     Navigator.of(context).pop<NewTask>((
       title: title,
       start: _start,
@@ -511,7 +514,7 @@ class _TaskSheetState extends State<TaskSheet> {
     if (picked != null && mounted) {
       setState(() {
         _until = picked;
-        _fit();
+        _adjusted = null;
       });
     }
   }
@@ -588,7 +591,7 @@ class _TaskSheetState extends State<TaskSheet> {
               selected: _until == null,
               onSelected: (_) => setState(() {
                 _until = null;
-                _fit();
+                _adjusted = null;
               }),
             ),
             ChoiceChip(
@@ -609,6 +612,7 @@ class _TaskSheetState extends State<TaskSheet> {
   @override
   Widget build(BuildContext context) {
     final slotEnd = _room.end;
+    final clashes = _clashes;
     final media = MediaQuery.of(context);
     // A fixed share of the room above the keyboard: the fields scroll (with
     // reach mode, so pulling down brings the top ones into thumb reach)
@@ -675,18 +679,43 @@ class _TaskSheetState extends State<TaskSheet> {
                                 style: TextStyle(
                                     color: context.colors.textSecondary),
                               ),
-                              _TimeButton(_start, onPressed: _pickStart),
+                              _TimeButton(_start,
+                                  clash: clashes, onPressed: _pickStart),
                               if (!widget.point) ...[
                                 Text(
                                   'to',
                                   style: TextStyle(
                                       color: context.colors.textSecondary),
                                 ),
-                                _TimeButton(_end, onPressed: _pickEnd),
+                                _TimeButton(_end,
+                                    clash: clashes, onPressed: _pickEnd),
                               ],
                             ],
                           ),
-                          if (_adjusted != null)
+                          if (clashes)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Text(
+                                    _repeats
+                                        ? 'A routine is there on one of '
+                                            'these days.'
+                                        : 'Another task is there.',
+                                    key: const Key('timeClash'),
+                                    style:
+                                        TextStyle(color: context.colors.danger),
+                                  ),
+                                  TextButton(
+                                    key: const Key('fitTime'),
+                                    onPressed: _fit,
+                                    child: const Text('Find a free time'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else if (_adjusted != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 4, bottom: 4),
                               child: Row(
@@ -801,8 +830,11 @@ class _TaskSheetState extends State<TaskSheet> {
                         ),
                       const Spacer(),
                       FilledButton(
-                        // Greyed out until there's a title (P15).
-                        onPressed: _title.text.trim().isEmpty ? null : _submit,
+                        // Greyed out until there's a title (P15) and
+                        // while the times clash.
+                        onPressed: _title.text.trim().isEmpty || clashes
+                            ? null
+                            : _submit,
                         child: Text(widget.submitLabel),
                       ),
                     ],
@@ -823,15 +855,20 @@ class _TimeButton extends StatelessWidget {
   final int minutes;
   final VoidCallback onPressed;
 
-  const _TimeButton(this.minutes, {required this.onPressed});
+  /// In red: the times run into something.
+  final bool clash;
+
+  const _TimeButton(this.minutes,
+      {required this.onPressed, this.clash = false});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor: context.colors.textPrimary,
-        side: BorderSide(color: context.colors.textHint),
+        foregroundColor: clash ? colors.danger : colors.textPrimary,
+        side: BorderSide(color: clash ? colors.danger : colors.textHint),
       ),
       child: Text(formatMinutes(minutes)),
     );

@@ -186,7 +186,7 @@ void main() {
       expect(find.text('Medicine'), findsOneWidget, reason: 'still there');
     });
 
-    testWidgets('set to repeat, it stays clear of routines, and says so',
+    testWidgets('set to repeat over a routine: red, until a free time is found',
         (tester) async {
       await openPlanner(tester);
       addMedicine();
@@ -201,10 +201,15 @@ void main() {
       await tester.tap(find.text('Every day'));
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('timeClash')), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('fitTime')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('fitTime')));
+      await tester.pumpAndSettle();
       expect(find.widgetWithText(OutlinedButton, '11:00'), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
-        'Now 09:00–11:00: a routine is there too.',
+        'Now 09:00–11:00: a routine was there.',
       );
       expect(find.text('Until the next routine'), findsOneWidget);
     });

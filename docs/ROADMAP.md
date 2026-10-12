@@ -341,7 +341,7 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   there instead of RESET.
 - [x] **Edit routine sheet:** the Save button isn't all the way to the
   side since the ✕ went (fix its place).
-- [ ] **Overlaps in the sheet: don't move the time by itself.** Today a
+- [x] **Overlaps in the sheet: don't move the time by itself.** Today a
   time that clashes on a picked weekday is moved to a free one (seen: a
   Mon/Wed/Fri routine 23:30–23:59, then a Tuesday one at the same time,
   picking Wed moved it). Instead keep the time, show it in red, disable

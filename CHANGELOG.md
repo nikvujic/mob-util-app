@@ -11,6 +11,9 @@ Release with the installable APK.
   and **Mono**.
 
 ### Changed
+- Planner sheet: a time that runs into another block is **no longer
+  moved by itself**. It stays, in red, Save is off, and a **Find a free
+  time** button moves it if you want.
 - **Clay** is first in Themes and the default for a new install. Its
   orange text buttons are a touch lighter, to read better.
 - Notes: the Checkbox button is a small one beside *Edit title*, shown

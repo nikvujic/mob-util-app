@@ -150,7 +150,7 @@ void main() {
     expect(delete.left, lessThan(sheet.left + 64));
   });
 
-  testWidgets('editing: a newly ticked day that clashes moves the times',
+  testWidgets('editing: a newly ticked day that clashes keeps the times',
       (tester) async {
     await openPlanner(tester);
     addGym(); // every day 18–19
@@ -174,11 +174,19 @@ void main() {
     await tapText(tester, 'Edit routine');
     await tapIn(tester, find.widgetWithText(FilterChip, 'Thu'));
     await tester.pump();
+    // Not moved by itself (Nikola): red, Save off, a button to fit it.
+    expect(find.widgetWithText(OutlinedButton, '08:30'), findsOneWidget);
+    expect(find.byKey(const Key('timeClash')), findsOneWidget);
+    final save = find.widgetWithText(FilledButton, 'Save');
+    expect(tester.widget<FilledButton>(save).onPressed, isNull);
+
+    await tapIn(tester, find.byKey(const Key('fitTime')));
+    expect(find.widgetWithText(OutlinedButton, '09:00'), findsOneWidget);
     expect(
       tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
-      'Now 09:00–10:00: a routine is there too.',
+      'Now 09:00–10:00: a routine was there.',
     );
-    await tapIn(tester, find.widgetWithText(FilledButton, 'Save'));
+    await tapIn(tester, save);
     await tester.pumpAndSettle();
 
     final run = container
@@ -187,6 +195,47 @@ void main() {
         .firstWhere((r) => r.title == 'Run');
     expect(run.start, at(9), reason: 'saved, not lost to a clash');
     expect(run.weekdays, {DateTime.thursday, DateTime.friday});
+  });
+
+  // Nikola's case (Mon/Wed/Fri 23:30–23:59, a Tuesday one at the same
+  // time, then Wednesday ticked), on days the strip shows: Thursday today,
+  // Friday tomorrow.
+  testWidgets('ticking a day another routine has there: time stays, Save off',
+      (tester) async {
+    await openPlanner(tester);
+    routines().add(
+      title: 'Late',
+      start: at(23.5),
+      end: at(23.5) + 29,
+      weekdays: {1, 3, 5},
+      from: today,
+    );
+    routines().add(
+      title: 'Tue',
+      start: at(23.5),
+      end: at(23.5) + 29,
+      weekdays: {DateTime.thursday},
+      from: today,
+    );
+    await tester.pump();
+    await tapText(tester, 'Tue');
+    await tapText(tester, 'Edit routine');
+    await tapIn(tester, find.widgetWithText(FilterChip, 'Fri'));
+    await tester.pump();
+
+    expect(find.widgetWithText(OutlinedButton, '23:30'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '23:59'), findsOneWidget);
+    expect(find.byKey(const Key('timeClash')), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
+          .onPressed,
+      isNull,
+    );
+    // Unticking Friday again clears it.
+    await tapIn(tester, find.widgetWithText(FilterChip, 'Fri'));
+    await tester.pump();
+    expect(find.byKey(const Key('timeClash')), findsNothing);
   });
 
   testWidgets('ticking a routine off counts for that day only', (tester) async {
@@ -275,7 +324,7 @@ void main() {
     });
 
     testWidgets(
-        'ticking a day another routine has moves the times clear, and says so',
+        'ticking a day another routine has: red until a free time is found',
         (tester) async {
       await openRoutines(tester);
       routines().add(
@@ -294,9 +343,11 @@ void main() {
       await tester.pump();
       await tapIn(tester, find.widgetWithText(FilterChip, 'Fri'));
       await tester.pump();
+      expect(find.byKey(const Key('timeClash')), findsOneWidget);
+      await tapIn(tester, find.byKey(const Key('fitTime')));
       expect(
         tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
-        'Now 01:00–02:00: a routine is there too.',
+        'Now 01:00–02:00: a routine was there.',
       );
       await tapIn(tester, find.widgetWithText(FilledButton, 'Add'));
       await tester.pumpAndSettle();

@@ -195,7 +195,8 @@ void main() {
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
 
-    // Pick 11:01 as the end: kept within its 3 minutes, no error.
+    // Pick 11:01 as the end: at least 5 minutes, so 11:05, which runs
+    // into C: red until fitted back into its 3 minutes; no error.
     await tester.tap(find.widgetWithText(OutlinedButton, '11:03'));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.keyboard_outlined));
@@ -207,10 +208,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+    expect(find.widgetWithText(OutlinedButton, '11:05'), findsOneWidget);
+    expect(find.byKey(const Key('timeClash')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('fitTime')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('fitTime')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
     expect(find.widgetWithText(OutlinedButton, '11:03'), findsOneWidget);
   });
 
-  testWidgets('a picked time that doesn\'t fit is changed, and it says so',
+  testWidgets('a picked time that doesn\'t fit stays, red, Save off',
       (tester) async {
     await openPlanner(tester);
     add(today, 'Gym', hour: 11); // 11:00–12:00
@@ -231,11 +239,20 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(OutlinedButton, '12:20'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
+    expect(find.byKey(const Key('timeClash')), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('taskTitle')), 'Lunch');
+    await tester.pump();
     expect(
-      tester.widget<Text>(find.byKey(const Key('timeAdjusted'))).data,
-      'Ends at 12:20: what\'s after starts then.',
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Add'))
+          .onPressed,
+      isNull,
     );
+    await tester.tap(find.byKey(const Key('fitTime')));
+    await tester.pump();
+    expect(find.widgetWithText(OutlinedButton, '12:20'), findsOneWidget);
+    expect(find.byKey(const Key('timeClash')), findsNothing);
   });
 
   testWidgets('tapping a day shows its tasks', (tester) async {
