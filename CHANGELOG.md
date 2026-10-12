@@ -18,6 +18,10 @@ Release with the installable APK.
   when ticking.
 
 ### Changed
+- Medicine: ticking a dose plays a short chime and buzzes (no undo when
+  unticking: just tap again). Doses sit two to a row, all the same
+  width; a tap anywhere on a card opens it; drag a card's handle to move
+  it; the buttons are always on the right; no "for good" written.
 - Planner: a new block starts **where you tap** the free time (rounded
   down to :00 or :30), and tapping the **left edge**, by the hour labels,
   adds a reminder there (rounded down to 15 minutes).

@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity: FlutterFragmentActivity() {
     private var sounds: SoundPool? = null
     private var click = 0
+    private var done = 0
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -27,11 +28,16 @@ class MainActivity: FlutterFragmentActivity() {
             )
             .build()
         click = pool.load(this, R.raw.click, 1)
+        // A dose ticked off (medicine, Round 14): a short chime.
+        done = pool.load(this, R.raw.done, 1)
         sounds = pool
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/sound")
             .setMethodCallHandler { call, result ->
                 if (call.method == "click") {
                     sounds?.play(click, 1f, 1f, 1, 0, 1f)
+                    result.success(null)
+                } else if (call.method == "done") {
+                    sounds?.play(done, 1f, 1f, 1, 0, 1f)
                     result.success(null)
                 } else {
                     result.notImplemented()

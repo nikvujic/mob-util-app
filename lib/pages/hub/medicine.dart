@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
+import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/pages/hub/medicine_sheet.dart';
@@ -128,78 +129,93 @@ class MedicinePage extends ConsumerWidget {
               icon: Icons.medication_outlined,
               message: 'No medicines',
             )
-          : PullDownList.children(
+          : PullDownList(
               bottomSpace: BottomActions.contentClearance,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Text(
-                    now.isEmpty
-                        ? 'Nothing to take today'
-                        : taken == doses
-                            ? 'Today: all taken'
-                            : 'Today: $taken of '
-                                '${countOf(doses, 'dose', 'doses')} taken',
-                    key: const Key('medicineToday'),
-                    style: TextStyle(
-                      color: taken == doses && now.isNotEmpty
-                          ? colors.accent
-                          : colors.textSecondary,
-                      fontWeight: FontWeight.w600,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      now.isEmpty
+                          ? 'Nothing to take today'
+                          : taken == doses
+                              ? 'Today: all taken'
+                              : 'Today: $taken of '
+                                  '${countOf(doses, 'dose', 'doses')} taken',
+                      key: const Key('medicineToday'),
+                      style: TextStyle(
+                        color: taken == doses && now.isNotEmpty
+                            ? colors.accent
+                            : colors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-                for (final medicine in now)
-                  _MedicineCard(
-                    medicine: medicine,
-                    book: book,
-                    day: today,
-                    onName: () => _menu(context, ref, medicine),
-                    onDose: (dose) {
-                      final was = book.takenFor(medicine.id, today, dose);
-                      HapticFeedback.selectionClick();
-                      ref
-                          .read(medicineProvider.notifier)
-                          .toggleDose(medicine.id, today, dose);
-                      // Unmarking by mistake is easy to undo.
-                      if (was != null) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(
-                            SnackBar(
-                              content: Text('${medicine.name}: not taken'),
-                              action: SnackBarAction(
-                                label: 'Undo',
-                                onPressed: () => ref
-                                    .read(medicineProvider.notifier)
-                                    .replaceAll(book),
-                              ),
-                            ),
-                          );
-                      }
-                    },
+                // Today's, in the user's order: drag a card's handle.
+                SliverReorderableList(
+                  itemCount: now.length,
+                  // onReorderItem only exists on newer Flutter than we
+                  // target.
+                  // ignore: deprecated_member_use
+                  onReorder: (from, to) => ref
+                      .read(medicineProvider.notifier)
+                      .reorder([for (final m in now) m.id], from, to),
+                  proxyDecorator: (child, _, __) => Material(
+                    type: MaterialType.transparency,
+                    elevation: 6,
+                    child: child,
                   ),
-                if (other.isNotEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-                    child: Text(
-                      'Not today',
-                      style: TextStyle(color: colors.textSecondary),
-                    ),
-                  ),
-                  for (final medicine in other)
-                    ListTile(
-                      title: Text(medicine.name),
-                      subtitle: Text(
-                        _schedule(medicine, today),
+                  itemBuilder: (context, index) {
+                    final medicine = now[index];
+                    return _MedicineCard(
+                      key: ValueKey(medicine.id),
+                      index: index,
+                      medicine: medicine,
+                      book: book,
+                      day: today,
+                      onOpen: () => _menu(context, ref, medicine),
+                      onDose: (dose) {
+                        final taking =
+                            book.takenFor(medicine.id, today, dose) == null;
+                        // Taken: a chime and a buzz (Nikola). Unticking
+                        // is just a tap again, no undo needed.
+                        if (taking) {
+                          HapticFeedback.mediumImpact();
+                          AppSound.done();
+                        }
+                        ref
+                            .read(medicineProvider.notifier)
+                            .toggleDose(medicine.id, today, dose);
+                      },
+                    );
+                  },
+                ),
+                if (other.isNotEmpty)
+                  SliverList.list(children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+                      child: Text(
+                        'Not today',
                         style: TextStyle(color: colors.textSecondary),
                       ),
-                      onTap: () => _menu(context, ref, medicine),
                     ),
-                ],
+                    for (final medicine in other)
+                      ListTile(
+                        title: Text(medicine.name),
+                        subtitle: Text(
+                          _schedule(medicine, today),
+                          style: TextStyle(color: colors.textSecondary),
+                        ),
+                        onTap: () => _menu(context, ref, medicine),
+                      ),
+                  ]),
               ],
             ),
+      // Always on the right: the hand can't be told from the touches
+      // here (Nikola).
       floatingActionButton: BottomActions(
+        side: HandSide.right,
         actions: [
           BottomAction(
             icon: Icons.history,
@@ -221,28 +237,33 @@ class MedicinePage extends ConsumerWidget {
   }
 }
 
-/// "08:00, 20:00 · from Thu, 1 Oct, for good".
+/// "08:00, 20:00 · from Thu, 1 Oct" (", until …" when it ends).
 String _schedule(Medicine m, DateTime today) {
   final times = m.times.map(formatMinutes).join(', ');
-  final until = m.until == null
-      ? 'for good'
-      : 'until ${formatDay(m.until!, today: today)}';
-  return '$times · from ${formatDay(m.from, today: today)}, $until';
+  // No end date: nothing said about one (Nikola).
+  final until =
+      m.until == null ? '' : ', until ${formatDay(m.until!, today: today)}';
+  return '$times · from ${formatDay(m.from, today: today)}$until';
 }
 
 /// A medicine's doses today: a big button each, taken or not.
 class _MedicineCard extends StatelessWidget {
+  final int index;
   final Medicine medicine;
   final MedicineBook book;
   final DateTime day;
-  final VoidCallback onName;
+
+  /// Its menu: a tap anywhere on the card but a dose (Nikola).
+  final VoidCallback onOpen;
   final ValueChanged<int> onDose;
 
   const _MedicineCard({
+    super.key,
+    required this.index,
     required this.medicine,
     required this.book,
     required this.day,
-    required this.onName,
+    required this.onOpen,
     required this.onDose,
   });
 
@@ -258,44 +279,76 @@ class _MedicineCard extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(18)),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            InkWell(
-              onTap: onName,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
-                child: Text(
-                  medicine.name,
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+        child: InkWell(
+          key: Key('medicineCard-${medicine.id}'),
+          onTap: onOpen,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
                 children: [
-                  for (var dose = 0; dose < medicine.dosesADay; dose++)
-                    _DoseButton(
-                      key: Key('dose-${medicine.id}-$dose'),
-                      label: several
-                          ? '${dose + 1} of ${medicine.dosesADay}'
-                          : null,
-                      name: medicine.name,
-                      time: medicine.times[dose],
-                      taken: book.takenFor(medicine.id, day, dose),
-                      onTap: () => onDose(dose),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+                      child: Text(
+                        medicine.name,
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
+                  ),
+                  // Drag here to move it (Nikola).
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: Semantics(
+                      label: 'Move ${medicine.name}',
+                      child: SizedBox.square(
+                        dimension: kMinInteractiveDimension,
+                        child: Icon(
+                          Icons.drag_handle,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                // Two per row, always the same width; one dose takes the
+                // first column, not the whole row (Nikola).
+                child: LayoutBuilder(
+                  builder: (context, box) {
+                    const gap = 8.0;
+                    final width = (box.maxWidth - gap) / 2;
+                    return Wrap(
+                      spacing: gap,
+                      runSpacing: gap,
+                      children: [
+                        for (var dose = 0; dose < medicine.dosesADay; dose++)
+                          SizedBox(
+                            width: width,
+                            child: _DoseButton(
+                              key: Key('dose-${medicine.id}-$dose'),
+                              label: several
+                                  ? '${dose + 1} of ${medicine.dosesADay}'
+                                  : null,
+                              name: medicine.name,
+                              time: medicine.times[dose],
+                              taken: book.takenFor(medicine.id, day, dose),
+                              onTap: () => onDose(dose),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -345,37 +398,41 @@ class _DoseButton extends StatelessWidget {
           ),
           onTap: onTap,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 120, minHeight: 64),
+            constraints: const BoxConstraints(minHeight: 64),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     done ? Icons.check_circle : Icons.radio_button_unchecked,
                     color: done ? fg : colors.textSecondary,
                   ),
                   const SizedBox(width: 10),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        formatMinutes(time),
-                        style: TextStyle(
-                          color: fg,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                  // Shrinks with the box (half a card wide).
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formatMinutes(time),
+                          style: TextStyle(
+                            color: fg,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                      Text(
-                        done ? 'Taken $at' : label ?? 'Tap when taken',
-                        style: TextStyle(
-                          color: done ? fg : colors.textSecondary,
-                          fontSize: 12,
+                        Text(
+                          done ? 'Taken $at' : label ?? 'Tap when taken',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: done ? fg : colors.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

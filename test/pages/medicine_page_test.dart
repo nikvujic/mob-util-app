@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/medicine_provider.dart';
@@ -59,7 +60,7 @@ void main() {
         DateTime(2026, 10, 12, 8, 3));
   });
 
-  testWidgets('a second tap unmarks it, with undo', (tester) async {
+  testWidgets('a second tap unmarks it (no undo needed)', (tester) async {
     late String id;
     await openMedicine(tester, () {
       id = medicine().add('Vitamin D', times: [480], from: today)!;
@@ -68,12 +69,39 @@ void main() {
     await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
     expect(container.read(medicineProvider).takenFor(id, today, 0), isNull);
-    expect(find.text('Vitamin D: not taken'), findsOneWidget);
-    await tester.tap(find.text('Undo'));
+    expect(find.text('Undo'), findsNothing);
+  });
+
+  testWidgets('ticking plays the chime and buzzes; unticking doesn\'t',
+      (tester) async {
+    late String id;
+    final calls = <String>[];
+    await openMedicine(tester, () {
+      id = medicine().add('Vitamin D', times: [480], from: today)!;
+    });
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(const MethodChannel('the_app/sound'),
+        (call) async {
+      calls.add('sound:${call.method}');
+      return null;
+    });
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'HapticFeedback.vibrate') calls.add('buzz');
+      return null;
+    });
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(
+          const MethodChannel('the_app/sound'), null);
+      messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
-    expect(container.read(medicineProvider).takenFor(id, today, 0)!.at,
-        DateTime(2026, 10, 12, 8, 3),
-        reason: 'the first time, kept');
+    expect(calls, containsAll(['sound:done', 'buzz']));
+    calls.clear();
+    await tester.tap(find.byKey(Key('dose-$id-0')));
+    await tester.pumpAndSettle();
+    expect(calls, isNot(contains('sound:done')));
   });
 
   testWidgets('several a day: each dose, "1 of 2"', (tester) async {
@@ -162,5 +190,69 @@ void main() {
     expect(find.text('Sat, 10 Oct'), findsOneWidget);
     expect(find.text('08:00 not taken'), findsNWidgets(2));
     expect(find.text('Fri, 9 Oct'), findsNothing, reason: 'before it began');
+  });
+
+  group('handling (Round 14)', () {
+    testWidgets('doses: two per row, the same width; one takes column 1',
+        (tester) async {
+      late String one, three;
+      await openMedicine(tester, () {
+        one = medicine().add('Once', times: [480], from: today)!;
+        three = medicine().add('Thrice', times: [480, 720, 1200], from: today)!;
+      });
+      Rect dose(String id, int d) =>
+          tester.getRect(find.byKey(Key('dose-$id-$d')));
+      expect(dose(three, 0).width, dose(three, 1).width);
+      expect(dose(three, 0).top, dose(three, 1).top, reason: 'one row');
+      expect(dose(three, 2).top, greaterThan(dose(three, 0).top));
+      expect(dose(three, 2).left, dose(three, 0).left, reason: 'column 1');
+      expect(dose(one, 0).width, dose(three, 0).width, reason: 'not full');
+    });
+
+    testWidgets('a tap anywhere on a card opens it', (tester) async {
+      late String id;
+      await openMedicine(tester, () {
+        id = medicine().add('Pills', times: [480], from: today)!;
+      });
+      final card = tester.getRect(find.byKey(Key('medicineCard-$id')));
+      // Beside the dose, in the card's empty half.
+      await tester.tapAt(Offset(card.right - 60, card.bottom - 20));
+      await tester.pumpAndSettle();
+      expect(find.text('Edit'), findsOneWidget);
+      expect(find.textContaining('for good'), findsNothing);
+      expect(find.text('08:00 · from Mon, 12 Oct'), findsOneWidget);
+    });
+
+    testWidgets('its buttons are on the right, whichever hand', (tester) async {
+      now = DateTime(2026, 10, 12, 8, 3);
+      container = await pumpApp(tester, clock: () => now);
+      await openTab(tester, 'Hub');
+      // The last touch on the left (a left hand), then open it without one.
+      await tester.tapAt(const Offset(20, 300));
+      await tester.pump();
+      await tapAsScreenReader(tester, find.byTooltip('Medicine'));
+      final width = tester.getSize(find.byType(MaterialApp)).width;
+      expect(tester.getCenter(find.byTooltip('Add medicine')).dx,
+          greaterThan(width / 2));
+    });
+
+    testWidgets('drag a card\'s handle to move it', (tester) async {
+      await openMedicine(tester, () {
+        medicine()
+          ..add('First', times: [480], from: today)
+          ..add('Second', times: [480], from: today);
+      });
+      // The first card's handle, dragged down past the second, in steps.
+      final handle = find.byIcon(Icons.drag_handle).first;
+      final drag = await tester.startGesture(tester.getCenter(handle));
+      for (var i = 0; i < 12; i++) {
+        await drag.moveBy(const Offset(0, 20));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(container.read(medicineProvider).medicines.map((m) => m.name),
+          ['Second', 'First']);
+    });
   });
 }

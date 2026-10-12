@@ -76,6 +76,25 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
     return before;
   }
 
+  /// Moves a medicine among [shown] (the ids in the order they're listed,
+  /// e.g. today's), from [oldIndex] to [newIndex]
+  /// (`ReorderableListView.onReorder` style); the others keep their places.
+  void reorder(List<String> shown, int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) newIndex--;
+    if (oldIndex == newIndex) return;
+    final moved = [...shown];
+    moved.insert(newIndex, moved.removeAt(oldIndex));
+    final next = moved.iterator;
+    final byId = {for (final m in state.medicines) m.id: m};
+    state = MedicineBook(
+      medicines: [
+        for (final m in state.medicines)
+          if (shown.contains(m.id)) byId[(next..moveNext()).current]! else m,
+      ],
+      taken: state.taken,
+    );
+  }
+
   /// Marks [dose] of [medicine] on [day] taken now, or unmarks it.
   void toggleDose(String medicine, DateTime day, int dose) {
     final mark = state.takenFor(medicine, day, dose);

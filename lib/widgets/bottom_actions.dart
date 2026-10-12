@@ -93,11 +93,16 @@ class BottomActions extends StatefulWidget {
   /// still outermost, only not reversed.
   final int keepOrderOfLast;
 
+  /// Always this side, instead of the hand's (e.g. where the hand can't be
+  /// told from the touches, Round 14).
+  final HandSide? side;
+
   const BottomActions({
     super.key,
     required this.actions,
     this.above = const [],
     this.keepOrderOfLast = 0,
+    this.side,
   });
 
   @override
@@ -152,7 +157,7 @@ class _BottomActionsState extends State<BottomActions> {
 
   @override
   Widget build(BuildContext context) {
-    final side = _side ??= HandTracker.sideOf(context);
+    final side = _side ??= widget.side ?? HandTracker.sideOf(context);
     final right = side == HandSide.right;
     final buttons = [
       for (final action in widget.actions)

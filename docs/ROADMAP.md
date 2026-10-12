@@ -359,15 +359,15 @@ Chunks, in order (each its own commit; release when a few are in):
 - [ ] (Nikola's note on tapping a stacked reminder was cut off: ask.)
 
 **3. Medicine, how it handles**
-- [ ] Its buttons always on the **right** (one-handed side can't be told
+- [x] Its buttons always on the **right** (one-handed side can't be told
   here).
-- [ ] No undo after unticking (just tick again); a **sound and vibration**
+- [x] No undo after unticking (just tick again); a **sound and vibration**
   on ticking (a nice one, not the click).
-- [ ] Dose boxes: **two per row, same width**; one dose takes the first
+- [x] Dose boxes: **two per row, same width**; one dose takes the first
   column, not the whole row.
-- [ ] **Drag handles** to order medicines.
-- [ ] A tap anywhere on a card (not on a dose) opens it, like its name.
-- [ ] Its menu: "for good" isn't written; no end date just shows none.
+- [x] **Drag handles** to order medicines.
+- [x] A tap anywhere on a card (not on a dose) opens it, like its name.
+- [x] Its menu: "for good" isn't written; no end date just shows none.
 
 **4. Medicine, history and states**
 - [ ] History easier to read: coloured day titles, a mark per dose
