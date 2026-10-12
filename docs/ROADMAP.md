@@ -329,6 +329,33 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 13 — Nikola's notes on 0.20.0 (2026-10-12)
+
+- [ ] **Checkbox button** in notes: a small button next to *Edit title*,
+  shown only while typing (keyboard up), instead of in the main row.
+- [ ] **Checkbox look:** the empty box bigger; the ticked box in the
+  theme's accent (Clay's orange).
+- [ ] **Clay first and the default theme**, and more themes for fun to
+  fill out the list (all dark, no light mode).
+- [ ] **Clear data:** no icon on the big Clear button; type **DELETE**
+  there instead of RESET.
+- [ ] **Edit routine sheet:** the Save button isn't all the way to the
+  side since the ✕ went (fix its place).
+- [ ] **Overlaps in the sheet: don't move the time by itself.** Today a
+  time that clashes on a picked weekday is moved to a free one (seen: a
+  Mon/Wed/Fri routine 23:30–23:59, then a Tuesday one at the same time,
+  picking Wed moved it). Instead keep the time, show it in red, disable
+  Save, and offer a button that finds a free time on request.
+- [ ] Shop: Nikola's note "shop items are gonna get some content next to
+  the …button" (to clarify).
+- Later, tests: **long inputs** everywhere (titles, notes, items,
+  counters…): any length is allowed (a personal app), but the layout must
+  never break because of it.
+- Later, locks (with O7/O10): Other (whatever it's renamed to) can still
+  be locked as a whole, **and each page in it can be locked on its own**
+  for when Other isn't locked. The quick-access menu, when it comes,
+  locks the same way Other does.
+
 ### Round 12 — Nikola's notes on 0.19.0 (2026-10-12)
 - [x] **No button flashes when it turns on, anywhere, now and later**
   (seen on the planner sheet's Add): one rule in the app's theme for
