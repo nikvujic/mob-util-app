@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/pages/hub/tools.dart';
+import 'package:the_app/providers/hub_dots_provider.dart';
 import 'package:the_app/providers/layout_provider.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 
@@ -39,6 +40,7 @@ class HubPage extends ConsumerWidget {
               _MovableTile(
                 key: ValueKey(tool),
                 tool: tool,
+                dot: ref.watch(hubToolDotProvider(tool)),
                 // Dragged over another tile: takes its place at once.
                 onHover: (dragged) => layout.moveInHub(dragged, index),
                 onMove: (by) => layout.moveInHub(tool, index + by),
@@ -58,6 +60,7 @@ class HubPage extends ConsumerWidget {
 /// get "Move earlier" / "Move later" instead.
 class _MovableTile extends StatelessWidget {
   final HubTool tool;
+  final bool dot;
   final ValueChanged<HubTool> onHover;
   final ValueChanged<int> onMove;
   final bool Function(int by) canMoveBy;
@@ -66,6 +69,7 @@ class _MovableTile extends StatelessWidget {
   const _MovableTile({
     super.key,
     required this.tool,
+    required this.dot,
     required this.onHover,
     required this.onMove,
     required this.canMoveBy,
@@ -74,7 +78,12 @@ class _MovableTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tile = _ToolTile(icon: tool.icon, label: tool.label, onTap: onTap);
+    final tile = _ToolTile(
+      icon: tool.icon,
+      label: tool.label,
+      dot: dot,
+      onTap: onTap,
+    );
     return DragTarget<HubTool>(
       onWillAcceptWithDetails: (details) {
         if (details.data != tool) onHover(details.data);
@@ -114,11 +123,15 @@ class _ToolTile extends StatelessWidget {
   /// The icon: an SVG asset drawn in black, shown in the accent colour.
   final String icon;
   final String label;
+
+  /// A red dot in the corner: the page asks for attention (O13).
+  final bool dot;
   final VoidCallback onTap;
 
   const _ToolTile({
     required this.icon,
     required this.label,
+    required this.dot,
     required this.onTap,
   });
 
@@ -134,17 +147,38 @@ class _ToolTile extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
-          child: Center(
-            child: SvgPicture.asset(
-              icon,
-              width: 44,
-              height: 44,
-              colorFilter: ColorFilter.mode(
-                context.colors.accent,
-                BlendMode.srcIn,
+          child: Stack(
+            children: [
+              Center(
+                child: SvgPicture.asset(
+                  icon,
+                  width: 44,
+                  height: 44,
+                  colorFilter: ColorFilter.mode(
+                    context.colors.accent,
+                    BlendMode.srcIn,
+                  ),
+                  excludeFromSemantics: true,
+                ),
               ),
-              excludeFromSemantics: true,
-            ),
+              if (dot)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Semantics(
+                    label: 'Needs attention',
+                    child: Container(
+                      key: const Key('toolDot'),
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: context.colors.danger,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

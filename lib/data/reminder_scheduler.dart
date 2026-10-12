@@ -3,16 +3,26 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-/// A planner reminder (P10): a notification at [at].
+/// What a reminder is about: each kind has its own Android channel, so
+/// they can be set apart in the phone's settings.
+enum ReminderKind { planner, medicine }
+
+/// A reminder (P10, O13): a notification at [at].
 class Reminder {
   final DateTime at;
   final String title;
   final String body;
+  final ReminderKind kind;
 
-  const Reminder({required this.at, required this.title, required this.body});
+  const Reminder({
+    required this.at,
+    required this.title,
+    required this.body,
+    this.kind = ReminderKind.planner,
+  });
 
   @override
-  String toString() => 'Reminder($at, $title, $body)';
+  String toString() => 'Reminder($at, $title, $body, ${kind.name})';
 }
 
 /// Shows reminders as notifications at their time.
@@ -28,14 +38,24 @@ abstract class ReminderScheduler {
 /// [ReminderScheduler] with Android notifications at exact times, kept
 /// across restarts of the phone (flutter_local_notifications).
 class NotificationReminderScheduler implements ReminderScheduler {
-  static const _channel = AndroidNotificationDetails(
-    'planner-reminders',
-    'Planner reminders',
-    channelDescription: 'Before planner blocks start',
-    importance: Importance.high,
-    priority: Priority.high,
-    category: AndroidNotificationCategory.reminder,
-  );
+  static const _channels = {
+    ReminderKind.planner: AndroidNotificationDetails(
+      'planner-reminders',
+      'Planner reminders',
+      channelDescription: 'Before planner blocks start',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    ),
+    ReminderKind.medicine: AndroidNotificationDetails(
+      'medicine-reminders',
+      'Medicine reminders',
+      channelDescription: 'When a dose is due, and again if not taken',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    ),
+  };
 
   final _plugin = FlutterLocalNotificationsPlugin();
   Future<bool>? _ready;
@@ -82,7 +102,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
           // An absolute moment: planned again on every app start, so a
           // change of time zone or daylight saving is picked up.
           tz.TZDateTime.from(reminder.at.toUtc(), tz.UTC),
-          const NotificationDetails(android: _channel),
+          NotificationDetails(android: _channels[reminder.kind]),
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
               : AndroidScheduleMode.inexactAllowWhileIdle,

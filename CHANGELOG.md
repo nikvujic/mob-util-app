@@ -7,6 +7,13 @@ Release with the installable APK.
 ## [0.23.0] - unreleased
 
 ### Added
+- Medicine: **reminders** at each dose time, and if you like a second
+  one 1–4 hours later while it's still not taken. A **red dot** on the
+  Medicine tile and the Hub tab while one of today's doses is due (shown
+  even when the Hub is locked). Both can be turned off or **paused** for
+  a day or more in Medicine's new **settings** (the gear in its top bar).
+  Medicine reminders have their own channel in Android's notification
+  settings.
 - Medicine: **history you can read and fix**. Each day has a coloured
   title and a mark per dose; tap one to set it taken, missed or not sure.
   Each medicine has its **own history** (in its menu): the total taken

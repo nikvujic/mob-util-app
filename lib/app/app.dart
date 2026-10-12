@@ -16,6 +16,8 @@ import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/providers/fingerprint_provider.dart';
+import 'package:the_app/providers/hub_dots_provider.dart';
+import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -99,11 +101,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   final _scaffold = GlobalKey<ScaffoldState>();
 
+  /// Looks again whether a dose has come due (the red dot, O13).
+  late final Timer _doseCheck = Timer.periodic(
+    const Duration(seconds: 30),
+    (_) => ref.invalidate(medicineDotProvider),
+  );
+
   /// Tells the session when the app leaves and comes back, for auto-lock.
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
     onHide: () => ref.read(sessionProvider.notifier).appHidden(),
     onShow: () {
       ref.read(sessionProvider.notifier).appShown();
+      // A dose may have come due while away (O13).
+      ref.invalidate(medicineDotProvider);
       // Reminders are planned two weeks ahead: top them up (P10).
       ref.read(reminderPlannerProvider).refresh();
     },
@@ -113,6 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _lifecycle; // start listening
+    _doseCheck; // start looking
     WidgetsBinding.instance.addPostFrameCallback((_) => _tellUnreadable());
   }
 
@@ -148,6 +159,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     _lifecycle.dispose();
     _exitArmed?.cancel();
+    _doseCheck.cancel();
     super.dispose();
   }
 
@@ -247,6 +259,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
         child: BottomNav(
           selectedIndex: _selectedIndex,
+          hubDot: ref.watch(hubDotProvider),
           onItemTapped: (index) {
             final left = _selectedIndex;
             setState(() => _selectedIndex = index);

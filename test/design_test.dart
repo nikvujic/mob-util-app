@@ -294,6 +294,22 @@ void main() {
         await t.tap(find.text('not set').first);
         await t.pumpAndSettle();
       },
+      'medicine settings': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Medicine'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Medicine settings'));
+        await t.pumpAndSettle();
+      },
+      'medicine pause sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Medicine'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Medicine settings'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('medicinePause')));
+        await t.pumpAndSettle();
+      },
       'medicine sheet': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Medicine'));

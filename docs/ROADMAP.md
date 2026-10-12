@@ -381,14 +381,15 @@ Chunks, in order (each its own commit; release when a few are in):
   sure** (for days not ticked at the time).
 
 **5. Hub page settings, notifications, the red dot**
-- [ ] Each Hub page that has settings gets a **settings button in its
+- [x] Each Hub page that has settings gets a **settings button in its
   top bar** (Counters and Placard don't need one).
-- [ ] Medicine settings: notifications on/off; the red dot on/off;
+- [x] Medicine settings: notifications on/off; the red dot on/off;
   **pause** notifications / the dot for a day or more.
-- [ ] Medicine **notifications** at dose times, and an optional **second
+- [x] Medicine **notifications** at dose times, and an optional **second
   one if a dose is still not taken** (e.g. 4 hours later).
-- [ ] A **red dot** on the Medicine tile and on the Hub tab when a dose
-  is missed (seen even when the Hub is locked).
+- [x] A **red dot** on the Medicine tile and on the Hub tab when a dose
+  is missed (seen even when the Hub is locked). Done as: due and not
+  marked today; marking it missed or not sure clears the dot too.
 
 ### Round 13 — Nikola's notes on 0.20.0 (2026-10-12)
 

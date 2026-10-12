@@ -7,8 +7,10 @@ import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/pages/hub/medicine_history.dart';
+import 'package:the_app/pages/hub/medicine_settings.dart';
 import 'package:the_app/pages/hub/medicine_sheet.dart';
 import 'package:the_app/providers/medicine_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
@@ -36,9 +38,12 @@ class MedicinePage extends ConsumerWidget {
     );
     // Started in the past: fill those days in, if wanted (O13; one missed
     // day can then be set in its history).
-    if (id == null || !draft.from.isBefore(today) || !context.mounted) {
-      return;
+    if (id == null || !context.mounted) return;
+    // Its doses will remind: make sure notifications may show (O13).
+    if (ref.read(preferencesProvider).medicineReminders) {
+      await allowMedicineReminders(context, ref);
     }
+    if (!draft.from.isBefore(today) || !context.mounted) return;
     final fill = await showConfirmDialog(
       context,
       title: 'Mark the past days taken?',
@@ -144,7 +149,23 @@ class MedicinePage extends ConsumerWidget {
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Medicine')),
+      appBar: AppBar(
+        title: const Text('Medicine'),
+        // Settings in the top bar, like every Hub page that has them
+        // (O12).
+        actions: [
+          IconButton(
+            key: const Key('medicineSettings'),
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Medicine settings',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const MedicineSettingsPage(),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: book.medicines.isEmpty
           ? const EmptyState(
               icon: Icons.medication_outlined,

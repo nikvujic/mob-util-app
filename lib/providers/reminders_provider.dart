@@ -8,8 +8,11 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
+import 'package:the_app/providers/medicine_alerts_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -85,9 +88,9 @@ List<Reminder> planReminders({
   return reminders.take(maxReminders).toList();
 }
 
-/// Keeps the phone's scheduled reminders in step with the planner (P10):
-/// plans them again whenever tasks, routines, reminders or the Planner's
-/// lock change,
+/// Keeps the phone's scheduled reminders in step with the planner (P10)
+/// and the medicines (O13): plans them again whenever tasks, routines,
+/// reminders, medicines, their settings or a lock change,
 /// and on [refresh] (e.g. when the app comes back).
 class ReminderPlanner {
   final Ref _ref;
@@ -101,6 +104,15 @@ class ReminderPlanner {
     _ref.listen(pinsProvider, (_, __) => _soon());
     _ref.listen(sectionLocksProvider, (_, __) => _soon());
     _ref.listen(securityProvider, (_, __) => _soon());
+    _ref.listen(medicineProvider, (_, __) => _soon());
+    _ref.listen(preferencesProvider, (before, after) {
+      if (before == null ||
+          before.medicineReminders != after.medicineReminders ||
+          before.medicineFollowUp != after.medicineFollowUp ||
+          before.medicinePausedUntil != after.medicinePausedUntil) {
+        _soon();
+      }
+    });
     _soon();
   }
 
@@ -148,17 +160,28 @@ class ReminderPlanner {
   }
 
   Future<void> _plan() async {
-    final hide = _ref.read(sectionLocksProvider).contains(AppSection.planner) &&
-        _ref.read(securityProvider) != null;
-    await _ref.read(reminderSchedulerProvider).replaceAll(
-          planReminders(
-            now: _ref.read(clockProvider)(),
-            tasks: _ref.read(plannerProvider),
-            routines: _ref.read(routinesProvider),
-            pins: _ref.read(pinsProvider),
-            hideTitles: hide,
-          ),
-        );
+    final locks = _ref.read(sectionLocksProvider);
+    final password = _ref.read(securityProvider) != null;
+    final now = _ref.read(clockProvider)();
+    final reminders = [
+      ...planReminders(
+        now: now,
+        tasks: _ref.read(plannerProvider),
+        routines: _ref.read(routinesProvider),
+        pins: _ref.read(pinsProvider),
+        hideTitles: password && locks.contains(AppSection.planner),
+      ),
+      ...planMedicineReminders(
+        now: now,
+        book: _ref.read(medicineProvider),
+        preferences: _ref.read(preferencesProvider),
+        days: reminderDays,
+        hideNames: password && locks.contains(AppSection.hub),
+      ),
+    ]..sort((a, b) => a.at.compareTo(b.at));
+    await _ref
+        .read(reminderSchedulerProvider)
+        .replaceAll(reminders.take(maxReminders).toList());
   }
 }
 

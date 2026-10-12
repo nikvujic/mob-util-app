@@ -150,7 +150,10 @@ fingerprint unlock is just turned on again.
 `AppPalette` (in `core/theme.dart`) holds a theme's colours; `AppTheme.of`
 builds the app's look from one, and widgets read it with `context.colors`.
 The chosen theme and other look-and-feel choices are `Preferences`, kept
-in `preferences.json` on the phone (not in backups). The design checks run
+in `preferences.json` on the phone (not in backups), as are a Hub page's
+settings (Medicine's reminders, follow-up, dot and pause; O12): they're
+about this phone, and missing values read as defaults, so the file needs
+no version. The design checks run
 every screen in every theme.
 
 Custom icons (the Hub tiles) are SVGs in `assets/icons/`, drawn in
@@ -248,6 +251,24 @@ flutter_local_notifications with exact alarms, which survive a restart;
 in tests, a fake that records them. Scheduling everything anew each time
 keeps it simple and keeps routines reminding indefinitely.
 
+Medicine reminders (O13) come from `planMedicineReminders`
+(`providers/medicine_alerts_provider.dart`) and go through the same
+planner, merged with the planner's and capped together; it also runs on
+medicine and medicine-setting changes. Each `Reminder` has a kind, and
+each kind its own Android channel (`planner-reminders`,
+`medicine-reminders`). A locked section's reminders leave out titles and
+names.
+
+## Red dots (O13)
+
+A Hub page can ask for attention with a red dot on its tile
+(`hubToolDotProvider`, an exhaustive switch over `HubTool` in
+`providers/hub_dots_provider.dart`); the Hub tab shows one when any page
+does, even while the Hub is locked (it tells nothing of what's inside).
+Medicine's dot is a dose due today and not marked (`medicineDotProvider`).
+Nothing changes in the data when a dose comes due, so the home screen
+looks again every 30 seconds and when the app comes back.
+
 ## Pages as a system (O9)
 
 The tab is the **Hub** throughout (`AppSection.hub`, `HubTool`,
@@ -261,6 +282,7 @@ there, and a new page has to be added to a few exhaustive switches, so it
 doesn't compile until it's complete:
 
 - `pages/hub/tools.dart` — its icon and page;
+- `providers/hub_dots_provider.dart` — whether its tile shows a red dot;
 - `providers/section_data_provider.dart` — how many things it holds and
   how to clear them (Settings → Clear data lists the Hub page by page; a
   locked Hub is cleared page by page on a password reset).
