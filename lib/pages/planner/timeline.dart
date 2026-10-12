@@ -198,7 +198,7 @@ class PlannerTimeline extends StatelessWidget {
   /// The hour labels' column: a small margin from the screen's edge, then
   /// the time (Round 15: they had sat right on the edge).
   static const _labelWidth = 64.0;
-  static const _labelInset = 12.0;
+  static const _labelInset = 6.0;
 
   /// Space above 00:00, so its label (centred on the line) isn't cut off.
   static const _topInset = 12.0;

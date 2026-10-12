@@ -60,13 +60,19 @@ List<Reminder> planMedicineReminders({
   return reminders;
 }
 
-/// Until when, in minutes past midnight, the day before's doses still
-/// count as due (Round 15): one at 23:30 that's missed still shows when
-/// going to bed.
+/// Until when, in minutes past midnight, a late dose of the day before
+/// still counts as due (Round 15): one at 23:30 that's missed still shows
+/// when going to bed.
 const dueOverMidnight = 120;
 
+/// Only the day before's doses from this time on (minutes past midnight)
+/// count after midnight (Round 17: at 00:50, the day's 11:00–22:00 doses
+/// had kept the dot).
+const lateDoseFrom = 23 * 60;
+
 /// Whether one of the doses due by [now] isn't marked (O13): today's whose
-/// time has come, and before [dueOverMidnight] also yesterday's.
+/// time has come, and before [dueOverMidnight] also yesterday's late ones
+/// (from [lateDoseFrom]).
 bool doseDue(MedicineBook book, DateTime now) {
   final today = dayOf(now);
   final minutes = now.hour * 60 + now.minute;
@@ -83,7 +89,8 @@ bool doseDue(MedicineBook book, DateTime now) {
   }
 
   return unmarked(today, (time) => time <= minutes) ||
-      (minutes < dueOverMidnight && unmarked(addDays(today, -1), (_) => true));
+      (minutes < dueOverMidnight &&
+          unmarked(addDays(today, -1), (time) => time >= lateDoseFrom));
 }
 
 /// The red dot on the Medicine tile and the Hub tab (O13): a dose due and

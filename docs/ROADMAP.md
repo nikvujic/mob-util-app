@@ -332,15 +332,15 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 ### Round 17 — Nikola's review of 0.24.0 (2026-10-13)
 
 **1. Quick fixes**
-- [ ] Medicine dot: at 00:50 it showed for yesterday's 11:00–22:00
+- [x] Medicine dot: at 00:50 it showed for yesterday's 11:00–22:00
   doses. Only yesterday's doses at **23:00 or later** keep it until
   02:00.
-- [ ] Planner: the hour labels' margin smaller (about 6).
-- [ ] Medicine: the vibration on ticking follows the gulp (two soft
+- [x] Planner: the hour labels' margin smaller (about 6).
+- [x] Medicine: the vibration on ticking follows the gulp (two soft
   pulses).
-- [ ] Medicine: a dose whose time has passed and isn't taken shows
+- [x] Medicine: a dose whose time has passed and isn't taken shows
   **red**.
-- [ ] Check every place the Round 14–16 timeline features should be
+- [x] Check every place the Round 14–16 timeline features should be
   (tap position, reach mode…), not just the planner: the Routines
   screen still lacks reach mode.
 

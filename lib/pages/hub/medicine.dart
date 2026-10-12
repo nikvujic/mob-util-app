@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -15,6 +14,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/widgets/ticking.dart';
 
 /// The medicine tracker (O6): today's doses, one tap each to mark taken
 /// (with the time); several a day show "1 of 2". The history lists every
@@ -138,9 +138,15 @@ class MedicinePage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) =>
+      // Again as time goes on: a dose whose time comes turns red.
+      Ticking(builder: (context) => _page(context, ref));
+
+  Widget _page(BuildContext context, WidgetRef ref) {
     final book = ref.watch(medicineProvider);
-    final today = dayOf(ref.watch(clockProvider)());
+    final clock = ref.watch(clockProvider)();
+    final today = dayOf(clock);
+    final minutes = clock.hour * 60 + clock.minute;
     final now = book.medicines.where((m) => m.isOn(today)).toList();
     final other = book.medicines.where((m) => !m.isOn(today)).toList();
     final doses = now.fold(0, (sum, m) => sum + m.dosesADay);
@@ -219,6 +225,7 @@ class MedicinePage extends ConsumerWidget {
                       medicine: medicine,
                       book: book,
                       day: today,
+                      minutes: minutes,
                       onOpen: () => _menu(context, ref, medicine),
                       onDose: (dose) {
                         final taking =
@@ -226,7 +233,7 @@ class MedicinePage extends ConsumerWidget {
                         // Taken: a chime and a buzz (Nikola). Unticking
                         // is just a tap again, no undo needed.
                         if (taking) {
-                          HapticFeedback.mediumImpact();
+                          AppSound.doneBuzz();
                           AppSound.done();
                         }
                         ref
@@ -298,6 +305,9 @@ class _MedicineCard extends StatelessWidget {
   final MedicineBook book;
   final DateTime day;
 
+  /// Minutes past midnight now: doses due by then and not taken are red.
+  final int minutes;
+
   /// Its menu: a tap anywhere on the card but a dose (Nikola).
   final VoidCallback onOpen;
   final ValueChanged<int> onDose;
@@ -308,6 +318,7 @@ class _MedicineCard extends StatelessWidget {
     required this.medicine,
     required this.book,
     required this.day,
+    required this.minutes,
     required this.onOpen,
     required this.onDose,
   });
@@ -384,6 +395,7 @@ class _MedicineCard extends StatelessWidget {
                               name: medicine.name,
                               time: medicine.times[dose],
                               taken: book.takenFor(medicine.id, day, dose),
+                              overdue: medicine.times[dose] <= minutes,
                               onTap: () => onDose(dose),
                             ),
                           ),
@@ -406,6 +418,9 @@ class _DoseButton extends StatelessWidget {
   final String name;
   final int time;
   final DoseTaken? taken;
+
+  /// Its time has come: not taken, it shows red (Round 17).
+  final bool overdue;
   final VoidCallback onTap;
 
   const _DoseButton({
@@ -414,6 +429,7 @@ class _DoseButton extends StatelessWidget {
     required this.name,
     required this.time,
     required this.taken,
+    required this.overdue,
     required this.onTap,
   });
 
@@ -427,17 +443,26 @@ class _DoseButton extends StatelessWidget {
         ticked == null ? null : formatMinutes(ticked.hour * 60 + ticked.minute);
     final fg =
         done ? (Theme.of(context).colorScheme.onPrimary) : colors.textPrimary;
+    final late = !done && overdue;
     return Semantics(
       button: true,
       checked: done,
       label: '$name, ${label ?? 'dose'} at ${formatMinutes(time)}'
-          '${done ? ', taken${at == null ? '' : ' at $at'}' : ''}',
+          '${done ? ', taken${at == null ? '' : ' at $at'}' : ''}'
+          '${late ? ', not taken yet' : ''}',
       excludeSemantics: true,
       child: Material(
         color: done ? colors.accent : colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: const BorderRadius.all(Radius.circular(14)),
-          side: BorderSide(color: done ? colors.accent : colors.textHint),
+          side: BorderSide(
+            color: done
+                ? colors.accent
+                : late
+                    ? colors.danger
+                    : colors.textHint,
+            width: late ? 2 : 1,
+          ),
         ),
         child: InkWell(
           customBorder: const RoundedRectangleBorder(
@@ -451,8 +476,16 @@ class _DoseButton extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    done ? Icons.check_circle : Icons.radio_button_unchecked,
-                    color: done ? fg : colors.textSecondary,
+                    done
+                        ? Icons.check_circle
+                        : late
+                            ? Icons.error_outline
+                            : Icons.radio_button_unchecked,
+                    color: done
+                        ? fg
+                        : late
+                            ? colors.danger
+                            : colors.textSecondary,
                   ),
                   const SizedBox(width: 10),
                   // Shrinks with the box (half a card wide).
@@ -472,11 +505,17 @@ class _DoseButton extends StatelessWidget {
                         Text(
                           done
                               ? (at == null ? 'Taken' : 'Taken $at')
-                              : label ?? 'Tap when taken',
+                              : label ??
+                                  (late ? 'Not taken yet' : 'Tap when taken'),
+                          key: late ? const Key('doseLate') : null,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: done ? fg : colors.textSecondary,
+                            color: done
+                                ? fg
+                                : late
+                                    ? colors.danger
+                                    : colors.textSecondary,
                             fontSize: 12,
                           ),
                         ),

@@ -4,6 +4,18 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.25.0] - unreleased
+
+### Fixed
+- Medicine: the red dot showed after midnight for any dose missed the
+  day before; now only for doses at 23:00 or later (until 02:00).
+
+### Changed
+- Medicine: a dose whose time has come and isn't taken shows in **red**.
+- Medicine: ticking a dose buzzes twice, softly, in step with the gulp.
+- Routines screen: reach mode on its timeline, as on the planner.
+- Planner: a smaller margin left of the hour labels.
+
 ## [0.24.0] - 2026-10-12
 
 ### Fixed

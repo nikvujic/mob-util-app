@@ -410,6 +410,28 @@ void main() {
     });
   });
 
+  testWidgets('Routines screen: reach mode, as on the planner (Round 17)',
+      (tester) async {
+    await openPlanner(tester);
+    await tester.tap(find.byTooltip('Routines'));
+    await tester.pumpAndSettle();
+    final midnight = find.text('00:00');
+    final free = find.textContaining('Free · ').first;
+    await tester.ensureVisible(midnight);
+    await tester.pumpAndSettle();
+    await tester.drag(free, const Offset(0, 300));
+    await tester.pumpAndSettle();
+    final atTop = tester.getTopLeft(midnight).dy;
+
+    await tester.drag(free, const Offset(0, 200));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(midnight).dy, greaterThan(atTop + 100));
+
+    await tester.drag(free, const Offset(0, -40));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(midnight).dy, moreOrLessEquals(atTop));
+  });
+
   group('Round 16', () {
     testWidgets('Routines screen: a routine starts where free time is tapped',
         (tester) async {

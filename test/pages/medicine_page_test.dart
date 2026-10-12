@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 
@@ -45,7 +46,8 @@ void main() {
     expect((m.name, m.from, m.until), ('Vitamin D', today, null));
     expect(m.times, [480]);
     expect(header(tester), 'Today: 0 of 1 dose taken');
-    expect(find.text('Tap when taken'), findsOneWidget);
+    // 08:00 has gone by (it's 08:03): late, in red (Round 17).
+    expect(find.text('Not taken yet'), findsOneWidget);
   });
 
   testWidgets('one tap marks a dose taken, with the time', (tester) async {
@@ -87,7 +89,9 @@ void main() {
       return null;
     });
     messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-      if (call.method == 'HapticFeedback.vibrate') calls.add('buzz');
+      if (call.method == 'HapticFeedback.vibrate') {
+        calls.add('buzz:${call.arguments}');
+      }
       return null;
     });
     addTearDown(() {
@@ -98,7 +102,12 @@ void main() {
 
     await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
-    expect(calls, containsAll(['sound:done', 'buzz']));
+    // Two pulses, like the gulp's two bloops (Round 17).
+    expect(calls, [
+      'buzz:HapticFeedbackType.mediumImpact',
+      'sound:done',
+      'buzz:HapticFeedbackType.lightImpact',
+    ]);
     calls.clear();
     await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
@@ -384,5 +393,33 @@ void main() {
       expect(container.read(medicineProvider).medicines.map((m) => m.name),
           ['Second', 'First']);
     });
+  });
+
+  testWidgets('a dose whose time has come and not taken is red (Round 17)',
+      (tester) async {
+    late String id;
+    await openMedicine(tester, () {
+      id = medicine().add('Pills', times: [480, 1200], from: today)!;
+    });
+    // 08:03: the 08:00 dose is late, the 20:00 one isn't.
+    final late = find.byKey(const Key('doseLate'));
+    expect(late, findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(Key('dose-$id-0')), matching: late),
+      findsOneWidget,
+    );
+    final danger =
+        Theme.of(tester.element(late)).extension<AppPalette>()!.danger;
+    expect(tester.widget<Text>(late).style!.color, danger);
+
+    // Comes on its own as time passes.
+    now = DateTime(2026, 10, 12, 20, 1);
+    await tester.pump(const Duration(seconds: 30));
+    expect(late, findsNWidgets(2));
+
+    // Taken: not red.
+    await tester.tap(find.byKey(Key('dose-$id-0')));
+    await tester.pumpAndSettle();
+    expect(late, findsOneWidget);
   });
 }

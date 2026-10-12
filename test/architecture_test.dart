@@ -105,8 +105,6 @@ final _plainScroll = RegExp(
 const plainScrollAllowed = {
   // A centred lock message, not a list.
   'app/section_gate.dart',
-  // The same timeline, for routines.
-  'pages/planner/routines.dart',
   // A form, used with the keyboard open.
   'pages/security/password_form.dart',
   // Tiles fill from the bottom right: already in thumb reach.

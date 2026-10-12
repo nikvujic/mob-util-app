@@ -13,6 +13,7 @@ import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 /// After a reminder was set ([remind] not null): makes sure notifications
 /// may be shown, asking Android if needed (P10), and says so if not.
@@ -114,7 +115,10 @@ class RoutinesPage extends ConsumerStatefulWidget {
 
 class _RoutinesPageState extends ConsumerState<RoutinesPage> {
   late int _weekday = widget.weekday;
-  late final ScrollController _timeline;
+
+  /// Where the timeline opens: around now (as if no block stretched the
+  /// hours before it).
+  late final double _opensAt;
 
   /// Builds again when the app comes back: today (which routines have
   /// ended) may have moved on.
@@ -124,18 +128,13 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
   void initState() {
     super.initState();
     final now = ref.read(clockProvider)();
-    _timeline = ScrollController(
-      // Around now (as if no block stretched the hours before it).
-      initialScrollOffset:
-          TimeScale.forBlocks(const []).y(math.max(0, now.hour - 1) * 60),
-    );
+    _opensAt = TimeScale.forBlocks(const []).y(math.max(0, now.hour - 1) * 60);
     _lifecycle = AppLifecycleListener(onResume: () => setState(() {}));
   }
 
   @override
   void dispose() {
     _lifecycle.dispose();
-    _timeline.dispose();
     super.dispose();
   }
 
@@ -220,27 +219,32 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              controller: _timeline,
-              child: PlannerTimeline(
-                adds: 'a routine',
-                blocks: [
-                  for (final r in shown)
-                    TimelineBlock(
-                      id: r.id,
-                      title: r.title,
-                      start: r.start,
-                      end: r.end,
-                      repeats: true,
-                      color: BlockColor.fromName(r.color),
-                      reminds: r.remind != null,
-                      description: r.description,
-                      onTap: () => editRoutine(context, ref, r),
-                    ),
-                ],
-                onAdd: _add,
-                onAddAt: (slot, at) => _add(slot, at: at),
-              ),
+            // Reach mode, as on the planner (Round 17).
+            child: PullDownList(
+              initialOffset: _opensAt,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: PlannerTimeline(
+                    adds: 'a routine',
+                    blocks: [
+                      for (final r in shown)
+                        TimelineBlock(
+                          id: r.id,
+                          title: r.title,
+                          start: r.start,
+                          end: r.end,
+                          repeats: true,
+                          color: BlockColor.fromName(r.color),
+                          reminds: r.remind != null,
+                          description: r.description,
+                          onTap: () => editRoutine(context, ref, r),
+                        ),
+                    ],
+                    onAdd: _add,
+                    onAddAt: (slot, at) => _add(slot, at: at),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
