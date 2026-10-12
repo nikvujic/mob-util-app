@@ -91,7 +91,7 @@ void main() {
     expect(screen - textBottom, greaterThanOrEqualTo(button.height + 16 + 48));
   });
 
-  testWidgets('deleted after asking, with undo; the menu brings it back',
+  testWidgets('deleted after asking, with undo; Settings restores it',
       (tester) async {
     await start(tester);
     await open(tester);
@@ -106,15 +106,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(tile, findsOneWidget);
 
-    // Deleted again, then from the menu.
+    // Deleted again: Settings offers to restore it; the menu has no entry.
     container.read(preferencesProvider.notifier).setIntroDeleted(true);
     await tester.pumpAndSettle();
     expect(tile, findsNothing);
     await openMenu(tester);
-    await tester.tap(find.text('Introduction'));
+    expect(find.text('Introduction'), findsNothing);
+    await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
-    expect(appBarTitle('Introduction'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('restoreIntro')));
+    await tester.pumpAndSettle();
     expect(preferences().introDeleted, isFalse);
+    expect(find.byKey(const Key('restoreIntro')), findsNothing,
+        reason: 'only offered while deleted');
   });
 
   testWidgets('an update brings it back, new', (tester) async {

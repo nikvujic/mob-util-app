@@ -13,6 +13,8 @@ Release with the installable APK.
   own bar too, so their last lines scroll clear of the buttons.
 
 ### Changed
+- The Introduction is no longer in the menu (it lives in Notes); once
+  deleted, **Settings → Restore the introduction** puts it back.
 - Medicine: a dose whose time has come and isn't taken shows in **red**.
 - Medicine: ticking a dose buzzes twice, softly, in step with the gulp.
 - Routines screen: reach mode on its timeline, as on the planner.

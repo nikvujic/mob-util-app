@@ -47,4 +47,4 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - **Export** saves everything to one file; **Import** restores it. Locked notes stay encrypted inside.
 
 ## Settings
-- Sounds and vibration, line numbers, whether this introduction comes back after updates, and **Clear data**.
+- Sounds and vibration, line numbers, whether this introduction comes back after updates (and restoring it if deleted), and **Clear data**.

@@ -9,17 +9,15 @@ import 'package:the_app/widgets/markdown_text.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
-/// Opens the Introduction (N16), bringing it back to Notes if it was
-/// deleted (from the menu).
+/// Opens the Introduction (N16).
 void openIntroduction(BuildContext context, WidgetRef ref) {
-  ref.read(preferencesProvider.notifier).setIntroDeleted(false);
   Navigator.of(context).push(
     MaterialPageRoute<void>(builder: (_) => const IntroductionPage()),
   );
 }
 
 /// The Introduction note (N16): how the app works, then what's new in this
-/// version. Read only, drawn as Markdown; it can be deleted (the menu
+/// version. Read only, drawn as Markdown; it can be deleted (Settings
 /// brings it back).
 class IntroductionPage extends ConsumerStatefulWidget {
   const IntroductionPage({super.key});
@@ -42,7 +40,7 @@ class _IntroductionPageState extends ConsumerState<IntroductionPage> {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Delete the introduction?',
-      message: 'It can be brought back from the menu.',
+      message: 'It can be restored in Settings.',
       confirmLabel: 'Delete',
       destructive: true,
     );

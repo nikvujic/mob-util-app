@@ -344,6 +344,8 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   (tap position, reach mode…), not just the planner: the Routines
   screen still lacks reach mode.
 
+- [x] Introduction: not in the menu (it's in Notes); deleted, Settings
+  offers to restore it.
 - [x] Introduction: room at the bottom so Delete doesn't cover the last
   lines (the phone's own bar wasn't counted on pages opened on top).
 
