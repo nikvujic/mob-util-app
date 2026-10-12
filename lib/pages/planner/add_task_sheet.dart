@@ -89,6 +89,8 @@ Future<NewTask?> showAddRoutineSheet(
   required int weekday,
   required DateTime from,
   RepeatRoom? room,
+  int? start,
+  int? end,
 }) {
   return showModalBottomSheet<NewTask>(
     context: context,
@@ -98,6 +100,8 @@ Future<NewTask?> showAddRoutineSheet(
     builder: (_) => TaskSheet(
       slot: slot,
       repeatRoom: room,
+      start: start,
+      end: end,
       repeat: RepeatChoice.always,
       weekdays: {weekday},
       from: from,
@@ -769,17 +773,29 @@ class _TaskSheetState extends State<TaskSheet> {
                                   ),
                                 ChoiceChip(
                                   // Up to what's next of the same kind: a
-                                  // task and a routine may share time (P12).
+                                  // task and a routine may share time
+                                  // (P12). Always shown (off when nothing
+                                  // comes next), so the chips never wrap
+                                  // differently as the times change.
                                   label: Text(
-                                    slotEnd == PlannerTask.dayMinutes
-                                        ? 'Until midnight'
-                                        : _repeats
-                                            ? 'Until the next routine'
-                                            : 'Until the next task',
+                                    _repeats
+                                        ? 'Until the next routine'
+                                        : 'Until the next task',
                                   ),
-                                  selected: _end == slotEnd,
-                                  onSelected: (_) =>
-                                      setState(() => _end = slotEnd),
+                                  selected: slotEnd < PlannerTask.dayMinutes &&
+                                      _end == slotEnd,
+                                  onSelected: slotEnd < PlannerTask.dayMinutes
+                                      ? (_) => setState(() => _end = slotEnd)
+                                      : null,
+                                ),
+                                // Always there (Round 16); past something
+                                // else, it shows the clash.
+                                ChoiceChip(
+                                  key: const Key('endOfDay'),
+                                  label: const Text('End of day'),
+                                  selected: _end == PlannerTask.dayMinutes,
+                                  onSelected: (_) => setState(
+                                      () => _end = PlannerTask.dayMinutes),
                                 ),
                               ],
                             ),

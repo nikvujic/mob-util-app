@@ -141,13 +141,21 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
 
   DateTime get _today => dayOf(ref.read(clockProvider)());
 
-  Future<void> _add(FreeSlot slot) async {
+  /// Adds a routine in [slot]; tapped at minute [at], it starts there
+  /// (to :00 / :30, as on the planner, Round 16).
+  Future<void> _add(FreeSlot slot, {int? at}) async {
     final today = _today;
+    final int? start = at == null
+        ? null
+        : (at ~/ 30 * 30).clamp(slot.start,
+            math.max(slot.start, slot.end - PlannerTask.minMinutes));
     final added = await showAddRoutineSheet(
       context,
       slot,
       weekday: _weekday,
       from: today,
+      start: start,
+      end: start == null ? null : math.min<int>(start + 60, slot.end),
       room: (weekdays, until, {required start, required end}) =>
           ref.read(routinesProvider.notifier).roomAround(
                 weekdays: weekdays,
@@ -231,6 +239,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
                     ),
                 ],
                 onAdd: _add,
+                onAddAt: (slot, at) => _add(slot, at: at),
               ),
             ),
           ),

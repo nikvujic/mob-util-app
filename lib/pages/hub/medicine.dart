@@ -43,7 +43,10 @@ class MedicinePage extends ConsumerWidget {
     if (ref.read(preferencesProvider).medicineReminders) {
       await allowMedicineReminders(context, ref);
     }
-    if (!draft.from.isBefore(today) || !context.mounted) return;
+    if (!context.mounted) return;
+    final added =
+        ref.read(medicineProvider).medicines.where((m) => m.id == id).single;
+    if (!ref.read(medicineProvider).offersFillPast(added, today)) return;
     final fill = await showConfirmDialog(
       context,
       title: 'Mark the past days taken?',

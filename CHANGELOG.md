@@ -14,7 +14,17 @@ Release with the installable APK.
 - Planner: the hour labels have their margin from the screen's edge
   back.
 
+### Added
+- Planner and routine sheets: an **End of day** choice for the end time.
+
 ### Changed
+- Medicine: ticking a dose plays a soft **gulp** instead of the chime.
+- Counters: the click is quieter and follows the **media volume**.
+- Placard: the hold to count is longer again (about 3 seconds).
+- Routines screen: a new routine starts where you tap the free time, as
+  on the planner.
+- Medicine: "Mark past days taken" is offered only when more than 10
+  past doses aren't set.
 - No tooltip pops up when holding a button (e.g. − in the shop).
 - Notes: no magnifier lens while selecting text.
 - Medicine: a dose missed late in the evening keeps the red dot until

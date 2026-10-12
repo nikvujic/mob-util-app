@@ -356,10 +356,7 @@ class MedicineOwnHistoryPage extends ConsumerWidget {
     final days = [
       for (var d = last; !d.isBefore(medicine.from); d = addDays(d, -1)) d,
     ];
-    final unset = days.any((d) =>
-        d.isBefore(today) &&
-        Iterable.generate(medicine.dosesADay)
-            .any((dose) => book.markFor(id, d, dose) == null));
+    final unset = book.offersFillPast(medicine, today);
     final total = book.takenCount(id);
     return Scaffold(
       appBar: AppBar(title: Text(medicine.name)),

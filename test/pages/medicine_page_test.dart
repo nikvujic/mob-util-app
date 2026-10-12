@@ -233,7 +233,7 @@ void main() {
       late String id;
       await openMedicine(tester, () {
         id = medicine()
-            .add('Coffee', times: [480], from: DateTime(2026, 10, 5))!;
+            .add('Coffee', times: [480], from: DateTime(2026, 9, 30))!;
         medicine().toggleDose(id, today, 0);
       });
       await openOwn(tester, 'Coffee');
@@ -246,8 +246,18 @@ void main() {
 
       await tester.tap(find.byKey(const Key('fillPast')));
       await tester.pumpAndSettle();
-      expect(total(), '8 doses', reason: '5–11 Oct, and today');
+      expect(total(), '13 doses', reason: '30 Sep–11 Oct, and today');
       expect(find.byKey(const Key('fillPast')), findsNothing);
+    });
+
+    testWidgets('ten or fewer not set: no "Mark past days taken" (Round 16)',
+        (tester) async {
+      await openMedicine(tester, () {
+        medicine().add('Coffee', times: [480], from: DateTime(2026, 10, 2));
+      });
+      await openOwn(tester, 'Coffee');
+      expect(find.byKey(const Key('fillPast')), findsNothing,
+          reason: '2–11 Oct: 10 doses');
     });
 
     testWidgets('a calendar day sets its dose', (tester) async {
@@ -280,8 +290,8 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('medicineFrom')));
     await tester.pumpAndSettle();
-    // Back to the 9th in the date picker.
-    await tester.tap(find.text('9'));
+    // Back to the 1st in the date picker.
+    await tester.tap(find.text('1'));
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('medicineSubmit')));
@@ -292,8 +302,24 @@ void main() {
     await tester.pumpAndSettle();
     final book = container.read(medicineProvider);
     final id = book.medicines.single.id;
-    expect(book.takenCount(id), 3, reason: '9, 10 and 11 Oct');
+    expect(book.takenCount(id), 11, reason: '1–11 Oct');
     expect(book.markFor(id, today, 0), isNull, reason: 'not today');
+  });
+
+  testWidgets('started a few days back: not asked (Round 16)', (tester) async {
+    await openMedicine(tester);
+    await tester.tap(find.byTooltip('Add medicine'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('medicineName')), 'Tea');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('medicineFrom')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('9'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('medicineSubmit')));
+    await tester.pumpAndSettle();
+    expect(find.text('Mark the past days taken?'), findsNothing);
   });
 
   group('handling (Round 14)', () {

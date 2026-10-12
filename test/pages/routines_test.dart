@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
+import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/day_strip.dart';
 
@@ -406,6 +407,59 @@ void main() {
           .routines
           .firstWhere((r) => r.title == 'Walk');
       expect((walk.start, walk.end), (at(1), at(2)));
+    });
+  });
+
+  group('Round 16', () {
+    testWidgets('Routines screen: a routine starts where free time is tapped',
+        (tester) async {
+      await openPlanner(tester);
+      await tester.tap(find.byTooltip('Routines'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('14:00').first);
+      await tester.pumpAndSettle();
+      final timeline = find.byType(PlannerTimeline);
+      final scale = PlannerTimeline.scaleFor(
+          tester.widget<PlannerTimeline>(timeline).blocks);
+      final top = tester.getTopLeft(timeline).dy;
+      await tester.tapAt(
+          Offset(150, top + PlannerTimeline.offsetOf(14 * 60 + 40, scale)));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(OutlinedButton, '14:30'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, '15:30'), findsOneWidget);
+    });
+
+    testWidgets('End of day sets the end to midnight', (tester) async {
+      await openPlanner(tester);
+      addGym();
+      await tester.pump();
+      await tapText(tester, 'Gym');
+      await tapText(tester, 'Edit routine');
+      await tapIn(tester, find.byKey(const Key('endOfDay')));
+      // Past nothing: no clash; the end reads 24:00 (or 00:00).
+      expect(find.byKey(const Key('timeClash')), findsNothing);
+      expect(
+        tester.widget<ChoiceChip>(find.byKey(const Key('endOfDay'))).selected,
+        isTrue,
+      );
+    });
+
+    testWidgets('End of day past another block shows the clash',
+        (tester) async {
+      await openPlanner(tester);
+      addGym(); // 18–19
+      routines().add(
+        title: 'Read',
+        start: at(21),
+        end: at(22),
+        weekdays: {1, 2, 3, 4, 5, 6, 7},
+        from: today,
+      );
+      await tester.pump();
+      await tapText(tester, 'Gym');
+      await tapText(tester, 'Edit routine');
+      await tapIn(tester, find.byKey(const Key('endOfDay')));
+      expect(find.byKey(const Key('timeClash')), findsOneWidget);
     });
   });
 }

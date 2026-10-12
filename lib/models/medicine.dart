@@ -141,6 +141,29 @@ class MedicineBook {
   int takenCount(String medicine) =>
       taken.where((t) => t.medicine == medicine && t.isTaken).length;
 
+  /// How many of [medicine]'s doses before [today] have nothing set,
+  /// counted back from yesterday, stopping once past [upTo].
+  int unsetBefore(Medicine medicine, DateTime today, {int upTo = 1 << 30}) {
+    var count = 0;
+    for (var d = DateTime(today.year, today.month, today.day - 1);
+        !d.isBefore(medicine.from) && count <= upTo;
+        d = DateTime(d.year, d.month, d.day - 1)) {
+      if (!medicine.isOn(d)) continue;
+      for (var dose = 0; dose < medicine.dosesADay; dose++) {
+        if (markFor(medicine.id, d, dose) == null) count++;
+      }
+    }
+    return count;
+  }
+
+  /// "Mark the past days taken" is offered only past this many doses not
+  /// set (Round 16): for a few, setting them one by one is easy enough.
+  static const fillPastAfter = 10;
+
+  /// Whether to offer filling in [medicine]'s past days.
+  bool offersFillPast(Medicine medicine, DateTime today) =>
+      unsetBefore(medicine, today, upTo: fillPastAfter) > fillPastAfter;
+
   /// How many things it holds (for Clear data).
   int get size => medicines.length;
 

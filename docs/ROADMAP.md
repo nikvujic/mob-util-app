@@ -334,16 +334,16 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 Before Round 15's chunks 2–3 (fixes first):
 
 **1. Quick fixes**
-- [ ] Medicine: the chime hurts the ears; something fun and soft
+- [x] Medicine: the chime hurts the ears; something fun and soft
   instead, like a **swallow / gulp** (or a crunch).
-- [ ] Counters: the click is loud and ignores the media volume; quieter,
+- [x] Counters: the click is loud and ignores the media volume; quieter,
   and following the **media volume**.
-- [ ] Placard: the hold a bit longer again.
-- [ ] Routines screen: tapping free time doesn't start where tapped
+- [x] Placard: the hold a bit longer again.
+- [x] Routines screen: tapping free time doesn't start where tapped
   (Round 14 did it only on the planner).
-- [ ] Planner / routine sheet: an **End of day** button for the end
+- [x] Planner / routine sheet: an **End of day** button for the end
   time.
-- [ ] Medicine: "Mark the past days taken" only when more than **10
+- [x] Medicine: "Mark the past days taken" only when more than **10
   doses** are not set (counting back from yesterday), on adding and in
   its history.
 
