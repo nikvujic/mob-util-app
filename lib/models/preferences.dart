@@ -16,7 +16,7 @@ class Preferences {
   final String? fingerprintFor;
 
   const Preferences({
-    this.theme = 'green',
+    this.theme = 'clay',
     this.counterFeedback = true,
     this.noteLineNumbers = true,
     this.fingerprintFor,
@@ -45,7 +45,7 @@ class Preferences {
 
   /// Missing values take their defaults, so older files stay readable.
   factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
-        theme: json['theme'] as String? ?? 'green',
+        theme: json['theme'] as String? ?? 'clay',
         counterFeedback: json['counterFeedback'] as bool? ?? true,
         noteLineNumbers: json['noteLineNumbers'] as bool? ?? true,
         fingerprintFor: json['fingerprintFor'] as String?,

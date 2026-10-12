@@ -335,7 +335,7 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   shown only while typing (keyboard up), instead of in the main row.
 - [x] **Checkbox look:** the empty box bigger; the ticked box in the
   theme's accent (Clay's orange).
-- [ ] **Clay first and the default theme**, and more themes for fun to
+- [x] **Clay first and the default theme**, and more themes for fun to
   fill out the list (all dark, no light mode).
 - [x] **Clear data:** no icon on the big Clear button; type **DELETE**
   there instead of RESET.

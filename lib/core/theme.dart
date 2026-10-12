@@ -18,6 +18,10 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Text on [accent] (filled buttons), if the generated one isn't
   /// readable enough on it.
   final Color? accentText;
+
+  /// The accent as text on the app's surfaces (text buttons), if [accent]
+  /// itself is too dark to read there.
+  final Color? accentForeground;
   final Color danger;
   final Color textPrimary;
   final Color textSecondary;
@@ -37,6 +41,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.accent,
     required this.onAccent,
     this.accentText,
+    this.accentForeground,
     required this.danger,
     required this.textPrimary,
     required this.textSecondary,
@@ -93,6 +98,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     accent: Color(0xFFC96442),
     onAccent: Colors.white,
     accentText: Color(0xFF141413),
+    // The orange as text on the dark surfaces: a touch lighter to read.
+    accentForeground: Color(0xFFD97757),
     danger: Color(0xFFF28B82),
     textPrimary: Color(0xFFFAF9F5),
     textSecondary: Color(0xFFB0AEA5),
@@ -102,6 +109,101 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Color(0xFF2E2D2A),
   );
 
+  /// Deep blue, with a sky-blue accent.
+  static const ocean = AppPalette(
+    background: Color(0xFF0B141D),
+    surface: Color(0xFF101C28),
+    card: Color(0xFF172736),
+    cardSelected: Color(0xFF16384A),
+    menu: Color(0xFF1E3245),
+    accent: Color(0xFF4FC3F7),
+    onAccent: Color(0xFF0B141D),
+    accentText: Color(0xFF0B141D),
+    danger: Color(0xFFF28B82),
+    textPrimary: Color(0xFFEAF2F8),
+    textSecondary: Color(0xFFAFC2D2),
+    textMuted: Color(0xFF8DA3B5),
+    textHint: Color(0xFF6E8598),
+    inactive: Color(0xFF8DA3B5),
+    divider: Color(0xFF223446),
+  );
+
+  /// Cool grey-blue, like a frosty night (after the Nord colours).
+  static const frost = AppPalette(
+    background: Color(0xFF242933),
+    surface: Color(0xFF2E3440),
+    card: Color(0xFF3B4252),
+    cardSelected: Color(0xFF3A5160),
+    menu: Color(0xFF434C5E),
+    accent: Color(0xFF88C0D0),
+    onAccent: Color(0xFF242933),
+    accentText: Color(0xFF242933),
+    danger: Color(0xFFF2A0A6),
+    textPrimary: Color(0xFFECEFF4),
+    textSecondary: Color(0xFFD0D6E0),
+    textMuted: Color(0xFFB4BCCA),
+    textHint: Color(0xFF8D96A6),
+    inactive: Color(0xFFB4BCCA),
+    divider: Color(0xFF3F4757),
+  );
+
+  /// Dark violet, with a lavender accent.
+  static const grape = AppPalette(
+    background: Color(0xFF14111B),
+    surface: Color(0xFF1B1724),
+    card: Color(0xFF251F31),
+    cardSelected: Color(0xFF392A52),
+    menu: Color(0xFF2D263B),
+    accent: Color(0xFFB39DDB),
+    onAccent: Color(0xFF14111B),
+    accentText: Color(0xFF14111B),
+    danger: Color(0xFFF28B82),
+    textPrimary: Color(0xFFF1ECF8),
+    textSecondary: Color(0xFFC3B8D4),
+    textMuted: Color(0xFF9F93B3),
+    textHint: Color(0xFF7F7394),
+    inactive: Color(0xFF9F93B3),
+    divider: Color(0xFF2E273B),
+  );
+
+  /// Warm dark with a pink accent.
+  static const rose = AppPalette(
+    background: Color(0xFF181013),
+    surface: Color(0xFF20161A),
+    card: Color(0xFF2B1E24),
+    cardSelected: Color(0xFF4A2433),
+    menu: Color(0xFF34252C),
+    accent: Color(0xFFF48FB1),
+    onAccent: Color(0xFF181013),
+    accentText: Color(0xFF181013),
+    danger: Color(0xFFFFAB91),
+    textPrimary: Color(0xFFF8EEF1),
+    textSecondary: Color(0xFFD3BCC4),
+    textMuted: Color(0xFFAF98A1),
+    textHint: Color(0xFF8C7680),
+    inactive: Color(0xFFAF98A1),
+    divider: Color(0xFF33242A),
+  );
+
+  /// Greys only, with white as the accent.
+  static const mono = AppPalette(
+    background: Color(0xFF101010),
+    surface: Color(0xFF181818),
+    card: Color(0xFF232323),
+    cardSelected: Color(0xFF3A3A3A),
+    menu: Color(0xFF2C2C2C),
+    accent: Color(0xFFE6E6E6),
+    onAccent: Color(0xFF101010),
+    accentText: Color(0xFF101010),
+    danger: Color(0xFFF28B82),
+    textPrimary: Color(0xFFF5F5F5),
+    textSecondary: Color(0xFFBDBDBD),
+    textMuted: Color(0xFF9E9E9E),
+    textHint: Color(0xFF7A7A7A),
+    inactive: Color(0xFF9E9E9E),
+    divider: Color(0xFF2A2A2A),
+  );
+
   @override
   AppPalette copyWith() => this;
 
@@ -109,11 +211,17 @@ class AppPalette extends ThemeExtension<AppPalette> {
   AppPalette lerp(AppPalette? other, double t) => t < 0.5 ? this : other!;
 }
 
-/// The themes to choose from (G12). Their [name] is what's stored.
+/// The themes to choose from (G12), all dark. Their [name] is what's
+/// stored; the first is the default (Clay, Nikola's pick).
 enum AppThemeChoice {
+  clay('Clay', AppPalette.clay),
   green('Green', AppPalette.green),
   black('Black', AppPalette.black),
-  clay('Clay', AppPalette.clay);
+  ocean('Ocean', AppPalette.ocean),
+  frost('Frost', AppPalette.frost),
+  grape('Grape', AppPalette.grape),
+  rose('Rose', AppPalette.rose),
+  mono('Mono', AppPalette.mono);
 
   const AppThemeChoice(this.label, this.palette);
 
@@ -122,14 +230,14 @@ enum AppThemeChoice {
 
   /// The theme stored as [id]; the default one if unknown.
   static AppThemeChoice fromId(String id) =>
-      values.where((t) => t.name == id).firstOrNull ?? green;
+      values.where((t) => t.name == id).firstOrNull ?? values.first;
 }
 
 /// The active palette: `context.colors.accent`. Outside the app's theme
-/// (e.g. a widget shown on its own in a test) it's the original green one.
+/// (e.g. a widget shown on its own in a test) it's the default, Clay.
 extension AppColorsOf on BuildContext {
   AppPalette get colors =>
-      Theme.of(this).extension<AppPalette>() ?? AppPalette.green;
+      Theme.of(this).extension<AppPalette>() ?? AppPalette.clay;
 }
 
 /// Shapes used across the app.
@@ -243,7 +351,13 @@ abstract final class AppTheme {
       filledButtonTheme: const FilledButtonThemeData(style: _noFade),
       elevatedButtonTheme: const ElevatedButtonThemeData(style: _noFade),
       outlinedButtonTheme: const OutlinedButtonThemeData(style: _noFade),
-      textButtonTheme: const TextButtonThemeData(style: _noFade),
+      textButtonTheme: TextButtonThemeData(
+        style: _noFade.merge(
+          TextButton.styleFrom(
+            foregroundColor: palette.accentForeground ?? palette.accent,
+          ),
+        ),
+      ),
       iconButtonTheme: const IconButtonThemeData(style: _noFade),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: palette.surface,
@@ -257,6 +371,6 @@ abstract final class AppTheme {
   /// Buttons change state at once (U8).
   static const _noFade = ButtonStyle(animationDuration: Duration.zero);
 
-  /// The original dark green look.
-  static ThemeData get dark => of(AppPalette.green);
+  /// The default look (Clay).
+  static ThemeData get dark => of(AppPalette.clay);
 }

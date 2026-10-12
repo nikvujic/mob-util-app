@@ -6,7 +6,13 @@ Release with the installable APK.
 
 ## [0.21.0] - unreleased
 
+### Added
+- Five more themes, all dark: **Ocean**, **Frost**, **Grape**, **Rose**
+  and **Mono**.
+
 ### Changed
+- **Clay** is first in Themes and the default for a new install. Its
+  orange text buttons are a touch lighter, to read better.
 - Notes: the Checkbox button is a small one beside *Edit title*, shown
   only while typing. The empty box is bigger, and both boxes are in the
   theme's accent colour.
