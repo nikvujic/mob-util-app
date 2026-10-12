@@ -319,6 +319,39 @@ void main() {
     });
   });
 
+  group('planner v5 / routines v2 / v7 backup (descriptions)', () {
+    void expectSample(List<PlannerTask> tasks, RoutineBook book) {
+      expect(
+          tasks.map((t) => t.description), ['Bring the X-ray.\nFloor 2', null]);
+      final pills = book.routines.single;
+      expect((pills.title, pills.end - pills.start, pills.description),
+          ('Pills 💊', 5, 'One with water'));
+    }
+
+    test('planner.json and routines.json with descriptions load', () async {
+      final dir = copyOf('test/fixtures/v7/storage');
+      final storage = await AppStorage.open(directory: dir);
+      expectSample(storage.initialPlannerTasks, storage.initialRoutines);
+      final names = dir.listSync().map((f) => f.uri.pathSegments.last);
+      expect(names.where((n) => n.contains('corrupt')), isEmpty);
+    });
+
+    test('v7 backup restores descriptions', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v7/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.plannerTasks, file.backup.routines);
+    });
+
+    test('older data has no descriptions', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v5/storage'),
+      );
+      expect(storage.initialPlannerTasks.map((t) => t.description),
+          everyElement(isNull));
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -396,6 +429,12 @@ void main() {
           'a4462a5a94d563eccfb85a17d059949d61b8c94343ae37eb804d42f381c0258f',
       'test/fixtures/v6/backup-plain.json':
           'fb141bdd6b34ef8791a9ed76d42cd85335f95fe37a94a900716af07d8a569627',
+      'test/fixtures/v7/storage/planner.json':
+          'c8f94175dc1691f1f6481559b8ecadd8afb5dc830951cede751b37309ddf15de',
+      'test/fixtures/v7/storage/routines.json':
+          '369f0338c403827369a6ab1d18eb2c023d0cebb3cbe73a2be4aa435e64ef4d4e',
+      'test/fixtures/v7/backup-plain.json':
+          '41628bbf3f82d529236ff34fa2886191bb92a3ac8902334a15c92586c4889052',
     };
     for (final MapEntry(key: path, value: hash) in expected.entries) {
       final digest = await Sha256().hash(File(path).readAsBytesSync());

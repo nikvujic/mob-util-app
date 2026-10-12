@@ -74,6 +74,7 @@ Future<void> seed(ProviderContainer container) async {
       start: 10 * 60,
       end: 11 * 60,
       color: 'blue', // a coloured block (P9) is checked too
+      description: 'Ask about the card', // P20
     );
   planner.toggleDone(container.read(plannerProvider).first.id);
   // A routine (P8), sharing time with a task: side by side (P12).

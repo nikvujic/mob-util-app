@@ -145,6 +145,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               until: task.until,
               color: task.color,
               remind: task.remind,
+              description: task.description,
             );
       } else {
         ref.read(plannerProvider.notifier).addTask(
@@ -154,6 +155,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               end: task.end,
               color: task.color,
               remind: task.remind,
+              description: task.description,
             );
       }
       await allowReminders(context, ref, task.remind);
@@ -181,6 +183,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               end: task.end!,
               color: BlockColor.fromName(task.color),
               remind: task.remind,
+              description: task.description,
             ),
             for (final choice in _TaskChoice.values)
               ListTile(
@@ -235,6 +238,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         end: changed.end,
         color: changed.color,
         remind: changed.remind,
+        description: changed.description,
       );
       await allowReminders(context, ref, changed.remind);
     } on TaskOverlapException {
@@ -259,6 +263,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               end: routine.end,
               color: BlockColor.fromName(routine.color),
               remind: routine.remind,
+              description: routine.description,
               routine: true,
             ),
             for (final choice in _RoutineChoice.values)
@@ -367,6 +372,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         note: beside.note,
         color: routine.color,
         remind: routine.remind,
+        description: routine.description,
         submitLabel: 'Save',
       ),
     );
@@ -381,6 +387,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             end: changed.end,
             color: changed.color,
             remind: changed.remind,
+            description: changed.description,
           );
       await allowReminders(context, ref, changed.remind);
     } on TaskOverlapException {
@@ -410,6 +417,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             end: task.end,
             color: task.color,
             remind: task.remind,
+            description: task.description,
           );
       await allowReminders(context, ref, task.remind);
     } on TaskOverlapException {
@@ -516,6 +524,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           done: task.done,
           color: BlockColor.fromName(task.color),
           reminds: task.remind != null,
+          description: task.description,
           selected: _selection.isSelected(task.id),
           onTap: () => _selection.handleTap(task.id, () => _taskTapped(task)),
           onLongPress: () => _selection.handleLongPress(task.id),
@@ -535,6 +544,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           repeats: true,
           color: BlockColor.fromName(o.routine.color),
           reminds: o.routine.remind != null,
+          description: o.routine.description,
           onTap: selecting ? () {} : () => _routineTapped(o),
           onToggleDone: selecting
               ? () {}
@@ -717,6 +727,7 @@ class _BlockHeader extends StatelessWidget {
   final int end;
   final BlockColor? color;
   final int? remind;
+  final String? description;
   final bool routine;
 
   const _BlockHeader({
@@ -725,6 +736,7 @@ class _BlockHeader extends StatelessWidget {
     required this.end,
     required this.color,
     required this.remind,
+    required this.description,
     this.routine = false,
   });
 
@@ -746,13 +758,28 @@ class _BlockHeader extends StatelessWidget {
               ),
             ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(
-        [
-          '${formatMinutes(start)}–${formatMinutes(end)}',
-          if (routine) 'a routine',
-          if (remind != null) 'reminds ${remindLabel(remind).toLowerCase()}',
-        ].join(' · '),
-        style: TextStyle(color: colors.textSecondary),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            [
+              '${formatMinutes(start)}–${formatMinutes(end)}',
+              if (routine) 'a routine',
+              if (remind != null)
+                'reminds ${remindLabel(remind).toLowerCase()}',
+            ].join(' · '),
+            style: TextStyle(color: colors.textSecondary),
+          ),
+          // In full here; the block shows what fits (P20).
+          if (description != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                description!,
+                style: TextStyle(color: colors.textPrimary),
+              ),
+            ),
+        ],
       ),
     );
   }

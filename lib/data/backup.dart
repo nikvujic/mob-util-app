@@ -62,8 +62,9 @@ class Backup {
   /// and end times, and a count from a since-removed page (`dzoniCount`,
   /// now ignored); 5 = planner
   /// routines (`routines`, as in `routines.json`) and block colours;
-  /// 6 = planner reminders (`plannerPins`, P14).
-  static const version = 6;
+  /// 6 = planner reminders (`plannerPins`, P14); 7 = tasks and routines
+  /// may have a description (P20).
+  static const version = 7;
 
   final DateTime createdAt;
   final String appVersion;

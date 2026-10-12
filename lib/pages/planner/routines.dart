@@ -84,6 +84,7 @@ Future<void> editRoutine(
       until: changed.until,
       color: changed.color,
       remind: changed.remind,
+      description: changed.description,
     );
     if (context.mounted) await allowReminders(context, ref, changed.remind);
   } on TaskOverlapException {
@@ -167,6 +168,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             until: added.until,
             color: added.color,
             remind: added.remind,
+            description: added.description,
           );
       await allowReminders(context, ref, added.remind);
     } on TaskOverlapException {
@@ -224,6 +226,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
                       repeats: true,
                       color: BlockColor.fromName(r.color),
                       reminds: r.remind != null,
+                      description: r.description,
                       onTap: () => editRoutine(context, ref, r),
                     ),
                 ],

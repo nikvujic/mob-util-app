@@ -13,6 +13,12 @@ import 'package:the_app/providers/planner_provider.dart';
 ///
 /// Routines never overlap each other on a day they could share.
 class RoutinesNotifier extends StateNotifier<RoutineBook> {
+  /// A description as kept: trimmed, null if blank (P20).
+  static String? _described(String? text) {
+    final trimmed = text?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   RoutinesNotifier(AppStorage storage) : super(storage.initialRoutines) {
     addListener(storage.saveRoutines, fireImmediately: false);
   }
@@ -40,6 +46,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     DateTime? until,
     String? color,
     int? remind,
+    String? description,
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return null;
@@ -54,6 +61,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
       until: until,
       color: color,
       remind: remind,
+      description: _described(description),
     );
     _checkFree(routine);
     state = RoutineBook(
@@ -75,6 +83,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     required DateTime? until,
     String? color,
     int? remind,
+    String? description,
   }) {
     final old = _find(id);
     if (start != old.start || end != old.end) {
@@ -89,6 +98,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
       until: () => until,
       color: () => color,
       remind: () => remind,
+      description: () => _described(description),
     );
     _checkFree(routine);
     state = RoutineBook(

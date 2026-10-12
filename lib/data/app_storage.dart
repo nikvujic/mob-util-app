@@ -20,9 +20,9 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
-///     <app documents>/data/planner.json {"version": 4, "tasks": [...]}
+///     <app documents>/data/planner.json {"version": 5, "tasks": [...]}
 ///     <app documents>/data/routines.json
-///         {"version": 1, "routines": [...], "days": [...]}
+///         {"version": 2, "routines": [...], "days": [...]}
 ///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/preferences.json
@@ -40,11 +40,13 @@ class AppStorage {
 
   /// Version of `planner.json`, which moves on its own. History: 2 = tasks
   /// per day; 3 = tasks have start and end times (P7; version 2 tasks have
-  /// none and are still read); 4 = tasks may have a colour (P9).
-  static const plannerFormatVersion = 4;
+  /// none and are still read); 4 = tasks may have a colour (P9); 5 = and
+  /// a description (P20).
+  static const plannerFormatVersion = 5;
 
-  /// Version of `routines.json` (P8). History: 1 = first format.
-  static const routinesFormatVersion = 1;
+  /// Version of `routines.json` (P8). History: 1 = first format; 2 =
+  /// routines may have a description (P20).
+  static const routinesFormatVersion = 2;
 
   /// Version of `pins.json` (P14). History: 1 = first format.
   static const pinsFormatVersion = 1;

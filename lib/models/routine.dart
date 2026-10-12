@@ -26,6 +26,9 @@ class Routine {
   /// Minutes before its start to remind (P10; 0: at the start), or null.
   final int? remind;
 
+  /// More about it (P20), or null.
+  final String? description;
+
   Routine({
     required this.id,
     required this.title,
@@ -36,6 +39,7 @@ class Routine {
     DateTime? until,
     this.color,
     this.remind,
+    this.description,
   })  : weekdays = Set.unmodifiable(weekdays),
         from = DateTime(from.year, from.month, from.day),
         until = until == null
@@ -81,6 +85,7 @@ class Routine {
     DateTime? Function()? until,
     String? Function()? color,
     int? Function()? remind,
+    String? Function()? description,
   }) =>
       Routine(
         id: id,
@@ -92,6 +97,7 @@ class Routine {
         until: until == null ? this.until : until(),
         color: color == null ? this.color : color(),
         remind: remind == null ? this.remind : remind(),
+        description: description == null ? this.description : description(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -104,6 +110,7 @@ class Routine {
         if (until != null) 'until': PlannerTask.dayToJson(until!),
         if (color != null) 'color': color,
         if (remind != null) 'remind': remind,
+        if (description != null) 'description': description,
       };
 
   factory Routine.fromJson(Map<String, dynamic> json) => Routine(
@@ -118,6 +125,7 @@ class Routine {
             : PlannerTask.dayFromJson(json['until']),
         color: json['color'] as String?,
         remind: json['remind'] as int?,
+        description: json['description'] as String?,
       );
 }
 

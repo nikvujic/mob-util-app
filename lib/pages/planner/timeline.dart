@@ -23,6 +23,9 @@ class TimelineBlock {
 
   /// Whether it has a reminder (P10): shown with a bell.
   final bool reminds;
+
+  /// Shown under the time when the block has room (P20).
+  final String? description;
   final bool selected;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
@@ -40,6 +43,7 @@ class TimelineBlock {
     this.repeats = false,
     this.color,
     this.reminds = false,
+    this.description,
     this.selected = false,
     this.onLongPress,
     this.onToggleDone,
@@ -510,7 +514,21 @@ class _Block extends StatelessWidget {
                               )
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [title, time],
+                                children: [
+                                  title,
+                                  time,
+                                  // As many lines as fit below (P20).
+                                  if (block.description != null)
+                                    Expanded(
+                                      child: _FittedLines(
+                                        block.description!,
+                                        style: TextStyle(
+                                          color: colors.textSecondary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                       ),
                       if (hasCheckbox)
@@ -601,6 +619,36 @@ class _Pin extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// [text] in as many whole lines as fit the height it's given (none if
+/// not even one does), the last one ending in "…" if it's cut.
+class _FittedLines extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+
+  const _FittedLines(this.text, {required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final scaled = MediaQuery.textScalerOf(context).scale(style.fontSize!);
+        final lineHeight = scaled * 1.4;
+        final lines = ((box.maxHeight - 2) / lineHeight).floor();
+        if (lines < 1) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            text,
+            maxLines: lines,
+            overflow: TextOverflow.ellipsis,
+            style: style.copyWith(height: 1.4),
+          ),
+        );
+      },
     );
   }
 }

@@ -29,6 +29,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Dentist');
     await tester.pump();
+    await tester.ensureVisible(find.text(remind));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(remind));
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));

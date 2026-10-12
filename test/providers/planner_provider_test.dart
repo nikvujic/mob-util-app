@@ -120,7 +120,7 @@ void main() {
     expect(planner.state.map((t) => t.title), ['B']);
   });
 
-  test('tasks are saved (planner.json version 4) and survive a restart',
+  test('tasks are saved (planner.json version 5) and survive a restart',
       () async {
     final dir = Directory.systemTemp.createTempSync('planner');
     addTearDown(() => dir.deleteSync(recursive: true));
@@ -133,7 +133,7 @@ void main() {
 
     final file = jsonDecode(File('${dir.path}/planner.json').readAsStringSync())
         as Map<String, dynamic>;
-    expect(file['version'], 4);
+    expect(file['version'], 5);
     expect(jsonEncode(file), contains('"day":"2026-10-12","start":480'));
 
     final reopened =

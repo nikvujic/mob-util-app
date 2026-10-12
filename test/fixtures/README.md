@@ -40,3 +40,8 @@ app still reads every version, so an update can never lose existing data.
   20:00.
 - `v6/backup-plain.json` — backup (version 6) with one task (Work) and
   those reminders.
+- `v7/storage/planner.json` (planner.json version 5) and
+  `v7/storage/routines.json` (routines.json version 2) — a task and a
+  routine with a description (P20); "Dentist" has two lines, "Groceries"
+  none; the routine "Pills 💊" is 5 minutes long.
+- `v7/backup-plain.json` — backup (version 7) with those.

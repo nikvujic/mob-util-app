@@ -48,7 +48,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D2 | **Import** a previously exported file: validated first (format, version), shows what it contains, and asks for confirmation before **replacing** current data. Invalid files are rejected without touching current data. | ✅ with Undo right after restoring |
 | D2a | **Encrypted backups.** Export first asks **Plain** (readable JSON) or **Encrypted**. Encrypted uses the **master password** and is only offered once one is set; the file can't be read without it. Importing an encrypted file asks for the master password it was made with. | ✅ |
 | D3 | Locked content stays encrypted inside the export; after import it opens with the same master password. | ✅ the backup carries the key, encrypted with the password; restoring adopts the backup's master password, or re-locks the notes under this phone's |
-| D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v6) are read in tests from frozen samples |
+| D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v7) are read in tests from frozen samples |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). The server is **typed in** (connection details entered in the app), never hard-coded. | 💭 not now |
 | D6 | **Data-safety sweep**: everything that could lose data (storage, updates, restore, locks, crashes, phone changes), how safe export is, and when cloud saving should come. | 💭 later |
 
@@ -118,6 +118,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P17 | **Notifications always arrive**: app open, in the background, swiped away, screen off, phone locked, after a restart (exact alarms, Doze, battery optimisation, boot). | 💭 Round 11 |
 | P18 | **Notification settings** (in Settings): the sound, and the colour (the block's colour, or set per reminder). | 💭 Round 11 |
 | P19 | **More block colours**; new tasks default to blue, routines to purple. | ✅ |
+| P20 | **Descriptions**: tasks and routines have an optional description, typed in the sheet under the title; shown on the block below the time when there's room (as many lines as fit), and in full in the block's menu. | ✅ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | ✅ via P7–P9 |
 
 ## U — UI polish ("fun but practical")

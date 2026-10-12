@@ -303,6 +303,12 @@ Sorted from one long message. Order of work is at the end.
 - [ ] **More colours** in the palette.
 - [ ] **Defaults:** new tasks are **blue**, new routines **purple**.
 
+**A2. Planner: descriptions** ✅ (Nikola, after chunk 2) — tasks and
+  routines get an optional description; it shows on the block when
+  there's room, and in the block's menu. (P20)
+- [x] Model and storage (planner.json v5, routines.json v2, backup v7,
+  frozen fixtures v7); the sheet's field; on blocks; in the menu.
+
 **C. Planner: reminders, redesigned** (replaces the see-through block)
 - [ ] A reminder is a **small mark on the timeline's left edge**, by the
   hour labels, at its time; nothing covers the blocks.

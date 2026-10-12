@@ -6,6 +6,11 @@ Release with the installable APK.
 
 ## [0.19.0] - unreleased
 
+### Added
+- Planner: tasks and routines can have a **description**. It shows on
+  the block under the time when there's room, and in full when you tap
+  the block. (Backups now have format 7; older ones restore as before.)
+
 ### Changed
 - Planner: tapping a task shows what it is first (time, colour,
   reminder) with Edit and Delete (with Undo), like a routine; editing

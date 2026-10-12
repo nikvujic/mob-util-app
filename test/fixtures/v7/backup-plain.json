@@ -1,0 +1,56 @@
+{
+  "format": "the-app-backup",
+  "version": 7,
+  "createdAt": "2026-10-12T09:00:00.000Z",
+  "appVersion": "0.19.0 (20)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [
+      {
+        "id": "t1",
+        "title": "Dentist",
+        "day": "2026-10-13",
+        "start": 540,
+        "end": 600,
+        "done": false,
+        "color": "teal",
+        "description": "Bring the X-ray.\nFloor 2"
+      },
+      {
+        "id": "t2",
+        "title": "Groceries",
+        "day": "2026-10-13",
+        "start": 1080,
+        "end": 1110,
+        "done": false
+      }
+    ],
+    "routines": {
+      "routines": [
+        {
+          "id": "r1",
+          "title": "Pills 💊",
+          "start": 480,
+          "end": 485,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "from": "2026-10-01",
+          "color": "purple",
+          "remind": 0,
+          "description": "One with water"
+        }
+      ],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": []
+  }
+}

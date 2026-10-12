@@ -14,6 +14,12 @@ class TaskOverlapException implements Exception {
 /// Tasks never overlap each other. Routines don't get in their way: a task
 /// and a routine may share time, side by side (P12).
 class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
+  /// A description as kept: trimmed, null if blank (P20).
+  static String? _described(String? text) {
+    final trimmed = text?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   PlannerNotifier(AppStorage storage) : super(storage.initialPlannerTasks) {
     addListener(storage.savePlannerTasks, fireImmediately: false);
   }
@@ -38,6 +44,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     required int end,
     String? color,
     int? remind,
+    String? description,
   }) {
     final trimmed = title.trim();
     if (trimmed.isEmpty) return;
@@ -50,6 +57,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       end: end,
       color: color,
       remind: remind,
+      description: _described(description),
     );
     final free = _free(_on(day));
     if (!free.any((s) => s.start <= start && end <= s.end)) {
@@ -67,6 +75,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     required int end,
     String? color,
     int? remind,
+    String? description,
   }) {
     final task = state.firstWhere((t) => t.id == id);
     if (start != task.start || end != task.end) {
@@ -82,6 +91,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       done: task.done,
       color: color,
       remind: remind,
+      description: _described(description),
     );
     final free = _free(_on(task.day).where((t) => t.id != id));
     if (!free.any((s) => s.start <= start && end <= s.end)) {

@@ -19,6 +19,7 @@ typedef NewTask = ({
   DateTime? until,
   String? color,
   int? remind,
+  String? description,
 });
 
 /// The time a repeating block (a routine) on [weekdays], until [until]
@@ -130,6 +131,7 @@ Future<NewTask?> showEditRoutineSheet(
       until: routine.until,
       color: routine.color,
       remind: routine.remind,
+      description: routine.description,
       submitLabel: 'Save',
       onDelete: onDelete,
     ),
@@ -155,6 +157,7 @@ Future<NewTask?> showEditTaskSheet(
       end: task.end,
       color: task.color,
       remind: task.remind,
+      description: task.description,
       submitLabel: 'Save',
     ),
   );
@@ -256,6 +259,9 @@ class TaskSheet extends StatefulWidget {
   /// Minutes before its start to remind (P10), or null for none.
   final int? remind;
 
+  /// More about it (P20); not asked for a reminder.
+  final String? description;
+
   const TaskSheet({
     super.key,
     required this.slot,
@@ -274,6 +280,7 @@ class TaskSheet extends StatefulWidget {
     this.point = false,
     this.color,
     this.remind,
+    this.description,
   });
 
   @override
@@ -283,6 +290,9 @@ class TaskSheet extends StatefulWidget {
 class _TaskSheetState extends State<TaskSheet> {
   late final _title = TextEditingController(text: widget.title)
     ..addListener(() => setState(() {})); // canPop follows the changes
+  late final _description =
+      TextEditingController(text: widget.description ?? '')
+        ..addListener(() => setState(() {}));
   late int _start = widget.start ?? widget.slot.start;
   late int _end = widget.end ?? math.min(_start + 60, widget.slot.end);
 
@@ -347,6 +357,7 @@ class _TaskSheetState extends State<TaskSheet> {
   @override
   void dispose() {
     _title.dispose();
+    _description.dispose();
     super.dispose();
   }
 
@@ -426,6 +437,7 @@ class _TaskSheetState extends State<TaskSheet> {
   /// Whether anything differs from how the sheet opened.
   bool get _changed =>
       _title.text != widget.title ||
+      _description.text != (widget.description ?? '') ||
       _start != _initialStart ||
       _end != _initialEnd ||
       !_sameDays(_weekdays, widget.weekdays ?? const {}) ||
@@ -489,6 +501,7 @@ class _TaskSheetState extends State<TaskSheet> {
       until: _repeats ? _until : null,
       color: _color?.name,
       remind: _remind,
+      description: widget.point ? null : _description.text,
     ));
   }
 
@@ -642,6 +655,19 @@ class _TaskSheetState extends State<TaskSheet> {
                             ),
                             onSubmitted: (_) => _submit(),
                           ),
+                          if (!widget.point) ...[
+                            const SizedBox(height: 4),
+                            TextField(
+                              key: const Key('taskDescription'),
+                              controller: _description,
+                              textCapitalization: TextCapitalization.sentences,
+                              minLines: 1,
+                              maxLines: 4,
+                              decoration: const InputDecoration(
+                                hintText: 'Description (optional)',
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           // Wraps (e.g. with a very large font) instead of overflowing.
                           Wrap(
