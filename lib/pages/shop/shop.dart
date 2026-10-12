@@ -100,6 +100,13 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     _selection.clear();
   }
 
+  /// The amount sheet (S7): big − / + at the bottom, in thumb reach; a
+  /// weight can also be typed exactly.
+  Future<void> _editAmount(String id) => showModalBottomSheet<void>(
+        context: context,
+        builder: (_) => _AmountSheet(id: id),
+      );
+
   Widget _section(List<ShopItem> items, {required bool toBuy}) {
     return SliverReorderableList(
       itemCount: items.length,
@@ -123,6 +130,13 @@ class _ShopPageState extends ConsumerState<ShopPage> {
           child: _ShopItemTile(
             key: item.id == _addedId ? _addedKey : null,
             item: item,
+            // Amounts change on the list to buy only, outside selection.
+            onQuantity: !toBuy || _selection.isActive
+                ? null
+                : () => _notifier.cycleQuantity(item.id),
+            onAmount: !toBuy || _selection.isActive
+                ? null
+                : () => _editAmount(item.id),
             index: index,
             selectionMode: _selection.isActive,
             selected: _selection.isSelected(item.id),
@@ -236,10 +250,16 @@ class _SectionHeader extends StatelessWidget {
 }
 
 /// A compact row (S4): exactly one touch target high, so more of the list
-/// fits on screen than with note rows, without becoming harder to tap.
+/// fits on screen than with note rows, without becoming harder to tap. On
+/// the right, before the handle: the amount (S7) and the button that picks
+/// its kind.
 class _ShopItemTile extends StatelessWidget {
   /// Vertical space between rows (note rows use 8).
   static const gap = 4.0;
+
+  /// Room for the amount and for its kind button.
+  static const _amountWidth = 72.0;
+  static const _kindWidth = 48.0;
 
   final ShopItem item;
   final int index;
@@ -247,6 +267,12 @@ class _ShopItemTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+
+  /// none → count → weight; null where it can't change (bought, selecting).
+  final VoidCallback? onQuantity;
+
+  /// Opens the amount sheet; null where it can't change.
+  final VoidCallback? onAmount;
 
   const _ShopItemTile({
     super.key,
@@ -256,56 +282,304 @@ class _ShopItemTile extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.onLongPress,
+    this.onQuantity,
+    this.onAmount,
   });
 
   @override
   Widget build(BuildContext context) {
-    // One semantic node for the whole row, so screen readers announce it as
-    // "Milk, not checked" — tapping it toggles it.
-    return MergeSemantics(
-      child: SelectableCard(
-        selected: selected,
+    final colors = context.colors;
+    final quantity = item.quantity;
+    final reserved = (quantity != null ? _amountWidth : 0.0) +
+        (onQuantity != null ? _kindWidth : 0.0);
+    // One semantic node for the row, so screen readers announce it as
+    // "Milk, not checked" — tapping it toggles it. The amount and its
+    // button sit on top, outside it, as controls of their own.
+    return Stack(
+      children: [
+        MergeSemantics(
+          child: SelectableCard(
+            selected: selected,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            child: ReorderableRow(
+              content: Row(
+                children: [
+                  // Shows the state only (U2): a cart while it's to buy, a
+                  // tick once it's bought. A tap anywhere on the row (with
+                  // one ripple for the whole row) toggles it; screen
+                  // readers hear a checkbox.
+                  Semantics(
+                    checked: !item.toBuy,
+                    child: SizedBox.square(
+                      dimension: kMinInteractiveDimension,
+                      child: Icon(
+                        item.toBuy ? Icons.shopping_cart_outlined : Icons.check,
+                        key: const Key('shopState'),
+                        size: 22,
+                        color:
+                            item.toBuy ? colors.accent : colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item.name,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: item.toBuy
+                            ? colors.textPrimary
+                            : colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: reserved),
+                ],
+              ),
+              indicator: ReorderOrSelectIndicator(
+                index: index,
+                selectionMode: selectionMode,
+                selected: selected,
+              ),
+            ),
+          ),
+        ),
+        if (reserved > 0)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            right: ReorderOrSelectIndicator.width,
+            child: Row(
+              children: [
+                if (quantity != null)
+                  SizedBox(
+                    width: _amountWidth,
+                    child: _AmountChip(
+                      item,
+                      onTap: onAmount,
+                      onLongPress: onLongPress,
+                    ),
+                  ),
+                if (onQuantity != null)
+                  IconButton(
+                    key: const Key('quantityKind'),
+                    tooltip: switch (quantity) {
+                      null => 'Amount: none',
+                      Quantity.count => 'Amount: count',
+                      Quantity.weight => 'Amount: weight',
+                    },
+                    icon: Icon(
+                      quantity == Quantity.weight
+                          ? Icons.scale_outlined
+                          : Icons.numbers,
+                      size: 20,
+                      color: quantity == null ? colors.textHint : colors.accent,
+                    ),
+                    onPressed: onQuantity,
+                    // Long-pressing anywhere on the row selects it.
+                    onLongPress: onLongPress,
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// How much of [item] to get: "×2" or "1.5 kg". Opens the amount sheet
+/// when [onTap] is given; otherwise only shows it (the bought list).
+class _AmountChip extends StatelessWidget {
+  final ShopItem item;
+  final VoidCallback? onTap;
+
+  /// Selects the row, as a long-press anywhere on it does.
+  final VoidCallback onLongPress;
+
+  const _AmountChip(
+    this.item, {
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  static String text(ShopItem item) => item.quantity == Quantity.weight
+      ? formatGrams(item.grams)
+      : '×${item.count}';
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final label = Text(
+      text(item),
+      key: const Key('shopAmount'),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: onTap == null ? colors.textSecondary : colors.textPrimary,
+      ),
+    );
+    // Only shown: touches go to the row underneath.
+    if (onTap == null) return IgnorePointer(child: Center(child: label));
+    return Semantics(
+      button: true,
+      label: 'Amount: ${text(item)}',
+      excludeSemantics: true,
+      child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        child: ReorderableRow(
-          content: Row(
-            children: [
-              // Shows the state only (U2): a cart while it's to buy, a
-              // tick once it's bought. A tap anywhere on the row (with
-              // one ripple for the whole row) toggles it; screen readers
-              // hear a checkbox.
-              Semantics(
-                checked: !item.toBuy,
-                child: SizedBox.square(
-                  dimension: kMinInteractiveDimension,
-                  child: Icon(
-                    item.toBuy ? Icons.shopping_cart_outlined : Icons.check,
-                    key: const Key('shopState'),
-                    size: 22,
-                    color: item.toBuy
-                        ? context.colors.accent
-                        : context.colors.textSecondary,
+        borderRadius: BorderRadius.circular(8),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colors.textHint),
+            ),
+            child: label,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The amount of one item (S7): its kind, and big − / + under the thumb.
+/// A weight steps through common amounts; tapping it types an exact one.
+/// Changes apply at once.
+class _AmountSheet extends ConsumerWidget {
+  final String id;
+
+  const _AmountSheet({required this.id});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final item = ref.watch(shopProvider).where((i) => i.id == id).firstOrNull;
+    if (item == null) return const SizedBox.shrink();
+    final shop = ref.read(shopProvider.notifier);
+    final colors = context.colors;
+    final weight = item.quantity == Quantity.weight;
+    // The next amount down / up from [from]; null at the end.
+    double? down(ShopItem from) => weight
+        ? gramsDown(from.grams)
+        : (from.count > 1 ? (from.count - 1).toDouble() : null);
+    double? up(ShopItem from) => weight
+        ? gramsUp(from.grams)
+        : (from.count < ShopNotifier.maxCount
+            ? (from.count + 1).toDouble()
+            : null);
+
+    /// Steps from the item as it is now, not as last drawn, so quick taps
+    /// in one frame all count.
+    void stepBy(double? Function(ShopItem) next) {
+      final now = ref.read(shopProvider).where((i) => i.id == id).firstOrNull;
+      final value = now == null ? null : next(now);
+      if (value == null) return;
+      weight ? shop.setGrams(id, value) : shop.setCount(id, value.toInt());
+    }
+
+    Future<void> typeExact() async {
+      final typed = await showTextInputSheet(
+        context,
+        hint: 'Grams',
+        // In grams, without a needless ".0".
+        initialValue: item.grams == item.grams.roundToDouble()
+            ? '${item.grams.toInt()}'
+            : '${item.grams}',
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      );
+      final grams = double.tryParse((typed ?? '').replaceAll(',', '.'));
+      if (grams != null) shop.setGrams(id, grams);
+    }
+
+    Widget step(
+      IconData icon,
+      String tooltip,
+      double? Function(ShopItem) next,
+    ) =>
+        IconButton.filledTonal(
+          tooltip: tooltip,
+          iconSize: 32,
+          constraints: const BoxConstraints.tightFor(width: 64, height: 64),
+          onPressed: next(item) == null ? null : () => stepBy(next),
+          icon: Icon(icon),
+        );
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              item.name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<Quantity?>(
+              segments: const [
+                ButtonSegment(value: null, label: Text('None')),
+                ButtonSegment(value: Quantity.count, label: Text('Count')),
+                ButtonSegment(value: Quantity.weight, label: Text('Weight')),
+              ],
+              selected: {item.quantity},
+              showSelectedIcon: false,
+              onSelectionChanged: (picked) =>
+                  shop.setQuantity(id, picked.first),
+            ),
+            if (item.quantity != null) ...[
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  step(Icons.remove, 'Less', down),
+                  Expanded(
+                    child: weight
+                        // Tap to type an exact weight (Nikola).
+                        ? TextButton(
+                            key: const Key('typeWeight'),
+                            onPressed: typeExact,
+                            child: Text(
+                              formatGrams(item.grams),
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w600,
+                                color: colors.textPrimary,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            '${item.count}',
+                            key: const Key('countValue'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                  ),
+                  step(Icons.add, 'More', up),
+                ],
+              ),
+              if (weight)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Tap the weight to type an exact one',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: colors.textSecondary, fontSize: 13),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Text(
-                  item.name,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: item.toBuy
-                        ? context.colors.textPrimary
-                        : context.colors.textSecondary,
-                  ),
-                ),
-              ),
             ],
-          ),
-          indicator: ReorderOrSelectIndicator(
-            index: index,
-            selectionMode: selectionMode,
-            selected: selected,
-          ),
+          ],
         ),
       ),
     );

@@ -98,7 +98,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | S4 | **Compact rows** — noticeably smaller than note rows (one 48 dp touch target high, ≥20% smaller, tighter gaps), so more items fit on screen without becoming harder to tap. | ✅ |
 | S5 | New items, and items moved back from *Items*, go to the **end** of *To buy*, so it keeps the order things were added in (Nikola's request). Bought items still go to the top of *Items*. | ✅ |
 | S6 | **A new item scrolls into view** as it's added: the list moves just enough to show it above the add sheet (from anywhere in the list), and not at all if it's already in view. | ✅ |
-| S7 | **Quantities**: a small button on each item toggles none → count → weight. Count − / + by 1 (default 1); weight in grams, − / + through common amounts (default 200 g), and tapping the weight types an exact amount (may be below 1 g). Each remembers its value. Read-only in the bought list. | 💭 Round 11 |
+| S7 | **Quantities**: a small button on each item (to buy) toggles none → count → weight; the amount shows beside it ("×2", "200 g", "1.5 kg"). Tapping the amount opens a sheet at the bottom with the kind (None / Count / Weight) and big − / +: count by 1 (from 1, default 1); weight through common amounts (default 200 g), and tapping the weight types an exact one (any number above 0, below 1 g too; a comma works). Changes apply at once. Each kind keeps its value. In the bought list the amount shows but doesn't change, and touches there act on the row. | ✅ − / + live in the sheet: inline in the one-touch-target row they'd leave no room for names |
 
 ## P — Planner (currently the "To Do" tab)
 

@@ -292,7 +292,7 @@ Everything from Round 11 and 12 except the new empty Other pages; the
 medicine tracker is in. In this order:
 
 1. **Main pages:** now line (D) ✅, reminders as marks (C) ✅, toasts (F) ✅,
-   shop quantities (I), **checkboxes in notes** (N15; Nikola changed his
+   shop quantities (I) ✅, **checkboxes in notes** (N15; Nikola changed his
    mind, they're in v1) ✅.
    Also done: **no flash of a locked page on coming back** (L8).
 2. **Pages as a system first** (O9), so nothing big changes after v1:
@@ -433,11 +433,11 @@ Sorted from one long message. Order of work is at the end.
   change can be discarded. (N14)
 
 **I. Shop: quantities** (S7)
-- [ ] A small button on the right of each item toggles **none → count →
+- [x] A small button on the right of each item toggles **none → count →
   weight**. Count: − / + by 1 (default 1). Weight in grams with smart
   − / + steps (no typing). Each kind remembers its value when toggled
   away and back. Shown but not editable in the bought list.
-- [ ] Weight: − / + jump through a list of **common amounts** (e.g. 50,
+- [x] Weight: − / + jump through a list of **common amounts** (e.g. 50,
   80, 100, 150, 200, 250, 280, 300, 400, 500, 750 g, 1 / 1.5 / 2 kg …);
   **default 200 g**. **Tapping the weight** opens a quick edit to type an
   exact amount (a number, may be below 1 g).

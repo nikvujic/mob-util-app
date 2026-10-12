@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.21.0] - unreleased
 
 ### Added
+- Shop: **amounts**. The new button on an item switches between none, a
+  count and a weight; tap the amount for big − / + (weights step through
+  common amounts, from 200 g) or to type an exact weight. (Backups now
+  have format 8; older ones restore as before.)
 - Planner: **reminders are small bell marks** on the timeline's left
   edge instead of boxes over the blocks. Close ones share a mark with a
   number; tap a mark to see them, tick them off or edit them.

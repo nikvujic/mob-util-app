@@ -18,6 +18,9 @@ class TextInputSheet extends StatefulWidget {
   /// returning a new one; it may be left empty.
   final TextEditingController? controller;
 
+  /// E.g. numbers for an amount; text by default.
+  final TextInputType? keyboardType;
+
   const TextInputSheet({
     super.key,
     required this.hint,
@@ -26,6 +29,7 @@ class TextInputSheet extends StatefulWidget {
     this.keepOpen = false,
     this.onSubmit,
     this.controller,
+    this.keyboardType,
   });
 
   @override
@@ -107,6 +111,7 @@ class _TextInputSheetState extends State<TextInputSheet> {
               controller: _controller,
               focusNode: _focusNode,
               autofocus: true,
+              keyboardType: widget.keyboardType,
               textCapitalization: TextCapitalization.sentences,
               textInputAction:
                   widget.keepOpen ? TextInputAction.send : TextInputAction.done,
@@ -144,6 +149,7 @@ Future<String?> showTextInputSheet(
   bool keepOpen = false,
   ValueChanged<String>? onSubmit,
   TextEditingController? controller,
+  TextInputType? keyboardType,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -155,6 +161,7 @@ Future<String?> showTextInputSheet(
       keepOpen: keepOpen,
       onSubmit: onSubmit,
       controller: controller,
+      keyboardType: keyboardType,
     ),
   );
 }

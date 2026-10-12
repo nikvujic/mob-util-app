@@ -65,6 +65,15 @@ Future<void> seed(ProviderContainer container) async {
   shop.toggle(
     container.read(shopProvider).firstWhere((i) => i.name == 'Milk').id,
   );
+  // Amounts (S7): Bread a count, Eggs a weight; Milk (bought) shows one.
+  String shopId(String name) =>
+      container.read(shopProvider).firstWhere((i) => i.name == name).id;
+  shop
+    ..setQuantity(shopId('Bread'), Quantity.count)
+    ..setCount(shopId('Bread'), 2)
+    ..setQuantity(shopId('Eggs'), Quantity.weight)
+    ..setGrams(shopId('Eggs'), 1500)
+    ..setQuantity(shopId('Milk'), Quantity.count);
   final today = designClock();
   final planner = container.read(plannerProvider.notifier)
     ..addTask(today, 'Gym', start: 8 * 60, end: 9 * 60)
@@ -148,6 +157,11 @@ void main() {
         expect(find.text('Save changes?'), findsOneWidget);
       },
       'shop': (t) => openTab(t, 'Shop'),
+      'shop amount sheet': (t) async {
+        await openTab(t, 'Shop');
+        await t.tap(find.bySemanticsLabel('Amount: 1.5 kg'));
+        await t.pumpAndSettle();
+      },
       'shop selection mode': (t) async {
         await openTab(t, 'Shop');
         await t.longPress(find.text('Milk'));
