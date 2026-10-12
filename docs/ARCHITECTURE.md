@@ -72,6 +72,10 @@ hierarchy (envelope encryption):
   Changing the password re-wraps this one key in a single atomic write.
 - **Session** (`providers/session_provider.dart`) holds both keys in
   memory while unlocked; nothing unwrapped is ever written to disk.
+  `app/privacy_curtain.dart` covers the whole app as soon as it starts
+  leaving while unlocked (inactive or hidden), so the frame Android keeps
+  for recent apps and for coming back shows nothing protected; it lifts
+  on resume, after the session has decided whether to auto-lock (L8).
 
 Every sealed box is bound to a purpose string (`context`), so data sealed
 for one purpose can't be passed off as another. A locked note's content is

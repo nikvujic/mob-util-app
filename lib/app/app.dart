@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/app/app_drawer.dart';
 import 'package:the_app/app/bottom_nav.dart';
+import 'package:the_app/app/privacy_curtain.dart';
 import 'package:the_app/app/section_gate.dart';
 import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
@@ -41,8 +42,10 @@ class MyApp extends ConsumerWidget {
       // Switch themes at once: an animated switch showed the old colours
       // for a moment (Nikola saw the old theme flash on the next page).
       themeAnimationDuration: Duration.zero,
-      // Tracks which side the user touches, for G11 bottom actions.
-      builder: (context, child) => HandTracker(child: child!),
+      // Tracks which side the user touches, for G11 bottom actions; the
+      // curtain hides what's unlocked as the app leaves.
+      builder: (context, child) =>
+          PrivacyCurtain(child: HandTracker(child: child!)),
       home: const HomeScreen(),
       onGenerateRoute: _route,
     );
