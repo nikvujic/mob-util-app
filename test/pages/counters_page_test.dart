@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
@@ -213,7 +215,7 @@ void main() {
       expect((c.step, c.min, c.max, c.color), (5, 0, 10, 'teal'));
       expect(find.text('+5'), findsOneWidget);
       expect(find.text('−5'), findsOneWidget);
-      expect(find.text('0–10'), findsOneWidget);
+      expect(find.textContaining('0–10', findRichText: true), findsOneWidget);
 
       await tester.tap(find.byTooltip('Count up Pages by 5'));
       await tester.tap(find.byTooltip('Count up Pages by 5'));
@@ -254,7 +256,7 @@ void main() {
       container.read(countersProvider.notifier).add('Laps',
           options: (name: 'Laps', step: 2, color: 'pink', min: null, max: 40));
       await tester.pump();
-      await tester.longPress(find.text('Laps'));
+      await tester.longPress(find.textContaining('Laps', findRichText: true));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Edit'));
       await tester.pumpAndSettle();
@@ -262,6 +264,58 @@ void main() {
           tester.widget<TextField>(find.byKey(Key(key))).controller!.text;
       expect((field('counterStep'), field('counterMin'), field('counterMax')),
           ('2', '', '40'));
+    });
+  });
+
+  group('look (Round 14)', () {
+    testWidgets('every card the same height, limits or not', (tester) async {
+      await openCounters(tester);
+      container.read(countersProvider.notifier)
+        ..add('Plain')
+        ..add('Ruled',
+            options: (name: 'Ruled', step: 5, color: 'teal', min: 0, max: 50));
+      await tester.pump();
+      double height(String name) => tester
+          .getSize(find.ancestor(
+            of: find.textContaining(name, findRichText: true),
+            matching: find.byType(SelectableCard),
+          ))
+          .height;
+      expect(height('Ruled'), height('Plain'));
+    });
+
+    testWidgets('− / + in the counter\'s vivid colour, else the app\'s grey',
+        (tester) async {
+      await openCounters(tester);
+      container.read(countersProvider.notifier)
+        ..add('Plain')
+        ..add('Teal', options: (
+          name: 'Teal',
+          step: 1,
+          color: 'teal',
+          min: null,
+          max: null
+        ));
+      await tester.pump();
+      Color? background(String tooltip) => tester
+          .widget<IconButton>(find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(IconButton),
+          ))
+          .style!
+          .backgroundColor!
+          .resolve({});
+      final palette = Theme.of(tester.element(find.byType(Scaffold).first))
+          .extension<AppPalette>()!;
+      expect(background('Count up Teal'), BlockColor.teal.stripe);
+      expect(background('Count up Plain'), palette.menu);
+    });
+
+    testWidgets('Min and Max have no placeholder text', (tester) async {
+      await openCounters(tester);
+      await tester.tap(find.byTooltip('New counter'));
+      await tester.pumpAndSettle();
+      expect(find.text('none'), findsNothing);
     });
   });
 }

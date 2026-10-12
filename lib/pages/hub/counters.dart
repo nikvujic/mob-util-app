@@ -134,7 +134,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                             // Room around each card (O5).
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
-                              vertical: 5,
+                              vertical: 4,
                             ),
                             child: _CounterCard(
                               counter: counter,
@@ -207,6 +207,9 @@ class _CounterCard extends StatelessWidget {
     required this.onLongPress,
   });
 
+  /// Every counter's row is this high, limits or not (Nikola).
+  static const _rowHeight = 64.0;
+
   /// Rounder than list rows (O5).
   static const _shape = RoundedRectangleBorder(
     borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -230,67 +233,93 @@ class _CounterCard extends StatelessWidget {
       selected: selected,
       onTap: onTap,
       onLongPress: onLongPress,
-      color: colour?.fill,
-      shape: _shape,
+      // Its colour as a clear edge (the fill colours are muted); the same
+      // edge, unseen, without one, so every card is the same size.
+      shape: _shape.copyWith(
+        side: BorderSide(
+          color: colour?.stripe ?? Colors.transparent,
+          width: 2,
+        ),
+      ),
       child: ReorderableRow(
         content: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 0, 14),
-          child: Row(
-            children: [
-              _StepButton(
-                icon: Icons.remove,
-                label: step == 1 ? null : '−$step',
-                tooltip: step == 1
-                    ? 'Count down ${counter.name}'
-                    : 'Count down ${counter.name} by $step',
-                // Off while selecting (a tap there selects instead), and
-                // at its lowest.
-                onPressed: selectionMode || !counter.canGoDown
-                    ? null
-                    : () => onStep(-1),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text(
-                      counter.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                    Text(
-                      '${counter.value}',
-                      key: Key('counterValue-${counter.id}'),
-                      style: TextStyle(
-                        color: colors.textPrimary,
-                        fontSize: 36,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (limits != null)
-                      Text(
-                        limits,
+          padding: const EdgeInsets.fromLTRB(10, 8, 0, 8),
+          // One fixed height for every counter (Nikola).
+          child: SizedBox(
+            height: _rowHeight,
+            child: Row(
+              children: [
+                _StepButton(
+                  icon: Icons.remove,
+                  label: step == 1 ? null : '−$step',
+                  colour: colour,
+                  tooltip: step == 1
+                      ? 'Count down ${counter.name}'
+                      : 'Count down ${counter.name} by $step',
+                  // Off while selecting (a tap there selects instead), and
+                  // at its lowest.
+                  onPressed: selectionMode || !counter.canGoDown
+                      ? null
+                      : () => onStep(-1),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Its limits beside the name, so every card is the
+                      // same height (Nikola).
+                      Text.rich(
+                        TextSpan(children: [
+                          TextSpan(text: counter.name),
+                          if (limits != null)
+                            TextSpan(
+                              text: '  $limits',
+                              style: TextStyle(
+                                color: colors.textMuted,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: colors.textSecondary,
-                          fontSize: 12,
+                          fontSize: 14,
                         ),
                       ),
-                  ],
+                      // Shrinks to fit (e.g. very large text), never
+                      // makes the card taller.
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '${counter.value}',
+                            key: Key('counterValue-${counter.id}'),
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              _StepButton(
-                icon: Icons.add,
-                label: step == 1 ? null : '+$step',
-                tooltip: step == 1
-                    ? 'Count up ${counter.name}'
-                    : 'Count up ${counter.name} by $step',
-                onPressed:
-                    selectionMode || !counter.canGoUp ? null : () => onStep(1),
-              ),
-            ],
+                _StepButton(
+                  icon: Icons.add,
+                  label: step == 1 ? null : '+$step',
+                  colour: colour,
+                  tooltip: step == 1
+                      ? 'Count up ${counter.name}'
+                      : 'Count up ${counter.name} by $step',
+                  onPressed: selectionMode || !counter.canGoUp
+                      ? null
+                      : () => onStep(1),
+                ),
+              ],
+            ),
           ),
         ),
         indicator: ReorderOrSelectIndicator(
@@ -303,14 +332,17 @@ class _CounterCard extends StatelessWidget {
   }
 }
 
-/// A big round − / + button.
+/// A big round − / + button: in the counter's colour (vivid), or the
+/// app's own grey without one (not Material's tonal tint, which looked
+/// green).
 class _StepButton extends StatelessWidget {
-  static const size = 64.0;
+  static const size = 56.0;
 
   final IconData icon;
 
   /// Shown instead of [icon] for a step above 1 ("+5").
   final String? label;
+  final BlockColor? colour;
   final String tooltip;
   final VoidCallback? onPressed;
 
@@ -319,25 +351,40 @@ class _StepButton extends StatelessWidget {
     required this.tooltip,
     required this.onPressed,
     this.label,
+    this.colour,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final label = this.label;
-    return IconButton.filledTonal(
+    final colour = this.colour;
+    final background = colour?.stripe ?? colors.menu;
+    // Dark on the bright colours, light on the grey.
+    final foreground = colour == null ? colors.textPrimary : colors.background;
+    return IconButton(
       icon: label == null
-          ? Icon(icon, size: 32)
+          ? Icon(icon, size: 28)
           : FittedBox(
               child: Text(
                 label,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                // A Text doesn't take the button's colour by itself.
+                style: TextStyle(
+                  color: onPressed == null ? colors.textMuted : foreground,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
       tooltip: tooltip,
       onPressed: onPressed,
       style: IconButton.styleFrom(
         fixedSize: const Size.square(size),
+        backgroundColor: background,
+        foregroundColor: foreground,
+        // At a limit: the app's grey, the label still readable.
+        disabledBackgroundColor: colors.menu,
+        disabledForegroundColor: colors.textMuted,
         // The counter plays its own click and vibration, or none if
         // switched off in Settings (U6).
         enableFeedback: false,

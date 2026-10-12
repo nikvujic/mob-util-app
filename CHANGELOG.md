@@ -13,6 +13,9 @@ Release with the installable APK.
 
 ### Changed
 - Placard: the hold to count is longer (about 2½ seconds).
+- Counters are more compact and all the same height; − / + are in the
+  counter's own colour, vivid (the colour also edges the card), or the
+  app's grey without one. No "none" hint in Min / Max.
 
 ## [0.22.0] - 2026-10-12
 

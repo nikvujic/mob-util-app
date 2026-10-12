@@ -344,7 +344,7 @@ Chunks, in order (each its own commit; release when a few are in):
   the ticked one, so ticking jumps; the ticked box still shows **white**
   on the phone (an emoji), not the accent. Both drawn the same way, same
   size, in the accent.
-- [ ] Counters: no "none" placeholder in Min / Max; the no-colour
+- [x] Counters: no "none" placeholder in Min / Max; the no-colour
   buttons look green (Material's tonal colour), and colours look washed
   out: use the vivid colours; every counter the same height (limits
   made the card taller); more compact overall.

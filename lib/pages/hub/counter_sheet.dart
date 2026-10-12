@@ -95,7 +95,6 @@ class _CounterSheetState extends State<_CounterSheet> {
       TextEditingController controller,
       String label,
       String key, {
-      String? hint,
       String? error,
     }) =>
         Expanded(
@@ -106,7 +105,6 @@ class _CounterSheetState extends State<_CounterSheet> {
             inputFormatters: whole,
             decoration: InputDecoration(
               labelText: label,
-              hintText: hint,
               errorText: error,
             ),
           ),
@@ -145,7 +143,6 @@ class _CounterSheetState extends State<_CounterSheet> {
                     _min,
                     'Min',
                     'counterMin',
-                    hint: 'none',
                     error: _parse(_min.text, blankOk: true).$2,
                   ),
                   const SizedBox(width: 12),
@@ -153,7 +150,6 @@ class _CounterSheetState extends State<_CounterSheet> {
                     _max,
                     'Max',
                     'counterMax',
-                    hint: 'none',
                     error: _parse(_max.text, blankOk: true).$2,
                   ),
                 ],
