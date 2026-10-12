@@ -286,6 +286,33 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
+### Goal: v1.0.0 — the version Nikola starts using for real (2026-10-12)
+
+Everything from Round 11 and 12 except the new empty Other pages; the
+medicine tracker is in. In this order:
+
+1. **Main pages:** now line (D), reminders as marks (C), toasts (F),
+   shop quantities (I).
+2. **The three Other pages:** counters (J), Džoni configurable (K, with
+   the inflate-and-shake hold), medicine tracker (L).
+3. **Security & data:** a lock for each Other page (O7); Clear data per
+   Other page, not only "Other" as a whole (D7 follow-up, once Other has
+   more than counters); the data-loss and error sweep (D6); surviving an
+   uninstall (D8): at least a backup reminder or an automatic export to a
+   folder Nikola picks. Cloud save (D5) stays after v1.
+4. **Notifications:** reliability (E1), then settings with default
+   sounds per kind and colours (E2).
+5. **UI improvements:** pictures for the Other pages and other visual
+   polish; the app's name and icon.
+6. **Release v1.0.0.** Before it: every stored format has its frozen
+   fixtures and backups carry all new data (medicine, Džoni's settings,
+   counter options, quantities), so nothing made with v1 is ever lost on
+   an update. Then Nikola clears the test data (Settings → Clear data)
+   and starts using it.
+
+After v1: the new Other pages (coin flip, days since/until, life
+percentage, birthdays, recipes, workout log), cloud save (D5).
+
 ### Round 12 — Nikola's notes on 0.19.0 (2026-10-12)
 - [x] **No button flashes when it turns on, anywhere, now and later**
   (seen on the planner sheet's Add): one rule in the app's theme for
