@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/pages/other/counters.dart';
+import 'package:the_app/pages/other/medicine.dart';
 import 'package:the_app/pages/other/placard.dart';
 
 /// How each of Other's pages (O9) looks and opens. Exhaustive: a new
@@ -10,10 +11,12 @@ extension OtherToolPage on OtherTool {
   String get icon => switch (this) {
         OtherTool.counters => 'assets/icons/counters.svg',
         OtherTool.placard => 'assets/icons/placard.svg',
+        OtherTool.medicine => 'assets/icons/medicine.svg',
       };
 
   Widget page() => switch (this) {
         OtherTool.counters => const CountersPage(),
         OtherTool.placard => const PlacardPage(),
+        OtherTool.medicine => const MedicinePage(),
       };
 }

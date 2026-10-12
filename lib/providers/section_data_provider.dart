@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/placard_provider.dart';
@@ -37,6 +39,7 @@ class SectionData {
         OtherTool.counters => _ref.read(countersProvider).length,
         // Its text and count, once set.
         OtherTool.placard => _ref.read(placardProvider).isSet ? 1 : 0,
+        OtherTool.medicine => _ref.read(medicineProvider).size,
       };
 
   /// Empties one of Other's pages (saved with the next flush).
@@ -46,6 +49,8 @@ class SectionData {
         _ref.read(countersProvider.notifier).replaceAll(const []);
       case OtherTool.placard:
         _ref.read(placardProvider.notifier).replace(Placard.initial);
+      case OtherTool.medicine:
+        _ref.read(medicineProvider.notifier).replaceAll(MedicineBook.empty);
     }
   }
 

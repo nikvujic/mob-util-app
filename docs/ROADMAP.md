@@ -301,7 +301,7 @@ medicine tracker is in. In this order:
    added at the end); each page's data in its own store and in backups
    under its id. ✅ Then **arrange Other** by holding a tile and dragging
    (O8).
-   **The three Other pages:** counters (J), Džoni configurable (K, with
+   ✅ **The three Other pages** (Hub now): counters (J), Džoni configurable (K, with
    the inflate-and-shake hold; renamed **Placard**, Nikola's pick), medicine tracker (L).
 3. **Security & data:** a lock for each Other page (O7); Clear data per
    Other page, not only "Other" as a whole (D7 follow-up, once Other has
@@ -457,7 +457,7 @@ Sorted from one long message. Order of work is at the end.
 - [x] Fix: on back the page **disappears before the screen turns back
   upright**; turn first, then close.
 
-**L. New page: medicine tracker** (O6) — Nikola takes a pill every
+**L. New page: medicine tracker** (O6) ✅ — Nikola takes a pill every
   morning and notes it in a sheet; make that one tap. Agreed shape (all
   of it combined):
   - Add medicines, each with **how many** (doses a day), **when** (times),

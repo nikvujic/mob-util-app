@@ -8,7 +8,8 @@
 /// those switches don't compile until a new page is in all of them.
 enum OtherTool {
   counters('Counters'),
-  placard('Placard');
+  placard('Placard'),
+  medicine('Medicine');
 
   const OtherTool(this.label);
 

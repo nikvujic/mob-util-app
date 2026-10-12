@@ -117,6 +117,8 @@ const plainScrollAllowed = {
   // A short form in a bottom sheet: already at the bottom, scrolling only
   // to stay clear of the keyboard.
   'pages/other/counter_sheet.dart',
+  // The same, for a medicine.
+  'pages/other/medicine_sheet.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

@@ -10,6 +10,10 @@ Release with the installable APK.
 - **Other is now called Hub.**
 
 ### Added
+- Hub: **Medicine**. Add your medicines with the time of each dose and
+  how long you take them; tap a dose when you've taken it (the time is
+  kept). Several a day show as 1 of 2. History lists every day. (In
+  backups, now format 11.)
 - Counters: **options**. A new counter (or Edit, in selection mode) has
   a step (− / + count by it), a colour and optional min and max; the
   buttons stop at the limits. Cards look rounder, with room around them.

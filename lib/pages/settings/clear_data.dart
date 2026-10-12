@@ -7,8 +7,10 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/layout_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
+import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_data_provider.dart';
@@ -112,7 +114,9 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
       ..watch(plannerProvider)
       ..watch(routinesProvider)
       ..watch(pinsProvider)
-      ..watch(countersProvider);
+      ..watch(countersProvider)
+      ..watch(placardProvider)
+      ..watch(medicineProvider);
     final tools = ref.watch(layoutProvider).other;
     final data = ref.read(sectionDataProvider);
     final colors = context.colors;

@@ -24,6 +24,7 @@ void main() {
     expect(assets.toSet(), {
       'assets/icons/counters.svg',
       'assets/icons/placard.svg',
+      'assets/icons/medicine.svg',
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
     for (final asset in assets) {
@@ -67,7 +68,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(layoutProvider).other,
-          [OtherTool.placard, OtherTool.counters]);
+          [OtherTool.placard, OtherTool.counters, OtherTool.medicine]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
         moreOrLessEquals(counters.dx, epsilon: 1),
@@ -94,7 +95,8 @@ void main() {
       );
       owner.performAction(node.id, SemanticsAction.customAction, later);
       await tester.pump();
-      expect(container.read(layoutProvider).other.last, OtherTool.counters);
+      expect(container.read(layoutProvider).other,
+          [OtherTool.placard, OtherTool.counters, OtherTool.medicine]);
       semantics.dispose();
     });
   });
