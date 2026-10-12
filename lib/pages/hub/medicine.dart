@@ -6,6 +6,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
+import 'package:the_app/pages/hub/medicine_history.dart';
 import 'package:the_app/pages/hub/medicine_sheet.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
@@ -23,14 +24,30 @@ class MedicinePage extends ConsumerWidget {
   DateTime _today(WidgetRef ref) => dayOf(ref.read(clockProvider)());
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final draft = await showMedicineSheet(context, today: _today(ref));
+    final today = _today(ref);
+    final draft = await showMedicineSheet(context, today: today);
     if (draft == null) return;
-    ref.read(medicineProvider.notifier).add(
-          draft.name,
-          times: draft.times,
-          from: draft.from,
-          until: draft.until,
-        );
+    final notifier = ref.read(medicineProvider.notifier);
+    final id = notifier.add(
+      draft.name,
+      times: draft.times,
+      from: draft.from,
+      until: draft.until,
+    );
+    // Started in the past: fill those days in, if wanted (O13; one missed
+    // day can then be set in its history).
+    if (id == null || !draft.from.isBefore(today) || !context.mounted) {
+      return;
+    }
+    final fill = await showConfirmDialog(
+      context,
+      title: 'Mark the past days taken?',
+      message: 'Every dose since ${formatDay(draft.from, today: today)}, '
+          'up to yesterday. You can set any day as missed in its history.',
+      confirmLabel: 'Mark taken',
+      cancelLabel: 'Leave empty',
+    );
+    if (fill) notifier.fillPast(id);
   }
 
   Future<void> _menu(
@@ -38,7 +55,7 @@ class MedicinePage extends ConsumerWidget {
     WidgetRef ref,
     Medicine medicine,
   ) async {
-    final choice = await showModalBottomSheet<bool>(
+    final choice = await showModalBottomSheet<_Choice>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -54,23 +71,27 @@ class MedicinePage extends ConsumerWidget {
                 style: TextStyle(color: context.colors.textSecondary),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('Edit'),
-              onTap: () => Navigator.of(context).pop(true),
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_outline),
-              title: const Text('Delete'),
-              onTap: () => Navigator.of(context).pop(false),
-            ),
+            for (final choice in _Choice.values)
+              ListTile(
+                leading: Icon(choice.icon),
+                title: Text(choice.label),
+                onTap: () => Navigator.of(context).pop(choice),
+              ),
           ],
         ),
       ),
     );
     if (choice == null || !context.mounted) return;
     final notifier = ref.read(medicineProvider.notifier);
-    if (choice) {
+    if (choice == _Choice.history) {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => MedicineOwnHistoryPage(id: medicine.id),
+        ),
+      );
+      return;
+    }
+    if (choice == _Choice.edit) {
       final draft = await showMedicineSheet(
         context,
         today: _today(ref),
@@ -376,15 +397,17 @@ class _DoseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final done = taken != null;
+    // Filled in afterwards: taken, but no time.
+    final ticked = taken?.at;
     final at =
-        done ? formatMinutes(taken!.at.hour * 60 + taken!.at.minute) : null;
+        ticked == null ? null : formatMinutes(ticked.hour * 60 + ticked.minute);
     final fg =
         done ? (Theme.of(context).colorScheme.onPrimary) : colors.textPrimary;
     return Semantics(
       button: true,
       checked: done,
       label: '$name, ${label ?? 'dose'} at ${formatMinutes(time)}'
-          '${done ? ', taken at $at' : ''}',
+          '${done ? ', taken${at == null ? '' : ' at $at'}' : ''}',
       excludeSemantics: true,
       child: Material(
         color: done ? colors.accent : colors.surface,
@@ -423,7 +446,9 @@ class _DoseButton extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          done ? 'Taken $at' : label ?? 'Tap when taken',
+                          done
+                              ? (at == null ? 'Taken' : 'Taken $at')
+                              : label ?? 'Tap when taken',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -444,60 +469,14 @@ class _DoseButton extends StatelessWidget {
   }
 }
 
-/// Every day back to the first medicine's start, newest first: each dose
-/// with the time it was marked taken, or "not taken".
-class MedicineHistoryPage extends ConsumerWidget {
-  const MedicineHistoryPage({super.key});
+/// A medicine's menu.
+enum _Choice {
+  history('History', Icons.history),
+  edit('Edit', Icons.edit_outlined),
+  delete('Delete', Icons.delete_outline);
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final book = ref.watch(medicineProvider);
-    final today = dayOf(ref.watch(clockProvider)());
-    final colors = context.colors;
-    final first = book.medicines.isEmpty
-        ? today
-        : book.medicines
-            .map((m) => m.from)
-            .reduce((a, b) => a.isBefore(b) ? a : b);
-    final days = [
-      for (var d = today; !d.isBefore(first); d = addDays(d, -1)) d,
-    ];
-    final rows = <Widget>[];
-    for (final day in days) {
-      final on = book.medicines.where((m) => m.isOn(day)).toList();
-      if (on.isEmpty) continue;
-      rows.add(Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-        child: Text(
-          daysBetween(day, today) == 0 ? 'Today' : formatDay(day, today: today),
-          style: TextStyle(
-            color: colors.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ));
-      for (final m in on) {
-        rows.add(ListTile(
-          title: Text(m.name),
-          subtitle: Text(
-            [
-              for (var dose = 0; dose < m.dosesADay; dose++)
-                switch (book.takenFor(m.id, day, dose)) {
-                  final t? => '${formatMinutes(m.times[dose])} ✓ '
-                      '${formatMinutes(t.at.hour * 60 + t.at.minute)}',
-                  null => '${formatMinutes(m.times[dose])} not taken',
-                },
-            ].join('   '),
-            style: TextStyle(color: colors.textSecondary),
-          ),
-        ));
-      }
-    }
-    return Scaffold(
-      appBar: AppBar(title: const Text('Medicine history')),
-      body: rows.isEmpty
-          ? const EmptyState(icon: Icons.history, message: 'No history yet')
-          : PullDownList.children(children: rows),
-    );
-  }
+  final String label;
+  final IconData icon;
+
+  const _Choice(this.label, this.icon);
 }

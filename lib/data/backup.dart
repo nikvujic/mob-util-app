@@ -68,8 +68,9 @@ class Backup {
   /// may have a description (P20); 8 = shop items may have a quantity
   /// (S7); 9 = Placard's text and count (`placard`, O4); 10 = counters
   /// may have a step, colour and limits (O5); 11 = the medicine tracker
-  /// (`medicine`, as in `medicine.json`, O6).
-  static const version = 11;
+  /// (`medicine`, as in `medicine.json`, O6); 12 = doses missed or not
+  /// sure, taken ones maybe without a time (O13).
+  static const version = 12;
 
   final DateTime createdAt;
   final String appVersion;

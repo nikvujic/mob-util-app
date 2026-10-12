@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [0.23.0] - unreleased
 
+### Added
+- Medicine: **history you can read and fix**. Each day has a coloured
+  title and a mark per dose; tap one to set it taken, missed or not sure.
+  Each medicine has its **own history** (in its menu): the total taken
+  so far, a calendar strip of its days (scroll left for older ones) and
+  every day below. A medicine can **start in the past**: you're asked
+  whether to mark those days taken, and its history has a button for it
+  too. (Backups now have format 12.)
+
 ### Fixed
 - Planner: screen readers can add a task from free time again (it had
   no tap action).

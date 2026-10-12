@@ -1,0 +1,1 @@
+{"version":2,"medicines":[{"id":"m1","name":"Coffee ☕","times":[480],"from":"2026-07-01"}],"taken":[{"medicine":"m1","day":"2026-07-01","dose":0},{"medicine":"m1","day":"2026-07-02","dose":0,"state":"missed"},{"medicine":"m1","day":"2026-07-03","dose":0,"state":"unsure"},{"medicine":"m1","day":"2026-10-12","dose":0,"at":"2026-10-12T07:55:00.000"}]}

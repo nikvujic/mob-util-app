@@ -67,3 +67,7 @@ app still reads every version, so an update can never lose existing data.
   Antibiotic twice a day (08:00, 20:00) 10–16 Oct; on 11 Oct the Vitamin D
   was taken at 08:04 and the Antibiotic's evening dose at 20:31.
 - `v11/backup-plain.json` — backup (version 11) with that.
+- `v12/storage/medicine.json` — dose states (O13, medicine.json version
+  2): Coffee ☕ from 1 Jul, taken 1 Jul (filled in, no time), missed 2
+  Jul, not sure 3 Jul, taken 12 Oct at 07:55.
+- `v12/backup-plain.json` — backup (version 12) with that.

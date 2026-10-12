@@ -509,6 +509,44 @@ void main() {
     });
   });
 
+  group('medicine v2 / v12 backup (dose states, O13)', () {
+    void expectSample(MedicineBook book) {
+      DoseTaken? mark(int month, int day) =>
+          book.markFor('m1', DateTime(2026, month, day), 0);
+      expect((mark(7, 1)!.state, mark(7, 1)!.at), (DoseState.taken, null),
+          reason: 'filled in: no time');
+      expect(mark(7, 2)!.state, DoseState.missed);
+      expect(mark(7, 3)!.state, DoseState.unsure);
+      expect(mark(10, 12)!.at, DateTime(2026, 10, 12, 7, 55));
+      expect(book.takenCount('m1'), 2);
+    }
+
+    test('medicine.json version 2 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v12/storage'),
+      );
+      expectSample(storage.initialMedicine);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v12 backup restores dose states', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v12/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.medicine);
+    });
+
+    test('version 1 doses read as taken, with their time', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v11/storage'),
+      );
+      final mark =
+          storage.initialMedicine.markFor('m1', DateTime(2026, 10, 11), 0)!;
+      expect((mark.state, mark.at),
+          (DoseState.taken, DateTime(2026, 10, 11, 8, 4)));
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -608,6 +646,10 @@ void main() {
           'f0a34c25e1e843a90eca8b6f3b3573413d4850552471a44e27b55f17d6d40ce2',
       'test/fixtures/v11/backup-plain.json':
           '957ea75a7409465f13e48a2a20db9929fb8c05b72eceb6c838904e66db9ff4a9',
+      'test/fixtures/v12/storage/medicine.json':
+          '82811a307c040ee98ae347c8793c3aa2cf1656a5e7201abea59f5119d87b2c30',
+      'test/fixtures/v12/backup-plain.json':
+          '2ba01bb04b33e1a5c16a76224d7339a44e5c9f8b5f8124716de10c7d9ef52e75',
       'test/fixtures/v8/storage/layout.json':
           'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };

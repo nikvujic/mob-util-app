@@ -118,6 +118,8 @@ const plainScrollAllowed = {
   'pages/hub/medicine_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
+  // A sideways strip of days inside a page that has reach mode.
+  'pages/hub/medicine_calendar.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

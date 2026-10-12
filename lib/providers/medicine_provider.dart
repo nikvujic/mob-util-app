@@ -95,18 +95,61 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
     );
   }
 
-  /// Marks [dose] of [medicine] on [day] taken now, or unmarks it.
+  /// Marks [dose] of [medicine] on [day] taken now, or unmarks it (a
+  /// dose set missed or not sure is marked taken).
   void toggleDose(String medicine, DateTime day, int dose) {
-    final mark = state.takenFor(medicine, day, dose);
+    final taken = state.takenFor(medicine, day, dose) != null;
+    setDose(medicine, day, dose, taken ? null : DoseState.taken);
+  }
+
+  /// Sets what became of [dose] of [medicine] on [day] (from the
+  /// history, O13); null: no mark. Taken now stamps the time, unless
+  /// it's for another day (set afterwards: no time).
+  void setDose(String medicine, DateTime day, int dose, DoseState? to) {
+    final now = _now();
+    final sameDay =
+        now.year == day.year && now.month == day.month && now.day == day.day;
     state = MedicineBook(
       medicines: state.medicines,
-      taken: mark != null
-          ? state.taken.where((t) => !identical(t, mark)).toList()
-          : [
-              ...state.taken,
-              DoseTaken(medicine: medicine, day: day, dose: dose, at: _now()),
-            ],
+      taken: [
+        for (final t in state.taken)
+          if (!t.isFor(medicine, day, dose)) t,
+        if (to != null)
+          DoseTaken(
+            medicine: medicine,
+            day: day,
+            dose: dose,
+            state: to,
+            at: to == DoseState.taken && sameDay ? now : null,
+          ),
+      ],
     );
+  }
+
+  /// Marks every dose of [medicine] from its start up to yesterday taken
+  /// where nothing is set yet (O13: starting in the past, then setting
+  /// the odd missed day). Returns how many it marked.
+  int fillPast(String medicine) {
+    final m = state.medicines.where((m) => m.id == medicine).firstOrNull;
+    if (m == null) return 0;
+    final today = _now();
+    final added = <DoseTaken>[];
+    for (var d = m.from;
+        d.isBefore(DateTime(today.year, today.month, today.day));
+        d = DateTime(d.year, d.month, d.day + 1)) {
+      if (!m.isOn(d)) continue;
+      for (var dose = 0; dose < m.dosesADay; dose++) {
+        if (state.markFor(medicine, d, dose) == null) {
+          added.add(DoseTaken(medicine: medicine, day: d, dose: dose));
+        }
+      }
+    }
+    if (added.isEmpty) return 0;
+    state = MedicineBook(
+      medicines: state.medicines,
+      taken: [...state.taken, ...added],
+    );
+    return added.length;
   }
 
   /// Replaces everything (a backup restored, an undo, Clear data).

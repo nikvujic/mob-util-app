@@ -370,14 +370,14 @@ Chunks, in order (each its own commit; release when a few are in):
 - [x] Its menu: "for good" isn't written; no end date just shows none.
 
 **4. Medicine, history and states**
-- [ ] History easier to read: coloured day titles, a mark per dose
+- [x] History easier to read: coloured day titles, a mark per dose
   (taken / missed / not sure), not plain text lines.
-- [ ] **A medicine's own history** (from its menu): a **calendar strip**
+- [x] **A medicine's own history** (from its menu): a **calendar strip**
   at the top (each day coloured by taken or not, scrolls to the left),
   every day below, and a **lifetime total** taken.
-- [ ] **Start in the past** and fill it in: e.g. "mark all past days
+- [x] **Start in the past** and fill it in: e.g. "mark all past days
   taken", then set the one missed day.
-- [ ] In history every dose can be set freely: **taken, missed, not
+- [x] In history every dose can be set freely: **taken, missed, not
   sure** (for days not ticked at the time).
 
 **5. Hub page settings, notifications, the red dot**

@@ -276,6 +276,24 @@ void main() {
         await t.tap(find.byTooltip('History'));
         await t.pumpAndSettle();
       },
+      'medicine own history': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Medicine'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Antibiotic'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('History'));
+        await t.pumpAndSettle();
+      },
+      'dose state sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Medicine'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('History'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('not set').first);
+        await t.pumpAndSettle();
+      },
       'medicine sheet': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Medicine'));

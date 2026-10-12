@@ -30,7 +30,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/layout.json {"version": 2, "hub": [ids]}
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
 ///     <app documents>/data/medicine.json
-///         {"version": 1, "medicines": [...], "taken": [...]}
+///         {"version": 2, "medicines": [...], "taken": [...]}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -69,8 +69,10 @@ class AppStorage {
   /// [formatVersion]; 3 = counters may have a step, colour and limits (O5).
   static const countersFormatVersion = 3;
 
-  /// Version of `medicine.json` (O6). History: 1 = first format.
-  static const medicineFormatVersion = 1;
+  /// Version of `medicine.json` (O6). History: 1 = first format; 2 =
+  /// doses can be missed or not sure, and taken ones may have no time
+  /// (O13).
+  static const medicineFormatVersion = 2;
 
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).

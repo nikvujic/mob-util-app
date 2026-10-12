@@ -321,6 +321,10 @@ abstract final class AppTheme {
         shape: const CircleBorder(),
       ),
       popupMenuTheme: PopupMenuThemeData(color: palette.menu),
+      // A selected row's text in the accent, readable on the surfaces.
+      listTileTheme: ListTileThemeData(
+        selectedColor: palette.accentForeground ?? palette.accent,
+      ),
       // Messages at the bottom (e.g. "… deleted · Undo", U7): a rounded
       // card in the app's colours, floating above the bottom buttons,
       // with the action in the accent.

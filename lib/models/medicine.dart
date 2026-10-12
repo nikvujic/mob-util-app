@@ -56,20 +56,29 @@ class Medicine {
       );
 }
 
-/// A dose marked taken (O6): which medicine, on which day, which of its
-/// doses (0 = the first time of the day), and when it was marked.
+/// What became of a dose (O13): taken, missed, or not sure (set later,
+/// from the history).
+enum DoseState { taken, missed, unsure }
+
+/// A dose marked (O6, O13): which medicine, on which day, which of its
+/// doses (0 = the first time of the day), what became of it, and when it
+/// was ticked ([at]; null when set afterwards, e.g. filling in past days).
 class DoseTaken {
   final String medicine;
   final DateTime day;
   final int dose;
-  final DateTime at;
+  final DoseState state;
+  final DateTime? at;
 
   DoseTaken({
     required this.medicine,
     required DateTime day,
     required this.dose,
-    required this.at,
+    this.state = DoseState.taken,
+    this.at,
   }) : day = DateTime(day.year, day.month, day.day);
+
+  bool get isTaken => state == DoseState.taken;
 
   bool isFor(String medicine, DateTime day, int dose) =>
       this.medicine == medicine &&
@@ -78,18 +87,25 @@ class DoseTaken {
       this.day.month == day.month &&
       this.day.day == day.day;
 
+  /// `state` only when not taken, `at` only when known (medicine.json 2).
   Map<String, dynamic> toJson() => {
         'medicine': medicine,
         'day': PlannerTask.dayToJson(day),
         'dose': dose,
-        'at': at.toIso8601String(),
+        if (state != DoseState.taken) 'state': state.name,
+        if (at != null) 'at': at!.toIso8601String(),
       };
 
   factory DoseTaken.fromJson(Map<String, dynamic> json) => DoseTaken(
         medicine: json['medicine'] as String,
         day: PlannerTask.dayFromJson(json['day']),
         dose: json['dose'] as int,
-        at: DateTime.parse(json['at'] as String),
+        // Version 1 had only taken doses, each with its time.
+        state: DoseState.values
+                .where((s) => s.name == json['state'])
+                .firstOrNull ??
+            DoseState.taken,
+        at: json['at'] == null ? null : DateTime.parse(json['at'] as String),
       );
 }
 
@@ -111,9 +127,19 @@ class MedicineBook {
 
   static const empty = MedicineBook._none();
 
-  /// The mark for [medicine]'s [dose] on [day], if taken.
-  DoseTaken? takenFor(String medicine, DateTime day, int dose) =>
+  /// The mark for [medicine]'s [dose] on [day], if it has one.
+  DoseTaken? markFor(String medicine, DateTime day, int dose) =>
       taken.where((t) => t.isFor(medicine, day, dose)).firstOrNull;
+
+  /// The mark for [medicine]'s [dose] on [day], if taken.
+  DoseTaken? takenFor(String medicine, DateTime day, int dose) {
+    final mark = markFor(medicine, day, dose);
+    return mark != null && mark.isTaken ? mark : null;
+  }
+
+  /// How many doses of [medicine] were ever taken (its lifetime total).
+  int takenCount(String medicine) =>
+      taken.where((t) => t.medicine == medicine && t.isTaken).length;
 
   /// How many things it holds (for Clear data).
   int get size => medicines.length;

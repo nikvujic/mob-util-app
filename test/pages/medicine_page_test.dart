@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 
 import '../helpers.dart';
@@ -175,7 +176,7 @@ void main() {
     expect(find.text('Once a day, at'), findsOneWidget);
   });
 
-  testWidgets('history: each day, taken with its time or not', (tester) async {
+  testWidgets('history: each day, each dose with how it went', (tester) async {
     late String id;
     await openMedicine(tester, () {
       id = medicine()
@@ -185,11 +186,114 @@ void main() {
     await tester.tap(find.byTooltip('History'));
     await tester.pumpAndSettle();
     expect(find.text('Today'), findsOneWidget);
-    expect(find.text('08:00 ✓ 08:03'), findsOneWidget);
+    expect(find.text('08:03'), findsOneWidget, reason: 'ticked at 08:03');
     expect(find.text('Sun, 11 Oct'), findsOneWidget);
     expect(find.text('Sat, 10 Oct'), findsOneWidget);
-    expect(find.text('08:00 not taken'), findsNWidgets(2));
+    expect(find.text('not set'), findsNWidgets(2));
     expect(find.text('Fri, 9 Oct'), findsNothing, reason: 'before it began');
+  });
+
+  testWidgets('history: a dose can be set missed, not sure or taken',
+      (tester) async {
+    late String id;
+    await openMedicine(tester, () {
+      id = medicine()
+          .add('Vitamin D', times: [480], from: DateTime(2026, 10, 11))!;
+    });
+    await tester.tap(find.byTooltip('History'));
+    await tester.pumpAndSettle();
+    final yesterday = DateTime(2026, 10, 11);
+    await tester.tap(find.byKey(Key('mark-$id-2026-10-11-0')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Missed'));
+    await tester.pumpAndSettle();
+    expect(container.read(medicineProvider).markFor(id, yesterday, 0)!.state,
+        DoseState.missed);
+    expect(find.text('missed'), findsOneWidget);
+
+    await tester.tap(find.byKey(Key('mark-$id-2026-10-11-0')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Taken'));
+    await tester.pumpAndSettle();
+    final mark = container.read(medicineProvider).markFor(id, yesterday, 0)!;
+    expect((mark.state, mark.at), (DoseState.taken, null),
+        reason: 'set afterwards: no time');
+  });
+
+  group('a medicine\'s own history (O13)', () {
+    Future<void> openOwn(WidgetTester tester, String name) async {
+      await tester.tap(find.text(name));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('History'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('total, calendar strip, and filling in past days',
+        (tester) async {
+      late String id;
+      await openMedicine(tester, () {
+        id = medicine()
+            .add('Coffee', times: [480], from: DateTime(2026, 10, 5))!;
+        medicine().toggleDose(id, today, 0);
+      });
+      await openOwn(tester, 'Coffee');
+      String total() =>
+          tester.widget<Text>(find.byKey(const Key('medicineTotal'))).data!;
+      expect(total(), '1 dose');
+      expect(find.byKey(const Key('medicineCalendar')), findsOneWidget);
+      expect(find.byKey(const Key('calendar-2026-10-12')), findsOneWidget,
+          reason: 'today in view at the right');
+
+      await tester.tap(find.byKey(const Key('fillPast')));
+      await tester.pumpAndSettle();
+      expect(total(), '8 doses', reason: '5–11 Oct, and today');
+      expect(find.byKey(const Key('fillPast')), findsNothing);
+    });
+
+    testWidgets('a calendar day sets its dose', (tester) async {
+      late String id;
+      await openMedicine(tester, () {
+        id = medicine()
+            .add('Coffee', times: [480], from: DateTime(2026, 10, 10))!;
+      });
+      await openOwn(tester, 'Coffee');
+      await tester.tap(find.byKey(const Key('calendar-2026-10-11')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Not sure'));
+      await tester.pumpAndSettle();
+      expect(
+        container
+            .read(medicineProvider)
+            .markFor(id, DateTime(2026, 10, 11), 0)!
+            .state,
+        DoseState.unsure,
+      );
+    });
+  });
+
+  testWidgets('started in the past: offers to mark those days taken',
+      (tester) async {
+    await openMedicine(tester);
+    await tester.tap(find.byTooltip('Add medicine'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('medicineName')), 'Tea');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('medicineFrom')));
+    await tester.pumpAndSettle();
+    // Back to the 9th in the date picker.
+    await tester.tap(find.text('9'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('medicineSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mark the past days taken?'), findsOneWidget);
+    await tester.tap(find.text('Mark taken'));
+    await tester.pumpAndSettle();
+    final book = container.read(medicineProvider);
+    final id = book.medicines.single.id;
+    expect(book.takenCount(id), 3, reason: '9, 10 and 11 Oct');
+    expect(book.markFor(id, today, 0), isNull, reason: 'not today');
   });
 
   group('handling (Round 14)', () {
