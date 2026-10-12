@@ -329,6 +329,29 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 17 — Nikola's review of 0.24.0 (2026-10-13)
+
+**1. Quick fixes**
+- [ ] Medicine dot: at 00:50 it showed for yesterday's 11:00–22:00
+  doses. Only yesterday's doses at **23:00 or later** keep it until
+  02:00.
+- [ ] Planner: the hour labels' margin smaller (about 6).
+- [ ] Medicine: the vibration on ticking follows the gulp (two soft
+  pulses).
+- [ ] Medicine: a dose whose time has passed and isn't taken shows
+  **red**.
+- [ ] Check every place the Round 14–16 timeline features should be
+  (tap position, reach mode…), not just the planner: the Routines
+  screen still lacks reach mode.
+
+**2. Placard**
+- [ ] The pop looks odd: find out why and improve it (the inflating is
+  right).
+- [ ] Sounds: a rising sound while inflating, and a **pop**.
+
+(The medicine **month calendar** with marks is Round 16's chunk 3, next
+after these.)
+
 ### Round 16 — Nikola's review of 0.23.0 (2026-10-12)
 
 Before Round 15's chunks 2–3 (fixes first):
