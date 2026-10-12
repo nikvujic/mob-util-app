@@ -329,6 +329,36 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 16 — Nikola's review of 0.23.0 (2026-10-12)
+
+Before Round 15's chunks 2–3 (fixes first):
+
+**1. Quick fixes**
+- [ ] Medicine: the chime hurts the ears; something fun and soft
+  instead, like a **swallow / gulp** (or a crunch).
+- [ ] Counters: the click is loud and ignores the media volume; quieter,
+  and following the **media volume**.
+- [ ] Placard: the hold a bit longer again.
+- [ ] Routines screen: tapping free time doesn't start where tapped
+  (Round 14 did it only on the planner).
+- [ ] Planner / routine sheet: an **End of day** button for the end
+  time.
+- [ ] Medicine: "Mark the past days taken" only when more than **10
+  doses** are not set (counting back from yesterday), on adding and in
+  its history.
+
+**2. Note checkboxes, drawn by the app**
+- [ ] On the phone the empty box is small again and the ticked one still
+  grey: the font's glyphs can't be trusted. Draw both boxes ourselves
+  over the text (same size, the accent, a tick), like the line numbers.
+
+**3. Medicine, per medicine**
+- [ ] "Remind again" belongs to **each medicine** (in its sheet), not
+  the page settings (medicine.json 3). The page keeps reminders on/off,
+  the dot and the pause.
+- [ ] The calendar in a medicine's history **taller**: a month grid
+  (weeks as rows), swiped left for older months, not a single strip.
+
 ### Round 15 — Nikola's notes on 0.23.0 (2026-10-12)
 
 Chunks, in order (each its own commit; release when a few are in):
