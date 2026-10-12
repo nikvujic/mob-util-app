@@ -321,6 +321,23 @@ abstract final class AppTheme {
         shape: const CircleBorder(),
       ),
       popupMenuTheme: PopupMenuThemeData(color: palette.menu),
+      // Messages at the bottom (e.g. "… deleted · Undo", U7): a rounded
+      // card in the app's colours, floating above the bottom buttons,
+      // with the action in the accent.
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        // The card colour (the menu's is too light for the accent action
+        // to read in some themes), with a thin edge to stand out.
+        backgroundColor: palette.card,
+        contentTextStyle: TextStyle(color: palette.textPrimary, fontSize: 15),
+        actionTextColor: palette.accentForeground ?? palette.accent,
+        elevation: 4,
+        insetPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          side: BorderSide(color: palette.textHint.withValues(alpha: 0.5)),
+        ),
+      ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: palette.surface,
         surfaceTintColor: Colors.transparent,

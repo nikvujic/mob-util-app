@@ -14,6 +14,8 @@ Release with the installable APK.
   and **Mono**.
 
 ### Changed
+- Messages at the bottom (like "… deleted · Undo") are a rounded card
+  in the theme's colours, floating above the buttons.
 - Planner sheet: a time that runs into another block is **no longer
   moved by itself**. It stays, in red, Save is off, and a **Find a free
   time** button moves it if you want.

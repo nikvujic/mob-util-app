@@ -291,7 +291,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 Everything from Round 11 and 12 except the new empty Other pages; the
 medicine tracker is in. In this order:
 
-1. **Main pages:** now line (D) ✅, reminders as marks (C) ✅, toasts (F),
+1. **Main pages:** now line (D) ✅, reminders as marks (C) ✅, toasts (F) ✅,
    shop quantities (I), **checkboxes in notes** (N15; Nikola changed his
    mind, they're in v1) ✅.
    Also done: **no flash of a locked page on coming back** (L8).

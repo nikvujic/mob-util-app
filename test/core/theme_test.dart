@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/theme.dart';
 
@@ -17,6 +18,17 @@ void main() {
         expect(style?.animationDuration, Duration.zero,
             reason: '${choice.name}: $kind buttons');
       }
+    }
+  });
+
+  test('bottom messages float, rounded, in the theme\'s colours (U7)', () {
+    for (final choice in AppThemeChoice.values) {
+      final palette = choice.palette;
+      final snack = AppTheme.of(palette).snackBarTheme;
+      expect(snack.behavior, SnackBarBehavior.floating, reason: choice.name);
+      expect(snack.backgroundColor, palette.card);
+      expect(snack.contentTextStyle?.color, palette.textPrimary);
+      expect(snack.shape, isA<RoundedRectangleBorder>());
     }
   });
 }

@@ -196,6 +196,14 @@ void main() {
         await t.tap(find.bySemanticsLabel(RegExp('Reminder: Call mum')));
         await t.pumpAndSettle();
       },
+      'undo message': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.bySemanticsLabel(RegExp('Reminder: Call mum')));
+        await t.pumpAndSettle();
+        await t.tap(find.bySemanticsLabel('Done: Call mum'));
+        await t.pumpAndSettle();
+        expect(find.text('Undo'), findsOneWidget);
+      },
       'other': (t) => openTab(t, 'Other'),
       'counters': (t) async {
         await openTab(t, 'Other');
