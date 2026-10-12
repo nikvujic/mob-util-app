@@ -329,6 +329,67 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 14 — Nikola's notes on 0.21–0.22 (2026-10-12)
+
+Chunks, in order (each its own commit; release when a few are in):
+
+**1. Quick fixes**
+- [ ] Planner sheet: the clash line looks like the info line (icon +
+  text), only red; **Find a free time** is a real button, left-aligned
+  with the rest.
+- [ ] Planner sheet: ticking a weekday that clashes makes the line
+  appear and **pushes the form down** (the chip just tapped scrolls out
+  of view): keep what's under the finger in place.
+- [ ] Notes checkboxes: the empty box sits too high next to the text and
+  the ticked one, so ticking jumps; the ticked box still shows **white**
+  on the phone (an emoji), not the accent. Both drawn the same way, same
+  size, in the accent.
+- [ ] Counters: no "none" placeholder in Min / Max; the no-colour
+  buttons look green (Material's tonal colour), and colours look washed
+  out: use the vivid colours; every counter the same height (limits
+  made the card taller); more compact overall.
+- [ ] Placard: the hold is **2–3× longer**.
+
+**2. Planner touches**
+- [ ] **Reach mode on the timeline**: pull down to bring the top block
+  into reach, with the snap back, like the lists.
+- [ ] Tapping free time starts the new block **near where it was tapped**
+  (to :00 / :30); tapping the **left edge** (by the hour labels) adds a
+  reminder there (to 15 minutes).
+- [ ] (Nikola's note on tapping a stacked reminder was cut off: ask.)
+
+**3. Medicine, how it handles**
+- [ ] Its buttons always on the **right** (one-handed side can't be told
+  here).
+- [ ] No undo after unticking (just tick again); a **sound and vibration**
+  on ticking (a nice one, not the click).
+- [ ] Dose boxes: **two per row, same width**; one dose takes the first
+  column, not the whole row.
+- [ ] **Drag handles** to order medicines.
+- [ ] A tap anywhere on a card (not on a dose) opens it, like its name.
+- [ ] Its menu: "for good" isn't written; no end date just shows none.
+
+**4. Medicine, history and states**
+- [ ] History easier to read: coloured day titles, a mark per dose
+  (taken / missed / not sure), not plain text lines.
+- [ ] **A medicine's own history** (from its menu): a **calendar strip**
+  at the top (each day coloured by taken or not, scrolls to the left),
+  every day below, and a **lifetime total** taken.
+- [ ] **Start in the past** and fill it in: e.g. "mark all past days
+  taken", then set the one missed day.
+- [ ] In history every dose can be set freely: **taken, missed, not
+  sure** (for days not ticked at the time).
+
+**5. Hub page settings, notifications, the red dot**
+- [ ] Each Hub page that has settings gets a **settings button in its
+  top bar** (Counters and Placard don't need one).
+- [ ] Medicine settings: notifications on/off; the red dot on/off;
+  **pause** notifications / the dot for a day or more.
+- [ ] Medicine **notifications** at dose times, and an optional **second
+  one if a dose is still not taken** (e.g. 4 hours later).
+- [ ] A **red dot** on the Medicine tile and on the Hub tab when a dose
+  is missed (seen even when the Hub is locked).
+
 ### Round 13 — Nikola's notes on 0.20.0 (2026-10-12)
 
 - [x] **Checkbox button** in notes: a small button next to *Edit title*,
