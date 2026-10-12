@@ -402,6 +402,37 @@ void main() {
     });
   });
 
+  group('placard v1 / v9 backup (Placard, O4)', () {
+    test('placard.json loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v9/storage'),
+      );
+      expect((storage.initialPlacard.text, storage.initialPlacard.count),
+          ('Why so quiet? 🤐', 41));
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v9 backup restores Placard', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v9/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect((file.backup.placard.text, file.backup.placard.count),
+          ('Why so quiet? 🤐', 41));
+      expect(file.backup.counters.single.value, 12);
+    });
+
+    test('older backups have a fresh one (the old Džoni count is ignored)', () {
+      for (final path in [
+        'test/fixtures/v4/backup-plain.json',
+        'test/fixtures/v8/backup-plain.json',
+      ]) {
+        final file =
+            BackupFile.parse(File(path).readAsStringSync()) as PlainBackupFile;
+        expect(file.backup.placard.isSet, isFalse, reason: path);
+      }
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -489,6 +520,10 @@ void main() {
           '833cc85385498b4ee601e343f9b7a04aefec2a30c6e3d680997ee86f6754d2a4',
       'test/fixtures/v8/backup-plain.json':
           '70a4f3dc35e9ef3a315b3a6c7d195b6aa3eb1183e51db186f765b3c420860742',
+      'test/fixtures/v9/storage/placard.json':
+          '110be31666a8ed658f5f7a38a3a6229b263dfd2f80f5f6c38d001ce2740b7e0b',
+      'test/fixtures/v9/backup-plain.json':
+          'bbd720bb1a8a58ab221289e9a894019a3f52e20282a078907a752f83bdf7432f',
       'test/fixtures/v8/storage/layout.json':
           'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };

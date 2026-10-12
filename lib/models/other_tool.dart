@@ -7,7 +7,8 @@
 /// `pages/other/tools.dart` and `providers/section_data_provider.dart`):
 /// those switches don't compile until a new page is in all of them.
 enum OtherTool {
-  counters('Counters');
+  counters('Counters'),
+  placard('Placard');
 
   const OtherTool(this.label);
 

@@ -7,6 +7,10 @@ Release with the installable APK.
 ## [0.22.0] - unreleased
 
 ### Added
+- Other: **Placard**. A big line of text, sideways and full screen, with
+  a count: hold the page and it inflates, shakes and pops to count one
+  up. Five taps in the top-right corner set the text and the count. (In
+  backups, now format 9.)
 - Other: **hold a tile and drag it** to change the order (kept).
 - Settings → Clear data lists Other's pages one by one.
 

@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
+import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -33,6 +35,8 @@ class SectionData {
   /// page doesn't compile until it's here.
   int countOf(OtherTool tool) => switch (tool) {
         OtherTool.counters => _ref.read(countersProvider).length,
+        // Its text and count, once set.
+        OtherTool.placard => _ref.read(placardProvider).isSet ? 1 : 0,
       };
 
   /// Empties one of Other's pages (saved with the next flush).
@@ -40,6 +44,8 @@ class SectionData {
     switch (tool) {
       case OtherTool.counters:
         _ref.read(countersProvider.notifier).replaceAll(const []);
+      case OtherTool.placard:
+        _ref.read(placardProvider.notifier).replace(Placard.initial);
     }
   }
 

@@ -218,6 +218,21 @@ void main() {
         await t.pumpAndSettle();
         expect(find.text('Undo'), findsOneWidget);
       },
+      'placard': (t) async {
+        await openTab(t, 'Other');
+        await t.tap(find.byTooltip('Placard'));
+        await t.pumpAndSettle();
+      },
+      'placard settings': (t) async {
+        await openTab(t, 'Other');
+        await t.tap(find.byTooltip('Placard'));
+        await t.pumpAndSettle();
+        for (var i = 0; i < 5; i++) {
+          await t.tap(find.byKey(const Key('placardCorner')));
+          await t.pump(const Duration(milliseconds: 50));
+        }
+        await t.pumpAndSettle();
+      },
       'other': (t) => openTab(t, 'Other'),
       'counters': (t) async {
         await openTab(t, 'Other');

@@ -10,11 +10,13 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
+import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -142,6 +144,27 @@ void main() {
 
       expect(noteTitles(), ['Current']);
       expect(itemNames(), ['Bread']);
+    });
+
+    test('Placard comes back, and goes back on undo (O4)', () async {
+      container
+          .read(placardProvider.notifier)
+          .set(text: 'Current one', count: 3);
+      final withPlacard = Backup(
+        createdAt: backup.createdAt,
+        appVersion: backup.appVersion,
+        notes: const [],
+        shopItems: const [],
+        placard: const Placard(text: 'From backup', count: 41),
+      );
+      final pick = importer().read(bytesOf(withPlacard.encode())) as PlainPick;
+      final undo = await importer().restore(pick.backup);
+      expect(container.read(placardProvider).text, 'From backup');
+      expect(container.read(placardProvider).count, 41);
+
+      await importer().undo(undo!);
+      expect(container.read(placardProvider).text, 'Current one');
+      expect(container.read(placardProvider).count, 3);
     });
   });
 

@@ -9,6 +9,7 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
@@ -26,6 +27,7 @@ import 'package:the_app/models/shop_item.dart';
 ///         {"version": 2, "routines": [...], "days": [...]}
 ///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
 ///     <app documents>/data/layout.json {"version": 1, "other": [ids]}
+///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
 ///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -57,6 +59,9 @@ class AppStorage {
   /// first format (Other's order).
   static const layoutFormatVersion = 1;
 
+  /// Version of `placard.json` (O4). History: 1 = first format.
+  static const placardFormatVersion = 1;
+
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
   static const shopFormatVersion = 3;
@@ -71,6 +76,7 @@ class AppStorage {
   final JsonFileStore? _routinesStore;
   final JsonFileStore? _pinsStore;
   final JsonFileStore? _layoutStore;
+  final JsonFileStore? _placardStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -81,6 +87,7 @@ class AppStorage {
   final List<Counter> initialCounters;
   final Preferences initialPreferences;
   final PageLayout initialLayout;
+  final Placard initialPlacard;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -98,7 +105,8 @@ class AppStorage {
     this._preferencesStore,
     this._routinesStore,
     this._pinsStore,
-    this._layoutStore, {
+    this._layoutStore,
+    this._placardStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -107,6 +115,7 @@ class AppStorage {
     required this.initialCounters,
     required this.initialPreferences,
     required this.initialLayout,
+    required this.initialPlacard,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
   });
@@ -121,6 +130,7 @@ class AppStorage {
     this.initialCounters = const [],
     this.initialPreferences = const Preferences(),
     PageLayout? initialLayout,
+    this.initialPlacard = Placard.initial,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
   })  : _notesStore = null,
@@ -133,6 +143,7 @@ class AppStorage {
         _routinesStore = null,
         _pinsStore = null,
         _layoutStore = null,
+        _placardStore = null,
         initialLayout = initialLayout ?? PageLayout.initial;
 
   /// Opens storage in [directory], or in the app's documents folder.
@@ -150,6 +161,7 @@ class AppStorage {
     final routinesStore = JsonFileStore(File('${dir.path}/routines.json'));
     final pinsStore = JsonFileStore(File('${dir.path}/pins.json'));
     final layoutStore = JsonFileStore(File('${dir.path}/layout.json'));
+    final placardStore = JsonFileStore(File('${dir.path}/placard.json'));
 
     return AppStorage._(
       notesStore,
@@ -162,6 +174,7 @@ class AppStorage {
       routinesStore,
       pinsStore,
       layoutStore,
+      placardStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -227,6 +240,12 @@ class AppStorage {
         PageLayout.initial,
         maxVersion: layoutFormatVersion,
         PageLayout.fromJson,
+      ),
+      initialPlacard: await _load(
+        placardStore,
+        Placard.initial,
+        maxVersion: placardFormatVersion,
+        Placard.fromJson,
       ),
       initialSectionLocks: await _load(settingsStore, const {}, (json) {
         final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
@@ -317,6 +336,13 @@ class AppStorage {
     });
   }
 
+  Future<void> savePlacard(Placard placard) async {
+    await _placardStore?.write({
+      'version': placardFormatVersion,
+      ...placard.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': formatVersion,
@@ -355,6 +381,7 @@ class AppStorage {
           _routinesStore,
           _pinsStore,
           _layoutStore,
+          _placardStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -373,6 +400,7 @@ class AppStorage {
     await _routinesStore?.flush();
     await _pinsStore?.flush();
     await _layoutStore?.flush();
+    await _placardStore?.flush();
   }
 }
 

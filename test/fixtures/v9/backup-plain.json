@@ -1,0 +1,27 @@
+{
+  "format": "the-app-backup",
+  "version": 9,
+  "createdAt": "2026-10-12T18:00:00.000Z",
+  "appVersion": "0.22.0 (23)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [
+      {
+        "id": "c1",
+        "name": "Push-ups",
+        "value": 12
+      }
+    ],
+    "placard": {
+      "text": "Why so quiet? 🤐",
+      "count": 41
+    }
+  }
+}

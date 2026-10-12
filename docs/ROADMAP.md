@@ -447,14 +447,14 @@ Sorted from one long message. Order of work is at the end.
   **max** (and more later).
 - [ ] Better style: margins, rounder corners.
 
-**K. Džoni back, configurable** (O4, instead of removed)
-- [ ] **Five taps in the top-right corner** open its settings: the text
+**K. Džoni back, configurable** (O4, instead of removed) ✅ as **Placard**
+- [x] **Five taps in the top-right corner** open its settings: the text
   (default **"Add text here!"**, Nikola sets his own on the phone) and
   the count.
-- [ ] **Better count animation**: while holding (a bit longer than now)
+- [x] **Better count animation**: while holding (a bit longer than now)
   the page **inflates and shakes**, then **pops** when it counts.
-- [ ] **Hide the status bar** while it's open.
-- [ ] Fix: on back the page **disappears before the screen turns back
+- [x] **Hide the status bar** while it's open.
+- [x] Fix: on back the page **disappears before the screen turns back
   upright**; turn first, then close.
 
 **L. New page: medicine tracker** (O6) — Nikola takes a pill every

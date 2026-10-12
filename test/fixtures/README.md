@@ -53,3 +53,7 @@ app still reads every version, so an update can never lose existing data.
 - `v8/storage/layout.json` — where the pages go (O9, layout.json version
   1): Other's order, `["counters"]`. Added after 0.21.0; not in backups
   (a setting, like the theme).
+- `v9/storage/placard.json` — Placard (O4, placard.json version 1): "Why so
+  quiet? 🤐", count 41.
+- `v9/backup-plain.json` — backup (version 9) with that Placard and one
+  counter (Push-ups, 12).

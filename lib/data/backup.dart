@@ -4,6 +4,7 @@ import 'package:the_app/core/crypto.dart' hide open;
 import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
@@ -64,8 +65,8 @@ class Backup {
   /// routines (`routines`, as in `routines.json`) and block colours;
   /// 6 = planner reminders (`plannerPins`, P14); 7 = tasks and routines
   /// may have a description (P20); 8 = shop items may have a quantity
-  /// (S7).
-  static const version = 8;
+  /// (S7); 9 = Placard's text and count (`placard`, O4).
+  static const version = 9;
 
   final DateTime createdAt;
   final String appVersion;
@@ -80,6 +81,9 @@ class Backup {
   final List<PlannerPin> plannerPins;
   final List<Counter> counters;
 
+  /// Placard's text and count (O4); a fresh one in backups from before.
+  final Placard placard;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -92,6 +96,7 @@ class Backup {
     this.routines = RoutineBook.empty,
     this.plannerPins = const [],
     this.counters = const [],
+    this.placard = Placard.initial,
     this.masterPassword,
   });
 
@@ -120,6 +125,7 @@ class Backup {
           'routines': routines.toJson(),
           'plannerPins': [for (final p in plannerPins) p.toJson()],
           'counters': [for (final c in counters) c.toJson()],
+          'placard': placard.toJson(),
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -210,6 +216,9 @@ class Backup {
           for (final c in data['counters'] as List<dynamic>? ?? const [])
             Counter.fromJson(c as Map<String, dynamic>),
         ],
+        placard: data['placard'] == null
+            ? Placard.initial
+            : Placard.fromJson(data['placard'] as Map<String, dynamic>),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(

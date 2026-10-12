@@ -126,6 +126,8 @@ class _ToolTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: label,
+      // Never on a long press: that picks the tile up to move it (O8).
+      triggerMode: TooltipTriggerMode.manual,
       child: Material(
         color: context.colors.card,
         borderRadius: BorderRadius.circular(16),
