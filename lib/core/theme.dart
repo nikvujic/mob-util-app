@@ -236,6 +236,15 @@ abstract final class AppTheme {
         labelStyle: TextStyle(color: palette.textPrimary),
         secondaryLabelStyle: TextStyle(color: palette.textPrimary),
       ),
+      // No button fades between states (U8): turning on, the label took
+      // its colour over 200 ms while the fill changed at once, so it showed
+      // grey on the new fill first, a flash (Nikola). Every button kind,
+      // so new ones can't bring it back.
+      filledButtonTheme: const FilledButtonThemeData(style: _noFade),
+      elevatedButtonTheme: const ElevatedButtonThemeData(style: _noFade),
+      outlinedButtonTheme: const OutlinedButtonThemeData(style: _noFade),
+      textButtonTheme: const TextButtonThemeData(style: _noFade),
+      iconButtonTheme: const IconButtonThemeData(style: _noFade),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: palette.surface,
         selectedItemColor: palette.accent,
@@ -244,6 +253,9 @@ abstract final class AppTheme {
       ),
     );
   }
+
+  /// Buttons change state at once (U8).
+  static const _noFade = ButtonStyle(animationDuration: Duration.zero);
 
   /// The original dark green look.
   static ThemeData get dark => of(AppPalette.green);

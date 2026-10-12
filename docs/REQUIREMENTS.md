@@ -132,7 +132,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | U5 | **Drag handle area a little smaller** than the current 80 dp (Notes, Shop). | ✅ |
 | U6 | **Counters: vibration and a click sound** on − / +, with an on/off switch in Menu → Settings. | ✅ the app's own click sound (Android's touch sound is often switched off, so it was silent — Nikola); follows the system volume, none in silent mode |
 | U7 | **Toasts** (messages at the bottom, with Undo) styled to match the app: rounded, themed, clear action. | 💭 Round 11 |
-| U8 | **No button flashes** when it turns on (label and fill change together), for every button in the app, enforced in the theme. | 💭 Round 12 |
+| U8 | **No button flashes** when it turns on (label and fill change together), for every button in the app, enforced in the theme. | ✅ in the theme; test/core/theme_test.dart |
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test): a cart (accent) while an item is to buy, a quiet tick once bought. Still announced as checked / not checked. | ✅ |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 

@@ -287,7 +287,7 @@ patterns other work builds on (G11, themes), then the bigger features.
   title.
 
 ### Round 12 — Nikola's notes on 0.19.0 (2026-10-12)
-- [ ] **No button flashes when it turns on, anywhere, now and later**
+- [x] **No button flashes when it turns on, anywhere, now and later**
   (seen on the planner sheet's Add): one rule in the app's theme for
   every button kind, checked by a test.
 - [ ] **Planner sheet buttons:** no ✕ (back closes, still asking about

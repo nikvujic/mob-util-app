@@ -4,6 +4,12 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.20.0] - unreleased
+
+### Fixed
+- No button flashes when it becomes available anymore (it happened on
+  the planner's Add): the fix now covers every button in the app.
+
 ## [0.19.0] - 2026-10-12
 
 ### Added

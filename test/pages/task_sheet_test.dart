@@ -115,6 +115,11 @@ void main() {
     await tester.enterText(titleField, 'Lunch');
     await tester.pump();
     expect(enabled(), isTrue);
+    // Its label takes its colour at once, with the fill (no flash, U8).
+    expect(
+      DefaultTextStyle.of(tester.element(find.text('Add'))).style.color,
+      Theme.of(tester.element(addButton)).colorScheme.onPrimary,
+    );
   });
 
   testWidgets('adding focuses the title; editing does not (P15)',
