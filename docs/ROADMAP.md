@@ -329,6 +329,44 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 15 — Nikola's notes on 0.23.0 (2026-10-12)
+
+Chunks, in order (each its own commit; release when a few are in):
+
+**1. Quick fixes**
+- [ ] Planner: the hour labels sit on the very edge of the screen; give
+  them their small margin back, even if the timeline gets a bit
+  narrower.
+- [ ] Shop: holding − (and + ) shows a tooltip; no tooltips on long
+  press on buttons that are pressed often (find the similar cases).
+- [ ] Notes: holding to select text shows a magnifier lens; none.
+- [ ] Notes editor: the action row over the text (Checkbox, Edit title)
+  has a background that **hides the lines under it** and catches taps
+  there (seen after redo: the restored "F" lines looked missing, and
+  tapping where they were made the scroll jump). Transparent, taps go
+  through to the text, and the line being edited is kept scrolled above
+  the actions.
+- [ ] Medicine dot: a dose still counts as due until **02:00** the next
+  day (a dose at 23:30 that's missed still shows when going to bed).
+- Discarded: the cut-off note on tapping a stacked reminder (a
+  mistake).
+
+**2. Introduction note** (N16)
+- [ ] A special note, **"Introduction"**, at the top of Notes: what each
+  part of the app does and how to use it (for any user, plain and
+  objective), and under it **what's new** (only the latest version's
+  changes). Shown after a fresh install and again after each update.
+- [ ] Read-only, nicely drawn markdown; can't be edited. Can be deleted;
+  the menu (or Settings) can bring it back.
+- [ ] A Settings switch: don't bring it back on updates.
+
+**3. Food tracker** (O14) — first in line when new Hub pages come
+- [ ] A Hub page for what was eaten each day and how well it agreed
+  (asked for by someone; details left to Claude): a list of foods,
+  each day's meals from it with a rating, a day view, and **statistics
+  that point out what tends to cause trouble** (and what's fine).
+  Design to propose first.
+
 ### Round 14 — Nikola's notes on 0.21–0.22 (2026-10-12)
 
 Chunks, in order (each its own commit; release when a few are in):
