@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.22.0] - unreleased
+## [0.22.0] - 2026-10-12
 
 ### Changed
 - **Other is now called Hub** (a section lock or tile order you had
