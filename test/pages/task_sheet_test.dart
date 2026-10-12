@@ -30,10 +30,8 @@ void main() {
     expect(sheet, findsOneWidget);
   }
 
-  Future<void> close(WidgetTester tester) async {
-    await tester.tap(find.byTooltip('Close'));
-    await tester.pumpAndSettle();
-  }
+  /// Closes the sheet the only way there is: back (no ✕).
+  Future<void> close(WidgetTester tester) => pressBack(tester);
 
   testWidgets('pulling down shifts the form; it does not close the sheet',
       (tester) async {
@@ -57,24 +55,18 @@ void main() {
   testWidgets('dragging the sheet down by its action row leaves it open',
       (tester) async {
     await openAddSheet(tester);
-    // Between Close and Add: outside the scrolling form.
-    final close = tester.getCenter(find.byTooltip('Close'));
+    // Left of Add: outside the scrolling form.
     final add = tester.getCenter(addButton);
-    await tester.dragFrom(
-      Offset((close.dx + add.dx) / 2, add.dy),
-      const Offset(0, 500),
-    );
+    await tester.dragFrom(Offset(add.dx - 200, add.dy), const Offset(0, 500));
     await tester.pumpAndSettle();
 
     expect(sheet, findsOneWidget);
   });
 
-  testWidgets('Close without changes closes straight away', (tester) async {
+  testWidgets('no ✕: back closes it (Round 12)', (tester) async {
     await openAddSheet(tester);
-    await close(tester);
-
-    expect(find.text('Discard changes?'), findsNothing);
-    expect(sheet, findsNothing);
+    expect(find.byIcon(Icons.close), findsNothing);
+    expect(find.byTooltip('Close'), findsNothing);
   });
 
   testWidgets('back without changes closes straight away', (tester) async {
@@ -182,7 +174,7 @@ void main() {
       await tester.pump();
     }
 
-    testWidgets('Close asks; Cancel keeps editing', (tester) async {
+    testWidgets('back asks; Cancel keeps editing', (tester) async {
       await openAddSheet(tester);
       await edit(tester);
       await close(tester);
@@ -195,7 +187,7 @@ void main() {
       expect(find.text('Lunch'), findsOneWidget);
     });
 
-    testWidgets('Close asks; Discard closes and adds nothing', (tester) async {
+    testWidgets('back asks; Discard closes and adds nothing', (tester) async {
       await openAddSheet(tester);
       await edit(tester);
       await close(tester);

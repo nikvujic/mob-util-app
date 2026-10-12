@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
@@ -46,24 +47,44 @@ void main() {
     );
   });
 
-  testWidgets('on a block when there is room; in full in its menu',
+  testWidgets('on blocks, as many lines as fit; in full in the menu',
       (tester) async {
     await openPlanner(tester);
+    const long = 'One line, then another, and then a third line that goes on '
+        'long enough to wrap a few times on a phone';
     planner()
-      ..addTask(today, 'Long',
-          start: at(10), end: at(12), description: 'Room for this')
-      ..addTask(today, 'Short',
-          start: at(13), end: at(13.5), description: 'No room for this');
+      ..addTask(today, 'Long', start: at(10), end: at(12), description: long)
+      ..addTask(today, 'Short', start: at(13), end: at(13.5), description: long)
+      ..addTask(today, 'Tiny',
+          start: at(14), end: at(14) + 5, description: long);
     await tester.pump();
 
-    expect(find.text('Room for this'), findsOneWidget);
-    expect(find.text('No room for this'), findsNothing);
+    int lines(String title) {
+      final block = find.ancestor(
+        of: find.text(title),
+        matching: find.byType(SelectableCard),
+      );
+      return tester
+          .widget<Text>(find.descendant(of: block, matching: find.text(long)))
+          .maxLines!;
+    }
+
+    expect(lines('Long'), greaterThan(1));
+    expect(lines('Short'), 1, reason: 'beside-the-title layout: one line');
+    expect(lines('Tiny'), 1, reason: 'even the smallest block (Round 12)');
 
     await tester.ensureVisible(find.text('Short'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Short'));
     await tester.pumpAndSettle();
-    expect(find.text('No room for this'), findsOneWidget, reason: 'menu');
+    final menu = find.byType(BottomSheet);
+    expect(
+      tester
+          .widget<Text>(find.descendant(of: menu, matching: find.text(long)))
+          .maxLines,
+      isNull,
+      reason: 'in full',
+    );
   });
 
   testWidgets('a routine has one too; changing just a day keeps it',

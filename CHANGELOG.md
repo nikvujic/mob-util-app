@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [0.20.0] - unreleased
 
+### Changed
+- Planner sheet: no ✕ (back closes it, asking first if something
+  changed); editing a routine has a plain **Delete** on the left.
+- Planner: short blocks show a line of their description too, down to
+  the smallest.
+
 ### Fixed
 - No button flashes when it becomes available anymore (it happened on
   the planner's Add): the fix now covers every button in the app.

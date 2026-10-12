@@ -290,9 +290,9 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **No button flashes when it turns on, anywhere, now and later**
   (seen on the planner sheet's Add): one rule in the app's theme for
   every button kind, checked by a test.
-- [ ] **Planner sheet buttons:** no ✕ (back closes, still asking about
+- [x] **Planner sheet buttons:** no ✕ (back closes, still asking about
   changes); editing a routine has a plain **Delete** on the left.
-- [ ] **Short blocks show one line of description** (their time is
+- [x] **Short blocks show one line of description** (their time is
   beside the title, so there's room below), down to the smallest block.
 - [ ] **Clear data** in Settings (Z1): pick sections (Notes, Shop,
   Planner, Other) and clear everything in them, after typing RESET and,

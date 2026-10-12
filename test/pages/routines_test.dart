@@ -237,7 +237,7 @@ void main() {
       await tester.pump();
 
       await tapText(tester, 'Gym');
-      await tapIn(tester, find.text('Delete routine'));
+      await tapIn(tester, find.text('Delete'));
       await tester.pumpAndSettle();
       expect(find.text('Delete routine?'), findsOneWidget);
       await tapIn(tester, find.widgetWithText(FilledButton, 'Delete'));

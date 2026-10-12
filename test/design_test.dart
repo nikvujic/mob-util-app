@@ -87,9 +87,8 @@ Future<void> seed(ProviderContainer container) async {
         color: 'purple',
       );
   // A 5-minute block: it stretches its hour (Round 10).
-  container
-      .read(plannerProvider.notifier)
-      .addTask(today, 'Pills', start: 20 * 60, end: 20 * 60 + 5);
+  container.read(plannerProvider.notifier).addTask(today, 'Pills',
+      start: 20 * 60, end: 20 * 60 + 5, description: 'With water');
   // A reminder (P14), over the task and routine.
   container
       .read(pinsProvider.notifier)
@@ -185,7 +184,7 @@ void main() {
         await t.pumpAndSettle();
         await t.tap(find.text('Stand-up').last);
         await t.pumpAndSettle();
-        expect(find.text('Delete routine'), findsOneWidget);
+        expect(find.text('Delete'), findsOneWidget);
       },
       'planner selection mode': (t) async {
         await openTab(t, 'Planner');

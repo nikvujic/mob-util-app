@@ -205,7 +205,6 @@ Future<NewTask?> showEditPinSheet(
       point: true,
       submitLabel: 'Save',
       onDelete: onDelete,
-      deleteLabel: 'Delete',
     ),
   );
 }
@@ -246,9 +245,6 @@ class TaskSheet extends StatefulWidget {
   /// closed.
   final VoidCallback? onDelete;
 
-  /// The Delete button's label.
-  final String deleteLabel;
-
   /// A reminder (P14): just a title and a time ("At"), no end, colour,
   /// remind or repeat. What it returns has its end at its start.
   final bool point;
@@ -276,7 +272,6 @@ class TaskSheet extends StatefulWidget {
     this.from,
     this.until,
     this.onDelete,
-    this.deleteLabel = 'Delete routine',
     this.point = false,
     this.color,
     this.remind,
@@ -785,19 +780,16 @@ class _TaskSheetState extends State<TaskSheet> {
               SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Row(
+                    // No ✕: back closes it (asking first if something
+                    // changed). Delete, when editing, sits on the left.
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        tooltip: 'Close',
-                        onPressed: _close,
-                      ),
                       if (widget.onDelete != null)
                         Flexible(
                           child: TextButton.icon(
                             icon: const Icon(Icons.delete_outline),
-                            label: Text(widget.deleteLabel),
+                            label: const Text('Delete'),
                             style: TextButton.styleFrom(
                               foregroundColor: context.colors.danger,
                             ),

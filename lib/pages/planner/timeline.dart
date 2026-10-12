@@ -505,11 +505,28 @@ class _Block extends StatelessWidget {
                         padding: EdgeInsets.fromLTRB(
                             12, 4, hasCheckbox ? 48 : 12, 4),
                         child: compact
-                            ? Row(
+                            // The time beside the title leaves a line
+                            // below for the description (Round 12).
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Flexible(child: title),
-                                  const SizedBox(width: 8),
-                                  Flexible(child: time),
+                                  Row(
+                                    children: [
+                                      Flexible(child: title),
+                                      const SizedBox(width: 8),
+                                      Flexible(child: time),
+                                    ],
+                                  ),
+                                  if (block.description != null)
+                                    Expanded(
+                                      child: _FittedLines(
+                                        block.description!,
+                                        style: TextStyle(
+                                          color: colors.textSecondary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               )
                             : Column(
