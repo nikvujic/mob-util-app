@@ -28,7 +28,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
 ///     <app documents>/data/layout.json {"version": 1, "other": [ids]}
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
-///     <app documents>/data/counters.json {"version": 2, "counters": [...]}
+///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
 ///     <app documents>/data/settings.json
@@ -61,6 +61,10 @@ class AppStorage {
 
   /// Version of `placard.json` (O4). History: 1 = first format.
   static const placardFormatVersion = 1;
+
+  /// Version of `counters.json`, on its own from here. History: 1–2 = as
+  /// [formatVersion]; 3 = counters may have a step, colour and limits (O5).
+  static const countersFormatVersion = 3;
 
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
@@ -225,6 +229,7 @@ class AppStorage {
       initialCounters: await _load(
         countersStore,
         [],
+        maxVersion: countersFormatVersion,
         (json) => [
           for (final e in json['counters'] as List<dynamic>)
             Counter.fromJson(e as Map<String, dynamic>),
@@ -345,7 +350,7 @@ class AppStorage {
 
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
-      'version': formatVersion,
+      'version': countersFormatVersion,
       'counters': [for (final c in counters) c.toJson()],
     });
   }

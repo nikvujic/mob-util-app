@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/app_dialog.dart';
+import 'package:the_app/widgets/colour_choice.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -770,7 +771,7 @@ class _TaskSheetState extends State<TaskSheet> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            _ColourChoice(
+                            ColourChoice(
                               selected: _color,
                               onSelected: (c) => setState(() {
                                 _color = c;
@@ -871,67 +872,6 @@ class _TimeButton extends StatelessWidget {
         side: BorderSide(color: clash ? colors.danger : colors.textHint),
       ),
       child: Text(formatMinutes(minutes)),
-    );
-  }
-}
-
-/// The colour row (P9): none, or one of the [BlockColor]s.
-class _ColourChoice extends StatelessWidget {
-  final BlockColor? selected;
-  final ValueChanged<BlockColor?> onSelected;
-
-  const _ColourChoice({required this.selected, required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    Widget dot(BlockColor? colour) {
-      final isSelected = colour == selected;
-      return Semantics(
-        button: true,
-        selected: isSelected,
-        label: 'Colour: ${colour?.label ?? 'none'}',
-        excludeSemantics: true,
-        child: InkResponse(
-          onTap: () => onSelected(colour),
-          radius: 24,
-          child: SizedBox.square(
-            dimension: 48,
-            child: Center(
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colour?.stripe ?? Colors.transparent,
-                  border: Border.all(
-                    color: isSelected ? colors.textPrimary : colors.textHint,
-                    width: isSelected ? 3 : 1,
-                  ),
-                ),
-                child: colour == null
-                    ? Icon(Icons.block, size: 18, color: colors.textSecondary)
-                    : null,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 4),
-          child: Text(
-            'Colour',
-            style: TextStyle(color: colors.textSecondary),
-          ),
-        ),
-        dot(null),
-        for (final colour in BlockColor.values) dot(colour),
-      ],
     );
   }
 }

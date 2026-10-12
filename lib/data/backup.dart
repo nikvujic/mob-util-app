@@ -65,8 +65,9 @@ class Backup {
   /// routines (`routines`, as in `routines.json`) and block colours;
   /// 6 = planner reminders (`plannerPins`, P14); 7 = tasks and routines
   /// may have a description (P20); 8 = shop items may have a quantity
-  /// (S7); 9 = Placard's text and count (`placard`, O4).
-  static const version = 9;
+  /// (S7); 9 = Placard's text and count (`placard`, O4); 10 = counters
+  /// may have a step, colour and limits (O5).
+  static const version = 10;
 
   final DateTime createdAt;
   final String appVersion;

@@ -10,6 +10,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -433,6 +434,45 @@ void main() {
     });
   });
 
+  group('counters v3 / v10 backup (counter options, O5)', () {
+    void expectSample(List<Counter> counters) {
+      expect(
+        counters.map((c) => (c.name, c.value, c.step, c.color, c.min, c.max)),
+        [
+          ('Push-ups', 12, 1, null, null, null),
+          ('Water 💧', 750, 250, 'blue', 0, 3000),
+          ('Floor', -2, 1, null, -3, null),
+        ],
+      );
+    }
+
+    test('counters.json with options loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v10/storage'),
+      );
+      expectSample(storage.initialCounters);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v10 backup restores counter options', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v10/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.counters);
+    });
+
+    test('older counters count by 1, with no limits', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v2/storage'),
+      );
+      expect(storage.initialCounters, isNotEmpty);
+      expect(
+        storage.initialCounters.map((c) => (c.step, c.color, c.min, c.max)),
+        everyElement((1, null, null, null)),
+      );
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -524,6 +564,10 @@ void main() {
           '110be31666a8ed658f5f7a38a3a6229b263dfd2f80f5f6c38d001ce2740b7e0b',
       'test/fixtures/v9/backup-plain.json':
           'bbd720bb1a8a58ab221289e9a894019a3f52e20282a078907a752f83bdf7432f',
+      'test/fixtures/v10/storage/counters.json':
+          '781da94fbe27d818356cd2f787e0ab094c2e6098565261b24d74eb7e559551dd',
+      'test/fixtures/v10/backup-plain.json':
+          '97bd4e11044a5f26bff2521c246ac49b87da5ec1f76d5e7514bb7116f12f873d',
       'test/fixtures/v8/storage/layout.json':
           'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };

@@ -57,3 +57,7 @@ app still reads every version, so an update can never lose existing data.
   quiet? 🤐", count 41.
 - `v9/backup-plain.json` — backup (version 9) with that Placard and one
   counter (Push-ups, 12).
+- `v10/storage/counters.json` — counters with options (O5; counters.json
+  now has its own version, 3): Push-ups 12 (no options), Water 💧 750 by
+  250 in blue between 0 and 3000, Floor −2 with a min of −3.
+- `v10/backup-plain.json` — backup (version 10) with those counters.

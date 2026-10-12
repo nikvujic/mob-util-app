@@ -1,0 +1,42 @@
+{
+  "format": "the-app-backup",
+  "version": 10,
+  "createdAt": "2026-10-12T19:00:00.000Z",
+  "appVersion": "0.22.0 (23)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [
+      {
+        "id": "c1",
+        "name": "Push-ups",
+        "value": 12
+      },
+      {
+        "id": "c2",
+        "name": "Water 💧",
+        "value": 750,
+        "step": 250,
+        "color": "blue",
+        "min": 0,
+        "max": 3000
+      },
+      {
+        "id": "c3",
+        "name": "Floor",
+        "value": -2,
+        "min": -3
+      }
+    ],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    }
+  }
+}

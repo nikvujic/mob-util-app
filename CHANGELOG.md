@@ -10,12 +10,16 @@ Release with the installable APK.
 - **Other is now called Hub.**
 
 ### Added
-- Other: **Placard**. A big line of text, sideways and full screen, with
+- Counters: **options**. A new counter (or Edit, in selection mode) has
+  a step (− / + count by it), a colour and optional min and max; the
+  buttons stop at the limits. Cards look rounder, with room around them.
+  (Backups now have format 10.)
+- Hub: **Placard**. A big line of text, sideways and full screen, with
   a count: hold the page and it inflates, shakes and pops to count one
   up. Five taps in the top-right corner set the text and the count. (In
   backups, now format 9.)
-- Other: **hold a tile and drag it** to change the order (kept).
-- Settings → Clear data lists Other's pages one by one.
+- Hub: **hold a tile and drag it** to change the order (kept).
+- Settings → Clear data lists the Hub's pages one by one.
 
 ## [0.21.0] - 2026-10-12
 

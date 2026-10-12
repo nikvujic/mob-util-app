@@ -104,7 +104,15 @@ Future<void> seed(ProviderContainer container) async {
       .add(today, 'Call mum', time: 10 * 60 + 40);
   container.read(countersProvider.notifier)
     ..add('Push-ups')
-    ..add('Glasses of water');
+    ..add('Glasses of water')
+    // With options (O5): a colour, a step and limits.
+    ..add('Water', options: (
+      name: 'Water',
+      step: 250,
+      color: 'blue',
+      min: 0,
+      max: 3000,
+    ));
 }
 
 /// A fake file picker that returns a small backup when importing.
@@ -237,6 +245,13 @@ void main() {
       'counters': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Counters'));
+        await t.pumpAndSettle();
+      },
+      'new counter sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Counters'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('New counter'));
         await t.pumpAndSettle();
       },
       'counters selection mode': (t) async {

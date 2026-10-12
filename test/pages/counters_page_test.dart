@@ -38,7 +38,8 @@ void main() {
     await openCounters(tester);
     await tester.tap(find.byTooltip('New counter'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Push-ups');
+    await tester.enterText(find.byKey(const Key('counterName')), 'Push-ups');
+    await tester.pump();
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
 
@@ -73,7 +74,7 @@ void main() {
     expect(values(), {'Push-ups': 0});
   });
 
-  testWidgets('selection: rename one, reset and delete with confirmation',
+  testWidgets('selection: edit one, reset and delete with confirmation',
       (tester) async {
     await openCounters(tester, names: ['Pushups', 'Coffee', 'Water']);
     for (final name in ['Pushups', 'Coffee', 'Water']) {
@@ -83,12 +84,13 @@ void main() {
     }
     await tester.pump();
 
-    // Rename: only with one selected.
+    // Edit: only with one selected.
     await tester.longPress(find.text('Pushups'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Rename'));
+    await tester.tap(find.byTooltip('Edit'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Push-ups');
+    await tester.enterText(find.byKey(const Key('counterName')), 'Push-ups');
+    await tester.pump();
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(values(), {'Push-ups': 5, 'Coffee': 5, 'Water': 5});
@@ -98,7 +100,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Coffee'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Rename'), findsNothing);
+    expect(find.byTooltip('Edit'), findsNothing);
     await tester.tap(find.byTooltip('Reset'));
     await tester.pumpAndSettle();
     expect(find.text('Reset 2 counters?'), findsOneWidget);
@@ -187,5 +189,79 @@ void main() {
     await pressBack(tester);
     expect(find.byTooltip('Delete'), findsNothing, reason: 'selection left');
     expect(find.text('Push-ups'), findsOneWidget, reason: 'still on Counters');
+  });
+
+  group('options (O5)', () {
+    Future<void> fill(WidgetTester tester, String key, String text) =>
+        tester.enterText(find.byKey(Key(key)), text);
+
+    testWidgets('a new counter with a step, limits and a colour',
+        (tester) async {
+      await openCounters(tester);
+      await tester.tap(find.byTooltip('New counter'));
+      await tester.pumpAndSettle();
+      await fill(tester, 'counterName', 'Pages');
+      await fill(tester, 'counterStep', '5');
+      await fill(tester, 'counterMin', '0');
+      await fill(tester, 'counterMax', '10');
+      await tester.tap(find.bySemanticsLabel('Colour: Teal'));
+      await tester.pump();
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+
+      final c = container.read(countersProvider).single;
+      expect((c.step, c.min, c.max, c.color), (5, 0, 10, 'teal'));
+      expect(find.text('+5'), findsOneWidget);
+      expect(find.text('−5'), findsOneWidget);
+      expect(find.text('0–10'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Count up Pages by 5'));
+      await tester.tap(find.byTooltip('Count up Pages by 5'));
+      await tester.pump();
+      expect(values(), {'Pages': 10});
+      final up = tester.widget<IconButton>(find.ancestor(
+        of: find.text('+5'),
+        matching: find.byType(IconButton),
+      ));
+      expect(up.onPressed, isNull, reason: 'at its max');
+    });
+
+    testWidgets('Add waits for a name and sensible numbers', (tester) async {
+      await openCounters(tester);
+      await tester.tap(find.byTooltip('New counter'));
+      await tester.pumpAndSettle();
+      bool enabled() =>
+          tester
+              .widget<FilledButton>(find.byKey(const Key('counterSubmit')))
+              .onPressed !=
+          null;
+      expect(enabled(), isFalse, reason: 'no name yet');
+      await fill(tester, 'counterName', 'Laps');
+      await tester.pump();
+      expect(enabled(), isTrue);
+      await fill(tester, 'counterStep', '0');
+      await tester.pump();
+      expect(enabled(), isFalse);
+      expect(find.text('At least 1'), findsOneWidget);
+      await fill(tester, 'counterStep', '2');
+      await fill(tester, 'counterMin', '-');
+      await tester.pump();
+      expect(enabled(), isFalse, reason: 'a lone minus is no number');
+    });
+
+    testWidgets('editing shows its options', (tester) async {
+      await openCounters(tester);
+      container.read(countersProvider.notifier).add('Laps',
+          options: (name: 'Laps', step: 2, color: 'pink', min: null, max: 40));
+      await tester.pump();
+      await tester.longPress(find.text('Laps'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Edit'));
+      await tester.pumpAndSettle();
+      String field(String key) =>
+          tester.widget<TextField>(find.byKey(Key(key))).controller!.text;
+      expect((field('counterStep'), field('counterMin'), field('counterMax')),
+          ('2', '', '40'));
+    });
   });
 }

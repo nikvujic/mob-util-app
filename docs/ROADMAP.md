@@ -443,9 +443,9 @@ Sorted from one long message. Order of work is at the end.
   exact amount (a number, may be below 1 g).
 
 **J. Counters, expanded** (O2/O5)
-- [ ] Adding a counter offers options: **step**, **colour**, **min**,
+- [x] Adding a counter offers options: **step**, **colour**, **min**,
   **max** (and more later).
-- [ ] Better style: margins, rounder corners.
+- [x] Better style: margins, rounder corners.
 
 **K. Džoni back, configurable** (O4, instead of removed) ✅ as **Placard**
 - [x] **Five taps in the top-right corner** open its settings: the text

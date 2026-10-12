@@ -5,13 +5,13 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/pages/other/counter_sheet.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
-import 'package:the_app/widgets/text_input_sheet.dart';
 
 /// Counters (O2): each with its name, its value and big − / + buttons.
 /// Long-press selects them to reset, rename or delete; the handle
@@ -43,25 +43,21 @@ class _CountersPageState extends ConsumerState<CountersPage> {
     super.dispose();
   }
 
+  /// A new counter, with its options (O5).
   Future<void> _add() async {
-    final name = await showTextInputSheet(
-      context,
-      hint: 'Counter name',
-      submitLabel: 'Add',
-    );
-    if (name != null && mounted) _notifier.add(name);
+    final options = await showCounterSheet(context);
+    if (options != null && mounted) {
+      _notifier.add(options.name, options: options);
+    }
   }
 
-  Future<void> _renameSelected() async {
+  /// Its name and options, from selection mode.
+  Future<void> _editSelected() async {
     final id = _selection.selected.single;
     final counter = ref.read(countersProvider).firstWhere((c) => c.id == id);
-    final name = await showTextInputSheet(
-      context,
-      hint: 'Counter name',
-      initialValue: counter.name,
-    );
-    if (name == null || !mounted) return;
-    _notifier.rename(id, name);
+    final options = await showCounterSheet(context, counter: counter);
+    if (options == null || !mounted) return;
+    _notifier.edit(id, options);
     _selection.clear();
   }
 
@@ -72,7 +68,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
       title: count == 1
           ? 'Reset counter?'
           : 'Reset ${countOf(count, 'counter', 'counters')}?',
-      message: 'The value goes back to 0.',
+      message: 'The value goes back to 0 (or its limit, if 0 is outside).',
       confirmLabel: 'Reset',
       destructive: true,
     );
@@ -135,7 +131,11 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                           final counter = counters[index];
                           return Padding(
                             key: ValueKey(counter.id),
-                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            // Room around each card (O5).
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 5,
+                            ),
                             child: _CounterCard(
                               counter: counter,
                               index: index,
@@ -167,8 +167,8 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                     if (_selection.count == 1)
                       SelectionAction(
                         icon: Icons.edit_outlined,
-                        tooltip: 'Rename',
-                        onPressed: _renameSelected,
+                        tooltip: 'Edit',
+                        onPressed: _editSelected,
                       ),
                     SelectionAction(
                       icon: Icons.restart_alt,
@@ -207,22 +207,47 @@ class _CounterCard extends StatelessWidget {
     required this.onLongPress,
   });
 
+  /// Rounder than list rows (O5).
+  static const _shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(18)),
+  );
+
+  /// "0–10", "from 0", "up to 10"; null without limits.
+  static String? _limits(Counter c) => switch ((c.min, c.max)) {
+        (null, null) => null,
+        (final min?, null) => 'from $min',
+        (null, final max?) => 'up to $max',
+        (final min?, final max?) => '$min–$max',
+      };
+
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final colour = BlockColor.fromName(counter.color);
+    final step = counter.step;
+    final limits = _limits(counter);
     return SelectableCard(
       selected: selected,
       onTap: onTap,
       onLongPress: onLongPress,
+      color: colour?.fill,
+      shape: _shape,
       child: ReorderableRow(
         content: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 0, 12),
+          padding: const EdgeInsets.fromLTRB(14, 14, 0, 14),
           child: Row(
             children: [
               _StepButton(
                 icon: Icons.remove,
-                tooltip: 'Count down ${counter.name}',
-                // Off while selecting, so a tap there selects instead.
-                onPressed: selectionMode ? null : () => onStep(-1),
+                label: step == 1 ? null : '−$step',
+                tooltip: step == 1
+                    ? 'Count down ${counter.name}'
+                    : 'Count down ${counter.name} by $step',
+                // Off while selecting (a tap there selects instead), and
+                // at its lowest.
+                onPressed: selectionMode || !counter.canGoDown
+                    ? null
+                    : () => onStep(-1),
               ),
               Expanded(
                 child: Column(
@@ -232,25 +257,38 @@ class _CounterCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: context.colors.textSecondary,
+                        color: colors.textSecondary,
                         fontSize: 14,
                       ),
                     ),
                     Text(
                       '${counter.value}',
+                      key: Key('counterValue-${counter.id}'),
                       style: TextStyle(
-                        color: context.colors.textPrimary,
+                        color: colors.textPrimary,
                         fontSize: 36,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (limits != null)
+                      Text(
+                        limits,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                   ],
                 ),
               ),
               _StepButton(
                 icon: Icons.add,
-                tooltip: 'Count up ${counter.name}',
-                onPressed: selectionMode ? null : () => onStep(1),
+                label: step == 1 ? null : '+$step',
+                tooltip: step == 1
+                    ? 'Count up ${counter.name}'
+                    : 'Count up ${counter.name} by $step',
+                onPressed:
+                    selectionMode || !counter.canGoUp ? null : () => onStep(1),
               ),
             ],
           ),
@@ -270,6 +308,9 @@ class _StepButton extends StatelessWidget {
   static const size = 64.0;
 
   final IconData icon;
+
+  /// Shown instead of [icon] for a step above 1 ("+5").
+  final String? label;
   final String tooltip;
   final VoidCallback? onPressed;
 
@@ -277,12 +318,22 @@ class _StepButton extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.label,
   });
 
   @override
   Widget build(BuildContext context) {
+    final label = this.label;
     return IconButton.filledTonal(
-      icon: Icon(icon, size: 32),
+      icon: label == null
+          ? Icon(icon, size: 32)
+          : FittedBox(
+              child: Text(
+                label,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+            ),
       tooltip: tooltip,
       onPressed: onPressed,
       style: IconButton.styleFrom(
