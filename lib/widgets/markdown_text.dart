@@ -72,8 +72,11 @@ class MarkdownEditingController extends TextEditingController {
   static const unchecked = '☐';
   static const checked = '☑';
 
-  /// How much bigger ☐ is drawn than the text.
-  static const uncheckedScale = 1.35;
+  /// How much bigger the boxes are drawn than the text.
+  static const boxScale = 1.15;
+
+  /// Unicode's "show the one before as text, not as an emoji" (VS15).
+  static const textStyle = '\uFE0E';
 
   /// Heading sizes, relative to the body text: `#`, `##`, `###`.
   static const headingScale = [1.5, 1.3, 1.15];
@@ -147,18 +150,22 @@ class MarkdownEditingController extends TextEditingController {
           final char = text[i];
           if (char == '[') {
             final ticked = text[i + 1] != ' ';
-            // ☐ is drawn smaller than ☑ in the phone's font: bigger, in a
-            // line no taller than the rest (Nikola). Both in the accent.
+            // The box stands for "[" and the mark after it ("x" or " "),
+            // two characters for two, so positions stay the same. The
+            // second is "text style, please": without it the phone drew
+            // ☑ as a white emoji, bigger and lower than ☐ (Nikola). Both
+            // the same size, a bit bigger than the text, in the accent.
             final size = base.fontSize ?? 16;
             spans.add(TextSpan(
-              text: ticked ? checked : unchecked,
+              text: '${ticked ? checked : unchecked}$textStyle',
               style: box.copyWith(
                 color: colors.accent,
                 fontWeight: FontWeight.w400,
-                fontSize: ticked ? size : size * uncheckedScale,
-                height: ticked ? null : 1 / uncheckedScale,
+                fontSize: size * boxScale,
+                height: 1 / boxScale,
               ),
             ));
+            i++; // its mark is in the box
           } else {
             final last = i == run.end - 1;
             spans.add(TextSpan(text: char, style: last ? base : _hidden));
@@ -269,8 +276,9 @@ class CheckboxTaps extends StatelessWidget {
     final box = controller.boxAt(offset);
     if (box == null) return null;
     // Only on the box itself, not anywhere along its line.
+    // The box is drawn for two characters ("[" and its mark).
     final rects = editable.getBoxesForSelection(
-      TextSelection(baseOffset: box, extentOffset: box + 1),
+      TextSelection(baseOffset: box, extentOffset: box + 2),
     );
     if (rects.isEmpty) return null;
     final local = editable.globalToLocal(position);

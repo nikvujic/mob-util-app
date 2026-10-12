@@ -72,7 +72,7 @@ void main() {
   testWidgets('a long enough hold counts once; a short one doesn\'t',
       (tester) async {
     await openPlacard(tester);
-    await hold(tester, const Duration(milliseconds: 400));
+    await hold(tester, const Duration(milliseconds: 1500));
     expect(placard().count, 1, reason: 'let go too early');
 
     await hold(tester, PlacardPage.holdTime + const Duration(seconds: 2));
@@ -99,7 +99,7 @@ void main() {
     expect(scale(), moreOrLessEquals(1));
     final finger = await tester.startGesture(tester.getCenter(sign));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump(const Duration(milliseconds: 1800));
     expect(scale(), greaterThan(1.05));
     await finger.up();
     await tester.pumpAndSettle();
@@ -171,5 +171,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('placardText')), findsNothing);
+  });
+
+  test('the hold is long (Nikola: two to three times the first 0.9 s)', () {
+    expect(PlacardPage.holdTime,
+        greaterThanOrEqualTo(const Duration(milliseconds: 1800)));
   });
 }

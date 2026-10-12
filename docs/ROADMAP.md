@@ -340,7 +340,7 @@ Chunks, in order (each its own commit; release when a few are in):
 - [ ] Planner sheet: ticking a weekday that clashes makes the line
   appear and **pushes the form down** (the chip just tapped scrolls out
   of view): keep what's under the finger in place.
-- [ ] Notes checkboxes: the empty box sits too high next to the text and
+- [x] Notes checkboxes: the empty box sits too high next to the text and
   the ticked one, so ticking jumps; the ticked box still shows **white**
   on the phone (an emoji), not the accent. Both drawn the same way, same
   size, in the accent.
@@ -348,7 +348,7 @@ Chunks, in order (each its own commit; release when a few are in):
   buttons look green (Material's tonal colour), and colours look washed
   out: use the vivid colours; every counter the same height (limits
   made the card taller); more compact overall.
-- [ ] Placard: the hold is **2–3× longer**.
+- [x] Placard: the hold is **2–3× longer**.
 
 **2. Planner touches**
 - [ ] **Reach mode on the timeline**: pull down to bring the top block

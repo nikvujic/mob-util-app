@@ -33,11 +33,11 @@ void main() {
   }
 
   /// Where the character at [index] is drawn, on screen.
-  Offset charAt(WidgetTester tester, int index) {
+  Offset charAt(WidgetTester tester, int index, {int length = 1}) {
     final editable = _editableIn(tester);
     final box = editable
         .getBoxesForSelection(
-          TextSelection(baseOffset: index, extentOffset: index + 1),
+          TextSelection(baseOffset: index, extentOffset: index + length),
         )
         .first
         .toRect();
@@ -55,9 +55,12 @@ void main() {
     expect(shown, contains('☐'));
     expect(shown, contains('☑'));
     expect(shown, isNot(contains('[')));
+    expect(shown.length, content(tester).text.length,
+        reason: 'one drawn character per character: taps land right');
   });
 
-  testWidgets('both boxes in the accent; the empty one bigger', (tester) async {
+  testWidgets('both boxes in the accent, as text, the same size',
+      (tester) async {
     await openNote(tester, '- [ ] milk\n- [x] eggs');
     final spans = <TextSpan>[];
     content(tester)
@@ -70,19 +73,26 @@ void main() {
       if (span is TextSpan) spans.add(span);
       return true;
     });
-    TextStyle styleOf(String glyph) =>
-        spans.firstWhere((s) => s.text == glyph).style!;
+    TextSpan spanOf(String glyph) =>
+        spans.firstWhere((s) => s.text?.startsWith(glyph) ?? false);
+    TextStyle styleOf(String glyph) => spanOf(glyph).style!;
     final accent =
         Theme.of(tester.element(contentField)).extension<AppPalette>()!.accent;
     expect(styleOf('☐').color, accent);
     expect(styleOf('☑').color, accent);
-    expect(styleOf('☐').fontSize, greaterThan(styleOf('☑').fontSize!));
+    // The same size (ticking doesn't move it), a bit bigger than the text.
+    expect(styleOf('☐').fontSize, styleOf('☑').fontSize);
+    expect(styleOf('☐').fontSize, greaterThan(16));
+    // Drawn as text, not as a (white) emoji.
+    for (final glyph in ['☐', '☑']) {
+      expect(spanOf(glyph).text, '$glyph\uFE0E');
+    }
   });
 
   testWidgets('tapping the box ticks it, without starting to edit',
       (tester) async {
     final id = await openNote(tester, 'Buy\n- [ ] milk');
-    await tester.tapAt(charAt(tester, 6)); // the "["
+    await tester.tapAt(charAt(tester, 6, length: 2)); // the box
     await tester.pump(const Duration(seconds: 1)); // autosave
 
     expect(content(tester).text, 'Buy\n- [x] milk');
@@ -92,7 +102,7 @@ void main() {
       'Buy\n- [x] milk',
     );
 
-    await tester.tapAt(charAt(tester, 6));
+    await tester.tapAt(charAt(tester, 6, length: 2));
     await tester.pump();
     expect(content(tester).text, 'Buy\n- [ ] milk', reason: 'and back');
   });
@@ -107,7 +117,7 @@ void main() {
 
   testWidgets('ticking is undone with ↶', (tester) async {
     await openNote(tester, '- [ ] milk');
-    await tester.tapAt(charAt(tester, 2));
+    await tester.tapAt(charAt(tester, 2, length: 2));
     await tester.pump(const Duration(seconds: 2));
     expect(content(tester).text, '- [x] milk');
     await tester.tap(find.byTooltip('Undo'));

@@ -4,6 +4,16 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.23.0] - unreleased
+
+### Fixed
+- Notes: the ticked checkbox showed as a white emoji, and the empty one
+  sat higher; both are now drawn the same, in the accent, without a jump
+  when ticking.
+
+### Changed
+- Placard: the hold to count is longer (about 2½ seconds).
+
 ## [0.22.0] - 2026-10-12
 
 ### Changed
