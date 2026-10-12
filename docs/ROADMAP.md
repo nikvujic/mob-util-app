@@ -353,7 +353,7 @@ Chunks, in order (each its own commit; release when a few are in):
 **2. Planner touches**
 - [x] **Reach mode on the timeline**: pull down to bring the top block
   into reach, with the snap back, like the lists.
-- [ ] Tapping free time starts the new block **near where it was tapped**
+- [x] Tapping free time starts the new block **near where it was tapped**
   (to :00 / :30); tapping the **left edge** (by the hour labels) adds a
   reminder there (to 15 minutes).
 - [ ] (Nikola's note on tapping a stacked reminder was cut off: ask.)

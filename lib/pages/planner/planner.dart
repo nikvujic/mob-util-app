@@ -96,12 +96,17 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       ..showSnackBar(SnackBar(content: Text(what)));
   }
 
-  Future<void> _addIn(DateTime day, FreeSlot slot) async {
+  /// Adds a task in free [slot] on [day]: near [at] (the minute tapped,
+  /// down to :00 or :30, Round 14), else as below.
+  Future<void> _addIn(DateTime day, FreeSlot slot, {int? at}) async {
     // Today, in free time that's going on now: start at the next full hour
     // rather than at the (past) start of the free time.
     final now = _now;
     int? start;
-    if (daysBetween(dayOf(now), day) == 0) {
+    if (at != null) {
+      start = (at ~/ 30 * 30).clamp(
+          slot.start, math.max(slot.start, slot.end - PlannerTask.minMinutes));
+    } else if (daysBetween(dayOf(now), day) == 0) {
       final minutes = now.hour * 60 + now.minute;
       final nextHour = (minutes + 59) ~/ 60 * 60;
       // Only if a block still fits after it.
@@ -427,11 +432,16 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
 
   /// Adds a reminder (P14) on [day]: today from the next full hour,
   /// other days from 09:00.
-  Future<void> _addPin(DateTime day) async {
+  /// Adds a reminder on [day]: at [at] (tapped on the timeline's edge,
+  /// down to 15 minutes, Round 14), else today from the next full hour,
+  /// other days from 09:00.
+  Future<void> _addPin(DateTime day, {int? at}) async {
     final now = _now;
-    final time = daysBetween(dayOf(now), day) == 0
-        ? math.min((now.hour + 1) * 60, PlannerTask.dayMinutes - 1)
-        : 9 * 60;
+    final time = at != null
+        ? (at ~/ 15 * 15).clamp(0, PlannerTask.dayMinutes - 1)
+        : daysBetween(dayOf(now), day) == 0
+            ? math.min((now.hour + 1) * 60, PlannerTask.dayMinutes - 1)
+            : 9 * 60;
     final pin = await showAddPinSheet(context, time: time);
     if (pin == null || !mounted) return;
     ref.read(pinsProvider.notifier).add(day, pin.title, time: pin.start);
@@ -593,6 +603,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                       child: PlannerTimeline(
                         blocks: blocks,
                         onAdd: selecting ? null : (slot) => _addIn(day, slot),
+                        onAddAt: selecting
+                            ? null
+                            : (slot, at) => _addIn(day, slot, at: at),
+                        onLeftTap:
+                            selecting ? null : (at) => _addPin(day, at: at),
                         now: isSameDay(day, today)
                             ? ref.read(clockProvider)
                             : null,

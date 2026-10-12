@@ -446,8 +446,8 @@ void main() {
 
     await tester.ensureVisible(free('00:00–24:00'));
     await tester.pumpAndSettle();
-    await tester.tap(free('00:00–24:00'));
-    await tester.pumpAndSettle();
+    // Without a point (a finger picks its own time, Round 14).
+    await tapAsScreenReader(tester, free('00:00–24:00'));
     expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, '14:00'), findsOneWidget);
   });
@@ -641,6 +641,63 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Today · Thu, 8 Oct'), findsOneWidget);
+    });
+  });
+
+  group('where you tap (Round 14)', () {
+    /// The point on screen at [minutes], [dx] in from the timeline's left.
+    Offset pointAt(WidgetTester tester, int minutes, {double dx = 150}) {
+      // The day's own scale: short blocks stretch their hour.
+      final timeline = find.byType(PlannerTimeline);
+      final top = tester.getTopLeft(timeline).dy;
+      final scale = PlannerTimeline.scaleFor(
+          tester.widget<PlannerTimeline>(timeline).blocks);
+      return Offset(dx, top + PlannerTimeline.offsetOf(minutes, scale));
+    }
+
+    Future<void> scrollTo(WidgetTester tester, String label) async {
+      await tester.ensureVisible(find.text(label));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('free time: a block starts near the tap, down to :30',
+        (tester) async {
+      await openPlanner(tester);
+      await scrollTo(tester, '14:00');
+      await tester.tapAt(pointAt(tester, 14 * 60 + 40));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(OutlinedButton, '14:30'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, '15:30'), findsOneWidget);
+    });
+
+    testWidgets('and down to :00 in the first half of an hour', (tester) async {
+      await openPlanner(tester);
+      await scrollTo(tester, '14:00');
+      await tester.tapAt(pointAt(tester, 14 * 60 + 10));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(OutlinedButton, '14:00'), findsOneWidget);
+    });
+
+    testWidgets('never before the free time starts', (tester) async {
+      await openPlanner(tester);
+      add(today, 'Gym', hour: 13); // 13:00–14:00
+      planner().addTask(today, 'Walk', start: 14 * 60, end: 14 * 60 + 10);
+      await tester.pump();
+      await scrollTo(tester, '14:00');
+      // 14:20 is in the free time from 14:10: down to :00 would be 14:00.
+      await tester.tapAt(pointAt(tester, 14 * 60 + 20));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(OutlinedButton, '14:10'), findsOneWidget);
+    });
+
+    testWidgets('the left edge adds a reminder there, down to 15 minutes',
+        (tester) async {
+      await openPlanner(tester);
+      await scrollTo(tester, '16:00');
+      await tester.tapAt(pointAt(tester, 16 * 60 + 40, dx: 20));
+      await tester.pumpAndSettle();
+      expect(find.text('At'), findsOneWidget, reason: 'the reminder sheet');
+      expect(find.widgetWithText(OutlinedButton, '16:30'), findsOneWidget);
     });
   });
 }

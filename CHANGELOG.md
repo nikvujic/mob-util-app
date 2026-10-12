@@ -7,6 +7,8 @@ Release with the installable APK.
 ## [0.23.0] - unreleased
 
 ### Fixed
+- Planner: screen readers can add a task from free time again (it had
+  no tap action).
 - Planner sheet: ticking a weekday that clashes no longer pushes the
   form down (the chip you tapped stays where it was). The clash line
   looks like the info line, in red, and **Find a free time** is a real
@@ -16,6 +18,9 @@ Release with the installable APK.
   when ticking.
 
 ### Changed
+- Planner: a new block starts **where you tap** the free time (rounded
+  down to :00 or :30), and tapping the **left edge**, by the hour labels,
+  adds a reminder there (rounded down to 15 minutes).
 - Planner: **reach mode** on the timeline. At 00:00, pull down again and
   the first hours come into thumb reach; push up and it snaps back.
 - Placard: the hold to count is longer (about 2½ seconds).

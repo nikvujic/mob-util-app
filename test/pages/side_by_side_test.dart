@@ -170,7 +170,10 @@ void main() {
       planner().addTask(today, 'Lunch', start: at(13), end: at(14));
       await tester.pump();
 
-      await tapText(tester, 'Free · 00:00–11:00');
+      await tester.ensureVisible(find.text('Free · 00:00–11:00'));
+      await tester.pumpAndSettle();
+      // Without a point: from its own rules (a finger picks its time).
+      await tapAsScreenReader(tester, find.text('Free · 00:00–11:00'));
       expect(find.widgetWithText(OutlinedButton, '10:00'), findsOneWidget,
           reason: 'an hour by default, within the free time');
       await tester.enterText(find.byKey(const Key('taskTitle')), 'Work');
@@ -193,7 +196,9 @@ void main() {
       planner().addTask(today, 'Lunch', start: at(13), end: at(14));
       await tester.pump();
 
-      await tapText(tester, 'Free · 00:00–11:00');
+      await tester.ensureVisible(find.text('Free · 00:00–11:00'));
+      await tester.pumpAndSettle();
+      await tapAsScreenReader(tester, find.text('Free · 00:00–11:00'));
       await tester.tap(find.text('Until the next task'));
       await tester.pump();
       await tester.ensureVisible(find.text('Every day'));

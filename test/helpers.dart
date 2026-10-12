@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -207,4 +208,15 @@ class FakeReminderScheduler implements ReminderScheduler {
   Future<void> replaceAll(List<Reminder> reminders) async {
     scheduled = List.of(reminders);
   }
+}
+
+/// Taps [finder] the way a screen reader does: its semantics action, with
+/// no point on the screen (e.g. free time then adds by its own rules, not
+/// near a finger).
+Future<void> tapAsScreenReader(WidgetTester tester, Finder finder) async {
+  final handle = tester.ensureSemantics();
+  final node = tester.getSemantics(finder);
+  node.owner!.performAction(node.id, SemanticsAction.tap);
+  await tester.pumpAndSettle();
+  handle.dispose();
 }

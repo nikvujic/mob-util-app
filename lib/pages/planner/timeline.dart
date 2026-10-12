@@ -152,6 +152,20 @@ class TimeScale {
     return TimeScale._(cuts, heights);
   }
 
+  /// The minute of the day at [y] down it (the other way round from [y]).
+  int minutesAt(double y) {
+    var top = 0.0;
+    for (var i = 0; i < _heights.length; i++) {
+      final (start, end) = (_cuts[i], _cuts[i + 1]);
+      if (y <= top + _heights[i]) {
+        final share = ((y - top) / _heights[i]).clamp(0.0, 1.0);
+        return (start + share * (end - start)).floor();
+      }
+      top += _heights[i];
+    }
+    return PlannerTask.dayMinutes;
+  }
+
   /// How far down the day [minutes] past midnight is (00:00 at 0).
   double y(int minutes) {
     var top = 0.0;
@@ -191,6 +205,15 @@ class PlannerTimeline extends StatelessWidget {
   /// Null while selecting.
   final ValueChanged<FreeSlot>? onAdd;
 
+  /// Free time tapped at a point: the slot and the minute tapped (Round
+  /// 14: a new block starts near there). Screen readers, which tap
+  /// without a point, get [onAdd].
+  final void Function(FreeSlot slot, int at)? onAddAt;
+
+  /// The left edge (by the hour labels) tapped: the minute there, for a
+  /// reminder (Round 14). Null: nothing there.
+  final ValueChanged<int>? onLeftTap;
+
   /// What adding in free time makes, for screen readers ("a task").
   final String adds;
 
@@ -211,6 +234,8 @@ class PlannerTimeline extends StatelessWidget {
     super.key,
     required this.blocks,
     required this.onAdd,
+    this.onAddAt,
+    this.onLeftTap,
     this.adds = 'a task',
     this.pins = const [],
     this.onPins,
@@ -289,6 +314,12 @@ class PlannerTimeline extends StatelessWidget {
                   slot: slot,
                   adds: adds,
                   onTap: onAdd == null ? null : () => onAdd!(slot),
+                  onTapAt: onAdd == null || onAddAt == null
+                      ? null
+                      : (dy) => onAddAt!(
+                            slot,
+                            _scale.minutesAt(_scale.y(slot.start) + dy),
+                          ),
                 ),
               ),
           for (final block in blocks)
@@ -308,6 +339,25 @@ class PlannerTimeline extends StatelessWidget {
               child: IgnorePointer(
                 child: ExcludeSemantics(
                   child: _NowLine(clock: now!, y: _y, left: _labelWidth),
+                ),
+              ),
+            ),
+          // The left edge, by the hour labels: a tap adds a reminder there
+          // (Round 14). Under the marks, so those still open theirs. Screen
+          // readers have the bell button instead.
+          if (onLeftTap != null)
+            Positioned(
+              top: 0,
+              left: 0,
+              width: _labelWidth,
+              height: _y(PlannerTask.dayMinutes),
+              child: ExcludeSemantics(
+                child: GestureDetector(
+                  key: const Key('timelineEdge'),
+                  behavior: HitTestBehavior.opaque,
+                  onTapUp: (details) => onLeftTap!(
+                    _scale.minutesAt(details.localPosition.dy - _topInset),
+                  ),
                 ),
               ),
             ),
@@ -419,8 +469,16 @@ class _FreeTime extends StatelessWidget {
   final String adds;
   final VoidCallback? onTap;
 
-  const _FreeTime(
-      {required this.slot, required this.adds, required this.onTap});
+  /// A tap at a point: how far down the free time it was. Instead of
+  /// [onTap] when given.
+  final ValueChanged<double>? onTapAt;
+
+  const _FreeTime({
+    required this.slot,
+    required this.adds,
+    required this.onTap,
+    this.onTapAt,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -428,6 +486,9 @@ class _FreeTime extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Free time, $range. Add $adds',
+      // Its own tap for screen readers: the tap below is left out with the
+      // rest of what's inside (it wasn't reachable before, Round 14).
+      onTap: onTap,
       excludeSemantics: true,
       child: Padding(
         // The same gap between blocks as the blocks have.
@@ -435,8 +496,12 @@ class _FreeTime extends StatelessWidget {
         child: DashedBorder(
           color: context.colors.textHint,
           radius: _radius,
-          child: InkWell(
+          child: _PointedInkWell(
             onTap: onTap,
+            // Past the gap above the dotted block.
+            onTapAt: onTapAt == null
+                ? null
+                : (dy) => onTapAt!(dy + PlannerTimeline.gap / 2),
             borderRadius: BorderRadius.circular(_radius),
             // Too short for the label: just the dotted block.
             child: LayoutBuilder(
@@ -863,4 +928,45 @@ class _PiecesBorder extends OutlinedBorder {
 
   @override
   int get hashCode => Object.hash(side, Object.hashAll(rects));
+}
+
+/// An [InkWell] that says where it was tapped ([onTapAt], how far down)
+/// when it can, else plain [onTap] (e.g. from a screen reader).
+class _PointedInkWell extends StatefulWidget {
+  final VoidCallback? onTap;
+  final ValueChanged<double>? onTapAt;
+  final BorderRadius borderRadius;
+  final Widget child;
+
+  const _PointedInkWell({
+    required this.onTap,
+    required this.onTapAt,
+    required this.borderRadius,
+    required this.child,
+  });
+
+  @override
+  State<_PointedInkWell> createState() => _PointedInkWellState();
+}
+
+class _PointedInkWellState extends State<_PointedInkWell> {
+  double? _down;
+
+  @override
+  Widget build(BuildContext context) {
+    final onTap = widget.onTap;
+    return InkWell(
+      onTapDown: (details) => _down = details.localPosition.dy,
+      onTapCancel: () => _down = null,
+      onTap: onTap == null
+          ? null
+          : () {
+              final down = _down, onTapAt = widget.onTapAt;
+              _down = null;
+              down != null && onTapAt != null ? onTapAt(down) : onTap();
+            },
+      borderRadius: widget.borderRadius,
+      child: widget.child,
+    );
+  }
 }
