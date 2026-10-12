@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/layout_provider.dart';
 
 import '../helpers.dart';
@@ -67,8 +67,8 @@ void main() {
       await drag.up();
       await tester.pumpAndSettle();
 
-      expect(container.read(layoutProvider).other,
-          [OtherTool.placard, OtherTool.counters, OtherTool.medicine]);
+      expect(container.read(layoutProvider).hub,
+          [HubTool.placard, HubTool.counters, HubTool.medicine]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
         moreOrLessEquals(counters.dx, epsilon: 1),
@@ -95,8 +95,8 @@ void main() {
       );
       owner.performAction(node.id, SemanticsAction.customAction, later);
       await tester.pump();
-      expect(container.read(layoutProvider).other,
-          [OtherTool.placard, OtherTool.counters, OtherTool.medicine]);
+      expect(container.read(layoutProvider).hub,
+          [HubTool.placard, HubTool.counters, HubTool.medicine]);
       semantics.dispose();
     });
   });

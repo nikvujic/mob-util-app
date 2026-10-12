@@ -11,7 +11,7 @@ import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/pages/notes/notes.dart';
-import 'package:the_app/pages/other/other.dart';
+import 'package:the_app/pages/hub/hub.dart';
 import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
@@ -74,7 +74,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// The page of each section, in [AppSection] order.
-  static const _pages = [NotesPage(), ShopPage(), PlannerPage(), OtherPage()];
+  static const _pages = [NotesPage(), ShopPage(), PlannerPage(), HubPage()];
 
   /// How far a swipe right along the bottom bar must go to open the menu.
   static const menuSwipeDistance = 48.0;

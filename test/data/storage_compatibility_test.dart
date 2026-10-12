@@ -12,7 +12,7 @@ import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/medicine.dart';
-import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -389,7 +389,7 @@ void main() {
       final storage = await AppStorage.open(
         directory: copyOf('test/fixtures/v8/storage'),
       );
-      expect(storage.initialLayout.other.first, OtherTool.counters);
+      expect(storage.initialLayout.hub.first, HubTool.counters);
       expect(storage.unreadable, isEmpty);
     });
 

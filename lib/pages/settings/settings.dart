@@ -45,7 +45,7 @@ class SettingsPage extends ConsumerWidget {
                 Icon(Icons.delete_sweep_outlined, color: context.colors.danger),
             title: const Text('Clear data'),
             subtitle: Text(
-              'Empty Notes, Shop, Planner or Other',
+              'Empty Notes, Shop, Planner or Hub pages',
               style: TextStyle(color: context.colors.textSecondary),
             ),
             onTap: () => Navigator.of(context).push(

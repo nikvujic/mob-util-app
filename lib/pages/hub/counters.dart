@@ -5,7 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/counter.dart';
-import 'package:the_app/pages/other/counter_sheet.dart';
+import 'package:the_app/pages/hub/counter_sheet.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';

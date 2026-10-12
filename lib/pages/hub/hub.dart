@@ -4,23 +4,23 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:the_app/core/theme.dart';
-import 'package:the_app/models/other_tool.dart';
-import 'package:the_app/pages/other/tools.dart';
+import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/pages/hub/tools.dart';
 import 'package:the_app/providers/layout_provider.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 
 /// Lists additional tools as square icon tiles, filled in from the bottom
 /// right (thumb reach, O3), in the order the user set (O8): hold a tile
 /// and drag it to move it. Each opens as its own page on top, and back
-/// returns here (O1). The tools come from [OtherTool] (O9).
-class OtherPage extends ConsumerWidget {
-  const OtherPage({super.key});
+/// returns here (O1). The tools come from [HubTool] (O9).
+class HubPage extends ConsumerWidget {
+  const HubPage({super.key});
 
   static const _tileSize = 104.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final order = ref.watch(layoutProvider).other;
+    final order = ref.watch(layoutProvider).hub;
     final layout = ref.read(layoutProvider.notifier);
     return Scaffold(
       appBar: const MainAppBar(title: 'Hub'),
@@ -40,8 +40,8 @@ class OtherPage extends ConsumerWidget {
                 key: ValueKey(tool),
                 tool: tool,
                 // Dragged over another tile: takes its place at once.
-                onHover: (dragged) => layout.moveInOther(dragged, index),
-                onMove: (by) => layout.moveInOther(tool, index + by),
+                onHover: (dragged) => layout.moveInHub(dragged, index),
+                onMove: (by) => layout.moveInHub(tool, index + by),
                 canMoveBy: (by) => index + by >= 0 && index + by < order.length,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(builder: (_) => tool.page()),
@@ -57,8 +57,8 @@ class OtherPage extends ConsumerWidget {
 /// A tile that can be held and dragged to a new place (O8); screen readers
 /// get "Move earlier" / "Move later" instead.
 class _MovableTile extends StatelessWidget {
-  final OtherTool tool;
-  final ValueChanged<OtherTool> onHover;
+  final HubTool tool;
+  final ValueChanged<HubTool> onHover;
   final ValueChanged<int> onMove;
   final bool Function(int by) canMoveBy;
   final VoidCallback onTap;
@@ -75,7 +75,7 @@ class _MovableTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tile = _ToolTile(icon: tool.icon, label: tool.label, onTap: onTap);
-    return DragTarget<OtherTool>(
+    return DragTarget<HubTool>(
       onWillAcceptWithDetails: (details) {
         if (details.data != tool) onHover(details.data);
         return true;
@@ -89,7 +89,7 @@ class _MovableTile extends StatelessWidget {
             const CustomSemanticsAction(label: 'Move later'): () => onMove(1),
         },
         child: LayoutBuilder(
-          builder: (context, box) => LongPressDraggable<OtherTool>(
+          builder: (context, box) => LongPressDraggable<HubTool>(
             data: tool,
             onDragStarted: HapticFeedback.selectionClick,
             // The tile under the finger, a little lifted.

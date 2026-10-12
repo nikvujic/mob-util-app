@@ -4,7 +4,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
-import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/layout_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
@@ -21,7 +21,7 @@ import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
-/// Settings → Clear data (D7): empties the picked sections (Other page by
+/// Settings → Clear data (D7): empties the picked sections (the Hub page by
 /// page, O9), after typing
 /// DELETE and, with a master password set, entering it.
 class ClearDataPage extends ConsumerStatefulWidget {
@@ -34,10 +34,10 @@ class ClearDataPage extends ConsumerStatefulWidget {
 class _ClearDataPageState extends ConsumerState<ClearDataPage> {
   final _picked = <AppSection>{};
 
-  /// Other's pages, each picked on its own (O9).
-  final _pickedTools = <OtherTool>{};
+  /// the Hub's pages, each picked on its own (O9).
+  final _pickedTools = <HubTool>{};
 
-  /// The main sections listed as a whole; Other is listed page by page.
+  /// The main sections listed as a whole; the Hub is listed page by page.
   static const _sections = [
     AppSection.notes,
     AppSection.shop,
@@ -48,7 +48,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
         AppSection.notes => 'Notes, locked ones too',
         AppSection.shop => 'The shopping list',
         AppSection.planner => 'Tasks, routines and reminders',
-        AppSection.other => 'Every page in the Hub',
+        AppSection.hub => 'Every page in the Hub',
       };
 
   bool get _nothingPicked => _picked.isEmpty && _pickedTools.isEmpty;
@@ -61,7 +61,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
         if (_picked.contains(section)) section,
     ];
     final tools = [
-      for (final tool in ref.read(layoutProvider).other)
+      for (final tool in ref.read(layoutProvider).hub)
         if (_pickedTools.contains(tool)) tool,
     ];
     final names = [
@@ -117,7 +117,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
       ..watch(countersProvider)
       ..watch(placardProvider)
       ..watch(medicineProvider);
-    final tools = ref.watch(layoutProvider).other;
+    final tools = ref.watch(layoutProvider).hub;
     final data = ref.read(sectionDataProvider);
     final colors = context.colors;
 
@@ -146,11 +146,11 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
                 style: TextStyle(color: colors.textSecondary),
               ),
             ),
-          // Other, page by page (O9).
+          // The Hub, page by page (O9).
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text(
-              AppSection.other.label,
+              AppSection.hub.label,
               style: TextStyle(
                 color: colors.textSecondary,
                 fontWeight: FontWeight.w600,

@@ -7,7 +7,8 @@ Release with the installable APK.
 ## [0.22.0] - unreleased
 
 ### Changed
-- **Other is now called Hub.**
+- **Other is now called Hub** (a section lock or tile order you had
+  carries over).
 
 ### Added
 - Hub: **Medicine**. Add your medicines with the time of each dose and

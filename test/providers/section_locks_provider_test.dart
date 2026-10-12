@@ -111,4 +111,18 @@ void main() {
     final storage = await AppStorage.open(directory: dir);
     expect(storage.initialSectionLocks, {AppSection.shop});
   });
+
+  test('the Hub\'s lock saved as "other" (before the rename) still holds',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('hub_lock');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    File('${dir.path}/settings.json').writeAsStringSync(
+      jsonEncode({
+        'version': 2,
+        'sectionLocks': ['other', 'shop']
+      }),
+    );
+    final storage = await AppStorage.open(directory: dir);
+    expect(storage.initialSectionLocks, {AppSection.hub, AppSection.shop});
+  });
 }

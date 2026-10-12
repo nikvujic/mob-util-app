@@ -51,7 +51,8 @@ app still reads every version, so an update can never lose existing data.
   (bought, no quantity shown, a count of 3 kept).
 - `v8/backup-plain.json` — backup (version 8) with those items.
 - `v8/storage/layout.json` — where the pages go (O9, layout.json version
-  1): Other's order, `["counters"]`. Added after 0.21.0; not in backups
+  1, from before the Hub's rename: its order under `other`),
+  `["counters"]`. Added after 0.21.0; not in backups
   (a setting, like the theme).
 - `v9/storage/placard.json` — Placard (O4, placard.json version 1): "Why so
   quiet? 🤐", count 41.

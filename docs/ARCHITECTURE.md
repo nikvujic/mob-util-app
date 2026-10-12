@@ -153,7 +153,7 @@ The chosen theme and other look-and-feel choices are `Preferences`, kept
 in `preferences.json` on the phone (not in backups). The design checks run
 every screen in every theme.
 
-Custom icons (the Other tiles) are SVGs in `assets/icons/`, drawn in
+Custom icons (the Hub tiles) are SVGs in `assets/icons/`, drawn in
 black and tinted with the theme's accent when shown (`flutter_svg`), so
 they follow every theme like the built-in icons.
 
@@ -250,26 +250,26 @@ keeps it simple and keeps routines reminding indefinitely.
 
 ## Pages as a system (O9)
 
-The tab users see as **Hub** is `other` in the code and in stored data
-(`AppSection.other`, `OtherTool`, `layout.json`'s `other`): only its label
-changed, so nothing saved had to.
+The tab is the **Hub** throughout (`AppSection.hub`, `HubTool`,
+`pages/hub/`). It was "Other" before (O11): `other` in a section lock or in
+`layout.json` version 1 is still read as the Hub.
 
-Other's pages are listed once, in `models/other_tool.dart` (`OtherTool`).
+The Hub's pages are listed once, in `models/hub_tool.dart` (`HubTool`).
 Each value's `name` is a stable id: it's what's stored, so a page is never
 renamed there, only its label. Everything that lists pages reads them from
 there, and a new page has to be added to a few exhaustive switches, so it
 doesn't compile until it's complete:
 
-- `pages/other/tools.dart` — its icon and page;
+- `pages/hub/tools.dart` — its icon and page;
 - `providers/section_data_provider.dart` — how many things it holds and
-  how to clear them (Settings → Clear data lists Other page by page; a
-  locked Other section is cleared page by page on a password reset).
+  how to clear them (Settings → Clear data lists the Hub page by page; a
+  locked Hub is cleared page by page on a password reset).
 
-Where pages go is `PageLayout` (`layout.json`, its own version): Other's
-order as page ids. Unknown ids are dropped and pages missing from it are
+Where pages go is `PageLayout` (`layout.json`, its own version): the
+Hub's order as page ids. Unknown ids are dropped and pages missing from it are
 added at the end, so a new page needs no change to stored data. It's a
 setting, like the theme, so it isn't in backups. The quick-access menu,
-sections in Other and per-page locks (O10, O7) are meant to be more fields
+sections in the Hub and per-page locks (O10, O7) are meant to be more fields
 of the layout and lists of the same ids, not a rework. Each page keeps its
 data in its own file and, in backups, under its own key.
 

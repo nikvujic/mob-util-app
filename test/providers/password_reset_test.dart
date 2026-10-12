@@ -84,9 +84,9 @@ void main() {
 
   test('deletes the content of locked sections, so locks can\'t be bypassed',
       () async {
-    await seed(locked: {AppSection.shop, AppSection.other});
+    await seed(locked: {AppSection.shop, AppSection.hub});
     final plan = reset().plan();
-    expect(plan.sections, {AppSection.shop: 1, AppSection.other: 1});
+    expect(plan.sections, {AppSection.shop: 1, AppSection.hub: 1});
     expect(plan.lockedNotes, 1);
 
     await reset().run();

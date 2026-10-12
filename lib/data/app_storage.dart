@@ -9,7 +9,7 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
-import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -27,7 +27,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/routines.json
 ///         {"version": 2, "routines": [...], "days": [...]}
 ///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
-///     <app documents>/data/layout.json {"version": 1, "other": [ids]}
+///     <app documents>/data/layout.json {"version": 2, "hub": [ids]}
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
 ///     <app documents>/data/medicine.json
 ///         {"version": 1, "medicines": [...], "taken": [...]}
@@ -59,8 +59,8 @@ class AppStorage {
   static const pinsFormatVersion = 1;
 
   /// Version of `layout.json` (O9): where the pages go. History: 1 =
-  /// first format (Other's order).
-  static const layoutFormatVersion = 1;
+  /// first format (the Hub's order, under `other`); 2 = under `hub` (O11).
+  static const layoutFormatVersion = 2;
 
   /// Version of `placard.json` (O4). History: 1 = first format.
   static const placardFormatVersion = 1;

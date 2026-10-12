@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/placard.dart';
-import 'package:the_app/pages/other/placard.dart';
+import 'package:the_app/pages/hub/placard.dart';
 import 'package:the_app/providers/placard_provider.dart';
 
 import '../helpers.dart';

@@ -251,7 +251,7 @@ void main() {
         }
         await t.pumpAndSettle();
       },
-      'other': (t) => openTab(t, 'Hub'),
+      'hub': (t) => openTab(t, 'Hub'),
       'counters': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Counters'));

@@ -53,7 +53,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
         AppSection.notes => countOf(count, 'note', 'notes'),
         AppSection.shop => countOf(count, 'item', 'items'),
         AppSection.planner => countOf(count, 'planner item', 'planner items'),
-        AppSection.other => countOf(count, 'counter', 'counters'),
+        AppSection.hub => countOf(count, 'counter', 'counters'),
       };
 
   List<String> get _lines => [

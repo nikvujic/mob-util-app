@@ -113,12 +113,12 @@ const plainScrollAllowed = {
   // A form, used with the keyboard open.
   'pages/security/password_form.dart',
   // Tiles fill from the bottom right: already in thumb reach.
-  'pages/other/other.dart',
+  'pages/hub/hub.dart',
   // A short form in a bottom sheet: already at the bottom, scrolling only
   // to stay clear of the keyboard.
-  'pages/other/counter_sheet.dart',
+  'pages/hub/counter_sheet.dart',
   // The same, for a medicine.
-  'pages/other/medicine_sheet.dart',
+  'pages/hub/medicine_sheet.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

@@ -5,7 +5,7 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
-import 'package:the_app/pages/other/medicine_sheet.dart';
+import 'package:the_app/pages/hub/medicine_sheet.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';

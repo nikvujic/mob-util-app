@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
-import 'package:the_app/models/other_tool.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
@@ -20,12 +20,12 @@ void main() {
 
   test('Other\'s order survives a restart (O8)', () async {
     final storage = await AppStorage.open(directory: dir);
-    final order = OtherTool.values.reversed.toList();
+    final order = HubTool.values.reversed.toList();
     await storage.saveLayout(PageLayout(order));
     await storage.flush();
 
     final reopened = await AppStorage.open(directory: dir);
-    expect(reopened.initialLayout.other, order);
+    expect(reopened.initialLayout.hub, order);
     expect(File('${dir.path}/layout.json').existsSync(), isTrue);
   });
 
