@@ -582,6 +582,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                   child: PlannerTimeline(
                     blocks: blocks,
                     onAdd: selecting ? null : (slot) => _addIn(day, slot),
+                    now: isSameDay(day, today) ? ref.read(clockProvider) : null,
                     pins: [
                       for (final pin in pins)
                         TimelinePin(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
@@ -206,6 +208,9 @@ class PlannerTimeline extends StatelessWidget {
   /// A reminder's height: one touch target.
   static const pinHeight = 48.0;
 
+  /// The time now, when the day shown is today: a line marks it (P21).
+  final DateTime Function()? now;
+
   final TimeScale _scale;
 
   PlannerTimeline({
@@ -214,6 +219,7 @@ class PlannerTimeline extends StatelessWidget {
     required this.onAdd,
     this.adds = 'a task',
     this.pins = const [],
+    this.now,
   }) : _scale = scaleFor(blocks);
 
   /// The [TimeScale] a timeline with [blocks] uses.
@@ -299,6 +305,14 @@ class PlannerTimeline extends StatelessWidget {
                 y: (minutes) => _scale.y(minutes) - _scale.y(block.start),
               ),
             ),
+          if (now != null)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ExcludeSemantics(
+                  child: _NowLine(clock: now!, y: _y, left: _labelWidth),
+                ),
+              ),
+            ),
           for (final (pin, top) in _pinPlaces())
             Positioned(
               top: top,
@@ -310,6 +324,85 @@ class PlannerTimeline extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// A line across the timeline at the time now, with a dot at its start
+/// (P21). Moves on by itself each minute.
+class _NowLine extends StatefulWidget {
+  final DateTime Function() clock;
+  final double Function(int minutes) y;
+  final double left;
+
+  const _NowLine({required this.clock, required this.y, required this.left});
+
+  @override
+  State<_NowLine> createState() => _NowLineState();
+}
+
+class _NowLineState extends State<_NowLine> {
+  late final Timer _tick;
+  late final DateTime _today = widget.clock();
+  late int? _minutes = _read();
+
+  /// Minutes past midnight now; null once the day shown is over (the app
+  /// left open past midnight).
+  int? _read() {
+    final now = widget.clock();
+    if (now.day != _today.day) return null;
+    return now.hour * 60 + now.minute;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 15), (_) {
+      final minutes = _read();
+      if (minutes != _minutes) setState(() => _minutes = minutes);
+    });
+  }
+
+  @override
+  void didUpdateWidget(_NowLine old) {
+    super.didUpdateWidget(old);
+    _minutes = _read();
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
+
+  static const _dot = 10.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final minutes = _minutes;
+    if (minutes == null) return const SizedBox.shrink();
+    final color = context.colors.accent;
+    final top = widget.y(minutes);
+    return Stack(
+      children: [
+        Positioned(
+          key: const Key('nowLine'),
+          top: top - 1,
+          height: 2,
+          left: widget.left,
+          right: 8,
+          child: ColoredBox(color: color),
+        ),
+        Positioned(
+          top: top - _dot / 2,
+          left: widget.left - _dot / 2,
+          width: _dot,
+          height: _dot,
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+        ),
+      ],
     );
   }
 }

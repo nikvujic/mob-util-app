@@ -7,6 +7,7 @@ Release with the installable APK.
 ## [0.20.0] - unreleased
 
 ### Added
+- Planner: a **now line** across today's timeline at the current time.
 - Settings → **Clear data**: pick Notes, Shop, Planner and/or Other and
   empty them, after typing RESET and entering the master password (if
   one is set). Backups are not touched.

@@ -121,6 +121,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P18 | **Notification settings** (in Settings): the sound, and the colour (the block's colour, or set per reminder). | 💭 Round 11 |
 | P19 | **More block colours**; new tasks default to blue, routines to purple. | ✅ |
 | P20 | **Descriptions**: tasks and routines have an optional description, typed in the sheet under the title; shown on the block below the time when there's room (as many lines as fit), and in full in the block's menu. | ✅ |
+| P21 | **Now line**: on today, a line with a dot marks the time now across the timeline (following stretched hours); it moves on each minute and goes when the day is over. | ✅ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | ✅ via P7–P9 |
 
 ## U — UI polish ("fun but practical")

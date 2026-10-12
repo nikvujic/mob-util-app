@@ -445,7 +445,7 @@ Sorted from one long message. Order of work is at the end.
 **Chunks** (small, one at a time; each can be released on its own):
 1. [x] G + H — switching tabs clears state; empty notes go away.
 2. [x] A + B — the planner sheet and tapping a task; colours.
-3. [ ] D — the "now" line.
+3. [x] D — the "now" line.
 4. [ ] C — reminders as marks on the timeline.
 5. [ ] E1 — notifications: check every state, fix what's missing; a
    phone test list.
