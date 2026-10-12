@@ -337,9 +337,9 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   theme's accent (Clay's orange).
 - [ ] **Clay first and the default theme**, and more themes for fun to
   fill out the list (all dark, no light mode).
-- [ ] **Clear data:** no icon on the big Clear button; type **DELETE**
+- [x] **Clear data:** no icon on the big Clear button; type **DELETE**
   there instead of RESET.
-- [ ] **Edit routine sheet:** the Save button isn't all the way to the
+- [x] **Edit routine sheet:** the Save button isn't all the way to the
   side since the ✕ went (fix its place).
 - [ ] **Overlaps in the sheet: don't move the time by itself.** Today a
   time that clashes on a picked weekday is moved to a free one (seen: a

@@ -4,6 +4,16 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.21.0] - unreleased
+
+### Changed
+- Settings → Clear data: confirm by typing DELETE; the Clear button is
+  just text.
+
+### Fixed
+- Editing a routine: Save sits right at the edge again (since Delete
+  moved left it stopped short).
+
 ## [0.20.0] - 2026-10-12
 
 ### Added

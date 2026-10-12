@@ -14,12 +14,11 @@ import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
-import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/password_prompt.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// Settings → Clear data (D7): empties the picked sections, after typing
-/// RESET and, with a master password set, entering it.
+/// DELETE and, with a master password set, entering it.
 class ClearDataPage extends ConsumerStatefulWidget {
   const ClearDataPage({super.key});
 
@@ -126,7 +125,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: FilledButton.icon(
+          child: FilledButton(
             key: const Key('clearData'),
             onPressed: _picked.isEmpty ? null : _clear,
             style: FilledButton.styleFrom(
@@ -135,8 +134,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
               foregroundColor: colors.background,
               minimumSize: const Size.fromHeight(48),
             ),
-            icon: const Icon(Icons.delete_forever_outlined),
-            label: const Text('Clear'),
+            child: const Text('Clear'),
           ),
         ),
       ),
@@ -144,7 +142,10 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
   }
 }
 
-/// Lists what goes; the user types [resetConfirmWord] to confirm.
+/// What the user types to confirm clearing (Nikola: DELETE here).
+const clearConfirmWord = 'DELETE';
+
+/// Lists what goes; the user types [clearConfirmWord] to confirm.
 class _ClearDataDialog extends StatefulWidget {
   final List<AppSection> sections;
 
@@ -169,7 +170,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
     super.dispose();
   }
 
-  bool get _confirmed => _confirm.text.trim().toUpperCase() == resetConfirmWord;
+  bool get _confirmed => _confirm.text.trim().toUpperCase() == clearConfirmWord;
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +204,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
             enableSuggestions: false,
             textCapitalization: TextCapitalization.characters,
             decoration: const InputDecoration(
-              labelText: 'Type $resetConfirmWord to confirm',
+              labelText: 'Type $clearConfirmWord to confirm',
             ),
           ),
         ],

@@ -61,9 +61,9 @@ void main() {
   Future<void> confirm(WidgetTester tester) async {
     await tester.tap(clearButton);
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('clearConfirm')), 'reset');
+    await tester.enterText(find.byKey(const Key('clearConfirm')), 'delete');
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Clear'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Clear').last);
     await tester.pumpAndSettle();
   }
 
@@ -88,7 +88,7 @@ void main() {
     await tester.tap(clearButton);
     await tester.pumpAndSettle();
 
-    final dialogClear = find.widgetWithText(FilledButton, 'Clear');
+    final dialogClear = find.widgetWithText(FilledButton, 'Clear').last;
     expect(enabled(tester, dialogClear), isFalse);
     await tester.enterText(find.byKey(const Key('clearConfirm')), 'nope');
     await tester.pump();
@@ -117,14 +117,14 @@ void main() {
     expect(find.byKey(const Key('promptPassword')), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('promptPassword')), 'wrong');
-    await tester.tap(find.widgetWithText(FilledButton, 'Clear'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Clear').last);
     await tester.pump();
     await settleBusy(tester);
     expect(find.text('Wrong password'), findsOneWidget);
     expect(container.read(shopProvider), hasLength(1));
 
     await tester.enterText(find.byKey(const Key('promptPassword')), password);
-    await tester.tap(find.widgetWithText(FilledButton, 'Clear'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Clear').last);
     await tester.pump();
     await settleBusy(tester);
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/day_strip.dart';
 
@@ -132,6 +133,21 @@ void main() {
     expect(container.read(routinesProvider).routines.single.title, 'Run');
     await showDay(tester, 'Friday 9 October');
     expect(find.text('Run'), findsOneWidget);
+  });
+
+  testWidgets('editing: Delete on the left, Save right at the edge',
+      (tester) async {
+    await openPlanner(tester);
+    addGym();
+    await tester.pump();
+    await tapText(tester, 'Gym');
+    await tapText(tester, 'Edit routine');
+
+    final sheet = tester.getRect(find.byType(TaskSheet));
+    final save = tester.getRect(find.widgetWithText(FilledButton, 'Save'));
+    final delete = tester.getRect(find.text('Delete'));
+    expect(save.right, moreOrLessEquals(sheet.right - 16, epsilon: 1));
+    expect(delete.left, lessThan(sheet.left + 64));
   });
 
   testWidgets('editing: a newly ticked day that clashes moves the times',

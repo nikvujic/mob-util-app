@@ -785,19 +785,19 @@ class _TaskSheetState extends State<TaskSheet> {
                     // No ✕: back closes it (asking first if something
                     // changed). Delete, when editing, sits on the left.
                     children: [
+                      // Not Flexible: that kept half the free space for
+                      // it, so Save stopped short of the edge (Nikola).
                       if (widget.onDelete != null)
-                        Flexible(
-                          child: TextButton.icon(
-                            icon: const Icon(Icons.delete_outline),
-                            label: const Text('Delete'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: context.colors.danger,
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              widget.onDelete!();
-                            },
+                        TextButton.icon(
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Delete'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: context.colors.danger,
                           ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            widget.onDelete!();
+                          },
                         ),
                       const Spacer(),
                       FilledButton(
