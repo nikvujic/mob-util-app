@@ -103,6 +103,11 @@ the same way round: locked notes and the content of locked sections are
 deleted and on disk first, then the password goes. Section locks clear
 and the session locks as soon as it does.
 
+What a section holds as a whole (the planner: tasks, routines and
+reminders) is counted and cleared in one place,
+`providers/section_data_provider.dart`, used by that reset and by
+Settings → Clear data (D7), which saves before saying it's done.
+
 Backups keep locked notes sealed and carry the master password record
 (as in `security.json`) that holds their key. Restoring on a phone without
 a master password adopts that record (saved before the notes); otherwise

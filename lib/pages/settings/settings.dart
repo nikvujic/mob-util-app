@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/pages/settings/clear_data.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
@@ -37,6 +38,19 @@ class SettingsPage extends ConsumerWidget {
             value: preferences.noteLineNumbers,
             onChanged:
                 ref.read(preferencesProvider.notifier).setNoteLineNumbers,
+          ),
+          const Divider(),
+          ListTile(
+            leading:
+                Icon(Icons.delete_sweep_outlined, color: context.colors.danger),
+            title: const Text('Clear data'),
+            subtitle: Text(
+              'Empty Notes, Shop, Planner or Other',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ClearDataPage()),
+            ),
           ),
         ],
       ),

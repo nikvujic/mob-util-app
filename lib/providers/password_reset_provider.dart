@@ -1,15 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
-import 'package:the_app/models/routine.dart';
-import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
-import 'package:the_app/providers/pins_provider.dart';
-import 'package:the_app/providers/planner_provider.dart';
-import 'package:the_app/providers/routines_provider.dart';
+import 'package:the_app/providers/section_data_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
-import 'package:the_app/providers/shop_provider.dart';
 
 /// What a reset of a forgotten master password deletes (L7).
 class PasswordResetPlan {
@@ -43,43 +38,25 @@ class PasswordReset {
           : notes.where((n) => n.isLocked).length,
       sections: {
         for (final section in AppSection.values)
-          if (locks.contains(section)) section: _count(section),
+          if (locks.contains(section))
+            section: _ref.read(sectionDataProvider).count(section),
       },
     );
   }
-
-  int _count(AppSection section) => switch (section) {
-        AppSection.notes => _ref.read(notesProvider).length,
-        AppSection.shop => _ref.read(shopProvider).length,
-        AppSection.planner => _ref.read(plannerProvider).length +
-            _ref.read(routinesProvider).routines.length +
-            _ref.read(pinsProvider).length,
-        AppSection.other => _ref.read(countersProvider).length,
-      };
 
   /// Deletes, saves, and only then removes the password: a crash in
   /// between leaves the password set, never protected data without it.
   Future<void> run() async {
     final locks = _ref.read(sectionLocksProvider);
-    final notes = _ref.read(notesProvider.notifier);
-    if (locks.contains(AppSection.notes)) {
-      notes.replaceAll(const []);
-    } else {
-      notes.removeNotes({
+    final data = _ref.read(sectionDataProvider);
+    for (final section in locks) {
+      data.clear(section);
+    }
+    if (!locks.contains(AppSection.notes)) {
+      _ref.read(notesProvider.notifier).removeNotes({
         for (final note in _ref.read(notesProvider))
           if (note.isLocked) note.id,
       });
-    }
-    if (locks.contains(AppSection.shop)) {
-      _ref.read(shopProvider.notifier).replaceAll(const []);
-    }
-    if (locks.contains(AppSection.planner)) {
-      _ref.read(plannerProvider.notifier).replaceAll(const []);
-      _ref.read(routinesProvider.notifier).replaceAll(RoutineBook.empty);
-      _ref.read(pinsProvider.notifier).replaceAll(const []);
-    }
-    if (locks.contains(AppSection.other)) {
-      _ref.read(countersProvider.notifier).replaceAll(const []);
     }
     await _ref.read(appStorageProvider).flush();
     // Section locks and the open session go with the password.

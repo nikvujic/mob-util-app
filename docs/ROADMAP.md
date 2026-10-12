@@ -294,7 +294,7 @@ patterns other work builds on (G11, themes), then the bigger features.
   changes); editing a routine has a plain **Delete** on the left.
 - [x] **Short blocks show one line of description** (their time is
   beside the title, so there's room below), down to the smallest block.
-- [ ] **Clear data** in Settings (Z1): pick sections (Notes, Shop,
+- [x] **Clear data** in Settings (Z1): pick sections (Notes, Shop,
   Planner, Other) and clear everything in them, after typing RESET and,
   with a master password set, entering it. For clearing test data.
 - [ ] Later: **lock each Other page on its own** (like section locks).

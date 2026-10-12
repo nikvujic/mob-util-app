@@ -44,6 +44,10 @@ class ConfirmDialog extends StatelessWidget {
   }
 }
 
+/// What the user types to confirm deleting for good (password reset,
+/// clear data).
+const resetConfirmWord = 'RESET';
+
 /// Shows a [ConfirmDialog] and resolves to `true` only if the user confirmed.
 /// Dismissing the dialog (tap outside, back) counts as cancel.
 Future<bool> showConfirmDialog(

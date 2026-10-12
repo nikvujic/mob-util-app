@@ -235,6 +235,26 @@ void main() {
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
       },
+      'clear data': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Settings'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Clear data'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('clear-notes')));
+        await t.pump();
+      },
+      'clear data dialog': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Settings'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Clear data'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('clear-notes')));
+        await t.pump();
+        await t.tap(find.byKey(const Key('clearData')));
+        await t.pumpAndSettle();
+      },
       'themes': (t) async {
         await openMenu(t);
         await t.tap(find.text('Themes'));

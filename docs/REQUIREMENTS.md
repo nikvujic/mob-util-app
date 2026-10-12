@@ -51,7 +51,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D4 | Export files carry a format version; newer app versions can always import older exports. | ✅ newer ones are rejected with a clear message; app data and backups of every version (v1–v7) are read in tests from frozen samples |
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). The server is **typed in** (connection details entered in the app), never hard-coded. | 💭 not now |
 | D6 | **Data-safety sweep**: everything that could lose data (storage, updates, restore, locks, crashes, phone changes), how safe export is, and when cloud saving should come. | 💭 later |
-| D7 | **Clear data per section** (Settings): pick Notes, Shop, Planner and/or Other and clear everything in them, after typing RESET and, with a master password set, entering it. | 💭 Round 12 |
+| D7 | **Clear data per section** (Settings): pick Notes, Shop, Planner and/or Other and clear everything in them, after typing RESET and, with a master password set, entering it. | ✅ |
 | D8 | **Surviving an uninstall**: data outside the app (automatic export to a folder the user picks, or cloud) so deleting the app doesn't lose it. | 💭 later |
 
 ## N — Notes

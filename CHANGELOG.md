@@ -6,6 +6,11 @@ Release with the installable APK.
 
 ## [0.20.0] - unreleased
 
+### Added
+- Settings → **Clear data**: pick Notes, Shop, Planner and/or Other and
+  empty them, after typing RESET and entering the master password (if
+  one is set). Backups are not touched.
+
 ### Changed
 - Planner sheet: no ✕ (back closes it, asking first if something
   changed); editing a routine has a plain **Delete** on the left.

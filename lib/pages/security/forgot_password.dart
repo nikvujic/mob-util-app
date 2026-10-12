@@ -4,6 +4,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/password_reset_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// Asks to reset a forgotten master password (L7), listing what [plan]
 /// deletes. When anything will be deleted, the user has to type [resetConfirmWord].
@@ -18,9 +19,6 @@ Future<bool> showForgotPasswordDialog(
   );
   return result ?? false;
 }
-
-/// What the user types to confirm deleting.
-const resetConfirmWord = 'RESET';
 
 class _ForgotPasswordDialog extends StatefulWidget {
   final PasswordResetPlan plan;
