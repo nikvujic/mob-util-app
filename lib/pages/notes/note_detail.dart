@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/crypto.dart';
+import 'package:the_app/core/markdown.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/note_history.dart';
@@ -164,6 +165,29 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   void _redo() {
     final text = _history.redo();
     if (text != null) _apply(text);
+  }
+
+  /// The checkbox button (N15): while typing, makes the line a checkbox
+  /// item or a plain line again; while viewing, starts a new checkbox at
+  /// the end, ready to type.
+  void _checklist() {
+    final content = _contentController;
+    final selection = content.selection;
+    if (!_contentFocusNode.hasFocus || !selection.isValid) {
+      final text = content.text;
+      final add = text.isEmpty || text.endsWith('\n') ? '- [ ] ' : '\n- [ ] ';
+      content.value = TextEditingValue(
+        text: text + add,
+        selection: TextSelection.collapsed(offset: text.length + add.length),
+      );
+      _contentFocusNode.requestFocus();
+      return;
+    }
+    final edit = toggleChecklistLine(content.text, selection.extentOffset);
+    content.value = TextEditingValue(
+      text: edit.text,
+      selection: TextSelection.collapsed(offset: edit.cursor),
+    );
   }
 
   Note? get _note =>
@@ -455,6 +479,11 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   tooltip: 'Discard changes',
                   onPressed: _revertInPlace,
                 ),
+              BottomAction(
+                icon: Icons.checklist,
+                tooltip: 'Checkbox',
+                onPressed: _checklist,
+              ),
               // Outermost, under the thumb.
               BottomAction(
                 icon: Icons.undo,
@@ -511,32 +540,36 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                     Expanded(
                       child: KeyedSubtree(
                         key: _contentFieldKey,
-                        child: TextField(
-                          key: const Key('noteContentField'),
+                        // Tapping a checkbox ticks it (N15).
+                        child: CheckboxTaps(
                           controller: _contentController,
-                          focusNode: _contentFocusNode,
-                          scrollController: _contentScroll,
-                          autofocus: widget.isNew,
-                          keyboardType: TextInputType.multiline,
-                          textCapitalization: TextCapitalization.sentences,
-                          maxLines: null,
-                          expands: true,
-                          // Enter continues a list (N9).
-                          inputFormatters: const [MarkdownListFormatter()],
-                          textAlignVertical: TextAlignVertical.top,
-                          style: TextStyle(
-                            color: context.colors.textPrimary,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Start writing…',
-                            hintStyle:
-                                TextStyle(color: context.colors.textHint),
-                            // The text ends above the buttons, never behind them.
-                            contentPadding: EdgeInsets.only(
-                              bottom: BottomActions.contentClearance +
-                                  BottomActions.aboveClearance,
+                          child: TextField(
+                            key: const Key('noteContentField'),
+                            controller: _contentController,
+                            focusNode: _contentFocusNode,
+                            scrollController: _contentScroll,
+                            autofocus: widget.isNew,
+                            keyboardType: TextInputType.multiline,
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: null,
+                            expands: true,
+                            // Enter continues a list (N9).
+                            inputFormatters: const [MarkdownListFormatter()],
+                            textAlignVertical: TextAlignVertical.top,
+                            style: TextStyle(
+                              color: context.colors.textPrimary,
+                              fontSize: 16,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Start writing…',
+                              hintStyle:
+                                  TextStyle(color: context.colors.textHint),
+                              // The text ends above the buttons, never behind them.
+                              contentPadding: EdgeInsets.only(
+                                bottom: BottomActions.contentClearance +
+                                    BottomActions.aboveClearance,
+                              ),
                             ),
                           ),
                         ),

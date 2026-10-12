@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:the_app/core/markdown.dart';
 import 'package:the_app/core/theme.dart';
@@ -43,6 +45,33 @@ class MarkdownEditingController extends TextEditingController {
     return TextRange(start: start, end: next == -1 ? text.length : next);
   }
 
+  /// The `[` of the checkbox drawn as a box at [offset] (a tap there
+  /// ticks it, N15), or null. Not on the line being edited, where the
+  /// symbols show instead.
+  int? boxAt(int offset) {
+    final checkbox = checkboxOnLine(text, offset);
+    if (checkbox == null || offset > checkbox.box + 3) return null;
+    final revealed = _revealed();
+    if (checkbox.start >= revealed.start &&
+        checkbox.start <= revealed.end &&
+        !revealed.isCollapsed) {
+      return null;
+    }
+    return checkbox.box;
+  }
+
+  /// Ticks or unticks the checkbox whose `[` is at [box]; the cursor stays.
+  void toggleBox(int box) {
+    value = value.copyWith(
+      text: toggleCheckbox(text, box),
+      composing: TextRange.empty,
+    );
+  }
+
+  /// Drawn instead of a checkbox's `[`.
+  static const unchecked = '☐';
+  static const checked = '☑';
+
   /// Heading sizes, relative to the body text: `#`, `##`, `###`.
   static const headingScale = [1.5, 1.3, 1.15];
 
@@ -68,6 +97,13 @@ class MarkdownEditingController extends TextEditingController {
       }
       if (run.bold) s = s.copyWith(fontWeight: FontWeight.w700);
       if (run.italic) s = s.copyWith(fontStyle: FontStyle.italic);
+      if (run.done) {
+        s = s.copyWith(
+          color: colors.textSecondary,
+          decoration: TextDecoration.lineThrough,
+          decorationColor: colors.textSecondary,
+        );
+      }
       if (run.strike) {
         s = s.copyWith(
           decoration: TextDecoration.lineThrough,
@@ -83,7 +119,7 @@ class MarkdownEditingController extends TextEditingController {
             fontStyle: FontStyle.normal,
             decoration: TextDecoration.none,
           ),
-        MdRole.listMarker => s.copyWith(
+        MdRole.listMarker || MdRole.checkbox => s.copyWith(
             color: colors.accent,
             fontWeight: FontWeight.w700,
           ),
@@ -100,6 +136,28 @@ class MarkdownEditingController extends TextEditingController {
     bool shown(MdRun run) => run.role != MdRole.marker || onRevealedLine(run);
     final spans = <TextSpan>[];
     for (final run in markdownRuns(text)) {
+      // A checkbox off the line being edited: its `[` drawn as a box, the
+      // other symbols as nothing, the space after it kept (N15).
+      if (run.role == MdRole.checkbox && !onRevealedLine(run)) {
+        final box = look(run);
+        for (var i = run.start; i < run.end; i++) {
+          final char = text[i];
+          if (char == '[') {
+            final ticked = text[i + 1] != ' ';
+            spans.add(TextSpan(
+              text: ticked ? checked : unchecked,
+              style: box.copyWith(
+                color: ticked ? colors.textSecondary : colors.accent,
+                fontWeight: FontWeight.w400,
+              ),
+            ));
+          } else {
+            final last = i == run.end - 1;
+            spans.add(TextSpan(text: char, style: last ? base : _hidden));
+          }
+        }
+        continue;
+      }
       final style = shown(run) ? look(run) : _hidden;
       // Split where the composing word starts and ends.
       final cuts = {
@@ -164,4 +222,96 @@ class MarkdownListFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: edit.cursor),
     );
   }
+}
+
+/// Ticks a checkbox drawn by [controller] when its box is tapped (N15),
+/// without starting to edit; any other touch goes to the text field in
+/// [child] as usual.
+class CheckboxTaps extends StatelessWidget {
+  final MarkdownEditingController controller;
+  final Widget child;
+
+  const CheckboxTaps({
+    super.key,
+    required this.controller,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      gestures: {
+        _BoxTapRecognizer:
+            GestureRecognizerFactoryWithHandlers<_BoxTapRecognizer>(
+          () => _BoxTapRecognizer(),
+          (recognizer) => recognizer
+            ..boxAt = ((position) => _boxAt(context, position))
+            ..onTap = controller.toggleBox,
+        ),
+      },
+      child: child,
+    );
+  }
+
+  /// The box under [position] (global), if any.
+  int? _boxAt(BuildContext context, Offset position) {
+    final editable = _findEditable(context.findRenderObject());
+    if (editable == null || !editable.attached) return null;
+    final offset = editable.getPositionForPoint(position).offset;
+    final box = controller.boxAt(offset);
+    if (box == null) return null;
+    // Only on the box itself, not anywhere along its line.
+    final rects = editable.getBoxesForSelection(
+      TextSelection(baseOffset: box, extentOffset: box + 1),
+    );
+    if (rects.isEmpty) return null;
+    final local = editable.globalToLocal(position);
+    final rect = rects.first.toRect().inflate(12);
+    return rect.contains(local) ? box : null;
+  }
+
+  static RenderEditable? _findEditable(RenderObject? root) {
+    if (root == null) return null;
+    if (root is RenderEditable) return root;
+    RenderEditable? found;
+    root.visitChildren((child) => found ??= _findEditable(child));
+    return found;
+  }
+}
+
+/// Claims a touch at once when it lands on a checkbox's box, so the text
+/// field underneath doesn't start editing; rejects every other touch.
+class _BoxTapRecognizer extends OneSequenceGestureRecognizer {
+  int? Function(Offset position)? boxAt;
+  ValueChanged<int>? onTap;
+
+  int? _box;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) =>
+      _box == null && (boxAt?.call(event.position) != null);
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    _box = boxAt?.call(event.position);
+    super.addAllowedPointer(event);
+    resolve(GestureDisposition.accepted);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerUpEvent) {
+      final box = _box;
+      if (box != null) onTap?.call(box);
+      stopTrackingPointer(event.pointer);
+    } else if (event is PointerCancelEvent) {
+      stopTrackingPointer(event.pointer);
+    }
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) => _box = null;
+
+  @override
+  String get debugDescription => 'checkbox tap';
 }

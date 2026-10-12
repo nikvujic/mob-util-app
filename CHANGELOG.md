@@ -7,6 +7,9 @@ Release with the installable APK.
 ## [0.20.0] - unreleased
 
 ### Added
+- Notes: **checkboxes**. Type `- [ ] ` (or use the new Checkbox button
+  next to ↶) and it shows as a box; tap the box to tick it. Enter starts
+  the next one.
 - Planner: a **now line** across today's timeline at the current time.
 - Settings → **Clear data**: pick Notes, Shop, Planner and/or Other and
   empty them, after typing RESET and entering the master password (if

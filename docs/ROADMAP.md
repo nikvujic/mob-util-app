@@ -293,7 +293,7 @@ medicine tracker is in. In this order:
 
 1. **Main pages:** now line (D) ✅, reminders as marks (C), toasts (F),
    shop quantities (I), **checkboxes in notes** (N15; Nikola changed his
-   mind, they're in v1).
+   mind, they're in v1) ✅.
    Also done: **no flash of a locked page on coming back** (L8).
 2. **Pages as a system first** (O9), so nothing big changes after v1:
    one registry of pages (id, name, icon, page, its data, lockable);

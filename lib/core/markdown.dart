@@ -13,6 +13,9 @@ enum MdRole {
 
   /// A list item's `-` or `1.`: part of the content, shown a bit muted.
   listMarker,
+
+  /// A checkbox's `- [ ] ` / `- [x] ` (N15): drawn as a box.
+  checkbox,
 }
 
 /// A stretch of a note's text, [start] to [end], and how it looks.
@@ -27,6 +30,9 @@ class MdRun {
   final bool italic;
   final bool strike;
 
+  /// In a ticked checkbox item (N15): shown done.
+  final bool done;
+
   const MdRun(
     this.start,
     this.end, {
@@ -35,6 +41,7 @@ class MdRun {
     this.bold = false,
     this.italic = false,
     this.strike = false,
+    this.done = false,
   });
 
   bool _sameLook(MdRun other) =>
@@ -42,15 +49,18 @@ class MdRun {
       heading == other.heading &&
       bold == other.bold &&
       italic == other.italic &&
-      strike == other.strike;
+      strike == other.strike &&
+      done == other.done;
 
   @override
   String toString() => 'MdRun($start–$end, ${role.name}'
       '${heading > 0 ? ', h$heading' : ''}${bold ? ', bold' : ''}'
-      '${italic ? ', italic' : ''}${strike ? ', strike' : ''})';
+      '${italic ? ', italic' : ''}${strike ? ', strike' : ''}'
+      '${done ? ', done' : ''})';
 }
 
 final _heading = RegExp(r'^(#{1,3}) ');
+final _task = RegExp(r'^(\s*)([-*+]) \[([ xX])\] ');
 final _bullet = RegExp(r'^(\s*)([-*+]) ');
 final _numbered = RegExp(r'^(\s*)(\d{1,3})([.)]) ');
 final _bold = RegExp(r'\*\*(?=\S)(.+?)(?<=\S)\*\*');
@@ -81,15 +91,21 @@ void _line(String line, int offset, List<MdRun> runs) {
   final italic = List.filled(n, false);
   final strike = List.filled(n, false);
   var heading = 0;
+  var done = false;
 
-  // What the line starts with: a heading or a list item.
+  // What the line starts with: a heading, a checkbox or a list item.
   var body = 0;
   final h = _heading.firstMatch(line);
+  final task = _task.firstMatch(line);
   final listItem = _bullet.firstMatch(line) ?? _numbered.firstMatch(line);
   if (h != null) {
     heading = h.group(1)!.length;
     body = h.end;
     role.fillRange(0, body, MdRole.marker);
+  } else if (task != null) {
+    body = task.end;
+    done = task.group(3) != ' ';
+    role.fillRange(task.group(1)!.length, body, MdRole.checkbox);
   } else if (listItem != null) {
     body = listItem.end;
     role.fillRange(listItem.group(1)!.length, body, MdRole.listMarker);
@@ -124,6 +140,7 @@ void _line(String line, int offset, List<MdRun> runs) {
         bold: bold[i],
         italic: italic[i],
         strike: strike[i],
+        done: done && i >= body,
       ),
     );
   }
@@ -144,6 +161,7 @@ void _add(List<MdRun> runs, MdRun run) {
         bold: last.bold,
         italic: last.italic,
         strike: last.strike,
+        done: last.done,
       ),
     );
   } else {
@@ -171,9 +189,14 @@ ListEdit? continueList(String text, int cursor) {
 
   final String next;
   final RegExpMatch item;
+  final task = _task.firstMatch(line);
   final bullet = _bullet.firstMatch(line);
   final numbered = _numbered.firstMatch(line);
-  if (bullet != null) {
+  if (task != null) {
+    // The next one starts unticked.
+    item = task;
+    next = '${task.group(1)}${task.group(2)} [ ] ';
+  } else if (bullet != null) {
     item = bullet;
     next = '${bullet.group(1)}${bullet.group(2)} ';
   } else if (numbered != null) {
@@ -193,4 +216,59 @@ ListEdit? continueList(String text, int cursor) {
     text: text.substring(0, cursor) + next + text.substring(cursor),
     cursor: cursor + next.length,
   );
+}
+
+/// A checkbox item's box (N15): [start] is where its `-` is, [box] where
+/// its `[` is.
+typedef MdCheckbox = ({int start, int box, bool checked});
+
+/// The checkbox on the line holding [offset], if that line is one.
+MdCheckbox? checkboxOnLine(String text, int offset) {
+  if (offset < 0 || offset > text.length) return null;
+  final lineStart = offset == 0 ? 0 : text.lastIndexOf('\n', offset - 1) + 1;
+  final lineEnd = text.indexOf('\n', lineStart);
+  final line = text.substring(lineStart, lineEnd == -1 ? text.length : lineEnd);
+  final task = _task.firstMatch(line);
+  if (task == null) return null;
+  final start = lineStart + task.group(1)!.length;
+  return (start: start, box: start + 2, checked: task.group(3) != ' ');
+}
+
+/// [text] with the checkbox whose `[` is at [box] ticked or unticked.
+String toggleCheckbox(String text, int box) {
+  final checked = text[box + 1] != ' ';
+  return text.replaceRange(box + 1, box + 2, checked ? ' ' : 'x');
+}
+
+/// The checklist button (N15): makes the line holding [cursor] a checkbox
+/// item (a bullet becomes one), or a plain line again if it already is
+/// one. The cursor stays with the text it was in.
+ListEdit toggleChecklistLine(String text, int cursor) {
+  cursor = cursor.clamp(0, text.length);
+  final lineStart = cursor == 0 ? 0 : text.lastIndexOf('\n', cursor - 1) + 1;
+  final lineEnd = text.indexOf('\n', lineStart);
+  final line = text.substring(lineStart, lineEnd == -1 ? text.length : lineEnd);
+
+  ListEdit replace(int from, int to, String put) {
+    final at = lineStart + from, end = lineStart + to;
+    final shift = put.length - (to - from);
+    return (
+      text: text.replaceRange(at, end, put),
+      cursor: cursor < at
+          ? cursor
+          : cursor >= end
+              ? cursor + shift
+              : at + put.length,
+    );
+  }
+
+  final task = _task.firstMatch(line);
+  if (task != null) return replace(task.group(1)!.length, task.end, '');
+  final bullet = _bullet.firstMatch(line);
+  if (bullet != null) {
+    final indent = bullet.group(1)!.length;
+    return replace(indent, bullet.end, '${bullet.group(2)} [ ] ');
+  }
+  final indent = RegExp(r'^\s*').firstMatch(line)!.end;
+  return replace(indent, indent, '- [ ] ');
 }

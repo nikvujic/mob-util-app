@@ -127,4 +127,63 @@ void main() {
       expect(enter('-no|'), isNull);
     });
   });
+
+  group('checkboxes (N15)', () {
+    test('"- [ ] " and "- [x] " are checkboxes; a ticked one is done', () {
+      expect(parts('- [ ] milk', role: MdRole.checkbox), ['- [ ] ']);
+      expect(parts('  * [X] eggs', role: MdRole.checkbox), ['* [X] ']);
+      expect(parts('- [x] eggs', where: (r) => r.done), ['eggs']);
+      expect(parts('- [ ] milk', where: (r) => r.done), isEmpty);
+      // Not checkboxes: no space after, or something else in the box.
+      expect(parts('- [ ]milk', role: MdRole.checkbox), isEmpty);
+      expect(parts('- [y] milk', role: MdRole.checkbox), isEmpty);
+      expect(parts('- [y] milk', role: MdRole.listMarker), ['- ']);
+    });
+
+    String? enter(String withCursor) {
+      final at = withCursor.indexOf('|');
+      final text =
+          '${withCursor.substring(0, at)}\n${withCursor.substring(at + 1)}';
+      final edit = continueList(text, at + 1);
+      if (edit == null) return null;
+      return '${edit.text.substring(0, edit.cursor)}|'
+          '${edit.text.substring(edit.cursor)}';
+    }
+
+    test('Enter continues with an empty box; on an empty one it ends', () {
+      expect(enter('- [x] milk|'), '- [x] milk\n- [ ] |');
+      expect(enter('  - [ ] milk|'), '  - [ ] milk\n  - [ ] |');
+      expect(enter('- [ ] milk\n- [ ] |'), '- [ ] milk\n|');
+    });
+
+    test('found from anywhere on its line; toggled', () {
+      const text = 'Buy\n  - [ ] milk\nend';
+      expect(checkboxOnLine(text, 0), isNull);
+      expect(checkboxOnLine(text, 10), (start: 6, box: 8, checked: false));
+      expect(checkboxOnLine(text, text.length), isNull);
+      final ticked = toggleCheckbox(text, 8);
+      expect(ticked, 'Buy\n  - [x] milk\nend');
+      expect(checkboxOnLine(ticked, 6)!.checked, isTrue);
+      expect(toggleCheckbox(ticked, 8), text);
+    });
+
+    test('the checkbox button: plain ↔ checkbox, a bullet becomes one', () {
+      String toggle(String withCursor) {
+        final at = withCursor.indexOf('|');
+        final edit = toggleChecklistLine(
+          withCursor.replaceFirst('|', ''),
+          at,
+        );
+        return '${edit.text.substring(0, edit.cursor)}|'
+            '${edit.text.substring(edit.cursor)}';
+      }
+
+      expect(toggle('milk|'), '- [ ] milk|');
+      expect(toggle('|'), '- [ ] |');
+      expect(toggle('a\n  mi|lk\nb'), 'a\n  - [ ] mi|lk\nb');
+      expect(toggle('- milk|'), '- [ ] milk|');
+      expect(toggle('- [x] mi|lk'), 'mi|lk');
+      expect(toggle('- [ |] milk'), '|milk', reason: 'cursor in the box');
+    });
+  });
 }
