@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/backup/backup.dart';
+import 'package:the_app/pages/notes/introduction.dart';
 import 'package:the_app/pages/security/security.dart';
 import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
+import 'package:the_app/providers/introduction_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
@@ -82,6 +84,13 @@ class AppDrawer extends ConsumerWidget {
                     title: const Text('Settings'),
                     onTap: () => _open(context, const SettingsPage()),
                   ),
+                  // Opens it, and brings it back to Notes if deleted (N16).
+                  if (ref.watch(introductionAvailableProvider))
+                    ListTile(
+                      leading: const Icon(Icons.auto_stories_outlined),
+                      title: const Text('Introduction'),
+                      onTap: () => openIntroduction(context, ref),
+                    ),
                 ],
               ),
             ),

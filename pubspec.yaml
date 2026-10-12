@@ -66,6 +66,10 @@ flutter:
   # Custom icons (the Other tiles), drawn in black and tinted in the app.
   assets:
     - assets/icons/
+    # The Introduction note (N16): the guide, and the changes for "What's
+    # new".
+    - assets/introduction.md
+    - CHANGELOG.md
 
   # To add assets to your application, add an assets section, like this:
   # assets:

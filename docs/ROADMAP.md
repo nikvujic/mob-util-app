@@ -383,13 +383,13 @@ Chunks, in order (each its own commit; release when a few are in):
   mistake).
 
 **2. Introduction note** (N16)
-- [ ] A special note, **"Introduction"**, at the top of Notes: what each
+- [x] A special note, **"Introduction"**, at the top of Notes: what each
   part of the app does and how to use it (for any user, plain and
   objective), and under it **what's new** (only the latest version's
   changes). Shown after a fresh install and again after each update.
-- [ ] Read-only, nicely drawn markdown; can't be edited. Can be deleted;
+- [x] Read-only, nicely drawn markdown; can't be edited. Can be deleted;
   the menu (or Settings) can bring it back.
-- [ ] A Settings switch: don't bring it back on updates.
+- [x] A Settings switch: don't bring it back on updates.
 
 **3. Food tracker** (O14) — first in line when new Hub pages come
 - [ ] A Hub page for what was eaten each day and how well it agreed

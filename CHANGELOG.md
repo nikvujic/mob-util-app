@@ -18,6 +18,10 @@ Release with the installable APK.
   accent, the same size.
 
 ### Added
+- An **Introduction** at the top of Notes: how each part of the app
+  works, and what's new in this version. It comes back marked *New*
+  after each update (Settings can turn that off); delete it from its
+  page, and open it any time from the menu.
 - Planner and routine sheets: an **End of day** choice for the end time.
 
 ### Changed

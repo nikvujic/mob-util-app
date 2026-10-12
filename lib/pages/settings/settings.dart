@@ -38,6 +38,18 @@ class SettingsPage extends ConsumerWidget {
             onChanged:
                 ref.read(preferencesProvider.notifier).setNoteLineNumbers,
           ),
+          SwitchListTile(
+            key: const Key('introOnUpdates'),
+            secondary: const Icon(Icons.auto_stories_outlined),
+            title: const Text('Introduction after updates'),
+            subtitle: Text(
+              'Brings the Introduction back to the top of Notes with each '
+              'new version, showing what changed. It\'s always in the menu.',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.introOnUpdates,
+            onChanged: ref.read(preferencesProvider.notifier).setIntroOnUpdates,
+          ),
           const Divider(),
           ListTile(
             leading:

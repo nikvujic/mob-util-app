@@ -32,6 +32,20 @@ class Preferences {
   /// null (or a day gone by): not paused.
   final DateTime? medicinePausedUntil;
 
+  /// The Introduction note (N16): deleted from the Notes list (the menu
+  /// brings it back).
+  final bool introDeleted;
+
+  /// The Introduction comes back after each update (unless off).
+  final bool introOnUpdates;
+
+  /// The app version the Introduction was last brought up for; null
+  /// before the first start (or before N16).
+  final String? introVersion;
+
+  /// It's new to the user (a fresh install or an update), until opened.
+  final bool introUnread;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -41,7 +55,24 @@ class Preferences {
     this.medicineFollowUp,
     this.medicineDot = true,
     this.medicinePausedUntil,
+    this.introDeleted = false,
+    this.introOnUpdates = true,
+    this.introVersion,
+    this.introUnread = false,
   });
+
+  /// After starting [version] of the app: a first start or an update
+  /// brings the Introduction up (an update only if [introOnUpdates]),
+  /// marked new. The same version: nothing changes.
+  Preferences startedVersion(String version) {
+    if (introVersion == version) return this;
+    final bringUp = introVersion == null || introOnUpdates;
+    return copyWith(
+      introVersion: () => version,
+      introDeleted: bringUp ? false : introDeleted,
+      introUnread: bringUp || introUnread,
+    );
+  }
 
   /// Whether medicine reminders and the dot are paused on [day].
   bool medicinePausedOn(DateTime day) {
@@ -59,6 +90,10 @@ class Preferences {
     int? Function()? medicineFollowUp,
     bool? medicineDot,
     DateTime? Function()? medicinePausedUntil,
+    bool? introDeleted,
+    bool? introOnUpdates,
+    String? Function()? introVersion,
+    bool? introUnread,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -74,6 +109,10 @@ class Preferences {
         medicinePausedUntil: medicinePausedUntil == null
             ? this.medicinePausedUntil
             : medicinePausedUntil(),
+        introDeleted: introDeleted ?? this.introDeleted,
+        introOnUpdates: introOnUpdates ?? this.introOnUpdates,
+        introVersion: introVersion == null ? this.introVersion : introVersion(),
+        introUnread: introUnread ?? this.introUnread,
       );
 
   Map<String, dynamic> toJson() => {
@@ -86,6 +125,10 @@ class Preferences {
         'medicineDot': medicineDot,
         if (medicinePausedUntil != null)
           'medicinePausedUntil': PlannerTask.dayToJson(medicinePausedUntil!),
+        'introDeleted': introDeleted,
+        'introOnUpdates': introOnUpdates,
+        if (introVersion != null) 'introVersion': introVersion,
+        'introUnread': introUnread,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -100,5 +143,9 @@ class Preferences {
         medicinePausedUntil: json['medicinePausedUntil'] == null
             ? null
             : PlannerTask.dayFromJson(json['medicinePausedUntil']),
+        introDeleted: json['introDeleted'] as bool? ?? false,
+        introOnUpdates: json['introOnUpdates'] as bool? ?? true,
+        introVersion: json['introVersion'] as String?,
+        introUnread: json['introUnread'] as bool? ?? false,
       );
 }

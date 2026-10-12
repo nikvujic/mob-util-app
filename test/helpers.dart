@@ -29,6 +29,7 @@ Future<ProviderContainer> pumpApp(
   DateTime Function()? clock,
   FingerprintVault? fingerprint,
   FakeReminderScheduler? reminders,
+  bool introduction = false,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -43,6 +44,9 @@ Future<ProviderContainer> pumpApp(
         reminders ?? FakeReminderScheduler(),
       ),
       if (clock != null) clockProvider.overrideWithValue(clock),
+      // The Introduction note (N16) only where a test asks for it.
+      if (introduction)
+        startedVersionProvider.overrideWithValue(testAppVersion),
       ...overrides,
     ],
   );

@@ -11,13 +11,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final storage = await AppStorage.open();
   final info = await PackageInfo.fromPlatform();
+  final version = '${info.version} (${info.buildNumber})';
   runApp(
     ProviderScope(
       overrides: [
         appStorageProvider.overrideWithValue(storage),
-        appVersionProvider.overrideWithValue(
-          '${info.version} (${info.buildNumber})',
-        ),
+        appVersionProvider.overrideWithValue(version),
+        // A first start or an update brings the Introduction up (N16).
+        startedVersionProvider.overrideWithValue(version),
       ],
       child: const MyApp(),
     ),

@@ -29,7 +29,9 @@ as a short list — not step-by-step test instructions.
 
 1. Bump `version` in `pubspec.yaml`.
 2. Add a section to `CHANGELOG.md`: `## [X.Y.Z] - YYYY-MM-DD` with
-   *Added* / *Changed* / *Fixed* lists, written for the user.
+   *Added* / *Changed* / *Fixed* lists, written for the user: the app
+   shows it as **What's new** in the Introduction note (N16). Update
+   `assets/introduction.md` when a feature is added or changes.
 3. Commit (`Release vX.Y.Z`) and push to `main`.
 4. Start the release, either way:
    - **On GitHub** (works from the phone too): *Actions → Release → Run

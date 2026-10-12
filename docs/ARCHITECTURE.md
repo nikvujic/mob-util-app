@@ -206,6 +206,17 @@ box over each from the field's own layout (like `LineNumbers`).
 `CheckboxTaps` ticks one when its box is tapped. Phones' fonts drew ☐ /
 ☑ at their own size and colour, so the app doesn't rely on them.
 
+## The Introduction note (N16)
+
+Not a stored note: a page (`pages/notes/introduction.dart`) and a tile
+at the top of Notes. Its text is `assets/introduction.md` (the guide,
+kept up to date with the features) followed by the version's section of
+`CHANGELOG.md`, which is bundled too (`core/changelog.dart` finds it;
+`data/bundled_text.dart` reads the files). Whether it shows, and whether
+it's new, are preferences: `main()` passes the version this start is
+(`startedVersionProvider`), and a version not seen before brings it
+back. Most tests don't pass one, so their Notes hold only their notes.
+
 ## Planner routines (P8)
 
 A routine (`models/routine.dart`) is one stored item — times, weekdays,

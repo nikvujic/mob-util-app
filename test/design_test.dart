@@ -150,6 +150,11 @@ void main() {
     // Each case opens one screen of the seeded app.
     final screens = <String, Future<void> Function(WidgetTester)>{
       'notes list': (_) async {},
+      'introduction': (t) async {
+        await t.tap(find.byKey(const Key('introductionTile')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('introductionText')), findsOneWidget);
+      },
       'notes selection mode': (t) async {
         await t.longPress(find.text('Groceries'));
         await t.pumpAndSettle();
@@ -396,7 +401,10 @@ void main() {
         testWidgets('$name (${theme.label})', (tester) async {
           final semantics = tester.ensureSemantics();
           final container = await pumpApp(tester,
-              backupFiles: pickingBackup(), clock: designClock);
+              backupFiles: pickingBackup(),
+              clock: designClock,
+              // The Introduction at the top of Notes (N16), new.
+              introduction: true);
           container.read(preferencesProvider.notifier).setTheme(theme.name);
           await seed(container);
           await tester.pump();
