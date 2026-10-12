@@ -45,8 +45,31 @@ void main() {
     await tester.pumpAndSettle();
 
     final label = tester.getRect(find.text('00:00'));
-    final viewport = tester.getRect(find.byType(SingleChildScrollView));
+    final viewport = tester.getRect(find.byType(CustomScrollView).first);
     expect(label.top, greaterThanOrEqualTo(viewport.top));
+  });
+
+  testWidgets('reach mode: pulled down at the top, 00:00 comes into reach',
+      (tester) async {
+    await openPlanner(tester);
+    final midnight = find.text('00:00');
+    await tester.ensureVisible(midnight);
+    await tester.pumpAndSettle();
+    // Up to the normal top: a scroll stops there, like any list.
+    await tester.drag(find.text('Free · 00:00–24:00'), const Offset(0, 300));
+    await tester.pumpAndSettle();
+    final atTop = tester.getTopLeft(midnight).dy;
+
+    // A new pull from the top shifts the day down, and it stays there.
+    await tester.drag(find.text('Free · 00:00–24:00'), const Offset(0, 200));
+    await tester.pumpAndSettle();
+    final inReach = tester.getTopLeft(midnight).dy;
+    expect(inReach, greaterThan(atTop + 100));
+
+    // Any push the other way snaps it back to its normal top.
+    await tester.drag(find.text('Free · 00:00–24:00'), const Offset(0, -40));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(midnight).dy, moreOrLessEquals(atTop));
   });
 
   testWidgets('opens on today: a whole free day, scrolled to around now',

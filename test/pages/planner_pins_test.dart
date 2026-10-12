@@ -170,7 +170,7 @@ void main() {
     pins()
       ..add(today, 'One', time: at(11))
       ..add(today, 'Two', time: at(11) + 5)
-      ..add(today, 'Later', time: at(15));
+      ..add(today, 'Later', time: at(12));
     await tester.pump();
 
     final both = find.bySemanticsLabel('2 reminders from 11:00');

@@ -38,12 +38,17 @@ class PullDownList extends StatefulWidget {
   /// [ScrollView.cacheExtent]); larger keeps rows ready for [reveal].
   final double? cacheExtent;
 
+  /// Where it opens, past its normal top (e.g. the planner at the current
+  /// hour).
+  final double initialOffset;
+
   const PullDownList({
     super.key,
     required this.slivers,
     this.bottomSpace = 0,
     this.cacheExtent,
     this.reachShare = reach,
+    this.initialOffset = 0,
   });
 
   /// A plain list of [children] (like a `ListView`), with reach mode.
@@ -53,7 +58,8 @@ class PullDownList extends StatefulWidget {
     this.bottomSpace = 0,
   })  : slivers = [SliverList.list(children: children)],
         cacheExtent = null,
-        reachShare = reach;
+        reachShare = reach,
+        initialOffset = 0;
 
   /// Scrolls the list around [row] just enough to show it whole, with
   /// [obscuredBottom] of the list's bottom treated as covered (e.g. by a
@@ -179,8 +185,9 @@ class _PullDownListState extends State<PullDownList> {
       builder: (context, box) {
         final top =
             _top ??= (box.maxHeight * widget.reachShare).floorToDouble();
-        final controller =
-            _controller ??= ScrollController(initialScrollOffset: top);
+        final controller = _controller ??= ScrollController(
+          initialScrollOffset: top + widget.initialOffset,
+        );
         return NotificationListener<ScrollNotification>(
           onNotification: _onScroll,
           child: CustomScrollView(

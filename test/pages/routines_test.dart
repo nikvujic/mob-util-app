@@ -78,6 +78,9 @@ void main() {
 
     await showDay(tester, 'Friday 9 October');
     expect(find.text('Read'), findsOneWidget);
+    // Off-screen blocks aren't read out (a scrolling list): bring it in.
+    await tester.ensureVisible(find.text('Read'));
+    await tester.pumpAndSettle();
     expect(find.bySemanticsLabel(RegExp('Routine')), findsWidgets);
   });
 
@@ -288,7 +291,8 @@ void main() {
     final id = addGym();
     await tester.pump();
 
-    await tester.ensureVisible(find.bySemanticsLabel('Done: Gym'));
+    // Off-screen blocks aren't in the screen reader's tree: scroll first.
+    await tester.ensureVisible(find.text('Gym'));
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Done: Gym'));
     await tester.pumpAndSettle();

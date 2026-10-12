@@ -105,9 +105,6 @@ final _plainScroll = RegExp(
 const plainScrollAllowed = {
   // A centred lock message, not a list.
   'app/section_gate.dart',
-  // The day's timeline: opens at the current hour; 00:00 isn't the
-  // place everyone needs to reach.
-  'pages/planner/planner.dart',
   // The same timeline, for routines.
   'pages/planner/routines.dart',
   // A form, used with the keyboard open.
@@ -119,6 +116,8 @@ const plainScrollAllowed = {
   'pages/hub/counter_sheet.dart',
   // The same, for a medicine.
   'pages/hub/medicine_sheet.dart',
+  // A reminder mark's menu: a short list in a bottom sheet.
+  'pages/planner/pin_menu.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

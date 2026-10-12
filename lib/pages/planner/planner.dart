@@ -9,6 +9,7 @@ import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/pages/planner/routines.dart';
+import 'package:the_app/pages/planner/pin_menu.dart';
 import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
@@ -17,6 +18,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/day_strip.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/section_reset.dart';
 import 'package:the_app/widgets/selection.dart';
 
@@ -33,7 +35,6 @@ class PlannerPage extends ConsumerStatefulWidget {
 
 class _PlannerPageState extends ConsumerState<PlannerPage> {
   final SelectionController _selection = SelectionController();
-  ScrollController? _timeline;
 
   /// The day shown; null means today (also after midnight passes).
   DateTime? _day;
@@ -80,7 +81,6 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     _selection
       ..removeListener(_rebuild)
       ..dispose();
-    _timeline?.dispose();
     super.dispose();
   }
 
@@ -452,24 +452,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   /// A reminder mark tapped (P14): its reminders, each like a small block
   /// with a box to tick it off; tapping one edits it (Delete is there).
   Future<void> _pinsTapped(List<PlannerPin> pins) async {
-    final picked = await showModalBottomSheet<(PlannerPin, bool)>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final pin in pins)
-                _PinTile(
-                  pin,
-                  onEdit: () => Navigator.of(context).pop((pin, false)),
-                  onDone: () => Navigator.of(context).pop((pin, true)),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+    final picked = await showPinMenu(context, pins);
     if (picked == null || !mounted) return;
     final (pin, done) = picked;
     done ? _pinDone(pin) : await _editPin(pin);
@@ -581,10 +564,8 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     ];
 
     // Opens around the current hour (the scroll stays when changing day).
-    final timeline = _timeline ??= ScrollController(
-      initialScrollOffset:
-          PlannerTimeline.scaleFor(blocks).y(math.max(0, now.hour - 1) * 60),
-    );
+    final opensAt =
+        PlannerTimeline.scaleFor(blocks).y(math.max(0, now.hour - 1) * 60);
 
     return SelectionPopScope(
       controller: _selection,
@@ -603,24 +584,32 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                   selection: _selection,
                 ),
               Expanded(
-                child: SingleChildScrollView(
-                  controller: timeline,
-                  child: PlannerTimeline(
-                    blocks: blocks,
-                    onAdd: selecting ? null : (slot) => _addIn(day, slot),
-                    now: isSameDay(day, today) ? ref.read(clockProvider) : null,
-                    pins: [
-                      for (final pin in pins)
-                        TimelinePin(
-                            id: pin.id, title: pin.title, time: pin.time),
-                    ],
-                    onPins: selecting
-                        ? null
-                        : (group) => _pinsTapped([
-                              for (final p in group)
-                                pins.firstWhere((pin) => pin.id == p.id),
-                            ]),
-                  ),
+                // Reach mode too (Round 14): pulled down at 00:00, the
+                // first hours come into thumb reach, and snap back.
+                child: PullDownList(
+                  initialOffset: opensAt,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: PlannerTimeline(
+                        blocks: blocks,
+                        onAdd: selecting ? null : (slot) => _addIn(day, slot),
+                        now: isSameDay(day, today)
+                            ? ref.read(clockProvider)
+                            : null,
+                        pins: [
+                          for (final pin in pins)
+                            TimelinePin(
+                                id: pin.id, title: pin.title, time: pin.time),
+                        ],
+                        onPins: selecting
+                            ? null
+                            : (group) => _pinsTapped([
+                                  for (final p in group)
+                                    pins.firstWhere((pin) => pin.id == p.id),
+                                ]),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -738,38 +727,6 @@ class _DayHeader extends StatelessWidget {
 }
 
 /// What can be done with a task's block (P15).
-/// A reminder in a mark's menu: bell, title, time and a box to tick it
-/// off; tapping it edits it.
-class _PinTile extends StatelessWidget {
-  final PlannerPin pin;
-  final VoidCallback onEdit;
-  final VoidCallback onDone;
-
-  const _PinTile(this.pin, {required this.onEdit, required this.onDone});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return ListTile(
-      leading: Icon(Icons.notifications_none, color: colors.accent),
-      title: Text(
-        pin.title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Text(
-        'Reminder at ${formatMinutes(pin.time)}',
-        style: TextStyle(color: colors.textSecondary),
-      ),
-      trailing: Checkbox(
-        value: false,
-        semanticLabel: 'Done: ${pin.title}',
-        onChanged: (_) => onDone(),
-      ),
-      onTap: onEdit,
-    );
-  }
-}
-
 enum _TaskChoice {
   edit('Edit', Icons.edit_outlined),
   delete('Delete', Icons.delete_outline);

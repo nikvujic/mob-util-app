@@ -16,6 +16,8 @@ Release with the installable APK.
   when ticking.
 
 ### Changed
+- Planner: **reach mode** on the timeline. At 00:00, pull down again and
+  the first hours come into thumb reach; push up and it snaps back.
 - Placard: the hold to count is longer (about 2½ seconds).
 - Counters are more compact and all the same height; − / + are in the
   counter's own colour, vivid (the colour also edges the card), or the
