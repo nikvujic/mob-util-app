@@ -32,6 +32,39 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     state = moved.toBuy ? [...others, moved] : [moved, ...others];
   }
 
+  /// The quantity button (S7): none → count → weight → none.
+  void cycleQuantity(String id) => _update(
+        id,
+        (item) => item.copyWith(
+          quantity: () => switch (item.quantity) {
+            null => Quantity.count,
+            Quantity.count => Quantity.weight,
+            Quantity.weight => null,
+          },
+        ),
+      );
+
+  void setQuantity(String id, Quantity? quantity) =>
+      _update(id, (item) => item.copyWith(quantity: () => quantity));
+
+  /// Count − / +: at least 1.
+  static const maxCount = 999;
+  void setCount(String id, int count) =>
+      _update(id, (item) => item.copyWith(count: count.clamp(1, maxCount)));
+
+  /// A weight in grams; anything above 0 (an exact one may be below 1 g).
+  void setGrams(String id, double grams) {
+    if (grams <= 0 || grams.isNaN || grams.isInfinite) return;
+    _update(id, (item) => item.copyWith(grams: grams));
+  }
+
+  void _update(String id, ShopItem Function(ShopItem) change) {
+    state = [
+      for (final item in state)
+        if (item.id == id) change(item) else item,
+    ];
+  }
+
   /// Replaces everything (used when restoring a backup).
   void replaceAll(List<ShopItem> items) {
     state = List.unmodifiable(items);

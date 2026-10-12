@@ -45,3 +45,8 @@ app still reads every version, so an update can never lose existing data.
   routine with a description (P20); "Dentist" has two lines, "Groceries"
   none; the routine "Pills 💊" is 5 minutes long.
 - `v7/backup-plain.json` — backup (version 7) with those.
+- `v8/storage/shop.json` — shop items with quantities (S7; shop.json now
+  has its own version, 3): Milk ×2, Flour 1.5 kg, Saffron 🌼 0.5 g (its
+  count of 4 kept from before it was switched to weight), and Bread
+  (bought, no quantity shown, a count of 3 kept).
+- `v8/backup-plain.json` — backup (version 8) with those items.

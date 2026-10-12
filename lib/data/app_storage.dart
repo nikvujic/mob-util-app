@@ -17,7 +17,7 @@ import 'package:the_app/models/shop_item.dart';
 /// Loads and saves all app data. Each feature has its own JSON file:
 ///
 ///     <app documents>/data/notes.json  {"version": 2, "notes": [...]}
-///     <app documents>/data/shop.json   {"version": 2, "items": [...]}
+///     <app documents>/data/shop.json   {"version": 3, "items": [...]}
 ///     <app documents>/data/security.json
 ///         {"version": 2, "masterPassword": {verifier} or null}
 ///     <app documents>/data/planner.json {"version": 5, "tasks": [...]}
@@ -50,6 +50,10 @@ class AppStorage {
 
   /// Version of `pins.json` (P14). History: 1 = first format.
   static const pinsFormatVersion = 1;
+
+  /// Version of `shop.json`, which moves on its own from here. History:
+  /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
+  static const shopFormatVersion = 3;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
@@ -154,6 +158,7 @@ class AppStorage {
       initialShopItems: await _load(
         shopStore,
         [],
+        maxVersion: shopFormatVersion,
         (json) => [
           for (final e in json['items'] as List<dynamic>)
             ShopItem.fromJson(e as Map<String, dynamic>),
@@ -251,7 +256,7 @@ class AppStorage {
 
   Future<void> saveShopItems(List<ShopItem> items) async {
     await _shopStore?.write({
-      'version': formatVersion,
+      'version': shopFormatVersion,
       'items': [for (final i in items) i.toJson()],
     });
   }

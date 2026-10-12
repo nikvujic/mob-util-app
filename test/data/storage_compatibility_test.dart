@@ -11,6 +11,7 @@ import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
+import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
@@ -352,6 +353,46 @@ void main() {
     });
   });
 
+  group('shop v3 / v8 backup (quantities)', () {
+    void expectSample(List<ShopItem> items) {
+      expect(
+        items.map((i) => (i.name, i.quantity, i.count, i.grams)),
+        [
+          ('Milk', Quantity.count, 2, 200.0),
+          ('Flour', Quantity.weight, 1, 1500.0),
+          ('Saffron 🌼', Quantity.weight, 4, 0.5),
+          ('Bread', null, 3, 200.0),
+        ],
+      );
+      expect(items.last.toBuy, isFalse);
+    }
+
+    test('shop.json with quantities loads', () async {
+      final dir = copyOf('test/fixtures/v8/storage');
+      final storage = await AppStorage.open(directory: dir);
+      expectSample(storage.initialShopItems);
+      final names = dir.listSync().map((f) => f.uri.pathSegments.last);
+      expect(names.where((n) => n.contains('corrupt')), isEmpty);
+    });
+
+    test('v8 backup restores quantities', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v8/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.shopItems);
+    });
+
+    test('older shop items have none', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v2/storage'),
+      );
+      expect(storage.initialShopItems.map((i) => i.quantity),
+          everyElement(isNull));
+      expect(storage.initialShopItems.map((i) => (i.count, i.grams)),
+          everyElement((1, 200.0)));
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -435,6 +476,10 @@ void main() {
           '369f0338c403827369a6ab1d18eb2c023d0cebb3cbe73a2be4aa435e64ef4d4e',
       'test/fixtures/v7/backup-plain.json':
           '41628bbf3f82d529236ff34fa2886191bb92a3ac8902334a15c92586c4889052',
+      'test/fixtures/v8/storage/shop.json':
+          '833cc85385498b4ee601e343f9b7a04aefec2a30c6e3d680997ee86f6754d2a4',
+      'test/fixtures/v8/backup-plain.json':
+          '70a4f3dc35e9ef3a315b3a6c7d195b6aa3eb1183e51db186f765b3c420860742',
     };
     for (final MapEntry(key: path, value: hash) in expected.entries) {
       final digest = await Sha256().hash(File(path).readAsBytesSync());

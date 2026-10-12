@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 void main() {
@@ -83,5 +84,101 @@ void main() {
     notifier.removeItems({idOf('Eggs'), idOf('Bread')});
     expect(toBuy(), ['Milk']);
     expect(stock(), isEmpty);
+  });
+
+  group('quantities (S7)', () {
+    ShopItem item(String name) =>
+        notifier.state.firstWhere((i) => i.name == name);
+
+    test('the button goes none → count → weight → none', () {
+      notifier.addItem('Milk');
+      final id = idOf('Milk');
+      expect(item('Milk').quantity, isNull);
+      notifier.cycleQuantity(id);
+      expect(item('Milk').quantity, Quantity.count);
+      expect(item('Milk').count, 1);
+      notifier.cycleQuantity(id);
+      expect(item('Milk').quantity, Quantity.weight);
+      expect(item('Milk').grams, 200);
+      notifier.cycleQuantity(id);
+      expect(item('Milk').quantity, isNull);
+    });
+
+    test('each kind keeps its value when switched away and back', () {
+      notifier.addItem('Flour');
+      final id = idOf('Flour');
+      notifier
+        ..setQuantity(id, Quantity.count)
+        ..setCount(id, 3)
+        ..setQuantity(id, Quantity.weight)
+        ..setGrams(id, 1500)
+        ..setQuantity(id, null)
+        ..setQuantity(id, Quantity.count);
+      expect(item('Flour').count, 3);
+      notifier.setQuantity(id, Quantity.weight);
+      expect(item('Flour').grams, 1500);
+    });
+
+    test('a count is 1–999; a weight anything above 0', () {
+      notifier.addItem('Eggs');
+      final id = idOf('Eggs');
+      notifier.setCount(id, 0);
+      expect(item('Eggs').count, 1);
+      notifier.setCount(id, 5000);
+      expect(item('Eggs').count, 999);
+      notifier.setGrams(id, 0.5);
+      expect(item('Eggs').grams, 0.5, reason: 'below 1 g is fine');
+      notifier
+        ..setGrams(id, 0)
+        ..setGrams(id, -3)
+        ..setGrams(id, double.nan);
+      expect(item('Eggs').grams, 0.5, reason: 'nonsense is ignored');
+    });
+
+    test('weights step through common amounts', () {
+      expect(gramsUp(200), 250);
+      expect(gramsDown(200), 150);
+      expect(gramsUp(230), 250, reason: 'from a typed one: the next');
+      expect(gramsDown(230), 200);
+      expect(gramsDown(1), isNull, reason: 'nothing below 1 g to step to');
+      expect(gramsDown(0.5), isNull);
+      expect(gramsUp(0.5), 1);
+      expect(gramsUp(5000), 6000, reason: 'past the list: whole kilos');
+      expect(gramsUp(6000), 7000);
+      expect(gramsDown(7000), 6000);
+      expect(gramsDown(5500), 5000);
+    });
+
+    test('shown as g or kg', () {
+      expect(formatGrams(200), '200 g');
+      expect(formatGrams(0.5), '0.5 g');
+      expect(formatGrams(12.25), '12.25 g');
+      expect(formatGrams(1000), '1 kg');
+      expect(formatGrams(1500), '1.5 kg');
+    });
+
+    test('saved only where it differs from the defaults', () {
+      const plain = ShopItem(id: 'a', name: 'Milk');
+      expect(plain.toJson().keys, ['id', 'name', 'toBuy']);
+      const full = ShopItem(
+        id: 'b',
+        name: 'Flour',
+        quantity: Quantity.weight,
+        count: 2,
+        grams: 1500,
+      );
+      final back = ShopItem.fromJson(full.toJson());
+      expect((back.quantity, back.count, back.grams),
+          (Quantity.weight, 2, 1500.0));
+      expect(
+        ShopItem.fromJson({
+          'id': 'c',
+          'name': 'X',
+          'toBuy': true,
+          'quantity': 'volume', // a newer kind
+        }).quantity,
+        isNull,
+      );
+    });
   });
 }

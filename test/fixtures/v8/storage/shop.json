@@ -1,0 +1,1 @@
+{"version":3,"items":[{"id":"s1","name":"Milk","toBuy":true,"quantity":"count","count":2},{"id":"s2","name":"Flour","toBuy":true,"quantity":"weight","grams":1500.0},{"id":"s3","name":"Saffron 🌼","toBuy":true,"quantity":"weight","count":4,"grams":0.5},{"id":"s4","name":"Bread","toBuy":false,"count":3}]}

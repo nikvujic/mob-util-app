@@ -63,8 +63,9 @@ class Backup {
   /// now ignored); 5 = planner
   /// routines (`routines`, as in `routines.json`) and block colours;
   /// 6 = planner reminders (`plannerPins`, P14); 7 = tasks and routines
-  /// may have a description (P20).
-  static const version = 7;
+  /// may have a description (P20); 8 = shop items may have a quantity
+  /// (S7).
+  static const version = 8;
 
   final DateTime createdAt;
   final String appVersion;
