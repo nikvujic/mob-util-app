@@ -291,7 +291,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 Everything from Round 11 and 12 except the new empty Other pages; the
 medicine tracker is in. In this order:
 
-1. **Main pages:** now line (D) ✅, reminders as marks (C), toasts (F),
+1. **Main pages:** now line (D) ✅, reminders as marks (C) ✅, toasts (F),
    shop quantities (I), **checkboxes in notes** (N15; Nikola changed his
    mind, they're in v1) ✅.
    Also done: **no flash of a locked page on coming back** (L8).
@@ -346,8 +346,6 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   Mon/Wed/Fri routine 23:30–23:59, then a Tuesday one at the same time,
   picking Wed moved it). Instead keep the time, show it in red, disable
   Save, and offer a button that finds a free time on request.
-- [ ] Shop: Nikola's note "shop items are gonna get some content next to
-  the …button" (to clarify).
 - Later, tests: **long inputs** everywhere (titles, notes, items,
   counters…): any length is allowed (a personal app), but the layout must
   never break because of it.
@@ -399,12 +397,12 @@ Sorted from one long message. Order of work is at the end.
   frozen fixtures v7); the sheet's field; on blocks; in the menu.
 
 **C. Planner: reminders, redesigned** (replaces the see-through block)
-- [ ] A reminder is a **small mark on the timeline's left edge**, by the
+- [x] A reminder is a **small mark on the timeline's left edge**, by the
   hour labels, at its time; nothing covers the blocks.
-- [ ] **Tapping it** shows a bubble that looks like a block, with its
+- [x] **Tapping it** shows a bubble that looks like a block, with its
   title, time and a checkbox (ticking deletes it, with undo) and
   Edit / Delete.
-- [ ] **Reminders close together merge** into one mark (with a count);
+- [x] **Reminders close together merge** into one mark (with a count);
   tapping it lists them, each tickable. (P14 updated)
 
 **D. Planner: a "now" line** across the timeline at the current time,

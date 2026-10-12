@@ -7,6 +7,9 @@ Release with the installable APK.
 ## [0.21.0] - unreleased
 
 ### Added
+- Planner: **reminders are small bell marks** on the timeline's left
+  edge instead of boxes over the blocks. Close ones share a mark with a
+  number; tap a mark to see them, tick them off or edit them.
 - Five more themes, all dark: **Ocean**, **Frost**, **Grape**, **Rose**
   and **Mono**.
 

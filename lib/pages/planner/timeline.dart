@@ -58,18 +58,10 @@ class TimelinePin {
   final String title;
   final int time;
 
-  /// Null while selecting.
-  final VoidCallback? onTap;
-
-  /// Ticks it off (which deletes it); null while selecting.
-  final VoidCallback? onDone;
-
   const TimelinePin({
     required this.id,
     required this.title,
     required this.time,
-    this.onTap,
-    this.onDone,
   });
 }
 
@@ -202,11 +194,13 @@ class PlannerTimeline extends StatelessWidget {
   /// What adding in free time makes, for screen readers ("a task").
   final String adds;
 
-  /// Reminders (P14), drawn over everything at their time.
+  /// Reminders (P14): marks on the left edge at their time, so nothing
+  /// covers the blocks. Ones closer than a touch target share a mark.
   final List<TimelinePin> pins;
 
-  /// A reminder's height: one touch target.
-  static const pinHeight = 48.0;
+  /// A reminder mark was tapped: the reminders it stands for, by time.
+  /// Null while selecting.
+  final ValueChanged<List<TimelinePin>>? onPins;
 
   /// The time now, when the day shown is today: a line marks it (P21).
   final DateTime Function()? now;
@@ -219,6 +213,7 @@ class PlannerTimeline extends StatelessWidget {
     required this.onAdd,
     this.adds = 'a task',
     this.pins = const [],
+    this.onPins,
     this.now,
   }) : _scale = scaleFor(blocks);
 
@@ -227,18 +222,20 @@ class PlannerTimeline extends StatelessWidget {
       TimeScale.forBlocks(
           [for (final b in blocks) (start: b.start, end: b.end)]);
 
-  /// Where each reminder goes: at its time, or just below the one before
-  /// if they'd cover each other.
-  List<(TimelinePin, double)> _pinPlaces() {
+  /// The reminders, grouped into marks: each takes the ones after it that
+  /// would be closer than a touch target, so marks never overlap.
+  List<List<TimelinePin>> _pinGroups() {
     final sorted = [...pins]..sort((a, b) => a.time.compareTo(b.time));
-    final places = <(TimelinePin, double)>[];
-    var free = 0.0;
+    final groups = <List<TimelinePin>>[];
     for (final pin in sorted) {
-      final top = _y(pin.time) > free ? _y(pin.time) : free;
-      places.add((pin, top));
-      free = top + pinHeight + gap;
+      if (groups.isNotEmpty &&
+          _y(pin.time) - _y(groups.last.first.time) < _PinMark.size) {
+        groups.last.add(pin);
+      } else {
+        groups.add([pin]);
+      }
     }
-    return places;
+    return groups;
   }
 
   /// Where [minutes] past midnight is on a timeline with [scale].
@@ -267,9 +264,10 @@ class PlannerTimeline extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: _labelWidth,
+                      // Left, leaving room for reminder marks on the right.
                       child: Text(
                         formatMinutes(minutes),
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                         style: TextStyle(color: colors.textMuted, fontSize: 12),
                       ),
                     ),
@@ -313,14 +311,18 @@ class PlannerTimeline extends StatelessWidget {
                 ),
               ),
             ),
-          for (final (pin, top) in _pinPlaces())
+          // On the left edge, by the hour labels: a touch target that ends
+          // where the blocks start.
+          for (final group in _pinGroups())
             Positioned(
-              top: top,
-              height: pinHeight,
-              // Indented, so what's under it still shows on the left.
-              left: _labelWidth + 24,
-              right: 8,
-              child: _Pin(pin),
+              top: _y(group.first.time) - _PinMark.size / 2,
+              left: _labelWidth - _PinMark.size,
+              width: _PinMark.size,
+              height: _PinMark.size,
+              child: _PinMark(
+                group,
+                onTap: onPins == null ? null : () => onPins!(group),
+              ),
             ),
         ],
       ),
@@ -668,60 +670,54 @@ class _Block extends StatelessWidget {
 
 /// A reminder (P14): a short see-through block with a dashed outline, a
 /// bell, its title and time, and a checkbox that ticks it off.
-class _Pin extends StatelessWidget {
-  static const _radius = 6.0;
+/// A reminder mark (P14): a bell at the timeline's left edge, or the
+/// number of reminders it stands for. A touch target of its own.
+class _PinMark extends StatelessWidget {
+  static const size = 48.0;
 
-  final TimelinePin pin;
+  final List<TimelinePin> pins;
+  final VoidCallback? onTap;
 
-  const _Pin(this.pin);
+  const _PinMark(this.pins, {required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return DashedBorder(
-      color: colors.accent,
-      radius: _radius,
-      child: Material(
-        // See-through: what's under it shows a little.
-        color: colors.background.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(_radius),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(_radius),
-          onTap: pin.onTap,
+    final time = formatMinutes(pins.first.time);
+    final label = pins.length == 1
+        ? 'Reminder: ${pins.single.title} at $time'
+        : '${pins.length} reminders from $time';
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Align(
+          alignment: Alignment.centerRight,
           child: Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.notifications_none,
-                  size: 18,
-                  color: colors.accent,
-                  semanticLabel: 'Reminder',
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    pin.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: colors.textPrimary,
-                      fontWeight: FontWeight.w600,
+            padding: const EdgeInsets.only(right: 2),
+            child: pins.length == 1
+                ? Icon(Icons.notifications, size: 16, color: colors.accent)
+                : Container(
+                    key: const Key('pinCount'),
+                    width: 18,
+                    height: 18,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colors.accent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${pins.length}',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  formatMinutes(pin.time),
-                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
-                ),
-                Checkbox(
-                  value: false,
-                  semanticLabel: 'Done: ${pin.title}',
-                  onChanged: pin.onDone == null ? null : (_) => pin.onDone!(),
-                ),
-              ],
-            ),
           ),
         ),
       ),

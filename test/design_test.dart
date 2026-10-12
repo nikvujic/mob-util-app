@@ -89,7 +89,7 @@ Future<void> seed(ProviderContainer container) async {
   // A 5-minute block: it stretches its hour (Round 10).
   container.read(plannerProvider.notifier).addTask(today, 'Pills',
       start: 20 * 60, end: 20 * 60 + 5, description: 'With water');
-  // A reminder (P14), over the task and routine.
+  // A reminder (P14): a mark beside the task and routine.
   container
       .read(pinsProvider.notifier)
       .add(today, 'Call mum', time: 10 * 60 + 40);
@@ -189,6 +189,11 @@ void main() {
       'planner selection mode': (t) async {
         await openTab(t, 'Planner');
         await t.longPress(find.text('Gym'));
+        await t.pumpAndSettle();
+      },
+      'reminder menu': (t) async {
+        await openTab(t, 'Planner');
+        await t.tap(find.bySemanticsLabel(RegExp('Reminder: Call mum')));
         await t.pumpAndSettle();
       },
       'other': (t) => openTab(t, 'Other'),

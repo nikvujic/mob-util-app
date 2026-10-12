@@ -449,6 +449,32 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     pins.update(pin.id, title: changed.title, time: changed.start);
   }
 
+  /// A reminder mark tapped (P14): its reminders, each like a small block
+  /// with a box to tick it off; tapping one edits it (Delete is there).
+  Future<void> _pinsTapped(List<PlannerPin> pins) async {
+    final picked = await showModalBottomSheet<(PlannerPin, bool)>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final pin in pins)
+                _PinTile(
+                  pin,
+                  onEdit: () => Navigator.of(context).pop((pin, false)),
+                  onDone: () => Navigator.of(context).pop((pin, true)),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    final (pin, done) = picked;
+    done ? _pinDone(pin) : await _editPin(pin);
+  }
+
   /// Ticking a reminder off deletes it (Nikola), with undo.
   void _pinDone(PlannerPin pin) => _removePin(pin, 'done');
 
@@ -586,13 +612,14 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                     pins: [
                       for (final pin in pins)
                         TimelinePin(
-                          id: pin.id,
-                          title: pin.title,
-                          time: pin.time,
-                          onTap: selecting ? null : () => _editPin(pin),
-                          onDone: selecting ? null : () => _pinDone(pin),
-                        ),
+                            id: pin.id, title: pin.title, time: pin.time),
                     ],
+                    onPins: selecting
+                        ? null
+                        : (group) => _pinsTapped([
+                              for (final p in group)
+                                pins.firstWhere((pin) => pin.id == p.id),
+                            ]),
                   ),
                 ),
               ),
@@ -711,6 +738,38 @@ class _DayHeader extends StatelessWidget {
 }
 
 /// What can be done with a task's block (P15).
+/// A reminder in a mark's menu: bell, title, time and a box to tick it
+/// off; tapping it edits it.
+class _PinTile extends StatelessWidget {
+  final PlannerPin pin;
+  final VoidCallback onEdit;
+  final VoidCallback onDone;
+
+  const _PinTile(this.pin, {required this.onEdit, required this.onDone});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return ListTile(
+      leading: Icon(Icons.notifications_none, color: colors.accent),
+      title: Text(
+        pin.title,
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: Text(
+        'Reminder at ${formatMinutes(pin.time)}',
+        style: TextStyle(color: colors.textSecondary),
+      ),
+      trailing: Checkbox(
+        value: false,
+        semanticLabel: 'Done: ${pin.title}',
+        onChanged: (_) => onDone(),
+      ),
+      onTap: onEdit,
+    );
+  }
+}
+
 enum _TaskChoice {
   edit('Edit', Icons.edit_outlined),
   delete('Delete', Icons.delete_outline);

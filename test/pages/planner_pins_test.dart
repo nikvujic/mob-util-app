@@ -4,11 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/widgets/day_strip.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
-/// Planner reminders (P14): a title at a time, no end, floating over the
-/// timeline; ticked off, they're gone.
+/// Planner reminders (P14): a title at a time, no end, shown as a mark on
+/// the timeline's left edge; ticked off, they're gone.
 void main() {
   late ProviderContainer container;
   late FakeReminderScheduler scheduler;
@@ -29,6 +30,16 @@ void main() {
 
   PinsNotifier pins() => container.read(pinsProvider.notifier);
 
+  /// The mark of the reminder [title].
+  Finder mark(String title) =>
+      find.bySemanticsLabel(RegExp('Reminder: $title'));
+
+  /// Taps the mark of [title]: its menu opens.
+  Future<void> openMark(WidgetTester tester, String title) async {
+    await tester.tap(mark(title));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('the bell button adds one, from the next full hour',
       (tester) async {
     await openPlanner(tester);
@@ -46,7 +57,7 @@ void main() {
 
     final pin = container.read(pinsProvider).single;
     expect((pin.title, pin.day, pin.time), ('Call mum', today, at(11)));
-    expect(find.text('Call mum'), findsOneWidget);
+    expect(mark('Call mum at 11:00'), findsOneWidget);
     expect(container.read(plannerProvider), isEmpty, reason: 'not a task');
     expect(
       scheduler.scheduled.map((r) => r.title),
@@ -88,11 +99,15 @@ void main() {
     container
         .read(plannerProvider.notifier)
         .addTask(today, 'Lunch', start: at(12), end: at(13));
-    expect(find.text('Call mum'), findsOneWidget);
-    // Drawn over the task, at its time.
-    final pin = tester.getRect(find.text('Call mum'));
-    final work = tester.getRect(find.text('Work'));
-    expect(pin.top, greaterThan(work.top));
+    // A mark on the left edge at its time: it covers nothing.
+    final pin = tester.getRect(mark('Call mum'));
+    final work = tester.getRect(find.ancestor(
+      of: find.text('Work'),
+      matching: find.byType(SelectableCard),
+    ));
+    expect(pin.right, lessThanOrEqualTo(work.left));
+    expect(pin.center.dy, greaterThan(work.top));
+    expect(pin.center.dy, lessThan(work.bottom));
   });
 
   testWidgets('ticking it off deletes it, with undo', (tester) async {
@@ -100,6 +115,8 @@ void main() {
     pins().add(today, 'Call mum', time: at(11));
     await tester.pump();
 
+    await openMark(tester, 'Call mum');
+    expect(find.text('Reminder at 11:00'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Done: Call mum'));
     await tester.pumpAndSettle();
     expect(container.read(pinsProvider), isEmpty);
@@ -115,6 +132,7 @@ void main() {
     pins().add(today, 'Call mum', time: at(11));
     await tester.pump();
 
+    await openMark(tester, 'Call mum');
     await tester.tap(find.text('Call mum'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Call dad');
@@ -123,6 +141,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(pinsProvider).single.title, 'Call dad');
 
+    await openMark(tester, 'Call dad');
     await tester.tap(find.text('Call dad'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
@@ -142,19 +161,29 @@ void main() {
       DateTime(2026, 10, 1),
       reason: 'the strip reaches back to it',
     );
-    expect(find.text('Old one'), findsNothing, reason: 'not carried over');
+    expect(mark('Old one'), findsNothing, reason: 'not carried over');
   });
 
-  testWidgets('two at about the same time don\'t cover each other',
+  testWidgets('close together they share a mark that lists them',
       (tester) async {
     await openPlanner(tester);
     pins()
       ..add(today, 'One', time: at(11))
-      ..add(today, 'Two', time: at(11) + 5);
+      ..add(today, 'Two', time: at(11) + 5)
+      ..add(today, 'Later', time: at(15));
     await tester.pump();
 
-    final one = tester.getRect(find.text('One'));
-    final two = tester.getRect(find.text('Two'));
-    expect(two.top - one.top, greaterThanOrEqualTo(48));
+    final both = find.bySemanticsLabel('2 reminders from 11:00');
+    expect(both, findsOneWidget);
+    expect(mark('Later'), findsOneWidget, reason: 'far enough: its own');
+    await tester.tap(both);
+    await tester.pumpAndSettle();
+    expect(find.text('One'), findsOneWidget);
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Done: Two'));
+    await tester.pumpAndSettle();
+    expect(container.read(pinsProvider).map((p) => p.title), ['One', 'Later']);
+    expect(mark('One at 11:00'), findsOneWidget, reason: 'alone again');
   });
 }
