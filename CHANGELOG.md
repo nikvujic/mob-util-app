@@ -15,6 +15,9 @@ Release with the installable APK.
 - Medicine: ticking a dose buzzes twice, softly, in step with the gulp.
 - Routines screen: reach mode on its timeline, as on the planner.
 - Planner: a smaller margin left of the hour labels.
+- Placard: the pop no longer shrinks first: it bursts from fully
+  inflated, with a ring flying out, and springs back. A rising sound
+  while you hold, and a pop.
 
 ## [0.24.0] - 2026-10-12
 

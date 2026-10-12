@@ -345,9 +345,12 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   screen still lacks reach mode.
 
 **2. Placard**
-- [ ] The pop looks odd: find out why and improve it (the inflating is
-  right).
-- [ ] Sounds: a rising sound while inflating, and a **pop**.
+- [x] The pop looks odd: find out why and improve it (the inflating is
+  right). Why: on popping, the inflated size (and the shake) reset in one
+  frame, then the pop swelled again, so it shrank before bursting. Now
+  the pop starts from fully inflated, bursts a little bigger with a ring
+  flying out, and springs back.
+- [x] Sounds: a rising sound while inflating, and a **pop**.
 
 (The medicine **month calendar** with marks is Round 16's chunk 3, next
 after these.)

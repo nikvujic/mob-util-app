@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/providers/placard_provider.dart';
@@ -31,6 +32,49 @@ class PlacardPage extends ConsumerStatefulWidget {
   ConsumerState<PlacardPage> createState() => _PlacardPageState();
 }
 
+/// How much bigger it gets when fully inflated.
+const inflated = 0.2;
+
+/// The size during the pop, [p] from 0 to 1: from fully inflated, a quick
+/// burst a little bigger, then a spring back to its size that wobbles
+/// once. Continuous with the inflating: no jump when it pops.
+double popScale(double p) {
+  const burst = 0.12; // the first part: bigger
+  const peak = 1 + inflated + 0.1;
+  if (p < burst) {
+    return 1 +
+        inflated +
+        (peak - 1 - inflated) * Curves.easeOut.transform(p / burst);
+  }
+  final back = Curves.elasticOut.transform((p - burst) / (1 - burst));
+  return peak + (1 - peak) * back;
+}
+
+/// The burst's ring: grows from the middle and fades out.
+class _Burst extends CustomPainter {
+  final double p;
+  final Color colour;
+
+  const _Burst(this.p, this.colour);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = Curves.easeOut.transform(p);
+    final radius = size.shortestSide * (0.3 + 0.5 * t);
+    canvas.drawCircle(
+      size.center(Offset.zero),
+      radius,
+      Paint()
+        ..color = colour.withValues(alpha: (1 - t) * 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 10 * (1 - t) + 1,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Burst old) => old.p != p || old.colour != colour;
+}
+
 class _PlacardPageState extends ConsumerState<PlacardPage>
     with TickerProviderStateMixin {
   /// 0 → 1 while held: how inflated the page is.
@@ -40,10 +84,12 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
     reverseDuration: const Duration(milliseconds: 250),
   )..addStatusListener(_held);
 
-  /// The pop after a count.
+  /// The pop after a count: from fully inflated, a burst, then a spring
+  /// back to its size (Round 17: it used to snap back first, then swell
+  /// again, which looked odd).
   late final AnimationController _pop = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 350),
+    duration: const Duration(milliseconds: 600),
   );
 
   /// False after a count until the finger lifts: one count per hold.
@@ -76,10 +122,13 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   }
 
   void _down() {
-    if (_armed) _hold.forward();
+    if (!_armed) return;
+    _hold.forward();
+    AppSound.inflate();
   }
 
   void _up() {
+    if (_armed) AppSound.stopInflate();
     _armed = true;
     // Also when it hasn't moved yet (a quick tap): else it would go on
     // filling up and count with no finger on it.
@@ -95,6 +144,8 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
     _armed = false;
     ref.read(placardProvider.notifier).count();
     HapticFeedback.heavyImpact();
+    AppSound.stopInflate();
+    AppSound.pop();
     // Deflate after the controller is done reporting (resetting it from
     // its own status call made it report "done" again: a double count).
     scheduleMicrotask(() {
@@ -207,17 +258,29 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
           child: AnimatedBuilder(
             animation: Listenable.merge([_hold, _pop]),
             builder: (context, child) {
+              final popping = _pop.isAnimating;
               final h = Curves.easeIn.transform(_hold.value);
-              final p = _pop.value;
               // Inflating, and shaking harder the fuller it gets...
-              final inflate = 1 + 0.2 * h;
-              final shake =
-                  h * h * 0.06 * math.sin(_hold.value * 146 * math.pi);
-              // ...then a pop that settles.
-              final pop = 1 + 0.25 * math.sin(p * math.pi) * (1 - p);
-              return Transform.rotate(
-                angle: shake,
-                child: Transform.scale(scale: inflate * pop, child: child),
+              final inflate = 1 + inflated * h;
+              final shake = popping
+                  ? 0.0
+                  : h * h * 0.06 * math.sin(_hold.value * 146 * math.pi);
+              final scale = popping ? popScale(_pop.value) : inflate;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  // ...then it bursts: a ring flies out and fades.
+                  if (popping)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _Burst(_pop.value, colors.accent),
+                      ),
+                    ),
+                  Transform.rotate(
+                    angle: shake,
+                    child: Transform.scale(scale: scale, child: child),
+                  ),
+                ],
               );
             },
             child: FittedBox(

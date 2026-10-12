@@ -22,6 +22,14 @@ abstract final class AppSound {
   /// Between the gulp's two bloops (see tool/make_done_sound.py).
   static const gulpGap = Duration(milliseconds: 110);
 
+  /// The Placard filling up (Round 17): a rising sound as long as a
+  /// hold; [stopInflate] stops it when the finger lifts early.
+  static Future<void> inflate() => _play('inflate');
+  static Future<void> stopInflate() => _play('stopInflate');
+
+  /// The Placard popping.
+  static Future<void> pop() => _play('pop');
+
   static Future<void> _play(String sound) async {
     try {
       await _channel.invokeMethod<void>(sound);

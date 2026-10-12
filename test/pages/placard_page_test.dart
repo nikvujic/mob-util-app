@@ -177,4 +177,60 @@ void main() {
     expect(PlacardPage.holdTime,
         greaterThanOrEqualTo(const Duration(milliseconds: 1800)));
   });
+
+  group('the pop and its sounds (Round 17)', () {
+    test('the pop starts where the inflating ends: no jump', () {
+      expect(popScale(0), closeTo(1 + inflated, 1e-9));
+      expect(popScale(1), closeTo(1, 1e-9));
+      // A burst bigger than fully inflated, then back down.
+      var biggest = 0.0;
+      for (var p = 0.0; p <= 1; p += 0.01) {
+        biggest = biggest > popScale(p) ? biggest : popScale(p);
+      }
+      expect(biggest, greaterThan(1 + inflated));
+    });
+
+    testWidgets('rising while held, stopped early on letting go, a pop',
+        (tester) async {
+      await openPlacard(tester);
+      final sounds = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('the_app/sound'), (call) async {
+        sounds.add(call.method);
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+              const MethodChannel('the_app/sound'), null));
+
+      await hold(tester, const Duration(milliseconds: 1000));
+      expect(sounds, ['inflate', 'stopInflate']);
+
+      sounds.clear();
+      await hold(tester, PlacardPage.holdTime + const Duration(seconds: 1));
+      expect(sounds, ['inflate', 'stopInflate', 'pop']);
+    });
+
+    testWidgets('the size stays the same the frame it pops', (tester) async {
+      await openPlacard(tester);
+      double scale() => tester
+          .widgetList<Transform>(find.ancestor(
+            of: find.byKey(const Key('placardText')),
+            matching: find.byType(Transform),
+          ))
+          .map((t) => t.transform.getMaxScaleOnAxis())
+          .reduce((a, b) => a * b);
+      final finger = await tester.startGesture(tester.getCenter(sign));
+      await tester.pump();
+      await tester
+          .pump(PlacardPage.holdTime - const Duration(milliseconds: 16));
+      final before = scale();
+      await tester.pump(const Duration(milliseconds: 16)); // it pops
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(scale(), greaterThanOrEqualTo(before - 0.02),
+          reason: 'no snap back before the burst');
+      await finger.up();
+      await tester.pumpAndSettle();
+    });
+  });
 }

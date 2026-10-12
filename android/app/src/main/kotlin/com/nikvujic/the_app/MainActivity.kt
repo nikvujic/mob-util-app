@@ -12,10 +12,16 @@ class MainActivity: FlutterFragmentActivity() {
     private var sounds: SoundPool? = null
     private var click = 0
     private var done = 0
+    private var inflate = 0
+    private var pop = 0
+
+    /// The Placard's inflating sound while it plays (0: none), to stop it.
+    private var inflating = 0
 
     companion object {
         private const val CLICK_VOLUME = 0.35f
         private const val DONE_VOLUME = 0.7f
+        private const val PLACARD_VOLUME = 0.6f
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -36,19 +42,34 @@ class MainActivity: FlutterFragmentActivity() {
         click = pool.load(this, R.raw.click, 1)
         // A dose ticked off (medicine): a soft gulp (Round 16).
         done = pool.load(this, R.raw.done, 1)
+        // The Placard (Round 17): rising while held, then a pop.
+        inflate = pool.load(this, R.raw.inflate, 1)
+        pop = pool.load(this, R.raw.pop, 1)
         sounds = pool
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/sound")
             .setMethodCallHandler { call, result ->
-                if (call.method == "click") {
+                val pool = sounds
+                when (call.method) {
                     // Quieter than full: it's heard many times in a row.
-                    sounds?.play(click, CLICK_VOLUME, CLICK_VOLUME, 1, 0, 1f)
-                    result.success(null)
-                } else if (call.method == "done") {
-                    sounds?.play(done, DONE_VOLUME, DONE_VOLUME, 1, 0, 1f)
-                    result.success(null)
-                } else {
-                    result.notImplemented()
+                    "click" -> pool?.play(click, CLICK_VOLUME, CLICK_VOLUME, 1, 0, 1f)
+                    "done" -> pool?.play(done, DONE_VOLUME, DONE_VOLUME, 1, 0, 1f)
+                    "inflate" -> {
+                        if (inflating != 0) pool?.stop(inflating)
+                        inflating = pool?.play(
+                            inflate, PLACARD_VOLUME, PLACARD_VOLUME, 1, 0, 1f
+                        ) ?: 0
+                    }
+                    "stopInflate" -> {
+                        if (inflating != 0) pool?.stop(inflating)
+                        inflating = 0
+                    }
+                    "pop" -> pool?.play(pop, PLACARD_VOLUME, PLACARD_VOLUME, 2, 0, 1f)
+                    else -> {
+                        result.notImplemented()
+                        return@setMethodCallHandler
+                    }
                 }
+                result.success(null)
             }
     }
 

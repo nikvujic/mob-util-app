@@ -35,7 +35,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 ## Hub
 Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - **Counters**: count anything with − and +, with a step, limits and a colour.
-- **Placard**: a big line of text, sideways. Hold to count one up. Tap the top-right corner five times for its settings.
+- **Placard**: a big line of text, sideways. Hold until it pops to count one up. Tap the top-right corner five times for its settings.
 - **Medicine**: tap a dose when you take it. Each medicine has a history and a calendar. **Reminders** come at dose times, and a **red dot** shows on the tile and the Hub tab while a dose is due. Its settings are behind the gear.
 
 ## Security
