@@ -44,7 +44,11 @@ void main() {
     return editable.localToGlobal(box.center);
   }
 
-  testWidgets('shows a box for "[ ]", and ☑ once ticked', (tester) async {
+  RenderCheckboxBoxes boxes(WidgetTester tester) =>
+      tester.renderObject<RenderCheckboxBoxes>(find.byType(CheckboxBoxes));
+
+  testWidgets('"[ ]" leaves square room for a box, one for one',
+      (tester) async {
     await openNote(tester, '- [ ] milk\n- [x] eggs');
     final shown = content(tester)
         .buildTextSpan(
@@ -52,41 +56,41 @@ void main() {
           withComposing: false,
         )
         .toPlainText();
-    expect(shown, contains('☐'));
-    expect(shown, contains('☑'));
+    expect(shown, contains(MarkdownEditingController.boxRoom));
     expect(shown, isNot(contains('[')));
     expect(shown.length, content(tester).text.length,
         reason: 'one drawn character per character: taps land right');
   });
 
-  testWidgets('both boxes in the accent, as text, the same size',
-      (tester) async {
+  testWidgets(
+      'the app draws both boxes: the same size, in the accent, '
+      'level with their line (Round 16)', (tester) async {
     await openNote(tester, '- [ ] milk\n- [x] eggs');
-    final spans = <TextSpan>[];
-    content(tester)
-        .buildTextSpan(
-      context: tester.element(contentField),
-      style: const TextStyle(fontSize: 16),
-      withComposing: false,
-    )
-        .visitChildren((span) {
-      if (span is TextSpan) spans.add(span);
-      return true;
-    });
-    TextSpan spanOf(String glyph) =>
-        spans.firstWhere((s) => s.text?.startsWith(glyph) ?? false);
-    TextStyle styleOf(String glyph) => spanOf(glyph).style!;
+    final painted = boxes(tester).painted;
+    expect([for (final b in painted) b.ticked], [false, true]);
+    final (empty, ticked) = (painted[0].rect, painted[1].rect);
+    expect(empty.width, moreOrLessEquals(ticked.width, epsilon: 0.01),
+        reason: 'ticking does not resize it');
+    expect(empty.width, greaterThan(12));
+    expect(empty.left, moreOrLessEquals(ticked.left, epsilon: 0.5));
     final accent =
         Theme.of(tester.element(contentField)).extension<AppPalette>()!.accent;
-    expect(styleOf('☐').color, accent);
-    expect(styleOf('☑').color, accent);
-    // The same size (ticking doesn't move it), a bit bigger than the text.
-    expect(styleOf('☐').fontSize, styleOf('☑').fontSize);
-    expect(styleOf('☐').fontSize, greaterThan(16));
-    // Drawn as text, not as a (white) emoji.
-    for (final glyph in ['☐', '☑']) {
-      expect(spanOf(glyph).text, '$glyph\uFE0E');
-    }
+    expect(boxes(tester).colour, accent);
+
+    // Centred on its words' row.
+    final here = tester.getTopLeft(find.byType(CheckboxBoxes));
+    final milk = charAt(tester, 6 + 3);
+    expect(empty.center.dy + here.dy, moreOrLessEquals(milk.dy, epsilon: 2));
+  });
+
+  testWidgets('on the line being edited the symbols show, no box',
+      (tester) async {
+    await openNote(tester, '- [ ] milk\nnext');
+    expect(boxes(tester).painted, hasLength(1));
+    await tester.tapAt(charAt(tester, 8)); // on "milk"
+    await tester.pumpAndSettle();
+    expect(editing(tester), isTrue);
+    expect(boxes(tester).painted, isEmpty);
   });
 
   testWidgets('tapping the box ticks it, without starting to edit',

@@ -199,6 +199,13 @@ an input formatter for Enter in lists. Formatting symbols are drawn as
 nothing (no width, transparent) except on the lines the cursor is on
 while the field has focus, so the note reads clean but stays editable.
 
+Checkboxes (N15) aren't characters of a font: a checkbox's `[` and mark
+are drawn as a square space (an em space and a zero-width one, two for
+two), and `CheckboxBoxes`, a render object around the field, paints a
+box over each from the field's own layout (like `LineNumbers`).
+`CheckboxTaps` ticks one when its box is tapped. Phones' fonts drew ☐ /
+☑ at their own size and colour, so the app doesn't rely on them.
+
 ## Planner routines (P8)
 
 A routine (`models/routine.dart`) is one stored item — times, weekdays,

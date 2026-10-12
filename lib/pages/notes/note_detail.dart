@@ -556,37 +556,40 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                               // Tapping a checkbox ticks it (N15).
                               child: CheckboxTaps(
                                 controller: _contentController,
-                                child: TextField(
-                                  key: const Key('noteContentField'),
+                                child: CheckboxBoxes(
                                   controller: _contentController,
-                                  focusNode: _contentFocusNode,
-                                  autofocus: widget.isNew,
-                                  keyboardType: TextInputType.multiline,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  maxLines: null,
-                                  // No magnifier while selecting (Round 15).
-                                  magnifierConfiguration:
-                                      TextMagnifierConfiguration.disabled,
-                                  // The line typed on stays above the
-                                  // buttons.
-                                  scrollPadding: const EdgeInsets.fromLTRB(
-                                      20, 20, 20, _clearance + 20),
-                                  // Enter continues a list (N9).
-                                  inputFormatters: const [
-                                    MarkdownListFormatter(),
-                                  ],
-                                  style: TextStyle(
-                                    color: context.colors.textPrimary,
-                                    fontSize: 16,
-                                  ),
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: 'Start writing…',
-                                    hintStyle: TextStyle(
-                                      color: context.colors.textHint,
+                                  child: TextField(
+                                    key: const Key('noteContentField'),
+                                    controller: _contentController,
+                                    focusNode: _contentFocusNode,
+                                    autofocus: widget.isNew,
+                                    keyboardType: TextInputType.multiline,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    maxLines: null,
+                                    // No magnifier while selecting (Round 15).
+                                    magnifierConfiguration:
+                                        TextMagnifierConfiguration.disabled,
+                                    // The line typed on stays above the
+                                    // buttons.
+                                    scrollPadding: const EdgeInsets.fromLTRB(
+                                        20, 20, 20, _clearance + 20),
+                                    // Enter continues a list (N9).
+                                    inputFormatters: const [
+                                      MarkdownListFormatter(),
+                                    ],
+                                    style: TextStyle(
+                                      color: context.colors.textPrimary,
+                                      fontSize: 16,
                                     ),
-                                    contentPadding: EdgeInsets.zero,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: 'Start writing…',
+                                      hintStyle: TextStyle(
+                                        color: context.colors.textHint,
+                                      ),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
                                   ),
                                 ),
                               ),

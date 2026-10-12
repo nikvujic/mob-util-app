@@ -348,7 +348,7 @@ Before Round 15's chunks 2–3 (fixes first):
   its history.
 
 **2. Note checkboxes, drawn by the app**
-- [ ] On the phone the empty box is small again and the ticked one still
+- [x] On the phone the empty box is small again and the ticked one still
   grey: the font's glyphs can't be trusted. Draw both boxes ourselves
   over the text (same size, the accent, a tick), like the line numbers.
 

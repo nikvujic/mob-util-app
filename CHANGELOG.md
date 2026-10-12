@@ -13,6 +13,9 @@ Release with the installable APK.
   and the line you're on scrolls up clear of the buttons.
 - Planner: the hour labels have their margin from the screen's edge
   back.
+- Notes: checkboxes are now drawn by the app, so both look right on
+  every phone: an outlined square, or a filled one with a tick, in the
+  accent, the same size.
 
 ### Added
 - Planner and routine sheets: an **End of day** choice for the end time.

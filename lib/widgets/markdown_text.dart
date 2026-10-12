@@ -68,15 +68,26 @@ class MarkdownEditingController extends TextEditingController {
     );
   }
 
-  /// Drawn instead of a checkbox's `[`.
-  static const unchecked = '☐';
-  static const checked = '☑';
+  /// What stands in the text for a checkbox's `[` and its mark: a
+  /// square, empty space (an em space and a zero-width one, two for two,
+  /// so positions stay the same). [CheckboxBoxes] draws the box over it
+  /// (Round 16): the phone's fonts drew ☐ / ☑ at their own size and
+  /// colour, whatever the app asked for.
+  static const boxRoom = '\u2003\u200B';
 
-  /// How much bigger the boxes are drawn than the text.
-  static const boxScale = 1.15;
-
-  /// Unicode's "show the one before as text, not as an emoji" (VS15).
-  static const textStyle = '\uFE0E';
+  /// The checkboxes drawn as boxes now: where each one's `[` is, and
+  /// whether it's ticked. Not on the line being edited, where the symbols
+  /// show instead.
+  List<({int box, bool ticked})> drawnBoxes() {
+    final revealed = _revealed();
+    return [
+      for (final run in markdownRuns(text))
+        if (run.role == MdRole.checkbox &&
+            !(run.start >= revealed.start && run.end <= revealed.end))
+          for (var i = run.start; i < run.end - 1; i++)
+            if (text[i] == '[') (box: i, ticked: text[i + 1] != ' '),
+    ];
+  }
 
   /// Heading sizes, relative to the body text: `#`, `##`, `###`.
   static const headingScale = [1.5, 1.3, 1.15];
@@ -145,24 +156,16 @@ class MarkdownEditingController extends TextEditingController {
       // A checkbox off the line being edited: its `[` drawn as a box, the
       // other symbols as nothing, the space after it kept (N15).
       if (run.role == MdRole.checkbox && !onRevealedLine(run)) {
-        final box = look(run);
         for (var i = run.start; i < run.end; i++) {
           final char = text[i];
           if (char == '[') {
-            final ticked = text[i + 1] != ' ';
-            // The box stands for "[" and the mark after it ("x" or " "),
-            // two characters for two, so positions stay the same. The
-            // second is "text style, please": without it the phone drew
-            // ☑ as a white emoji, bigger and lower than ☐ (Nikola). Both
-            // the same size, a bit bigger than the text, in the accent.
-            final size = base.fontSize ?? 16;
+            // Room for the box, drawn over it by [CheckboxBoxes].
             spans.add(TextSpan(
-              text: '${ticked ? checked : unchecked}$textStyle',
-              style: box.copyWith(
-                color: colors.accent,
-                fontWeight: FontWeight.w400,
-                fontSize: size * boxScale,
-                height: 1 / boxScale,
+              text: boxRoom,
+              style: base.copyWith(
+                color: Colors.transparent,
+                letterSpacing: 0,
+                decoration: TextDecoration.none,
               ),
             ));
             i++; // its mark is in the box
@@ -330,4 +333,158 @@ class _BoxTapRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   String get debugDescription => 'checkbox tap';
+}
+
+/// Draws the checkboxes of a note's text (N15) over the field in [child]:
+/// a rounded square in the accent, filled with a tick when ticked. Drawn
+/// by the app, so they look the same on every phone (Round 16: the font's
+/// ☐ / ☑ came out small or grey). Where they go comes from the field's
+/// own layout, at the room [MarkdownEditingController] leaves for them.
+class CheckboxBoxes extends SingleChildRenderObjectWidget {
+  final MarkdownEditingController controller;
+
+  const CheckboxBoxes({
+    super.key,
+    required this.controller,
+    required Widget super.child,
+  });
+
+  @override
+  RenderCheckboxBoxes createRenderObject(BuildContext context) =>
+      RenderCheckboxBoxes(
+        controller: controller,
+        colour: context.colors.accent,
+        tick: context.colors.background,
+      );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderCheckboxBoxes renderObject,
+  ) {
+    renderObject
+      ..controller = controller
+      ..colour = context.colors.accent
+      ..tick = context.colors.background;
+  }
+}
+
+/// Paints the [CheckboxBoxes] over its child.
+class RenderCheckboxBoxes extends RenderProxyBox {
+  RenderCheckboxBoxes({
+    required MarkdownEditingController controller,
+    required Color colour,
+    required Color tick,
+  })  : _controller = controller,
+        _colour = colour,
+        _tick = tick;
+
+  MarkdownEditingController _controller;
+  set controller(MarkdownEditingController value) {
+    if (identical(value, _controller)) return;
+    if (attached) _controller.removeListener(markNeedsPaint);
+    _controller = value;
+    if (attached) _controller.addListener(markNeedsPaint);
+    markNeedsPaint();
+  }
+
+  Color _colour;
+  Color get colour => _colour;
+  set colour(Color value) {
+    if (value == _colour) return;
+    _colour = value;
+    markNeedsPaint();
+  }
+
+  Color _tick;
+  set tick(Color value) {
+    if (value == _tick) return;
+    _tick = value;
+    markNeedsPaint();
+  }
+
+  /// The boxes last painted, in this box's coordinates: for tests.
+  @visibleForTesting
+  List<({Rect rect, bool ticked})> painted = const [];
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _controller.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _controller.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  RenderEditable? _editable() {
+    RenderEditable? found;
+    void visit(RenderObject child) {
+      if (found != null) return;
+      if (child is RenderEditable) {
+        found = child;
+      } else {
+        child.visitChildren(visit);
+      }
+    }
+
+    if (child != null) visit(child!);
+    return found;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    final painted = <({Rect rect, bool ticked})>[];
+    this.painted = painted;
+    final editable = _editable();
+    if (editable == null || !editable.hasSize) return;
+    final toHere = editable.getTransformTo(this);
+    final canvas = context.canvas;
+    for (final (:box, :ticked) in _controller.drawnBoxes()) {
+      final rows = editable.getBoxesForSelection(
+        TextSelection(baseOffset: box, extentOffset: box + 2),
+      );
+      if (rows.isEmpty) continue;
+      final room = MatrixUtils.transformRect(toHere, rows.first.toRect());
+      // A square a little smaller than the room, centred in it.
+      final side = room.width * 0.9;
+      final square = Rect.fromCenter(
+        center: room.center,
+        width: side,
+        height: side,
+      );
+      painted.add((rect: square, ticked: ticked));
+      final shape = RRect.fromRectAndRadius(
+        square.shift(offset),
+        Radius.circular(side * 0.18),
+      );
+      if (ticked) {
+        canvas.drawRRect(shape, Paint()..color = _colour);
+        final r = square.shift(offset);
+        canvas.drawPath(
+          Path()
+            ..moveTo(r.left + side * 0.24, r.top + side * 0.52)
+            ..lineTo(r.left + side * 0.43, r.top + side * 0.71)
+            ..lineTo(r.left + side * 0.77, r.top + side * 0.31),
+          Paint()
+            ..color = _tick
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = side * 0.13
+            ..strokeCap = StrokeCap.round
+            ..strokeJoin = StrokeJoin.round,
+        );
+      } else {
+        canvas.drawRRect(
+          shape.deflate(side * 0.05),
+          Paint()
+            ..color = _colour
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = side * 0.1,
+        );
+      }
+    }
+  }
 }
