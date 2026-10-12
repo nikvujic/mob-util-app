@@ -72,6 +72,9 @@ class MarkdownEditingController extends TextEditingController {
   static const unchecked = '☐';
   static const checked = '☑';
 
+  /// How much bigger ☐ is drawn than the text.
+  static const uncheckedScale = 1.35;
+
   /// Heading sizes, relative to the body text: `#`, `##`, `###`.
   static const headingScale = [1.5, 1.3, 1.15];
 
@@ -144,11 +147,16 @@ class MarkdownEditingController extends TextEditingController {
           final char = text[i];
           if (char == '[') {
             final ticked = text[i + 1] != ' ';
+            // ☐ is drawn smaller than ☑ in the phone's font: bigger, in a
+            // line no taller than the rest (Nikola). Both in the accent.
+            final size = base.fontSize ?? 16;
             spans.add(TextSpan(
               text: ticked ? checked : unchecked,
               style: box.copyWith(
-                color: ticked ? colors.textSecondary : colors.accent,
+                color: colors.accent,
                 fontWeight: FontWeight.w400,
+                fontSize: ticked ? size : size * uncheckedScale,
+                height: ticked ? null : 1 / uncheckedScale,
               ),
             ));
           } else {

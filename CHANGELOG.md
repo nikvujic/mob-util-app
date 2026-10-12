@@ -7,6 +7,9 @@ Release with the installable APK.
 ## [0.21.0] - unreleased
 
 ### Changed
+- Notes: the Checkbox button is a small one beside *Edit title*, shown
+  only while typing. The empty box is bigger, and both boxes are in the
+  theme's accent colour.
 - Settings → Clear data: confirm by typing DELETE; the Clear button is
   just text.
 

@@ -331,9 +331,9 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 
 ### Round 13 — Nikola's notes on 0.20.0 (2026-10-12)
 
-- [ ] **Checkbox button** in notes: a small button next to *Edit title*,
+- [x] **Checkbox button** in notes: a small button next to *Edit title*,
   shown only while typing (keyboard up), instead of in the main row.
-- [ ] **Checkbox look:** the empty box bigger; the ticked box in the
+- [x] **Checkbox look:** the empty box bigger; the ticked box in the
   theme's accent (Clay's orange).
 - [ ] **Clay first and the default theme**, and more themes for fun to
   fill out the list (all dark, no light mode).

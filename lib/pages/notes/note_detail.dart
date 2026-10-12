@@ -167,22 +167,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     if (text != null) _apply(text);
   }
 
-  /// The checkbox button (N15): while typing, makes the line a checkbox
-  /// item or a plain line again; while viewing, starts a new checkbox at
-  /// the end, ready to type.
+  /// The checkbox button (N15, shown while typing): makes the line a
+  /// checkbox item or a plain line again.
   void _checklist() {
     final content = _contentController;
     final selection = content.selection;
-    if (!_contentFocusNode.hasFocus || !selection.isValid) {
-      final text = content.text;
-      final add = text.isEmpty || text.endsWith('\n') ? '- [ ] ' : '\n- [ ] ';
-      content.value = TextEditingValue(
-        text: text + add,
-        selection: TextSelection.collapsed(offset: text.length + add.length),
-      );
-      _contentFocusNode.requestFocus();
-      return;
-    }
+    if (!selection.isValid) return;
     final edit = toggleChecklistLine(content.text, selection.extentOffset);
     content.value = TextEditingValue(
       text: edit.text,
@@ -449,17 +439,26 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         // note (G11).
         floatingActionButton: ListenableBuilder(
           listenable: Listenable.merge(
-            [_titleController, _contentController, _history],
+            [_titleController, _contentController, _history, _contentFocusNode],
           ),
           builder: (context, _) => BottomActions(
             // ↶ ↷ read left to right on either side.
             keepOrderOfLast: 2,
             // Up at the top, the title is out of thumb reach (N11).
-            above: BottomAction(
-              icon: Icons.title,
-              tooltip: 'Edit title',
-              onPressed: _editTitle,
-            ),
+            above: [
+              BottomAction(
+                icon: Icons.title,
+                tooltip: 'Edit title',
+                onPressed: _editTitle,
+              ),
+              // Only while typing the text, keyboard up (N15).
+              if (_contentFocusNode.hasFocus)
+                BottomAction(
+                  icon: Icons.checklist,
+                  tooltip: 'Checkbox',
+                  onPressed: _checklist,
+                ),
+            ],
             actions: [
               locked
                   ? BottomAction(
@@ -479,11 +478,6 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   tooltip: 'Discard changes',
                   onPressed: _revertInPlace,
                 ),
-              BottomAction(
-                icon: Icons.checklist,
-                tooltip: 'Checkbox',
-                onPressed: _checklist,
-              ),
               // Outermost, under the thumb.
               BottomAction(
                 icon: Icons.undo,

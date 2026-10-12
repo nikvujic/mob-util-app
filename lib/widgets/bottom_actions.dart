@@ -72,20 +72,21 @@ class BottomAction {
 /// A page's actions as round buttons along the bottom, on the side of the
 /// hand in use (G11): bottom right in the given order, or bottom left with
 /// the order mirrored, so the last action is always outermost, under the
-/// thumb. An extra, less used action can sit [above] the row, smaller, on
+/// thumb. Extra, less used actions can sit [above] the row, smaller, on
 /// the same side. The side is taken when the buttons appear and kept while
 /// they're shown. Use as the page's floating action button.
 class BottomActions extends StatefulWidget {
   /// Space to leave below content so it can scroll clear of the buttons.
   static const contentClearance = 88.0;
 
-  /// Extra space to leave with a button [above] the row.
+  /// Extra space to leave with buttons [above] the row.
   static const aboveClearance = 56.0;
 
   final List<BottomAction> actions;
 
-  /// A smaller button above the row, at its outer end.
-  final BottomAction? above;
+  /// Smaller buttons above the row, the first at its outer end (over the
+  /// outermost button), the rest further in.
+  final List<BottomAction> above;
 
   /// How many of the last [actions] keep their order on the left side
   /// too, as a group (e.g. ↶ ↷, which read left to right): the group is
@@ -95,7 +96,7 @@ class BottomActions extends StatefulWidget {
   const BottomActions({
     super.key,
     required this.actions,
-    this.above,
+    this.above = const [],
     this.keepOrderOfLast = 0,
   });
 
@@ -160,7 +161,16 @@ class _BottomActionsState extends State<BottomActions> {
           child: _button(context, action),
         ),
     ];
-    final above = widget.above;
+    // Outermost first: on the right that's the end of the row.
+    final small = [
+      for (final action in widget.above)
+        Padding(
+          // Centred over a row button: its 48 dp touch area (a 40 dp
+          // button) in the 56 dp button's 6 dp margins, plus 12 dp apart.
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+          child: _button(context, action, small: true),
+        ),
+    ];
     // As wide as the screen (minus the usual margins), so the row can sit
     // at either side whatever the page's button location.
     return SizedBox(
@@ -170,12 +180,11 @@ class _BottomActionsState extends State<BottomActions> {
         crossAxisAlignment:
             right ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          if (above != null)
-            Padding(
-              // Centred over the outermost button: its 48 dp touch area
-              // (a 40 dp button) in the 56 dp button's 6 dp margins.
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-              child: _button(context, above, small: true),
+          if (small.isNotEmpty)
+            Row(
+              mainAxisAlignment:
+                  right ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: right ? small.reversed.toList() : small,
             ),
           Row(
             mainAxisAlignment:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/widgets/markdown_text.dart';
 
@@ -56,6 +57,28 @@ void main() {
     expect(shown, isNot(contains('[')));
   });
 
+  testWidgets('both boxes in the accent; the empty one bigger', (tester) async {
+    await openNote(tester, '- [ ] milk\n- [x] eggs');
+    final spans = <TextSpan>[];
+    content(tester)
+        .buildTextSpan(
+      context: tester.element(contentField),
+      style: const TextStyle(fontSize: 16),
+      withComposing: false,
+    )
+        .visitChildren((span) {
+      if (span is TextSpan) spans.add(span);
+      return true;
+    });
+    TextStyle styleOf(String glyph) =>
+        spans.firstWhere((s) => s.text == glyph).style!;
+    final accent =
+        Theme.of(tester.element(contentField)).extension<AppPalette>()!.accent;
+    expect(styleOf('☐').color, accent);
+    expect(styleOf('☑').color, accent);
+    expect(styleOf('☐').fontSize, greaterThan(styleOf('☑').fontSize!));
+  });
+
   testWidgets('tapping the box ticks it, without starting to edit',
       (tester) async {
     final id = await openNote(tester, 'Buy\n- [ ] milk');
@@ -100,19 +123,25 @@ void main() {
   });
 
   group('the Checkbox button', () {
-    testWidgets('while viewing, starts one at the end, ready to type',
-        (tester) async {
+    testWidgets('only while typing, next to Edit title', (tester) async {
       await openNote(tester, 'Buy');
-      await tester.tap(find.byTooltip('Checkbox'));
+      expect(find.byTooltip('Checkbox'), findsNothing);
+      await tester.tap(contentField);
       await tester.pump();
-      expect(content(tester).text, 'Buy\n- [ ] ');
-      expect(editing(tester), isTrue);
-      expect(content(tester).selection.baseOffset, 'Buy\n- [ ] '.length);
+      expect(find.byTooltip('Checkbox'), findsOneWidget);
+      final box = tester.getRect(find.byTooltip('Checkbox'));
+      final title = tester.getRect(find.byTooltip('Edit title'));
+      expect(box.center.dy, moreOrLessEquals(title.center.dy, epsilon: 1));
+      final middle = tester.getSize(find.byType(MaterialApp)).width / 2;
+      expect((box.center.dx - middle).abs(),
+          lessThan((title.center.dx - middle).abs()),
+          reason: 'further in from the edge');
     });
 
     testWidgets('while typing, makes the line one, and back', (tester) async {
       await openNote(tester, '');
       await tester.enterText(contentField, 'milk');
+      await tester.pump(); // the button shows once typing
       await tester.tap(find.byTooltip('Checkbox'));
       await tester.pump();
       expect(content(tester).text, '- [ ] milk');
