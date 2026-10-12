@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.21.0] - unreleased
+## [0.21.0] - 2026-10-12
 
 ### Added
 - Shop: **amounts**. The new button on an item switches between none, a
