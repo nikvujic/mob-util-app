@@ -35,10 +35,6 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setMedicineReminders(bool on) =>
       state = state.copyWith(medicineReminders: on);
 
-  /// Minutes after the dose to remind again; null: off.
-  void setMedicineFollowUp(int? minutes) =>
-      state = state.copyWith(medicineFollowUp: () => minutes);
-
   void setMedicineDot(bool on) => state = state.copyWith(medicineDot: on);
 
   /// The app started at [version] (N16): brings the Introduction up on

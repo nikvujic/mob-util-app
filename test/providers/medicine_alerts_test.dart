@@ -19,6 +19,16 @@ void main() {
     until: tomorrow,
   );
 
+  /// The same, reminding again [minutes] after each dose (Round 16).
+  Medicine pillsAgain(int minutes) => Medicine(
+        id: 'p',
+        name: 'Pills',
+        times: pills.times,
+        from: pills.from,
+        until: pills.until,
+        followUp: minutes,
+      );
+
   List<String> plan(
     MedicineBook book, {
     Preferences preferences = const Preferences(),
@@ -68,11 +78,9 @@ void main() {
     expect(reminders, ['13 20:0 Pills: Time to take it · 20:00']);
   });
 
-  test('with a follow-up, a second one later if still not marked', () {
-    final reminders = plan(
-      MedicineBook(medicines: [pills]),
-      preferences: const Preferences(medicineFollowUp: 240),
-    );
+  test('a medicine with a follow-up: a second one later if still not marked',
+      () {
+    final reminders = plan(MedicineBook(medicines: [pillsAgain(240)]));
     expect(reminders, [
       // This morning's dose: its time has gone, the follow-up hasn't.
       '12 12:0 Pills: Not taken yet · 08:00',
@@ -85,10 +93,7 @@ void main() {
     ]);
     // A follow-up gone by as well: none.
     expect(
-      plan(
-        MedicineBook(medicines: [pills]),
-        preferences: const Preferences(medicineFollowUp: 60),
-      ).first,
+      plan(MedicineBook(medicines: [pillsAgain(60)])).first,
       '12 20:0 Pills: Time to take it · 20:00',
     );
   });
@@ -96,11 +101,8 @@ void main() {
   test('off: none at all', () {
     expect(
       plan(
-        MedicineBook(medicines: [pills]),
-        preferences: const Preferences(
-          medicineReminders: false,
-          medicineFollowUp: 60,
-        ),
+        MedicineBook(medicines: [pillsAgain(60)]),
+        preferences: const Preferences(medicineReminders: false),
       ),
       isEmpty,
     );
@@ -122,8 +124,7 @@ void main() {
   test('the Hub locked: no name', () {
     expect(
       plan(
-        MedicineBook(medicines: [pills]),
-        preferences: const Preferences(medicineFollowUp: 60),
+        MedicineBook(medicines: [pillsAgain(60)]),
         hideNames: true,
       ).take(2),
       [
@@ -202,22 +203,24 @@ void main() {
     });
   });
 
+  test('a medicine keeps its follow-up (medicine.json 3)', () {
+    expect(Medicine.fromJson(pillsAgain(120).toJson()).followUp, 120);
+    expect(pills.toJson().containsKey('followUp'), isFalse);
+  });
+
   test('settings are kept in preferences, older files read as defaults', () {
     final preferences = Preferences(
       medicineReminders: false,
-      medicineFollowUp: 180,
       medicineDot: false,
       medicinePausedUntil: tomorrow,
     );
     final read = Preferences.fromJson(preferences.toJson());
     expect(read.medicineReminders, isFalse);
-    expect(read.medicineFollowUp, 180);
     expect(read.medicineDot, isFalse);
     expect(read.medicinePausedUntil, tomorrow);
 
     final old = Preferences.fromJson({'theme': 'clay'});
     expect(old.medicineReminders, isTrue);
-    expect(old.medicineFollowUp, isNull);
     expect(old.medicineDot, isTrue);
     expect(old.medicinePausedUntil, isNull);
   });

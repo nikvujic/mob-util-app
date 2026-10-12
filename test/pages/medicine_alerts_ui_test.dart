@@ -60,18 +60,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(appBarTitle('Medicine settings'), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('medicineFollowUp')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('4 h later'));
-      await tester.pumpAndSettle();
-      expect(container.read(preferencesProvider).medicineFollowUp, 240);
-      expect(find.text('4 h later'), findsOneWidget, reason: 'shown');
-
-      await tester.tap(find.byKey(const Key('medicineFollowUp')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Off').last);
-      await tester.pumpAndSettle();
-      expect(container.read(preferencesProvider).medicineFollowUp, isNull);
+      expect(find.byKey(const Key('medicineFollowUp')), findsNothing,
+          reason: 'set per medicine now (Round 16)');
 
       await tester.tap(find.byKey(const Key('medicineDot')));
       await tester.pumpAndSettle();
@@ -80,10 +70,6 @@ void main() {
       await tester.tap(find.byKey(const Key('medicineReminders')));
       await tester.pumpAndSettle();
       expect(container.read(preferencesProvider).medicineReminders, isFalse);
-      // A second reminder needs the first.
-      await tester.tap(find.byKey(const Key('medicineFollowUp')));
-      await tester.pumpAndSettle();
-      expect(find.text('Remind again'), findsNothing);
 
       await tester.tap(find.byKey(const Key('medicineReminders')));
       await tester.pumpAndSettle();
@@ -126,7 +112,11 @@ void main() {
         '12 20:0 Pills: Time to take it · 20:00',
       ]);
 
-      preferences().setMedicineFollowUp(60);
+      // Its sheet: remind again 1 h later (Round 16).
+      final id = container.read(medicineProvider).medicines.single.id;
+      final m = container.read(medicineProvider).medicines.single;
+      medicine()
+          .update(id, name: m.name, times: m.times, from: m.from, followUp: 60);
       await tester.pumpAndSettle();
       expect(medicineReminders().take(3), [
         '12 10:0 Pills: Time to take it · 10:00',

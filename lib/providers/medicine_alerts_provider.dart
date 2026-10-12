@@ -8,9 +8,10 @@ import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 
 /// The medicine reminders (O13) due after [now] for the next [days] days:
-/// one at each dose time not yet marked, and with a follow-up set, another
-/// that many minutes later. None while off or paused ([Preferences]). With
-/// [hideNames] (the Hub is locked) the medicine's name is left out.
+/// one at each dose time not yet marked, and for a medicine with a
+/// follow-up (Round 16), another that many minutes later. None while off
+/// or paused ([Preferences]). With [hideNames] (the Hub is locked) the
+/// medicine's name is left out.
 List<Reminder> planMedicineReminders({
   required DateTime now,
   required MedicineBook book,
@@ -21,7 +22,6 @@ List<Reminder> planMedicineReminders({
   if (!preferences.medicineReminders) return const [];
   final reminders = <Reminder>[];
   final today = dayOf(now);
-  final followUp = preferences.medicineFollowUp;
 
   void add(DateTime at, Medicine medicine, int time, {required bool again}) {
     if (!at.isAfter(now) || preferences.medicinePausedOn(at)) return;
@@ -51,6 +51,7 @@ List<Reminder> planMedicineReminders({
         if (book.markFor(medicine.id, day, dose) != null) continue;
         final at = DateTime(day.year, day.month, day.day, 0, time);
         add(at, medicine, time, again: false);
+        final followUp = medicine.followUp;
         if (followUp != null) {
           add(at.add(Duration(minutes: followUp)), medicine, time, again: true);
         }

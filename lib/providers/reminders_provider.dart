@@ -108,7 +108,6 @@ class ReminderPlanner {
     _ref.listen(preferencesProvider, (before, after) {
       if (before == null ||
           before.medicineReminders != after.medicineReminders ||
-          before.medicineFollowUp != after.medicineFollowUp ||
           before.medicinePausedUntil != after.medicinePausedUntil) {
         _soon();
       }

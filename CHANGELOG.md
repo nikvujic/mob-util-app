@@ -13,6 +13,10 @@ Release with the installable APK.
   own bar too, so their last lines scroll clear of the buttons.
 
 ### Changed
+- Medicine: **Remind again** is now set for each medicine, in its sheet
+  (No, or 1–4 h later), instead of once for the whole page. Its menu
+  shows it. (Backups now have format 13.) If you had set it for the
+  page, set it again on the medicines that need it.
 - The Introduction is no longer in the menu (it lives in Notes); once
   deleted, **Settings → Restore the introduction** puts it back.
 - Medicine: a dose whose time has come and isn't taken shows in **red**.

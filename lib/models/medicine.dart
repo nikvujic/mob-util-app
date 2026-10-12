@@ -13,12 +13,17 @@ class Medicine {
   /// The last day it's taken; null: for good.
   final DateTime? until;
 
+  /// Minutes after a dose's time to remind again while it's not marked
+  /// (Round 16: set per medicine); null: no second reminder.
+  final int? followUp;
+
   Medicine({
     required this.id,
     required this.name,
     required List<int> times,
     required DateTime from,
     DateTime? until,
+    this.followUp,
   })  : times = List.unmodifiable([...times]..sort()),
         from = DateTime(from.year, from.month, from.day),
         until = until == null
@@ -43,6 +48,7 @@ class Medicine {
         'times': times,
         'from': PlannerTask.dayToJson(from),
         if (until != null) 'until': PlannerTask.dayToJson(until!),
+        if (followUp != null) 'followUp': followUp,
       };
 
   factory Medicine.fromJson(Map<String, dynamic> json) => Medicine(
@@ -53,6 +59,7 @@ class Medicine {
         until: json['until'] == null
             ? null
             : PlannerTask.dayFromJson(json['until']),
+        followUp: json['followUp'] as int?,
       );
 }
 

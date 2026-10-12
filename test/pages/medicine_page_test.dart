@@ -422,4 +422,42 @@ void main() {
     await tester.pumpAndSettle();
     expect(late, findsOneWidget);
   });
+
+  testWidgets('remind again is set per medicine, in its sheet (Round 16)',
+      (tester) async {
+    await openMedicine(tester);
+    await tester.tap(find.byTooltip('Add medicine'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('medicineName')), 'Pills');
+    await tester.pump();
+    expect(
+        tester.widget<ChoiceChip>(find.byKey(const Key('followUp-0'))).selected,
+        isTrue,
+        reason: 'off by default');
+    await tester.ensureVisible(find.byKey(const Key('followUp-120')));
+    await tester.tap(find.byKey(const Key('followUp-120')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('medicineSubmit')));
+    await tester.pumpAndSettle();
+    final m = container.read(medicineProvider).medicines.single;
+    expect(m.followUp, 120);
+
+    // Its menu says so, and editing keeps it.
+    await tester.tap(find.text('Pills'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('again after 2 h'), findsOneWidget);
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    expect(
+        tester
+            .widget<ChoiceChip>(find.byKey(const Key('followUp-120')))
+            .selected,
+        isTrue);
+    await tester.ensureVisible(find.byKey(const Key('followUp-0')));
+    await tester.tap(find.byKey(const Key('followUp-0')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('medicineSubmit')));
+    await tester.pumpAndSettle();
+    expect(container.read(medicineProvider).medicines.single.followUp, isNull);
+  });
 }

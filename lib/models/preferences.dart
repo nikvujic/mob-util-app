@@ -20,10 +20,6 @@ class Preferences {
   /// Medicine (O12): a notification at each dose time not yet marked.
   final bool medicineReminders;
 
-  /// Medicine (O12): minutes after a dose's time to remind again if it's
-  /// still not marked; null: no second reminder.
-  final int? medicineFollowUp;
-
   /// Medicine (O12): a red dot on its Hub tile and the Hub tab while one of
   /// today's doses is due and not marked.
   final bool medicineDot;
@@ -52,7 +48,6 @@ class Preferences {
     this.noteLineNumbers = true,
     this.fingerprintFor,
     this.medicineReminders = true,
-    this.medicineFollowUp,
     this.medicineDot = true,
     this.medicinePausedUntil,
     this.introDeleted = false,
@@ -87,7 +82,6 @@ class Preferences {
     bool? noteLineNumbers,
     String? Function()? fingerprintFor,
     bool? medicineReminders,
-    int? Function()? medicineFollowUp,
     bool? medicineDot,
     DateTime? Function()? medicinePausedUntil,
     bool? introDeleted,
@@ -102,9 +96,6 @@ class Preferences {
         fingerprintFor:
             fingerprintFor == null ? this.fingerprintFor : fingerprintFor(),
         medicineReminders: medicineReminders ?? this.medicineReminders,
-        medicineFollowUp: medicineFollowUp == null
-            ? this.medicineFollowUp
-            : medicineFollowUp(),
         medicineDot: medicineDot ?? this.medicineDot,
         medicinePausedUntil: medicinePausedUntil == null
             ? this.medicinePausedUntil
@@ -121,7 +112,6 @@ class Preferences {
         'noteLineNumbers': noteLineNumbers,
         if (fingerprintFor != null) 'fingerprintFor': fingerprintFor,
         'medicineReminders': medicineReminders,
-        if (medicineFollowUp != null) 'medicineFollowUp': medicineFollowUp,
         'medicineDot': medicineDot,
         if (medicinePausedUntil != null)
           'medicinePausedUntil': PlannerTask.dayToJson(medicinePausedUntil!),
@@ -138,7 +128,6 @@ class Preferences {
         noteLineNumbers: json['noteLineNumbers'] as bool? ?? true,
         fingerprintFor: json['fingerprintFor'] as String?,
         medicineReminders: json['medicineReminders'] as bool? ?? true,
-        medicineFollowUp: json['medicineFollowUp'] as int?,
         medicineDot: json['medicineDot'] as bool? ?? true,
         medicinePausedUntil: json['medicinePausedUntil'] == null
             ? null

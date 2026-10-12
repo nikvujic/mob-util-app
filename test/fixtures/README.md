@@ -71,3 +71,8 @@ app still reads every version, so an update can never lose existing data.
   2): Coffee ☕ from 1 Jul, taken 1 Jul (filled in, no time), missed 2
   Jul, not sure 3 Jul, taken 12 Oct at 07:55.
 - `v12/backup-plain.json` — backup (version 12) with that.
+- `v13/storage/medicine.json` — remind again per medicine (Round 16,
+  medicine.json version 3): Iron 🩸 twice a day (08:00, 20:00) from 1
+  Oct, reminding again 4 h later (`followUp` 240); Vitamin C at 09:00
+  with none; Iron's morning dose taken 12 Oct at 08:02.
+- `v13/backup-plain.json` — backup (version 13) with that.

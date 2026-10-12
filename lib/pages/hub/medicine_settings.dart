@@ -27,12 +27,6 @@ Future<void> allowMedicineReminders(
     );
 }
 
-/// The second reminder's choices, in minutes after the dose (0: none).
-const _followUpChoices = [0, 60, 120, 180, 240];
-
-String _followUpLabel(int? minutes) =>
-    minutes == null || minutes == 0 ? 'Off' : '${minutes ~/ 60} h later';
-
 /// How long a pause lasts: through today and this many days more.
 const _pauseChoices = <(String, int)>[
   ('Today', 0),
@@ -42,8 +36,8 @@ const _pauseChoices = <(String, int)>[
 ];
 
 /// The Medicine page's settings (O12), from the gear in its top bar:
-/// reminders at dose times and a second one if still not taken, the red
-/// dot, and pausing both for a while.
+/// reminders at dose times (a second one is set per medicine, Round 16),
+/// the red dot, and pausing both for a while.
 class MedicineSettingsPage extends ConsumerWidget {
   const MedicineSettingsPage({super.key});
 
@@ -95,35 +89,14 @@ class MedicineSettingsPage extends ConsumerWidget {
             secondary: const Icon(Icons.notifications_outlined),
             title: const Text('Reminders'),
             subtitle: Text(
-              'A notification at each dose time, unless it\'s marked.',
+              'A notification at each dose time, unless it\'s marked. Each '
+              'medicine can also remind again later (in its own settings).',
               style: muted(),
             ),
             value: preferences.medicineReminders,
             onChanged: (on) {
               notifier.setMedicineReminders(on);
               if (on) allowMedicineReminders(context, ref);
-            },
-          ),
-          ListTile(
-            key: const Key('medicineFollowUp'),
-            enabled: preferences.medicineReminders,
-            leading: const Icon(Icons.notification_add_outlined),
-            title: const Text('Remind again if not taken'),
-            subtitle: Text(
-              _followUpLabel(preferences.medicineFollowUp),
-              style: muted(),
-            ),
-            onTap: () async {
-              final picked = await _pick<int>(
-                context,
-                title: 'Remind again',
-                choices: [
-                  for (final m in _followUpChoices) (_followUpLabel(m), m),
-                ],
-                selected: (m) => m == (preferences.medicineFollowUp ?? 0),
-              );
-              if (picked == null) return;
-              notifier.setMedicineFollowUp(picked == 0 ? null : picked);
             },
           ),
           SwitchListTile(

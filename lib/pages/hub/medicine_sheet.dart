@@ -9,11 +9,16 @@ typedef MedicineDraft = ({
   List<int> times,
   DateTime from,
   DateTime? until,
+  int? followUp,
 });
 
+/// "Remind again" choices, in minutes after a dose (0: off).
+const followUpChoices = [0, 60, 120, 180, 240];
+
 /// The sheet to add a medicine, or edit [medicine] (O6): its name, the
-/// time of each dose (how many a day = how many times), and from when
-/// until when (or for good). Null if closed.
+/// time of each dose (how many a day = how many times), from when until
+/// when (or for good), and whether to remind again if a dose isn't taken
+/// (Round 16). Null if closed.
 Future<MedicineDraft?> showMedicineSheet(
   BuildContext context, {
   required DateTime today,
@@ -44,6 +49,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
   late final List<int> _times = [...?widget.medicine?.times];
   late DateTime _from = widget.medicine?.from ?? widget.today;
   late DateTime? _until = widget.medicine?.until;
+  late int _followUp = widget.medicine?.followUp ?? 0;
 
   @override
   void initState() {
@@ -115,6 +121,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
       times: [..._times]..sort(),
       from: _from,
       until: _until,
+      followUp: _followUp == 0 ? null : _followUp,
     ));
   }
 
@@ -205,6 +212,22 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                     selected: _until != null,
                     onSelected: (_) => _pickDate(until: true),
                   ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text('Remind again if not taken', style: label),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final minutes in followUpChoices)
+                    ChoiceChip(
+                      key: Key('followUp-$minutes'),
+                      label: Text(
+                        minutes == 0 ? 'No' : '${minutes ~/ 60} h later',
+                      ),
+                      selected: _followUp == minutes,
+                      onSelected: (_) => setState(() => _followUp = minutes),
+                    ),
                 ],
               ),
               const SizedBox(height: 8),

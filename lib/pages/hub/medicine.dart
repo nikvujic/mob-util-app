@@ -35,6 +35,7 @@ class MedicinePage extends ConsumerWidget {
       times: draft.times,
       from: draft.from,
       until: draft.until,
+      followUp: draft.followUp,
     );
     // Started in the past: fill those days in, if wanted (O13; one missed
     // day can then be set in its history).
@@ -112,6 +113,7 @@ class MedicinePage extends ConsumerWidget {
         times: draft.times,
         from: draft.from,
         until: draft.until,
+        followUp: draft.followUp,
       );
       return;
     }
@@ -295,7 +297,9 @@ String _schedule(Medicine m, DateTime today) {
   // No end date: nothing said about one (Nikola).
   final until =
       m.until == null ? '' : ', until ${formatDay(m.until!, today: today)}';
-  return '$times · from ${formatDay(m.from, today: today)}$until';
+  final again =
+      m.followUp == null ? '' : ' · again after ${m.followUp! ~/ 60} h';
+  return '$times · from ${formatDay(m.from, today: today)}$until$again';
 }
 
 /// A medicine's doses today: a big button each, taken or not.

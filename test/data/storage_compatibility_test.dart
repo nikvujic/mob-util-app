@@ -547,6 +547,38 @@ void main() {
     });
   });
 
+  group('medicine v3 / v13 backup (remind again per medicine, Round 16)', () {
+    void expectSample(MedicineBook book) {
+      final [iron, vitaminC] = book.medicines;
+      expect((iron.name, iron.followUp), ('Iron 🩸', 240));
+      expect(vitaminC.followUp, isNull);
+      expect(book.markFor('m1', DateTime(2026, 10, 12), 0)!.at,
+          DateTime(2026, 10, 12, 8, 2));
+    }
+
+    test('medicine.json version 3 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v13/storage'),
+      );
+      expectSample(storage.initialMedicine);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v13 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v13/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.medicine);
+    });
+
+    test('version 2 medicines have none', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v12/storage'),
+      );
+      expect(storage.initialMedicine.medicines.single.followUp, isNull);
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -650,6 +682,10 @@ void main() {
           '82811a307c040ee98ae347c8793c3aa2cf1656a5e7201abea59f5119d87b2c30',
       'test/fixtures/v12/backup-plain.json':
           '2ba01bb04b33e1a5c16a76224d7339a44e5c9f8b5f8124716de10c7d9ef52e75',
+      'test/fixtures/v13/storage/medicine.json':
+          '42e2e740aa34861e8564a1eb1552ffcc4ab18fe2f826fdf9ce8e5d10257dbe5a',
+      'test/fixtures/v13/backup-plain.json':
+          '56b1a7cd9dc07d1e48fa76fc906ea9b94c3f0a8332acb3b35e2fb6c40d25174e',
       'test/fixtures/v8/storage/layout.json':
           'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };
