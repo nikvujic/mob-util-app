@@ -61,3 +61,8 @@ app still reads every version, so an update can never lose existing data.
   now has its own version, 3): Push-ups 12 (no options), Water 💧 750 by
   250 in blue between 0 and 3000, Floor −2 with a min of −3.
 - `v10/backup-plain.json` — backup (version 10) with those counters.
+- `v11/storage/medicine.json` — the medicine tracker (O6, medicine.json
+  version 1): Vitamin D 💊 once a day (08:00) from 1 Oct for good, and
+  Antibiotic twice a day (08:00, 20:00) 10–16 Oct; on 11 Oct the Vitamin D
+  was taken at 08:04 and the Antibiotic's evening dose at 20:31.
+- `v11/backup-plain.json` — backup (version 11) with that.

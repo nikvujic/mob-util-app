@@ -8,6 +8,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
@@ -15,6 +16,7 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
@@ -51,6 +53,7 @@ class BackupExporter {
       plannerPins: _ref.read(pinsProvider),
       counters: _ref.read(countersProvider),
       placard: _ref.read(placardProvider),
+      medicine: _ref.read(medicineProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -260,6 +263,7 @@ class BackupImporter {
       source.plannerPins,
       source.counters,
       source.placard,
+      source.medicine,
     );
     return RestoreUndo._(
       previous,
@@ -278,6 +282,7 @@ class BackupImporter {
       undo._previous.plannerPins,
       undo._previous.counters,
       undo._previous.placard,
+      undo._previous.medicine,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -350,6 +355,7 @@ class BackupImporter {
     List<PlannerPin> plannerPins,
     List<Counter> counters,
     Placard placard,
+    MedicineBook medicine,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -358,6 +364,7 @@ class BackupImporter {
     _ref.read(pinsProvider.notifier).replaceAll(plannerPins);
     _ref.read(countersProvider.notifier).replaceAll(counters);
     _ref.read(placardProvider.notifier).replace(placard);
+    _ref.read(medicineProvider.notifier).replaceAll(medicine);
     await _ref.read(appStorageProvider).flush();
   }
 }

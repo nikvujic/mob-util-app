@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:the_app/core/crypto.dart' hide open;
 import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
@@ -66,8 +67,9 @@ class Backup {
   /// 6 = planner reminders (`plannerPins`, P14); 7 = tasks and routines
   /// may have a description (P20); 8 = shop items may have a quantity
   /// (S7); 9 = Placard's text and count (`placard`, O4); 10 = counters
-  /// may have a step, colour and limits (O5).
-  static const version = 10;
+  /// may have a step, colour and limits (O5); 11 = the medicine tracker
+  /// (`medicine`, as in `medicine.json`, O6).
+  static const version = 11;
 
   final DateTime createdAt;
   final String appVersion;
@@ -85,6 +87,9 @@ class Backup {
   /// Placard's text and count (O4); a fresh one in backups from before.
   final Placard placard;
 
+  /// The medicine tracker (O6); empty in backups from before it.
+  final MedicineBook medicine;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -98,6 +103,7 @@ class Backup {
     this.plannerPins = const [],
     this.counters = const [],
     this.placard = Placard.initial,
+    this.medicine = MedicineBook.empty,
     this.masterPassword,
   });
 
@@ -127,6 +133,7 @@ class Backup {
           'plannerPins': [for (final p in plannerPins) p.toJson()],
           'counters': [for (final c in counters) c.toJson()],
           'placard': placard.toJson(),
+          'medicine': medicine.toJson(),
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -220,6 +227,9 @@ class Backup {
         placard: data['placard'] == null
             ? Placard.initial
             : Placard.fromJson(data['placard'] as Map<String, dynamic>),
+        medicine: data['medicine'] == null
+            ? MedicineBook.empty
+            : MedicineBook.fromJson(data['medicine'] as Map<String, dynamic>),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(

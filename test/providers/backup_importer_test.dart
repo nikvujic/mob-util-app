@@ -9,11 +9,13 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/placard_provider.dart';
@@ -144,6 +146,44 @@ void main() {
 
       expect(noteTitles(), ['Current']);
       expect(itemNames(), ['Bread']);
+    });
+
+    test('the medicine tracker comes back, and goes back on undo (O6)',
+        () async {
+      final current = container.read(medicineProvider.notifier);
+      current.add('Current', times: [480], from: DateTime(2026, 10, 1));
+      final saved = Medicine(
+        id: 'm1',
+        name: 'From backup',
+        times: const [480, 1200],
+        from: DateTime(2026, 10, 1),
+      );
+      final withMedicine = Backup(
+        createdAt: backup.createdAt,
+        appVersion: backup.appVersion,
+        notes: const [],
+        shopItems: const [],
+        medicine: MedicineBook(
+          medicines: [saved],
+          taken: [
+            DoseTaken(
+              medicine: 'm1',
+              day: DateTime(2026, 10, 2),
+              dose: 0,
+              at: DateTime(2026, 10, 2, 8, 5),
+            ),
+          ],
+        ),
+      );
+      final pick = importer().read(bytesOf(withMedicine.encode())) as PlainPick;
+      final undo = await importer().restore(pick.backup);
+      final restored = container.read(medicineProvider);
+      expect(restored.medicines.single.name, 'From backup');
+      expect(restored.takenFor('m1', DateTime(2026, 10, 2), 0)!.at,
+          DateTime(2026, 10, 2, 8, 5));
+
+      await importer().undo(undo!);
+      expect(container.read(medicineProvider).medicines.single.name, 'Current');
     });
 
     test('Placard comes back, and goes back on undo (O4)', () async {

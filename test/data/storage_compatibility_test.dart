@@ -11,6 +11,7 @@ import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -473,6 +474,41 @@ void main() {
     });
   });
 
+  group('medicine v1 / v11 backup (medicine tracker, O6)', () {
+    void expectSample(MedicineBook book) {
+      expect(book.medicines.map((m) => (m.name, m.dosesADay, m.until)), [
+        ('Vitamin D 💊', 1, null),
+        ('Antibiotic', 2, DateTime(2026, 10, 16)),
+      ]);
+      final day = DateTime(2026, 10, 11);
+      expect(book.takenFor('m1', day, 0)!.at, DateTime(2026, 10, 11, 8, 4));
+      expect(book.takenFor('m2', day, 1)!.at, DateTime(2026, 10, 11, 20, 31));
+      expect(book.takenFor('m2', day, 0), isNull);
+    }
+
+    test('medicine.json loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v11/storage'),
+      );
+      expectSample(storage.initialMedicine);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v11 backup restores the medicine tracker', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v11/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.medicine);
+    });
+
+    test('older backups have none', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v10/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.medicine.medicines, isEmpty);
+    });
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -568,6 +604,10 @@ void main() {
           '781da94fbe27d818356cd2f787e0ab094c2e6098565261b24d74eb7e559551dd',
       'test/fixtures/v10/backup-plain.json':
           '97bd4e11044a5f26bff2521c246ac49b87da5ec1f76d5e7514bb7116f12f873d',
+      'test/fixtures/v11/storage/medicine.json':
+          'f0a34c25e1e843a90eca8b6f3b3573413d4850552471a44e27b55f17d6d40ce2',
+      'test/fixtures/v11/backup-plain.json':
+          '957ea75a7409465f13e48a2a20db9929fb8c05b72eceb6c838904e66db9ff4a9',
       'test/fixtures/v8/storage/layout.json':
           'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };

@@ -1,0 +1,57 @@
+{
+  "format": "the-app-backup",
+  "version": 11,
+  "createdAt": "2026-10-12T20:00:00.000Z",
+  "appVersion": "0.22.0 (23)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [
+        {
+          "id": "m1",
+          "name": "Vitamin D 💊",
+          "times": [
+            480
+          ],
+          "from": "2026-10-01"
+        },
+        {
+          "id": "m2",
+          "name": "Antibiotic",
+          "times": [
+            480,
+            1200
+          ],
+          "from": "2026-10-10",
+          "until": "2026-10-16"
+        }
+      ],
+      "taken": [
+        {
+          "medicine": "m1",
+          "day": "2026-10-11",
+          "dose": 0,
+          "at": "2026-10-11T08:04:00.000"
+        },
+        {
+          "medicine": "m2",
+          "day": "2026-10-11",
+          "dose": 1,
+          "at": "2026-10-11T20:31:00.000"
+        }
+      ]
+    }
+  }
+}

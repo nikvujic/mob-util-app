@@ -7,6 +7,7 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/json_file_store.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/other_tool.dart';
 import 'package:the_app/models/placard.dart';
@@ -28,6 +29,8 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/pins.json {"version": 1, "pins": [...]}
 ///     <app documents>/data/layout.json {"version": 1, "other": [ids]}
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
+///     <app documents>/data/medicine.json
+///         {"version": 1, "medicines": [...], "taken": [...]}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -66,6 +69,9 @@ class AppStorage {
   /// [formatVersion]; 3 = counters may have a step, colour and limits (O5).
   static const countersFormatVersion = 3;
 
+  /// Version of `medicine.json` (O6). History: 1 = first format.
+  static const medicineFormatVersion = 1;
+
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
   static const shopFormatVersion = 3;
@@ -81,6 +87,7 @@ class AppStorage {
   final JsonFileStore? _pinsStore;
   final JsonFileStore? _layoutStore;
   final JsonFileStore? _placardStore;
+  final JsonFileStore? _medicineStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -92,6 +99,7 @@ class AppStorage {
   final Preferences initialPreferences;
   final PageLayout initialLayout;
   final Placard initialPlacard;
+  final MedicineBook initialMedicine;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -110,7 +118,8 @@ class AppStorage {
     this._routinesStore,
     this._pinsStore,
     this._layoutStore,
-    this._placardStore, {
+    this._placardStore,
+    this._medicineStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -120,6 +129,7 @@ class AppStorage {
     required this.initialPreferences,
     required this.initialLayout,
     required this.initialPlacard,
+    required this.initialMedicine,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
   });
@@ -135,6 +145,7 @@ class AppStorage {
     this.initialPreferences = const Preferences(),
     PageLayout? initialLayout,
     this.initialPlacard = Placard.initial,
+    this.initialMedicine = MedicineBook.empty,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
   })  : _notesStore = null,
@@ -148,6 +159,7 @@ class AppStorage {
         _pinsStore = null,
         _layoutStore = null,
         _placardStore = null,
+        _medicineStore = null,
         initialLayout = initialLayout ?? PageLayout.initial;
 
   /// Opens storage in [directory], or in the app's documents folder.
@@ -166,6 +178,7 @@ class AppStorage {
     final pinsStore = JsonFileStore(File('${dir.path}/pins.json'));
     final layoutStore = JsonFileStore(File('${dir.path}/layout.json'));
     final placardStore = JsonFileStore(File('${dir.path}/placard.json'));
+    final medicineStore = JsonFileStore(File('${dir.path}/medicine.json'));
 
     return AppStorage._(
       notesStore,
@@ -179,6 +192,7 @@ class AppStorage {
       pinsStore,
       layoutStore,
       placardStore,
+      medicineStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -251,6 +265,12 @@ class AppStorage {
         Placard.initial,
         maxVersion: placardFormatVersion,
         Placard.fromJson,
+      ),
+      initialMedicine: await _load(
+        medicineStore,
+        MedicineBook.empty,
+        maxVersion: medicineFormatVersion,
+        MedicineBook.fromJson,
       ),
       initialSectionLocks: await _load(settingsStore, const {}, (json) {
         final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
@@ -348,6 +368,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveMedicine(MedicineBook book) async {
+    await _medicineStore?.write({
+      'version': medicineFormatVersion,
+      ...book.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': countersFormatVersion,
@@ -387,6 +414,7 @@ class AppStorage {
           _pinsStore,
           _layoutStore,
           _placardStore,
+          _medicineStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -406,6 +434,7 @@ class AppStorage {
     await _pinsStore?.flush();
     await _layoutStore?.flush();
     await _placardStore?.flush();
+    await _medicineStore?.flush();
   }
 }
 
