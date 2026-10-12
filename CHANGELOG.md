@@ -19,6 +19,8 @@ Release with the installable APK.
   the smallest.
 
 ### Fixed
+- Coming back after the auto-lock no longer shows the locked page for
+  a moment: the app is covered as it leaves while unlocked.
 - No button flashes when it becomes available anymore (it happened on
   the planner's Add): the fix now covers every button in the app.
 

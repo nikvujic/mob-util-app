@@ -291,9 +291,17 @@ patterns other work builds on (G11, themes), then the bigger features.
 Everything from Round 11 and 12 except the new empty Other pages; the
 medicine tracker is in. In this order:
 
-1. **Main pages:** now line (D), reminders as marks (C), toasts (F),
-   shop quantities (I).
-2. **The three Other pages:** counters (J), Džoni configurable (K, with
+1. **Main pages:** now line (D) ✅, reminders as marks (C), toasts (F),
+   shop quantities (I), **checkboxes in notes** (N15; Nikola changed his
+   mind, they're in v1).
+   Also done: **no flash of a locked page on coming back** (L8).
+2. **Pages as a system first** (O9), so nothing big changes after v1:
+   one registry of pages (id, name, icon, page, its data, lockable);
+   the arrangement stored as page ids (unknown ids ignored, new pages
+   added at the end); each page's data in its own store and in backups
+   under its id. Then **arrange Other** by holding a tile and dragging
+   (O8).
+   **The three Other pages:** counters (J), Džoni configurable (K, with
    the inflate-and-shake hold; it gets a **new name**, Nikola picks), medicine tracker (L).
 3. **Security & data:** a lock for each Other page (O7); Clear data per
    Other page, not only "Other" as a whole (D7 follow-up, once Other has
@@ -314,7 +322,11 @@ medicine tracker is in. In this order:
    an update. Then Nikola clears the test data (Settings → Clear data)
    and starts using it.
 
-After v1: the new Other pages (coin flip, days since/until, life
+After v1 (v2): the **page organizer** (O10): a quick-access menu from
+the right side with pages picked for it, maybe sections and a new name
+for Other, later pages for Nikola's servers and connectors to his
+projects. Built on O9, so it adds places to put pages, not a rework.
+Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
 ### Round 12 — Nikola's notes on 0.19.0 (2026-10-12)
