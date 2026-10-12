@@ -259,6 +259,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 'back the way it was.',
       );
       if (!mounted || _closedByLock) return;
+      if (save == null) {
+        _leaving = false; // tapped outside: stay and keep editing
+        return;
+      }
       if (save) {
         _save();
       } else {

@@ -57,14 +57,31 @@ void main() {
       expect(noteById(id).content, 'milk, eggs');
     });
 
-    testWidgets('tapping outside the dialog also keeps the changes',
+    testWidgets('tapping outside the dialog stays in the note (Nikola)',
+        (tester) async {
+      await openExistingNote(tester);
+      await tester.enterText(contentField, 'milk, eggs');
+
+      await leaveNote(tester);
+      await tester.tapAt(const Offset(5, 5)); // outside the dialog
+      await tester.pumpAndSettle();
+
+      expect(find.text('Save changes?'), findsNothing);
+      expect(appBarTitle('Notes'), findsNothing, reason: 'still editing');
+      expect(find.text('milk, eggs'), findsOneWidget);
+
+      // Back asks again, as before.
+      await leaveNote(tester);
+      expect(find.text('Save changes?'), findsOneWidget);
+    });
+
+    testWidgets('back on the dialog keeps the changes and leaves',
         (tester) async {
       final id = await openExistingNote(tester);
       await tester.enterText(contentField, 'milk, eggs');
 
       await leaveNote(tester);
-      await tester.tapAt(const Offset(5, 5)); // dialog barrier
-      await tester.pumpAndSettle();
+      await pressBack(tester);
 
       expect(appBarTitle('Notes'), findsOneWidget);
       expect(noteById(id).content, 'milk, eggs');

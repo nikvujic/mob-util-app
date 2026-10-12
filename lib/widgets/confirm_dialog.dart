@@ -89,17 +89,40 @@ Future<bool> showDeleteConfirmDialog(
 }
 
 /// Asks whether to keep changes when leaving an editor: **Discard** or
-/// **Save**. Resolves to `true` for Save **and** when the dialog is
-/// dismissed (tap outside, back): only an explicit Discard throws changes
-/// away.
-Future<bool> showSaveChangesDialog(
+/// **Save**. Resolves to `true` for Save and for back (only an explicit
+/// Discard throws changes away), `false` for Discard, and `null` for a tap
+/// outside: that just closes the dialog, staying in the editor (Nikola).
+Future<bool?> showSaveChangesDialog(
   BuildContext context, {
   String title = 'Save changes?',
   String? message,
-}) async {
-  final result = await showDialog<bool>(
+}) {
+  // Back pops with no result (→ Save); a tap outside is told apart by
+  // its own layer under the dialog.
+  const stay = #stay;
+  return showDialog<Object>(
     context: context,
-    builder: (context) => AppDialog(
+    barrierDismissible: false,
+    builder: (context) => Stack(
+      children: [
+        Positioned.fill(
+          child: Semantics(
+            label: 'Keep editing',
+            child: GestureDetector(
+              key: const Key('outsideDialog'),
+              behavior: HitTestBehavior.opaque,
+              onTap: () => Navigator.of(context).pop(stay),
+            ),
+          ),
+        ),
+        _saveChanges(context, title, message),
+      ],
+    ),
+  ).then((result) => result == stay ? null : (result as bool?) ?? true);
+}
+
+Widget _saveChanges(BuildContext context, String title, String? message) =>
+    AppDialog(
       title: title,
       content: message == null ? null : DialogMessage(message),
       actions: [
@@ -114,7 +137,4 @@ Future<bool> showSaveChangesDialog(
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
-    ),
-  );
-  return result ?? true;
-}
+    );

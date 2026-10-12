@@ -302,7 +302,7 @@ medicine tracker is in. In this order:
    under its id. Then **arrange Other** by holding a tile and dragging
    (O8).
    **The three Other pages:** counters (J), Džoni configurable (K, with
-   the inflate-and-shake hold; it gets a **new name**, Nikola picks), medicine tracker (L).
+   the inflate-and-shake hold; renamed **Placard**, Nikola's pick), medicine tracker (L).
 3. **Security & data:** a lock for each Other page (O7); Clear data per
    Other page, not only "Other" as a whole (D7 follow-up, once Other has
    more than counters); the data-loss and error sweep (D6); surviving an

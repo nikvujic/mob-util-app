@@ -13,6 +13,8 @@ Release with the installable APK.
   one is set). Backups are not touched.
 
 ### Changed
+- Notes: tapping outside the *Save changes?* dialog only closes it and
+  you stay in the note (back on the dialog still saves and leaves).
 - Planner sheet: no ✕ (back closes it, asking first if something
   changed); editing a routine has a plain **Delete** on the left.
 - Planner: short blocks show a line of their description too, down to

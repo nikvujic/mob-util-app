@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
+import '../helpers.dart';
+
 void main() {
   Future<Future<bool>> open(WidgetTester tester, {int count = 2}) async {
     late Future<bool> result;
@@ -49,8 +51,8 @@ void main() {
   });
 
   group('showSaveChangesDialog', () {
-    Future<Future<bool>> openSave(WidgetTester tester) async {
-      late Future<bool> result;
+    Future<Future<bool?>> openSave(WidgetTester tester) async {
+      late Future<bool?> result;
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (context) => TextButton(
@@ -76,11 +78,18 @@ void main() {
       expect(await result, isFalse);
     });
 
-    testWidgets('dismissing counts as save', (tester) async {
+    testWidgets('back counts as save', (tester) async {
+      final result = await openSave(tester);
+      await pressBack(tester);
+      expect(await result, isTrue);
+    });
+
+    testWidgets('a tap outside only closes it (null: stay)', (tester) async {
       final result = await openSave(tester);
       await tester.tapAt(const Offset(5, 5));
       await tester.pumpAndSettle();
-      expect(await result, isTrue);
+      expect(find.text('Save'), findsNothing);
+      expect(await result, isNull);
     });
 
     testWidgets('Discard on the left, Save on the right, as real buttons',
