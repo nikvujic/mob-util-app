@@ -23,7 +23,7 @@ class OtherPage extends ConsumerWidget {
     final order = ref.watch(layoutProvider).other;
     final layout = ref.read(layoutProvider.notifier);
     return Scaffold(
-      appBar: const MainAppBar(title: 'Other'),
+      appBar: const MainAppBar(title: 'Hub'),
       // Right to left, bottom to top: the first tool sits in the bottom
       // right corner.
       body: Directionality(

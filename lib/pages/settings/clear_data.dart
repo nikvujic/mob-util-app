@@ -46,7 +46,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
         AppSection.notes => 'Notes, locked ones too',
         AppSection.shop => 'The shopping list',
         AppSection.planner => 'Tasks, routines and reminders',
-        AppSection.other => 'Every page in Other',
+        AppSection.other => 'Every page in the Hub',
       };
 
   bool get _nothingPicked => _picked.isEmpty && _pickedTools.isEmpty;

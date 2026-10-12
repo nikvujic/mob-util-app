@@ -219,12 +219,12 @@ void main() {
         expect(find.text('Undo'), findsOneWidget);
       },
       'placard': (t) async {
-        await openTab(t, 'Other');
+        await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Placard'));
         await t.pumpAndSettle();
       },
       'placard settings': (t) async {
-        await openTab(t, 'Other');
+        await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Placard'));
         await t.pumpAndSettle();
         for (var i = 0; i < 5; i++) {
@@ -233,14 +233,14 @@ void main() {
         }
         await t.pumpAndSettle();
       },
-      'other': (t) => openTab(t, 'Other'),
+      'other': (t) => openTab(t, 'Hub'),
       'counters': (t) async {
-        await openTab(t, 'Other');
+        await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Counters'));
         await t.pumpAndSettle();
       },
       'counters selection mode': (t) async {
-        await openTab(t, 'Other');
+        await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Counters'));
         await t.pumpAndSettle();
         await t.longPress(find.text('Push-ups'));
@@ -727,7 +727,7 @@ void main() {
     await tester.pump();
     await openTab(tester, 'Shop');
     await openTab(tester, 'Planner');
-    await openTab(tester, 'Other');
+    await openTab(tester, 'Hub');
     await tester.tap(find.byTooltip('Counters'));
     await tester.pumpAndSettle();
     await tester.pageBack();

@@ -140,11 +140,12 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | U2 | Shop: replace the checkboxes with simple, nicer icons (from the phone test): a cart (accent) while an item is to buy, a quiet tick once bought. Still announced as checked / not checked. | ✅ |
 | U3 | **One-handed use:** selection actions (select all, delete) as buttons in the lower right; lists can be pulled down past the top so top items come within thumb reach (springing back); bigger drag-handle grab areas; consistent ripples. From the second phone test. | ✅ pull-down is a first version, to tune on the phone |
 
-## O — Other
+## O — Other (shown as **Hub** since Round 13)
 
 | # | Requirement | Status |
 |---|-------------|--------|
 | O1 | **Other** tab lists additional tools; each opens as a page on top (back returns to the list). | ✅ Counters is the first tool |
+| O11 | **Renamed to Hub** (Nikola's pick): the tab and its page say *Hub*. Inside the code and in stored data it stays `other` (section locks, layout), so nothing saved changes. | ✅ |
 | O3 | **Tools as tiles:** Other shows its tools as square tiles with only an icon (no title; still labelled for screen readers), laid out from the bottom right (thumb reach). | ✅ |
 | O4 | **Placard** (was the Džoni page): sideways, full screen (no status bar), a big line of text with a count under it. **Holding** the page inflates it, shaking harder as it fills, then it **pops and counts** one up (a hold of about a second; one count per hold; letting go early lets it down; a tap does nothing). **Five taps in the top-right corner** open its settings: the text (default "Add text here!"; blank goes back to it) and the count (default 1; Reset fills in 0, Save applies). On back it turns upright first, then closes. Kept in `placard.json` and in backups. | ✅ |
 | O2 | **Counters**: named counters with big − / + buttons and the current value; add, rename, reset, delete; reorder. | ✅ values may go below 0; reset and rename via selection mode; selection mode without ✕ (back leaves it) |

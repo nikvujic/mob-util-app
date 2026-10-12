@@ -41,7 +41,7 @@ void main() {
   Future<void> openPlacard(WidgetTester tester) async {
     container = await pumpApp(tester);
     recordSystem(tester);
-    await openTab(tester, 'Other');
+    await openTab(tester, 'Hub');
     await tester.tap(find.byTooltip('Placard'));
     await tester.pumpAndSettle();
   }

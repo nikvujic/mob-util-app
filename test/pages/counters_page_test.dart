@@ -20,7 +20,7 @@ void main() {
     for (final name in names) {
       container.read(countersProvider.notifier).add(name);
     }
-    await openTab(tester, 'Other');
+    await openTab(tester, 'Hub');
     await tester.tap(find.byTooltip('Counters'));
     await tester.pumpAndSettle();
   }
@@ -31,7 +31,7 @@ void main() {
     expect(find.text('No counters'), findsOneWidget);
 
     await pressBack(tester);
-    expect(appBarTitle('Other'), findsOneWidget);
+    expect(appBarTitle('Hub'), findsOneWidget);
   });
 
   testWidgets('+ adds a counter at 0', (tester) async {

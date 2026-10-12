@@ -34,7 +34,7 @@ class BottomNav extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.apps_outlined),
           activeIcon: Icon(Icons.apps),
-          label: 'Other',
+          label: 'Hub',
         ),
       ],
     );

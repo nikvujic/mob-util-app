@@ -6,6 +6,9 @@ Release with the installable APK.
 
 ## [0.22.0] - unreleased
 
+### Changed
+- **Other is now called Hub.**
+
 ### Added
 - Other: **Placard**. A big line of text, sideways and full screen, with
   a count: hold the page and it inflates, shakes and pops to count one

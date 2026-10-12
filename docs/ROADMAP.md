@@ -323,8 +323,8 @@ medicine tracker is in. In this order:
    and starts using it.
 
 After v1 (v2): the **page organizer** (O10): a quick-access menu from
-the right side with pages picked for it, maybe sections and a new name
-for Other, later pages for Nikola's servers and connectors to his
+the right side with pages picked for it, maybe sections in the Hub
+(Other, renamed **Hub** in Round 13), later pages for Nikola's servers and connectors to his
 projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).

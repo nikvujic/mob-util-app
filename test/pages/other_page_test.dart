@@ -14,7 +14,7 @@ void main() {
   testWidgets('each tile has its own icon, which is in the app',
       (tester) async {
     await pumpApp(tester);
-    await openTab(tester, 'Other');
+    await openTab(tester, 'Hub');
 
     final assets = [
       for (final picture
@@ -36,7 +36,7 @@ void main() {
   testWidgets('tools are icon tiles, the first one in the bottom right',
       (tester) async {
     await pumpApp(tester);
-    await openTab(tester, 'Other');
+    await openTab(tester, 'Hub');
 
     final size = tester.getSize(find.byType(MaterialApp));
     final counters = tester.getRect(find.byTooltip('Counters'));
@@ -53,7 +53,7 @@ void main() {
     testWidgets('hold a tile and drag it onto another: they swap places',
         (tester) async {
       final container = await pumpApp(tester);
-      await openTab(tester, 'Other');
+      await openTab(tester, 'Hub');
       final counters = tester.getCenter(find.byTooltip('Counters'));
       final placard = tester.getCenter(find.byTooltip('Placard'));
 
@@ -77,7 +77,7 @@ void main() {
 
     testWidgets('a tap still opens the page', (tester) async {
       await pumpApp(tester);
-      await openTab(tester, 'Other');
+      await openTab(tester, 'Hub');
       await tester.tap(find.byTooltip('Counters'));
       await tester.pumpAndSettle();
       expect(appBarTitle('Counters'), findsOneWidget);
@@ -86,7 +86,7 @@ void main() {
     testWidgets('screen readers can move tiles too', (tester) async {
       final semantics = tester.ensureSemantics();
       final container = await pumpApp(tester);
-      await openTab(tester, 'Other');
+      await openTab(tester, 'Hub');
       final node = tester.getSemantics(find.byTooltip('Counters'));
       final owner = node.owner!;
       final later = CustomSemanticsAction.getIdentifier(

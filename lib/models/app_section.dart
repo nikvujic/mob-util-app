@@ -3,7 +3,7 @@ enum AppSection {
   notes('Notes'),
   shop('Shop'),
   planner('Planner'),
-  other('Other');
+  other('Hub');
 
   const AppSection(this.label);
 

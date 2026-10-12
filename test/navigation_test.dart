@@ -7,7 +7,7 @@ import 'package:the_app/widgets/selection.dart';
 import 'helpers.dart';
 
 void main() {
-  const tabs = ['Notes', 'Shop', 'Planner', 'Other'];
+  const tabs = ['Notes', 'Shop', 'Planner', 'Hub'];
 
   testWidgets('starts on Notes', (tester) async {
     await pumpApp(tester);
@@ -152,7 +152,7 @@ void main() {
     await pumpApp(tester);
     await openTab(tester, 'Planner');
     expect(find.textContaining('Today · '), findsOneWidget);
-    await openTab(tester, 'Other');
+    await openTab(tester, 'Hub');
     expect(find.byTooltip('Counters'), findsOneWidget);
   });
 

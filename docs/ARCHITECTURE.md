@@ -250,6 +250,10 @@ keeps it simple and keeps routines reminding indefinitely.
 
 ## Pages as a system (O9)
 
+The tab users see as **Hub** is `other` in the code and in stored data
+(`AppSection.other`, `OtherTool`, `layout.json`'s `other`): only its label
+changed, so nothing saved had to.
+
 Other's pages are listed once, in `models/other_tool.dart` (`OtherTool`).
 Each value's `name` is a stable id: it's what's stored, so a page is never
 renamed there, only its label. Everything that lists pages reads them from
