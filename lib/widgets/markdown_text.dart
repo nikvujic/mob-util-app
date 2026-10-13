@@ -89,6 +89,61 @@ class MarkdownEditingController extends TextEditingController {
     ];
   }
 
+  bool _onRevealed(int start, int end, TextRange revealed) =>
+      !revealed.isCollapsed && start >= revealed.start && end <= revealed.end;
+
+  /// Where each divider drawn as a line starts (N17); not on the line
+  /// being edited, where its symbols show instead.
+  List<int> drawnDividers() {
+    final revealed = _revealed();
+    return [
+      for (final run in markdownRuns(text))
+        if (run.role == MdRole.divider &&
+            !_onRevealed(run.start, run.end, revealed))
+          run.start,
+    ];
+  }
+
+  /// Each quote line's bar (N17): where its `>` is and where the line
+  /// ends; not on the line being edited.
+  List<({int start, int end})> drawnQuoteBars() {
+    final revealed = _revealed();
+    return [
+      for (final run in markdownRuns(text))
+        if (run.role == MdRole.quoteMarker &&
+            !_onRevealed(run.start, run.end, revealed))
+          (start: run.start, end: _lineEnd(run.start)),
+    ];
+  }
+
+  /// Each ``` code block (N17), fences included: drawn on a panel.
+  List<({int start, int end})> codeBlocks() {
+    final blocks = <({int start, int end})>[];
+    int? open;
+    var lineStart = 0;
+    while (lineStart <= text.length) {
+      final end = _lineEnd(lineStart);
+      if (isFence(text.substring(lineStart, end))) {
+        if (open == null) {
+          open = lineStart;
+        } else {
+          blocks.add((start: open, end: end));
+          open = null;
+        }
+      }
+      if (end >= text.length) break;
+      lineStart = end + 1;
+    }
+    // Not closed yet (being typed): to the end.
+    if (open != null) blocks.add((start: open, end: text.length));
+    return blocks;
+  }
+
+  int _lineEnd(int from) {
+    final next = text.indexOf('\n', from);
+    return next == -1 ? text.length : next;
+  }
+
   /// Heading sizes, relative to the body text: `#` to `####` (Round 27:
   /// `####` just a little bigger than the text, bold).
   static const headingScale = [1.5, 1.3, 1.15, 1.05];
@@ -132,6 +187,27 @@ class MarkdownEditingController extends TextEditingController {
           decorationColor: colors.textSecondary,
         );
       }
+      // N17: code in a fixed-width font (on a tint when inline; a block
+      // gets a whole panel), highlights on the accent, quotes muted and
+      // slanted.
+      if (run.code) {
+        s = s.copyWith(
+          fontFamily: 'monospace',
+          fontFamilyFallback: const ['Roboto Mono', 'Courier'],
+          backgroundColor: run.block ? null : colors.card,
+        );
+      }
+      if (run.highlight) {
+        s = s.copyWith(
+          backgroundColor: colors.accent.withValues(alpha: 0.3),
+        );
+      }
+      if (run.quote) {
+        s = s.copyWith(
+          color: colors.textSecondary,
+          fontStyle: FontStyle.italic,
+        );
+      }
       return switch (run.role) {
         MdRole.text => s,
         // Faint, yet readable (muted keeps the contrast rule).
@@ -144,6 +220,12 @@ class MarkdownEditingController extends TextEditingController {
         MdRole.listMarker || MdRole.checkbox => s.copyWith(
             color: colors.accent,
             fontWeight: FontWeight.w700,
+          ),
+        // Shown (muted) only on the line being edited; elsewhere drawn
+        // (a bar, a line).
+        MdRole.quoteMarker || MdRole.divider => s.copyWith(
+            color: colors.textMuted,
+            fontStyle: FontStyle.normal,
           ),
       };
     }
@@ -179,6 +261,26 @@ class MarkdownEditingController extends TextEditingController {
             spans.add(TextSpan(text: char, style: last ? base : _hidden));
           }
         }
+        continue;
+      }
+      // A quote's `>` off the line being edited: room for its bar, the
+      // space after it kept (N17). One character for one.
+      if (run.role == MdRole.quoteMarker && !onRevealedLine(run)) {
+        for (var i = run.start; i < run.end; i++) {
+          spans.add(TextSpan(
+            text: text[i] == '>' ? '\u2003' : text[i],
+            style: base.copyWith(color: Colors.transparent),
+          ));
+        }
+        continue;
+      }
+      // A divider off the line being edited: its symbols there, unseen;
+      // the line is drawn across instead (N17).
+      if (run.role == MdRole.divider && !onRevealedLine(run)) {
+        spans.add(TextSpan(
+          text: text.substring(run.start, run.end),
+          style: base.copyWith(color: Colors.transparent),
+        ));
         continue;
       }
       final style = shown(run) ? look(run) : _hidden;
@@ -372,7 +474,9 @@ class CheckboxBoxes extends SingleChildRenderObjectWidget {
         controller: controller,
         colour: context.colors.accent,
         tick: context.colors.background,
-      );
+      )
+        ..rule = context.colors.textMuted
+        ..panel = context.colors.card;
 
   @override
   void updateRenderObject(
@@ -382,7 +486,9 @@ class CheckboxBoxes extends SingleChildRenderObjectWidget {
     renderObject
       ..controller = controller
       ..colour = context.colors.accent
-      ..tick = context.colors.background;
+      ..tick = context.colors.background
+      ..rule = context.colors.textMuted
+      ..panel = context.colors.card;
   }
 }
 
@@ -420,6 +526,31 @@ class RenderCheckboxBoxes extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// Dividers' lines (N17).
+  Color _rule = Colors.transparent;
+  set rule(Color value) {
+    if (value == _rule) return;
+    _rule = value;
+    markNeedsPaint();
+  }
+
+  /// Code blocks' panels (N17).
+  Color _panel = Colors.transparent;
+  set panel(Color value) {
+    if (value == _panel) return;
+    _panel = value;
+    markNeedsPaint();
+  }
+
+  /// The quote bars, divider lines and code panels last painted, in this
+  /// box's coordinates: for tests.
+  @visibleForTesting
+  List<Rect> paintedBars = const [];
+  @visibleForTesting
+  List<Rect> paintedRules = const [];
+  @visibleForTesting
+  List<Rect> paintedPanels = const [];
+
   /// The boxes last painted, in this box's coordinates: for tests.
   @visibleForTesting
   List<({Rect rect, bool ticked})> painted = const [];
@@ -451,15 +582,81 @@ class RenderCheckboxBoxes extends RenderProxyBox {
     return found;
   }
 
+  /// The rectangle (here) around [start] to [end] of the text, as laid out.
+  Rect? _around(RenderEditable editable, Matrix4 toHere, int start, int end) {
+    final rows = editable.getBoxesForSelection(
+      TextSelection(baseOffset: start, extentOffset: end),
+    );
+    if (rows.isEmpty) return null;
+    var rect = rows.first.toRect();
+    for (final row in rows.skip(1)) {
+      rect = rect.expandToInclude(row.toRect());
+    }
+    return MatrixUtils.transformRect(toHere, rect);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
+    final editable = _editable();
+    final laidOut = editable != null && editable.hasSize;
+    final toHere = laidOut ? editable.getTransformTo(this) : null;
+
+    // Code blocks' panels, under the text (N17): the field's full width.
+    final panels = <Rect>[];
+    if (laidOut) {
+      final width =
+          MatrixUtils.transformRect(toHere!, Offset.zero & editable.size);
+      for (final (:start, :end) in _controller.codeBlocks()) {
+        final around = _around(editable, toHere, start, end);
+        if (around == null) continue;
+        final rect = Rect.fromLTRB(
+            width.left - 4, around.top - 2, width.right + 4, around.bottom + 2);
+        panels.add(rect);
+        context.canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.shift(offset), const Radius.circular(6)),
+          Paint()..color = _panel,
+        );
+      }
+    }
+    paintedPanels = panels;
+
     super.paint(context, offset);
     final painted = <({Rect rect, bool ticked})>[];
     this.painted = painted;
-    final editable = _editable();
-    if (editable == null || !editable.hasSize) return;
-    final toHere = editable.getTransformTo(this);
+    paintedBars = const [];
+    paintedRules = const [];
+    if (!laidOut) return;
     final canvas = context.canvas;
+
+    // Quotes' bars (N17): down the quoted line, in the `>`'s room.
+    final bars = <Rect>[];
+    for (final (:start, :end) in _controller.drawnQuoteBars()) {
+      final room = _around(editable, toHere!, start, start + 1);
+      final line = _around(editable, toHere, start, end);
+      if (room == null || line == null) continue;
+      final bar =
+          Rect.fromLTWH(room.left + room.width * 0.3, line.top, 3, line.height);
+      bars.add(bar);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(bar.shift(offset), const Radius.circular(1.5)),
+        Paint()..color = _colour,
+      );
+    }
+    paintedBars = bars;
+
+    // Dividers (N17): a line across, through the middle of their line.
+    final rules = <Rect>[];
+    final width =
+        MatrixUtils.transformRect(toHere!, Offset.zero & editable.size);
+    for (final start in _controller.drawnDividers()) {
+      final line = _around(editable, toHere, start, start + 1);
+      if (line == null) continue;
+      final rule =
+          Rect.fromLTWH(width.left, line.center.dy - 0.75, width.width, 1.5);
+      rules.add(rule);
+      canvas.drawRect(rule.shift(offset), Paint()..color = _rule);
+    }
+    paintedRules = rules;
     for (final (:box, :ticked) in _controller.drawnBoxes()) {
       final rows = editable.getBoxesForSelection(
         TextSelection(baseOffset: box, extentOffset: box + 2),

@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [1.2.0] - unreleased
 
+### Added
+- **More formats in notes**: inline `code` and code blocks (between
+  ``` lines, on a panel), quotes (`> `, with a bar down the side),
+  highlights (`==like this==`) and dividers (`---`, a line across).
+- **A format bar**: while typing, the **Format** button (where Checkbox
+  was) opens a row of buttons above the keyboard: checkbox, lists,
+  heading, bold, italic, strikethrough, highlight, quote, code, code
+  block and divider. They format the selection or its lines, and press
+  again to undo it. The keyboard stays up.
+
 ### Changed
 - Notes: `####` makes a small heading (bold, a little bigger than the
   text), and list dots are a bit bigger.

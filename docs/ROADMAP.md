@@ -349,9 +349,9 @@ Nikola is importing his notes: the extra formats and their buttons now
   title button.
 
 **2. More formats, and a formatting bar** (N17)
-- [ ] Inline `code`, code blocks (```), quotes (>), highlight (==…==), a
+- [x] Inline `code`, code blocks (```), quotes (>), highlight (==…==), a
   divider (---).
-- [ ] A Format button (in place of Checkbox) opening a row of format
+- [x] A Format button (in place of Checkbox) opening a row of format
   buttons above the keyboard, without leaving or covering the text.
 
 **3. Hub pages: Recipes next** — of the new Hub pages (not the food

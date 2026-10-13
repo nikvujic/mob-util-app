@@ -14,7 +14,9 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 - **+** starts a note; it's saved as you type.
 - **Markdown**: start a line with a hash and a space for a heading (two, three or four hashes for smaller ones); wrap words in two stars for **bold**, one star for *italic*, two tildes to strike them out. The symbols hide when you're not on that line.
 - **Lists**: start a line with a dash and a space, or a number and a dot. Enter continues the list; Enter on an empty item ends it.
-- **Checkboxes**: a dash, a space and square brackets with a space inside make one; tap the box to tick it. The checkbox button (shown while typing) turns a line into one.
+- **Checkboxes**: a dash, a space and square brackets with a space inside make one; tap the box to tick it.
+- **More formats**: backticks for `code`, three backticks on the lines above and below for a code block, a greater-than sign and a space for a quote, two equals signs on each side to ==highlight==, and three dashes alone on a line for a divider.
+- **Format** (shown while typing) opens a row of buttons above the keyboard for all of these: they format what's selected (or the line), and pressing one again takes it off.
 - **Undo** and **redo** step through your changes; **Discard** puts the note back as it was.
 - **Lock** a note to encrypt it with your master password.
 - Line numbers can be turned off in Settings.

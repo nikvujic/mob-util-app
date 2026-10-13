@@ -97,12 +97,16 @@ class BottomActions extends StatefulWidget {
   /// told from the touches, Round 14).
   final HandSide? side;
 
+  /// A full-width bar over everything (e.g. the notes' formatting, N17).
+  final Widget? bar;
+
   const BottomActions({
     super.key,
     required this.actions,
     this.above = const [],
     this.keepOrderOfLast = 0,
     this.side,
+    this.bar,
   });
 
   @override
@@ -185,6 +189,11 @@ class _BottomActionsState extends State<BottomActions> {
         crossAxisAlignment:
             right ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
+          if (widget.bar case final bar?)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: bar,
+            ),
           if (small.isNotEmpty)
             Row(
               mainAxisAlignment:

@@ -13,6 +13,7 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
+import 'package:the_app/widgets/format_bar.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/line_numbers.dart';
 import 'package:the_app/widgets/markdown_text.dart';
@@ -78,9 +79,15 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
   final _contentScroll = ScrollController();
 
-  /// Room below the text, so its end can scroll clear of the buttons.
-  static const _clearance =
-      BottomActions.contentClearance + BottomActions.aboveClearance;
+  /// Room below the text, so its end can scroll clear of the buttons (and
+  /// of the format bar, while it's open).
+  double get _clearance =>
+      BottomActions.contentClearance +
+      BottomActions.aboveClearance +
+      (_formatOpen ? FormatBar.height + 8 : 0);
+
+  /// The format bar (N17) is open.
+  bool _formatOpen = false;
 
   /// The text field, for the line numbers (N12) to follow.
   final _contentFieldKey = GlobalKey();
@@ -171,18 +178,47 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     if (text != null) _apply(text);
   }
 
-  /// The checkbox button (N15, shown while typing): makes the line a
-  /// checkbox item or a plain line again.
-  void _checklist() {
+  /// A format button's edit (N17) on the selection (or the cursor).
+  void _format(MdEdit Function(String text, int start, int end) edit) {
     final content = _contentController;
     final selection = content.selection;
     if (!selection.isValid) return;
-    final edit = toggleChecklistLine(content.text, selection.extentOffset);
+    final result = edit(content.text, selection.start, selection.end);
     content.value = TextEditingValue(
-      text: edit.text,
-      selection: TextSelection.collapsed(offset: edit.cursor),
+      text: result.text,
+      selection: TextSelection(
+        baseOffset: result.start,
+        extentOffset: result.end,
+      ),
     );
   }
+
+  /// The format bar's buttons (N17, Round 27), most used first.
+  late final List<FormatButton> _formatButtons = [
+    FormatButton(Icons.checklist, 'Checkbox',
+        () => _format((t, s, e) => toggleLines(t, s, e, MdLine.checkbox))),
+    FormatButton(Icons.format_list_bulleted, 'Bulleted list',
+        () => _format((t, s, e) => toggleLines(t, s, e, MdLine.bullet))),
+    FormatButton(Icons.format_list_numbered, 'Numbered list',
+        () => _format((t, s, e) => toggleLines(t, s, e, MdLine.numbered))),
+    FormatButton(Icons.format_size, 'Heading', () => _format(cycleHeading)),
+    FormatButton(Icons.format_bold, 'Bold',
+        () => _format((t, s, e) => toggleWrap(t, s, e, '**'))),
+    FormatButton(Icons.format_italic, 'Italic',
+        () => _format((t, s, e) => toggleWrap(t, s, e, '*'))),
+    FormatButton(Icons.format_strikethrough, 'Strikethrough',
+        () => _format((t, s, e) => toggleWrap(t, s, e, '~~'))),
+    FormatButton(Icons.border_color_outlined, 'Highlight',
+        () => _format((t, s, e) => toggleWrap(t, s, e, '=='))),
+    FormatButton(Icons.format_quote, 'Quote',
+        () => _format((t, s, e) => toggleLines(t, s, e, MdLine.quote))),
+    FormatButton(Icons.code, 'Code',
+        () => _format((t, s, e) => toggleWrap(t, s, e, '`'))),
+    FormatButton(
+        Icons.data_object, 'Code block', () => _format(toggleCodeBlock)),
+    FormatButton(Icons.horizontal_rule, 'Divider',
+        () => _format((t, s, e) => insertDivider(t, e))),
+  ];
 
   Note? get _note =>
       ref.read(notesProvider).where((n) => n.id == widget.noteId).firstOrNull;
@@ -465,14 +501,20 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 tooltip: 'Edit title',
                 onPressed: _editTitle,
               ),
-              // Only while typing the text, keyboard up (N15).
+              // Only while typing the text, keyboard up: opens the format
+              // bar (N17; it took the Checkbox button's place, Round 27).
               if (_contentFocusNode.hasFocus)
                 BottomAction(
-                  icon: Icons.checklist,
-                  tooltip: 'Checkbox',
-                  onPressed: _checklist,
+                  icon: _formatOpen
+                      ? Icons.keyboard_hide_outlined
+                      : Icons.text_format,
+                  tooltip: _formatOpen ? 'Close formatting' : 'Format',
+                  onPressed: () => setState(() => _formatOpen = !_formatOpen),
                 ),
             ],
+            bar: _formatOpen && _contentFocusNode.hasFocus
+                ? FormatBar(buttons: _formatButtons)
+                : null,
             actions: [
               locked
                   ? BottomAction(
@@ -557,7 +599,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                         builder: (context, box) => SingleChildScrollView(
                           key: const Key('noteContentScroll'),
                           controller: _contentScroll,
-                          padding: const EdgeInsets.only(bottom: _clearance),
+                          padding: EdgeInsets.only(bottom: _clearance),
                           child: ConstrainedBox(
                             // At least the page tall: a tap anywhere below
                             // short text still starts typing.
@@ -584,7 +626,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                                         TextMagnifierConfiguration.disabled,
                                     // The line typed on stays above the
                                     // buttons.
-                                    scrollPadding: const EdgeInsets.fromLTRB(
+                                    scrollPadding: EdgeInsets.fromLTRB(
                                         20, 20, 20, _clearance + 20),
                                     // Enter continues a list (N9).
                                     inputFormatters: const [

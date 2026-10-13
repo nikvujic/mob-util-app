@@ -136,14 +136,14 @@ void main() {
     expect(content(tester).text, '- [x] milk\n- [ ] ');
   });
 
-  group('the Checkbox button', () {
+  group('the Format button (in place of Checkbox, Round 27)', () {
     testWidgets('only while typing, next to Edit title', (tester) async {
       await openNote(tester, 'Buy');
-      expect(find.byTooltip('Checkbox'), findsNothing);
+      expect(find.byTooltip('Format'), findsNothing);
       await tester.tap(contentField);
       await tester.pump();
-      expect(find.byTooltip('Checkbox'), findsOneWidget);
-      final box = tester.getRect(find.byTooltip('Checkbox'));
+      expect(find.byTooltip('Format'), findsOneWidget);
+      final box = tester.getRect(find.byTooltip('Format'));
       final title = tester.getRect(find.byTooltip('Edit title'));
       expect(box.center.dy, moreOrLessEquals(title.center.dy, epsilon: 1));
       final middle = tester.getSize(find.byType(MaterialApp)).width / 2;
@@ -152,10 +152,13 @@ void main() {
           reason: 'further in from the edge');
     });
 
-    testWidgets('while typing, makes the line one, and back', (tester) async {
+    testWidgets("its bar's Checkbox makes the line one, and back",
+        (tester) async {
       await openNote(tester, '');
       await tester.enterText(contentField, 'milk');
       await tester.pump(); // the button shows once typing
+      await tester.tap(find.byTooltip('Format'));
+      await tester.pump();
       await tester.tap(find.byTooltip('Checkbox'));
       await tester.pump();
       expect(content(tester).text, '- [ ] milk');

@@ -410,3 +410,14 @@ tap while Shift is held, and some phone keyboards leave Shift "held".
 `app/stuck_shift.dart` wraps the app's pointer input (installed in
 `main`): a touch going down first sends a synthetic key-up for a held
 Shift.
+
+More formats (N17, Round 27): `markdownRuns` also reads inline code,
+highlights, quotes, dividers and ``` blocks (a block's lines are code,
+nothing else). Drawn by `MarkdownEditingController` as styles, and by
+`RenderCheckboxBoxes` around the text: code panels under it, quote bars
+and divider lines over it (the `>` and `---` keep their characters,
+unseen, so positions never move). The format bar's edits are pure
+functions in `core/markdown.dart` (`toggleWrap`, `toggleLines`,
+`cycleHeading`, `toggleCodeBlock`, `insertDivider`) returning the new text
+and selection; `widgets/format_bar.dart` is the row, in `BottomActions`'
+`bar` slot.

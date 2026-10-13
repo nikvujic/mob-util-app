@@ -64,6 +64,12 @@ Future<void> seed(ProviderContainer container) async {
     ..addNote(title: 'Trip plan');
   final bank = container.read(notesProvider).last.id;
   await notes.lockNote(bank, DataKey.fromBytes(List.filled(32, 1)));
+  // Every format (N17): checked for contrast in each theme.
+  notes.addNote(
+    title: 'Formats',
+    content: '#### Small heading\n> A quote\nSome `code` and ==a highlight==\n'
+        '---\n```\nx = 1\n```\nend',
+  );
   final shop = container.read(shopProvider.notifier)
     ..addItem('Milk')
     ..addItem('Bread')
@@ -354,6 +360,23 @@ void main() {
             (w.key! as ValueKey<String>).value.endsWith('-1')));
         await t.pumpAndSettle();
         expect(find.byKey(const Key('holdToTake')), findsOneWidget);
+      },
+      'note formats and the format bar': (t) async {
+        t.view.physicalSize = const Size(1080, 2400);
+        addTearDown(t.view.resetPhysicalSize);
+        await t.pump();
+        await t.tap(find.text('Formats'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('noteContentField')));
+        await t.pump();
+        await t.tap(find.byTooltip('Format'));
+        await t.pumpAndSettle();
+        // Off the drawn lines: the cursor at the very end.
+        final field =
+            t.widget<TextField>(find.byKey(const Key('noteContentField')));
+        field.controller!.selection =
+            TextSelection.collapsed(offset: field.controller!.text.length);
+        await t.pumpAndSettle();
       },
       'counters selection mode': (t) async {
         await openTab(t, 'Hub');

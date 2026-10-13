@@ -16,6 +16,12 @@ enum MdRole {
 
   /// A checkbox's `- [ ] ` / `- [x] ` (N15): drawn as a box.
   checkbox,
+
+  /// A quote's `>` (and the space after it) (N17): drawn as a bar.
+  quoteMarker,
+
+  /// A divider line, `---` (N17): drawn as a line across.
+  divider,
 }
 
 /// A stretch of a note's text, [start] to [end], and how it looks.
@@ -33,6 +39,16 @@ class MdRun {
   /// In a ticked checkbox item (N15): shown done.
   final bool done;
 
+  /// Code (N17): between backticks, or a line of a ``` block ([block]).
+  final bool code;
+  final bool block;
+
+  /// Between `==`: highlighted (N17).
+  final bool highlight;
+
+  /// On a `>` line: a quote (N17).
+  final bool quote;
+
   const MdRun(
     this.start,
     this.end, {
@@ -42,6 +58,10 @@ class MdRun {
     this.italic = false,
     this.strike = false,
     this.done = false,
+    this.code = false,
+    this.block = false,
+    this.highlight = false,
+    this.quote = false,
   });
 
   bool _sameLook(MdRun other) =>
@@ -50,13 +70,19 @@ class MdRun {
       bold == other.bold &&
       italic == other.italic &&
       strike == other.strike &&
-      done == other.done;
+      done == other.done &&
+      code == other.code &&
+      block == other.block &&
+      highlight == other.highlight &&
+      quote == other.quote;
 
   @override
   String toString() => 'MdRun($start–$end, ${role.name}'
       '${heading > 0 ? ', h$heading' : ''}${bold ? ', bold' : ''}'
       '${italic ? ', italic' : ''}${strike ? ', strike' : ''}'
-      '${done ? ', done' : ''})';
+      '${done ? ', done' : ''}${code ? ', code' : ''}'
+      '${block ? ', block' : ''}${highlight ? ', highlight' : ''}'
+      '${quote ? ', quote' : ''})';
 }
 
 final _heading = RegExp(r'^(#{1,4}) ');
@@ -66,18 +92,43 @@ final _numbered = RegExp(r'^(\s*)(\d{1,3})([.)]) ');
 final _bold = RegExp(r'\*\*(?=\S)(.+?)(?<=\S)\*\*');
 final _strike = RegExp(r'~~(?=\S)(.+?)(?<=\S)~~');
 final _italic = RegExp(r'(?<!\*)\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?!\*)');
+final _code = RegExp(r'`([^`]+)`');
+final _highlight = RegExp(r'==(?=\S)(.+?)(?<=\S)==');
+final _quote = RegExp(r'^(\s*)> ?');
+final _divider = RegExp(r'^\s*(-{3,}|\*{3,}|_{3,})\s*$');
+final _fence = RegExp(r'^\s*```');
+
+/// Whether [line] opens or closes a code block (N17).
+bool isFence(String line) => _fence.hasMatch(line);
 
 /// How [text] looks, as runs covering all of it in order (none for empty
 /// text). Inline styles don't cross lines.
 List<MdRun> markdownRuns(String text) {
   final runs = <MdRun>[];
   var lineStart = 0;
+  // Inside a ``` code block (N17): its lines are code, nothing else.
+  var inBlock = false;
   while (lineStart <= text.length) {
     final newline = text.indexOf('\n', lineStart);
     final lineEnd = newline == -1 ? text.length : newline;
-    _line(text.substring(lineStart, lineEnd), lineStart, runs);
+    final line = text.substring(lineStart, lineEnd);
+    if (isFence(line)) {
+      inBlock = !inBlock;
+      if (line.isNotEmpty) {
+        _add(
+            runs,
+            MdRun(lineStart, lineEnd,
+                role: MdRole.marker, code: true, block: true));
+      }
+    } else if (inBlock) {
+      if (line.isNotEmpty) {
+        _add(runs, MdRun(lineStart, lineEnd, code: true, block: true));
+      }
+    } else {
+      _line(line, lineStart, runs);
+    }
     if (newline == -1) break;
-    _add(runs, MdRun(newline, newline + 1));
+    _add(runs, MdRun(newline, newline + 1, block: inBlock));
     lineStart = newline + 1;
   }
   return runs;
@@ -85,38 +136,59 @@ List<MdRun> markdownRuns(String text) {
 
 void _line(String line, int offset, List<MdRun> runs) {
   if (line.isEmpty) return;
+  // A divider: the whole line, drawn as a line across (N17).
+  if (_divider.hasMatch(line)) {
+    _add(runs, MdRun(offset, offset + line.length, role: MdRole.divider));
+    return;
+  }
   final n = line.length;
   final role = List.filled(n, MdRole.text);
   final bold = List.filled(n, false);
   final italic = List.filled(n, false);
   final strike = List.filled(n, false);
+  final code = List.filled(n, false);
+  final highlight = List.filled(n, false);
   var heading = 0;
   var done = false;
 
+  // A quote (N17): its `>` drawn as a bar; the rest as usual, quoted.
+  var quoted = 0;
+  final q = _quote.firstMatch(line);
+  if (q != null) {
+    quoted = q.end;
+    role.fillRange(q.group(1)!.length, quoted, MdRole.quoteMarker);
+  }
+
   // What the line starts with: a heading, a checkbox or a list item.
-  var body = 0;
-  final h = _heading.firstMatch(line);
-  final task = _task.firstMatch(line);
-  final listItem = _bullet.firstMatch(line) ?? _numbered.firstMatch(line);
+  var body = quoted;
+  final rest = line.substring(quoted);
+  final h = _heading.firstMatch(rest);
+  final task = _task.firstMatch(rest);
+  final listItem = _bullet.firstMatch(rest) ?? _numbered.firstMatch(rest);
   if (h != null) {
     heading = h.group(1)!.length;
-    body = h.end;
-    role.fillRange(0, body, MdRole.marker);
+    body = quoted + h.end;
+    role.fillRange(quoted, body, MdRole.marker);
   } else if (task != null) {
-    body = task.end;
+    body = quoted + task.end;
     done = task.group(3) != ' ';
-    role.fillRange(task.group(1)!.length, body, MdRole.checkbox);
+    role.fillRange(quoted + task.group(1)!.length, body, MdRole.checkbox);
   } else if (listItem != null) {
-    body = listItem.end;
-    role.fillRange(listItem.group(1)!.length, body, MdRole.listMarker);
+    body = quoted + listItem.end;
+    role.fillRange(quoted + listItem.group(1)!.length, body, MdRole.listMarker);
   }
 
   // Inline styles, in the rest of the line; the symbols are markers.
+  // Code first: nothing inside it is styled (N17).
   void style(RegExp pattern, List<bool> flag, int markerLength) {
     for (final m in pattern.allMatches(line, body)) {
       final inner = m.start + markerLength, innerEnd = m.end - markerLength;
-      // Already symbols of another style (e.g. the stars of **bold**).
-      if (role[m.start] == MdRole.marker || role[m.end - 1] == MdRole.marker) {
+      // Already symbols of another style (e.g. the stars of **bold**), or
+      // inside code.
+      if (role[m.start] == MdRole.marker ||
+          role[m.end - 1] == MdRole.marker ||
+          code[m.start] ||
+          code[m.end - 1]) {
         continue;
       }
       flag.fillRange(inner, innerEnd, true);
@@ -125,8 +197,10 @@ void _line(String line, int offset, List<MdRun> runs) {
     }
   }
 
+  style(_code, code, 1);
   style(_bold, bold, 2);
   style(_strike, strike, 2);
+  style(_highlight, highlight, 2);
   style(_italic, italic, 1);
 
   for (var i = 0; i < n; i++) {
@@ -141,6 +215,9 @@ void _line(String line, int offset, List<MdRun> runs) {
         italic: italic[i],
         strike: strike[i],
         done: done && i >= body,
+        code: code[i],
+        highlight: highlight[i],
+        quote: quoted > 0 && i >= quoted,
       ),
     );
   }
@@ -162,6 +239,10 @@ void _add(List<MdRun> runs, MdRun run) {
         italic: last.italic,
         strike: last.strike,
         done: last.done,
+        code: last.code,
+        block: last.block,
+        highlight: last.highlight,
+        quote: last.quote,
       ),
     );
   } else {
@@ -192,7 +273,12 @@ ListEdit? continueList(String text, int cursor) {
   final task = _task.firstMatch(line);
   final bullet = _bullet.firstMatch(line);
   final numbered = _numbered.firstMatch(line);
-  if (task != null) {
+  final quote = _quote.firstMatch(line);
+  if (quote != null) {
+    // A quote goes on too (N17).
+    item = quote;
+    next = '${quote.group(1)}> ';
+  } else if (task != null) {
     // The next one starts unticked.
     item = task;
     next = '${task.group(1)}${task.group(2)} [ ] ';
@@ -271,4 +357,269 @@ ListEdit toggleChecklistLine(String text, int cursor) {
   }
   final indent = RegExp(r'^\s*').firstMatch(line)!.end;
   return replace(indent, indent, '- [ ] ');
+}
+
+/// An edit by a format button (N17): the new text and the selection after
+/// it ([start] to [end]; the same for a cursor).
+typedef MdEdit = ({String text, int start, int end});
+
+/// Bold, italic, strike, highlight or code (N17): wraps the selection in
+/// [mark] (`**`, `*`, `~~`, `==`, `` ` ``), or unwraps it if it already
+/// is (the marks inside the selection or just around it). With nothing
+/// selected, puts a pair at the cursor and the cursor between them.
+MdEdit toggleWrap(String text, int start, int end, String mark) {
+  final n = mark.length;
+  final selected = text.substring(start, end);
+  if (start == end) {
+    return (
+      text: text.replaceRange(start, end, '$mark$mark'),
+      start: start + n,
+      end: start + n,
+    );
+  }
+  if (selected.length >= 2 * n &&
+      selected.startsWith(mark) &&
+      selected.endsWith(mark)) {
+    final inner = selected.substring(n, selected.length - n);
+    return (
+      text: text.replaceRange(start, end, inner),
+      start: start,
+      end: start + inner.length,
+    );
+  }
+  if (start >= n &&
+      end + n <= text.length &&
+      text.substring(start - n, start) == mark &&
+      text.substring(end, end + n) == mark) {
+    return (
+      text: text.replaceRange(start - n, end + n, selected),
+      start: start - n,
+      end: end - n,
+    );
+  }
+  return (
+    text: text.replaceRange(start, end, '$mark$selected$mark'),
+    start: start + n,
+    end: end + n,
+  );
+}
+
+/// What a format button puts at the start of lines (N17).
+enum MdLine { bullet, numbered, checkbox, quote }
+
+/// The lines from the one holding [start] to the one holding [end]:
+/// where the first starts and the last ends.
+({int start, int end}) _lines(String text, int start, int end) {
+  final first = start == 0 ? 0 : text.lastIndexOf('\n', start - 1) + 1;
+  final next = text.indexOf('\n', end);
+  return (start: first, end: next == -1 ? text.length : next);
+}
+
+/// A change to one line: its characters [from] to [to] replaced by [put].
+typedef _LineChange = ({int from, int to, String put});
+
+/// Applies [change] to each line between [start] and [end] (null leaves a
+/// line as it is). The selection keeps to the same words: a position in
+/// replaced characters goes to just after what replaced them.
+MdEdit _eachLine(
+  String text,
+  int start,
+  int end,
+  _LineChange? Function(String line, int index) change,
+) {
+  final span = _lines(text, start, end);
+  final lines = text.substring(span.start, span.end).split('\n');
+  final out = StringBuffer();
+  // Where each line starts, and its change.
+  final starts = <int>[];
+  final changes = <_LineChange?>[];
+  var at = span.start;
+  for (final (i, line) in lines.indexed) {
+    if (i > 0) out.write('\n');
+    final c = change(line, i);
+    starts.add(at);
+    changes.add(c);
+    out.write(c == null ? line : line.replaceRange(c.from, c.to, c.put));
+    at += line.length + 1;
+  }
+
+  int map(int offset) {
+    var moved = 0;
+    for (var i = 0; i < lines.length; i++) {
+      final c = changes[i];
+      final lineEnd = starts[i] + lines[i].length;
+      if (c != null && offset <= lineEnd) {
+        final o = offset - starts[i];
+        if (o < c.from) return offset + moved;
+        if (o < c.to || (o == c.from && c.from == c.to)) {
+          return starts[i] + moved + c.from + c.put.length;
+        }
+        return offset + moved + c.put.length - (c.to - c.from);
+      }
+      if (offset <= lineEnd) return offset + moved;
+      if (c != null) moved += c.put.length - (c.to - c.from);
+    }
+    return offset + moved;
+  }
+
+  return (
+    text: text.replaceRange(span.start, span.end, out.toString()),
+    start: map(start),
+    end: map(end),
+  );
+}
+
+/// Lists, checkboxes and quotes (N17): gives the selected lines that kind
+/// of start, or takes it away if they all have it already. A list item
+/// becomes the other kind (a bullet a checkbox, …); numbers count from 1.
+/// Empty lines in a selection of several are left alone.
+MdEdit toggleLines(String text, int start, int end, MdLine kind) {
+  final span = _lines(text, start, end);
+  final lines = text.substring(span.start, span.end).split('\n');
+  final quote = RegExp(r'^(\s*)> ?');
+
+  // A list line's start: where it begins (after the indent) and ends.
+  ({int from, int to, String kind})? listStart(String line) {
+    final indent = RegExp(r'^\s*').firstMatch(line)!.end;
+    final rest = line.substring(indent);
+    final task = _task.firstMatch(rest);
+    if (task != null) {
+      return (from: indent, to: indent + task.end, kind: 'checkbox');
+    }
+    final bullet = _bullet.firstMatch(rest);
+    if (bullet != null) {
+      return (from: indent, to: indent + bullet.end, kind: 'bullet');
+    }
+    final numbered = _numbered.firstMatch(rest);
+    if (numbered != null) {
+      return (from: indent, to: indent + numbered.end, kind: 'numbered');
+    }
+    return null;
+  }
+
+  bool has(String line) => kind == MdLine.quote
+      ? quote.hasMatch(line)
+      : listStart(line)?.kind == kind.name;
+
+  final skipEmpty = lines.length > 1;
+  final content = [
+    for (final l in lines)
+      if (l.trim().isNotEmpty || !skipEmpty) l
+  ];
+  final remove = content.isNotEmpty && content.every(has);
+  var number = 0;
+  return _eachLine(text, start, end, (line, i) {
+    if (skipEmpty && line.trim().isEmpty) return null;
+    if (kind == MdLine.quote) {
+      final q = quote.firstMatch(line);
+      if (remove) {
+        return q == null
+            ? null
+            : (from: q.group(1)!.length, to: q.end, put: '');
+      }
+      final indent = RegExp(r'^\s*').firstMatch(line)!.end;
+      return (from: indent, to: indent, put: '> ');
+    }
+    final old = listStart(line);
+    final indent = RegExp(r'^\s*').firstMatch(line)!.end;
+    final from = old?.from ?? indent, to = old?.to ?? indent;
+    if (remove) return (from: from, to: to, put: '');
+    number++;
+    return (
+      from: from,
+      to: to,
+      put: switch (kind) {
+        MdLine.bullet => '- ',
+        MdLine.numbered => '$number. ',
+        MdLine.checkbox => '- [ ] ',
+        MdLine.quote => '',
+      },
+    );
+  });
+}
+
+/// The heading button (N17): no heading → `#` → `##` → `###` → `####` →
+/// none again (the first line decides), on the line(s) of the selection.
+MdEdit cycleHeading(String text, int start, int end) {
+  final first = _lines(text, start, start);
+  final current = _heading.firstMatch(text.substring(first.start, first.end));
+  final level = current == null ? 0 : current.group(1)!.length;
+  final next = (level + 1) % 5;
+  return _eachLine(text, start, end, (line, i) {
+    final h = _heading.firstMatch(line);
+    return (
+      from: 0,
+      to: h?.end ?? 0,
+      put: next == 0 ? '' : '${'#' * next} ',
+    );
+  });
+}
+
+/// The code block button (N17): wraps the selected lines in ``` fences,
+/// or, inside a block, takes its fences away.
+MdEdit toggleCodeBlock(String text, int start, int end) {
+  final span = _lines(text, start, end);
+  // The fence lines above the selection: inside a block if odd.
+  int? open;
+  var fences = 0;
+  var at = 0;
+  while (at < span.start) {
+    final line = _lines(text, at, at);
+    if (isFence(text.substring(line.start, line.end))) {
+      fences++;
+      open = line.start;
+    }
+    at = line.end + 1;
+  }
+  if (fences.isOdd && open != null) {
+    final openLine = _lines(text, open, open);
+    // The closing fence, the first one below the selection.
+    ({int start, int end})? close;
+    at = span.end + 1;
+    while (at <= text.length) {
+      final line = _lines(text, at, at);
+      if (isFence(text.substring(line.start, line.end))) {
+        close = line;
+        break;
+      }
+      if (line.end >= text.length) break;
+      at = line.end + 1;
+    }
+    var out = text;
+    if (close != null) {
+      // With the line break before it.
+      out = out.replaceRange(close.start - 1, close.end, '');
+    }
+    // With the line break after it.
+    final cut = openLine.end - openLine.start + 1;
+    out = out.replaceRange(openLine.start, openLine.end + 1, '');
+    return (text: out, start: start - cut, end: end - cut);
+  }
+  final body = text.substring(span.start, span.end);
+  return (
+    text: text.replaceRange(span.start, span.end, '```\n$body\n```'),
+    start: start + 4,
+    end: end + 4,
+  );
+}
+
+/// The divider button (N17): a `---` line after the cursor's line (or in
+/// place of an empty one), the cursor on a new line below it.
+MdEdit insertDivider(String text, int cursor) {
+  final line = _lines(text, cursor, cursor);
+  final empty = text.substring(line.start, line.end).trim().isEmpty;
+  if (empty) {
+    final put = '---\n';
+    return (
+      text: text.replaceRange(line.start, line.end, put),
+      start: line.start + put.length,
+      end: line.start + put.length,
+    );
+  }
+  const put = '\n---\n';
+  return (
+    text: text.replaceRange(line.end, line.end, put),
+    start: line.end + put.length,
+    end: line.end + put.length,
+  );
 }
