@@ -8,8 +8,10 @@ import 'package:the_app/pages/security/security.dart';
 import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
+import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/pip.dart';
+import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
@@ -110,6 +112,11 @@ class AppDrawer extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+            // Pip's room (Round 26).
+            PipRoom(
+              brain: ref.watch(pipBrainProvider),
+              animate: ref.watch(pipAnimatesProvider),
             ),
             Padding(
               padding: const EdgeInsets.all(16),

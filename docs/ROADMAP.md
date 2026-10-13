@@ -336,7 +336,7 @@ fixtures for every stored format.
 ### Round 26 — after v1: Pip's room, and notes on 1.0.0 (2026-10-13)
 
 **1. Pip's room in the menu** (now; see Round 24, part 8)
-- [ ] A small field at the bottom of the menu. The first time the menu
+- [x] A small field at the bottom of the menu. The first time the menu
   opens, Pip pops out of the ground; then he stands about and walks.
   Drawn finer than the icon, crisp, squash and stretch on the jump.
 
@@ -347,6 +347,17 @@ fixtures for every stored format.
 - [ ] Menu header: "The App" a little lower, level with Pip.
 - [ ] The launcher icon looks a bit soft next to other apps' icons:
   sharper (e.g. drawn as a vector, crisp at any size).
+
+**3. More notes for later** (after Pip's room and its revisions)
+- [ ] Markdown lists: slightly bigger dots.
+- [ ] Even smaller headings: `####`, just a bit bigger than the text,
+  bold.
+- [ ] **To-do note** (new): a special note at the top of Notes, turned
+  on and off like the Introduction; just a list, like Shop without
+  sections: add items; tapping one completes (removes) it, with a "Task
+  completed" toast and Undo.
+- [ ] A new note's title (the default or "Untitled"): tapping the title
+  button selects its text, so it's quick to replace.
 
 ### Round 25 — Nikola's notes on 0.28.0, then v1 (2026-10-13)
 

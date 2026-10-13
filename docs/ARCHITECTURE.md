@@ -395,3 +395,12 @@ Pip (Round 25), the mascot: `widgets/pip.dart` draws him from the same
 16 x 16 grid as the launcher icon (`tool/make_icon.py`), each grid pixel
 snapped to whole device pixels, in his own colours. The menu's header
 shows him; his room (after v1) builds on it.
+
+Pip's room (Round 26): `core/pip_brain.dart` is his behaviour, plain
+Dart (spawning, standing, walking; where he is, his frame, squash and
+stretch), stepped with the time gone by and a `Random` (seeded in
+tests). `widgets/pip_room.dart` draws the field and his frames (a
+20-wide grid composed from head, face and legs) with a `Ticker` while
+the menu is open; `pipBrainProvider` keeps one brain for the app's run,
+so he spawns only the first time. `pipAnimatesProvider` is off in tests
+(an endless animation never settles) except Pip's own.

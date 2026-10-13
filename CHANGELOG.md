@@ -4,6 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.1.0] - unreleased
+
+### Added
+- **Pip's room**: a strip of field at the bottom of the menu. The first
+  time you open the menu, Pip pops out of the ground (it cracks, he
+  comes up, hops and lands); then he stands about, blinks and walks
+  around. Next time he's where you left him. He keeps still when the
+  phone is set to remove animations.
+
+### Fixed
+- A list a fraction of a pixel off (e.g. the menu above Pip's room)
+  could keep settling every frame, never resting.
+
 ## [1.0.0] - 2026-10-13
 
 ### Added

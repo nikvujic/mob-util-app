@@ -240,9 +240,13 @@ class _PullDownListState extends State<PullDownList> {
                   // under it).
                   final room =
                       widget.bottomSpace + MediaQuery.paddingOf(context).bottom;
+                  // Rounded up (Round 26): with fractional sizes (e.g. Pip's
+                  // room, in whole device pixels, below the menu) the end
+                  // could come out a hair short of the normal top, and the
+                  // list kept trying to settle back there, every frame.
                   final fill = math.max(
                     room,
-                    constraints.viewportMainAxisExtent - rows,
+                    (constraints.viewportMainAxisExtent - rows).ceilToDouble(),
                   );
                   return SliverToBoxAdapter(child: SizedBox(height: fill));
                 },

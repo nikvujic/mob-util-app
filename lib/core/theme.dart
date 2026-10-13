@@ -416,4 +416,12 @@ abstract final class PipColours {
   static const body = Color(0xFFC96442); // body, feet
   static const screen = Color(0xFFF5F0E8);
   static const face = Color(0xFF141413); // eyes, mouth
+  static const shade = Color(0xFFA84F33); // under the body, feet
+  static const light = Color(0xFFF2C07A); // the antenna's light
+
+  // His room (Round 26): grass on dirt.
+  static const grass = Color(0xFF5E8C3A);
+  static const grassLight = Color(0xFF86B85A);
+  static const dirt = Color(0xFF6B4423);
+  static const dirtDark = Color(0xFF4E301A);
 }

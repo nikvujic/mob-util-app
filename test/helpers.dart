@@ -12,6 +12,7 @@ import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/app/app.dart';
+import 'package:the_app/providers/pip_provider.dart';
 
 const testAppVersion = '1.2.3 (4)';
 
@@ -30,6 +31,7 @@ Future<ProviderContainer> pumpApp(
   FingerprintVault? fingerprint,
   FakeReminderScheduler? reminders,
   bool introduction = false,
+  bool pipMoves = false,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -44,6 +46,9 @@ Future<ProviderContainer> pumpApp(
         reminders ?? FakeReminderScheduler(),
       ),
       if (clock != null) clockProvider.overrideWithValue(clock),
+      // Pip stands still (an endless animation never settles); his own
+      // tests let him move.
+      pipAnimatesProvider.overrideWithValue(pipMoves),
       // The Introduction note (N16) only where a test asks for it.
       if (introduction)
         startedVersionProvider.overrideWithValue(testAppVersion),
