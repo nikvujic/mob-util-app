@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [0.27.0] - unreleased
 
+### Fixed
+- Security: the Hub's lock switch could hide under the phone's own
+  navigation bar; every list now leaves room for that bar.
+- A tapped notification's "go to" is dropped when you go to another tab
+  yourself (it went to Medicine later, after a detour).
+
 ### Added
 - Medicine histories: a **back to top** button once you've scrolled far
   down.

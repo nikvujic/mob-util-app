@@ -68,6 +68,25 @@ void main() {
     await settleBusy(tester);
   }
 
+  testWidgets(
+      "every section's switch can be reached, above the phone's bar "
+      '(Round 21: the Hub hid under it)', (tester) async {
+    tester.view.padding =
+        FakeViewPadding(bottom: 48 * tester.view.devicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    await start(tester, locked: {AppSection.hub});
+    await openSecurity(tester);
+    final list = find.byType(Scrollable).last;
+    for (var i = 0; i < 5; i++) {
+      await tester.drag(list, const Offset(0, -600));
+      await tester.pumpAndSettle();
+    }
+    final hub = find.widgetWithText(SwitchListTile, 'Hub');
+    final screen = tester.getSize(find.byType(MaterialApp)).height;
+    expect(tester.getBottomLeft(hub).dy, lessThanOrEqualTo(screen - 48),
+        reason: 'clear of the bar');
+  });
+
   testWidgets('without a master password there are no switches',
       (tester) async {
     await start(tester, withPassword: false);

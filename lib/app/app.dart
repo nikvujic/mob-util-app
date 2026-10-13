@@ -283,7 +283,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: BottomNav(
           selectedIndex: _selectedIndex,
           hubDot: ref.watch(hubDotProvider),
-          onItemTapped: (index) => _show(AppSection.values[index]),
+          onItemTapped: (index) {
+            // Going elsewhere drops a tapped notification's "go to"
+            // (Round 21): it was for where the app took you.
+            if (index != _selectedIndex) {
+              ref.read(pendingTargetProvider.notifier).state = null;
+            }
+            _show(AppSection.values[index]);
+          },
         ),
       ),
     );

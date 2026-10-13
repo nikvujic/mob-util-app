@@ -234,14 +234,12 @@ class _PullDownListState extends State<PullDownList> {
               SliverLayoutBuilder(
                 builder: (context, constraints) {
                   final rows = constraints.precedingScrollExtent - top;
-                  // Room for the buttons, and for the phone's own bar below
-                  // them on pages without the bottom navigation (the
-                  // buttons sit above it; Round 17: the Introduction's
-                  // Delete covered its last lines).
-                  final room = widget.bottomSpace == 0
-                      ? 0.0
-                      : widget.bottomSpace +
-                          MediaQuery.paddingOf(context).bottom;
+                  // Room for the buttons, and always for the phone's own
+                  // bar (gesture or buttons) on pages that reach under it
+                  // (Round 21: the last row, Security's Hub, sat hidden
+                  // under it).
+                  final room =
+                      widget.bottomSpace + MediaQuery.paddingOf(context).bottom;
                   final fill = math.max(
                     room,
                     constraints.viewportMainAxisExtent - rows,

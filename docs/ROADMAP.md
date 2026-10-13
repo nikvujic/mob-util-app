@@ -333,9 +333,11 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 ### Round 21 — security (2026-10-13), before Round 20's Markdown
 
 **1. Bugs**
-- [ ] Security: the Hub sometimes missing from the section locks (it
-  seemed to go after locking it).
-- [ ] A tapped notification's "go to" outlives a change of course: Hub
+- [x] Security: the Hub sometimes missing from the section locks (it
+  seemed to go after locking it). Cause: the list's last row sat under
+  the phone's own bar (no room for it on pages without bottom buttons);
+  every list now leaves that room.
+- [x] A tapped notification's "go to" outlives a change of course: Hub
   locked, a medicine notification tapped, then Planner and back to Hub,
   unlocked: it still went to Medicine. Going elsewhere drops it.
 

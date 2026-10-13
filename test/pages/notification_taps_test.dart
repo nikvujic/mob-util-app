@@ -128,9 +128,7 @@ void main() {
     expect(find.text('Planner is locked'), findsOneWidget);
     expect(find.text('Dentist'), findsNothing);
 
-    // Away and back, still locked: still waiting.
-    await openTab(tester, 'Notes');
-    await openTab(tester, 'Planner');
+    // Still waiting while it stays there (e.g. the app left and back).
     expect(container.read(pendingTargetProvider), isNotNull);
 
     // Unlocked: there it goes.
@@ -140,5 +138,32 @@ void main() {
     expect(find.textContaining('Tomorrow · Fri, 9 Oct'), findsOneWidget);
     expect(find.text('Dentist').hitTestable(), findsOneWidget);
     expect(container.read(pendingTargetProvider), isNull);
+  });
+
+  testWidgets(
+      'going elsewhere drops it (Round 21): Hub locked, a medicine '
+      'notification, then Planner and back, unlocked: no Medicine',
+      (tester) async {
+    await start(tester);
+    await tester.runAsync(() async {
+      await container
+          .read(securityProvider.notifier)
+          .setPassword('master password');
+      await container.read(sessionProvider.notifier).unlock('master password');
+    });
+    container.read(sectionLocksProvider.notifier).lock(AppSection.hub);
+    container.read(sessionProvider.notifier).lock();
+    await tester.pumpAndSettle();
+
+    await tapNotification(tester, const MedicineTarget().payload);
+    expect(find.text('Hub is locked'), findsOneWidget);
+    await openTab(tester, 'Planner');
+    expect(container.read(pendingTargetProvider), isNull);
+    await openTab(tester, 'Hub');
+    await tester.runAsync(() =>
+        container.read(sessionProvider.notifier).unlock('master password'));
+    await tester.pumpAndSettle();
+    expect(appBarTitle('Medicine'), findsNothing);
+    expect(appBarTitle('Hub'), findsOneWidget);
   });
 }
