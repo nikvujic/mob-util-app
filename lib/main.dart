@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:the_app/app/app.dart';
+import 'package:the_app/app/stuck_shift.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/data/app_storage.dart';
 
@@ -9,6 +10,8 @@ import 'package:the_app/data/app_storage.dart';
 /// it to the app through provider overrides.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Taps in notes: never as if Shift were held (Round 26).
+  guardAgainstStuckShift();
   final storage = await AppStorage.open();
   final info = await PackageInfo.fromPlatform();
   final version = '${info.version} (${info.buildNumber})';

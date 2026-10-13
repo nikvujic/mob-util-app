@@ -340,6 +340,13 @@ fixtures for every stored format.
   opens, Pip pops out of the ground; then he stands about and walks.
   Drawn finer than the icon, crisp, squash and stretch on the jump.
 
+**1b. Bug, next in line (important)**
+- [x] Notes: stuck selecting text. Tapping anywhere in the text no longer
+  placed the cursor; it selected everything from the start to the tap.
+  Cause: the app thought Shift was held (a phone keyboard's Shift
+  "down" without its "up"), and a Shift-tap extends the selection. Now
+  a finger touching the screen first lets go of a stuck Shift.
+
 **2. Notes for later** (on 1.0.0)
 - [ ] No toast when deleting the Introduction.
 - [ ] Backup: "Last backup" has two spaces between date and time; one

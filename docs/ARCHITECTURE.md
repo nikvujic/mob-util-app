@@ -404,3 +404,9 @@ tests). `widgets/pip_room.dart` draws the field and his frames (a
 the menu is open; `pipBrainProvider` keeps one brain for the app's run,
 so he spawns only the first time. `pipAnimatesProvider` is off in tests
 (an endless animation never settles) except Pip's own.
+
+Stuck Shift (Round 26): Flutter's text fields extend the selection on a
+tap while Shift is held, and some phone keyboards leave Shift "held".
+`app/stuck_shift.dart` wraps the app's pointer input (installed in
+`main`): a touch going down first sends a synthetic key-up for a held
+Shift.

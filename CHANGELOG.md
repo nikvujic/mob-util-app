@@ -14,6 +14,10 @@ Release with the installable APK.
   phone is set to remove animations.
 
 ### Fixed
+- Notes: tapping in the text could select everything from the start
+  instead of placing the cursor, and stay that way (the app thought
+  Shift was held after the keyboard's Shift key). A touch now lets go
+  of a stuck Shift.
 - A list a fraction of a pixel off (e.g. the menu above Pip's room)
   could keep settling every frame, never resting.
 
