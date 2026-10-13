@@ -269,6 +269,65 @@ void main() {
           reason: '2–11 Oct: 10 doses');
     });
 
+    testWidgets(
+        'a month calendar: weeks as rows, older months to the left '
+        '(Round 16)', (tester) async {
+      late String id;
+      await openMedicine(tester, () {
+        id = medicine()
+            .add('Coffee', times: [480], from: DateTime(2026, 9, 28))!;
+        medicine()
+          ..setDose(id, DateTime(2026, 10, 1), 0, DoseState.taken)
+          ..setDose(id, DateTime(2026, 10, 2), 0, DoseState.missed);
+      });
+      await openOwn(tester, 'Coffee');
+      String month() =>
+          tester.widget<Text>(find.byKey(const Key('calendarMonth'))).data!;
+      expect(month(), 'October 2026');
+      Finder day(String d) => find.byKey(Key('calendar-$d'));
+
+      // A week is a row, Monday first: Mondays share a column, the next
+      // week is below, and Thu 1 Oct sits right of Monday's column.
+      expect(tester.getCenter(day('2026-10-05')).dx,
+          moreOrLessEquals(tester.getCenter(day('2026-10-12')).dx));
+      expect(tester.getCenter(day('2026-10-12')).dy,
+          greaterThan(tester.getCenter(day('2026-10-05')).dy));
+      expect(tester.getCenter(day('2026-10-01')).dx,
+          greaterThan(tester.getCenter(day('2026-10-05')).dx));
+
+      // Marked by how it went.
+      final palette =
+          Theme.of(tester.element(day('2026-10-01'))).extension<AppPalette>()!;
+      Color? fill(String d) =>
+          (tester.widget<Container>(day(d)).decoration as BoxDecoration).color;
+      expect(fill('2026-10-01'), palette.accent);
+      expect(fill('2026-10-02'), palette.danger);
+      expect(fill('2026-10-20'), isNull, reason: 'still to come');
+      expect(find.byKey(const Key('calendarNewer')), findsOneWidget);
+      expect(
+          tester
+              .widget<IconButton>(find.byKey(const Key('calendarNewer')))
+              .onPressed,
+          isNull,
+          reason: 'nothing after this month');
+
+      // Older: a swipe to the right (or ‹).
+      await tester.fling(find.byKey(const Key('medicineCalendar')),
+          const Offset(400, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(month(), 'September 2026');
+      expect(fill('2026-09-28'), isNotNull, reason: 'its first day');
+      expect(
+          tester
+              .widget<IconButton>(find.byKey(const Key('calendarOlder')))
+              .onPressed,
+          isNull,
+          reason: 'nothing before it started');
+      await tester.tap(find.byKey(const Key('calendarNewer')));
+      await tester.pumpAndSettle();
+      expect(month(), 'October 2026');
+    });
+
     testWidgets('a calendar day sets its dose', (tester) async {
       late String id;
       await openMedicine(tester, () {
@@ -278,7 +337,8 @@ void main() {
       await openOwn(tester, 'Coffee');
       await tester.tap(find.byKey(const Key('calendar-2026-10-11')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Not sure'));
+      // The sheet's choice (the legend under the calendar says it too).
+      await tester.tap(find.text('Not sure').last);
       await tester.pumpAndSettle();
       expect(
         container

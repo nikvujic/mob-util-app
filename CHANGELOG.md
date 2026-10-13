@@ -4,6 +4,14 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.26.0] - unreleased
+
+### Changed
+- Medicine: a medicine's history has a **month calendar** instead of
+  the strip: weeks as rows, each day coloured by how it went (with a
+  legend). Swipe right or tap ‹ for older months; tap a day to set its
+  doses.
+
 ## [0.25.0] - 2026-10-13
 
 ### Fixed

@@ -116,8 +116,6 @@ const plainScrollAllowed = {
   'pages/hub/medicine_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
-  // A sideways strip of days inside a page that has reach mode.
-  'pages/hub/medicine_calendar.dart',
   // A note's text while editing: a pull would move the text being typed.
   'pages/notes/note_detail.dart',
 };

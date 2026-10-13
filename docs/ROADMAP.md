@@ -388,7 +388,7 @@ Before Round 15's chunks 2–3 (fixes first):
 - [x] "Remind again" belongs to **each medicine** (in its sheet), not
   the page settings (medicine.json 3). The page keeps reminders on/off,
   the dot and the pause.
-- [ ] The calendar in a medicine's history **taller**: a month grid
+- [x] The calendar in a medicine's history **taller**: a month grid
   (weeks as rows), swiped left for older months, not a single strip.
 
 ### Round 15 — Nikola's notes on 0.23.0 (2026-10-12)

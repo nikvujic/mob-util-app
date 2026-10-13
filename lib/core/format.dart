@@ -88,3 +88,7 @@ int daysBetween(DateTime from, DateTime to) =>
 String formatMinutes(int minutes) =>
     '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
     '${(minutes % 60).toString().padLeft(2, '0')}';
+
+/// `October 2026` (a month's title, e.g. on a calendar).
+String formatMonth(DateTime month) =>
+    '${_monthsLong[month.month - 1]} ${month.year}';

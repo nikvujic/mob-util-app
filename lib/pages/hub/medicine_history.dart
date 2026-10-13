@@ -332,8 +332,8 @@ class MedicineHistoryPage extends ConsumerWidget {
   }
 }
 
-/// One medicine's history (O13): how many were ever taken, a calendar strip
-/// of its days (newest at the right; scroll left for older ones), and
+/// One medicine's history (O13): how many were ever taken, a month
+/// calendar of its days (Round 16; older months to the left), and
 /// every day below, each dose settable. Past days not set yet can be filled
 /// in as taken in one go.
 class MedicineOwnHistoryPage extends ConsumerWidget {
@@ -384,7 +384,6 @@ class MedicineOwnHistoryPage extends ConsumerWidget {
           MedicineCalendar(
             medicine: medicine,
             book: book,
-            days: days.reversed.toList(),
             today: today,
             onDay: (day) => _dayDoses(context, ref, medicine, day),
           ),
