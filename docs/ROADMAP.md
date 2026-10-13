@@ -374,7 +374,8 @@ done without him: kept for now, but he picks the real one, see 6.)
 **7. Order to v1** — 0.28.0 is a test build of all this; Nikola tests,
   sends small fixes and his icon pick; then v1.0.0.
 
-**6. The icon** — (prompt given in chat, Round 24) a prompt for Nikola to ask Claude for icon ideas
+**6. The icon** — [x] **Pip** (Nikola's pick, a 16 × 16 grid) drawn by
+  `tool/make_icon.py`. (Prompt given in chat, Round 24:) a prompt for Nikola to ask Claude for icon ideas
   (from the theme and what the app is), and how to send the chosen one
   back (a screenshot, a file, or instructions to draw the same).
 

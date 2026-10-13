@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.0.0] - unreleased
+
+### Changed
+- **The app's icon is Pip**: a little 8-bit robot with a screen for a
+  face, in the Clay colours (crisp at every size, and with the face cut
+  out in Android 13's themed icons).
+
 ## [0.28.0] - 2026-10-13
 
 ### Added
