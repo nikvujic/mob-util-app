@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [1.0.0] - unreleased
+## [0.28.0] - unreleased
 
 ### Added
 - **Important medicines**: set when adding or editing one. Taking a dose
@@ -39,9 +39,9 @@ Release with the installable APK.
   taken, missed or not sure.
 - Doses due at the same time come as **one** notification naming them
   all (Android could hold the second one back for many minutes).
-- **The app's own icon**: a little pixel robot in the Clay colours,
-  instead of Flutter's logo. On Android 13 and later it follows the
-  phone's themed icons too.
+- **The app's own icon** (for now): a little pixel robot in the Clay
+  colours, instead of Flutter's logo. On Android 13 and later it follows
+  the phone's themed icons too.
 
 ## [0.27.0] - 2026-10-13
 

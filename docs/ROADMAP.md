@@ -369,8 +369,10 @@ done without him: kept for now, but he picks the real one, see 6.)
 **4. After v1 (v2)**
 - [ ] Medicine: pick weekdays (supplements taken some days only).
 
-**5. Install problem** — Nikola can't install the app; the message
-  is still to come.
+**5. Install problem** — solved: a bad download (Nikola installed it).
+
+**7. Order to v1** — 0.28.0 is a test build of all this; Nikola tests,
+  sends small fixes and his icon pick; then v1.0.0.
 
 **6. The icon** — (prompt given in chat, Round 24) a prompt for Nikola to ask Claude for icon ideas
   (from the theme and what the app is), and how to send the chosen one
