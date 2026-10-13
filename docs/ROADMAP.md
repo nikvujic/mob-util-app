@@ -126,7 +126,9 @@ Small fixes, not urgent; can go out together as one polish release.
       import re-seals under this phone's key (or adopts it if none).
       v2 backup fixtures frozen.
 
-- [ ] After 12e: **explain to Nikola in plain terms** how locked notes
+- [x] ~~After 12e: **explain to Nikola in plain terms** how locked notes~~
+  Dropped (Round 30): not needed any more.
+  
   work (what's encrypted, what the password protects, what backups
   carry) — he asked for it.
 
@@ -332,6 +334,18 @@ fixtures for every stored format.
   workout log, timer, habits, weight log, expenses, packing lists, a
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
+
+### Round 30 — Nikola's review of 1.3.0 (2026-10-13)
+
+Then the notifications page (Round 28, part 3).
+
+- [ ] To-do: **under** the Introduction (the Introduction stays on top).
+- [ ] To-do: its buttons follow the **hand-side rule** like every page.
+- [ ] To-do: **two lists**: done things go down to a *Completed* list;
+  tapping toggles them back; a **Delete completed** button.
+- [ ] Restore part: the **Restore** button is broken (text and icon in
+  one line, over the round button's sides).
+- [ ] Restored copies get **(Copy)** in their titles.
 
 ### Round 29 — Nikola's notes on 1.2.0 and 1.2.1 (2026-10-13)
 
@@ -844,7 +858,8 @@ Chunks, in order (each its own commit; release when a few are in):
 - [x] Tapping free time starts the new block **near where it was tapped**
   (to :00 / :30); tapping the **left edge** (by the hour labels) adds a
   reminder there (to 15 minutes).
-- [ ] (Nikola's note on tapping a stacked reminder was cut off: ask.)
+- [x] ~~(Nikola's note on tapping a stacked reminder was cut off: ask.)~~
+  Dropped (Round 30): too long ago to recall.
 
 **3. Medicine, how it handles**
 - [x] Its buttons always on the **right** (one-handed side can't be told
