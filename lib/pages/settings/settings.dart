@@ -18,17 +18,6 @@ class SettingsPage extends ConsumerWidget {
       body: PullDownList.children(
         children: [
           SwitchListTile(
-            secondary: const Icon(Icons.vibration),
-            title: const Text('Counter click and vibration'),
-            subtitle: Text(
-              'On − and +. The click follows the media volume.',
-              style: TextStyle(color: context.colors.textSecondary),
-            ),
-            value: preferences.counterFeedback,
-            onChanged:
-                ref.read(preferencesProvider.notifier).setCounterFeedback,
-          ),
-          SwitchListTile(
             secondary: const Icon(Icons.format_list_numbered),
             title: const Text('Line numbers in notes'),
             subtitle: Text(
@@ -38,6 +27,17 @@ class SettingsPage extends ConsumerWidget {
             value: preferences.noteLineNumbers,
             onChanged:
                 ref.read(preferencesProvider.notifier).setNoteLineNumbers,
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.vibration),
+            title: const Text('Counter click and vibration'),
+            subtitle: Text(
+              'On − and +. The click follows the media volume.',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.counterFeedback,
+            onChanged:
+                ref.read(preferencesProvider.notifier).setCounterFeedback,
           ),
           SwitchListTile(
             key: const Key('introOnUpdates'),

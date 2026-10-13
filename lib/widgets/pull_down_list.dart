@@ -70,6 +70,17 @@ class PullDownList extends StatefulWidget {
         ?._reveal(row, obscuredBottom);
   }
 
+  /// Scrolls the list that [inside] is in back to its normal top,
+  /// smoothly (e.g. a "back to top" button, Round 20).
+  static Future<void> scrollToTop(BuildContext inside) async {
+    await inside.findAncestorStateOfType<_PullDownListState>()?._scrollToTop();
+  }
+
+  /// How far down the list that [inside] is in has scrolled from its
+  /// normal top, in pixels (0 at the top or in reach mode).
+  static double scrolledOf(BuildContext inside) =>
+      inside.findAncestorStateOfType<_PullDownListState>()?._scrolled ?? 0;
+
   @override
   State<PullDownList> createState() => _PullDownListState();
 }
@@ -117,6 +128,23 @@ class _PullDownListState extends State<PullDownList> {
     final controller = _controller, top = _top;
     if (controller == null || top == null || !controller.hasClients) return;
     if (controller.offset < top) controller.jumpTo(top);
+  }
+
+  double get _scrolled {
+    final controller = _controller, top = _top;
+    if (controller == null || top == null || !controller.hasClients) return 0;
+    return (controller.offset - top).clamp(0, double.infinity);
+  }
+
+  Future<void> _scrollToTop() async {
+    _inReach = false;
+    final controller = _controller, top = _top;
+    if (controller == null || top == null || !controller.hasClients) return;
+    await controller.animateTo(
+      top,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _reveal(BuildContext row, double obscuredBottom) {

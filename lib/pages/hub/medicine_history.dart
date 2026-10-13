@@ -8,6 +8,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/pages/hub/medicine_calendar.dart';
 import 'package:the_app/providers/medicine_provider.dart';
+import 'package:the_app/widgets/back_to_top.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
@@ -335,55 +336,57 @@ class MedicineHistoryPage extends ConsumerWidget {
     }
     return Scaffold(
       appBar: AppBar(title: const Text('Medicine history')),
-      body: PullDownList(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  for (final m in book.medicines)
-                    ActionChip(
-                      key: Key('historyOf-${m.id}'),
-                      avatar: Icon(
-                        Icons.history,
-                        size: 18,
-                        color: colors.textSecondary,
+      body: BackToTop(
+        child: PullDownList(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final m in book.medicines)
+                      ActionChip(
+                        key: Key('historyOf-${m.id}'),
+                        avatar: Icon(
+                          Icons.history,
+                          size: 18,
+                          color: colors.textSecondary,
+                        ),
+                        label: Text(m.name),
+                        onPressed: () => _open(context, m),
                       ),
-                      label: Text(m.name),
-                      onPressed: () => _open(context, m),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverList.builder(
-            itemCount: days.length,
-            itemBuilder: (context, index) {
-              final day = days[index];
-              final on = book.medicines.where((m) => m.isOn(day)).toList();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _DayTitle(
-                    day: day,
-                    today: today,
-                    outcome: outcomeOf(book, on, day),
-                  ),
-                  for (final m in on)
-                    _DayRow(
-                      medicine: m,
-                      book: book,
+            SliverList.builder(
+              itemCount: days.length,
+              itemBuilder: (context, index) {
+                final day = days[index];
+                final on = book.medicines.where((m) => m.isOn(day)).toList();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _DayTitle(
                       day: day,
-                      onTap: () => _open(context, m, day: day),
+                      today: today,
+                      outcome: outcomeOf(book, on, day),
                     ),
-                ],
-              );
-            },
-          ),
-        ],
+                    for (final m in on)
+                      _DayRow(
+                        medicine: m,
+                        book: book,
+                        day: day,
+                        onTap: () => _open(context, m, day: day),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -572,73 +575,75 @@ class _MedicineOwnHistoryPageState
     final total = book.takenCount(widget.id);
     return Scaffold(
       appBar: AppBar(title: Text(medicine.name)),
-      body: PullDownList(
-        slivers: [
-          SliverList.list(
-            children: [
-              Padding(
-                key: _header,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: Text(
-                  countOf(total, 'dose', 'doses'),
-                  key: const Key('medicineTotal'),
-                  style: TextStyle(
-                    color: colors.accent,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Text(
-                  'taken since ${formatDay(medicine.from, today: today)}',
-                  style: TextStyle(color: colors.textSecondary),
-                ),
-              ),
-              // A day tapped shows it below; it isn't changed from here
-              // (Round 18).
-              MedicineCalendar(
-                medicine: medicine,
-                book: book,
-                today: today,
-                onDay: _showDay,
-              ),
-              if (unset)
+      body: BackToTop(
+        child: PullDownList(
+          slivers: [
+            SliverList.list(
+              children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: OutlinedButton.icon(
-                      key: const Key('fillPast'),
-                      onPressed: () => _fill(context, ref, medicine),
-                      icon: const Icon(Icons.done_all, size: 18),
-                      label: const Text('Mark past days taken'),
+                  key: _header,
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                  child: Text(
+                    countOf(total, 'dose', 'doses'),
+                    key: const Key('medicineTotal'),
+                    style: TextStyle(
+                      color: colors.accent,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-            ],
-          ),
-          // Built as they come into view: years of days stay quick.
-          SliverList.builder(
-            itemCount: days.length,
-            itemBuilder: (context, index) {
-              final day = days[index];
-              return Column(
-                key: _keyFor(day),
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _DayTitle(
-                    day: day,
-                    today: today,
-                    outcome: outcomeOf(book, [medicine], day),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Text(
+                    'taken since ${formatDay(medicine.from, today: today)}',
+                    style: TextStyle(color: colors.textSecondary),
                   ),
-                  _DayDoses(medicine: medicine, day: day, showName: false),
-                ],
-              );
-            },
-          ),
-        ],
+                ),
+                // A day tapped shows it below; it isn't changed from here
+                // (Round 18).
+                MedicineCalendar(
+                  medicine: medicine,
+                  book: book,
+                  today: today,
+                  onDay: _showDay,
+                ),
+                if (unset)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        key: const Key('fillPast'),
+                        onPressed: () => _fill(context, ref, medicine),
+                        icon: const Icon(Icons.done_all, size: 18),
+                        label: const Text('Mark past days taken'),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            // Built as they come into view: years of days stay quick.
+            SliverList.builder(
+              itemCount: days.length,
+              itemBuilder: (context, index) {
+                final day = days[index];
+                return Column(
+                  key: _keyFor(day),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _DayTitle(
+                      day: day,
+                      today: today,
+                      outcome: outcomeOf(book, [medicine], day),
+                    ),
+                    _DayDoses(medicine: medicine, day: day, showName: false),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

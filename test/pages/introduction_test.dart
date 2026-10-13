@@ -151,6 +151,18 @@ void main() {
     expect(tile, findsNothing);
   });
 
+  testWidgets('Settings: line numbers first (Round 20)', (tester) async {
+    await start(tester);
+    await openMenu(tester);
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    final tiles = tester
+        .widgetList<SwitchListTile>(find.byType(SwitchListTile))
+        .map((t) => (t.title! as Text).data)
+        .toList();
+    expect(tiles.first, 'Line numbers in notes');
+  });
+
   testWidgets('Settings switches it off for updates', (tester) async {
     await start(tester);
     await openMenu(tester);

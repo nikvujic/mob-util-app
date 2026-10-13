@@ -333,16 +333,16 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 ### Round 20 — Nikola's review of 0.26.0 (2026-10-13)
 
 **1. Quick fixes**
-- [ ] Medicine: the card's total a bit higher, level with the drag
+- [x] Medicine: the card's total a bit higher, level with the drag
   handle.
-- [ ] Placard: the inflating a bit longer; the pop quieter (the inflate
+- [x] Placard: the inflating a bit longer; the pop quieter (the inflate
   tone is soft, the pop was loud next to it).
-- [ ] Settings: line numbers first.
-- [ ] Notes: **Discard changes** always there (greyed out until there's
+- [x] Settings: line numbers first.
+- [x] Notes: **Discard changes** always there (greyed out until there's
   something to discard), not appearing and shifting the buttons.
 
 **2. Back to top in the medicine histories**
-- [ ] A button that scrolls to the top, in the history of all and in a
+- [x] A button that scrolls to the top, in the history of all and in a
   medicine's own; only once scrolled far (when it helps).
 
 **3. More Markdown, and a formatting bar** (N17)

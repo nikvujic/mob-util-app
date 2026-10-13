@@ -22,6 +22,10 @@ class MainActivity: FlutterFragmentActivity() {
         private const val CLICK_VOLUME = 0.35f
         private const val DONE_VOLUME = 0.7f
         private const val PLACARD_VOLUME = 0.6f
+
+        /// The pop, quieter than the inflating (Round 20: it was loud
+        /// next to the soft tone).
+        private const val POP_VOLUME = 0.3f
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -66,7 +70,7 @@ class MainActivity: FlutterFragmentActivity() {
                         if (inflating != 0) pool?.stop(inflating)
                         inflating = 0
                     }
-                    "pop" -> pool?.play(pop, PLACARD_VOLUME, PLACARD_VOLUME, 2, 0, 1f)
+                    "pop" -> pool?.play(pop, POP_VOLUME, POP_VOLUME, 2, 0, 1f)
                     else -> {
                         result.notImplemented()
                         return@setMethodCallHandler

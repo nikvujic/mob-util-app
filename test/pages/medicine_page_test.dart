@@ -98,6 +98,11 @@ void main() {
     });
     final count = find.byKey(Key('medicineCount-$id'));
     expect(tester.widget<Text>(count).data, '2');
+    // Level with the drag handle beside it (Round 20).
+    expect(
+        tester.getCenter(count).dy,
+        moreOrLessEquals(tester.getCenter(find.byIcon(Icons.drag_handle)).dy,
+            epsilon: 1));
     await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
     expect(tester.widget<Text>(count).data, '3');
@@ -561,5 +566,52 @@ void main() {
     await tester.tap(find.byKey(const Key('medicineSubmit')));
     await tester.pumpAndSettle();
     expect(container.read(medicineProvider).medicines.single.followUp, isNull);
+  });
+
+  testWidgets('back to top in the histories, once scrolled far (Round 20)',
+      (tester) async {
+    late String id;
+    await openMedicine(tester, () {
+      id = medicine()
+          .add('Vitamin D', times: [480], from: DateTime(2026, 1, 1))!;
+    });
+    final button = find.byKey(const Key('backToTop'));
+    double scale() => tester
+        .widget<AnimatedScale>(
+            find.ancestor(of: button, matching: find.byType(AnimatedScale)))
+        .scale;
+    for (final (open, top) in [
+      (
+        () => tester.tap(find.byTooltip('History')),
+        find.byKey(Key('historyOf-$id')),
+      ),
+      (
+        () async {
+          await tester.pageBack();
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Vitamin D'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('History'));
+        },
+        find.byKey(const Key('medicineTotal')),
+      ),
+    ]) {
+      await open();
+      await tester.pumpAndSettle();
+      expect(scale(), 0, reason: 'at the top: not needed');
+      final list = find.byType(Scrollable).first;
+      await tester.drag(list, const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(scale(), 0, reason: 'not far yet');
+      for (var i = 0; i < 6; i++) {
+        await tester.drag(list, const Offset(0, -600));
+        await tester.pumpAndSettle();
+      }
+      expect(scale(), 1, reason: 'far down: there');
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(scale(), 0, reason: 'back at the top');
+      expect(top.hitTestable(), findsOneWidget, reason: 'the top in view');
+    }
   });
 }

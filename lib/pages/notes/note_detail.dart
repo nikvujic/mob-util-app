@@ -475,13 +475,15 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                       tooltip: 'Lock note',
                       onPressed: _lock,
                     ),
-              if (!widget.isNew && _hasChanges)
-                BottomAction(
-                  // Not ↶: that's undo.
-                  icon: Icons.settings_backup_restore,
-                  tooltip: 'Discard changes',
-                  onPressed: _revertInPlace,
-                ),
+              // Always there, greyed out until there's something to
+              // discard, so the buttons don't shift (Round 20).
+              BottomAction(
+                // Not ↶: that's undo.
+                icon: Icons.settings_backup_restore,
+                tooltip: 'Discard changes',
+                enabled: !widget.isNew && _hasChanges,
+                onPressed: _revertInPlace,
+              ),
               // Outermost, under the thumb.
               BottomAction(
                 icon: Icons.undo,

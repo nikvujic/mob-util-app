@@ -359,18 +359,16 @@ class _MedicineCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // How many it's been, ever (Round 18).
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '${book.takenCount(medicine.id)}',
-                      key: Key('medicineCount-${medicine.id}'),
-                      semanticsLabel:
-                          '${countOf(book.takenCount(medicine.id), 'dose', 'doses')} taken in all',
-                      style: TextStyle(
-                        color: colors.textSecondary,
-                        fontSize: 12,
-                      ),
+                  // How many it's been, ever (Round 18), level with the
+                  // handle beside it (Round 20).
+                  Text(
+                    '${book.takenCount(medicine.id)}',
+                    key: Key('medicineCount-${medicine.id}'),
+                    semanticsLabel:
+                        '${countOf(book.takenCount(medicine.id), 'dose', 'doses')} taken in all',
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      fontSize: 12,
                     ),
                   ),
                   // Drag here to move it (Nikola).

@@ -150,23 +150,39 @@ void main() {
       expect(find.text('No notes'), findsOneWidget);
     });
 
-    testWidgets('has no ↶ button', (tester) async {
+    testWidgets('its Discard changes is there, greyed out (Round 20)',
+        (tester) async {
       await openNewNote(tester);
-      expect(find.byTooltip('Discard changes'), findsNothing);
+      await tester.enterText(contentField, 'milk');
+      await tester.pump();
+      final button = find.ancestor(
+        of: find.byTooltip('Discard changes'),
+        matching: find.byType(FloatingActionButton),
+      );
+      expect(tester.widget<FloatingActionButton>(button).onPressed, isNull,
+          reason: 'a new note has nothing to go back to');
     });
   });
 
   group('Discard changes in an edited note', () {
     final discardButton = find.byTooltip('Discard changes');
 
-    testWidgets('shows once something changed, at the bottom, not as ↶',
-        (tester) async {
+    testWidgets(
+        'always there, greyed out until something changed (Round 20), '
+        'at the bottom, not as ↶', (tester) async {
       await openExistingNote(tester);
-      expect(discardButton, findsNothing);
+      VoidCallback? pressed() => tester
+          .widget<FloatingActionButton>(find.ancestor(
+            of: discardButton,
+            matching: find.byType(FloatingActionButton),
+          ))
+          .onPressed;
+      expect(discardButton, findsOneWidget, reason: 'its place kept');
+      expect(pressed(), isNull);
 
       await tester.enterText(contentField, 'milk, eggs');
       await tester.pump();
-      expect(discardButton, findsOneWidget);
+      expect(pressed(), isNotNull);
       expect(
         find.descendant(of: discardButton, matching: find.byIcon(Icons.undo)),
         findsNothing,
@@ -194,7 +210,15 @@ void main() {
       expect(find.text('milk'), findsOneWidget);
       expect(noteById(id).content, 'milk');
       expect(noteById(id).modifiedAt, original.modifiedAt);
-      expect(discardButton, findsNothing);
+      expect(
+          tester
+              .widget<FloatingActionButton>(find.ancestor(
+                of: discardButton,
+                matching: find.byType(FloatingActionButton),
+              ))
+              .onPressed,
+          isNull,
+          reason: 'nothing left to discard');
 
       // Nothing changed any more, so back leaves without asking.
       await leaveNote(tester);

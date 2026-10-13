@@ -4,6 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [0.27.0] - unreleased
+
+### Added
+- Medicine histories: a **back to top** button once you've scrolled far
+  down.
+
+### Changed
+- Notes: **Discard changes** is always there (greyed out until there's
+  something to discard), so the buttons don't shift.
+- Placard: a longer inflate (about 4 seconds), and a quieter pop.
+- Medicine: the total on each card is level with the drag handle.
+- Settings: line numbers first.
+
 ## [0.26.0] - 2026-10-13
 
 ### Added
