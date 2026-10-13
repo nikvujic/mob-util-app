@@ -12,6 +12,8 @@ Release with the installable APK.
   pops him out (with a buzz on each tap). That day is his birthday; his
   name and age show above the room. He's in backups, and keeps his real
   age when restored.
+- Pip's sky follows the time of day: stars and the moon at night, the
+  sun by day, dawn and dusk colours in between.
 
 ## [1.4.1] - 2026-10-13
 

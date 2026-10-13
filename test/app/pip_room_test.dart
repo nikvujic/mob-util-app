@@ -5,6 +5,8 @@ import 'package:the_app/widgets/pixel_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_scene.dart';
+import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/providers/pip_provider.dart';
 
 import '../helpers.dart';
@@ -26,6 +28,15 @@ void main() {
             tester.getTopLeft(find.textContaining('Version')).dy));
     // Not moving (here, in tests): simply standing there.
     expect(container.read(pipBrainProvider).spawned, isTrue);
+  });
+
+  testWidgets('his sky follows the clock (Round 35)', (tester) async {
+    await pumpApp(tester, clock: () => DateTime(2026, 10, 13, 23));
+    await openMenu(tester);
+    final scene = tester.widget<PipRoom>(find.byType(PipRoom)).scene!;
+    expect(scene.place, PipPlace.room);
+    expect(scene.part, DayPart.night);
+    expect(scene.props, {PipProp.stars, PipProp.moon});
   });
 
   group('moving', () {

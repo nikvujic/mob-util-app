@@ -21,6 +21,30 @@ enum PipActivity {
   walking,
 }
 
+/// His animations that can be played on request (Round 35: Pip Home's
+/// Animations): each one he has, by name.
+enum PipAnimation {
+  spawn('Out of the ground'),
+  hatch('Out of his egg'),
+  walk('A walk'),
+  blink('A blink'),
+  turn('A look round');
+
+  final String label;
+
+  const PipAnimation(this.label);
+}
+
+/// What may start while he's doing something (Round 35): the one table
+/// that keeps things from clashing. Mid-entrance (out of the ground or
+/// his egg) nothing interrupts; an egg only hatches by its taps. New
+/// activities and events (batteries, bugs...) get their row and column
+/// here, and the table is tested whole.
+bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
+      PipActivity.egg || PipActivity.hatching || PipActivity.spawning => false,
+      PipActivity.standing || PipActivity.walking => true,
+    };
+
 /// Pip's frames, by name; drawn by `widgets/pip_room.dart`.
 enum PipFrame { idle, blink, step1, step2, step3, step4, oh, tuck }
 
@@ -113,6 +137,31 @@ class PipBrain {
   static const jumpEnd = 0.65;
   static const hatchLandEnd = 0.9;
   static const fadeEnd = 1.8;
+
+  /// Plays [animation] now, if [mayStart] lets it (false if not).
+  bool play(PipAnimation animation) {
+    if (!mayStart(activity, animation)) return false;
+    switch (animation) {
+      case PipAnimation.spawn:
+        activity = PipActivity.spawning;
+        _t = 0;
+      case PipAnimation.hatch:
+        taps = hatchTaps;
+        activity = PipActivity.hatching;
+        _t = 0;
+        _eggX = x;
+        facingRight = false;
+      case PipAnimation.walk:
+        _walk();
+      case PipAnimation.blink:
+        _stand();
+        _blinking = 0.15;
+      case PipAnimation.turn:
+        _stand();
+        facingRight = !facingRight;
+    }
+    return true;
+  }
 
   /// A tap on the egg: one more crack. True when it's the one that hatches
   /// him (the hatching starts).

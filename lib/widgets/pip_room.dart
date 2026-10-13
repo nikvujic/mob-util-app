@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
@@ -21,11 +22,21 @@ class PipRoom extends StatefulWidget {
   /// The tap that hatched him: that moment is his birthday.
   final VoidCallback? onHatched;
 
+  /// What's in his sky (Round 35), worked out for this place and moment;
+  /// null: no sky (the page's own colour behind him).
+  final PipScene? scene;
+
+  /// How tall it is, in his pixels: [rows] for the menu's strip, more for
+  /// Pip Home's scene.
+  final int height;
+
   const PipRoom({
     super.key,
     required this.brain,
     this.animate = true,
     this.onHatched,
+    this.scene,
+    this.height = rows,
   });
 
   /// About how big one of Pip's pixels is.
@@ -133,9 +144,14 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
             widget.brain.roomWidth = (box.maxWidth / pixel).floor();
             return SizedBox(
               width: box.maxWidth,
-              height: PipRoom.rows * pixel,
+              height: widget.height * pixel,
               child: CustomPaint(
-                painter: _RoomPainter(widget.brain, pixel),
+                painter: _RoomPainter(
+                  widget.brain,
+                  pixel,
+                  widget.height,
+                  widget.scene,
+                ),
               ),
             );
           },
@@ -149,7 +165,10 @@ class _RoomPainter extends CustomPainter {
   final PipBrain brain;
   final double pixel;
 
-  _RoomPainter(this.brain, this.pixel);
+  final int height;
+  final PipScene? scene;
+
+  _RoomPainter(this.brain, this.pixel, this.height, this.scene);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -162,7 +181,61 @@ class _RoomPainter extends CustomPainter {
     }
 
     final columns = (size.width / pixel).ceil();
-    final groundTop = (PipRoom.rows - PipRoom.ground).toDouble();
+
+    /// A round blob of [r] pixels around [cx], [cy] (the sun, the moon).
+    void disc(int cx, int cy, int r, Color colour) {
+      for (var y = -r; y <= r; y++) {
+        for (var x = -r; x <= r; x++) {
+          if (x * x + y * y <= r * r + r) {
+            dot((cx + x).toDouble(), (cy + y).toDouble(), colour);
+          }
+        }
+      }
+    }
+
+    /// A small pixel cloud, its top left at [x], [y].
+    void cloud(double x, double y) {
+      dot(x + 2, y, PipColours.cloud, 4, 1);
+      dot(x + 1, y + 1, PipColours.cloud, 7, 1);
+      dot(x, y + 2, PipColours.cloud, 10, 2);
+    }
+
+    final groundTop = (height - PipRoom.ground).toDouble();
+
+    // His sky (Round 35): bands of colour from top to bottom (stepped,
+    // pixel style), then what's in it now.
+    if (scene case final scene? when scene.sky != null) {
+      final (top, bottom) = scene.sky!;
+      const bands = 8;
+      final band = (groundTop / bands).ceilToDouble();
+      for (var i = 0; i < bands; i++) {
+        dot(0, i * band, Color.lerp(top, bottom, i / (bands - 1))!,
+            columns.toDouble(), band);
+      }
+      final home = scene.place == PipPlace.home;
+      for (final prop in scene.props) {
+        switch (prop) {
+          case PipProp.stars:
+            // The same stars every time, in the upper part of the sky.
+            for (var i = 0; i < columns * groundTop ~/ 60; i++) {
+              final x = (i * 7919 + 13) % columns;
+              final y = (i * 104729 + 7) % (groundTop * 0.7).floor();
+              dot(x.toDouble(), y.toDouble(), PipColours.star);
+            }
+          case PipProp.moon:
+            disc(columns - (home ? 14 : 10), home ? 10 : 6, home ? 4 : 3,
+                PipColours.moon);
+          case PipProp.sun:
+            disc(columns - (home ? 14 : 10), home ? 10 : 6, home ? 5 : 3,
+                PipColours.sun);
+          case PipProp.clouds:
+            for (final (cx, cy) in [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)]) {
+              cloud((columns * cx).floorToDouble(),
+                  (groundTop * cy).floorToDouble());
+            }
+        }
+      }
+    }
 
     // The ground: a row of grass with lighter tufts, dirt with specks.
     for (var x = 0; x < columns; x++) {

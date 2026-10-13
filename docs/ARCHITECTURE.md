@@ -295,6 +295,18 @@ hatched: `tapEgg` counts taps (cracks at 1, 3, 5; the 7th starts
 his birthday. Letters for him are `core/pixel_font.dart` (3 x 5 glyphs)
 drawn by `widgets/pixel_text.dart` on the room's pixel grid.
 
+One system for his world (Round 35), so nothing shows or plays where it
+doesn't belong. `core/pip_scene.dart`: a `PipPlace` (the menu's `room`,
+Pip Home's `home`), the `DayPart` from the clock (`dayPartAt`), a
+`PipBackground` (each gives its sky per part of the day), and `PipProp`s
+(stars, moon, sun, clouds; later snow, hats...), each declaring the
+places, parts of the day and backgrounds it shows in. `PipScene.at` is
+the one place that works out what's showing; `PipRoom` only draws it.
+What he does goes through one table too: `mayStart(activity,
+animation)` in `pip_brain.dart`, and `play` asks it first (nothing
+interrupts the egg, the hatch or coming up). New props and animations
+add a row to these tables; tests check the tables, not each screen.
+
 ## Notifications page (E3, Round 31)
 
 Settings per page (`models/notify_settings.dart`: `NotifyPage`,

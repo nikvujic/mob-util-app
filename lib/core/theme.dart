@@ -420,6 +420,20 @@ abstract final class PipColours {
   static const light = Color(0xFFF2C07A); // the antenna's light
   static const eggShade = Color(0xFFD8D0C2); // his egg's shade (Round 34)
 
+  // His sky (Round 35), top and bottom of each part of the day.
+  static const nightTop = Color(0xFF0F162C);
+  static const nightBottom = Color(0xFF2B3C63);
+  static const dawnTop = Color(0xFF3B4A7A);
+  static const dawnBottom = Color(0xFFE8A27A);
+  static const dayTop = Color(0xFF4F86C6);
+  static const dayBottom = Color(0xFFA9D2EE);
+  static const duskTop = Color(0xFF2E2A5C);
+  static const duskBottom = Color(0xFFD9775A);
+  static const star = Color(0xFFF5F0E8);
+  static const moon = Color(0xFFF5E6B0);
+  static const sun = Color(0xFFFFD36E);
+  static const cloud = Color(0xFFF2F4F8);
+
   // His room (Round 26): grass on dirt.
   static const grass = Color(0xFF5E8C3A);
   static const grassLight = Color(0xFF86B85A);
