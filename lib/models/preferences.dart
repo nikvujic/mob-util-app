@@ -1,3 +1,4 @@
+import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/planner_task.dart';
 
 /// How the user likes the app: look and feel, kept on this phone (not in
@@ -23,6 +24,14 @@ class Preferences {
   /// Medicine (O12): reminders and the dot are paused through this day;
   /// null (or a day gone by): not paused.
   final DateTime? medicinePausedUntil;
+
+  /// The planner's notifications (Round 31): on, and paused through a day.
+  final bool plannerReminders;
+  final DateTime? plannerPausedUntil;
+
+  /// How each page's notifications look and sound (Round 31); a page not
+  /// here is [NotifyStyle.plain].
+  final Map<NotifyPage, NotifyStyle> notifyStyles;
 
   /// The Introduction note (N16): deleted from the Notes list (the menu
   /// brings it back).
@@ -69,6 +78,9 @@ class Preferences {
     this.fingerprintFor,
     this.medicineReminders = true,
     this.medicinePausedUntil,
+    this.plannerReminders = true,
+    this.plannerPausedUntil,
+    this.notifyStyles = const {},
     this.introDeleted = false,
     this.introOnUpdates = true,
     this.introVersion,
@@ -124,11 +136,17 @@ class Preferences {
   }
 
   /// Whether medicine reminders and the dot are paused on [day].
-  bool medicinePausedOn(DateTime day) {
-    final until = medicinePausedUntil;
-    return until != null &&
-        !DateTime(day.year, day.month, day.day).isAfter(until);
-  }
+  bool medicinePausedOn(DateTime day) => _pausedOn(medicinePausedUntil, day);
+
+  /// Whether the planner's notifications are paused on [day] (Round 31).
+  bool plannerPausedOn(DateTime day) => _pausedOn(plannerPausedUntil, day);
+
+  static bool _pausedOn(DateTime? until, DateTime day) =>
+      until != null && !DateTime(day.year, day.month, day.day).isAfter(until);
+
+  /// How [page]'s notifications look and sound.
+  NotifyStyle styleOf(NotifyPage page) =>
+      notifyStyles[page] ?? NotifyStyle.plain;
 
   Preferences copyWith({
     String? theme,
@@ -137,6 +155,9 @@ class Preferences {
     String? Function()? fingerprintFor,
     bool? medicineReminders,
     DateTime? Function()? medicinePausedUntil,
+    bool? plannerReminders,
+    DateTime? Function()? plannerPausedUntil,
+    Map<NotifyPage, NotifyStyle>? notifyStyles,
     bool? introDeleted,
     bool? introOnUpdates,
     String? Function()? introVersion,
@@ -158,6 +179,11 @@ class Preferences {
         medicinePausedUntil: medicinePausedUntil == null
             ? this.medicinePausedUntil
             : medicinePausedUntil(),
+        plannerReminders: plannerReminders ?? this.plannerReminders,
+        plannerPausedUntil: plannerPausedUntil == null
+            ? this.plannerPausedUntil
+            : plannerPausedUntil(),
+        notifyStyles: notifyStyles ?? this.notifyStyles,
         introDeleted: introDeleted ?? this.introDeleted,
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
         introVersion: introVersion == null ? this.introVersion : introVersion(),
@@ -181,6 +207,14 @@ class Preferences {
         'medicineReminders': medicineReminders,
         if (medicinePausedUntil != null)
           'medicinePausedUntil': PlannerTask.dayToJson(medicinePausedUntil!),
+        'plannerReminders': plannerReminders,
+        if (plannerPausedUntil != null)
+          'plannerPausedUntil': PlannerTask.dayToJson(plannerPausedUntil!),
+        if (notifyStyles.isNotEmpty)
+          'notifyStyles': {
+            for (final MapEntry(:key, :value) in notifyStyles.entries)
+              key.name: value.toJson(),
+          },
         'introDeleted': introDeleted,
         'introOnUpdates': introOnUpdates,
         if (introVersion != null) 'introVersion': introVersion,
@@ -206,6 +240,18 @@ class Preferences {
         medicinePausedUntil: json['medicinePausedUntil'] == null
             ? null
             : PlannerTask.dayFromJson(json['medicinePausedUntil']),
+        plannerReminders: json['plannerReminders'] as bool? ?? true,
+        plannerPausedUntil: json['plannerPausedUntil'] == null
+            ? null
+            : PlannerTask.dayFromJson(json['plannerPausedUntil']),
+        // Pages unknown here (from a newer app) are skipped.
+        notifyStyles: {
+          for (final MapEntry(:key, :value)
+              in (json['notifyStyles'] as Map<String, dynamic>? ?? const {})
+                  .entries)
+            if (NotifyPage.fromName(key) case final page?)
+              page: NotifyStyle.fromJson(value as Map<String, dynamic>),
+        },
         introDeleted: json['introDeleted'] as bool? ?? false,
         introOnUpdates: json['introOnUpdates'] as bool? ?? true,
         introVersion: json['introVersion'] as String?,

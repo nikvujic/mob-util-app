@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/preferences.dart';
 
 /// The user's preferences (theme, counter feedback). Saved on change.
@@ -83,6 +84,22 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void readIntro() {
     if (state.introUnread) state = state.copyWith(introUnread: false);
   }
+
+  /// The planner's notifications on or off (Round 31).
+  void setPlannerReminders(bool on) =>
+      state = state.copyWith(plannerReminders: on);
+
+  /// Pauses the planner's notifications through [day]; null resumes.
+  void pausePlannerUntil(DateTime? day) => state = state.copyWith(
+        plannerPausedUntil: () =>
+            day == null ? null : DateTime(day.year, day.month, day.day),
+      );
+
+  /// How [page]'s notifications look and sound (Round 31).
+  void setNotifyStyle(NotifyPage page, NotifyStyle style) =>
+      state = state.copyWith(
+        notifyStyles: {...state.notifyStyles, page: style},
+      );
 
   /// Pauses medicine reminders and the dot through [day]; null resumes.
   void pauseMedicineUntil(DateTime? day) => state = state.copyWith(

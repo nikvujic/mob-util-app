@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/notification_target.dart';
+import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
@@ -132,6 +135,9 @@ class ReminderPlanner {
       if (before == null ||
           before.medicineReminders != after.medicineReminders ||
           before.medicinePausedUntil != after.medicinePausedUntil ||
+          before.plannerReminders != after.plannerReminders ||
+          before.plannerPausedUntil != after.plannerPausedUntil ||
+          !_sameStyles(before.notifyStyles, after.notifyStyles) ||
           before.backupDueAt != after.backupDueAt ||
           before.lastBackupAt != after.lastBackupAt) {
         _soon();
@@ -183,37 +189,81 @@ class ReminderPlanner {
     }
   }
 
+  static bool _sameStyles(
+    Map<NotifyPage, NotifyStyle> a,
+    Map<NotifyPage, NotifyStyle> b,
+  ) =>
+      NotifyPage.values.every((p) => a[p] == b[p]);
+
   Future<void> _plan() async {
     final locks = _ref.read(sectionLocksProvider);
     final password = _ref.read(securityProvider) != null;
     final now = _ref.read(clockProvider)();
+    final preferences = _ref.read(preferencesProvider);
+    bool private(NotifyPage page) => preferences.styleOf(page).private;
     final reminders = [
       ...planReminders(
         now: now,
         tasks: _ref.read(plannerProvider),
         routines: _ref.read(routinesProvider),
         pins: _ref.read(pinsProvider),
-        hideTitles: password && locks.contains(AppSection.planner),
+        // Locked, or set private (Round 31): no names.
+        hideTitles: password && locks.contains(AppSection.planner) ||
+            private(NotifyPage.planner),
       ),
       ...planMedicineReminders(
         now: now,
         book: _ref.read(medicineProvider),
-        preferences: _ref.read(preferencesProvider),
+        preferences: preferences,
         days: reminderDays,
         hideNames: password &&
-            (locks.contains(AppSection.hub) ||
-                _ref.read(pageLocksProvider).contains(HubTool.medicine)),
+                (locks.contains(AppSection.hub) ||
+                    _ref.read(pageLocksProvider).contains(HubTool.medicine)) ||
+            private(NotifyPage.medicine),
       ),
       ...planBackupReminders(
         now: now,
-        preferences: _ref.read(preferencesProvider),
+        preferences: preferences,
         days: reminderDays,
       ),
     ]..sort((a, b) => a.at.compareTo(b.at));
-    await _ref
-        .read(reminderSchedulerProvider)
-        .replaceAll(withKeepGoing(reminders, now: now));
+    await _ref.read(reminderSchedulerProvider).replaceAll(
+          withKeepGoing(withNotifySettings(reminders, preferences), now: now),
+        );
   }
+}
+
+/// The page a kind of reminder comes from (none for the app's own).
+NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
+      ReminderKind.planner => NotifyPage.planner,
+      ReminderKind.medicine => NotifyPage.medicine,
+      ReminderKind.backup => NotifyPage.backup,
+      ReminderKind.notice => null,
+    };
+
+/// [reminders] as each page's settings say (Round 31): none from the
+/// planner while it's off or paused that day (Medicine and Backup leave
+/// theirs out when planning), each in its page's tint.
+List<Reminder> withNotifySettings(
+  List<Reminder> reminders,
+  Preferences preferences,
+) {
+  final kept = <Reminder>[];
+  for (final r in reminders) {
+    final page = pageOf(r.kind);
+    if (page == null) {
+      kept.add(r);
+      continue;
+    }
+    if (page == NotifyPage.planner &&
+        (!preferences.plannerReminders || preferences.plannerPausedOn(r.at))) {
+      continue;
+    }
+    kept.add(r.tinted(
+      BlockColor.fromName(preferences.styleOf(page).colour)?.stripe,
+    ));
+  }
+  return kept;
 }
 
 /// [reminders] (sorted) as many as can be scheduled, and when they'd run

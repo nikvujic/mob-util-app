@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,13 +20,26 @@ class Reminder {
   /// Where tapping it leads (Round 19), as [NotificationTarget.payload].
   final String? target;
 
+  /// Its tint (Round 31), or null: the phone's own.
+  final Color? colour;
+
   const Reminder({
     required this.at,
     required this.title,
     required this.body,
     this.kind = ReminderKind.planner,
     this.target,
+    this.colour,
   });
+
+  Reminder tinted(Color? colour) => Reminder(
+        at: at,
+        title: title,
+        body: body,
+        kind: kind,
+        target: target,
+        colour: colour,
+      );
 
   @override
   String toString() => 'Reminder($at, $title, $body, ${kind.name})';
@@ -84,6 +98,23 @@ class NotificationReminderScheduler implements ReminderScheduler {
       category: AndroidNotificationCategory.reminder,
     ),
   };
+
+  /// Its kind's channel, with its tint (Round 31).
+  @visibleForTesting
+  static AndroidNotificationDetails detailsFor(Reminder reminder) {
+    final channel = _channels[reminder.kind]!;
+    final colour = reminder.colour;
+    if (colour == null) return channel;
+    return AndroidNotificationDetails(
+      channel.channelId,
+      channel.channelName,
+      channelDescription: channel.channelDescription,
+      importance: channel.importance,
+      priority: channel.priority,
+      category: channel.category,
+      color: colour,
+    );
+  }
 
   final _plugin = FlutterLocalNotificationsPlugin();
   Future<bool>? _ready;
@@ -166,7 +197,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
           // An absolute moment: planned again on every app start, so a
           // change of time zone or daylight saving is picked up.
           tz.TZDateTime.from(reminder.at.toUtc(), tz.UTC),
-          NotificationDetails(android: _channels[reminder.kind]),
+          NotificationDetails(android: detailsFor(reminder)),
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
               : AndroidScheduleMode.inexactAllowWhileIdle,

@@ -397,11 +397,13 @@ one page in the menu, history and settings together.
   maybe an icon.
 
 How it's built (Round 31), in chunks:
-- [ ] **Settings per page** (Planner, Medicine, Backup), kept on this
+- [x] **Settings per page** (Planner, Medicine, Backup), kept on this
   phone: on / off; **pause** until a day (Planner, Medicine; Medicine's
   switch and pause move here from its Hub settings); **private** (the
   name left out: "A task at 10:00", "A dose is due"); **colour** (the
-  notification's tint); **sound**. The scheduler follows them.
+  notification's tint); **sound**. The scheduler follows them. *Done*
+  (the model and the scheduler; the page next; sounds in their own
+  chunk).
 - [ ] **History**: the app keeps what it scheduled (`notifications.json`,
   this phone only); those whose time has come, today and yesterday, are
   the history (Android doesn't tell an app which were shown, but a
