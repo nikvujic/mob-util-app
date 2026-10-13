@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [1.0.0] - unreleased
+## [1.0.0] - 2026-10-13
 
 ### Added
 - **Pip** next to "The App" at the top of the menu, which now keeps the
