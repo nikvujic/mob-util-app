@@ -120,7 +120,10 @@ class MedicinePage extends ConsumerWidget {
           important: draft.important,
         );
       }
-      if (!context.mounted) return;
+      // Not over a lock screen: the page may have been closed meanwhile.
+      if (!context.mounted || ModalRoute.of(context)?.isCurrent != true) {
+        return;
+      }
       final now = ref
           .read(medicineProvider)
           .medicines

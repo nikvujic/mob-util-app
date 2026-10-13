@@ -57,6 +57,9 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
   bool _holding = false;
   bool _finished = false;
 
+  /// Fingers on the button: it fills while there's at least one.
+  int _fingers = 0;
+
   /// The tenth of the way the last tick was at.
   int _lastTick = 0;
 
@@ -73,6 +76,11 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
     _fill.forward();
     _waves.repeat();
     AppSound.fill();
+  }
+
+  void _lift() {
+    _fingers = (_fingers - 1).clamp(0, 10);
+    if (_fingers == 0) _release();
   }
 
   void _release() {
@@ -118,9 +126,11 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
             onLongPress: _done,
             child: Listener(
               key: const Key('holdToTake'),
-              onPointerDown: (_) => _press(),
-              onPointerUp: (_) => _release(),
-              onPointerCancel: (_) => _release(),
+              onPointerDown: (_) {
+                if (++_fingers == 1) _press();
+              },
+              onPointerUp: (_) => _lift(),
+              onPointerCancel: (_) => _lift(),
               child: AnimatedBuilder(
                 animation: Listenable.merge([_fill, _waves]),
                 builder: (context, _) {

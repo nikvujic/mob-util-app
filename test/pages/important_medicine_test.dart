@@ -152,6 +152,28 @@ void main() {
       expect(taken(), isTrue);
     });
 
+    testWidgets(
+        'a second finger neither restarts nor stops it; one finger left '
+        'keeps filling (Round 24)', (tester) async {
+      await start(tester);
+      await tester.tap(find.byKey(Key('dose-$id-0')));
+      await tester.pumpAndSettle();
+      final center = tester.getCenter(hold);
+      final first = await tester.startGesture(center);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      final second =
+          await tester.startGesture(center + const Offset(10, 10), pointer: 7);
+      await tester.pump(const Duration(seconds: 1));
+      await second.up();
+      await tester.pump(const Duration(seconds: 1));
+      expect(full(tester), 60, reason: 'still filling, from where it was');
+      await tester.pump(const Duration(seconds: 2, milliseconds: 100));
+      await tester.pumpAndSettle();
+      await first.up();
+      expect(taken(), isTrue);
+    });
+
     testWidgets('unticking asks as before, no hold', (tester) async {
       await start(tester);
       medicine().toggleDose(id, today, 0);

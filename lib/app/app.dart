@@ -232,6 +232,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _sectionShown[index].fire();
   }
 
+  /// Closes everything open on top of the home screen, except pages from
+  /// the menu (they show nothing of a section).
+  void _closeOpenPages() {
+    Navigator.of(context).popUntil(
+      (route) => route.isFirst || route.settings.name == AppRoutes.menuPage,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // The app locked while something was open on top of a locked section
@@ -241,14 +249,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       sectionClosedProvider(AppSection.values[_selectedIndex]),
       (wasClosed, closed) {
         // Pages from the menu stay: they show nothing of the section.
-        if (closed && wasClosed == false) {
-          Navigator.of(context).popUntil(
-            (route) =>
-                route.isFirst || route.settings.name == AppRoutes.menuPage,
-          );
-        }
+        if (closed && wasClosed == false) _closeOpenPages();
       },
     );
+    // A Hub page locking (O7) closes what's open over it too (its menu,
+    // sheets, dialogs, history), while on the Hub.
+    ref.listen(anyPageClosedProvider, (wasClosed, closed) {
+      if (closed &&
+          wasClosed == false &&
+          AppSection.values[_selectedIndex] == AppSection.hub) {
+        _closeOpenPages();
+      }
+    });
 
     // Saving fails (D6): say so once, and again when it works.
     ref.listen(saveFailingProvider, (was, failing) {

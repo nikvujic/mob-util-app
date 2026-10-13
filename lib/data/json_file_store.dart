@@ -51,6 +51,8 @@ class JsonFileStore {
   /// Schedules [json] to be written. Returns a future that completes once
   /// this (or a newer) document is on disk.
   Future<void> write(Object json) {
+    // Newer than whatever failed: that's no longer to be retried.
+    _unsaved = null;
     _pending = json;
     _hasPending = true;
     return _running ??= _drain();
@@ -96,8 +98,12 @@ class JsonFileStore {
   /// Tries again to write what couldn't be written (e.g. once space was
   /// freed), unless something newer is on its way.
   Future<void> retry() {
-    if (!failing.value || _hasPending) return _running ?? Future.value();
-    return write(_unsaved!);
+    final unsaved = _unsaved;
+    // Something newer is being written (or waits): that wins.
+    if (!failing.value || unsaved == null || _running != null || _hasPending) {
+      return _running ?? Future.value();
+    }
+    return write(unsaved);
   }
 
   Future<void> _writeNow(Object? json) async {

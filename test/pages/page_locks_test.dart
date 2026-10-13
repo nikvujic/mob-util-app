@@ -5,6 +5,8 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
+import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -129,6 +131,38 @@ void main() {
     await tester.pump();
     expect(find.text('Push-ups'), findsNothing);
     expect(find.text('Counters is locked'), findsOneWidget);
+  });
+
+  testWidgets(
+      'locking while its menu is open: everything over the page closes '
+      '(Round 24)', (tester) async {
+    await start(tester, pages: {HubTool.medicine});
+    container
+        .read(medicineProvider.notifier)
+        .add('Iron', times: [480], from: DateTime(2026, 10, 1));
+    await openTab(tester, 'Hub');
+    await openTile(tester, 'Medicine');
+    await tester.tap(find.text('Iron'));
+    await tester.pumpAndSettle();
+    expect(find.text('History'), findsOneWidget);
+    lockApp();
+    await tester.pumpAndSettle();
+    expect(find.text('History'), findsNothing, reason: 'the menu closed');
+    expect(find.text('Iron'), findsNothing);
+    expect(appBarTitle('Hub'), findsOneWidget);
+  });
+
+  testWidgets("elsewhere, a page's lock leaves what's open alone",
+      (tester) async {
+    await start(tester, pages: {HubTool.medicine});
+    container.read(notesProvider.notifier).addNote(title: 'Diary');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Diary'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('noteContentField')), findsOneWidget);
+    lockApp(); // Notes isn't locked: the note stays open
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('noteContentField')), findsOneWidget);
   });
 
   testWidgets(

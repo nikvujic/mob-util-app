@@ -76,4 +76,20 @@ void main() {
     await store.retry(); // nothing to do
     expect(await store.read(), {'n': 2});
   });
+
+  test('a retry never writes the failed version over a newer one (Round 24)',
+      () async {
+    final blocker = Directory('${store.file.path}.tmp')
+      ..createSync(recursive: true);
+    await store.write({'n': 1}); // fails
+    expect(store.failing.value, isTrue);
+    blocker.deleteSync();
+
+    final newer = store.write({'n': 2}); // on its way
+    await store.retry(); // e.g. the app came back meanwhile
+    await newer;
+    await store.flush();
+    expect(await store.read(), {'n': 2});
+    expect(store.failing.value, isFalse);
+  });
 }

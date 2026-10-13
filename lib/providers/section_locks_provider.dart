@@ -110,6 +110,11 @@ final pageHiddenProvider = Provider.family<bool, HubTool>((ref, page) {
       ref.watch(sectionClosedProvider(AppSection.hub));
 });
 
+/// Whether any of the Hub's pages is closed right now (its own lock).
+final anyPageClosedProvider = Provider<bool>((ref) {
+  return HubTool.values.any((t) => ref.watch(pageClosedProvider(t)));
+});
+
 /// Whether any section or Hub page is closed right now (e.g. backups need
 /// unlocking).
 final anySectionClosedProvider = Provider<bool>((ref) {

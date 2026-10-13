@@ -22,6 +22,10 @@ Release with the installable APK.
   coming.
 
 ### Fixed
+- When the app locks, a locked Hub page closes everything open over it
+  too (its menu, the edit view, the hold dialog, its history).
+- Two fingers on a hold button no longer restart its sound or stop it
+  while one finger still holds.
 - Locking from the menu (Lock now) keeps the menu open instead of
   closing it and showing the page behind; a page opened from the menu
   (e.g. Security) stays open when the app locks.
