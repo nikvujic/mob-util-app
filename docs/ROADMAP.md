@@ -305,7 +305,7 @@ fixtures for every stored format.
    phone, with the app swiped away, with battery saving on, when the
    clock or time zone changes, with exact alarms not allowed. Fix what's
    missing; a short phone test list for Nikola.
-3. [ ] **The app's own icon**: an 8-bit pixel character of our own,
+3. [x] **The app's own icon**: an 8-bit pixel character of our own,
    replacing Flutter's logo (launcher icon and the notification icon's
    look checked).
 4. [ ] **Last pass before v1**: a read through everything that saves
@@ -338,6 +338,9 @@ fixtures for every stored format.
 Nikola: the backup reminder, then release (0.27.0); then the icon, the
 notification checks and the last pass.
 - [x] Backup reminder (D9).
+- [x] Released 0.27.0; the next is 1.0.0.
+- [x] The icon: a pixel robot of our own (`tool/make_icon.py`), legacy
+  and adaptive, with a one-colour layer for themed icons.
 
 A note for after v1:
 - [ ] **Notifications page** (menu → Notifications; E3): a **history**
