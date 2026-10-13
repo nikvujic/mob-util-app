@@ -6,6 +6,7 @@ import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/security/security.dart';
 import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
+import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
@@ -73,8 +74,22 @@ class AppDrawer extends ConsumerWidget {
                     onTap: () => _open(context, const ThemesPage()),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.save_alt),
+                    leading: ref.watch(backupDueProvider)
+                        ? Badge(
+                            key: const Key('backupDot'),
+                            smallSize: 10,
+                            backgroundColor: context.colors.danger,
+                            child: const Icon(Icons.save_alt),
+                          )
+                        : const Icon(Icons.save_alt),
                     title: const Text('Backup'),
+                    subtitle: ref.watch(backupDueProvider)
+                        ? Text(
+                            'Time for a new one',
+                            style:
+                                TextStyle(color: context.colors.textSecondary),
+                          )
+                        : null,
                     onTap: () => _open(context, const BackupPage()),
                   ),
                   ListTile(

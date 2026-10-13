@@ -10,11 +10,13 @@ import 'package:the_app/app/section_gate.dart';
 import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/pages/hub/hub.dart';
 import 'package:the_app/pages/planner/planner.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
+import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/fingerprint_provider.dart';
 import 'package:the_app/providers/hub_dots_provider.dart';
 import 'package:the_app/models/notification_target.dart';
@@ -28,6 +30,7 @@ import 'package:the_app/providers/storage_status_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/back_handlers.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
+import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/section_reset.dart';
 
 /// The app shell: theme and the home screen with the main sections.
@@ -106,7 +109,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Looks again whether a dose has come due (the red dot, O13).
   late final Timer _doseCheck = Timer.periodic(
     const Duration(seconds: 30),
-    (_) => ref.invalidate(medicineDotProvider),
+    (_) => ref
+      ..invalidate(medicineDotProvider)
+      ..invalidate(backupDueProvider),
   );
 
   /// Tells the session when the app leaves and comes back, for auto-lock.
@@ -116,6 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(sessionProvider.notifier).appShown();
       // A dose may have come due while away (O13).
       ref.invalidate(medicineDotProvider);
+      ref.invalidate(backupDueProvider);
       // Reminders are planned two weeks ahead: top them up (P10).
       ref.read(reminderPlannerProvider).refresh();
     },
@@ -225,10 +231,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(pendingTargetProvider, (_, target) {
       if (target == null) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
-      _show(switch (target) {
-        PlannerTarget() => AppSection.planner,
-        MedicineTarget() => AppSection.hub,
-      });
+      switch (target) {
+        case PlannerTarget():
+          _show(AppSection.planner);
+        case MedicineTarget():
+          _show(AppSection.hub);
+        // Not a section: Backup opens on top of the one shown.
+        case BackupTarget():
+          ref.read(pendingTargetProvider.notifier).state = null;
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const BackupPage()),
+          );
+      }
     });
 
     return PopScope(
@@ -238,7 +252,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
       child: BackHandlerScope(
         handlers: _backHandlers,
-        child: _buildScaffold(),
+        child: MenuDot(
+          shown: ref.watch(backupDueProvider),
+          child: _buildScaffold(),
+        ),
       ),
     );
   }

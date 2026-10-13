@@ -16,6 +16,10 @@ Release with the installable APK.
   first (it replaced them without it).
 
 ### Added
+- **Weekly backup reminder**: Backup shows when the last backup was.
+  A week after it, a red dot on the menu and on Backup, and an evening
+  notification (again every 3 days until you export one) that opens
+  Backup. It can be turned off on Backup.
 - **Lock each Hub page on its own**: in Security, under the Hub, a
   switch per page. A locked page asks for the master password while the
   app is locked (its tile shows a small lock), whether or not the Hub

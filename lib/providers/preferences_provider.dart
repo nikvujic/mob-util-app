@@ -1,17 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/preferences.dart';
 
 /// The user's preferences (theme, counter feedback). Saved on change.
 class PreferencesNotifier extends StateNotifier<Preferences> {
   /// [started]: the app version this start is, which brings the
-  /// Introduction up on a first start or an update (N16).
-  PreferencesNotifier(AppStorage storage, {String? started})
+  /// Introduction up on a first start or an update (N16); [now], when it
+  /// started (the backup reminder counts from the first one, D8).
+  PreferencesNotifier(AppStorage storage, {String? started, DateTime? now})
       : super(
           started == null
               ? storage.initialPreferences
-              : storage.initialPreferences.startedVersion(started),
+              : storage.initialPreferences
+                  .startedVersion(started)
+                  .startedAt(now ?? DateTime.now()),
         ) {
     addListener(storage.savePreferences, fireImmediately: false);
     // Kept at once, so the next start knows this version was seen.
@@ -59,6 +63,11 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
     }
   }
 
+  /// A backup was exported at [at] (D8): the reminder counts from it.
+  void backedUp(DateTime at) => state = state.copyWith(lastBackupAt: () => at);
+
+  void setBackupReminder(bool on) => state = state.copyWith(backupReminder: on);
+
   /// The Introduction was opened: no longer new.
   void readIntro() {
     if (state.introUnread) state = state.copyWith(introUnread: false);
@@ -76,5 +85,6 @@ final preferencesProvider =
   (ref) => PreferencesNotifier(
     ref.watch(appStorageProvider),
     started: ref.watch(startedVersionProvider),
+    now: ref.read(clockProvider)(),
   ),
 );

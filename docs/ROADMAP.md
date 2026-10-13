@@ -297,7 +297,7 @@ reset), **per-page Hub locks (O7)**, Clear data per Hub page, frozen
 fixtures for every stored format.
 
 **Left for v1** (in this order):
-1. [ ] **Backup reminder** (D8, first part): Backup shows when the last
+1. [x] **Backup reminder** (D8, first part; D9): Backup shows when the last
    export was; after a week without one, a quiet reminder (a dot on the
    menu's Backup and a notification) to export. So a lost or reset phone
    never costs more than a week.
@@ -315,8 +315,10 @@ fixtures for every stored format.
    Clear data) and starts using it.
 
 **After v1** (v1.x / v2, roughly by size):
-- Notification sounds per kind, picked in the app (E2; Android's own
-  per-channel settings work meanwhile).
+- **Notifications page** in the menu (E3, Round 23): recent ones (today
+  and yesterday) that open their page, a clear button, and the
+  notification settings: sounds per kind, picked in the app (E2;
+  Android's own per-channel settings work meanwhile).
 - More Markdown and a formatting bar (N17, Round 20).
 - **Automatic backup** to a folder Nikola picks (D8, second part), then
   a self-hosted cloud backup (D5).
@@ -330,6 +332,21 @@ fixtures for every stored format.
   workout log, timer, habits, weight log, expenses, packing lists, a
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
+
+### Round 23 — order to v1 (2026-10-13)
+
+Nikola: the backup reminder, then release (0.27.0); then the icon, the
+notification checks and the last pass.
+- [x] Backup reminder (D9).
+
+A note for after v1:
+- [ ] **Notifications page** (menu → Notifications; E3): a **history**
+  of recent notifications — today and yesterday — because ones cleared
+  from the phone's drawer (e.g. by opening the app instead of tapping
+  them) are otherwise gone unseen. Tapping one goes to its page / item
+  (like tapping the notification), and a button clears the list. The
+  same page holds the notification settings planned with E2 (sounds per
+  kind).
 
 ### Round 22 — towards v1 (2026-10-13)
 

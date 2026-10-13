@@ -50,6 +50,10 @@ Future<void> openForgotPassword(WidgetTester t) async {
 
 /// Seeds a few notes (one locked) and shop items (in both sections).
 Future<void> seed(ProviderContainer container) async {
+  // A backup due (D8): the menu's dot and Backup's red line are checked.
+  container
+      .read(preferencesProvider.notifier)
+      .backedUp(designClock().subtract(const Duration(days: 10)));
   final notes = container.read(notesProvider.notifier)
     ..addNote(title: 'Bank', content: 'PIN')
     ..addNote(

@@ -10,6 +10,7 @@ import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
+import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
@@ -130,7 +131,9 @@ class ReminderPlanner {
     _ref.listen(preferencesProvider, (before, after) {
       if (before == null ||
           before.medicineReminders != after.medicineReminders ||
-          before.medicinePausedUntil != after.medicinePausedUntil) {
+          before.medicinePausedUntil != after.medicinePausedUntil ||
+          before.backupDueAt != after.backupDueAt ||
+          before.lastBackupAt != after.lastBackupAt) {
         _soon();
       }
     });
@@ -200,6 +203,11 @@ class ReminderPlanner {
         hideNames: password &&
             (locks.contains(AppSection.hub) ||
                 _ref.read(pageLocksProvider).contains(HubTool.medicine)),
+      ),
+      ...planBackupReminders(
+        now: now,
+        preferences: _ref.read(preferencesProvider),
+        days: reminderDays,
       ),
     ]..sort((a, b) => a.at.compareTo(b.at));
     await _ref

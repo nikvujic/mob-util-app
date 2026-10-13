@@ -52,7 +52,8 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D5 | Cloud backup to a self-hosted service (e.g. S3-backed). The server is **typed in** (connection details entered in the app), never hard-coded. | 💭 not now |
 | D6 | **Data-safety sweep**: everything that could lose data (storage, updates, restore, locks, crashes, phone changes), how safe export is, and when cloud saving should come. | 💭 later |
 | D7 | **Clear data per section** (Settings): pick Notes, Shop, Planner and/or Other and clear everything in them, after typing DELETE and, with a master password set, entering it. The Clear button is text only. | ✅ |
-| D8 | **Surviving an uninstall**: data outside the app (automatic export to a folder the user picks, or cloud) so deleting the app doesn't lose it. | 💭 later |
+| D8 | **Surviving an uninstall**: data outside the app (automatic export to a folder the user picks, or cloud) so deleting the app doesn't lose it. | 🟡 the weekly reminder (D9) is in; automatic export after v1 |
+| D9 | **Weekly backup reminder** (Round 23): Backup shows when the last export was ("8 days ago"; in red once due). A week after it (or after the first start, with none yet), a red dot on the menu button and on Backup, and a notification in the evening (19:00), again every 3 days until a backup is exported; tapping it opens Backup. A switch on Backup turns it off. Restoring doesn't count; a cancelled export doesn't either. | ✅ |
 
 ## N — Notes
 

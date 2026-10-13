@@ -1,6 +1,6 @@
 /// Where a notification leads when it's tapped (Round 19): the planner at
-/// a day and a time (a block, a routine or a reminder), or the medicine
-/// page. Carried in the notification as a short text ([payload]).
+/// a day and a time (a block, a routine or a reminder), the medicine
+/// page, or Backup. Carried in the notification as a short text ([payload]).
 sealed class NotificationTarget {
   const NotificationTarget();
 
@@ -19,6 +19,8 @@ sealed class NotificationTarget {
         return PlannerTarget(date, time);
       case ['medicine']:
         return const MedicineTarget();
+      case ['backup']:
+        return const BackupTarget();
     }
     return null;
   }
@@ -58,4 +60,15 @@ class MedicineTarget extends NotificationTarget {
 
   @override
   String toString() => 'MedicineTarget()';
+}
+
+/// The Backup page (a backup reminder, D8).
+class BackupTarget extends NotificationTarget {
+  const BackupTarget();
+
+  @override
+  String get payload => 'backup';
+
+  @override
+  String toString() => 'BackupTarget()';
 }

@@ -47,6 +47,17 @@ class Preferences {
   /// Cleared by the next unlock.
   final DateTime? resetBlockedUntil;
 
+  /// When the last backup was exported (D8), or null if none yet.
+  final DateTime? lastBackupAt;
+
+  /// Where the weekly backup reminder counts from while there's been no
+  /// backup: the first start of a version that has it.
+  final DateTime? backupCountFrom;
+
+  /// The weekly backup reminder (D8): a dot on the menu and a notification
+  /// once a week has gone by without a backup.
+  final bool backupReminder;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -60,7 +71,32 @@ class Preferences {
     this.introVersion,
     this.introUnread = false,
     this.resetBlockedUntil,
+    this.lastBackupAt,
+    this.backupCountFrom,
+    this.backupReminder = true,
   });
+
+  /// How long until a backup is due again (D8).
+  static const backupEvery = Duration(days: 7);
+
+  /// When the next backup is due, or null when the reminder is off (or
+  /// there's nothing to count from yet).
+  DateTime? get backupDueAt {
+    if (!backupReminder) return null;
+    return (lastBackupAt ?? backupCountFrom)?.add(backupEvery);
+  }
+
+  /// Whether a backup is due at [now].
+  bool backupDueBy(DateTime now) {
+    final due = backupDueAt;
+    return due != null && !now.isBefore(due);
+  }
+
+  /// Started at [now]: the backup reminder starts counting, if it hasn't.
+  Preferences startedAt(DateTime now) =>
+      lastBackupAt == null && backupCountFrom == null
+          ? copyWith(backupCountFrom: () => now)
+          : this;
 
   /// Whether resetting the master password is blocked at [now].
   bool resetBlockedAt(DateTime now) {
@@ -101,6 +137,9 @@ class Preferences {
     String? Function()? introVersion,
     bool? introUnread,
     DateTime? Function()? resetBlockedUntil,
+    DateTime? Function()? lastBackupAt,
+    DateTime? Function()? backupCountFrom,
+    bool? backupReminder,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -120,6 +159,10 @@ class Preferences {
         resetBlockedUntil: resetBlockedUntil == null
             ? this.resetBlockedUntil
             : resetBlockedUntil(),
+        lastBackupAt: lastBackupAt == null ? this.lastBackupAt : lastBackupAt(),
+        backupCountFrom:
+            backupCountFrom == null ? this.backupCountFrom : backupCountFrom(),
+        backupReminder: backupReminder ?? this.backupReminder,
       );
 
   Map<String, dynamic> toJson() => {
@@ -137,6 +180,11 @@ class Preferences {
         'introUnread': introUnread,
         if (resetBlockedUntil != null)
           'resetBlockedUntil': resetBlockedUntil!.toIso8601String(),
+        if (lastBackupAt != null)
+          'lastBackupAt': lastBackupAt!.toIso8601String(),
+        if (backupCountFrom != null)
+          'backupCountFrom': backupCountFrom!.toIso8601String(),
+        'backupReminder': backupReminder,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -157,5 +205,12 @@ class Preferences {
         resetBlockedUntil: json['resetBlockedUntil'] == null
             ? null
             : DateTime.tryParse(json['resetBlockedUntil'] as String),
+        lastBackupAt: json['lastBackupAt'] == null
+            ? null
+            : DateTime.tryParse(json['lastBackupAt'] as String),
+        backupCountFrom: json['backupCountFrom'] == null
+            ? null
+            : DateTime.tryParse(json['backupCountFrom'] as String),
+        backupReminder: json['backupReminder'] as bool? ?? true,
       );
 }

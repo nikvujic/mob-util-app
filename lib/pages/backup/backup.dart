@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/core/clock.dart';
 import 'package:the_app/providers/backup_provider.dart';
+import 'package:the_app/providers/backup_reminder_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -116,6 +119,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ? await exporter.export()
           : await exporter.exportEncrypted(key);
       if (result == ExportResult.saved) {
+        ref
+            .read(preferencesProvider.notifier)
+            .backedUp(ref.read(clockProvider)());
         messenger.showSnackBar(
           SnackBar(
             content: Text(
@@ -280,8 +286,21 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     }
   }
 
+  /// "today", "yesterday", "8 days ago".
+  static String _ago(DateTime at, DateTime now) {
+    final days = dayOf(now).difference(dayOf(at)).inDays;
+    return switch (days) {
+      <= 0 => 'today',
+      1 => 'yesterday',
+      _ => '$days days ago',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final preferences = ref.watch(preferencesProvider);
+    final last = preferences.lastBackupAt;
+    final due = ref.watch(backupDueProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Backup')),
       body: PullDownList.children(
@@ -290,8 +309,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             leading: const Icon(Icons.save_alt),
             title: const Text('Export all data'),
             subtitle: Text(
-              'Save all your data to a file you choose',
-              style: TextStyle(color: context.colors.textSecondary),
+              last == null
+                  ? 'No backup yet'
+                  : 'Last backup: ${formatDateTime(last)} '
+                      '(${_ago(last, ref.watch(clockProvider)())})',
+              key: const Key('lastBackup'),
+              style: TextStyle(
+                color:
+                    due ? context.colors.danger : context.colors.textSecondary,
+              ),
             ),
             trailing: _exporting
                 ? const SizedBox.square(
@@ -316,6 +342,18 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                   )
                 : null,
             onTap: _busy ? null : _import,
+          ),
+          SwitchListTile(
+            key: const Key('backupReminder'),
+            secondary: const Icon(Icons.notifications_outlined),
+            title: const Text('Weekly reminder'),
+            subtitle: Text(
+              'A dot on the menu and a notification when a week has gone by '
+              'without a backup',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.backupReminder,
+            onChanged: ref.read(preferencesProvider.notifier).setBackupReminder,
           ),
           Padding(
             padding: EdgeInsets.all(16),
