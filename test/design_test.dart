@@ -294,7 +294,9 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Medicine'));
         await t.pumpAndSettle();
-        await t.tap(find.byTooltip('History'));
+        await t.tap(find.text('Antibiotic'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('History'));
         await t.pumpAndSettle();
         await t.tap(find.text('not set').first);
         await t.pumpAndSettle();

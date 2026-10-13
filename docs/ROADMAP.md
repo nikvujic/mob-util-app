@@ -355,10 +355,10 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   opening.
 
 **2. Medicine history for all**
-- [ ] The medicines at the top; a tap opens one's own history.
-- [ ] Each day as a small **table** (medicine × doses); tapping an item
+- [x] The medicines at the top; a tap opens one's own history.
+- [x] Each day as a small **table** (medicine × doses); tapping an item
   opens that medicine's history, scrolled to the day.
-- [ ] Ready for years of doses (thousands of marks): lookups by an
+- [x] Ready for years of doses (thousands of marks): lookups by an
   index, lists built lazily.
 
 ### Round 17 — Nikola's review of 0.24.0 (2026-10-13)

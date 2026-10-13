@@ -136,4 +136,33 @@ void main() {
           (v1.state, v1.at), (DoseState.taken, DateTime(2026, 10, 11, 8, 4)));
     });
   });
+
+  test('years of marks: each found quickly (Round 18)', () {
+    final start = DateTime(2020, 1, 1);
+    final marks = [
+      for (var d = 0; d < 2500; d++)
+        for (var dose = 0; dose < 2; dose++)
+          DoseTaken(
+            medicine: 'm',
+            day: DateTime(start.year, start.month, start.day + d),
+            dose: dose,
+            state: d % 7 == 0 ? DoseState.missed : DoseState.taken,
+          ),
+    ];
+    final book = MedicineBook(taken: marks);
+    final watch = Stopwatch()..start();
+    var missed = 0;
+    for (var d = 0; d < 2500; d++) {
+      for (var dose = 0; dose < 2; dose++) {
+        final mark = book.markFor(
+            'm', DateTime(start.year, start.month, start.day + d), dose)!;
+        if (mark.state == DoseState.missed) missed++;
+      }
+    }
+    watch.stop();
+    expect(missed, 2 * (2500 / 7).ceil());
+    expect(book.markFor('m', DateTime(2030, 1, 1), 0), isNull);
+    // 5000 lookups: a linear search was ~25 million steps.
+    expect(watch.elapsedMilliseconds, lessThan(500));
+  });
 }

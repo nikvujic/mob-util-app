@@ -213,47 +213,86 @@ void main() {
     expect(find.text('Once a day, at'), findsOneWidget);
   });
 
-  testWidgets('history: each day, each dose with how it went', (tester) async {
+  testWidgets('history: the medicines on top, each day a table (Round 18)',
+      (tester) async {
     late String id;
+    late String other;
     await openMedicine(tester, () {
       id = medicine()
           .add('Vitamin D', times: [480], from: DateTime(2026, 10, 10))!;
-      medicine().toggleDose(id, today, 0);
+      other = medicine()
+          .add('Iron', times: [480, 1200], from: DateTime(2026, 10, 11))!;
+      medicine()
+        ..toggleDose(id, today, 0)
+        ..setDose(other, DateTime(2026, 10, 11), 1, DoseState.missed);
     });
     await tester.tap(find.byTooltip('History'));
     await tester.pumpAndSettle();
+    expect(find.byKey(Key('historyOf-$id')), findsOneWidget);
+    expect(find.byKey(Key('historyOf-$other')), findsOneWidget);
     expect(find.text('Today'), findsOneWidget);
-    expect(find.text('08:03'), findsOneWidget, reason: 'ticked at 08:03');
     expect(find.text('Sun, 11 Oct'), findsOneWidget);
     expect(find.text('Sat, 10 Oct'), findsOneWidget);
-    expect(find.text('not set'), findsNWidgets(2));
     expect(find.text('Fri, 9 Oct'), findsNothing, reason: 'before it began');
+    // A row per medicine on its days.
+    expect(find.byKey(Key('historyRow-$other-2026-10-11')), findsOneWidget);
+    expect(find.byKey(Key('historyRow-$other-2026-10-10')), findsNothing,
+        reason: 'Iron began on the 11th');
+    final missed = find.descendant(
+      of: find.byKey(Key('historyRow-$other-2026-10-11')),
+      matching: find.byIcon(Icons.cancel),
+    );
+    expect(tester.widget<Icon>(missed).color, DoseColours.missed);
   });
 
-  testWidgets('history: a dose can be set missed, not sure or taken',
+  testWidgets('history: a medicine on top opens its own history',
       (tester) async {
     late String id;
     await openMedicine(tester, () {
       id = medicine()
-          .add('Vitamin D', times: [480], from: DateTime(2026, 10, 11))!;
+          .add('Vitamin D', times: [480], from: DateTime(2026, 10, 10))!;
     });
     await tester.tap(find.byTooltip('History'));
     await tester.pumpAndSettle();
-    final yesterday = DateTime(2026, 10, 11);
-    await tester.tap(find.byKey(Key('mark-$id-2026-10-11-0')));
+    await tester.tap(find.byKey(Key('historyOf-$id')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('medicineTotal')), findsOneWidget);
+    expect(appBarTitle('Vitamin D'), findsOneWidget);
+  });
+
+  testWidgets(
+      'history: a row opens that medicine at that day, where a dose '
+      'can be set missed, not sure or taken', (tester) async {
+    late String id;
+    await openMedicine(tester, () {
+      id = medicine()
+          .add('Vitamin D', times: [480], from: DateTime(2026, 7, 1))!;
+    });
+    await tester.tap(find.byTooltip('History'));
+    await tester.pumpAndSettle();
+    // A day far down the list.
+    final row = find.byKey(Key('historyRow-$id-2026-09-01'));
+    await tester.scrollUntilVisible(row, 500,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    final mark = find.byKey(Key('mark-$id-2026-09-01-0'));
+    expect(mark.hitTestable(), findsOneWidget, reason: 'scrolled to it');
+
+    final day = DateTime(2026, 9, 1);
+    await tester.tap(mark);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Missed'));
     await tester.pumpAndSettle();
-    expect(container.read(medicineProvider).markFor(id, yesterday, 0)!.state,
+    expect(container.read(medicineProvider).markFor(id, day, 0)!.state,
         DoseState.missed);
-    expect(find.text('missed'), findsOneWidget);
 
-    await tester.tap(find.byKey(Key('mark-$id-2026-10-11-0')));
+    await tester.tap(mark);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Taken'));
     await tester.pumpAndSettle();
-    final mark = container.read(medicineProvider).markFor(id, yesterday, 0)!;
-    expect((mark.state, mark.at), (DoseState.taken, null),
+    final set = container.read(medicineProvider).markFor(id, day, 0)!;
+    expect((set.state, set.at), (DoseState.taken, null),
         reason: 'set afterwards: no time');
   });
 

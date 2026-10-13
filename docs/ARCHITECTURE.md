@@ -277,6 +277,16 @@ each kind its own Android channel (`planner-reminders`,
 `medicine-reminders`). A locked section's reminders leave out titles and
 names.
 
+## Years of medicine history (Round 18)
+
+Marks are found through an index (`MedicineBook.markFor`), made once per
+book (a book never changes; a new one comes with each change), so a
+lookup stays quick with thousands of marks. The histories build their
+days lazily (`SliverList.builder`), and opening a medicine's history at
+a day scrolls there in steps until that day is built. `medicine.json`
+grows by about 80 bytes a mark: ten years of three doses a day is about
+a megabyte, written whole on each change, which is still quick.
+
 ## Red dots (O13)
 
 A Hub page can ask for attention with a red dot on its tile

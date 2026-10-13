@@ -298,38 +298,169 @@ class _DayDoses extends StatelessWidget {
   }
 }
 
-/// Every day back to the first medicine's start, newest first: a coloured
-/// title per day and a mark per dose, each settable (O13).
+/// The history of every medicine (O6, Round 18): the medicines at the
+/// top (a tap opens one's own history), then each day as a small table, a
+/// row per medicine with a mark per dose. Tapping a row opens that
+/// medicine's history at that day, where its doses can be set. Days are
+/// built as they scroll into view, so years of them stay quick.
 class MedicineHistoryPage extends ConsumerWidget {
   const MedicineHistoryPage({super.key});
+
+  void _open(BuildContext context, Medicine medicine, {DateTime? day}) =>
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => MedicineOwnHistoryPage(id: medicine.id, day: day),
+        ),
+      );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final book = ref.watch(medicineProvider);
     final today = dayOf(ref.watch(clockProvider)());
+    final colors = context.colors;
     final first = book.medicines.isEmpty
         ? today
         : book.medicines
             .map((m) => m.from)
             .reduce((a, b) => a.isBefore(b) ? a : b);
-    final rows = <Widget>[];
-    for (var day = today; !day.isBefore(first); day = addDays(day, -1)) {
-      final on = book.medicines.where((m) => m.isOn(day)).toList();
-      if (on.isEmpty) continue;
-      rows.add(_DayTitle(
-        day: day,
-        today: today,
-        outcome: outcomeOf(book, on, day),
-      ));
-      for (final m in on) {
-        rows.add(_DayDoses(medicine: m, day: day));
-      }
+    final days = [
+      for (var day = today; !day.isBefore(first); day = addDays(day, -1))
+        if (book.medicines.any((m) => m.isOn(day))) day,
+    ];
+    if (days.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Medicine history')),
+        body: const EmptyState(icon: Icons.history, message: 'No history yet'),
+      );
     }
     return Scaffold(
       appBar: AppBar(title: const Text('Medicine history')),
-      body: rows.isEmpty
-          ? const EmptyState(icon: Icons.history, message: 'No history yet')
-          : PullDownList.children(children: rows),
+      body: PullDownList(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final m in book.medicines)
+                    ActionChip(
+                      key: Key('historyOf-${m.id}'),
+                      avatar: Icon(
+                        Icons.history,
+                        size: 18,
+                        color: colors.textSecondary,
+                      ),
+                      label: Text(m.name),
+                      onPressed: () => _open(context, m),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          SliverList.builder(
+            itemCount: days.length,
+            itemBuilder: (context, index) {
+              final day = days[index];
+              final on = book.medicines.where((m) => m.isOn(day)).toList();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _DayTitle(
+                    day: day,
+                    today: today,
+                    outcome: outcomeOf(book, on, day),
+                  ),
+                  for (final m in on)
+                    _DayRow(
+                      medicine: m,
+                      book: book,
+                      day: day,
+                      onTap: () => _open(context, m, day: day),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A medicine's row in a day's table: its name, then a mark per dose.
+class _DayRow extends StatelessWidget {
+  final Medicine medicine;
+  final MedicineBook book;
+  final DateTime day;
+  final VoidCallback onTap;
+
+  const _DayRow({
+    required this.medicine,
+    required this.book,
+    required this.day,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final marks = [
+      for (var dose = 0; dose < medicine.dosesADay; dose++)
+        book.markFor(medicine.id, day, dose),
+    ];
+    String said(DoseTaken? mark) => switch (mark?.state) {
+          DoseState.taken => 'taken',
+          DoseState.missed => 'missed',
+          DoseState.unsure => 'not sure',
+          null => 'not set',
+        };
+    return Semantics(
+      button: true,
+      label: '${medicine.name}: ${[
+        for (final (dose, mark) in marks.indexed)
+          '${formatMinutes(medicine.times[dose])} ${said(mark)}',
+      ].join(', ')}',
+      excludeSemantics: true,
+      child: InkWell(
+        key: Key('historyRow-${medicine.id}-${PlannerDay.key(day)}'),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    medicine.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: colors.textPrimary),
+                  ),
+                ),
+                for (final mark in marks)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Icon(
+                      switch (mark?.state) {
+                        DoseState.taken => Icons.check_circle,
+                        DoseState.missed => Icons.cancel,
+                        DoseState.unsure => Icons.help,
+                        null => Icons.radio_button_unchecked,
+                      },
+                      size: 22,
+                      color: _markColour(context, mark?.state),
+                    ),
+                  ),
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right, color: colors.textHint, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

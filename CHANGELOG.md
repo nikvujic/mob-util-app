@@ -13,6 +13,11 @@ Release with the installable APK.
   the list below.
 - Medicine: history and calendar use the same colours in every theme:
   **green** taken, **red** missed, amber not sure.
+- Medicine: the **history of all medicines** is new: the medicines on
+  top (tap one for its own history), then each day as a small table, a
+  row per medicine with a mark per dose. Tapping a row opens that
+  medicine's history at that day, where doses can be set. Ready for years
+  of history.
 - Medicine: unticking a dose asks first (a slip of the finger); each
   card shows how many doses were taken in all.
 - Medicine: late doses on the main page are no longer red (that was

@@ -134,9 +134,26 @@ class MedicineBook {
 
   static const empty = MedicineBook._none();
 
+  /// Each book's marks by medicine, day and dose, made on first use: a
+  /// lookup stays quick with years of marks (Round 18). A book never
+  /// changes, so its index doesn't either.
+  static final _indexes = Expando<Map<String, DoseTaken>>();
+
+  static String _keyOf(String medicine, DateTime day, int dose) =>
+      '$medicine|${day.year}-${day.month}-${day.day}|$dose';
+
   /// The mark for [medicine]'s [dose] on [day], if it has one.
-  DoseTaken? markFor(String medicine, DateTime day, int dose) =>
-      taken.where((t) => t.isFor(medicine, day, dose)).firstOrNull;
+  DoseTaken? markFor(String medicine, DateTime day, int dose) {
+    final index = _indexes[this] ??= () {
+      final index = <String, DoseTaken>{};
+      // The first one wins, as before (there's never more than one).
+      for (final t in taken) {
+        index.putIfAbsent(_keyOf(t.medicine, t.day, t.dose), () => t);
+      }
+      return index;
+    }();
+    return index[_keyOf(medicine, day, dose)];
+  }
 
   /// The mark for [medicine]'s [dose] on [day], if taken.
   DoseTaken? takenFor(String medicine, DateTime day, int dose) {
