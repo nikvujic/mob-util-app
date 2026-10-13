@@ -19,7 +19,7 @@ void main() {
     final p = pip();
     expect(p.x, (120 - PipBrain.width) / 2);
     expect(p.activity, PipActivity.spawning);
-    expect(p.sunk, 18);
+    expect(p.sunk, PipBrain.height, reason: 'all of him, antenna too');
     expect(p.dirt, 0);
   });
 
@@ -28,7 +28,7 @@ void main() {
     run(p, 0.3);
     expect(p.dirt, greaterThan(0), reason: 'the ground cracks');
     run(p, 0.5); // ~0.8 s: rising
-    expect(p.sunk, inExclusiveRange(0, 18));
+    expect(p.sunk, inExclusiveRange(0, PipBrain.height));
     run(p, 0.3); // ~1.1 s: the hop
     expect(p.sunk, 0);
     expect(p.lift, greaterThan(0));
@@ -60,6 +60,21 @@ void main() {
     expect(seen, containsAll(PipActivity.values));
     expect(
         frames, containsAll([PipFrame.blink, PipFrame.step1, PipFrame.step3]));
+  });
+
+  test('standing, now and then he turns to look the other way', () {
+    final p = pip(width: PipBrain.width + 4); // too small to walk
+    run(p, 2);
+    var turns = 0;
+    var facing = p.facingRight;
+    for (var i = 0; i < 60 * 60; i++) {
+      p.step(1 / 60);
+      expect(p.activity, PipActivity.standing);
+      if (p.facingRight != facing) turns++;
+      facing = p.facingRight;
+    }
+    expect(turns, greaterThan(2), reason: 'a few times a minute');
+    expect(turns, lessThan(20), reason: 'not all the time');
   });
 
   test('a room too small to walk in: he just stands', () {

@@ -41,8 +41,9 @@ class PipBrain {
     x = first ? _maxX / 2 : x.clamp(0, _maxX);
   }
 
-  /// Pip's width, in pixels.
+  /// Pip's size, in pixels (Round 27: 19 tall, his screen a row taller).
   static const width = 20;
+  static const height = 19;
 
   /// Walking speed, in pixels a second.
   static const speed = 14.0;
@@ -72,6 +73,10 @@ class PipBrain {
   double _blinkIn = 2;
   double _blinking = 0;
 
+  /// Standing, when he turns to look the other way (Round 27), if he
+  /// does this time.
+  double? _turnAt;
+
   /// Whether he has come out of the ground (only once).
   bool get spawned => activity != PipActivity.spawning;
 
@@ -90,6 +95,10 @@ class PipBrain {
           _blinking = 0.15;
           _blinkIn = 2 + random.nextDouble() * 3;
         }
+        if (_turnAt != null && _t >= _turnAt!) {
+          facingRight = !facingRight;
+          _turnAt = null;
+        }
         if (_t >= _standFor) _walk();
       case PipActivity.walking:
         final distance = speed * dt;
@@ -107,6 +116,10 @@ class PipBrain {
     activity = PipActivity.standing;
     _t = 0;
     _standFor = 1.5 + random.nextDouble() * 3.5;
+    // Now and then he looks round the other way for a bit.
+    _turnAt = random.nextDouble() < 0.4
+        ? _standFor * (0.3 + 0.4 * random.nextDouble())
+        : null;
   }
 
   void _walk() {
@@ -145,10 +158,10 @@ class PipBrain {
   /// How far below the ground he still is (0: fully up), in pixels.
   double get sunk {
     if (activity != PipActivity.spawning) return 0;
-    if (_t < crackEnd) return 18;
+    if (_t < crackEnd) return height.toDouble();
     if (_t < riseEnd) {
       final p = (_t - crackEnd) / (riseEnd - crackEnd);
-      return 18 * (1 - _easeOut(p));
+      return height * (1 - _easeOut(p));
     }
     return 0;
   }

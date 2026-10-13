@@ -90,6 +90,9 @@ void main() {
       await start(tester);
       await openMenu(tester);
       expect(find.byKey(const Key('menuPip')), findsOneWidget);
+      // The room's idle frame, 20 x 19 (Round 27), whole pixels.
+      final size = tester.getSize(find.byKey(const Key('menuPip')));
+      expect(size.width / size.height, closeTo(20 / 19, 0.001));
       // The title a little below Pip's middle (Round 27).
       final pip = tester.getCenter(find.byKey(const Key('menuPip'))).dy;
       final title = tester.getCenter(find.byKey(const Key('menuTitle'))).dy;

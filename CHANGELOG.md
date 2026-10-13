@@ -4,6 +4,15 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- Pip's screen is one row taller, less flat, in his room, in the menu's
+  header and on the launcher icon (finer pixels there too, the same
+  goofy look as in the room).
+- Pip: standing about, he now and then turns to look the other way;
+  coming out of the ground he starts fully under it.
+
 ## [1.2.0] - 2026-10-13
 
 ### Added

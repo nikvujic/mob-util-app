@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/widgets/pip_sprites.dart';
 
 /// Pip's room (Round 26): a strip of field at the bottom of the menu where
 /// Pip stands about and walks, moved by [brain]. Drawn in pixels (each a
@@ -18,7 +19,7 @@ class PipRoom extends StatefulWidget {
   /// About how big one of Pip's pixels is.
   static const pixel = 2.5;
 
-  /// The room's height, in Pip's pixels: Pip (18), a hop (6), the
+  /// The room's height, in Pip's pixels: Pip (19), a hop (6), the
   /// ground (5) and a little air.
   static const rows = 32;
 
@@ -99,133 +100,6 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
       ),
     );
   }
-}
-
-/// Pip's frames on a 20-wide grid: the same head and face as the icon,
-/// finer, with legs that can step.
-abstract final class PipSprites {
-  /// How many rows his screen has (Round 27: being chosen; 8 so far).
-  static int screenRows = 8;
-
-  static List<String> get _head => [
-        '.........A..........',
-        '.........L..........',
-        '...LLLLLLLLLLLLLL...',
-        '..LLLLLLLLLLLLLLLL..',
-        for (var i = 0; i < screenRows; i++) '..LWWWWWWWWWWWWWWL..',
-        '..LLLLLLLLLLLLLLLL..',
-        '...OOOOOOOOOOOOOO...',
-        '...SSSSSSSSSSSSSS...',
-      ];
-
-  static const _legs = {
-    'stand': [
-      '.....OO......OO.....',
-      '.....OO......OO.....',
-      '.....SS......SS.....',
-    ],
-    'stepL': [
-      '.....OO......OO.....',
-      '.....SS......OO.....',
-      '.............SS.....',
-    ],
-    'stepR': [
-      '.....OO......OO.....',
-      '.....OO......SS.....',
-      '.....SS.............',
-    ],
-    'tuck': [
-      '.....SS......SS.....',
-      '....................',
-      '....................',
-    ],
-  };
-
-  /// The face's dark pixels, inside the screen (14 x 8, from its top
-  /// left), looking [look] pixels to the right.
-  static Set<(int, int)> _face(String kind, int look) {
-    final eyes = [3 + look, 10 + look];
-    final mouth = 4 + look;
-    // A taller screen: the face a little lower, the mouth a little
-    // further from the eyes (from two rows more).
-    final extra = screenRows - 8;
-    final down = (extra + 1) ~/ 2;
-    final apart = extra >= 2 ? 1 : 0;
-    return {
-      for (final (x, y) in _plainFace(kind, eyes, mouth))
-        (x, y >= 4 ? y + down + apart : y + down),
-    };
-  }
-
-  static Set<(int, int)> _plainFace(String kind, List<int> eyes, int mouth) {
-    return {
-      for (final e in eyes)
-        ...kind == 'blink'
-            ? [(e, 2), (e + 1, 2)]
-            : [(e, 1), (e + 1, 1), (e, 2), (e + 1, 2)],
-      ...kind == 'oh'
-          ? [
-              (mouth + 2, 4),
-              (mouth + 3, 4),
-              (mouth + 1, 5),
-              (mouth + 4, 5),
-              (mouth + 2, 6),
-              (mouth + 3, 6),
-            ]
-          : [
-              (mouth, 4),
-              (mouth + 5, 4),
-              for (var i = 1; i <= 4; i++) (mouth + i, 5),
-            ],
-    };
-  }
-
-  static List<String> _frame(String face, String legs, {int look = 0}) {
-    final rows = [for (final r in _head) r.split('')];
-    for (final (x, y) in _face(face, look)) {
-      rows[4 + y][3 + x] = 'K';
-    }
-    return [
-      for (final r in rows) r.join(),
-      ..._legs[legs]!,
-    ];
-  }
-
-  static int? _framesFor;
-  static Map<PipFrame, List<String>>? _frames;
-
-  /// Each frame's rows (made again when [screenRows] changes).
-  static Map<PipFrame, List<String>> get frames {
-    if (_framesFor != screenRows) {
-      _frames = _build();
-      _framesFor = screenRows;
-    }
-    return _frames!;
-  }
-
-  static Map<PipFrame, List<String>> _build() => {
-        PipFrame.idle: _frame('smile', 'stand'),
-        PipFrame.blink: _frame('blink', 'stand'),
-        // Walking: looking ahead (to the right; mirrored going left).
-        PipFrame.step1: _frame('smile', 'stepL', look: 1),
-        PipFrame.step2: _frame('smile', 'stand', look: 1),
-        PipFrame.step3: _frame('smile', 'stepR', look: 1),
-        PipFrame.step4: _frame('smile', 'stand', look: 1),
-        PipFrame.oh: _frame('oh', 'stand'),
-        PipFrame.tuck: _frame('oh', 'tuck'),
-      };
-
-  static const colours = {
-    'L': PipColours.casing,
-    'O': PipColours.body,
-    'S': PipColours.shade,
-    'W': PipColours.screen,
-    'K': PipColours.face,
-    'A': PipColours.light,
-  };
-
-  /// How many rows a frame has.
-  static int get height => _head.length + 3;
 }
 
 class _RoomPainter extends CustomPainter {

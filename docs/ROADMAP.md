@@ -364,9 +364,11 @@ Nikola is importing his notes: the extra formats and their buttons now
   needs a finer grid. **No**: pictures in his own pixels look more
   natural; a finer screen-only grid is kept for an occasional detailed
   picture (later, on Pip's page).
-- [ ] The room: the 14 x 9 screen in every frame, and the animations
-  (spawn, hop, walk, blink) checked and improved where needed.
-- [ ] The menu header's Pip and the app icon: the room's idle frame,
+- [x] The room: the 14 x 9 screen in every frame, and the animations
+  (spawn, hop, walk, blink) checked and improved where needed: he now
+  starts fully underground (his antenna peeked out), and standing he
+  turns to look the other way now and then.
+- [x] The menu header's Pip and the app icon: the room's idle frame,
   the same grid (the face a little to one side, as in the room: goofy,
   and Nikola likes it), not a centred face.
 

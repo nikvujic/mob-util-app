@@ -391,16 +391,19 @@ hold_to_take.dart`): a 5-second `AnimationController` drives a painted
 glass, the native `fill` sound (`tool/make_fill_sound.py`) and haptic
 ticks; letting go reverses it.
 
-Pip (Round 25), the mascot: `widgets/pip.dart` draws him from the same
-16 x 16 grid as the launcher icon (`tool/make_icon.py`), each grid pixel
-snapped to whole device pixels, in his own colours. The menu's header
-shows him; his room (after v1) builds on it.
+Pip (Round 25), the mascot: `widgets/pip.dart` draws him standing (his
+room's idle frame, `widgets/pip_sprites.dart`), each grid pixel snapped
+to whole device pixels, in his own colours; the menu's header shows him.
+The launcher icon (`tool/make_icon.py`) holds a copy of the same frame
+and colours; `test/widgets/pip_sprites_test.dart` keeps them equal, so
+after changing his look, update the tool's `SPRITE` and run it.
 
 Pip's room (Round 26): `core/pip_brain.dart` is his behaviour, plain
 Dart (spawning, standing, walking; where he is, his frame, squash and
 stretch), stepped with the time gone by and a `Random` (seeded in
-tests). `widgets/pip_room.dart` draws the field and his frames (a
-20-wide grid composed from head, face and legs) with a `Ticker` while
+tests). `widgets/pip_room.dart` draws the field and his frames
+(`widgets/pip_sprites.dart`: a 20 x 19 grid composed from head, a
+14 x 9 screen with his face, and legs) with a `Ticker` while
 the menu is open; `pipBrainProvider` keeps one brain for the app's run,
 so he spawns only the first time. `pipAnimatesProvider` is off in tests
 (an endless animation never settles) except Pip's own.

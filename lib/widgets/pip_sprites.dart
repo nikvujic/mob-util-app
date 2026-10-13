@@ -1,0 +1,117 @@
+import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/theme.dart';
+
+/// Pip's frames on a 20-wide grid (Round 26), one letter a pixel ('.'
+/// empty): his head with a 14 x 9 screen (Round 27: one row taller than
+/// at first, less flat), his face on it, and legs that can step. The room
+/// draws them all; the menu header and the launcher icon
+/// (`tool/make_icon.py`) draw [PipFrame.idle].
+abstract final class PipSprites {
+  /// His screen's size, in pixels.
+  static const screenWidth = 14;
+  static const screenRows = 9;
+
+  static final _head = [
+    '.........A..........',
+    '.........L..........',
+    '...LLLLLLLLLLLLLL...',
+    '..LLLLLLLLLLLLLLLL..',
+    for (var i = 0; i < screenRows; i++) '..LWWWWWWWWWWWWWWL..',
+    '..LLLLLLLLLLLLLLLL..',
+    '...OOOOOOOOOOOOOO...',
+    '...SSSSSSSSSSSSSS...',
+  ];
+
+  /// Where the screen's top left pixel is.
+  static const _screenX = 3, _screenY = 4;
+
+  static const _legs = {
+    'stand': [
+      '.....OO......OO.....',
+      '.....OO......OO.....',
+      '.....SS......SS.....',
+    ],
+    'stepL': [
+      '.....OO......OO.....',
+      '.....SS......OO.....',
+      '.............SS.....',
+    ],
+    'stepR': [
+      '.....OO......OO.....',
+      '.....OO......SS.....',
+      '.....SS.............',
+    ],
+    'tuck': [
+      '.....SS......SS.....',
+      '....................',
+      '....................',
+    ],
+  };
+
+  /// The face's dark pixels, on the screen (from its top left), looking
+  /// [look] pixels to the right. Even looking ahead his face sits a pixel
+  /// right of the middle: a little goofy, and liked that way.
+  static Set<(int, int)> _face(String kind, int look) {
+    final eyes = [3 + look, 10 + look];
+    final mouth = 4 + look;
+    return {
+      for (final e in eyes)
+        ...switch (kind) {
+          'blink' => [(e, 3), (e + 1, 3)],
+          _ => [(e, 2), (e + 1, 2), (e, 3), (e + 1, 3)],
+        },
+      ...switch (kind) {
+        // Surprised: a small round mouth.
+        'oh' => [
+            (mouth + 2, 5),
+            (mouth + 3, 5),
+            (mouth + 1, 6),
+            (mouth + 4, 6),
+            (mouth + 2, 7),
+            (mouth + 3, 7),
+          ],
+        _ => [
+            (mouth, 5),
+            (mouth + 5, 5),
+            for (var i = 1; i <= 4; i++) (mouth + i, 6),
+          ],
+      },
+    };
+  }
+
+  static List<String> _frame(String face, String legs, {int look = 0}) {
+    final rows = [for (final r in _head) r.split('')];
+    for (final (x, y) in _face(face, look)) {
+      rows[_screenY + y][_screenX + x] = 'K';
+    }
+    return [
+      for (final r in rows) r.join(),
+      ..._legs[legs]!,
+    ];
+  }
+
+  /// Each frame's rows.
+  static final Map<PipFrame, List<String>> frames = {
+    PipFrame.idle: _frame('smile', 'stand'),
+    PipFrame.blink: _frame('blink', 'stand'),
+    // Walking: looking ahead (to the right; mirrored going left).
+    PipFrame.step1: _frame('smile', 'stepL', look: 1),
+    PipFrame.step2: _frame('smile', 'stand', look: 1),
+    PipFrame.step3: _frame('smile', 'stepR', look: 1),
+    PipFrame.step4: _frame('smile', 'stand', look: 1),
+    PipFrame.oh: _frame('oh', 'stand'),
+    PipFrame.tuck: _frame('oh', 'tuck'),
+  };
+
+  static const colours = {
+    'L': PipColours.casing,
+    'O': PipColours.body,
+    'S': PipColours.shade,
+    'W': PipColours.screen,
+    'K': PipColours.face,
+    'A': PipColours.light,
+  };
+
+  /// How many rows a frame has.
+  static int get height => _head.length + 3;
+}
