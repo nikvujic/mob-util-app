@@ -42,6 +42,11 @@ class Preferences {
   /// It's new to the user (a fresh install or an update), until opened.
   final bool introUnread;
 
+  /// "Forgot master password?" is greyed out until then (Round 21): its
+  /// Reset was tapped instead of held, as someone not in on it would.
+  /// Cleared by the next unlock.
+  final DateTime? resetBlockedUntil;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -54,7 +59,14 @@ class Preferences {
     this.introOnUpdates = true,
     this.introVersion,
     this.introUnread = false,
+    this.resetBlockedUntil,
   });
+
+  /// Whether resetting the master password is blocked at [now].
+  bool resetBlockedAt(DateTime now) {
+    final until = resetBlockedUntil;
+    return until != null && now.isBefore(until);
+  }
 
   /// After starting [version] of the app: a first start or an update
   /// brings the Introduction up (an update only if [introOnUpdates]),
@@ -88,6 +100,7 @@ class Preferences {
     bool? introOnUpdates,
     String? Function()? introVersion,
     bool? introUnread,
+    DateTime? Function()? resetBlockedUntil,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -104,6 +117,9 @@ class Preferences {
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
         introVersion: introVersion == null ? this.introVersion : introVersion(),
         introUnread: introUnread ?? this.introUnread,
+        resetBlockedUntil: resetBlockedUntil == null
+            ? this.resetBlockedUntil
+            : resetBlockedUntil(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -119,6 +135,8 @@ class Preferences {
         'introOnUpdates': introOnUpdates,
         if (introVersion != null) 'introVersion': introVersion,
         'introUnread': introUnread,
+        if (resetBlockedUntil != null)
+          'resetBlockedUntil': resetBlockedUntil!.toIso8601String(),
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -136,5 +154,8 @@ class Preferences {
         introOnUpdates: json['introOnUpdates'] as bool? ?? true,
         introVersion: json['introVersion'] as String?,
         introUnread: json['introUnread'] as bool? ?? false,
+        resetBlockedUntil: json['resetBlockedUntil'] == null
+            ? null
+            : DateTime.tryParse(json['resetBlockedUntil'] as String),
       );
 }

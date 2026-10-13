@@ -43,6 +43,8 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - A **master password** encrypts locked notes and can lock whole sections. Without it, locked data can't be read, so keep it safe.
 - **Fingerprint** unlock can stand in for typing it.
 - The app locks again a little after you leave it.
+- Forgot the password? **Forgot master password** resets it by deleting what it protects. To make sure it's you, type RESET and then **hold** Reset for 10 seconds; a plain tap turns it off for a day (or until you next unlock).
+- Locked notes can't be deleted, and a backup can't be restored over them, without the password.
 
 ## Backup
 - **Export** saves everything to one file; **Import** restores it. Locked notes stay encrypted inside.

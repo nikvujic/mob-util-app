@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/security/forgot_password.dart';
@@ -45,7 +47,15 @@ class SecurityPage extends ConsumerWidget {
   Future<void> _forgot(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     final reset = ref.read(passwordResetProvider);
-    if (!await showForgotPasswordDialog(context, reset.plan())) return;
+    final choice = await showForgotPasswordDialog(context, reset.plan());
+    if (choice == ResetChoice.tapped) {
+      // Not the owner's way: greyed out until the next unlock or a day.
+      ref
+          .read(preferencesProvider.notifier)
+          .blockReset(ref.read(clockProvider)());
+      return;
+    }
+    if (choice != ResetChoice.reset) return;
     try {
       await reset.run();
     } on StorageWriteException {
@@ -140,6 +150,10 @@ class SecurityPage extends ConsumerWidget {
               onTap: () => _open(context, PasswordFormMode.remove),
             ),
             ListTile(
+              key: const Key('forgotPassword'),
+              enabled: !ref
+                  .watch(preferencesProvider)
+                  .resetBlockedAt(ref.watch(clockProvider)()),
               leading: const Icon(Icons.lock_reset),
               title: const Text('Forgot master password?'),
               subtitle: Text(

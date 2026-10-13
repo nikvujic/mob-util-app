@@ -5,6 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
+import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
@@ -65,13 +66,22 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   /// While a section is locked and the app is locked, backups need the
   /// app unlocked: they'd contain (or replace) that section's data.
   /// False if the user cancels.
-  Future<bool> _unlockIfSectionsClosed() async {
-    if (!ref.read(anySectionClosedProvider)) return true;
+  Future<bool> _unlockIfSectionsClosed({bool replaces = false}) async {
+    // Restoring also replaces locked notes: not without the password
+    // either, sections locked or not (Round 21).
+    final lockedNotes = replaces &&
+        ref.read(securityProvider) != null &&
+        ref.read(sessionProvider) == null &&
+        ref.read(notesProvider).any((n) => n.isLocked);
+    if (!ref.read(anySectionClosedProvider) && !lockedNotes) return true;
     final keys = await showPasswordPrompt<UnlockedKeys>(
       context,
       title: 'Unlock',
-      message: 'Some sections are locked. Enter the master password to '
-          'back up or restore.',
+      message: lockedNotes && !ref.read(anySectionClosedProvider)
+          ? 'Restoring replaces your locked notes. Enter the master '
+              'password to restore.'
+          : 'Some sections are locked. Enter the master password to '
+              'back up or restore.',
       confirmLabel: 'Unlock',
       attempt: ref.read(sessionProvider.notifier).unlock,
       alternative: PromptAlternative.fingerprint(
@@ -192,7 +202,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ));
 
   Future<void> _import() async {
-    if (!await _unlockIfSectionsClosed() || !mounted) return;
+    if (!await _unlockIfSectionsClosed(replaces: true) || !mounted) return;
     final importer = ref.read(backupImporterProvider);
 
     final PickedBackup? file;

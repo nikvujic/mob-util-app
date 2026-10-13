@@ -407,4 +407,41 @@ void main() {
     expect(note('Old bank').isLocked, isTrue);
     expect(await readLocked('Old bank'), 'old PIN', reason: 'our key');
   });
+
+  group('deleting locked notes needs the password (Round 21)', () {
+    Future<void> deleteSelected(WidgetTester tester, String? title) async {
+      if (title != null) {
+        await tester.longPress(find.text(title));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.byTooltip('Delete'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete').last);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('app locked: asked for; cancelled, nothing goes',
+        (tester) async {
+      await start(tester, titles: ['Bank', 'Shopping'], locked: true);
+      await seedLocked(tester, 'Bank');
+      await deleteSelected(tester, 'Bank');
+      expect(find.byKey(const Key('promptPassword')), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(
+          container.read(notesProvider).map((n) => n.title), contains('Bank'));
+
+      await deleteSelected(tester, null); // still selected
+      await enterPassword(tester, password);
+      expect(container.read(notesProvider).map((n) => n.title),
+          isNot(contains('Bank')));
+    });
+
+    testWidgets('unlocked notes go without asking', (tester) async {
+      await start(tester, titles: ['Bank', 'Shopping'], locked: true);
+      await deleteSelected(tester, 'Shopping');
+      expect(find.byKey(const Key('promptPassword')), findsNothing);
+      expect(container.read(notesProvider).map((n) => n.title), ['Bank']);
+    });
+  });
 }

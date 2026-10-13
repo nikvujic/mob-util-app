@@ -11,6 +11,9 @@ Release with the installable APK.
   navigation bar; every list now leaves room for that bar.
 - A tapped notification's "go to" is dropped when you go to another tab
   yourself (it went to Medicine later, after a detour).
+- Locked notes can no longer be deleted without the master password.
+- Importing a backup over locked notes asks for the master password
+  first (it replaced them without it).
 
 ### Added
 - Medicine histories: a **back to top** button once you've scrolled far
@@ -22,6 +25,9 @@ Release with the installable APK.
 - Placard: a longer inflate (about 4 seconds), and a quieter pop.
 - Medicine: the total on each card is level with the drag handle.
 - Settings: line numbers first.
+- Security: resetting a forgotten password is harder to stumble on:
+  after typing RESET, **hold** Reset for 10 seconds. A plain tap greys
+  the reset out until the next unlock, or for a day.
 
 ## [0.26.0] - 2026-10-13
 

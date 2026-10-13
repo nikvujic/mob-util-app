@@ -342,14 +342,17 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   unlocked: it still went to Medicine. Going elsewhere drops it.
 
 **2. Nothing protected can be destroyed without the password**
-- [ ] Locked notes can't be deleted without the master password (the
+- [x] Locked notes can't be deleted without the master password (the
   list's Delete asks for it when a locked one is selected).
-- [ ] **Reset (forgot password)** is hidden in plain sight: after typing
+- [x] **Reset (forgot password)** is hidden in plain sight: after typing
   RESET, the button must be **held 10 seconds**. A normal tap greys
   reset out until the next unlock, or a full day.
-- [ ] A check of every other way to lose protected data without the
+- [x] A check of every other way to lose protected data without the
   password (Clear data, importing a backup over it, deleting from
-  selection mode, …), fixing what's open.
+  selection mode, …), fixing what's open. Clear data, removing or
+  changing the password and turning a section lock off already asked
+  for it; exporting keeps locked notes sealed. **Importing** a backup
+  replaced locked notes without it: now asks first.
 
 **3. Lock each Hub page on its own** (O7, noted; built after Markdown)
 - [ ] In Security, under the Hub: a switch per Hub page. The Hub and its

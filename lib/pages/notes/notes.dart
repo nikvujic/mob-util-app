@@ -157,6 +157,19 @@ class _NotesPageState extends ConsumerState<NotesPage> {
       plural: 'notes',
     );
     if (!confirmed || !mounted) return;
+    // A locked note isn't deleted without the master password (Round 21):
+    // the app unlocked, or the password now.
+    final anyLocked = ref
+        .read(notesProvider)
+        .any((n) => n.isLocked && _selection.isSelected(n.id));
+    if (anyLocked) {
+      final key = await unlockNotesKey(
+        context,
+        ref,
+        message: 'Enter the master password to delete locked notes.',
+      );
+      if (key == null || !mounted) return;
+    }
     ref.read(notesProvider.notifier).removeNotes(_selection.selected);
     _selection.clear();
   }

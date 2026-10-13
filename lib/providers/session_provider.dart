@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -72,6 +73,8 @@ class SessionNotifier extends StateNotifier<UnlockedKeys?> {
       return false;
     }
     state = UnlockedKeys(key, dataKey);
+    // Whoever unlocks knows the password: the reset is theirs again.
+    _ref.read(preferencesProvider.notifier).unblockReset();
     return true;
   }
 

@@ -47,6 +47,18 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
 
   void setIntroOnUpdates(bool on) => state = state.copyWith(introOnUpdates: on);
 
+  /// Greys out the password reset for a day (or until the next unlock).
+  void blockReset(DateTime now) => state = state.copyWith(
+        resetBlockedUntil: () => now.add(const Duration(days: 1)),
+      );
+
+  /// The app was unlocked: the reset may be used again.
+  void unblockReset() {
+    if (state.resetBlockedUntil != null) {
+      state = state.copyWith(resetBlockedUntil: () => null);
+    }
+  }
+
   /// The Introduction was opened: no longer new.
   void readIntro() {
     if (state.introUnread) state = state.copyWith(introUnread: false);

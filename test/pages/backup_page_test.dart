@@ -9,6 +9,7 @@ import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 
 import '../helpers.dart';
@@ -220,6 +221,28 @@ void main() {
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
       expect(titles(), ['Groceries']);
+    });
+
+    testWidgets(
+        'locked notes, app locked: asks for the password before restoring '
+        '(Round 21)', (tester) async {
+      await openBackup(tester, withPassword: true);
+      final session = container.read(sessionProvider.notifier);
+      await tester.runAsync(() => session.unlock(password));
+      final groceries = container.read(notesProvider).single;
+      await container
+          .read(notesProvider.notifier)
+          .lockNote(groceries.id, container.read(sessionProvider)!.dataKey);
+      session.lock();
+      await tester.pumpAndSettle();
+      files.toPick = Uint8List.fromList(utf8.encode(sample().encode()));
+      await tapImport(tester);
+
+      expect(find.textContaining('replaces your locked notes'), findsOneWidget);
+      expect(find.text('Restore this backup?'), findsNothing);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(titles(), ['Groceries'], reason: 'nothing replaced');
     });
 
     testWidgets('cancelling the confirmation changes nothing', (tester) async {

@@ -6,18 +6,36 @@ import 'package:the_app/providers/password_reset_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
+/// What came of the reset dialog.
+enum ResetChoice {
+  /// Closed, nothing done.
+  cancel,
+
+  /// Confirmed: reset.
+  reset,
+
+  /// Reset tapped instead of held (Round 21): someone not in on it. The
+  /// caller greys the reset out for a while.
+  tapped,
+}
+
+/// How long Reset has to be held when it deletes something (Round 21).
+const resetHold = Duration(seconds: 10);
+
 /// Asks to reset a forgotten master password (L7), listing what [plan]
-/// deletes. When anything will be deleted, the user has to type [resetConfirmWord].
-/// Resolves to true if confirmed.
-Future<bool> showForgotPasswordDialog(
+/// deletes. When anything will be deleted, the user has to type
+/// [resetConfirmWord] and then **hold** Reset for [resetHold]; a plain tap
+/// gives [ResetChoice.tapped] (nothing says so: it's for the owner to
+/// know).
+Future<ResetChoice> showForgotPasswordDialog(
   BuildContext context,
   PasswordResetPlan plan,
 ) async {
-  final result = await showDialog<bool>(
+  final result = await showDialog<ResetChoice>(
     context: context,
     builder: (_) => _ForgotPasswordDialog(plan),
   );
-  return result ?? false;
+  return result ?? ResetChoice.cancel;
 }
 
 class _ForgotPasswordDialog extends StatefulWidget {
@@ -29,8 +47,19 @@ class _ForgotPasswordDialog extends StatefulWidget {
   State<_ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
 }
 
-class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
+class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog>
+    with SingleTickerProviderStateMixin {
   final _confirm = TextEditingController();
+
+  /// 0 → 1 while Reset is held.
+  late final AnimationController _hold =
+      AnimationController(vsync: this, duration: resetHold)
+        ..addListener(() => setState(() {}))
+        ..addStatusListener((status) {
+          if (status == AnimationStatus.completed && mounted) {
+            Navigator.of(context).pop(ResetChoice.reset);
+          }
+        });
 
   @override
   void initState() {
@@ -41,7 +70,20 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   @override
   void dispose() {
     _confirm.dispose();
+    _hold.dispose();
     super.dispose();
+  }
+
+  void _pressed() {
+    if (!_deletes) {
+      Navigator.of(context).pop(ResetChoice.reset);
+      return;
+    }
+    // Let go: a quick tap (under 0.8 s held) gives it away; a hold let go
+    // early just stops.
+    final quick = _hold.value * resetHold.inMilliseconds < 800;
+    _hold.reset();
+    if (quick) Navigator.of(context).pop(ResetChoice.tapped);
   }
 
   bool get _deletes => widget.plan.deletesAnything;
@@ -115,13 +157,40 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       actions: [
         DialogButton(
           label: 'Cancel',
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(ResetChoice.cancel),
         ),
-        DialogButton(
-          label: 'Reset',
-          primary: true,
-          danger: true,
-          onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
+        // Held, it fills from the left (only once it's being held).
+        Listener(
+          onPointerDown:
+              _confirmed && _deletes ? (_) => _hold.forward(from: 0) : null,
+          // A tap's up comes before its onPressed: keep the value for it.
+          onPointerUp: (_) => _hold.stop(),
+          onPointerCancel: (_) => _hold.reset(),
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              DialogButton(
+                key: const Key('resetButton'),
+                label: 'Reset',
+                primary: true,
+                danger: true,
+                onPressed: _confirmed ? _pressed : null,
+              ),
+              if (_hold.value > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: LinearProgressIndicator(
+                    key: const Key('resetHold'),
+                    value: _hold.value,
+                    minHeight: 3,
+                    color: context.colors.textPrimary,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
     );

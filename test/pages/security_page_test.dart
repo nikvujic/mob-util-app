@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
@@ -14,6 +16,7 @@ void main() {
   const newPassword = 'second password';
 
   late ProviderContainer container;
+  var clock = DateTime(2026, 10, 13, 9);
 
   SecurityNotifier security() => container.read(securityProvider.notifier);
 
@@ -262,7 +265,15 @@ void main() {
       await openForgot(tester);
       await tester.enterText(find.byKey(const Key('resetConfirm')), 'RESET');
       await tester.pump();
-      await tester.tap(resetButton());
+      // Held for 10 seconds (Round 21), a bar filling meanwhile.
+      final finger = await tester.startGesture(tester.getCenter(resetButton()));
+      await tester.pump(); // the hold starts
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.byKey(const Key('resetHold')), findsOneWidget);
+      expect(security().hasMasterPassword, isTrue, reason: 'not yet');
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await finger.up();
       await tester.pumpAndSettle();
 
       expect(security().hasMasterPassword, isFalse);
@@ -281,6 +292,88 @@ void main() {
       await tester.tap(resetButton());
       await tester.pumpAndSettle();
       expect(security().hasMasterPassword, isFalse);
+    });
+
+    group('hidden in plain sight (Round 21)', () {
+      Future<void> lockedShop(WidgetTester tester) async {
+        container = await pumpApp(
+          tester,
+          clock: () => clock,
+        );
+        await tester.runAsync(() => security().setPassword(password));
+        container.read(shopProvider.notifier).addItem('Milk');
+        container.read(sectionLocksProvider.notifier).lock(AppSection.shop);
+        await openMenu(tester);
+        await tester.tap(find.text('Security'));
+        await tester.pumpAndSettle();
+      }
+
+      bool forgotEnabled(WidgetTester tester) => tester
+          .widget<ListTile>(find.byKey(const Key('forgotPassword')))
+          .enabled;
+
+      testWidgets('a plain tap on Reset does nothing, and greys it out',
+          (tester) async {
+        clock = DateTime(2026, 10, 13, 9);
+        await lockedShop(tester);
+        await openForgot(tester);
+        await tester.enterText(find.byKey(const Key('resetConfirm')), 'RESET');
+        await tester.pump();
+        await tester.tap(resetButton());
+        await tester.pumpAndSettle();
+        expect(find.text('Reset master password?'), findsNothing);
+        expect(security().hasMasterPassword, isTrue);
+        expect(container.read(shopProvider), hasLength(1));
+        expect(forgotEnabled(tester), isFalse);
+      });
+
+      testWidgets('let go before 10 seconds: nothing, not greyed',
+          (tester) async {
+        clock = DateTime(2026, 10, 13, 9);
+        await lockedShop(tester);
+        await openForgot(tester);
+        await tester.enterText(find.byKey(const Key('resetConfirm')), 'RESET');
+        await tester.pump();
+        final finger =
+            await tester.startGesture(tester.getCenter(resetButton()));
+        await tester.pump(); // the hold starts
+        await tester.pump(const Duration(seconds: 4));
+        await finger.up();
+        await tester.pumpAndSettle();
+        expect(find.text('Reset master password?'), findsOneWidget,
+            reason: 'still open');
+        expect(security().hasMasterPassword, isTrue);
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        expect(forgotEnabled(tester), isTrue);
+      });
+
+      testWidgets('greyed out until a day passes, or the next unlock',
+          (tester) async {
+        clock = DateTime(2026, 10, 13, 9);
+        await lockedShop(tester);
+        container
+            .read(preferencesProvider.notifier)
+            .blockReset(DateTime(2026, 10, 13, 9));
+        await tester.pumpAndSettle();
+        expect(forgotEnabled(tester), isFalse);
+
+        clock = DateTime(2026, 10, 14, 9, 1);
+        container.read(preferencesProvider.notifier).setCounterFeedback(false);
+        await tester.pumpAndSettle();
+        expect(forgotEnabled(tester), isTrue, reason: 'a day later');
+
+        clock = DateTime(2026, 10, 14, 10);
+        container
+            .read(preferencesProvider.notifier)
+            .blockReset(DateTime(2026, 10, 14, 10));
+        await tester.pumpAndSettle();
+        expect(forgotEnabled(tester), isFalse);
+        await tester.runAsync(
+            () => container.read(sessionProvider.notifier).unlock(password));
+        await tester.pumpAndSettle();
+        expect(forgotEnabled(tester), isTrue, reason: 'unlocked: theirs');
+      });
     });
   });
 }

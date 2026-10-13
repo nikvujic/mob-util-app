@@ -105,7 +105,10 @@ reset, the stored key is cleared. Tests use a fake keystore.
 A forgotten password is reset (`providers/password_reset_provider.dart`)
 the same way round: locked notes and the content of locked sections are
 deleted and on disk first, then the password goes. Section locks clear
-and the session locks as soon as it does.
+and the session locks as soon as it does. The reset button has to be held
+for ten seconds (`resetHold`); a plain tap returns `ResetChoice.tapped`
+and blocks the reset (`Preferences.resetBlockedUntil`, phone only) until
+the next unlock or a day later.
 
 What a section holds as a whole (the planner: tasks, routines and
 reminders) is counted and cleared in one place,
