@@ -390,3 +390,8 @@ Ticking one's dose goes through `showHoldToTake` (`pages/hub/
 hold_to_take.dart`): a 5-second `AnimationController` drives a painted
 glass, the native `fill` sound (`tool/make_fill_sound.py`) and haptic
 ticks; letting go reverses it.
+
+Pip (Round 25), the mascot: `widgets/pip.dart` draws him from the same
+16 x 16 grid as the launcher icon (`tool/make_icon.py`), each grid pixel
+snapped to whole device pixels, in his own colours. The menu's header
+shows him; his room (after v1) builds on it.

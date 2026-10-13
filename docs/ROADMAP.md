@@ -335,15 +335,15 @@ fixtures for every stored format.
 
 ### Round 25 — Nikola's notes on 0.28.0, then v1 (2026-10-13)
 
-- [ ] Hub tiles: the page lock at the bottom left (outside the icon),
+- [x] Hub tiles: the page lock at the bottom left (outside the icon),
   not centred.
-- [ ] Medicine, Important: drop the part in parentheses from its
+- [x] Medicine, Important: drop the part in parentheses from its
   explanation.
-- [ ] Hold-to-take: an ending, a small pop, a tick in place of the
+- [x] Hold-to-take: an ending, a small pop, a tick in place of the
   icon, staying a moment before the dialog closes.
-- [ ] Menu: Pip next to "The App" in the header, and the header always
+- [x] Menu: Pip next to "The App" in the header, and the header always
   the same height (the Lock button made it taller, shifting the menu).
-- [ ] Placard: the pop's volume as before (only the inflate louder).
+- [x] Placard: the pop's volume as before (only the inflate louder).
 - Pip's room in the menu: the first thing after v1.
 - Then release v1.0.0 (Nikola: yes, after these).
 

@@ -85,6 +85,20 @@ void main() {
       expect(find.byType(SnackBar), findsNothing);
     });
 
+    testWidgets('the header: Pip, and the same height locked or not (Round 25)',
+        (tester) async {
+      await start(tester);
+      await openMenu(tester);
+      expect(find.byKey(const Key('menuPip')), findsOneWidget);
+      final unlocked = tester.getSize(find.byKey(const Key('menuHeader')));
+      final items = tester.getTopLeft(find.text('Security')).dy;
+      await tester.tap(find.byTooltip('Lock now'));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byKey(const Key('menuHeader'))), unlocked);
+      expect(tester.getTopLeft(find.text('Security')).dy, items,
+          reason: "the menu doesn't shift");
+    });
+
     testWidgets(
         "locking from Security while on a locked section: Security stays "
         '(Round 24)', (tester) async {

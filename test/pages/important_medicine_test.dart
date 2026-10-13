@@ -148,6 +148,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpAndSettle();
       await gesture.up();
+      // Full: a pop, a tick, and a moment before it closes (Round 25).
+      expect(find.text('Taken'), findsOneWidget);
+      expect(find.byKey(const Key('holdTaken')), findsOneWidget);
+      expect(find.text('Take Iron?'), findsOneWidget, reason: 'still there');
+      await tester.pump(holdToTakeEnd);
+      await tester.pumpAndSettle();
       expect(find.text('Take Iron?'), findsNothing);
       expect(taken(), isTrue);
     });
@@ -171,6 +177,8 @@ void main() {
       await tester.pump(const Duration(seconds: 2, milliseconds: 100));
       await tester.pumpAndSettle();
       await first.up();
+      await tester.pump(holdToTakeEnd);
+      await tester.pumpAndSettle();
       expect(taken(), isTrue);
     });
 

@@ -9,6 +9,10 @@ import 'package:the_app/widgets/app_dialog.dart';
 /// How long the button is held to take an important medicine's dose.
 const holdToTakeTime = Duration(seconds: 5);
 
+/// Once full (Round 25): a small pop, a tick in place of the icon, and
+/// this long before the dialog closes.
+const holdToTakeEnd = Duration(milliseconds: 900);
+
 /// Asks to take a dose of an important medicine (Round 24): [name] at
 /// [time]. A big round button has to be held for [holdToTakeTime]: it
 /// fills up like a glass, with a sound and small ticks while held, and
@@ -54,6 +58,12 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
     duration: const Duration(milliseconds: 1200),
   );
 
+  /// The ending (Round 25): 0 → 1, a burst out and a ring spreading.
+  late final AnimationController _pop = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 450),
+  );
+
   bool _holding = false;
   bool _finished = false;
 
@@ -93,10 +103,18 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
 
   void _done() {
     if (_finished) return;
-    _finished = true;
+    setState(() {
+      _finished = true;
+      _holding = false;
+    });
     _waves.stop();
     AppSound.stopFill();
-    if (mounted) Navigator.of(context).pop(true);
+    HapticFeedback.mediumImpact();
+    _pop.forward(from: 0);
+    // Stays full, with its tick, for a moment.
+    Future<void>.delayed(holdToTakeEnd, () {
+      if (mounted) Navigator.of(context).pop(true);
+    });
   }
 
   @override
@@ -104,6 +122,7 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
     if (_holding && !_finished) AppSound.stopFill();
     _fill.dispose();
     _waves.dispose();
+    _pop.dispose();
     super.dispose();
   }
 
@@ -132,11 +151,15 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
               onPointerUp: (_) => _lift(),
               onPointerCancel: (_) => _lift(),
               child: AnimatedBuilder(
-                animation: Listenable.merge([_fill, _waves]),
+                animation: Listenable.merge([_fill, _waves, _pop]),
                 builder: (context, _) {
                   final fill = _fill.value;
                   // A little swell while held, growing as it fills.
-                  final scale = 1.0 + (_holding ? 0.04 + 0.04 * fill : 0.0);
+                  // The pop: a quick swell past full size, then back.
+                  final burst = math.sin(math.pi * _pop.value);
+                  final scale = _finished
+                      ? 1.0 + 0.16 * burst
+                      : 1.0 + (_holding ? 0.04 + 0.04 * fill : 0.0);
                   return AnimatedScale(
                     scale: scale,
                     duration: const Duration(milliseconds: 150),
@@ -150,6 +173,7 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
                           painter: _GlassPainter(
                             fill: fill,
                             wave: _waves.value,
+                            pop: _pop.value,
                             ground: colors.card,
                             liquid: colors.accent,
                             ring: colors.accent,
@@ -161,7 +185,12 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
                               children: [
                                 // Light once the liquid is over it.
                                 Icon(
-                                  Icons.medication_outlined,
+                                  // A tick once taken (Round 25).
+                                  _finished
+                                      ? Icons.check_rounded
+                                      : Icons.medication_outlined,
+                                  key:
+                                      Key(_finished ? 'holdTaken' : 'holdIcon'),
                                   size: 40,
                                   color: fill > 0.62
                                       ? colors.onAccent
@@ -169,7 +198,11 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _holding ? 'Keep holding' : 'Hold',
+                                  _finished
+                                      ? 'Taken'
+                                      : _holding
+                                          ? 'Keep holding'
+                                          : 'Hold',
                                   style: TextStyle(
                                     color: fill > 0.47
                                         ? colors.onAccent
@@ -205,6 +238,9 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
 class _GlassPainter extends CustomPainter {
   final double fill;
   final double wave;
+
+  /// The ending, 0 → 1: a ring spreading out and fading, and a few sparks.
+  final double pop;
   final Color ground;
   final Color liquid;
   final Color ring;
@@ -213,6 +249,7 @@ class _GlassPainter extends CustomPainter {
   _GlassPainter({
     required this.fill,
     required this.wave,
+    this.pop = 0,
     required this.ground,
     required this.liquid,
     required this.ring,
@@ -269,12 +306,37 @@ class _GlassPainter extends CustomPainter {
         stroke..color = ring,
       );
     }
+
+    if (pop > 0 && pop < 1) {
+      final fade = 1 - pop;
+      // A ring spreading out from the rim.
+      canvas.drawCircle(
+        center,
+        radius + 4 + 18 * pop,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4 * fade
+          ..color = ring.withValues(alpha: fade),
+      );
+      // Eight sparks flying out.
+      final spark = Paint()..color = liquid.withValues(alpha: fade);
+      for (var i = 0; i < 8; i++) {
+        final angle = i * math.pi / 4 + math.pi / 8;
+        final distance = radius + 6 + 26 * pop;
+        canvas.drawCircle(
+          center + Offset(math.cos(angle), math.sin(angle)) * distance,
+          4 * fade,
+          spark,
+        );
+      }
+    }
   }
 
   @override
   bool shouldRepaint(_GlassPainter old) =>
       old.fill != fill ||
       old.wave != wave ||
+      old.pop != pop ||
       old.ground != ground ||
       old.liquid != liquid;
 }

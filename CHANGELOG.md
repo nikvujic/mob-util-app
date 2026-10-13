@@ -6,7 +6,17 @@ Release with the installable APK.
 
 ## [1.0.0] - unreleased
 
+### Added
+- **Pip** next to "The App" at the top of the menu, which now keeps the
+  same height whether Lock now is shown or not (it used to shift).
+- Taking an important medicine ends with a small pop and a tick, which
+  stays a moment before the dialog closes.
+
 ### Changed
+- Hub tiles: a locked page's small lock sits in the bottom left corner.
+- Placard's pop is back to its quieter volume (the inflating stays
+  louder).
+- Medicine: a shorter explanation of Important.
 - **The app's icon is Pip**: a little 8-bit robot with a screen for a
   face, in the Clay colours (crisp at every size, and with the face cut
   out in Android 13's themed icons).

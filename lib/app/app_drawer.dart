@@ -9,6 +9,7 @@ import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
+import 'package:the_app/widgets/pip.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
@@ -34,31 +35,38 @@ class AppDrawer extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // A fixed header with the special actions (doesn't scroll).
+            // A fixed header with the special actions (doesn't scroll),
+            // always the same height, Lock now or not (Round 25), with Pip.
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'The App',
-                      style: TextStyle(
-                        color: context.colors.textPrimary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+              child: SizedBox(
+                key: const Key('menuHeader'),
+                height: kMinInteractiveDimension,
+                child: Row(
+                  children: [
+                    const Pip(key: Key('menuPip'), size: 32),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'The App',
+                        style: TextStyle(
+                          color: context.colors.textPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                  if (ref.watch(sessionProvider) != null)
-                    IconButton(
-                      icon: const Icon(Icons.lock_outline),
-                      tooltip: 'Lock now',
-                      // Quietly (Round 24): the menu stays open, so the
-                      // page behind it isn't shown; the button going
-                      // away says it's done.
-                      onPressed: ref.read(sessionProvider.notifier).lock,
-                    ),
-                ],
+                    if (ref.watch(sessionProvider) != null)
+                      IconButton(
+                        icon: const Icon(Icons.lock_outline),
+                        tooltip: 'Lock now',
+                        // Quietly (Round 24): the menu stays open, so the
+                        // page behind it isn't shown; the button going
+                        // away says it's done.
+                        onPressed: ref.read(sessionProvider.notifier).lock,
+                      ),
+                  ],
+                ),
               ),
             ),
             Divider(height: 1, color: context.colors.divider),

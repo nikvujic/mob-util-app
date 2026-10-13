@@ -322,7 +322,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                         'Taking a dose needs the button held for 5 seconds, '
                         "so it isn't ticked by mistake. The red dot on the "
                         "Hub shows while one of its doses is due and not "
-                        'taken (only important medicines bring it up).',
+                        'taken.',
                         style: label,
                       ),
                       value: _important,

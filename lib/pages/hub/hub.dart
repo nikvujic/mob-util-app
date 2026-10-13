@@ -154,8 +154,8 @@ class _ToolTile extends StatelessWidget {
   /// A red dot in the corner: the page asks for attention (O13).
   final bool dot;
 
-  /// A small lock under the icon, centred: the page has its own lock (O7;
-  /// Round 24: not in a corner).
+  /// A small lock in the bottom left corner, clear of the icon: the page
+  /// has its own lock (O7; Rounds 24–25).
   final bool locked;
   final VoidCallback onTap;
 
@@ -195,9 +195,8 @@ class _ToolTile extends StatelessWidget {
               ),
               if (locked)
                 Positioned(
-                  bottom: 8,
-                  left: 0,
-                  right: 0,
+                  bottom: 10,
+                  left: 10,
                   child: Icon(
                     Icons.lock_outline,
                     key: Key('toolLock-$label'),

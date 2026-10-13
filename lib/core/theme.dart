@@ -409,3 +409,11 @@ abstract final class DoseColours {
   static const missed = Color(0xFFEF5350);
   static const unsure = Color(0xFFFFB300);
 }
+
+/// Pip's own colours (Round 25), the launcher icon's, whatever the theme.
+abstract final class PipColours {
+  static const casing = Color(0xFFD97757); // head casing, antenna
+  static const body = Color(0xFFC96442); // body, feet
+  static const screen = Color(0xFFF5F0E8);
+  static const face = Color(0xFF141413); // eyes, mouth
+}

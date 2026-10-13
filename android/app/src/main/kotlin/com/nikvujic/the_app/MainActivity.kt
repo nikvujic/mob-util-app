@@ -28,6 +28,10 @@ class MainActivity: FlutterFragmentActivity() {
         /// (Round 24: louder; the files are louder too).
         private const val DONE_VOLUME = 1f
         private const val PLACARD_VOLUME = 1f
+
+        /// The pop stays as quiet as before (Round 25: only the inflating
+        /// got louder).
+        private const val POP_VOLUME = 0.3f
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -74,7 +78,7 @@ class MainActivity: FlutterFragmentActivity() {
                         if (inflating != 0) pool?.stop(inflating)
                         inflating = 0
                     }
-                    "pop" -> pool?.play(pop, PLACARD_VOLUME, PLACARD_VOLUME, 2, 0, 1f)
+                    "pop" -> pool?.play(pop, POP_VOLUME, POP_VOLUME, 2, 0, 1f)
                     "fill" -> {
                         if (filling != 0) pool?.stop(filling)
                         filling = pool?.play(
