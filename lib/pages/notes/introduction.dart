@@ -45,21 +45,9 @@ class _IntroductionPageState extends ConsumerState<IntroductionPage> {
       destructive: true,
     );
     if (!confirmed || !mounted) return;
-    final preferences = ref.read(preferencesProvider.notifier);
-    preferences.setIntroDeleted(true);
-    final messenger = ScaffoldMessenger.of(context);
+    // No toast (Round 27): it was asked, and Settings brings it back.
+    ref.read(preferencesProvider.notifier).setIntroDeleted(true);
     Navigator.of(context).pop();
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: const Text('Introduction deleted'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => preferences.setIntroDeleted(false),
-          ),
-        ),
-      );
   }
 
   @override

@@ -91,7 +91,7 @@ void main() {
     expect(screen - textBottom, greaterThanOrEqualTo(button.height + 16 + 48));
   });
 
-  testWidgets('deleted after asking, with undo; Settings restores it',
+  testWidgets('deleted after asking, no toast (Round 27); Settings restores it',
       (tester) async {
     await start(tester);
     await open(tester);
@@ -101,15 +101,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(tile, findsNothing);
     expect(preferences().introDeleted, isTrue);
+    expect(find.byType(SnackBar), findsNothing);
 
-    await tester.tap(find.text('Undo'));
-    await tester.pumpAndSettle();
-    expect(tile, findsOneWidget);
-
-    // Deleted again: Settings offers to restore it; the menu has no entry.
-    container.read(preferencesProvider.notifier).setIntroDeleted(true);
-    await tester.pumpAndSettle();
-    expect(tile, findsNothing);
+    // Settings offers to restore it; the menu has no entry.
     await openMenu(tester);
     expect(find.text('Introduction'), findsNothing);
     await tester.tap(find.text('Settings'));

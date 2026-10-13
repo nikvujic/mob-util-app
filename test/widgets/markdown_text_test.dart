@@ -49,7 +49,7 @@ void main() {
     final palette = AppPalette.green;
     expect(spanOf(tester, 'Shopping').style!.fontSize, greaterThan(16));
     expect(spanOf(tester, 'milk').style!.fontWeight, FontWeight.w700);
-    expect(spanOf(tester, '• ').style!.color, palette.accent);
+    expect(spanOf(tester, '•').style!.color, palette.accent);
     expect(spanOf(tester, 'eggs').style!.fontStyle, FontStyle.italic);
     expect(spanOf(tester, 'tea').style!.decoration, TextDecoration.lineThrough);
   });
@@ -107,8 +107,8 @@ void main() {
           reason: 'kept, a bullet shown as a dot');
       expect(hidden(spanOf(tester, '## ')), isTrue);
       expect(spans(tester).where((s) => s.text == '**').every(hidden), isTrue);
-      expect(hidden(spanOf(tester, '• ')), isFalse);
-      expect(spanOf(tester, '• ').style!.color, AppPalette.green.accent);
+      expect(hidden(spanOf(tester, '•')), isFalse);
+      expect(spanOf(tester, '•').style!.color, AppPalette.green.accent);
     });
 
     testWidgets('typing: the cursor\'s line shows them, muted', (tester) async {
@@ -161,5 +161,24 @@ void main() {
     await tester.pump();
     expect(shown(), '- milk\n• eggs\n1. one');
     expect(controller.text, '- milk\n* eggs\n1. one', reason: 'unchanged');
+  });
+
+  testWidgets('a bullet\'s dot is bigger than the text (Round 27)',
+      (tester) async {
+    await pumpField(tester, '- milk');
+    final dot = spanOf(tester, '•');
+    expect(dot.style!.fontSize, greaterThan(16));
+    expect(dot.style!.fontSize! * dot.style!.height!, closeTo(16 * 1.2, 0.01),
+        reason: 'the line stays as tall');
+  });
+
+  testWidgets('#### is a small heading: bold, a little bigger (Round 27)',
+      (tester) async {
+    await pumpField(tester, '#### Four\n### Three');
+    final four = spanOf(tester, 'Four').style!;
+    final three = spanOf(tester, 'Three').style!;
+    expect(four.fontWeight, FontWeight.w700);
+    expect(four.fontSize, greaterThan(16));
+    expect(four.fontSize, lessThan(three.fontSize!));
   });
 }

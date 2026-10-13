@@ -125,7 +125,7 @@ void main() {
       expect(find.text('Time for a new one'), findsOneWidget);
       await tester.tap(find.text('Backup'));
       await tester.pumpAndSettle();
-      expect(find.text('Last backup: 2026-10-05  00:00 (8 days ago)'),
+      expect(find.text('Last backup: 2026-10-05 00:00 (8 days ago)'),
           findsOneWidget);
 
       await tester.tap(find.text('Export all data'));
@@ -134,7 +134,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(container.read(preferencesProvider).lastBackupAt, now);
       expect(
-          find.text('Last backup: 2026-10-13  10:00 (today)'), findsOneWidget);
+          find.text('Last backup: 2026-10-13 10:00 (today)'), findsOneWidget);
       expect(backupReminders().first.at, DateTime(2026, 10, 20, 19),
           reason: 'a week from now');
       await tester.pageBack();

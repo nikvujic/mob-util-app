@@ -339,13 +339,13 @@ Nikola is importing his notes: the extra formats and their buttons now
 (Round 20, part 3, brought forward), with the small fixes from Round 26.
 
 **1. Small fixes** (Round 26, part 2 and 3)
-- [ ] No toast when deleting the Introduction.
-- [ ] Backup: one space between the date and time of the last backup.
-- [ ] Menu header: "The App" a little lower, level with Pip.
-- [ ] A sharper launcher icon (a vector, crisp at any size).
-- [ ] Markdown lists: slightly bigger dots.
-- [ ] Smaller headings: `####`, a bit bigger than the text, bold.
-- [ ] A new note's title (default or "Untitled") selected on tapping the
+- [x] No toast when deleting the Introduction.
+- [x] Backup: one space between the date and time of the last backup.
+- [x] Menu header: "The App" a little lower, level with Pip.
+- [x] A sharper launcher icon (a vector, crisp at any size).
+- [x] Markdown lists: slightly bigger dots.
+- [x] Smaller headings: `####`, a bit bigger than the text, bold.
+- [x] A new note's title (default or "Untitled") selected on tapping the
   title button.
 
 **2. More formats, and a formatting bar** (N17)

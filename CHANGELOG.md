@@ -4,6 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.2.0] - unreleased
+
+### Changed
+- Notes: `####` makes a small heading (bold, a little bigger than the
+  text), and list dots are a bit bigger.
+- Notes: tapping the title button on a new note selects "New Note", so
+  typing replaces it.
+- The launcher icon is drawn as a vector, crisp at any size.
+- Menu: "The App" sits level with Pip.
+- Deleting the Introduction no longer shows a toast (Settings brings it
+  back).
+- Backup: one space between the last backup's date and time.
+
 ## [1.1.0] - 2026-10-13
 
 ### Added

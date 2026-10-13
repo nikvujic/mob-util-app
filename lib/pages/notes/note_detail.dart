@@ -329,12 +329,22 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// Edit title: the title field is out of thumb reach (N11).
   /// The title changes as it's typed, and may be left empty (saved as
   /// "Untitled" on leaving, like clearing it at the top).
-  Future<void> _editTitle() => showTextInputSheet(
-        context,
-        hint: 'Title',
-        submitLabel: 'Done',
-        controller: _titleController,
-      );
+  /// A default title ("New Note", "Untitled") comes selected, so typing
+  /// replaces it (Round 27).
+  Future<void> _editTitle() {
+    final title = _titleController.text;
+    final placeholder =
+        title.trim() == NotesNotifier.defaultTitle || title.trim() == _untitled;
+    _titleController.selection = placeholder
+        ? TextSelection(baseOffset: 0, extentOffset: title.length)
+        : TextSelection.collapsed(offset: title.length);
+    return showTextInputSheet(
+      context,
+      hint: 'Title',
+      submitLabel: 'Done',
+      controller: _titleController,
+    );
+  }
 
   /// Lock note: saves, then encrypts the content.
   Future<void> _lock() async {

@@ -90,6 +90,10 @@ void main() {
       await start(tester);
       await openMenu(tester);
       expect(find.byKey(const Key('menuPip')), findsOneWidget);
+      // The title a little below Pip's middle (Round 27).
+      final pip = tester.getCenter(find.byKey(const Key('menuPip'))).dy;
+      final title = tester.getCenter(find.byKey(const Key('menuTitle'))).dy;
+      expect(title - pip, inInclusiveRange(1, 5));
       final unlocked = tester.getSize(find.byKey(const Key('menuHeader')));
       final items = tester.getTopLeft(find.text('Security')).dy;
       await tester.tap(find.byTooltip('Lock now'));

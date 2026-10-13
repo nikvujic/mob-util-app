@@ -1,14 +1,15 @@
 """Draws the app's launcher icon: **Pip** (Round 24, Nikola's pick), an
 8-bit pixel robot on a 16 x 16 grid, in the Clay theme's colours on its
-dark ground. Nearest-neighbour only: every grid pixel is a whole number
-of device pixels, so the edges stay crisp.
+dark ground.
 
-Writes the legacy icons (mipmap-*/ic_launcher.png, 48 dp, a rounded
-square, Pip at 2 dp a pixel), the adaptive icon's foreground
-(mipmap-*/ic_launcher_foreground.png: 108 dp, Pip at 4 dp a pixel = 64
-dp, inside the 66 dp safe zone; the background is a colour in
-values/ic_launcher_background.xml) and its one-colour version for themed
-icons (mipmap-*/ic_launcher_monochrome.png: the face cut out).
+Android 8 and later use the adaptive icon: Clay's dark colour behind
+(values/ic_launcher_background.xml) and Pip as a vector in front
+(drawable/ic_launcher_foreground.xml, 108 units with Pip 64 wide, inside
+the 66-unit safe zone), with a one-colour version for themed icons
+(drawable/ic_launcher_monochrome.xml, the face cut out). Vectors are
+crisp at any size (Round 27: the images looked soft). Older phones use
+images (mipmap-*/ic_launcher.png, 48 dp, Pip at 2 dp a pixel, nearest
+neighbour only).
 Run from the repository root: python3 tool/make_icon.py
 """
 
@@ -84,16 +85,49 @@ for name, scale in DENSITIES.items():
     icon = draw(legacy, round(32 * scale), GROUND + (255,))
     rounded(icon, round(10 * scale)).save(
         f'{RES}/mipmap-{name}/ic_launcher.png', optimize=True)
-    # Adaptive: 108 dp, the safe circle is 66 dp; Pip at 4 dp a pixel.
-    full = round(108 * scale)
-    draw(full, round(64 * scale), (0, 0, 0, 0)).save(
-        f'{RES}/mipmap-{name}/ic_launcher_foreground.png', optimize=True)
-
-    # Themed icons (Android 13): one colour, the eyes and mouth cut out.
-    white = (255, 255, 255)
-    mono = {c: (None if c == 'K' else white) for c in COLOURS}
-    draw(full, round(64 * scale), (0, 0, 0, 0), mono).save(
-        f'{RES}/mipmap-{name}/ic_launcher_monochrome.png', optimize=True)
 
 # A big one to look at.
 draw(512, 384, GROUND + (255,)).save('/tmp/icon_preview.png')
+
+
+def vector(colours):
+    """Pip as a vector drawable for the adaptive icon (Round 27: sharper
+    than images, crisp at whatever size the launcher draws it): 108 x 108,
+    Pip's pixels as 4-unit squares, 64 units wide, centred. [colours] maps
+    a letter to a colour; letters left out are holes."""
+    cell, left = 4, (108 - 64) / 2
+    paths = []
+    for letter, rgb in colours.items():
+        runs = []
+        for y, row in enumerate(SPRITE):
+            x = 0
+            while x < len(row):
+                if row[x] != letter:
+                    x += 1
+                    continue
+                start = x
+                while x < len(row) and row[x] == letter:
+                    x += 1
+                runs.append('M%g,%gh%gv%gh%gz' % (
+                    left + start * cell, left + y * cell,
+                    (x - start) * cell, cell, -(x - start) * cell))
+        if runs:
+            paths.append(
+                '    <path\n'
+                '        android:fillColor="#FF%02X%02X%02X"\n'
+                '        android:pathData="%s" />' % (rgb + (''.join(runs),)))
+    return ('<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!-- Pip, drawn by tool/make_icon.py: do not edit by hand. -->\n'
+            '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+            '    android:width="108dp"\n'
+            '    android:height="108dp"\n'
+            '    android:viewportWidth="108"\n'
+            '    android:viewportHeight="108">\n' + '\n'.join(paths) +
+            '\n</vector>\n')
+
+
+with open(f'{RES}/drawable/ic_launcher_foreground.xml', 'w') as out:
+    out.write(vector(COLOURS))
+# Themed icons: one colour, the face cut out.
+with open(f'{RES}/drawable/ic_launcher_monochrome.xml', 'w') as out:
+    out.write(vector({c: (255, 255, 255) for c in COLOURS if c != 'K'}))

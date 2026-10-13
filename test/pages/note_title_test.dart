@@ -85,4 +85,31 @@ void main() {
       'Untitled',
     );
   });
+
+  testWidgets(
+      'a default title comes selected, to be typed over; a real one '
+      "doesn't (Round 27)", (tester) async {
+    container = await pumpApp(tester);
+    container.read(notesProvider.notifier)
+      ..addNote() // "New Note"
+      ..addNote(title: 'Shopping', content: 'milk');
+    await tester.pump();
+    TextSelection selection() =>
+        tester.widget<TextField>(sheetField).controller!.selection;
+
+    await tester.tap(find.text(NotesNotifier.defaultTitle));
+    await tester.pumpAndSettle();
+    await openEditTitle(tester);
+    expect(selection(), const TextSelection(baseOffset: 0, extentOffset: 8));
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Shopping'));
+    await tester.pumpAndSettle();
+    await openEditTitle(tester);
+    expect(selection().isCollapsed, isTrue);
+    expect(selection().baseOffset, 'Shopping'.length);
+  });
 }

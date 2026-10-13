@@ -49,12 +49,18 @@ class AppDrawer extends ConsumerWidget {
                     const Pip(key: Key('menuPip'), size: 32),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        'The App',
-                        style: TextStyle(
-                          color: context.colors.textPrimary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                      // A little lower than centred, level with Pip's head
+                      // and feet rather than his antenna (Round 27).
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          key: const Key('menuTitle'),
+                          'The App',
+                          style: TextStyle(
+                            color: context.colors.textPrimary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),

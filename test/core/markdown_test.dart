@@ -33,15 +33,16 @@ void main() {
     }
   });
 
-  test('headings: # to ### then a space, at the start of a line', () {
-    const text = '# One\n## Two\n### Three\n#### Four\n#No\nx ## no';
-    expect(parts(text, role: MdRole.marker), ['# ', '## ', '### ']);
+  test('headings: # to #### then a space, at the start of a line', () {
+    const text =
+        '# One\n## Two\n### Three\n#### Four\n##### Five\n#No\nx ## no';
+    expect(parts(text, role: MdRole.marker), ['# ', '## ', '### ', '#### ']);
     final h = {
       for (final run in markdownRuns(text))
         if (run.role == MdRole.text && run.heading > 0)
           text.substring(run.start, run.end): run.heading,
     };
-    expect(h, {'One': 1, 'Two': 2, 'Three': 3});
+    expect(h, {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4});
   });
 
   test('list items: bullets and numbers, also indented', () {

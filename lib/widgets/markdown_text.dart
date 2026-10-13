@@ -89,8 +89,13 @@ class MarkdownEditingController extends TextEditingController {
     ];
   }
 
-  /// Heading sizes, relative to the body text: `#`, `##`, `###`.
-  static const headingScale = [1.5, 1.3, 1.15];
+  /// Heading sizes, relative to the body text: `#` to `####` (Round 27:
+  /// `####` just a little bigger than the text, bold).
+  static const headingScale = [1.5, 1.3, 1.15, 1.05];
+
+  /// A bullet's dot, bigger than the text's (Round 27), at the same line
+  /// height.
+  static const bulletScale = 1.35;
 
   @override
   TextSpan buildTextSpan({
@@ -195,7 +200,19 @@ class MarkdownEditingController extends TextEditingController {
         final from = cuts[i], to = cuts[i + 1];
         final inWord = from >= composing.start && to <= composing.end;
         var piece = text.substring(from, to);
-        if (bullet && from == run.start) piece = '•${piece.substring(1)}';
+        if (bullet && from == run.start) {
+          // The dot on its own, bigger; the rest as the marker.
+          final size = style.fontSize ?? 16;
+          spans.add(TextSpan(
+            text: '•',
+            style: style.copyWith(
+              fontSize: size * bulletScale,
+              height: (style.height ?? 1.2) / bulletScale,
+            ),
+          ));
+          piece = piece.substring(1);
+          if (piece.isEmpty) continue;
+        }
         spans.add(
           TextSpan(
             text: piece,

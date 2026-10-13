@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pip, drawn by tool/make_icon.py: do not edit by hand. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFD97757"
+        android:pathData="M50,30h4v4h-4zM34,34h40v4h-40zM30,38h48v4h-48zM30,42h4v4h-4zM74,42h4v4h-4zM30,46h4v4h-4zM74,46h4v4h-4zM30,50h4v4h-4zM74,50h4v4h-4zM30,54h4v4h-4zM74,54h4v4h-4zM30,58h4v4h-4zM74,58h4v4h-4zM30,62h4v4h-4zM74,62h4v4h-4zM30,66h4v4h-4zM74,66h4v4h-4zM30,70h48v4h-48z" />
+    <path
+        android:fillColor="#FFC96442"
+        android:pathData="M34,74h40v4h-40zM34,78h8v4h-8zM66,78h8v4h-8z" />
+    <path
+        android:fillColor="#FFF5F0E8"
+        android:pathData="M50,26h4v4h-4zM34,42h40v4h-40zM34,46h4v4h-4zM46,46h16v4h-16zM70,46h4v4h-4zM34,50h4v4h-4zM46,50h16v4h-16zM70,50h4v4h-4zM34,54h40v4h-40zM34,58h8v4h-8zM46,58h16v4h-16zM66,58h8v4h-8zM34,62h12v4h-12zM62,62h12v4h-12zM34,66h40v4h-40z" />
+    <path
+        android:fillColor="#FF141413"
+        android:pathData="M38,46h8v4h-8zM62,46h8v4h-8zM38,50h8v4h-8zM62,50h8v4h-8zM42,58h4v4h-4zM62,58h4v4h-4zM46,62h16v4h-16z" />
+</vector>

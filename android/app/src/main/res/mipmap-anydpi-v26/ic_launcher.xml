@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The launcher icon on Android 8+: the pixel robot (tool/make_icon.py)
-     on Clay's dark ground; the launcher picks the shape. -->
+<!-- The launcher icon on Android 8+: Pip as vectors (tool/make_icon.py),
+     crisp at any size, on Clay's dark ground; the launcher picks the
+     shape. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
-    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
-    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
 </adaptive-icon>

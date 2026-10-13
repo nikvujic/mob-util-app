@@ -311,7 +311,8 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             subtitle: Text(
               last == null
                   ? 'No backup yet'
-                  : 'Last backup: ${formatDateTime(last)} '
+                  // One space here (Round 27; the notes' dates keep two).
+                  : 'Last backup: ${formatDateTime(last, gap: ' ')} '
                       '(${_ago(last, ref.watch(clockProvider)())})',
               key: const Key('lastBackup'),
               style: TextStyle(

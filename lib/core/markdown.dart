@@ -24,7 +24,7 @@ class MdRun {
   final int end;
   final MdRole role;
 
-  /// 1–3 inside a `#`–`###` heading line, else 0.
+  /// 1–4 inside a `#`–`####` heading line, else 0.
   final int heading;
   final bool bold;
   final bool italic;
@@ -59,7 +59,7 @@ class MdRun {
       '${done ? ', done' : ''})';
 }
 
-final _heading = RegExp(r'^(#{1,3}) ');
+final _heading = RegExp(r'^(#{1,4}) ');
 final _task = RegExp(r'^(\s*)([-*+]) \[([ xX])\] ');
 final _bullet = RegExp(r'^(\s*)([-*+]) ');
 final _numbered = RegExp(r'^(\s*)(\d{1,3})([.)]) ');
