@@ -330,6 +330,30 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 21 — security (2026-10-13), before Round 20's Markdown
+
+**1. Bugs**
+- [ ] Security: the Hub sometimes missing from the section locks (it
+  seemed to go after locking it).
+- [ ] A tapped notification's "go to" outlives a change of course: Hub
+  locked, a medicine notification tapped, then Planner and back to Hub,
+  unlocked: it still went to Medicine. Going elsewhere drops it.
+
+**2. Nothing protected can be destroyed without the password**
+- [ ] Locked notes can't be deleted without the master password (the
+  list's Delete asks for it when a locked one is selected).
+- [ ] **Reset (forgot password)** is hidden in plain sight: after typing
+  RESET, the button must be **held 10 seconds**. A normal tap greys
+  reset out until the next unlock, or a full day.
+- [ ] A check of every other way to lose protected data without the
+  password (Clear data, importing a backup over it, deleting from
+  selection mode, …), fixing what's open.
+
+**3. Lock each Hub page on its own** (O7, noted; built after Markdown)
+- [ ] In Security, under the Hub: a switch per Hub page. The Hub and its
+  pages lock independently: a locked Hub with some pages free (for the
+  quick-access menu, later), or a free Hub with some pages locked.
+
 ### Round 20 — Nikola's review of 0.26.0 (2026-10-13)
 
 **1. Quick fixes**
