@@ -429,6 +429,8 @@ done without him: kept for now, but he picks the real one, see 6.)
 - [ ] Later: his own Hub page (tamagotchi-like); doing things by
   himself: sleeping at night, something on his screen, waking up after
   the app was away.
+- [ ] On his page, a section that **plays each of his animations** on
+  demand (pop out, hop, walk, blink, …) (Nikola, Round 26).
 - [ ] On his page, besides the pet side: **Godville-style random
   events** (Nikola, Round 26): little things happening to him by
   themselves, told as a log.
