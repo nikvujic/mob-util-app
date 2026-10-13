@@ -237,7 +237,10 @@ class _Day extends StatelessWidget {
     }
     final counts = medicine.isOn(day) && !day.isAfter(today);
     final outcome = counts ? outcomeOf(book, [medicine], day) : DayOutcome.none;
-    final dark = outcome == DayOutcome.taken || outcome == DayOutcome.missed;
+    // Dark numbers on the bright fills.
+    final dark = outcome == DayOutcome.taken ||
+        outcome == DayOutcome.missed ||
+        outcome == DayOutcome.unsure;
     final isToday = daysBetween(day, today) == 0;
     final square = Container(
       key: Key('calendar-${PlannerDay.key(day)}'),

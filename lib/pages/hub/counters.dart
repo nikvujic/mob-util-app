@@ -38,6 +38,13 @@ class _CountersPageState extends ConsumerState<CountersPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // The first click in step with its buzz.
+    if (ref.read(preferencesProvider).counterFeedback) AppSound.warm();
+  }
+
+  @override
   void dispose() {
     _selection.dispose();
     super.dispose();

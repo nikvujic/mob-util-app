@@ -53,6 +53,9 @@ class MainActivity: FlutterFragmentActivity() {
                     // Quieter than full: it's heard many times in a row.
                     "click" -> pool?.play(click, CLICK_VOLUME, CLICK_VOLUME, 1, 0, 1f)
                     "done" -> pool?.play(done, DONE_VOLUME, DONE_VOLUME, 1, 0, 1f)
+                    // Silent: wakes the audio path, so the first real
+                    // click isn't late against its buzz (Round 18).
+                    "warm" -> pool?.play(click, 0f, 0f, 0, 0, 1f)
                     "inflate" -> {
                         if (inflating != 0) pool?.stop(inflating)
                         inflating = pool?.play(

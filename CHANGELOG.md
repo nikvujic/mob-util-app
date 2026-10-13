@@ -9,8 +9,17 @@ Release with the installable APK.
 ### Changed
 - Medicine: a medicine's history has a **month calendar** instead of
   the strip: weeks as rows, each day coloured by how it went (with a
-  legend). Swipe right or tap ‹ for older months; tap a day to set its
-  doses.
+  legend). Swipe right or tap ‹ for older months; tap a day to see it in
+  the list below.
+- Medicine: history and calendar use the same colours in every theme:
+  **green** taken, **red** missed, amber not sure.
+- Medicine: unticking a dose asks first (a slip of the finger); each
+  card shows how many doses were taken in all.
+- Medicine: late doses on the main page are no longer red (that was
+  meant for the calendar).
+- Placard: the inflating sound is just the rising tone, no static.
+- Planner: the hour labels a touch further from the edge.
+- Counters: the first click after opening is in step with its buzz.
 
 ## [0.25.0] - 2026-10-13
 

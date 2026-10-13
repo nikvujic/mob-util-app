@@ -400,3 +400,12 @@ abstract final class AppTheme {
   /// The default look (Clay).
   static ThemeData get dark => of(AppPalette.clay);
 }
+
+/// How a dose went, in the same colours whatever the theme (Round 18):
+/// green taken, red missed, amber not sure. Bright enough to read as text
+/// on every (dark) theme, and dark text reads on them.
+abstract final class DoseColours {
+  static const taken = Color(0xFF4CAF50);
+  static const missed = Color(0xFFEF5350);
+  static const unsure = Color(0xFFFFB300);
+}

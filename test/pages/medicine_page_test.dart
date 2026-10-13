@@ -46,8 +46,7 @@ void main() {
     expect((m.name, m.from, m.until), ('Vitamin D', today, null));
     expect(m.times, [480]);
     expect(header(tester), 'Today: 0 of 1 dose taken');
-    // 08:00 has gone by (it's 08:03): late, in red (Round 17).
-    expect(find.text('Not taken yet'), findsOneWidget);
+    expect(find.text('Tap when taken'), findsOneWidget);
   });
 
   testWidgets('one tap marks a dose taken, with the time', (tester) async {
@@ -63,7 +62,8 @@ void main() {
         DateTime(2026, 10, 12, 8, 3));
   });
 
-  testWidgets('a second tap unmarks it (no undo needed)', (tester) async {
+  testWidgets('a second tap unmarks it, after asking (Round 18)',
+      (tester) async {
     late String id;
     await openMedicine(tester, () {
       id = medicine().add('Vitamin D', times: [480], from: today)!;
@@ -71,8 +71,36 @@ void main() {
     });
     await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
+    expect(find.text('Mark as not taken?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(container.read(medicineProvider).takenFor(id, today, 0), isNotNull,
+        reason: 'a slip: kept');
+
+    await tester.tap(find.byKey(Key('dose-$id-0')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Not taken'));
+    await tester.pumpAndSettle();
     expect(container.read(medicineProvider).takenFor(id, today, 0), isNull);
     expect(find.text('Undo'), findsNothing);
+  });
+
+  testWidgets('each card shows how many were taken in all (Round 18)',
+      (tester) async {
+    late String id;
+    await openMedicine(tester, () {
+      id = medicine()
+          .add('Vitamin D', times: [480], from: DateTime(2026, 10, 1))!;
+      medicine()
+        ..setDose(id, DateTime(2026, 10, 1), 0, DoseState.taken)
+        ..setDose(id, DateTime(2026, 10, 2), 0, DoseState.taken)
+        ..setDose(id, DateTime(2026, 10, 3), 0, DoseState.missed);
+    });
+    final count = find.byKey(Key('medicineCount-$id'));
+    expect(tester.widget<Text>(count).data, '2');
+    await tester.tap(find.byKey(Key('dose-$id-0')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(count).data, '3');
   });
 
   testWidgets('ticking plays the chime and buzzes; unticking doesn\'t',
@@ -300,8 +328,10 @@ void main() {
           Theme.of(tester.element(day('2026-10-01'))).extension<AppPalette>()!;
       Color? fill(String d) =>
           (tester.widget<Container>(day(d)).decoration as BoxDecoration).color;
-      expect(fill('2026-10-01'), palette.accent);
-      expect(fill('2026-10-02'), palette.danger);
+      // The same colours in every theme (Round 18).
+      expect(fill('2026-10-01'), DoseColours.taken);
+      expect(fill('2026-10-02'), DoseColours.missed);
+      expect(palette.accent, isNot(DoseColours.taken));
       expect(fill('2026-10-20'), isNull, reason: 'still to come');
       expect(find.byKey(const Key('calendarNewer')), findsOneWidget);
       expect(
@@ -328,25 +358,26 @@ void main() {
       expect(month(), 'October 2026');
     });
 
-    testWidgets('a calendar day sets its dose', (tester) async {
+    testWidgets(
+        'a calendar day shows that day below; it changes nothing (Round 18)',
+        (tester) async {
       late String id;
       await openMedicine(tester, () {
-        id = medicine()
-            .add('Coffee', times: [480], from: DateTime(2026, 10, 10))!;
+        id =
+            medicine().add('Coffee', times: [480], from: DateTime(2026, 8, 1))!;
       });
       await openOwn(tester, 'Coffee');
-      await tester.tap(find.byKey(const Key('calendar-2026-10-11')));
+      final mark = find.byKey(Key('mark-$id-2026-10-01-0'));
+      expect(mark.hitTestable(), findsNothing, reason: 'far down');
+      await tester.tap(find.byKey(const Key('calendar-2026-10-01')));
       await tester.pumpAndSettle();
-      // The sheet's choice (the legend under the calendar says it too).
-      await tester.tap(find.text('Not sure').last);
-      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsNothing, reason: 'no sheet');
       expect(
-        container
-            .read(medicineProvider)
-            .markFor(id, DateTime(2026, 10, 11), 0)!
-            .state,
-        DoseState.unsure,
-      );
+          container
+              .read(medicineProvider)
+              .markFor(id, DateTime(2026, 10, 1), 0),
+          isNull);
+      expect(mark.hitTestable(), findsOneWidget, reason: 'shown, on screen');
     });
   });
 
@@ -453,34 +484,6 @@ void main() {
       expect(container.read(medicineProvider).medicines.map((m) => m.name),
           ['Second', 'First']);
     });
-  });
-
-  testWidgets('a dose whose time has come and not taken is red (Round 17)',
-      (tester) async {
-    late String id;
-    await openMedicine(tester, () {
-      id = medicine().add('Pills', times: [480, 1200], from: today)!;
-    });
-    // 08:03: the 08:00 dose is late, the 20:00 one isn't.
-    final late = find.byKey(const Key('doseLate'));
-    expect(late, findsOneWidget);
-    expect(
-      find.descendant(of: find.byKey(Key('dose-$id-0')), matching: late),
-      findsOneWidget,
-    );
-    final danger =
-        Theme.of(tester.element(late)).extension<AppPalette>()!.danger;
-    expect(tester.widget<Text>(late).style!.color, danger);
-
-    // Comes on its own as time passes.
-    now = DateTime(2026, 10, 12, 20, 1);
-    await tester.pump(const Duration(seconds: 30));
-    expect(late, findsNWidgets(2));
-
-    // Taken: not red.
-    await tester.tap(find.byKey(Key('dose-$id-0')));
-    await tester.pumpAndSettle();
-    expect(late, findsOneWidget);
   });
 
   testWidgets('remind again is set per medicine, in its sheet (Round 16)',

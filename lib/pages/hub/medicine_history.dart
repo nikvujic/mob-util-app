@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
@@ -61,10 +63,10 @@ DayOutcome outcomeOf(
 Color outcomeColour(BuildContext context, DayOutcome outcome) {
   final colors = context.colors;
   return switch (outcome) {
-    DayOutcome.taken => colors.accent,
-    DayOutcome.partly => colors.accent.withValues(alpha: 0.5),
-    DayOutcome.missed => colors.danger,
-    DayOutcome.unsure => colors.textMuted,
+    DayOutcome.taken => DoseColours.taken,
+    DayOutcome.partly => DoseColours.taken.withValues(alpha: 0.45),
+    DayOutcome.missed => DoseColours.missed,
+    DayOutcome.unsure => DoseColours.unsure,
     DayOutcome.none => colors.card,
   };
 }
@@ -123,9 +125,9 @@ Future<void> showDoseSheet(
 Color _markColour(BuildContext context, DoseState? state) {
   final colors = context.colors;
   return switch (state) {
-    DoseState.taken => colors.accent,
-    DoseState.missed => colors.danger,
-    DoseState.unsure => colors.textSecondary,
+    DoseState.taken => DoseColours.taken,
+    DoseState.missed => DoseColours.missed,
+    DoseState.unsure => DoseColours.unsure,
     null => colors.textHint,
   };
 }
@@ -220,8 +222,8 @@ class _DayTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final colour = switch (outcome) {
-      DayOutcome.taken => colors.accent,
-      DayOutcome.missed => colors.danger,
+      DayOutcome.taken => DoseColours.taken,
+      DayOutcome.missed => DoseColours.missed,
       _ => colors.textPrimary,
     };
     return Padding(
@@ -336,109 +338,176 @@ class MedicineHistoryPage extends ConsumerWidget {
 /// calendar of its days (Round 16; older months to the left), and
 /// every day below, each dose settable. Past days not set yet can be filled
 /// in as taken in one go.
-class MedicineOwnHistoryPage extends ConsumerWidget {
+class MedicineOwnHistoryPage extends ConsumerStatefulWidget {
   final String id;
 
-  const MedicineOwnHistoryPage({super.key, required this.id});
+  /// Opens scrolled to this day (from the history of all, Round 18).
+  final DateTime? day;
+
+  const MedicineOwnHistoryPage({super.key, required this.id, this.day});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MedicineOwnHistoryPage> createState() =>
+      _MedicineOwnHistoryPageState();
+}
+
+class _MedicineOwnHistoryPageState
+    extends ConsumerState<MedicineOwnHistoryPage> {
+  /// The top of the list, to reach its scroll position.
+  final _header = GlobalKey();
+
+  /// The days built so far (the list builds them as they come into view).
+  final _dayKeys = <DateTime, GlobalKey>{};
+
+  GlobalKey _keyFor(DateTime day) => _dayKeys.putIfAbsent(day, GlobalKey.new);
+
+  @override
+  void initState() {
+    super.initState();
+    final day = widget.day;
+    if (day != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showDay(day));
+    }
+  }
+
+  /// Scrolls the list to [day]'s entry. Days are built only near the
+  /// screen (thousands over the years), so first a jump to about where it
+  /// is, then steps until it's built, then exactly to it.
+  Future<void> _showDay(DateTime day) async {
+    final days = _days();
+    final index = days.indexWhere((d) => daysBetween(d, day) == 0);
+    if (index < 0) return;
+    // Taken now: the top of the list goes as it scrolls away.
+    final listContext = _header.currentContext;
+    if (listContext == null) return;
+    final position = Scrollable.of(listContext).position;
+    for (var tries = 0; tries < 60; tries++) {
+      if (!mounted) return;
+      final target = _dayKeys[days[index]]?.currentContext;
+      if (target != null && target.mounted) {
+        await Scrollable.ensureVisible(
+          target,
+          alignment: 0.05,
+          duration: const Duration(milliseconds: 250),
+        );
+        return;
+      }
+      // Where it'd be if the days were spread evenly over what's known.
+      final built = _dayKeys.entries
+          .where((e) => e.value.currentContext != null)
+          .map((e) => days.indexWhere((d) => daysBetween(d, e.key) == 0))
+          .where((i) => i >= 0)
+          .toList();
+      final ahead = built.isEmpty || index > built.reduce(math.max);
+      final step = position.viewportDimension * 0.9;
+      position.jumpTo(
+        (position.pixels + (ahead ? step : -step))
+            .clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+    }
+  }
+
+  Medicine? get _medicine => ref
+      .read(medicineProvider)
+      .medicines
+      .where((m) => m.id == widget.id)
+      .firstOrNull;
+
+  /// Its days, newest first.
+  List<DateTime> _days() {
+    final medicine = _medicine;
+    if (medicine == null) return const [];
+    final today = dayOf(ref.read(clockProvider)());
+    final last = medicine.until != null && medicine.until!.isBefore(today)
+        ? medicine.until!
+        : today;
+    return [
+      for (var d = last; !d.isBefore(medicine.from); d = addDays(d, -1)) d,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final book = ref.watch(medicineProvider);
-    final medicine = book.medicines.where((m) => m.id == id).firstOrNull;
+    final medicine = book.medicines.where((m) => m.id == widget.id).firstOrNull;
     if (medicine == null) {
       return Scaffold(appBar: AppBar(title: const Text('History')));
     }
     final today = dayOf(ref.watch(clockProvider)());
     final colors = context.colors;
-    final last = medicine.until != null && medicine.until!.isBefore(today)
-        ? medicine.until!
-        : today;
-    final days = [
-      for (var d = last; !d.isBefore(medicine.from); d = addDays(d, -1)) d,
-    ];
+    final days = _days();
     final unset = book.offersFillPast(medicine, today);
-    final total = book.takenCount(id);
+    final total = book.takenCount(widget.id);
     return Scaffold(
       appBar: AppBar(title: Text(medicine.name)),
-      body: PullDownList.children(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(
-              countOf(total, 'dose', 'doses'),
-              key: const Key('medicineTotal'),
-              style: TextStyle(
-                color: colors.accent,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Text(
-              'taken since ${formatDay(medicine.from, today: today)}',
-              style: TextStyle(color: colors.textSecondary),
-            ),
-          ),
-          MedicineCalendar(
-            medicine: medicine,
-            book: book,
-            today: today,
-            onDay: (day) => _dayDoses(context, ref, medicine, day),
-          ),
-          if (unset)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton.icon(
-                  key: const Key('fillPast'),
-                  onPressed: () => _fill(context, ref, medicine),
-                  icon: const Icon(Icons.done_all, size: 18),
-                  label: const Text('Mark past days taken'),
+      body: PullDownList(
+        slivers: [
+          SliverList.list(
+            children: [
+              Padding(
+                key: _header,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                child: Text(
+                  countOf(total, 'dose', 'doses'),
+                  key: const Key('medicineTotal'),
+                  style: TextStyle(
+                    color: colors.accent,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-            ),
-          for (final day in days) ...[
-            _DayTitle(
-              day: day,
-              today: today,
-              outcome: outcomeOf(book, [medicine], day),
-            ),
-            _DayDoses(medicine: medicine, day: day, showName: false),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// A day of the calendar tapped: its doses, to set.
-  Future<void> _dayDoses(
-    BuildContext context,
-    WidgetRef ref,
-    Medicine medicine,
-    DateTime day,
-  ) async {
-    if (medicine.dosesADay == 1) {
-      await showDoseSheet(context, ref, medicine: medicine, day: day, dose: 0);
-      return;
-    }
-    final today = dayOf(ref.read(clockProvider)());
-    await showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(title: Text(formatDay(day, today: today))),
-              _DayDoses(medicine: medicine, day: day, showName: false),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Text(
+                  'taken since ${formatDay(medicine.from, today: today)}',
+                  style: TextStyle(color: colors.textSecondary),
+                ),
+              ),
+              // A day tapped shows it below; it isn't changed from here
+              // (Round 18).
+              MedicineCalendar(
+                medicine: medicine,
+                book: book,
+                today: today,
+                onDay: _showDay,
+              ),
+              if (unset)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      key: const Key('fillPast'),
+                      onPressed: () => _fill(context, ref, medicine),
+                      icon: const Icon(Icons.done_all, size: 18),
+                      label: const Text('Mark past days taken'),
+                    ),
+                  ),
+                ),
             ],
           ),
-        ),
+          // Built as they come into view: years of days stay quick.
+          SliverList.builder(
+            itemCount: days.length,
+            itemBuilder: (context, index) {
+              final day = days[index];
+              return Column(
+                key: _keyFor(day),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _DayTitle(
+                    day: day,
+                    today: today,
+                    outcome: outcomeOf(book, [medicine], day),
+                  ),
+                  _DayDoses(medicine: medicine, day: day, showName: false),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }

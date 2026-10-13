@@ -9,6 +9,10 @@ abstract final class AppSound {
   /// (e.g. tests).
   static Future<void> click() => _play('click');
 
+  /// Plays the click silently, so the audio is awake for the first real
+  /// one (Round 18: the first tap's click lagged its buzz).
+  static Future<void> warm() => _play('warm');
+
   /// A soft gulp: something done (a dose taken, Round 16).
   static Future<void> done() => _play('done');
 

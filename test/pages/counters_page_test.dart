@@ -142,6 +142,30 @@ void main() {
       return calls;
     }
 
+    testWidgets('opening the page wakes the sound, silently (Round 18)',
+        (tester) async {
+      final sounds = <String>[];
+      const sound = MethodChannel('the_app/sound');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(sound,
+          (call) async {
+        sounds.add(call.method);
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(sound, null));
+      await openCounters(tester, names: ['Push-ups']);
+      expect(sounds, ['warm']);
+
+      // Not with the feedback off.
+      sounds.clear();
+      container.read(preferencesProvider.notifier).setCounterFeedback(false);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Counters'));
+      await tester.pumpAndSettle();
+      expect(sounds, isEmpty);
+    });
+
     testWidgets('each − / + clicks and vibrates', (tester) async {
       await openCounters(tester, names: ['Push-ups']);
       final calls = recordFeedback(tester);

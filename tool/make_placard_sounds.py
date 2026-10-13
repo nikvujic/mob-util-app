@@ -1,8 +1,9 @@
 """Writes the Placard's sounds (Round 17) into android/app/src/main/res/raw/:
 
 - inflate.wav: a hold's length (3.2 s) of a soft, rising "stretch": a low
-  tone sliding up with a little wobble and some breathy air, getting
-  louder as it fills. Stopped early when the finger lifts.
+  tone sliding up with a little wobble, getting louder as it fills (no
+  breathy noise: Round 18, it sounded like a TV's static). Stopped early
+  when the finger lifts.
 - pop.wav: a balloon pop - a short burst of noise that dies away fast,
   over a low thump.
 
@@ -31,7 +32,6 @@ def inflate():
     length = 3.2
     samples = []
     phase = 0.0
-    air = 0.0
     for i in range(int(RATE * length)):
         t = i / RATE
         k = t / length
@@ -39,12 +39,13 @@ def inflate():
         freq = 140 + 340 * k ** 1.6 + 6 * math.sin(2 * math.pi * 7 * t)
         phase += 2 * math.pi * freq / RATE
         tone = math.sin(phase) + 0.25 * math.sin(2 * phase)
-        # Breathy air: noise, smoothed so it's soft.
-        air = 0.97 * air + 0.03 * random.uniform(-1, 1)
-        loud = 0.12 + 0.33 * k
+        # Drawn and unused: the noise that was here took these, and the
+        # pop below (liked as it is) depends on what's left.
+        random.uniform(-1, 1)
+        loud = 0.15 + 0.4 * k
         fade_in = min(1.0, t / 0.08)
         fade_out = min(1.0, (length - t) / 0.05)
-        samples.append(loud * fade_in * fade_out * (0.7 * tone + 2.5 * air))
+        samples.append(loud * fade_in * fade_out * 0.8 * tone)
     write('inflate', samples)
 
 
