@@ -421,6 +421,16 @@ void main() {
         await t.pumpAndSettle();
         expect(find.text('Restore this backup?'), findsOneWidget);
       },
+      'restore part': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Backup'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Restore part of a backup'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Tea'));
+        await t.pumpAndSettle();
+        expect(find.text('Restore 1'), findsOneWidget);
+      },
       'settings': (t) async {
         await openMenu(t);
         await t.tap(find.text('Settings'));

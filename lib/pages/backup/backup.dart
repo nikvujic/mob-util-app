@@ -4,6 +4,7 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/pages/backup/restore_part.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -207,36 +208,42 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             },
           ));
 
-  Future<void> _import() async {
-    if (!await _unlockIfSectionsClosed(replaces: true) || !mounted) return;
+  /// Lets the user pick a backup file and opens it (asking for an
+  /// encrypted one's password). Null if cancelled or unreadable (said).
+  Future<RestorableBackup?> _pickBackup() async {
     final importer = ref.read(backupImporterProvider);
-
     final PickedBackup? file;
     try {
       file = await importer.pick();
     } on ImportException catch (e) {
       _showMessage(e.message);
-      return;
+      return null;
     } catch (e, st) {
       debugPrint('Import failed: $e\n$st');
       _showMessage("Couldn't open the file.");
-      return;
+      return null;
     }
-    if (file == null || !mounted) return;
+    if (file == null || !mounted) return null;
 
-    final RestorableBackup backup;
     switch (file) {
       case PlainPick(backup: final plain):
-        backup = plain;
+        return plain;
       case EncryptedPick():
         final opened = await _openEncrypted(file);
-        if (opened == null || !mounted) return;
+        if (opened == null || !mounted) return null;
         if (opened.error != null) {
           _showMessage(opened.error!);
-          return;
+          return null;
         }
-        backup = opened.backup!;
+        return opened.backup!;
     }
+  }
+
+  Future<void> _import() async {
+    if (!await _unlockIfSectionsClosed(replaces: true) || !mounted) return;
+    final importer = ref.read(backupImporterProvider);
+    final backup = await _pickBackup();
+    if (backup == null || !mounted) return;
 
     final confirmed = await showConfirmDialog(
       context,
@@ -282,6 +289,50 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     } catch (e, st) {
       debugPrint('Restore failed: $e\n$st');
       if (mounted) _showMessage("Couldn't restore the backup.");
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  /// Restores some things from a backup, added to what's there (Round
+  /// 28).
+  Future<void> _importPart() async {
+    if (!await _unlockIfSectionsClosed() || !mounted) return;
+    final importer = ref.read(backupImporterProvider);
+    final backup = await _pickBackup();
+    if (backup == null || !mounted) return;
+    final picked = await pickBackupParts(context, backup);
+    if (picked == null || !mounted) return;
+
+    setState(() => _importing = true);
+    try {
+      final done = await importer.restorePart(
+        backup,
+        picked,
+        thisAppKey: _askThisAppKey,
+        backupKey: _askBackupKey,
+      );
+      if (done == null || !mounted) return;
+      _showMessage(
+        [
+          '${done.added == 1 ? '1 thing' : '${done.added} things'} restored',
+          if (done.copies > 0)
+            done.copies == 1 ? '1 as a copy' : '${done.copies} as copies',
+          if (done.skipped > 0)
+            '${done.skipped} left out (still there, or their time is taken)',
+          if (done.undo.adoptedMasterPassword)
+            "its master password is now this app's",
+        ].join('; '),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () => importer.undo(done.undo),
+        ),
+      );
+    } on ImportException catch (e) {
+      if (mounted) _showMessage(e.message);
+    } catch (e, st) {
+      debugPrint('Partial restore failed: $e\n$st');
+      if (mounted) _showMessage("Couldn't restore from the backup.");
     } finally {
       if (mounted) setState(() => _importing = false);
     }
@@ -344,6 +395,17 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                   )
                 : null,
             onTap: _busy ? null : _import,
+          ),
+          ListTile(
+            key: const Key('restorePart'),
+            leading: const Icon(Icons.playlist_add_check),
+            title: const Text('Restore part of a backup'),
+            subtitle: Text(
+              "Pick things from a backup (e.g. one note) to add to what's "
+              'here',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            onTap: _busy ? null : _importPart,
           ),
           SwitchListTile(
             key: const Key('backupReminder'),

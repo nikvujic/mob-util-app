@@ -54,6 +54,7 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | D7 | **Clear data per section** (Settings): pick Notes, Shop, Planner and/or Other and clear everything in them, after typing DELETE and, with a master password set, entering it. The Clear button is text only. | ✅ |
 | D8 | **Surviving an uninstall**: data outside the app (automatic export to a folder the user picks, or cloud) so deleting the app doesn't lose it. | 🟡 the weekly reminder (D9) is in; automatic export after v1 |
 | D9 | **Weekly backup reminder** (Round 23): Backup shows when the last export was ("8 days ago"; in red once due). A week after it (or after the first start, with none yet), a red dot on the menu button and on Backup, and a notification in the evening (19:00), again every 3 days until a backup is exported; tapping it opens Backup. A switch on Backup turns it off. Restoring doesn't count; a cancelled export doesn't either. | ✅ |
+| D10 | **Restore part of a backup** (Round 28): Backup → *Restore part of a backup* opens a backup (plain or encrypted) and lists what it holds by kind (notes, to-do, shop, planner tasks, routines, reminders, counters, medicines), nothing ticked; *All* / *None* per kind. *Restore N* adds the picked things to what's in the app (nothing is replaced). One still in the app (marked *Also in the app*) comes back as a copy beside it; planner tasks and routines whose time is taken are left out (said). A medicine comes with its history; locked notes stay locked. Undo puts things back as they were. | ✅ |
 
 ## N — Notes
 

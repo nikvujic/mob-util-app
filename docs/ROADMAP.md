@@ -342,7 +342,10 @@ notifications page later (it is bigger than it looked).
   Introduction, the first thing and a count on its tile; tap completes
   (Undo), hold edits, the handle moves; Settings turns it off.
 
-**2. Restore only part of a backup** (Round 26, part 3) — now.
+**2. Restore only part of a backup** (Round 26, part 3) — [x] done
+  (D10): Backup → Restore part of a backup; pick by kind, added to
+  what's there; ones still there come back as copies; tasks and routines
+  whose time is taken are left out.
 
 **3. Notifications page** (later; replaces Round 23's plan and E2/E3):
 one page in the menu, history and settings together.
@@ -430,7 +433,7 @@ Nikola is importing his notes: the extra formats and their buttons now
   completed" toast and Undo.
 - [x] A new note's title (the default or "Untitled"): tapping the title
   button selects its text, so it's quick to replace.
-- [ ] **Restore only part of a backup** (a backup extractor): open a
+- [x] **Restore only part of a backup** (a backup extractor): open a
   backup and pick what to bring back (e.g. one note), added to what's
   there instead of replacing everything.
 

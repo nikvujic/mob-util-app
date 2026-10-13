@@ -149,6 +149,19 @@ an end in minutes from midnight; `freeSlots` gives the gaps of a day, and
 format version (`AppStorage.plannerFormatVersion`), so an older app sets a
 newer planner file aside instead of dropping the times.
 
+## Restoring part of a backup (D10, Round 28)
+
+`BackupImporter.restorePart` takes the ids picked, by kind
+(`BackupPart`), and adds those things to what's in the app instead of
+replacing it: notes on top, list items at the end. Something with an id
+still in the app comes back as a copy with a new id (a locked note is
+opened and sealed again, as its seal names its id); planner tasks and
+routines go through their notifiers' `restoreTask` / `restore`, so one
+whose time is taken (or that is still there) is left out and counted. A
+medicine brings its dose marks (renamed with a copy's id). Locked notes
+are re-locked as in a full restore. Undo is a full restore's: the data as
+it was before. The page picking them is `pages/backup/restore_part.dart`.
+
 ## Android's own backup
 
 The app keeps Android's Auto Backup on (the default, decided with Nikola):

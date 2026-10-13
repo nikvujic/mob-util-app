@@ -52,6 +52,7 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 
 ## Backup
 - **Export** saves everything to one file; **Import** restores it. Locked notes stay encrypted inside.
+- **Restore part of a backup** brings back only what you pick (say, one note), added to what's there.
 - Backup shows when you last exported. A week later, a **red dot** on the menu and an evening notification remind you to make a new one (turn it off on Backup).
 
 ## Settings

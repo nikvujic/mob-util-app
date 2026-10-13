@@ -10,6 +10,9 @@ Release with the installable APK.
 - **To-do note** at the top of Notes: a plain list. Add things with
   **+**; tap one when it's done ("Task completed", with Undo); hold one
   to change it. It can be turned off in Settings, and is in backups.
+- **Restore part of a backup**: pick things from a backup (one note, a
+  few shop items, a medicine with its history...) and they're added to
+  what's in the app, with Undo. Nothing is replaced.
 
 ## [1.2.1] - 2026-10-13
 

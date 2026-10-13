@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/crypto.dart';
+import 'package:the_app/core/id.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
@@ -119,6 +120,50 @@ class RestorableBackup {
   int get pinCount => _backup.plannerPins.length;
   int get counterCount => _backup.counters.length;
   int get todoCount => _backup.todo.length;
+
+  // What's in it, to pick from (restoring part of it, Round 28).
+  List<Note> get notes => _backup.notes;
+  List<TodoItem> get todo => _backup.todo;
+  List<ShopItem> get shopItems => _backup.shopItems;
+  List<PlannerTask> get plannerTasks => _backup.plannerTasks;
+  List<Routine> get routines => _backup.routines.routines;
+  List<PlannerPin> get plannerPins => _backup.plannerPins;
+  List<Counter> get counters => _backup.counters;
+  List<Medicine> get medicines => _backup.medicine.medicines;
+}
+
+/// The kinds of things in a backup, to restore some of them (Round 28).
+enum BackupPart {
+  notes,
+  todo,
+  shop,
+  tasks,
+  routines,
+  reminders,
+  counters,
+  medicines
+}
+
+/// What [BackupImporter.restorePart] did.
+class PartRestore {
+  /// Puts things back as they were, like a full restore's.
+  final RestoreUndo undo;
+
+  /// How many things were added; of them, how many as copies (one with
+  /// the same id was still in the app, so both are kept).
+  final int added;
+  final int copies;
+
+  /// Planner tasks and routines left out: their time is taken, or they
+  /// are still in the app.
+  final int skipped;
+
+  const PartRestore._(
+    this.undo, {
+    required this.added,
+    required this.copies,
+    required this.skipped,
+  });
 }
 
 /// A picked backup file: plain (ready) or encrypted (needs its password).
@@ -274,6 +319,217 @@ class BackupImporter {
       previous,
       previousMasterPassword,
       adoptedMasterPassword: adopt,
+    );
+  }
+
+  /// Adds the things [picked] (ids, by kind) from [backup] to what's in
+  /// the app, leaving the rest as it is (Round 28: e.g. one note back).
+  /// Something still in the app (the same id) comes back as a copy
+  /// beside it; planner tasks and routines whose time is taken (or that
+  /// are still there) are left out. A medicine comes with its history.
+  /// Locked notes are handled as in [restore]. Null if the user
+  /// cancelled a password prompt (nothing changed then).
+  Future<PartRestore?> restorePart(
+    RestorableBackup backup,
+    Map<BackupPart, Set<String>> picked, {
+    AskThisAppKey thisAppKey = _cancelled,
+    AskBackupKey backupKey = _cancelledFor,
+  }) async {
+    final source = backup._backup;
+    bool chosen(BackupPart part, String id) =>
+        picked[part]?.contains(id) ?? false;
+    final previousMasterPassword = _ref.read(securityProvider);
+    final previous = _ref.read(backupExporterProvider).snapshot();
+    var added = 0, copies = 0, skipped = 0;
+
+    // Notes, locked ones under this app's key (or the backup's, adopted).
+    var notes = [
+      for (final n in source.notes)
+        if (chosen(BackupPart.notes, n.id)) n,
+    ];
+    var adopt = false;
+    DataKey? lockKey;
+    if (notes.any((n) => n.isLocked)) {
+      final record = source.masterPassword;
+      if (previousMasterPassword == null) {
+        if (record == null) throw _missingKey;
+        adopt = true;
+      } else {
+        final ours = _ref.read(sessionProvider)?.dataKey ?? await thisAppKey();
+        if (ours == null) return null;
+        final relocked = await _relock(
+          notes,
+          record,
+          fileKey: backup._fileKey,
+          thisAppKey: () async => ours,
+          backupKey: backupKey,
+        );
+        if (relocked == null) return null;
+        notes = relocked;
+        lockKey = ours;
+      }
+    }
+    final noteIds = {for (final n in _ref.read(notesProvider)) n.id};
+    final restoredNotes = <Note>[];
+    for (final note in notes) {
+      added++;
+      if (!noteIds.contains(note.id)) {
+        restoredNotes.add(note);
+        continue;
+      }
+      copies++;
+      final copy = Note.fromJson({...note.toJson(), 'id': generateId()});
+      if (!note.isLocked) {
+        restoredNotes.add(copy);
+        continue;
+      }
+      // Sealed for its id: sealed again for the copy's.
+      if (lockKey == null) {
+        final record = source.masterPassword!;
+        final fileKey = backup._fileKey;
+        lockKey = fileKey == null ? null : await record.unwrapDataKey(fileKey);
+        lockKey ??= await backupKey(record);
+        if (lockKey == null) return null;
+      }
+      final content = await NotesNotifier.openContent(note, lockKey);
+      restoredNotes.add(await NotesNotifier.lockedCopy(copy, content, lockKey));
+    }
+
+    /// [current] with the [part] picked from [from] after it; one with an
+    /// id already there gets a new one.
+    List<T> merged<T>(
+      List<T> current,
+      List<T> from,
+      BackupPart part,
+      String Function(T) idOf,
+      Map<String, dynamic> Function(T) toJson,
+      T Function(Map<String, dynamic>) fromJson,
+    ) {
+      final ids = {for (final item in current) idOf(item)};
+      final result = [...current];
+      for (final item in from) {
+        if (!chosen(part, idOf(item))) continue;
+        added++;
+        if (ids.contains(idOf(item))) {
+          copies++;
+          result.add(fromJson({...toJson(item), 'id': generateId()}));
+        } else {
+          result.add(item);
+        }
+      }
+      return result;
+    }
+
+    if (adopt) {
+      // The password first: locked notes must never be saved without it.
+      _ref.read(securityProvider.notifier).restore(source.masterPassword);
+      await _ref.read(appStorageProvider).flush();
+    }
+    if (restoredNotes.isNotEmpty) {
+      _ref
+          .read(notesProvider.notifier)
+          .replaceAll([...restoredNotes, ..._ref.read(notesProvider)]);
+    }
+    _ref.read(todoProvider.notifier).replaceAll(merged(
+          _ref.read(todoProvider),
+          source.todo,
+          BackupPart.todo,
+          (i) => i.id,
+          (i) => i.toJson(),
+          TodoItem.fromJson,
+        ));
+    _ref.read(shopProvider.notifier).replaceAll(merged(
+          _ref.read(shopProvider),
+          source.shopItems,
+          BackupPart.shop,
+          (i) => i.id,
+          (i) => i.toJson(),
+          ShopItem.fromJson,
+        ));
+    _ref.read(pinsProvider.notifier).replaceAll(merged(
+          _ref.read(pinsProvider),
+          source.plannerPins,
+          BackupPart.reminders,
+          (p) => p.id,
+          (p) => p.toJson(),
+          PlannerPin.fromJson,
+        ));
+    _ref.read(countersProvider.notifier).replaceAll(merged(
+          _ref.read(countersProvider),
+          source.counters,
+          BackupPart.counters,
+          (c) => c.id,
+          (c) => c.toJson(),
+          Counter.fromJson,
+        ));
+
+    // Tasks and routines still there, or whose time is taken: left out.
+    final planner = _ref.read(plannerProvider.notifier);
+    for (final task in source.plannerTasks) {
+      if (!chosen(BackupPart.tasks, task.id)) continue;
+      if (_ref.read(plannerProvider).any((t) => t.id == task.id)) {
+        skipped++;
+        continue;
+      }
+      try {
+        planner.restoreTask(task);
+        added++;
+      } on TaskOverlapException {
+        skipped++;
+      }
+    }
+    final routines = _ref.read(routinesProvider.notifier);
+    for (final routine in source.routines.routines) {
+      if (!chosen(BackupPart.routines, routine.id)) continue;
+      if (_ref.read(routinesProvider).routines.any((r) => r.id == routine.id)) {
+        skipped++;
+        continue;
+      }
+      try {
+        routines.restore(routine, [
+          for (final d in source.routines.days.values)
+            if (d.routineId == routine.id) d,
+        ]);
+        added++;
+      } on TaskOverlapException {
+        skipped++;
+      }
+    }
+
+    // Medicines, each with its history.
+    final book = _ref.read(medicineProvider);
+    final medicineIds = {for (final m in book.medicines) m.id};
+    final medicines = [...book.medicines];
+    final marks = [...book.taken];
+    for (final medicine in source.medicine.medicines) {
+      if (!chosen(BackupPart.medicines, medicine.id)) continue;
+      added++;
+      var id = medicine.id;
+      if (medicineIds.contains(id)) {
+        copies++;
+        id = generateId();
+      }
+      medicines.add(Medicine.fromJson({...medicine.toJson(), 'id': id}));
+      for (final mark in source.medicine.taken) {
+        if (mark.medicine == medicine.id) {
+          marks.add(DoseTaken.fromJson({...mark.toJson(), 'medicine': id}));
+        }
+      }
+    }
+    _ref
+        .read(medicineProvider.notifier)
+        .replaceAll(MedicineBook(medicines: medicines, taken: marks));
+
+    await _ref.read(appStorageProvider).flush();
+    return PartRestore._(
+      RestoreUndo._(
+        previous,
+        previousMasterPassword,
+        adoptedMasterPassword: adopt,
+      ),
+      added: added,
+      copies: copies,
+      skipped: skipped,
     );
   }
 
