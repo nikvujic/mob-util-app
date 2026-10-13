@@ -365,6 +365,9 @@ fixtures for every stored format.
   completed" toast and Undo.
 - [ ] A new note's title (the default or "Untitled"): tapping the title
   button selects its text, so it's quick to replace.
+- [ ] **Restore only part of a backup** (a backup extractor): open a
+  backup and pick what to bring back (e.g. one note), added to what's
+  there instead of replacing everything.
 
 ### Round 25 — Nikola's notes on 0.28.0, then v1 (2026-10-13)
 
