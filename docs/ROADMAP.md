@@ -327,11 +327,36 @@ fixtures for every stored format.
   with pages picked for it, maybe sections in the Hub, later pages for
   Nikola's servers and connectors to his projects. Built on O9, so it
   adds places to put pages, not a rework.
-- New Hub pages (see *Later / ideas*): birthdays & yearly dates, days
+- New Hub pages (see *Later / ideas*), **Recipes first** (Round 27): birthdays & yearly dates, days
   since / until, coin flip / decision helper, life percentage, recipes,
   workout log, timer, habits, weight log, expenses, packing lists, a
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
+
+### Round 27 — polish and note formatting (2026-10-13)
+
+Nikola is importing his notes: the extra formats and their buttons now
+(Round 20, part 3, brought forward), with the small fixes from Round 26.
+
+**1. Small fixes** (Round 26, part 2 and 3)
+- [ ] No toast when deleting the Introduction.
+- [ ] Backup: one space between the date and time of the last backup.
+- [ ] Menu header: "The App" a little lower, level with Pip.
+- [ ] A sharper launcher icon (a vector, crisp at any size).
+- [ ] Markdown lists: slightly bigger dots.
+- [ ] Smaller headings: `####`, a bit bigger than the text, bold.
+- [ ] A new note's title (default or "Untitled") selected on tapping the
+  title button.
+
+**2. More formats, and a formatting bar** (N17)
+- [ ] Inline `code`, code blocks (```), quotes (>), highlight (==…==), a
+  divider (---).
+- [ ] A Format button (in place of Checkbox) opening a row of format
+  buttons above the keyboard, without leaving or covering the text.
+
+**3. Hub pages: Recipes next** — of the new Hub pages (not the food
+  tracker or Pip's page, which have their own places), Recipes is the
+  next one built.
 
 ### Round 26 — after v1: Pip's room, and notes on 1.0.0 (2026-10-13)
 
