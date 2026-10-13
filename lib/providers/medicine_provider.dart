@@ -22,6 +22,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
     required DateTime from,
     DateTime? until,
     int? followUp,
+    bool important = false,
   }) {
     final trimmed = name.trim();
     if (trimmed.isEmpty || times.isEmpty) return null;
@@ -32,6 +33,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
       from: from,
       until: until,
       followUp: followUp,
+      important: important,
     );
     state = MedicineBook(
       medicines: [...state.medicines, medicine],
@@ -49,6 +51,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
     required DateTime from,
     DateTime? until,
     int? followUp,
+    bool important = false,
   }) {
     if (times.isEmpty) return;
     state = MedicineBook(
@@ -62,6 +65,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
               from: from,
               until: until,
               followUp: followUp,
+              important: important,
             )
           else
             m,

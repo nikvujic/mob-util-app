@@ -14,6 +14,10 @@ class MainActivity: FlutterFragmentActivity() {
     private var done = 0
     private var inflate = 0
     private var pop = 0
+    private var fill = 0
+
+    /// The hold-to-take sound playing (Round 24), to stop on letting go.
+    private var filling = 0
 
     /// The Placard's inflating sound while it plays (0: none), to stop it.
     private var inflating = 0
@@ -47,6 +51,8 @@ class MainActivity: FlutterFragmentActivity() {
         // The Placard (Round 17): rising while held, then a pop.
         inflate = pool.load(this, R.raw.inflate, 1)
         pop = pool.load(this, R.raw.pop, 1)
+        // An important medicine's hold-to-take (Round 24): a glass filling.
+        fill = pool.load(this, R.raw.fill, 1)
         sounds = pool
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/sound")
             .setMethodCallHandler { call, result ->
@@ -69,6 +75,16 @@ class MainActivity: FlutterFragmentActivity() {
                         inflating = 0
                     }
                     "pop" -> pool?.play(pop, PLACARD_VOLUME, PLACARD_VOLUME, 2, 0, 1f)
+                    "fill" -> {
+                        if (filling != 0) pool?.stop(filling)
+                        filling = pool?.play(
+                            fill, DONE_VOLUME, DONE_VOLUME, 1, 0, 1f
+                        ) ?: 0
+                    }
+                    "stopFill" -> {
+                        if (filling != 0) pool?.stop(filling)
+                        filling = 0
+                    }
                     else -> {
                         result.notImplemented()
                         return@setMethodCallHandler

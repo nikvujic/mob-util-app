@@ -17,6 +17,10 @@ class Medicine {
   /// (Round 16: set per medicine); null: no second reminder.
   final int? followUp;
 
+  /// Important (Round 24): taking a dose needs a 5-second hold, and only
+  /// important medicines bring up the red dot.
+  final bool important;
+
   Medicine({
     required this.id,
     required this.name,
@@ -24,6 +28,7 @@ class Medicine {
     required DateTime from,
     DateTime? until,
     this.followUp,
+    this.important = false,
   })  : times = List.unmodifiable([...times]..sort()),
         from = DateTime(from.year, from.month, from.day),
         until = until == null
@@ -49,6 +54,7 @@ class Medicine {
         'from': PlannerTask.dayToJson(from),
         if (until != null) 'until': PlannerTask.dayToJson(until!),
         if (followUp != null) 'followUp': followUp,
+        if (important) 'important': true,
       };
 
   factory Medicine.fromJson(Map<String, dynamic> json) => Medicine(
@@ -60,6 +66,7 @@ class Medicine {
             ? null
             : PlannerTask.dayFromJson(json['until']),
         followUp: json['followUp'] as int?,
+        important: json['important'] as bool? ?? false,
       );
 }
 

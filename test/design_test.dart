@@ -119,10 +119,11 @@ Future<void> seed(ProviderContainer container) async {
       min: 0,
       max: 3000,
     ));
-  // The medicine tracker (O6): one dose taken, one not; one ended.
+  // The medicine tracker (O6): one dose taken, one not; one ended. The
+  // antibiotic is important (Round 24): the hold-to-take is checked too.
   final medicine = container.read(medicineProvider.notifier);
-  final pills =
-      medicine.add('Antibiotic', times: [480, 1200], from: addDays(today, -3))!;
+  final pills = medicine.add('Antibiotic',
+      times: [480, 1200], from: addDays(today, -3), important: true)!;
   medicine
     ..toggleDose(pills, today, 0)
     ..add('Course',
@@ -327,6 +328,32 @@ void main() {
         await t.pumpAndSettle();
         await t.tap(find.byTooltip('Add medicine'));
         await t.pumpAndSettle();
+      },
+      'medicine sheet, lower part': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Medicine'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Add medicine'));
+        await t.pumpAndSettle();
+        final important = find.byKey(const Key('medicineImportant'));
+        await t.scrollUntilVisible(important, 100,
+            scrollable: find
+                .descendant(
+                    of: find.byType(BottomSheet),
+                    matching: find.byType(Scrollable))
+                .first);
+        await t.pumpAndSettle();
+      },
+      'hold to take': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Medicine'));
+        await t.pumpAndSettle();
+        await t.tap(find.byWidgetPredicate((w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('dose-') &&
+            (w.key! as ValueKey<String>).value.endsWith('-1')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('holdToTake')), findsOneWidget);
       },
       'counters selection mode': (t) async {
         await openTab(t, 'Hub');

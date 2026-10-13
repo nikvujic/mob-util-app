@@ -79,3 +79,8 @@ app still reads every version, so an update can never lose existing data.
 - `v13/storage/settings.json` — locks (settings.json still version 2;
   `pageLocks` added in Round 21, after 0.26.0): the Shop section locked,
   and the Hub's Placard and Medicine pages (O7). Not in backups.
+- `v14/storage/medicine.json` — important medicines (Round 24,
+  medicine.json version 4): Heart pills ❤️ twice a day (08:00, 20:00)
+  from 1 Oct, **important**; Vitamin C at 09:00, not; the Heart pills'
+  morning dose taken 12 Oct at 08:01.
+- `v14/backup-plain.json` — backup (version 14) with that.

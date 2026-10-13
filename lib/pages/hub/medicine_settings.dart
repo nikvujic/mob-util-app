@@ -100,18 +100,6 @@ class MedicineSettingsPage extends ConsumerWidget {
               if (on) allowMedicineReminders(context, ref);
             },
           ),
-          SwitchListTile(
-            key: const Key('medicineDot'),
-            secondary: const Icon(Icons.circle_notifications_outlined),
-            title: const Text('Red dot'),
-            subtitle: Text(
-              'On the Medicine tile and the Hub tab while a dose is due '
-              'and not marked. Shown even when the Hub is locked.',
-              style: muted(),
-            ),
-            value: preferences.medicineDot,
-            onChanged: notifier.setMedicineDot,
-          ),
           const Divider(),
           ListTile(
             key: const Key('medicinePause'),

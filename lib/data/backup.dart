@@ -70,8 +70,9 @@ class Backup {
   /// may have a step, colour and limits (O5); 11 = the medicine tracker
   /// (`medicine`, as in `medicine.json`, O6); 12 = doses missed or not
   /// sure, taken ones maybe without a time (O13); 13 = a medicine may
-  /// remind again after its doses (Round 16).
-  static const version = 13;
+  /// remind again after its doses (Round 16); 14 = a medicine may be
+  /// important (Round 24).
+  static const version = 14;
 
   final DateTime createdAt;
   final String appVersion;

@@ -580,6 +580,39 @@ void main() {
     });
   });
 
+  group('medicine v4 / v14 backup (important medicines, Round 24)', () {
+    void expectSample(MedicineBook book) {
+      final [heart, vitaminC] = book.medicines;
+      expect((heart.name, heart.important), ('Heart pills ❤️', true));
+      expect(vitaminC.important, isFalse);
+      expect(book.markFor('m1', DateTime(2026, 10, 12), 0)!.at,
+          DateTime(2026, 10, 12, 8, 1));
+    }
+
+    test('medicine.json version 4 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v14/storage'),
+      );
+      expectSample(storage.initialMedicine);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v14 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v14/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.medicine);
+    });
+
+    test('version 3 medicines are not important', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v13/storage'),
+      );
+      expect(storage.initialMedicine.medicines.map((m) => m.important),
+          everyElement(isFalse));
+    });
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -695,6 +728,10 @@ void main() {
           '42e2e740aa34861e8564a1eb1552ffcc4ab18fe2f826fdf9ce8e5d10257dbe5a',
       'test/fixtures/v13/backup-plain.json':
           '56b1a7cd9dc07d1e48fa76fc906ea9b94c3f0a8332acb3b35e2fb6c40d25174e',
+      'test/fixtures/v14/storage/medicine.json':
+          '363069098653b44771ddd73f008f6522b53b5663ac21065869fe85416e5b1e8c',
+      'test/fixtures/v14/backup-plain.json':
+          '8ab0ceded332cfb23f5dc0694161259b46527fd943c5748127099bb7e37b8dac',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

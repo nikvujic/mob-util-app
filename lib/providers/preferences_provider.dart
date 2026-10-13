@@ -39,8 +39,6 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setMedicineReminders(bool on) =>
       state = state.copyWith(medicineReminders: on);
 
-  void setMedicineDot(bool on) => state = state.copyWith(medicineDot: on);
-
   /// The app started at [version] (N16): brings the Introduction up on
   /// a first start or an update.
   void startedVersion(String version) => state = state.startedVersion(version);

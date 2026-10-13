@@ -64,9 +64,8 @@ void main() {
       expect(find.byKey(const Key('medicineFollowUp')), findsNothing,
           reason: 'set per medicine now (Round 16)');
 
-      await tester.tap(find.byKey(const Key('medicineDot')));
-      await tester.pumpAndSettle();
-      expect(container.read(preferencesProvider).medicineDot, isFalse);
+      expect(find.byKey(const Key('medicineDot')), findsNothing,
+          reason: 'important medicines decide (Round 24)');
 
       await tester.tap(find.byKey(const Key('medicineReminders')));
       await tester.pumpAndSettle();
@@ -196,7 +195,7 @@ void main() {
     testWidgets('on the tile and the Hub tab while a dose is due',
         (tester) async {
       await start(tester, seed: () {
-        medicine().add('Pills', times: [480], from: today);
+        medicine().add('Pills', times: [480], from: today, important: true);
       });
       await tester.pumpAndSettle();
       expect(hubDot, findsOneWidget);
@@ -213,7 +212,8 @@ void main() {
       await start(
         tester,
         at: DateTime(2026, 10, 12, 7, 59),
-        seed: () => medicine().add('Pills', times: [480], from: today),
+        seed: () =>
+            medicine().add('Pills', times: [480], from: today, important: true),
       );
       await tester.pumpAndSettle();
       expect(hubDot, findsNothing);
@@ -227,7 +227,7 @@ void main() {
 
     testWidgets('marked missed or not sure: no dot', (tester) async {
       await start(tester, seed: () {
-        medicine().add('Pills', times: [480], from: today);
+        medicine().add('Pills', times: [480], from: today, important: true);
       });
       final id = container.read(medicineProvider).medicines.single.id;
       medicine().setDose(id, today, 0, DoseState.missed);
@@ -235,18 +235,20 @@ void main() {
       expect(hubDot, findsNothing);
     });
 
-    testWidgets('off, or paused: no dot', (tester) async {
+    testWidgets('a medicine not important: no dot (Round 24)', (tester) async {
       await start(tester, seed: () {
-        medicine().add('Pills', times: [480], from: today);
+        medicine().add('Vitamin C', times: [480], from: today);
       });
-      preferences().setMedicineDot(false);
       await tester.pumpAndSettle();
       expect(hubDot, findsNothing);
       expect(toolDot, findsNothing);
+    });
 
-      preferences()
-        ..setMedicineDot(true)
-        ..pauseMedicineUntil(today);
+    testWidgets('paused: no dot', (tester) async {
+      await start(tester, seed: () {
+        medicine().add('Pills', times: [480], from: today, important: true);
+      });
+      preferences().pauseMedicineUntil(today);
       await tester.pumpAndSettle();
       expect(hubDot, findsNothing);
 
@@ -259,7 +261,7 @@ void main() {
 
     testWidgets('on the Hub tab even while the Hub is locked', (tester) async {
       await start(tester, seed: () {
-        medicine().add('Pills', times: [480], from: today);
+        medicine().add('Pills', times: [480], from: today, important: true);
       });
       await tester.runAsync(() async {
         await container

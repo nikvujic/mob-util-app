@@ -7,6 +7,11 @@ Release with the installable APK.
 ## [1.0.0] - unreleased
 
 ### Added
+- **Important medicines**: set when adding or editing one. Taking a dose
+  then means holding a big button for 5 seconds; it fills up like a
+  glass, with a sound, and drains if you let go early. The red dot on
+  the Hub only shows for important medicines (its switch is gone from
+  Medicine settings).
 - Settings says when the phone blocks the app's notifications, and
   asks to allow them.
 - If something can't be saved (e.g. the phone's storage is full), the
@@ -27,6 +32,9 @@ Release with the installable APK.
 - Hub tiles: a locked page's small lock sits under the icon, centred.
 - Medicine histories: back to top always on the right, and the list
   leaves room at the end so it doesn't cover the last entries.
+- Medicine: adding or editing one opens a taller view that scrolls and
+  closes only with back (asking if something changed); after editing,
+  the medicine's menu stays open.
 - Medicine settings say what stops a reminder: the dose already set as
   taken, missed or not sure.
 - Doses due at the same time come as **one** notification naming them

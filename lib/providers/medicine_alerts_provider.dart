@@ -103,15 +103,16 @@ const dueOverMidnight = 120;
 /// day's earlier doses had kept the dot).
 const lateDoseFrom = 22 * 60;
 
-/// Whether one of the doses due by [now] isn't marked (O13): today's whose
-/// time has come, and before [dueOverMidnight] also yesterday's late ones
-/// (from [lateDoseFrom], 22:00).
+/// Whether one of the important medicines' doses due by [now] isn't
+/// marked (O13; Round 24: only important ones): today's whose time has
+/// come, and before [dueOverMidnight] also yesterday's late ones (from
+/// [lateDoseFrom], 22:00).
 bool doseDue(MedicineBook book, DateTime now) {
   final today = dayOf(now);
   final minutes = now.hour * 60 + now.minute;
   bool unmarked(DateTime day, bool Function(int time) due) {
     for (final medicine in book.medicines) {
-      if (!medicine.isOn(day)) continue;
+      if (!medicine.important || !medicine.isOn(day)) continue;
       for (final (dose, time) in medicine.times.indexed) {
         if (due(time) && book.markFor(medicine.id, day, dose) == null) {
           return true;
@@ -126,15 +127,14 @@ bool doseDue(MedicineBook book, DateTime now) {
           unmarked(addDays(today, -1), (time) => time >= lateDoseFrom));
 }
 
-/// The red dot on the Medicine tile and the Hub tab (O13): a dose due and
-/// not marked, unless the dot is off or paused. The home screen looks
+/// The red dot on the Medicine tile and the Hub tab (O13): an important
+/// medicine's dose due and not marked, unless paused (Round 24: the
+/// important flag decides; there's no switch for it). The home screen looks
 /// again every half minute and when the app comes back (a dose comes due
 /// with no change to anything here).
 final medicineDotProvider = Provider<bool>((ref) {
   final book = ref.watch(medicineProvider);
   final preferences = ref.watch(preferencesProvider);
   final now = ref.watch(clockProvider)();
-  return preferences.medicineDot &&
-      !preferences.medicinePausedOn(dayOf(now)) &&
-      doseDue(book, now);
+  return !preferences.medicinePausedOn(dayOf(now)) && doseDue(book, now);
 });

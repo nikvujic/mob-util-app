@@ -340,15 +340,15 @@ v1, with a stop for his go-ahead; v1 waits for these. (The icon was
 done without him: kept for now, but he picks the real one, see 6.)
 
 **1. Medicine: important medicines** (before v1)
-- [ ] **Important** (set when adding or editing, with a note on what it
+- [x] **Important** (set when adding or editing, with a note on what it
   does): ticking one of its doses as taken opens a dialog with a big
   button to **hold for 5 seconds**: it fills while held, animated, with
   a sound while holding (in the spirit of Placard's, not the same).
-- [ ] The **red dot** only for important medicines; the "Red dot"
+- [x] The **red dot** only for important medicines; the "Red dot"
   switch in Medicine settings goes (the important flag decides).
 - [x] Settings wording: "at each dose time, unless it's marked" — say
   what marked means (taken, missed or not sure).
-- [ ] The add / edit view like the routines one: scrolls to the lower
+- [x] The add / edit view like the routines one: scrolls to the lower
   options, closes only with back. After editing, closing it leaves the
   medicine's menu (history / edit / delete) open.
 - [x] The tick sound for a normal medicine louder.
@@ -360,7 +360,7 @@ done without him: kept for now, but he picks the real one, see 6.)
 **3. From the 0.27.0 review**
 - [x] Hub tiles: the lock icon not in the corner — under the icon,
   centred at the bottom (outside the icon's area).
-- [ ] The Introduction keeps up with features (each round).
+- [x] The Introduction keeps up with features (each round).
 - [x] Back to top in the histories always on the right, and room left
   at the end so it doesn't cover the last entries.
 - [x] Placard: the pop timing as before Round 20 (revert that change).

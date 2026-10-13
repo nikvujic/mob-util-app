@@ -17,6 +17,8 @@ void main() {
     times: [8 * 60, 20 * 60],
     from: DateTime(2026, 10, 1),
     until: tomorrow,
+    // The red dot is for important ones only (Round 24).
+    important: true,
   );
 
   /// The same, reminding again [minutes] after each dose (Round 16).
@@ -176,6 +178,19 @@ void main() {
       expect(doseDue(book, DateTime(2026, 10, 12, 8)), isTrue);
     });
 
+    test('only important medicines count (Round 24)', () {
+      final plain = Medicine(
+        id: 'v',
+        name: 'Vitamin C',
+        times: [8 * 60],
+        from: DateTime(2026, 10, 1),
+      );
+      expect(doseDue(MedicineBook(medicines: [plain]), now), isFalse);
+      expect(Medicine.fromJson(plain.toJson()).important, isFalse);
+      expect(plain.toJson().containsKey('important'), isFalse);
+      expect(Medicine.fromJson(pills.toJson()).important, isTrue);
+    });
+
     test('marked any way: not due', () {
       for (final state in DoseState.values) {
         final book = MedicineBook(
@@ -194,6 +209,7 @@ void main() {
         name: 'Late',
         times: [23 * 60 + 30],
         from: DateTime(2026, 10, 1),
+        important: true,
       );
       final book = MedicineBook(medicines: [late]);
       expect(doseDue(book, DateTime(2026, 10, 13, 1, 59)), isTrue);
@@ -213,6 +229,7 @@ void main() {
         name: 'Day',
         times: [11 * 60, 21 * 60 + 59],
         from: DateTime(2026, 10, 1),
+        important: true,
       );
       final at = DateTime(2026, 10, 13, 0, 50);
       expect(doseDue(MedicineBook(medicines: [day]), at), isFalse);
@@ -222,6 +239,7 @@ void main() {
         name: 'Ten',
         times: [22 * 60],
         from: DateTime(2026, 10, 1),
+        important: true,
       );
       expect(doseDue(MedicineBook(medicines: [ten]), at), isTrue);
     });
@@ -246,17 +264,14 @@ void main() {
   test('settings are kept in preferences, older files read as defaults', () {
     final preferences = Preferences(
       medicineReminders: false,
-      medicineDot: false,
       medicinePausedUntil: tomorrow,
     );
     final read = Preferences.fromJson(preferences.toJson());
     expect(read.medicineReminders, isFalse);
-    expect(read.medicineDot, isFalse);
     expect(read.medicinePausedUntil, tomorrow);
 
     final old = Preferences.fromJson({'theme': 'clay'});
     expect(old.medicineReminders, isTrue);
-    expect(old.medicineDot, isTrue);
     expect(old.medicinePausedUntil, isNull);
   });
 

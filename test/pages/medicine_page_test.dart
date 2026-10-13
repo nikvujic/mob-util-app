@@ -195,8 +195,9 @@ void main() {
     expect(m.name, 'Pills 💊');
     expect(m.times, [480, 720], reason: 'a dose 4 hours after the last');
 
-    await tester.tap(find.text('Pills 💊'));
-    await tester.pumpAndSettle();
+    // Its menu is open again, on the medicine as it now is (Round 24).
+    expect(find.text('History'), findsOneWidget);
+    expect(find.text('Pills 💊'), findsNWidgets(2), reason: 'card and menu');
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));

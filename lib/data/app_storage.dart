@@ -73,8 +73,8 @@ class AppStorage {
   /// Version of `medicine.json` (O6). History: 1 = first format; 2 =
   /// doses can be missed or not sure, and taken ones may have no time
   /// (O13); 3 = a medicine may remind again after its doses (`followUp`,
-  /// Round 16).
-  static const medicineFormatVersion = 3;
+  /// Round 16); 4 = a medicine may be important (`important`, Round 24).
+  static const medicineFormatVersion = 4;
 
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).

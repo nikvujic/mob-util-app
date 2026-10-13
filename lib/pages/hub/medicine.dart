@@ -5,6 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
+import 'package:the_app/pages/hub/hold_to_take.dart';
 import 'package:the_app/pages/hub/medicine_history.dart';
 import 'package:the_app/pages/hub/medicine_settings.dart';
 import 'package:the_app/pages/hub/medicine_sheet.dart';
@@ -35,6 +36,7 @@ class MedicinePage extends ConsumerWidget {
       from: draft.from,
       until: draft.until,
       followUp: draft.followUp,
+      important: draft.important,
     );
     // Started in the past: fill those days in, if wanted (O13; one missed
     // day can then be set in its history).
@@ -58,6 +60,8 @@ class MedicinePage extends ConsumerWidget {
     if (fill) notifier.fillPast(id);
   }
 
+  /// The medicine's menu: history, edit, delete. After editing it opens
+  /// again, on the medicine as it now is (Round 24).
   Future<void> _menu(
     BuildContext context,
     WidgetRef ref,
@@ -105,15 +109,24 @@ class MedicinePage extends ConsumerWidget {
         today: _today(ref),
         medicine: medicine,
       );
-      if (draft == null) return;
-      notifier.update(
-        medicine.id,
-        name: draft.name,
-        times: draft.times,
-        from: draft.from,
-        until: draft.until,
-        followUp: draft.followUp,
-      );
+      if (draft != null) {
+        notifier.update(
+          medicine.id,
+          name: draft.name,
+          times: draft.times,
+          from: draft.from,
+          until: draft.until,
+          followUp: draft.followUp,
+          important: draft.important,
+        );
+      }
+      if (!context.mounted) return;
+      final now = ref
+          .read(medicineProvider)
+          .medicines
+          .where((m) => m.id == medicine.id)
+          .firstOrNull;
+      if (now != null) await _menu(context, ref, now);
       return;
     }
     final confirmed = await showConfirmDialog(
@@ -224,6 +237,16 @@ class MedicinePage extends ConsumerWidget {
                       onDose: (dose) async {
                         final taken = book.takenFor(medicine.id, today, dose);
                         if (taken == null) {
+                          // Important: only by holding the button (Round
+                          // 24).
+                          if (medicine.important) {
+                            final held = await showHoldToTake(
+                              context,
+                              name: medicine.name,
+                              time: formatMinutes(medicine.times[dose]),
+                            );
+                            if (!held || !context.mounted) return;
+                          }
                           // Taken: a gulp and a buzz (Nikola).
                           AppSound.doneBuzz();
                           AppSound.done();

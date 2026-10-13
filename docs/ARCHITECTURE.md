@@ -383,3 +383,10 @@ write and a `failing` flag; `AppStorage.saveFailing` is true while any
 store fails, `retryFailed` writes the kept documents again (the home
 screen calls it when the app comes back), and the home screen says when
 saving starts failing and when it works again (`saveFailingProvider`).
+
+Important medicines (Round 24): `Medicine.important` (medicine.json v4,
+backup v14). The red dot (`doseDue`) counts only important medicines.
+Ticking one's dose goes through `showHoldToTake` (`pages/hub/
+hold_to_take.dart`): a 5-second `AnimationController` drives a painted
+glass, the native `fill` sound (`tool/make_fill_sound.py`) and haptic
+ticks; letting go reverses it.

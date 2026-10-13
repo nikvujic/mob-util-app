@@ -20,10 +20,6 @@ class Preferences {
   /// Medicine (O12): a notification at each dose time not yet marked.
   final bool medicineReminders;
 
-  /// Medicine (O12): a red dot on its Hub tile and the Hub tab while one of
-  /// today's doses is due and not marked.
-  final bool medicineDot;
-
   /// Medicine (O12): reminders and the dot are paused through this day;
   /// null (or a day gone by): not paused.
   final DateTime? medicinePausedUntil;
@@ -64,7 +60,6 @@ class Preferences {
     this.noteLineNumbers = true,
     this.fingerprintFor,
     this.medicineReminders = true,
-    this.medicineDot = true,
     this.medicinePausedUntil,
     this.introDeleted = false,
     this.introOnUpdates = true,
@@ -130,7 +125,6 @@ class Preferences {
     bool? noteLineNumbers,
     String? Function()? fingerprintFor,
     bool? medicineReminders,
-    bool? medicineDot,
     DateTime? Function()? medicinePausedUntil,
     bool? introDeleted,
     bool? introOnUpdates,
@@ -148,7 +142,6 @@ class Preferences {
         fingerprintFor:
             fingerprintFor == null ? this.fingerprintFor : fingerprintFor(),
         medicineReminders: medicineReminders ?? this.medicineReminders,
-        medicineDot: medicineDot ?? this.medicineDot,
         medicinePausedUntil: medicinePausedUntil == null
             ? this.medicinePausedUntil
             : medicinePausedUntil(),
@@ -171,7 +164,6 @@ class Preferences {
         'noteLineNumbers': noteLineNumbers,
         if (fingerprintFor != null) 'fingerprintFor': fingerprintFor,
         'medicineReminders': medicineReminders,
-        'medicineDot': medicineDot,
         if (medicinePausedUntil != null)
           'medicinePausedUntil': PlannerTask.dayToJson(medicinePausedUntil!),
         'introDeleted': introDeleted,
@@ -194,7 +186,6 @@ class Preferences {
         noteLineNumbers: json['noteLineNumbers'] as bool? ?? true,
         fingerprintFor: json['fingerprintFor'] as String?,
         medicineReminders: json['medicineReminders'] as bool? ?? true,
-        medicineDot: json['medicineDot'] as bool? ?? true,
         medicinePausedUntil: json['medicinePausedUntil'] == null
             ? null
             : PlannerTask.dayFromJson(json['medicinePausedUntil']),

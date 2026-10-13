@@ -34,6 +34,11 @@ abstract final class AppSound {
   /// The Placard popping.
   static Future<void> pop() => _play('pop');
 
+  /// An important medicine's hold-to-take (Round 24): a glass filling up,
+  /// as long as the hold; [stopFill] stops it when the finger lifts early.
+  static Future<void> fill() => _play('fill');
+  static Future<void> stopFill() => _play('stopFill');
+
   static Future<void> _play(String sound) async {
     try {
       await _channel.invokeMethod<void>(sound);
