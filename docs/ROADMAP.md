@@ -333,6 +333,25 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 29 — Nikola's notes on 1.2.0 and 1.2.1 (2026-10-13)
+
+After the to-do note and partial restore are released; before the
+notifications page. (1.2.1: Pip is good.)
+
+- [ ] Placard: the pop sound a **bubbly pop**, like a bubble bursting.
+- [ ] Introduction: **remembers where it was scrolled to**, unless it's
+  new or was just restored.
+- [ ] **Code formatting** looks bad and unreadable; improve it. In the
+  Introduction (1.2.0) most of "What's new" showed as code, with `- `
+  and `### Changed` unformatted: the code example likely opened a block
+  that never closed. Fix both.
+- [ ] The **Format** button's icon (an A with a line under it): pick a
+  better one.
+- [ ] The format bar goes **under** the little handle pointing at the
+  line being edited; it can go over it (it's easy to close).
+- [ ] The **bigger list dots** sit too high next to the text and the
+  line number (as the checkboxes did once); align them.
+
 ### Round 28 — to-do note, partial restore; the notifications page planned (2026-10-13)
 
 Nikola, after 1.2.1: the to-do note and partial restore now; the
