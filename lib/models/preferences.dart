@@ -38,6 +38,10 @@ class Preferences {
   /// It's new to the user (a fresh install or an update), until opened.
   final bool introUnread;
 
+  /// How far down the Introduction was read (Round 29), to open there
+  /// again; back to the top when it's new or restored.
+  final double introScroll;
+
   /// "Forgot master password?" is greyed out until then (Round 21): its
   /// Reset was tapped instead of held, as someone not in on it would.
   /// Cleared by the next unlock.
@@ -69,6 +73,7 @@ class Preferences {
     this.introOnUpdates = true,
     this.introVersion,
     this.introUnread = false,
+    this.introScroll = 0,
     this.resetBlockedUntil,
     this.lastBackupAt,
     this.backupCountFrom,
@@ -114,6 +119,7 @@ class Preferences {
       introVersion: () => version,
       introDeleted: bringUp ? false : introDeleted,
       introUnread: bringUp || introUnread,
+      introScroll: bringUp ? 0 : introScroll,
     );
   }
 
@@ -135,6 +141,7 @@ class Preferences {
     bool? introOnUpdates,
     String? Function()? introVersion,
     bool? introUnread,
+    double? introScroll,
     DateTime? Function()? resetBlockedUntil,
     DateTime? Function()? lastBackupAt,
     DateTime? Function()? backupCountFrom,
@@ -155,6 +162,7 @@ class Preferences {
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
         introVersion: introVersion == null ? this.introVersion : introVersion(),
         introUnread: introUnread ?? this.introUnread,
+        introScroll: introScroll ?? this.introScroll,
         resetBlockedUntil: resetBlockedUntil == null
             ? this.resetBlockedUntil
             : resetBlockedUntil(),
@@ -177,6 +185,7 @@ class Preferences {
         'introOnUpdates': introOnUpdates,
         if (introVersion != null) 'introVersion': introVersion,
         'introUnread': introUnread,
+        if (introScroll > 0) 'introScroll': introScroll,
         if (resetBlockedUntil != null)
           'resetBlockedUntil': resetBlockedUntil!.toIso8601String(),
         if (lastBackupAt != null)
@@ -201,6 +210,7 @@ class Preferences {
         introOnUpdates: json['introOnUpdates'] as bool? ?? true,
         introVersion: json['introVersion'] as String?,
         introUnread: json['introUnread'] as bool? ?? false,
+        introScroll: (json['introScroll'] as num?)?.toDouble() ?? 0,
         resetBlockedUntil: json['resetBlockedUntil'] == null
             ? null
             : DateTime.tryParse(json['resetBlockedUntil'] as String),

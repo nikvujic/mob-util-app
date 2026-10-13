@@ -35,6 +35,38 @@ void main() {
     await tester.pump();
   }
 
+  testWidgets(
+      'while it\'s open, no cursor handle to cover it; the Tt icon '
+      '(Round 29)', (tester) async {
+    container = await pumpApp(tester);
+    container
+        .read(notesProvider.notifier)
+        .addNote(title: 'Recipes', content: 'Pancakes and more');
+    await tester.pump();
+    await tester.tap(find.text('Recipes'));
+    await tester.pumpAndSettle();
+    await tester.tap(contentField);
+    await tester.pumpAndSettle();
+    // Tapping again into the text shows the cursor's handle.
+    await tester.tapAt(tester.getTopLeft(contentField) + const Offset(40, 12));
+    await tester.pumpAndSettle();
+    final hidden = find.byKey(const Key('cursorHandleHidden'));
+    expect(hidden, findsNothing);
+    expect(
+        find.descendant(
+          of: find.byTooltip('Format'),
+          matching: find.byIcon(Icons.text_fields),
+        ),
+        findsOneWidget);
+
+    await tester.tap(find.byTooltip('Format'));
+    await tester.pump();
+    expect(hidden, findsOneWidget);
+    await tester.tap(find.byTooltip('Close formatting'));
+    await tester.pump();
+    expect(hidden, findsNothing);
+  });
+
   void select(WidgetTester tester, int start, int end) =>
       content(tester).selection =
           TextSelection(baseOffset: start, extentOffset: end);

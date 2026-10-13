@@ -57,26 +57,39 @@ class _IntroductionPageState extends ConsumerState<IntroductionPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Introduction')),
       body: switch (text) {
-        AsyncData(:final value) => PullDownList.children(
-            bottomSpace: BottomActions.contentClearance,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                child: Text.rich(
-                  key: const Key('introductionText'),
-                  // The notes' own Markdown look, read only.
-                  MarkdownEditingController(text: value).buildTextSpan(
-                    context: context,
-                    style: TextStyle(
-                      color: colors.textPrimary,
-                      fontSize: 16,
-                      height: 1.4,
+        // Opens where it was left (Round 29), saved when scrolling stops.
+        AsyncData(:final value) => NotificationListener<ScrollEndNotification>(
+            onNotification: (end) {
+              final inside = end.context;
+              if (inside != null) {
+                ref
+                    .read(preferencesProvider.notifier)
+                    .setIntroScroll(PullDownList.scrolledOf(inside));
+              }
+              return false;
+            },
+            child: PullDownList.children(
+              bottomSpace: BottomActions.contentClearance,
+              initialOffset: ref.read(preferencesProvider).introScroll,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Text.rich(
+                    key: const Key('introductionText'),
+                    // The notes' own Markdown look, read only.
+                    MarkdownEditingController(text: value).buildTextSpan(
+                      context: context,
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 16,
+                        height: 1.4,
+                      ),
+                      withComposing: false,
                     ),
-                    withComposing: false,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         AsyncError() => Center(
             child: Text(

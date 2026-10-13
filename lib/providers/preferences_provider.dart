@@ -44,8 +44,18 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void startedVersion(String version) => state = state.startedVersion(version);
 
   /// Deletes the Introduction from Notes (false brings it back).
-  void setIntroDeleted(bool deleted) =>
-      state = state.copyWith(introDeleted: deleted);
+  void setIntroDeleted(bool deleted) => state = state.copyWith(
+        introDeleted: deleted,
+        // Restored: from the top (Round 29).
+        introScroll: deleted ? null : 0,
+      );
+
+  /// Where the Introduction was left, scrolled (Round 29).
+  void setIntroScroll(double offset) {
+    if (offset != state.introScroll) {
+      state = state.copyWith(introScroll: offset);
+    }
+  }
 
   void setIntroOnUpdates(bool on) => state = state.copyWith(introOnUpdates: on);
 

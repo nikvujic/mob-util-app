@@ -12,6 +12,14 @@ Release with the installable APK.
   little smaller and easier to read, and the hidden fence lines get no
   line number.
 - Notes: list dots sit level with the text.
+- Notes: with the format bar open, the cursor's little pointer no longer
+  sits over it.
+
+### Changed
+- Notes: the Format button shows "Tt" instead of an underlined A.
+- The Introduction opens where you left it (from the top when it's new
+  or restored).
+- Placard: the pop sounds like a bubble popping.
 
 ## [1.3.0] - 2026-10-13
 

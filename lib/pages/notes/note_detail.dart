@@ -89,6 +89,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// The format bar (N17) is open.
   bool _formatOpen = false;
 
+  /// While it is, the cursor's handle isn't shown (Round 29).
+  final _formatShown = ValueNotifier(false);
+  late final _selectionControls = FormatBarSelectionControls(_formatShown);
+
   /// The text field, for the line numbers (N12) to follow.
   final _contentFieldKey = GlobalKey();
   late final AppLifecycleListener _lifecycleListener;
@@ -146,6 +150,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleController.dispose();
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _formatShown.dispose();
     _titleFocusNode.dispose();
     _contentScroll.dispose();
     _history.dispose();
@@ -505,11 +510,15 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
               // bar (N17; it took the Checkbox button's place, Round 27).
               if (_contentFocusNode.hasFocus)
                 BottomAction(
+                  // "Tt" (Round 29: not the underlined A).
                   icon: _formatOpen
                       ? Icons.keyboard_hide_outlined
-                      : Icons.text_format,
+                      : Icons.text_fields,
                   tooltip: _formatOpen ? 'Close formatting' : 'Format',
-                  onPressed: () => setState(() => _formatOpen = !_formatOpen),
+                  onPressed: () {
+                    setState(() => _formatOpen = !_formatOpen);
+                    _formatShown.value = _formatOpen;
+                  },
                 ),
             ],
             bar: _formatOpen && _contentFocusNode.hasFocus
@@ -615,6 +624,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                                   child: TextField(
                                     key: const Key('noteContentField'),
                                     controller: _contentController,
+                                    selectionControls: _selectionControls,
                                     focusNode: _contentFocusNode,
                                     autofocus: widget.isNew,
                                     keyboardType: TextInputType.multiline,

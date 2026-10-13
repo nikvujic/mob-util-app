@@ -338,8 +338,8 @@ fixtures for every stored format.
 After the to-do note and partial restore are released; before the
 notifications page. (1.2.1: Pip is good.)
 
-- [ ] Placard: the pop sound a **bubbly pop**, like a bubble bursting.
-- [ ] Introduction: **remembers where it was scrolled to**, unless it's
+- [x] Placard: the pop sound a **bubbly pop**, like a bubble bursting.
+- [x] Introduction: **remembers where it was scrolled to**, unless it's
   new or was just restored.
 - [x] **Code formatting** looks bad and unreadable; improve it. In the
   Introduction (1.2.0) most of "What's new" showed as code, with `- `
@@ -347,10 +347,12 @@ notifications page. (1.2.1: Pip is good.)
   that never closed. Fix both. *Done:* a block needs its closing ```
   (a lone one is text); code 0.88 of the text's size; no line numbers
   beside hidden fences; a test reads every version's "What's new".
-- [ ] The **Format** button's icon (an A with a line under it): pick a
-  better one.
-- [ ] The format bar goes **under** the little handle pointing at the
-  line being edited; it can go over it (it's easy to close).
+- [x] The **Format** button's icon (an A with a line under it): pick a
+  better one. *Done:* "Tt".
+- [x] The format bar goes **under** the little handle pointing at the
+  line being edited; it can go over it (it's easy to close). *Done:*
+  Android draws that handle above everything, so it's hidden while the
+  bar is open (selection handles stay).
 - [x] The **bigger list dots** sit too high next to the text and the
   line number (as the checkboxes did once); align them. *Done:* drawn
   as a circle centred on the text's middle (one character still).

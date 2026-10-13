@@ -1,5 +1,34 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:the_app/core/theme.dart';
+
+/// The text field's usual selection handles, but no cursor handle (the
+/// pointer under the caret) while [hideCursor] is true (Round 29): with
+/// the format bar open it sat over the bar. Selection handles stay.
+class FormatBarSelectionControls extends MaterialTextSelectionControls
+    with TextSelectionHandleControls {
+  final ValueListenable<bool> hideCursor;
+
+  FormatBarSelectionControls(this.hideCursor);
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textHeight, [
+    VoidCallback? onTap,
+  ]) {
+    final handle = super.buildHandle(context, type, textHeight, onTap);
+    if (type != TextSelectionHandleType.collapsed) return handle;
+    return ValueListenableBuilder(
+      valueListenable: hideCursor,
+      builder: (_, hidden, child) => hidden
+          ? const SizedBox.shrink(key: Key('cursorHandleHidden'))
+          : child!,
+      child: handle,
+    );
+  }
+}
 
 /// One button of a [FormatBar].
 class FormatButton {

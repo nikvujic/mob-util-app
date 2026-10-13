@@ -56,10 +56,10 @@ class PullDownList extends StatefulWidget {
     super.key,
     required List<Widget> children,
     this.bottomSpace = 0,
+    this.initialOffset = 0,
   })  : slivers = [SliverList.list(children: children)],
         cacheExtent = null,
-        reachShare = reach,
-        initialOffset = 0;
+        reachShare = reach;
 
   /// Scrolls the list around [row] just enough to show it whole, with
   /// [obscuredBottom] of the list's bottom treated as covered (e.g. by a

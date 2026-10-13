@@ -4,8 +4,8 @@
   tone sliding up with a little wobble, getting louder as it fills (no
   breathy noise: Round 18, it sounded like a TV's static). Stopped early
   when the finger lifts.
-- pop.wav: a balloon pop - a short burst of noise that dies away fast,
-  over a low thump.
+- pop.wav: a bubble popping (Round 29; a balloon's burst before): a
+  short "blup", its pitch leaping up, a tiny click, a smaller one after.
 
 Run from the repo root: python3 tool/make_placard_sounds.py
 """
@@ -50,18 +50,34 @@ def inflate():
 
 
 def pop():
-    length = 0.25
-    samples = []
-    smooth = 0.0
-    for i in range(int(RATE * length)):
-        t = i / RATE
-        noise = random.uniform(-1, 1)
-        smooth = 0.6 * smooth + 0.4 * noise  # a little less hiss
-        crack = smooth * math.exp(-t * 55)
-        thump = math.sin(2 * math.pi * 85 * t) * math.exp(-t * 22)
-        fade = min(1.0, (length - t) / 0.03)
-        samples.append(fade * (0.9 * crack + 0.6 * thump))
-    write('pop', samples)
+    """A bubble popping (Round 29: was a balloon's burst): a short tone
+    whose pitch leaps up as it dies away, the "blup" of a bubble, with a
+    tiny click as it breaks, and a smaller second one just after."""
+    length = 0.22
+    samples = [0.0] * int(RATE * length)
+
+    def bubble(at, base, rise, size):
+        phase = 0.0
+        start = int(RATE * at)
+        for i in range(start, len(samples)):
+            t = (i - start) / RATE
+            # The pitch shoots up (a bubble's resonance as it shrinks).
+            freq = base * math.exp(rise * t)
+            phase += 2 * math.pi * freq / RATE
+            attack = min(1.0, t / 0.002)
+            samples[i] += size * attack * math.exp(-t * 38) * math.sin(phase)
+
+    bubble(0.0, 420, 18, 0.95)
+    bubble(0.055, 700, 16, 0.35)
+    # The skin breaking: a few milliseconds of soft noise.
+    for i in range(int(RATE * 0.006)):
+        samples[i] += 0.35 * random.uniform(-1, 1) * (1 - i / (RATE * 0.006))
+    fade = int(RATE * 0.03)
+    for i in range(fade):
+        samples[-1 - i] *= i / fade
+    # As loud as the old pop (Round 25: keep its volume), not clipped.
+    peak = max(abs(v) for v in samples)
+    write('pop', [0.9 * v / peak for v in samples])
 
 
 inflate()

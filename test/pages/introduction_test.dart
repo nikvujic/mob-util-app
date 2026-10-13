@@ -9,6 +9,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 import '../helpers.dart';
 
@@ -139,6 +140,44 @@ void main() {
     );
     expect(tile, findsNothing);
     expect(find.text('No notes'), findsOneWidget);
+  });
+
+  group('opens where it was left (Round 29)', () {
+    final text = find.byKey(const Key('introductionText'));
+    double scrolled(WidgetTester tester) =>
+        PullDownList.scrolledOf(tester.element(text));
+
+    testWidgets('closed and opened again: the same place', (tester) async {
+      await start(tester);
+      await open(tester);
+      await tester.dragFrom(const Offset(400, 400), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      final left = scrolled(tester);
+      expect(left, greaterThan(100));
+      expect(preferences().introScroll, left);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await open(tester);
+      expect(scrolled(tester), closeTo(left, 0.5));
+    });
+
+    testWidgets('new (an update) or restored: from the top', (tester) async {
+      await start(
+        tester,
+        const Preferences(introVersion: '1.0.0 (1)', introScroll: 900),
+      );
+      expect(preferences().introScroll, 0, reason: 'an update brings it up');
+      await open(tester);
+      expect(scrolled(tester), 0);
+
+      container.read(preferencesProvider.notifier)
+        ..setIntroScroll(700)
+        ..setIntroDeleted(true);
+      expect(preferences().introScroll, 700, reason: 'kept while deleted');
+      container.read(preferencesProvider.notifier).setIntroDeleted(false);
+      expect(preferences().introScroll, 0);
+    });
   });
 
   testWidgets('the same version again: stays deleted', (tester) async {
