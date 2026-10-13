@@ -91,6 +91,9 @@ app still reads every version, so an update can never lose existing data.
 - `v16/storage/todo.json` — done to-dos (Round 30, todo.json version 2):
   as v15, "Pay the bills, šta god" done.
 - `v16/backup-plain.json` — backup (version 16) with that.
+- `v17/storage/pip.json` — Pip, the pet (Round 34, pip.json version 1):
+  hatched 13 Oct 2026 20:30 UTC, named "Bip 2".
+- `v17/backup-plain.json` — backup (version 17) with him.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

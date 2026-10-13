@@ -28,6 +28,8 @@ import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
+import 'package:the_app/models/pip_life.dart';
 
 /// Outcome of an export, for the UI to report.
 enum ExportResult { saved, cancelled }
@@ -58,6 +60,7 @@ class BackupExporter {
       placard: _ref.read(placardProvider),
       medicine: _ref.read(medicineProvider),
       todo: _ref.read(todoProvider),
+      pip: _ref.read(pipLifeProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -317,6 +320,7 @@ class BackupImporter {
       source.placard,
       source.medicine,
       source.todo,
+      source.pip,
     );
     return RestoreUndo._(
       previous,
@@ -566,6 +570,7 @@ class BackupImporter {
       undo._previous.placard,
       undo._previous.medicine,
       undo._previous.todo,
+      undo._previous.pip,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -640,6 +645,7 @@ class BackupImporter {
     Placard placard,
     MedicineBook medicine,
     List<TodoItem> todo,
+    PipLife? pip,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -650,6 +656,8 @@ class BackupImporter {
     _ref.read(placardProvider.notifier).replace(placard);
     _ref.read(medicineProvider.notifier).replaceAll(medicine);
     _ref.read(todoProvider.notifier).replaceAll(todo);
+    // From before him: he stays as he is.
+    if (pip != null) _ref.read(pipLifeProvider.notifier).replace(pip);
     await _ref.read(appStorageProvider).flush();
   }
 }

@@ -5,6 +5,7 @@ import 'package:the_app/core/crypto.dart' as crypto show open;
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -73,8 +74,9 @@ class Backup {
   /// sure, taken ones maybe without a time (O13); 13 = a medicine may
   /// remind again after its doses (Round 16); 14 = a medicine may be
   /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28);
-  /// 16 = to-do things may be done (Round 30).
-  static const version = 16;
+  /// 16 = to-do things may be done (Round 30); 17 = Pip, the pet (`pip`,
+  /// Round 34).
+  static const version = 17;
 
   final DateTime createdAt;
   final String appVersion;
@@ -98,6 +100,10 @@ class Backup {
   /// The to-do note's list (Round 28); empty in backups from before it.
   final List<TodoItem> todo;
 
+  /// Pip (Round 34); null in backups from before him: restoring one of
+  /// those leaves him as he is.
+  final PipLife? pip;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -113,6 +119,7 @@ class Backup {
     this.placard = Placard.initial,
     this.medicine = MedicineBook.empty,
     this.todo = const [],
+    this.pip,
     this.masterPassword,
   });
 
@@ -144,6 +151,7 @@ class Backup {
           'placard': placard.toJson(),
           'medicine': medicine.toJson(),
           'todo': [for (final t in todo) t.toJson()],
+          if (pip != null) 'pip': pip!.toJson(),
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -244,6 +252,9 @@ class Backup {
           for (final t in data['todo'] as List<dynamic>? ?? const [])
             TodoItem.fromJson(t as Map<String, dynamic>),
         ],
+        pip: data['pip'] == null
+            ? null
+            : PipLife.fromJson(data['pip'] as Map<String, dynamic>),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(

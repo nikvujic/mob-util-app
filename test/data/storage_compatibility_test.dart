@@ -17,6 +17,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/models/todo_item.dart';
+import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
@@ -697,6 +698,40 @@ void main() {
     expect(storage.unreadable, isEmpty);
   });
 
+  group('pip.json v1 / v17 backup (Pip, the pet, Round 34)', () {
+    void expectSample(PipLife? pip) {
+      expect(pip!.name, 'Bip 2');
+      expect(pip.born!.toUtc(), DateTime.utc(2026, 10, 13, 20, 30));
+      expect(pip.hatched, isTrue);
+    }
+
+    test('pip.json version 1 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v17/storage'),
+      );
+      expectSample(storage.initialPip);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v17 backup restores him', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v17/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.pip);
+    });
+
+    test('before him: an egg; older backups leave him be', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v16/storage'),
+      );
+      expect(storage.initialPip, PipLife.egg);
+      final file = BackupFile.parse(
+        File('test/fixtures/v16/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.pip, isNull);
+    });
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -826,6 +861,10 @@ void main() {
           '7fe387a63e7fe6fcfec32b8529001e29e1bfece45683b49be9b3bd19b7d97bef',
       'test/fixtures/v16/storage/notifications.json':
           '1157e0d44eaaa195391bd23e526b6ee8df8372925bbbf127e8a7228063fbe565',
+      'test/fixtures/v17/storage/pip.json':
+          '42af9cbe1b6e4f6787bf7b551c2662e736698733ea8e4855a8479791bffc8524',
+      'test/fixtures/v17/backup-plain.json':
+          'b9bfd92486de0d507b725942431714bdd522a299bfa978514abb2106a44e79bf',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

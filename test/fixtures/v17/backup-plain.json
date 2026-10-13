@@ -1,0 +1,30 @@
+{
+  "format": "the-app-backup",
+  "version": 17,
+  "createdAt": "2026-10-14T09:00:00.000Z",
+  "appVersion": "1.5.0 (38)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [],
+    "pip": {
+      "born": "2026-10-13T20:30:00.000Z",
+      "name": "Bip 2"
+    }
+  }
+}
