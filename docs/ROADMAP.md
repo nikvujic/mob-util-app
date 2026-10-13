@@ -371,6 +371,15 @@ done without him: kept for now, but he picks the real one, see 6.)
 
 **5. Install problem** — solved: a bad download (Nikola installed it).
 
+**8. Pip, a virtual pet** (idea; Nikola decides after seeing the cost)
+- [ ] Before v1 maybe: a small **room** at the bottom of the menu (a
+  field); the first time the menu opens, Pip pops out of the ground,
+  then stands and walks about. Drawn at a finer pixel scale than the
+  icon so walking and squash/stretch look right.
+- [ ] Later: his own Hub page (tamagotchi-like); doing things by
+  himself: sleeping at night, something on his screen, waking up after
+  the app was away.
+
 **7. Order to v1** — 0.28.0 is a test build of all this; Nikola tests,
   sends small fixes and his icon pick; then v1.0.0.
 
