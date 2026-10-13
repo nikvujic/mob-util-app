@@ -358,7 +358,10 @@ Nikola is importing his notes: the extra formats and their buttons now
 - [ ] The screen a little taller (now 14 x 8 looks flat; 14 x 11 too
   tall: try one row more), kept simple: no bezel line, solid eyes as
   now. A finer grid is fine, but the pixel look stays (the grass as it
-  is).
+  is). **Chosen: one row more (14 x 9)**, for the room and the app icon
+  too.
+- [ ] First: example pictures on his screen, to see whether the screen
+  needs a finer grid.
 
 **3. Hub pages: Recipes next** — of the new Hub pages (not the food
   tracker or Pip's page, which have their own places), Recipes is the
