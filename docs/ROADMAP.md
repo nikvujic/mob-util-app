@@ -330,6 +330,33 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 18 — Nikola's review of 0.25.0 (2026-10-13)
+
+**1. Quick fixes**
+- [ ] Planner: hour labels a touch further right (6 → 7).
+- [ ] Medicine: **undo** the red on late dose buttons (Round 17 misread:
+  "mark red missed" meant the calendar, where missed looked lighter than
+  taken).
+- [ ] Medicine history and calendar: **fixed colours**, not the theme's:
+  green for taken, a clear red for missed (it looked disabled), and
+  distinct ones for some / not sure.
+- [ ] Placard: the inflating sound without the white noise (keep the
+  rising "wuwuwu" tone).
+- [ ] Medicine: unticking a taken dose **asks first** (an accidental
+  touch); ticking doesn't.
+- [ ] Medicine: each card shows its **total doses taken**, small.
+- [ ] Medicine calendar: a tap on a day **doesn't** change states (it
+  shows that day below instead).
+- [ ] Counters: the feel of the first taps after opening is "off"
+  (a double sound or a different buzz?): look for a cause.
+
+**2. Medicine history for all**
+- [ ] The medicines at the top; a tap opens one's own history.
+- [ ] Each day as a small **table** (medicine × doses); tapping an item
+  opens that medicine's history, scrolled to the day.
+- [ ] Ready for years of doses (thousands of marks): lookups by an
+  index, lists built lazily.
+
 ### Round 17 — Nikola's review of 0.24.0 (2026-10-13)
 
 **1. Quick fixes**
