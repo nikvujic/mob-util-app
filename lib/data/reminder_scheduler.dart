@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,11 +16,15 @@ class Reminder {
   final String body;
   final ReminderKind kind;
 
+  /// Where tapping it leads (Round 19), as [NotificationTarget.payload].
+  final String? target;
+
   const Reminder({
     required this.at,
     required this.title,
     required this.body,
     this.kind = ReminderKind.planner,
+    this.target,
   });
 
   @override
@@ -33,6 +39,13 @@ abstract class ReminderScheduler {
 
   /// Replaces every scheduled reminder with [reminders].
   Future<void> replaceAll(List<Reminder> reminders);
+
+  /// The [Reminder.target] of each notification tapped while the app runs.
+  Stream<String> get opened;
+
+  /// The [Reminder.target] of the notification that started the app, if
+  /// one did; only once.
+  Future<String?> takeLaunch();
 }
 
 /// [ReminderScheduler] with Android notifications at exact times, kept
@@ -59,6 +72,27 @@ class NotificationReminderScheduler implements ReminderScheduler {
 
   final _plugin = FlutterLocalNotificationsPlugin();
   Future<bool>? _ready;
+  final _opened = StreamController<String>.broadcast();
+  bool _launchTaken = false;
+
+  @override
+  Stream<String> get opened {
+    _init(); // so taps are heard
+    return _opened.stream;
+  }
+
+  @override
+  Future<String?> takeLaunch() async {
+    if (_launchTaken || !await _init()) return null;
+    _launchTaken = true;
+    try {
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      if (details?.didNotificationLaunchApp != true) return null;
+      return details!.notificationResponse?.payload;
+    } on PlatformException {
+      return null;
+    }
+  }
 
   /// Sets the plugin up once; false where it can't run (e.g. tests).
   Future<bool> _init() => _ready ??= () async {
@@ -68,6 +102,11 @@ class NotificationReminderScheduler implements ReminderScheduler {
               android:
                   AndroidInitializationSettings('@drawable/ic_notification'),
             ),
+            // Tapped while the app runs (or is in the background).
+            onDidReceiveNotificationResponse: (response) {
+              final payload = response.payload;
+              if (payload != null) _opened.add(payload);
+            },
           );
           return true;
         } on MissingPluginException {
@@ -106,6 +145,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
           androidScheduleMode: exact
               ? AndroidScheduleMode.exactAllowWhileIdle
               : AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: reminder.target,
         );
       }
     } on PlatformException {

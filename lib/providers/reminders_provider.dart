@@ -5,6 +5,7 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
@@ -42,6 +43,8 @@ List<Reminder> planReminders({
     // Minutes beyond 0–59 roll over, also into the day before.
     final at = DateTime(day.year, day.month, day.day, 0, start - remind);
     if (!at.isAfter(now)) return;
+    // Tapped: the planner on that day, at the block (Round 19).
+    final target = PlannerTarget(day, start).payload;
     final time = '${formatMinutes(start)}–${formatMinutes(end)}';
     final when = remind == 0
         ? 'Now'
@@ -54,8 +57,14 @@ List<Reminder> planReminders({
               at: at,
               title: 'Planner',
               body: 'A block starts at ${formatMinutes(start)}',
+              target: target,
             )
-          : Reminder(at: at, title: title, body: '$when · $time'),
+          : Reminder(
+              at: at,
+              title: title,
+              body: '$when · $time',
+              target: target,
+            ),
     );
   }
 
@@ -78,10 +87,21 @@ List<Reminder> planReminders({
     final at = DateTime(pin.day.year, pin.day.month, pin.day.day, 0, pin.time);
     if (!at.isAfter(now) || !at.isBefore(last)) continue;
     final time = formatMinutes(pin.time);
+    final target = PlannerTarget(pin.day, pin.time).payload;
     reminders.add(
       hideTitles
-          ? Reminder(at: at, title: 'Planner', body: 'A reminder at $time')
-          : Reminder(at: at, title: pin.title, body: 'Reminder · $time'),
+          ? Reminder(
+              at: at,
+              title: 'Planner',
+              body: 'A reminder at $time',
+              target: target,
+            )
+          : Reminder(
+              at: at,
+              title: pin.title,
+              body: 'Reminder · $time',
+              target: target,
+            ),
     );
   }
   reminders.sort((a, b) => a.at.compareTo(b.at));

@@ -212,6 +212,22 @@ class FakeReminderScheduler implements ReminderScheduler {
   Future<void> replaceAll(List<Reminder> reminders) async {
     scheduled = List.of(reminders);
   }
+
+  /// Taps on notifications: add a [Reminder.target] to tap one.
+  final taps = StreamController<String>.broadcast();
+
+  @override
+  Stream<String> get opened => taps.stream;
+
+  /// The notification that started the app, if any.
+  String? launch;
+
+  @override
+  Future<String?> takeLaunch() async {
+    final target = launch;
+    launch = null;
+    return target;
+  }
 }
 
 /// Taps [finder] the way a screen reader does: its semantics action, with

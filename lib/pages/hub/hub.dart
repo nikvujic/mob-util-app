@@ -6,7 +6,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/pages/hub/tools.dart';
+import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/providers/hub_dots_provider.dart';
+import 'package:the_app/providers/notification_target_provider.dart';
 import 'package:the_app/providers/layout_provider.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 
@@ -21,6 +23,18 @@ class HubPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // A medicine notification tapped (Round 19): its page, once the Hub
+    // is open (locked, it waits for the next visit).
+    if (ref.watch(pendingTargetProvider) is MedicineTarget) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final pending = ref.read(pendingTargetProvider.notifier);
+        if (!context.mounted || pending.state is! MedicineTarget) return;
+        pending.state = null;
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => HubTool.medicine.page()),
+        );
+      });
+    }
     final order = ref.watch(layoutProvider).hub;
     final layout = ref.read(layoutProvider.notifier);
     return Scaffold(

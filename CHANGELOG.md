@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [0.26.0] - unreleased
 
+### Added
+- **Tapping a notification opens what it's about**: a block, routine or
+  reminder opens the Planner on its day, scrolled to it; a medicine opens
+  the Medicine page. A locked section still asks first; if it isn't
+  unlocked then, it goes there once it is.
+
 ### Changed
 - Medicine: a medicine's history has a **month calendar** instead of
   the strip: weeks as rows, each day coloured by how it went (with a

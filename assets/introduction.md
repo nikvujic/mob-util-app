@@ -31,6 +31,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 - **Routines** repeat on the weekdays you pick; edit them from the Routines button.
 - Blocks can have a **colour**, a **description** and a **reminder** before they start.
 - Times that run into another block turn red; **Find a free time** moves them.
+- Tapping a reminder's **notification** opens the planner at it.
 
 ## Hub
 Extra tools, as tiles. Hold a tile and drag it to rearrange them.

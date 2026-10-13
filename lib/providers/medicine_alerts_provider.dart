@@ -3,6 +3,7 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/medicine.dart';
+import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -30,6 +31,7 @@ List<Reminder> planMedicineReminders({
       Reminder(
         at: at,
         kind: ReminderKind.medicine,
+        target: const MedicineTarget().payload,
         title: hideNames ? 'Medicine' : medicine.name,
         body: switch ((hideNames, again)) {
           (false, false) => 'Time to take it · $clock',

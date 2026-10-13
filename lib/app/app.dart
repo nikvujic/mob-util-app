@@ -17,7 +17,9 @@ import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/pages/shop/shop.dart';
 import 'package:the_app/providers/fingerprint_provider.dart';
 import 'package:the_app/providers/hub_dots_provider.dart';
+import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
+import 'package:the_app/providers/notification_target_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -188,6 +190,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
   }
 
+  /// Goes to [section], as its tab in the bottom bar does: both the
+  /// section left and the one shown reset (G13, G18).
+  void _show(AppSection section) {
+    final index = AppSection.values.indexOf(section);
+    final left = _selectedIndex;
+    setState(() => _selectedIndex = index);
+    if (left != index) _sectionShown[left].fire();
+    _sectionShown[index].fire();
+  }
+
   @override
   Widget build(BuildContext context) {
     // The app locked while something was open on top of a locked section
@@ -207,6 +219,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(fingerprintProvider, (_, __) {});
     // Kept running, so reminders follow every planner change (P10).
     ref.listen(reminderPlannerProvider, (_, __) {});
+    // A notification tapped: to its section, on top of everything (its
+    // page takes it from there once unlocked, Round 19).
+    ref.listen(notificationOpenerProvider, (_, __) {});
+    ref.listen(pendingTargetProvider, (_, target) {
+      if (target == null) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      _show(switch (target) {
+        PlannerTarget() => AppSection.planner,
+        MedicineTarget() => AppSection.hub,
+      });
+    });
 
     return PopScope(
       canPop: false,
@@ -260,12 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: BottomNav(
           selectedIndex: _selectedIndex,
           hubDot: ref.watch(hubDotProvider),
-          onItemTapped: (index) {
-            final left = _selectedIndex;
-            setState(() => _selectedIndex = index);
-            if (left != index) _sectionShown[left].fire();
-            _sectionShown[index].fire();
-          },
+          onItemTapped: (index) => _show(AppSection.values[index]),
         ),
       ),
     );

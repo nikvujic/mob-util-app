@@ -287,6 +287,17 @@ a day scrolls there in steps until that day is built. `medicine.json`
 grows by about 80 bytes a mark: ten years of three doses a day is about
 a megabyte, written whole on each change, which is still quick.
 
+## Tapping a notification (Round 19)
+
+Each `Reminder` carries a target (`models/notification_target.dart`):
+`planner|day|minutes` or `medicine`, as the notification's payload. The
+scheduler reports taps (`opened`) and the notification that started the
+app (`takeLaunch`); `notificationOpenerProvider` turns them into
+`pendingTargetProvider`. The home screen closes pages on top and goes to
+the section; the page itself (Planner, Hub) takes the target when it's
+built, which a locked section's isn't, so a target waits until the
+section is unlocked.
+
 ## Red dots (O13)
 
 A Hub page can ask for attention with a red dot on its tile

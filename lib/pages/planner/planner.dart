@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
@@ -12,6 +13,7 @@ import 'package:the_app/pages/planner/routines.dart';
 import 'package:the_app/pages/planner/pin_menu.dart';
 import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/pins_provider.dart';
+import 'package:the_app/providers/notification_target_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
@@ -38,6 +40,29 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
 
   /// The day shown; null means today (also after midnight passes).
   DateTime? _day;
+
+  /// A notification tapped (Round 19): the minute to scroll to, and a
+  /// count that makes the timeline open there afresh each time.
+  int? _goTo;
+  int _jumps = 0;
+  PlannerTarget? _taking;
+
+  /// Takes a tapped notification's target (once this page is built, so
+  /// not while the Planner is locked: it waits for the next visit).
+  void _take(PlannerTarget target) {
+    if (identical(_taking, target)) return;
+    _taking = target;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(pendingTargetProvider.notifier).state = null;
+      _selection.clear();
+      setState(() {
+        _day = target.day;
+        _goTo = target.minutes;
+        _jumps++;
+      });
+    });
+  }
 
   DateTime get _now => ref.read(clockProvider)();
 
@@ -71,6 +96,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
 
   /// Coming back to the Planner shows today, not the day picked before.
   void _backToToday() {
+    _goTo = null; // the scroll stays where it is
     if (_day != null) setState(() => _day = null);
   }
 
@@ -522,6 +548,8 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     for (final p in allPins) {
       if (p.day.isBefore(firstDay)) firstDay = p.day;
     }
+    final target = ref.watch(pendingTargetProvider);
+    if (target is PlannerTarget) _take(target);
     var day = _day ?? today;
     if (day.isBefore(firstDay)) day = firstDay;
     final tasks = all.where((t) => isSameDay(t.day, day)).toList();
@@ -573,9 +601,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         ),
     ];
 
-    // Opens around the current hour (the scroll stays when changing day).
-    final opensAt =
-        PlannerTimeline.scaleFor(blocks).y(math.max(0, now.hour - 1) * 60);
+    // Opens around the current hour (the scroll stays when changing day),
+    // or at a tapped notification's time, a little above it.
+    final opensAt = PlannerTimeline.scaleFor(blocks).y(
+      _goTo != null ? math.max(0, _goTo! - 30) : math.max(0, now.hour - 1) * 60,
+    );
 
     return SelectionPopScope(
       controller: _selection,
@@ -597,6 +627,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                 // Reach mode too (Round 14): pulled down at 00:00, the
                 // first hours come into thumb reach, and snap back.
                 child: PullDownList(
+                  key: ValueKey(_jumps),
                   initialOffset: opensAt,
                   slivers: [
                     SliverToBoxAdapter(

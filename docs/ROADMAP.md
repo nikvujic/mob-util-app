@@ -342,9 +342,9 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   between them, each tap going to the nearer mark.
 
 **2. Tapping a notification opens what it's about**
-- [ ] A planner block, routine or reminder: the Planner, on that day,
+- [x] A planner block, routine or reminder: the Planner, on that day,
   scrolled to it. A medicine: the Medicine page.
-- [ ] Locks stay as they are: a locked section asks first. If it isn't
+- [x] Locks stay as they are: a locked section asks first. If it isn't
   unlocked then, the "go to" waits and happens on the next visit to the
   page once unlocked.
 

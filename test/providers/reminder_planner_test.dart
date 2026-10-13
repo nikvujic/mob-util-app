@@ -22,6 +22,12 @@ class _SlowScheduler implements ReminderScheduler {
   Future<bool> requestPermission() async => true;
 
   @override
+  Stream<String> get opened => const Stream.empty();
+
+  @override
+  Future<String?> takeLaunch() async => null;
+
+  @override
   Future<void> replaceAll(List<Reminder> reminders) async {
     running++;
     if (running > mostAtOnce) mostAtOnce = running;
