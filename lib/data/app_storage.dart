@@ -16,6 +16,7 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/todo_item.dart';
 
 /// Loads and saves all app data. Each feature has its own JSON file:
 ///
@@ -31,6 +32,7 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
 ///     <app documents>/data/medicine.json
 ///         {"version": 2, "medicines": [...], "taken": [...]}
+///     <app documents>/data/todo.json {"version": 1, "items": [...]}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -80,6 +82,9 @@ class AppStorage {
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
   static const shopFormatVersion = 3;
 
+  /// Version of `todo.json` (Round 28). History: 1 = first format.
+  static const todoFormatVersion = 1;
+
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
@@ -92,6 +97,7 @@ class AppStorage {
   final JsonFileStore? _layoutStore;
   final JsonFileStore? _placardStore;
   final JsonFileStore? _medicineStore;
+  final JsonFileStore? _todoStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -104,6 +110,7 @@ class AppStorage {
   final PageLayout initialLayout;
   final Placard initialPlacard;
   final MedicineBook initialMedicine;
+  final List<TodoItem> initialTodo;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -130,7 +137,8 @@ class AppStorage {
     this._pinsStore,
     this._layoutStore,
     this._placardStore,
-    this._medicineStore, {
+    this._medicineStore,
+    this._todoStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -141,6 +149,7 @@ class AppStorage {
     required this.initialLayout,
     required this.initialPlacard,
     required this.initialMedicine,
+    required this.initialTodo,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
     required this.initialPageLocks,
@@ -158,6 +167,7 @@ class AppStorage {
     PageLayout? initialLayout,
     this.initialPlacard = Placard.initial,
     this.initialMedicine = MedicineBook.empty,
+    this.initialTodo = const [],
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
     this.initialPageLocks = const {},
@@ -173,6 +183,7 @@ class AppStorage {
         _layoutStore = null,
         _placardStore = null,
         _medicineStore = null,
+        _todoStore = null,
         initialLayout = initialLayout ?? PageLayout.initial;
 
   /// Opens storage in [directory], or in the app's documents folder.
@@ -192,6 +203,7 @@ class AppStorage {
     final layoutStore = JsonFileStore(File('${dir.path}/layout.json'));
     final placardStore = JsonFileStore(File('${dir.path}/placard.json'));
     final medicineStore = JsonFileStore(File('${dir.path}/medicine.json'));
+    final todoStore = JsonFileStore(File('${dir.path}/todo.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
     final locks =
         await _load(settingsStore, (<AppSection>{}, <HubTool>{}), (json) {
@@ -219,6 +231,7 @@ class AppStorage {
       layoutStore,
       placardStore,
       medicineStore,
+      todoStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -297,6 +310,15 @@ class AppStorage {
         MedicineBook.empty,
         maxVersion: medicineFormatVersion,
         MedicineBook.fromJson,
+      ),
+      initialTodo: await _load(
+        todoStore,
+        [],
+        maxVersion: todoFormatVersion,
+        (json) => [
+          for (final e in json['items'] as List<dynamic>)
+            TodoItem.fromJson(e as Map<String, dynamic>),
+        ],
       ),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
@@ -398,6 +420,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveTodo(List<TodoItem> items) async {
+    await _todoStore?.write({
+      'version': todoFormatVersion,
+      'items': [for (final i in items) i.toJson()],
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': countersFormatVersion,
@@ -452,6 +481,7 @@ class AppStorage {
           _layoutStore,
           _placardStore,
           _medicineStore,
+          _todoStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -475,6 +505,7 @@ class AppStorage {
           _layoutStore,
           _placardStore,
           _medicineStore,
+          _todoStore,
         ])
           if (store != null) store,
       ];
@@ -510,6 +541,7 @@ class AppStorage {
     await _layoutStore?.flush();
     await _placardStore?.flush();
     await _medicineStore?.flush();
+    await _todoStore?.flush();
   }
 }
 

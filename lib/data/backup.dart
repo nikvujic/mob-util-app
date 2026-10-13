@@ -10,6 +10,7 @@ import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/todo_item.dart';
 
 /// Thrown when a backup file can't be read. [message] is shown to the user.
 class BackupFormatException implements Exception {
@@ -71,8 +72,8 @@ class Backup {
   /// (`medicine`, as in `medicine.json`, O6); 12 = doses missed or not
   /// sure, taken ones maybe without a time (O13); 13 = a medicine may
   /// remind again after its doses (Round 16); 14 = a medicine may be
-  /// important (Round 24).
-  static const version = 14;
+  /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28).
+  static const version = 15;
 
   final DateTime createdAt;
   final String appVersion;
@@ -93,6 +94,9 @@ class Backup {
   /// The medicine tracker (O6); empty in backups from before it.
   final MedicineBook medicine;
 
+  /// The to-do note's list (Round 28); empty in backups from before it.
+  final List<TodoItem> todo;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -107,6 +111,7 @@ class Backup {
     this.counters = const [],
     this.placard = Placard.initial,
     this.medicine = MedicineBook.empty,
+    this.todo = const [],
     this.masterPassword,
   });
 
@@ -137,6 +142,7 @@ class Backup {
           'counters': [for (final c in counters) c.toJson()],
           'placard': placard.toJson(),
           'medicine': medicine.toJson(),
+          'todo': [for (final t in todo) t.toJson()],
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -233,6 +239,10 @@ class Backup {
         medicine: data['medicine'] == null
             ? MedicineBook.empty
             : MedicineBook.fromJson(data['medicine'] as Map<String, dynamic>),
+        todo: [
+          for (final t in data['todo'] as List<dynamic>? ?? const [])
+            TodoItem.fromJson(t as Map<String, dynamic>),
+        ],
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(
@@ -250,7 +260,8 @@ class Backup {
         !unique(backup.shopItems.map((i) => i.id)) ||
         !unique(backup.plannerTasks.map((t) => t.id)) ||
         !unique(backup.plannerPins.map((p) => p.id)) ||
-        !unique(backup.counters.map((c) => c.id))) {
+        !unique(backup.counters.map((c) => c.id)) ||
+        !unique(backup.todo.map((t) => t.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
     return backup;

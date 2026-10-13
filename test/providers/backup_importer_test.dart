@@ -13,6 +13,7 @@ import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
@@ -22,6 +23,7 @@ import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/providers/todo_provider.dart';
 
 import '../helpers.dart';
 
@@ -206,6 +208,26 @@ void main() {
       expect(container.read(placardProvider).text, 'Current one');
       expect(container.read(placardProvider).count, 3);
     });
+  });
+
+  test('the to-do list comes back, and goes back on undo (Round 28)', () async {
+    final container = containerWith(AppStorage.inMemory());
+    BackupImporter importer() => container.read(backupImporterProvider);
+    container.read(todoProvider.notifier).add('Current');
+    final withTodo = Backup(
+      createdAt: backup.createdAt,
+      appVersion: backup.appVersion,
+      notes: const [],
+      shopItems: const [],
+      todo: const [TodoItem(id: 't1', text: 'From backup')],
+    );
+    final pick = importer().read(bytesOf(withTodo.encode())) as PlainPick;
+    expect(pick.backup.todoCount, 1);
+    final undo = await importer().restore(pick.backup);
+    expect(container.read(todoProvider).map((i) => i.text), ['From backup']);
+
+    await importer().undo(undo!);
+    expect(container.read(todoProvider).map((i) => i.text), ['Current']);
   });
 
   test('export then import gives back exactly the same data', () async {

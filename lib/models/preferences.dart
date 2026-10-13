@@ -54,6 +54,10 @@ class Preferences {
   /// once a week has gone by without a backup.
   final bool backupReminder;
 
+  /// The to-do note at the top of Notes (Round 28); its list stays when
+  /// it's turned off.
+  final bool todoNote;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -69,6 +73,7 @@ class Preferences {
     this.lastBackupAt,
     this.backupCountFrom,
     this.backupReminder = true,
+    this.todoNote = true,
   });
 
   /// How long until a backup is due again (D8).
@@ -134,6 +139,7 @@ class Preferences {
     DateTime? Function()? lastBackupAt,
     DateTime? Function()? backupCountFrom,
     bool? backupReminder,
+    bool? todoNote,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -156,6 +162,7 @@ class Preferences {
         backupCountFrom:
             backupCountFrom == null ? this.backupCountFrom : backupCountFrom(),
         backupReminder: backupReminder ?? this.backupReminder,
+        todoNote: todoNote ?? this.todoNote,
       );
 
   Map<String, dynamic> toJson() => {
@@ -177,6 +184,7 @@ class Preferences {
         if (backupCountFrom != null)
           'backupCountFrom': backupCountFrom!.toIso8601String(),
         'backupReminder': backupReminder,
+        'todoNote': todoNote,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -203,5 +211,6 @@ class Preferences {
             ? null
             : DateTime.tryParse(json['backupCountFrom'] as String),
         backupReminder: json['backupReminder'] as bool? ?? true,
+        todoNote: json['todoNote'] as bool? ?? true,
       );
 }

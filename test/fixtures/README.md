@@ -84,3 +84,7 @@ app still reads every version, so an update can never lose existing data.
   from 1 Oct, **important**; Vitamin C at 09:00, not; the Heart pills'
   morning dose taken 12 Oct at 08:01.
 - `v14/backup-plain.json` — backup (version 14) with that.
+- `v15/storage/todo.json` — the to-do note's list (Round 28, todo.json
+  version 1): "Call the dentist 🦷", "Pay the bills, šta god", "Water
+  the plants", in that order (ids t1–t3).
+- `v15/backup-plain.json` — backup (version 15) with that.

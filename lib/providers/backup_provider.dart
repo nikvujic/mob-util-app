@@ -15,6 +15,7 @@ import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/placard_provider.dart';
@@ -25,6 +26,7 @@ import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/providers/todo_provider.dart';
 
 /// Outcome of an export, for the UI to report.
 enum ExportResult { saved, cancelled }
@@ -54,6 +56,7 @@ class BackupExporter {
       counters: _ref.read(countersProvider),
       placard: _ref.read(placardProvider),
       medicine: _ref.read(medicineProvider),
+      todo: _ref.read(todoProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -115,6 +118,7 @@ class RestorableBackup {
   int get routineCount => _backup.routines.routines.length;
   int get pinCount => _backup.plannerPins.length;
   int get counterCount => _backup.counters.length;
+  int get todoCount => _backup.todo.length;
 }
 
 /// A picked backup file: plain (ready) or encrypted (needs its password).
@@ -264,6 +268,7 @@ class BackupImporter {
       source.counters,
       source.placard,
       source.medicine,
+      source.todo,
     );
     return RestoreUndo._(
       previous,
@@ -283,6 +288,7 @@ class BackupImporter {
       undo._previous.counters,
       undo._previous.placard,
       undo._previous.medicine,
+      undo._previous.todo,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -356,6 +362,7 @@ class BackupImporter {
     List<Counter> counters,
     Placard placard,
     MedicineBook medicine,
+    List<TodoItem> todo,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -365,6 +372,7 @@ class BackupImporter {
     _ref.read(countersProvider.notifier).replaceAll(counters);
     _ref.read(placardProvider.notifier).replace(placard);
     _ref.read(medicineProvider.notifier).replaceAll(medicine);
+    _ref.read(todoProvider.notifier).replaceAll(todo);
     await _ref.read(appStorageProvider).flush();
   }
 }

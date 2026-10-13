@@ -13,6 +13,7 @@ import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/providers/todo_provider.dart';
 
 /// Everything a section holds, to count or clear it as a whole: the
 /// planner's tasks, routines and reminders, the Hub's counters.
@@ -23,7 +24,9 @@ class SectionData {
 
   /// How many things [section] holds.
   int count(AppSection section) => switch (section) {
-        AppSection.notes => _ref.read(notesProvider).length,
+        // With the to-do note's list (Round 28).
+        AppSection.notes =>
+          _ref.read(notesProvider).length + _ref.read(todoProvider).length,
         AppSection.shop => _ref.read(shopProvider).length,
         AppSection.planner => _ref.read(plannerProvider).length +
             _ref.read(routinesProvider).routines.length +
@@ -59,6 +62,7 @@ class SectionData {
     switch (section) {
       case AppSection.notes:
         _ref.read(notesProvider.notifier).replaceAll(const []);
+        _ref.read(todoProvider.notifier).replaceAll(const []);
       case AppSection.shop:
         _ref.read(shopProvider.notifier).replaceAll(const []);
       case AppSection.planner:

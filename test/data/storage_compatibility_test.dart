@@ -16,6 +16,7 @@ import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 void main() {
@@ -613,6 +614,42 @@ void main() {
     });
   });
 
+  group('todo.json v1 / v15 backup (the to-do note, Round 28)', () {
+    void expectSample(List<TodoItem> items) {
+      expect(items.map((i) => (i.id, i.text)), [
+        ('t1', 'Call the dentist 🦷'),
+        ('t2', 'Pay the bills, šta god'),
+        ('t3', 'Water the plants'),
+      ]);
+    }
+
+    test('todo.json version 1 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v15/storage'),
+      );
+      expectSample(storage.initialTodo);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v15 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v15/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.todo);
+    });
+
+    test('older backups and storage have none', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v14/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.todo, isEmpty);
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v14/storage'),
+      );
+      expect(storage.initialTodo, isEmpty);
+    });
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -732,6 +769,10 @@ void main() {
           '363069098653b44771ddd73f008f6522b53b5663ac21065869fe85416e5b1e8c',
       'test/fixtures/v14/backup-plain.json':
           '8ab0ceded332cfb23f5dc0694161259b46527fd943c5748127099bb7e37b8dac',
+      'test/fixtures/v15/storage/todo.json':
+          '08cbf1c49b60b341d5c9c55756a77f63340a649b1e8b89222dc5876d96953a7b',
+      'test/fixtures/v15/backup-plain.json':
+          '7b152eb6450c34821620cf5fc0518aba22231334aa423f298e734a65c6720965',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':
