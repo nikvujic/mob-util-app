@@ -53,25 +53,22 @@ void main() {
       ];
 
   group('settings (O12)', () {
-    testWidgets('a gear in the top bar opens them; each is kept',
-        (tester) async {
+    testWidgets(
+        'a bell in the top bar opens the Notifications page (Round 31); '
+        'each is kept', (tester) async {
       await start(tester);
       await openMedicine(tester);
-      await tester.tap(find.byTooltip('Medicine settings'));
+      await tester.tap(find.byTooltip('Notifications'));
       await tester.pumpAndSettle();
-      expect(appBarTitle('Medicine settings'), findsOneWidget);
+      expect(appBarTitle('Notifications'), findsOneWidget);
 
-      expect(find.byKey(const Key('medicineFollowUp')), findsNothing,
-          reason: 'set per medicine now (Round 16)');
-
-      expect(find.byKey(const Key('medicineDot')), findsNothing,
-          reason: 'important medicines decide (Round 24)');
-
-      await tester.tap(find.byKey(const Key('medicineReminders')));
+      final on = find.byKey(const Key('notifyOn-medicine'));
+      await reveal(tester, on);
+      await tester.tap(on);
       await tester.pumpAndSettle();
       expect(container.read(preferencesProvider).medicineReminders, isFalse);
 
-      await tester.tap(find.byKey(const Key('medicineReminders')));
+      await tester.tap(on);
       await tester.pumpAndSettle();
       expect(container.read(preferencesProvider).medicineReminders, isTrue);
       expect(reminders.asked, 1, reason: 'turned on: asks to notify');
@@ -80,10 +77,12 @@ void main() {
     testWidgets('pause for a day or more, and resume', (tester) async {
       await start(tester);
       await openMedicine(tester);
-      await tester.tap(find.byTooltip('Medicine settings'));
+      await tester.tap(find.byTooltip('Notifications'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('medicinePause')));
+      final pause = find.byKey(const Key('notifyPause-medicine'));
+      await reveal(tester, pause);
+      await tester.tap(pause);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Through tomorrow'));
       await tester.pumpAndSettle();
@@ -91,7 +90,7 @@ void main() {
       expect(find.text('Paused'), findsOneWidget);
       expect(find.textContaining('through Tue, 13 Oct'), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('medicinePause')));
+      await tester.tap(pause);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Resume now'));
       await tester.pumpAndSettle();

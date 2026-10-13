@@ -689,7 +689,7 @@ void main() {
     final log = storage.initialNotificationLog;
     expect(log.scheduled.map((n) => (n.title, n.kind, n.target)), [
       ('Iron 🩸', 'medicine', 'medicine'),
-      ('Zubar, čet', 'planner', 'planner:2026-10-13:660'),
+      ('Zubar, čet', 'planner', 'planner|2026-10-13|660'),
     ]);
     expect(log.scheduled.last.at.toUtc(), DateTime.utc(2026, 10, 13, 8, 50));
     expect(log.scheduled.last.body, 'In 10 min · 11:00–12:00');
@@ -825,7 +825,7 @@ void main() {
       'test/fixtures/v16/backup-plain.json':
           '7fe387a63e7fe6fcfec32b8529001e29e1bfece45683b49be9b3bd19b7d97bef',
       'test/fixtures/v16/storage/notifications.json':
-          '6918b07e45f3b97e84aa932958cb4fafce41ed88f519ba5ef92e9017e5ea02d6',
+          '1157e0d44eaaa195391bd23e526b6ee8df8372925bbbf127e8a7228063fbe565',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

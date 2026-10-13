@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Notifications** in the menu: the latest notifications, even after
+  they're cleared from the phone (all of today's and yesterday's a tap
+  away; tap one to go to it), and each page's notification settings:
+  on or off, pause, private (no names on the lock screen) and a colour.
+  The planner's can now be paused or turned off too. Medicine's settings
+  moved here (its bell opens them).
+
 ### Changed
 - To-do: two lists, like Shop. Tapping a thing moves it down to
   **Completed** (and back); **Delete completed** clears them, with Undo.

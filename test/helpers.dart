@@ -248,3 +248,14 @@ Future<void> tapAsScreenReader(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
   handle.dispose();
 }
+
+/// Brings [finder] into view on the page on top: scrolling its list down
+/// until it's built, then to it (wherever it is).
+Future<void> reveal(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(finder, 100,
+        scrollable: find.byType(Scrollable).last);
+  }
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}

@@ -25,8 +25,16 @@ class NotificationLogNotifier extends StateNotifier<NotificationLog> {
     ], now);
   }
 
-  /// The history cleared, at [now].
-  void clear(DateTime now) => state = state.clearedAtTime(now);
+  /// The history cleared, at [now]. Returns when it was cleared before,
+  /// to [unclear] it (Undo).
+  DateTime? clear(DateTime now) {
+    final before = state.clearedAt;
+    state = state.clearedAtTime(now);
+    return before;
+  }
+
+  /// Undoes a [clear]: cleared [before] again, as it was.
+  void unclear(DateTime? before) => state = state.clearedAtTime(before);
 }
 
 final notificationLogProvider =

@@ -23,6 +23,8 @@ import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
+import 'package:the_app/providers/notification_log_provider.dart';
+import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -55,6 +57,15 @@ Future<void> seed(ProviderContainer container) async {
   container
       .read(preferencesProvider.notifier)
       .backedUp(designClock().subtract(const Duration(days: 10)));
+  // A notification shown an hour ago (Round 31), for the history.
+  container.read(notificationLogProvider.notifier).planned([
+    Reminder(
+      at: designClock().subtract(const Duration(hours: 1)),
+      title: 'Dentist',
+      body: 'Now · 09:00–10:00',
+      target: 'planner|2026-10-08|480',
+    ),
+  ], designClock().subtract(const Duration(hours: 2)));
   // The to-do note's list (Round 28).
   container.read(todoProvider.notifier)
     ..add('Call the dentist')
@@ -322,20 +333,32 @@ void main() {
         await t.tap(find.text('not set').first);
         await t.pumpAndSettle();
       },
-      'medicine settings': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Medicine'));
+      'notifications page': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Notifications'));
         await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Medicine settings'));
+        expect(find.text('Dentist'), findsOneWidget, reason: 'recent');
+      },
+      'notifications page, further down': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Notifications'));
+        await t.pumpAndSettle();
+        await reveal(t, find.byKey(const Key('notifyColour-medicine')));
+      },
+      'notification history': (t) async {
+        await openMenu(t);
+        await t.tap(find.text('Notifications'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('All 1'));
         await t.pumpAndSettle();
       },
       'medicine pause sheet': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Medicine'));
+        await openMenu(t);
+        await t.tap(find.text('Notifications'));
         await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Medicine settings'));
-        await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('medicinePause')));
+        final pause = find.byKey(const Key('notifyPause-medicine'));
+        await reveal(t, pause);
+        await t.tap(pause);
         await t.pumpAndSettle();
       },
       'medicine sheet': (t) async {

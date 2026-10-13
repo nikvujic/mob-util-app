@@ -94,4 +94,4 @@ app still reads every version, so an update can never lose existing data.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
-  Oct 11:00) on 13 Oct 08:50 UTC; cleared 12 Oct 19:00 UTC.
+  Oct 11:00, `planner|2026-10-13|660`) on 13 Oct 08:50 UTC; cleared 12 Oct 19:00 UTC.

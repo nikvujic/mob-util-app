@@ -387,10 +387,10 @@ notifications page later (it is bigger than it looked).
 
 **3. Notifications page** (later; replaces Round 23's plan and E2/E3):
 one page in the menu, history and settings together.
-- [ ] At the top, a window with the **3 most recent** notifications;
+- [x] At the top, a window with the **3 most recent** notifications;
   tapping it opens the **full history** (each one tapped goes to its
   page / item; a button clears it).
-- [ ] Under it, **settings for each page** (Planner, Medicine, Backup,
+- [x] Under it, **settings for each page** (Planner, Medicine, Backup,
   ...): mute, sound, pause (Medicine's pause moves here), colour,
   **plain or private** (private says just "a medicine" / "a task"
   instead of its name, so nothing sensitive shows on the lock screen),
@@ -408,7 +408,7 @@ How it's built (Round 31), in chunks:
   this phone only); those whose time has come, today and yesterday, are
   the history (Android doesn't tell an app which were shown, but a
   scheduled one is shown at its time). *Clear* hides them.
-- [ ] **The page** (menu → Notifications): the 3 latest in a window,
+- [x] **The page** (menu → Notifications): the 3 latest in a window,
   tapped: the whole history (tapping one goes to its page); under it,
   each page's settings.
 - [ ] **Sounds**: the phone's default, a few of the app's own, or

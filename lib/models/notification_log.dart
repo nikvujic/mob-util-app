@@ -87,8 +87,8 @@ class NotificationLog {
     );
   }
 
-  /// The history cleared at [now].
-  NotificationLog clearedAtTime(DateTime now) =>
+  /// The history cleared at [now] (null: as never cleared, for Undo).
+  NotificationLog clearedAtTime(DateTime? now) =>
       NotificationLog(scheduled: scheduled, clearedAt: now);
 
   Map<String, dynamic> toJson() => {

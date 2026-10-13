@@ -4,6 +4,7 @@ import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/backup/backup.dart';
+import 'package:the_app/pages/notifications/notifications.dart';
 import 'package:the_app/pages/security/security.dart';
 import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
@@ -110,6 +111,11 @@ class AppDrawer extends ConsumerWidget {
                           )
                         : null,
                     onTap: () => _open(context, const BackupPage()),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: const Text('Notifications'),
+                    onTap: () => _open(context, const NotificationsPage()),
                   ),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined),

@@ -260,6 +260,22 @@ the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
 notes.
 
+## Notifications page (E3, Round 31)
+
+Settings per page (`models/notify_settings.dart`: `NotifyPage`,
+`NotifyStyle` with private, colour and sound) live in `Preferences`, with
+the planner's on/off and pause beside Medicine's and Backup's.
+`ReminderPlanner` follows them: private pages plan without names (as a
+locked section does), `withNotifySettings` drops the planner's while off
+or paused and tints each page's reminders (`Reminder.colour` → Android's
+notification colour). The history is `NotificationLog`
+(`notifications.json`, this phone only): each plan is logged; what was
+scheduled and whose time has come, today or yesterday, is the history
+(Android doesn't tell an app which were shown). A tapped entry sets
+`pendingTargetProvider`, as a tapped notification does. The page is
+`pages/notifications/notifications.dart`, opened from the menu and, by
+name (`AppRoutes.notifications`), from Medicine.
+
 ## Planner routines (P8)
 
 A routine (`models/routine.dart`) is one stored item — times, weekdays,

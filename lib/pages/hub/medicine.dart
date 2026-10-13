@@ -7,10 +7,11 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/pages/hub/hold_to_take.dart';
 import 'package:the_app/pages/hub/medicine_history.dart';
-import 'package:the_app/pages/hub/medicine_settings.dart';
+import 'package:the_app/core/routes.dart';
 import 'package:the_app/pages/hub/medicine_sheet.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
@@ -20,6 +21,24 @@ import 'package:the_app/widgets/pull_down_list.dart';
 /// (with the time); several a day show "1 of 2". The history lists every
 /// day. Medicines are added at the bottom; tapping one's name edits or
 /// deletes it.
+
+/// Makes sure notifications may be shown, asking Android if needed, and
+/// says so if not (O13).
+Future<void> _allowNotifications(BuildContext context, WidgetRef ref) async {
+  final messenger = ScaffoldMessenger.of(context);
+  if (await ref.read(reminderPlannerProvider).requestPermission()) return;
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Notifications are off for this app, so medicine reminders '
+          'won\'t show. They can be turned on in Android\'s settings.',
+        ),
+      ),
+    );
+}
+
 class MedicinePage extends ConsumerWidget {
   const MedicinePage({super.key});
 
@@ -43,7 +62,7 @@ class MedicinePage extends ConsumerWidget {
     if (id == null || !context.mounted) return;
     // Its doses will remind: make sure notifications may show (O13).
     if (ref.read(preferencesProvider).medicineReminders) {
-      await allowMedicineReminders(context, ref);
+      await _allowNotifications(context, ref);
     }
     if (!context.mounted) return;
     final added =
@@ -171,18 +190,15 @@ class MedicinePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Medicine'),
-        // Settings in the top bar, like every Hub page that has them
-        // (O12).
+        // Its settings were all about notifications: they're on the
+        // Notifications page now (Round 31), a tap away from here.
         actions: [
           IconButton(
             key: const Key('medicineSettings'),
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Medicine settings',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const MedicineSettingsPage(),
-              ),
-            ),
+            icon: const Icon(Icons.notifications_outlined),
+            tooltip: 'Notifications',
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppRoutes.notifications),
           ),
         ],
       ),

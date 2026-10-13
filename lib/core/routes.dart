@@ -10,4 +10,7 @@ abstract final class AppRoutes {
   /// the app locking leaves it open (Round 24), it shows nothing of a
   /// section.
   static const menuPage = '/menu';
+
+  /// The Notifications page (Round 31), also opened from Medicine.
+  static const notifications = '/notifications';
 }

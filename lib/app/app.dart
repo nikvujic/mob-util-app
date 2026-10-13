@@ -10,6 +10,7 @@ import 'package:the_app/app/section_gate.dart';
 import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/pages/notifications/notifications.dart';
 import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/notes/notes.dart';
 import 'package:the_app/pages/hub/hub.dart';
@@ -65,6 +66,10 @@ class MyApp extends ConsumerWidget {
       AppRoutes.setMasterPassword => MaterialPageRoute<String>(
           settings: settings,
           builder: (_) => const PasswordFormPage(mode: PasswordFormMode.set),
+        ),
+      AppRoutes.notifications => MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const NotificationsPage(),
         ),
       _ => null,
     };
@@ -285,6 +290,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(pendingTargetProvider, (_, target) {
       if (target == null) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
+      // From the notifications' history (Round 31): the menu closes too.
+      final scaffold = _scaffold.currentState;
+      if (scaffold != null && scaffold.isDrawerOpen) scaffold.closeDrawer();
       switch (target) {
         case PlannerTarget():
           _show(AppSection.planner);
