@@ -288,47 +288,48 @@ patterns other work builds on (G11, themes), then the bigger features.
 
 ### Goal: v1.0.0 — the version Nikola starts using for real (2026-10-12)
 
-Everything from Round 11 and 12 except the new empty Other pages; the
-medicine tracker is in. In this order:
+Refreshed in Round 22 (2026-10-13). Done so far: the main pages (now
+line, reminders as marks, toasts, shop quantities, checkboxes), pages as
+a system (O9) with the Hub arranged by dragging (O8), Counters, Placard,
+Medicine, notification taps opening their page, the security pass
+(Round 21: nothing protected destroyed without the password, hidden
+reset), **per-page Hub locks (O7)**, Clear data per Hub page, frozen
+fixtures for every stored format.
 
-1. **Main pages:** now line (D) ✅, reminders as marks (C) ✅, toasts (F) ✅,
-   shop quantities (I) ✅, **checkboxes in notes** (N15; Nikola changed his
-   mind, they're in v1) ✅.
-   Also done: **no flash of a locked page on coming back** (L8).
-2. ✅ **Pages as a system first** (O9), so nothing big changes after v1:
-   one registry of pages (id, name, icon, page, its data, lockable);
-   the arrangement stored as page ids (unknown ids ignored, new pages
-   added at the end); each page's data in its own store and in backups
-   under its id. ✅ Then **arrange Other** by holding a tile and dragging
-   (O8).
-   ✅ **The three Other pages** (Hub now): counters (J), Džoni configurable (K, with
-   the inflate-and-shake hold; renamed **Placard**, Nikola's pick), medicine tracker (L).
-3. **Security & data:** a lock for each Other page (O7); Clear data per
-   Other page, not only "Other" as a whole (D7 follow-up, once Other has
-   more than counters); the data-loss and error sweep (D6); surviving an
-   uninstall (D8): at least a backup reminder or an automatic export to a
-   folder Nikola picks. Cloud save (D5) stays after v1.
-4. **Notifications:** reliability (E1), then settings with default
-   sounds per kind (planner blocks, routines, reminders, medicine) and
-   colours (E2).
-5. **UI improvements:** pictures for the Other pages and other visual
-   polish. The name stays **The App** (Nikola's master app for
-   everything: later maybe controls for his other services and
-   connectors to his projects). The icon: an **8-bit pixel character**,
-   our own (in the spirit of Claude Code's little space invader, not a
-   copy of it).
-6. **Release v1.0.0.** Before it: every stored format has its frozen
-   fixtures and backups carry all new data (medicine, Džoni's settings,
-   counter options, quantities), so nothing made with v1 is ever lost on
-   an update. Then Nikola clears the test data (Settings → Clear data)
-   and starts using it.
+**Left for v1** (in this order):
+1. [ ] **Backup reminder** (D8, first part): Backup shows when the last
+   export was; after a week without one, a quiet reminder (a dot on the
+   menu's Backup and a notification) to export. So a lost or reset phone
+   never costs more than a week.
+2. [ ] **Notifications, reliability check** (E1): after a restart of the
+   phone, with the app swiped away, with battery saving on, when the
+   clock or time zone changes, with exact alarms not allowed. Fix what's
+   missing; a short phone test list for Nikola.
+3. [ ] **The app's own icon**: an 8-bit pixel character of our own,
+   replacing Flutter's logo (launcher icon and the notification icon's
+   look checked).
+4. [ ] **Last pass before v1**: a read through everything that saves
+   (D6's remaining part: updates, crashes while saving, a full disk),
+   the Introduction checked against the app, the docs tidied.
+5. [ ] **Release v1.0.0.** Then Nikola clears the test data (Settings →
+   Clear data) and starts using it.
 
-After v1 (v2): the **page organizer** (O10): a quick-access menu from
-the right side with pages picked for it, maybe sections in the Hub
-(Other, renamed **Hub** in Round 13), later pages for Nikola's servers and connectors to his
-projects. Built on O9, so it adds places to put pages, not a rework.
-Also: the new Other pages (coin flip, days since/until, life
-percentage, birthdays, recipes, workout log), cloud save (D5).
+**After v1** (v1.x / v2, roughly by size):
+- Notification sounds per kind, picked in the app (E2; Android's own
+  per-channel settings work meanwhile).
+- More Markdown and a formatting bar (N17, Round 20).
+- **Automatic backup** to a folder Nikola picks (D8, second part), then
+  a self-hosted cloud backup (D5).
+- **Food tracker** (O14, design waiting for Nikola's review).
+- **Page organizer** (O10): a quick-access menu from the right side
+  with pages picked for it, maybe sections in the Hub, later pages for
+  Nikola's servers and connectors to his projects. Built on O9, so it
+  adds places to put pages, not a rework.
+- New Hub pages (see *Later / ideas*): birthdays & yearly dates, days
+  since / until, coin flip / decision helper, life percentage, recipes,
+  workout log, timer, habits, weight log, expenses, packing lists, a
+  converter.
+- UI polish (U1): animations, shake on a wrong password, transitions.
 
 ### Round 22 — towards v1 (2026-10-13)
 
@@ -337,7 +338,7 @@ maybe); per-page Hub locks first; then get v1 working so he can start
 using the app: a list of what's in v1 and what's later.
 - [x] Per-page Hub locks (Round 21, part 3).
 - [x] Round 20's Markdown (N17) moved to after v1.
-- [ ] The v1 list and the later list (below, "Goal: v1.0.0").
+- [x] The v1 list and the later list (above, "Goal: v1.0.0").
 
 ### Round 21 — security (2026-10-13), before Round 20's Markdown
 
