@@ -14,8 +14,9 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     if (!state.hatched) state = state.copyWith(born: now);
   }
 
-  /// A new name: trimmed, at most [maxName] letters; blank keeps his.
-  static const maxName = 12;
+  /// A new name: trimmed, at most [maxName] letters (Round 35: 6, so
+  /// it never overflows); blank keeps his.
+  static const maxName = 6;
   void rename(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return;

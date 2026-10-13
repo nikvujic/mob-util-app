@@ -39,14 +39,14 @@ void main() {
     expect(PipLife.ageText(12), '12 DAYS');
   });
 
-  test('renamed: trimmed, at most 12 letters; blank keeps his', () {
+  test('renamed: trimmed, at most 6 letters; blank keeps his', () {
     final pip = PipLifeNotifier(AppStorage.inMemory());
     pip.rename('  Bip  ');
     expect(pip.state.name, 'Bip');
     pip.rename('   ');
     expect(pip.state.name, 'Bip');
     pip.rename('Abcdefghijklmnop');
-    expect(pip.state.name, 'Abcdefghijkl');
+    expect(pip.state.name, 'Abcdef');
   });
 
   group('in backups', () {
