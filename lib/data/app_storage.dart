@@ -9,6 +9,7 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
+import 'package:the_app/models/notification_log.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
@@ -32,7 +33,9 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
 ///     <app documents>/data/medicine.json
 ///         {"version": 2, "medicines": [...], "taken": [...]}
-///     <app documents>/data/todo.json {"version": 1, "items": [...]}
+///     <app documents>/data/todo.json {"version": 2, "items": [...]}
+///     <app documents>/data/notifications.json
+///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
@@ -86,6 +89,11 @@ class AppStorage {
   /// things may be done (`done`, Round 30).
   static const todoFormatVersion = 2;
 
+  /// Version of `notifications.json` (Round 31): what was scheduled, for
+  /// the history. This phone only, not in backups. History: 1 = first
+  /// format.
+  static const notificationsFormatVersion = 1;
+
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
@@ -99,6 +107,7 @@ class AppStorage {
   final JsonFileStore? _placardStore;
   final JsonFileStore? _medicineStore;
   final JsonFileStore? _todoStore;
+  final JsonFileStore? _notificationsStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -112,6 +121,7 @@ class AppStorage {
   final Placard initialPlacard;
   final MedicineBook initialMedicine;
   final List<TodoItem> initialTodo;
+  final NotificationLog initialNotificationLog;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -139,7 +149,8 @@ class AppStorage {
     this._layoutStore,
     this._placardStore,
     this._medicineStore,
-    this._todoStore, {
+    this._todoStore,
+    this._notificationsStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -151,6 +162,7 @@ class AppStorage {
     required this.initialPlacard,
     required this.initialMedicine,
     required this.initialTodo,
+    required this.initialNotificationLog,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
     required this.initialPageLocks,
@@ -169,6 +181,7 @@ class AppStorage {
     this.initialPlacard = Placard.initial,
     this.initialMedicine = MedicineBook.empty,
     this.initialTodo = const [],
+    NotificationLog? initialNotificationLog,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
     this.initialPageLocks = const {},
@@ -185,6 +198,9 @@ class AppStorage {
         _placardStore = null,
         _medicineStore = null,
         _todoStore = null,
+        _notificationsStore = null,
+        initialNotificationLog =
+            initialNotificationLog ?? NotificationLog.empty,
         initialLayout = initialLayout ?? PageLayout.initial;
 
   /// Opens storage in [directory], or in the app's documents folder.
@@ -205,6 +221,8 @@ class AppStorage {
     final placardStore = JsonFileStore(File('${dir.path}/placard.json'));
     final medicineStore = JsonFileStore(File('${dir.path}/medicine.json'));
     final todoStore = JsonFileStore(File('${dir.path}/todo.json'));
+    final notificationsStore =
+        JsonFileStore(File('${dir.path}/notifications.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
     final locks =
         await _load(settingsStore, (<AppSection>{}, <HubTool>{}), (json) {
@@ -233,6 +251,7 @@ class AppStorage {
       placardStore,
       medicineStore,
       todoStore,
+      notificationsStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -320,6 +339,12 @@ class AppStorage {
           for (final e in json['items'] as List<dynamic>)
             TodoItem.fromJson(e as Map<String, dynamic>),
         ],
+      ),
+      initialNotificationLog: await _load(
+        notificationsStore,
+        NotificationLog.empty,
+        maxVersion: notificationsFormatVersion,
+        NotificationLog.fromJson,
       ),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
@@ -428,6 +453,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveNotificationLog(NotificationLog log) async {
+    await _notificationsStore?.write({
+      'version': notificationsFormatVersion,
+      ...log.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': countersFormatVersion,
@@ -483,6 +515,7 @@ class AppStorage {
           _placardStore,
           _medicineStore,
           _todoStore,
+          _notificationsStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -507,6 +540,7 @@ class AppStorage {
           _placardStore,
           _medicineStore,
           _todoStore,
+          _notificationsStore,
         ])
           if (store != null) store,
       ];
@@ -543,6 +577,7 @@ class AppStorage {
     await _placardStore?.flush();
     await _medicineStore?.flush();
     await _todoStore?.flush();
+    await _notificationsStore?.flush();
   }
 }
 

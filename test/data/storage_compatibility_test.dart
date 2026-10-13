@@ -682,6 +682,21 @@ void main() {
     });
   });
 
+  test('notifications.json version 1 (Round 31) loads', () async {
+    final storage = await AppStorage.open(
+      directory: copyOf('test/fixtures/v16/storage'),
+    );
+    final log = storage.initialNotificationLog;
+    expect(log.scheduled.map((n) => (n.title, n.kind, n.target)), [
+      ('Iron 🩸', 'medicine', 'medicine'),
+      ('Zubar, čet', 'planner', 'planner:2026-10-13:660'),
+    ]);
+    expect(log.scheduled.last.at.toUtc(), DateTime.utc(2026, 10, 13, 8, 50));
+    expect(log.scheduled.last.body, 'In 10 min · 11:00–12:00');
+    expect(log.clearedAt!.toUtc(), DateTime.utc(2026, 10, 12, 19));
+    expect(storage.unreadable, isEmpty);
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -809,6 +824,8 @@ void main() {
           '49ac46bdc944294b55e21d4edec324a21e06441a74eba602a21084431219f873',
       'test/fixtures/v16/backup-plain.json':
           '7fe387a63e7fe6fcfec32b8529001e29e1bfece45683b49be9b3bd19b7d97bef',
+      'test/fixtures/v16/storage/notifications.json':
+          '6918b07e45f3b97e84aa932958cb4fafce41ed88f519ba5ef92e9017e5ea02d6',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

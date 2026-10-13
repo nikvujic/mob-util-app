@@ -16,6 +16,7 @@ import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
+import 'package:the_app/providers/notification_log_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -131,6 +132,8 @@ class ReminderPlanner {
     _ref.listen(pageLocksProvider, (_, __) => _soon());
     _ref.listen(securityProvider, (_, __) => _soon());
     _ref.listen(medicineProvider, (_, __) => _soon());
+    // Whether notifications are allowed, known for the history.
+    _ref.listen(notificationsAllowedProvider, (_, __) {});
     _ref.listen(preferencesProvider, (before, after) {
       if (before == null ||
           before.medicineReminders != after.medicineReminders ||
@@ -227,9 +230,14 @@ class ReminderPlanner {
         days: reminderDays,
       ),
     ]..sort((a, b) => a.at.compareTo(b.at));
-    await _ref.read(reminderSchedulerProvider).replaceAll(
-          withKeepGoing(withNotifySettings(reminders, preferences), now: now),
-        );
+    final scheduled =
+        withKeepGoing(withNotifySettings(reminders, preferences), now: now);
+    // Kept for the history (Round 31); nothing shows if not allowed (as
+    // last looked at: asking here would hold planning up).
+    if (_ref.read(notificationsAllowedProvider).valueOrNull ?? true) {
+      _ref.read(notificationLogProvider.notifier).planned(scheduled, now);
+    }
+    await _ref.read(reminderSchedulerProvider).replaceAll(scheduled);
   }
 }
 

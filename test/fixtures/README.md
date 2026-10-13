@@ -91,3 +91,7 @@ app still reads every version, so an update can never lose existing data.
 - `v16/storage/todo.json` — done to-dos (Round 30, todo.json version 2):
   as v15, "Pay the bills, šta god" done.
 - `v16/backup-plain.json` — backup (version 16) with that.
+- `v16/storage/notifications.json` — the notifications' history (Round
+  31, notifications.json version 1; this phone only, not in backups):
+  Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
+  Oct 11:00) on 13 Oct 08:50 UTC; cleared 12 Oct 19:00 UTC.

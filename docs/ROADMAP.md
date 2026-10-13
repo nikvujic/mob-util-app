@@ -404,7 +404,7 @@ How it's built (Round 31), in chunks:
   notification's tint); **sound**. The scheduler follows them. *Done*
   (the model and the scheduler; the page next; sounds in their own
   chunk).
-- [ ] **History**: the app keeps what it scheduled (`notifications.json`,
+- [x] **History**: the app keeps what it scheduled (`notifications.json`,
   this phone only); those whose time has come, today and yesterday, are
   the history (Android doesn't tell an app which were shown, but a
   scheduled one is shown at its time). *Clear* hides them.
