@@ -330,6 +330,21 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 19 — Nikola's notes before the night (2026-10-13)
+
+**1. Reminder marks on the timeline**
+- [ ] The bell marks a little **bigger**, keeping the circle the same
+  distance from the timeline and from the hour labels.
+- [ ] A new **merge** rule: two reminders that aren't really close got
+  merged into one mark, which makes them harder to work with.
+
+**2. Tapping a notification opens what it's about**
+- [ ] A planner block, routine or reminder: the Planner, on that day,
+  scrolled to it. A medicine: the Medicine page.
+- [ ] Locks stay as they are: a locked section asks first. If it isn't
+  unlocked then, the "go to" waits and happens on the next visit to the
+  page once unlocked.
+
 ### Round 18 — Nikola's review of 0.25.0 (2026-10-13)
 
 **1. Quick fixes**
