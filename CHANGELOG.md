@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.25.0] - unreleased
+## [0.25.0] - 2026-10-13
 
 ### Fixed
 - Medicine: the red dot showed after midnight for any dose missed the

@@ -309,7 +309,8 @@ medicine tracker is in. In this order:
    uninstall (D8): at least a backup reminder or an automatic export to a
    folder Nikola picks. Cloud save (D5) stays after v1.
 4. **Notifications:** reliability (E1), then settings with default
-   sounds per kind and colours (E2).
+   sounds per kind (planner blocks, routines, reminders, medicine) and
+   colours (E2).
 5. **UI improvements:** pictures for the Other pages and other visual
    polish. The name stays **The App** (Nikola's master app for
    everything: later maybe controls for his other services and
@@ -529,7 +530,9 @@ Chunks, in order (each its own commit; release when a few are in):
   with a master password set, entering it. For clearing test data.
 - [ ] Later: **lock each Other page on its own** (like section locks).
 - [ ] Later (with E2): **default notification sounds** for tasks,
-  routines and reminders separately.
+  routines and reminders separately, and for medicine (Nikola, Round
+  17: a sound per kind, picked in the app; each kind already has its own
+  Android channel, so Android's per-channel sound works meanwhile).
 - [ ] Later (with D6): **what if the app is deleted?** Uninstalling
   deletes the app's files; ways to survive it: Android's backup (on, see
   ARCHITECTURE), exports, an automatic export to a folder the user picks
