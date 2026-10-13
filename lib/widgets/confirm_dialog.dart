@@ -138,3 +138,99 @@ Widget _saveChanges(BuildContext context, String title, String? message) =>
         ),
       ],
     );
+
+/// Asks to type [word] (DELETE) before something that matters goes for
+/// good (Round 32: an important medicine). True only once typed and
+/// confirmed.
+Future<bool> showTypeToConfirmDialog(
+  BuildContext context, {
+  required String title,
+  String? message,
+  String word = 'DELETE',
+  String confirmLabel = 'Delete',
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (_) => _TypeToConfirmDialog(
+      title: title,
+      message: message,
+      word: word,
+      confirmLabel: confirmLabel,
+    ),
+  );
+  return result ?? false;
+}
+
+class _TypeToConfirmDialog extends StatefulWidget {
+  final String title;
+  final String? message;
+  final String word;
+  final String confirmLabel;
+
+  const _TypeToConfirmDialog({
+    required this.title,
+    required this.message,
+    required this.word,
+    required this.confirmLabel,
+  });
+
+  @override
+  State<_TypeToConfirmDialog> createState() => _TypeToConfirmDialogState();
+}
+
+class _TypeToConfirmDialogState extends State<_TypeToConfirmDialog> {
+  final _typed = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _typed.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _typed.dispose();
+    super.dispose();
+  }
+
+  bool get _confirmed => _typed.text.trim().toUpperCase() == widget.word;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppDialog(
+      title: widget.title,
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.message case final message?) DialogMessage(message),
+          const SizedBox(height: 16),
+          TextField(
+            key: const Key('typeToConfirm'),
+            controller: _typed,
+            autofocus: true,
+            autocorrect: false,
+            enableSuggestions: false,
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              labelText: 'Type ${widget.word} to confirm',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        DialogButton(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        DialogButton(
+          label: widget.confirmLabel,
+          primary: true,
+          danger: true,
+          onPressed: _confirmed ? () => Navigator.of(context).pop(true) : null,
+        ),
+      ],
+    );
+  }
+}

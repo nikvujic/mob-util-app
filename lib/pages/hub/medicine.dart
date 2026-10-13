@@ -151,13 +151,24 @@ class MedicinePage extends ConsumerWidget {
       if (now != null) await _menu(context, ref, now);
       return;
     }
-    final confirmed = await showConfirmDialog(
-      context,
-      title: 'Delete ${medicine.name}?',
-      message: 'Its history goes too.',
-      confirmLabel: 'Delete',
-      destructive: true,
-    );
+    // An important one: typing DELETE, so it isn't lost by a slip
+    // (Round 32).
+    final bool confirmed;
+    if (medicine.important) {
+      confirmed = await showTypeToConfirmDialog(
+        context,
+        title: 'Delete ${medicine.name}?',
+        message: 'It\'s an important medicine. Its history goes too.',
+      );
+    } else {
+      confirmed = await showConfirmDialog(
+        context,
+        title: 'Delete ${medicine.name}?',
+        message: 'Its history goes too.',
+        confirmLabel: 'Delete',
+        destructive: true,
+      );
+    }
     if (!confirmed || !context.mounted) return;
     final before = notifier.remove(medicine.id);
     ScaffoldMessenger.of(context)

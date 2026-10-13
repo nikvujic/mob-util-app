@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- Notes: pressing bold, italic or strikethrough again takes it off (with
+  the cursor in or just after the word, or on an empty pair), instead of
+  adding more symbols.
+- After an update, the app could show twice in the recent apps.
+
 ### Added
 - **Notifications** in the menu: the latest notifications, even after
   they're cleared from the phone (all of today's and yesterday's a tap
@@ -16,6 +22,9 @@ Release with the installable APK.
   moved here (its bell opens them).
 
 ### Changed
+- Medicine: deleting an important medicine asks you to type DELETE.
+- Medicine: when editing, the number of doses stays as it was (it mixed
+  up the history); their times can still change.
 - To-do: two lists, like Shop. Tapping a thing moves it down to
   **Completed** (and back); **Delete completed** clears them, with Undo.
   The note now sits under the Introduction, and its buttons are on the

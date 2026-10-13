@@ -338,18 +338,20 @@ fixtures for every stored format.
 ### Round 32 — Nikola's review of 1.3.1 (2026-10-13)
 
 **1. Formats**
-- [ ] Bold, italic and strikethrough **toggle**: pressing one again on
+- [x] Bold, italic and strikethrough **toggle**: pressing one again on
   formatted text takes it off, instead of stacking more symbols.
 - [ ] Later (a lot later): **proper code blocks**, multi-line, with a
   nicer look, from a button of their own (strikethrough's button can go
   to make room: it's not used).
 
 **2. Improvements**
-- [ ] Sometimes after an update there are **two of the app** in the
-  recent apps: look into it.
-- [ ] Medicine: deleting an **important** medicine asks to type DELETE,
+- [x] Sometimes after an update there are **two of the app** in the
+  recent apps: look into it. *Found:* the manifest's empty
+  `taskAffinity` (Flutter's template) made a launch from the installer or
+  a notification start a second task; removed.
+- [x] Medicine: deleting an **important** medicine asks to type DELETE,
   like other places.
-- [ ] Medicine: the **number of doses** can't be changed once added (it
+- [x] Medicine: the **number of doses** can't be changed once added (it
   confused the history); their times still can.
 
 ### Pip, a virtual pet (Nikola's plan, Round 32) — bit by bit, between other features

@@ -241,15 +241,19 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                                   key: Key('medicineTime-$index'),
                                   label: Text(formatMinutes(minutes)),
                                   onPressed: () => _editTime(index),
-                                  // At least one dose.
-                                  onDeleted: _times.length > 1
+                                  // At least one dose; and once added, as
+                                  // many as it had (Round 32: changing
+                                  // the number confused its history).
+                                  onDeleted: widget.medicine == null &&
+                                          _times.length > 1
                                       ? () =>
                                           setState(() => _times.removeAt(index))
                                       : null,
                                   deleteButtonTooltipMessage:
                                       'Remove this dose',
                                 ),
-                              if (_times.length < maxDoses)
+                              if (widget.medicine == null &&
+                                  _times.length < maxDoses)
                                 ActionChip(
                                   key: const Key('medicineAddTime'),
                                   avatar: const Icon(Icons.add, size: 18),
@@ -258,6 +262,19 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                                 ),
                             ],
                           ),
+                          if (widget.medicine != null)
+                            Padding(
+                              key: const Key('medicineDosesFixed'),
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'Times can change; how many stays, for its '
+                                'history. For more or fewer, add it anew.',
+                                style: TextStyle(
+                                  color: context.colors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,

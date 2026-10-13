@@ -375,14 +375,65 @@ ListEdit toggleChecklistLine(String text, int cursor) {
 /// it ([start] to [end]; the same for a cursor).
 typedef MdEdit = ({String text, int start, int end});
 
+/// Where [mark] wraps something on the line from [from] to [to] of
+/// [text], as pairs of the marks' positions (in order, each opening one
+/// with the next). A single `*` that's part of `**` doesn't count.
+List<(int, int)> _markPairs(String text, int from, int to, String mark) {
+  final found = <int>[];
+  var i = text.indexOf(mark, from);
+  while (i != -1 && i + mark.length <= to) {
+    final single = mark == '*';
+    final partOfMore = single &&
+        ((i > 0 && text[i - 1] == '*') ||
+            (i + 1 < text.length && text[i + 1] == '*'));
+    if (partOfMore) {
+      i = text.indexOf(mark, i + 1);
+      continue;
+    }
+    found.add(i);
+    i = text.indexOf(mark, i + mark.length);
+  }
+  return [
+    for (var k = 0; k + 1 < found.length; k += 2) (found[k], found[k + 1]),
+  ];
+}
+
 /// Bold, italic, strike, highlight or code (N17): wraps the selection in
 /// [mark] (`**`, `*`, `~~`, `==`, `` ` ``), or unwraps it if it already
 /// is (the marks inside the selection or just around it). With nothing
-/// selected, puts a pair at the cursor and the cursor between them.
+/// selected: in (or just after) something already wrapped in [mark], it
+/// takes the marks off (Round 32: pressing again had stacked more);
+/// else puts a pair at the cursor and the cursor between them.
 MdEdit toggleWrap(String text, int start, int end, String mark) {
   final n = mark.length;
   final selected = text.substring(start, end);
   if (start == end) {
+    // Between an empty pair just put there: gone again.
+    if (start >= n &&
+        start + n <= text.length &&
+        text.substring(start - n, start) == mark &&
+        text.substring(start, start + n) == mark) {
+      return (
+        text: text.replaceRange(start - n, start + n, ''),
+        start: start - n,
+        end: start - n,
+      );
+    }
+    final line = _lines(text, start, start);
+    for (final (open, close) in _markPairs(text, line.start, line.end, mark)) {
+      if (start < open || start > close + n) continue;
+      final inner = text.substring(open + n, close);
+      final at = start <= open + n
+          ? open
+          : start <= close
+              ? start - n
+              : start - 2 * n;
+      return (
+        text: text.replaceRange(open, close + n, inner),
+        start: at,
+        end: at,
+      );
+    }
     return (
       text: text.replaceRange(start, end, '$mark$mark'),
       start: start + n,

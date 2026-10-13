@@ -186,14 +186,15 @@ void main() {
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('medicineName')), 'Pills 💊');
-    await tester.tap(find.byKey(const Key('medicineAddTime')));
-    await tester.pump();
-    expect(find.text('2 times a day, at'), findsOneWidget);
+    // How many doses stays as it was (Round 32); their times can change.
+    expect(find.byKey(const Key('medicineAddTime')), findsNothing);
+    expect(find.byTooltip('Remove this dose'), findsNothing);
+    expect(find.byKey(const Key('medicineDosesFixed')), findsOneWidget);
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     final m = container.read(medicineProvider).medicines.single;
     expect(m.name, 'Pills 💊');
-    expect(m.times, [480, 720], reason: 'a dose 4 hours after the last');
+    expect(m.times, [480]);
 
     // Its menu is open again, on the medicine as it now is (Round 24).
     expect(find.text('History'), findsOneWidget);
@@ -206,6 +207,24 @@ void main() {
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
     expect(container.read(medicineProvider).medicines, hasLength(1));
+  });
+
+  testWidgets('an important one: deleting asks to type DELETE (Round 32)',
+      (tester) async {
+    await openMedicine(tester, () {
+      medicine().add('Heart', times: [480], from: today, important: true);
+    });
+    await tester.tap(find.text('Heart'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    final delete = find.widgetWithText(FilledButton, 'Delete');
+    expect(tester.widget<FilledButton>(delete).onPressed, isNull);
+    await tester.enterText(find.byKey(const Key('typeToConfirm')), 'delete');
+    await tester.pump();
+    await tester.tap(delete);
+    await tester.pumpAndSettle();
+    expect(container.read(medicineProvider).medicines, isEmpty);
   });
 
   testWidgets('the sheet keeps at least one dose', (tester) async {

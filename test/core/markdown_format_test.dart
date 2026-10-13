@@ -102,6 +102,21 @@ void main() {
       expect(wrap('buy |', '*'), 'buy *|*');
       expect(wrap('|', '~~'), '~~|~~');
     });
+
+    test('pressed again it toggles, not stacking more marks (Round 32)', () {
+      // An empty pair just put there: gone again.
+      expect(wrap('buy **|**', '**'), 'buy |');
+      expect(wrap('*|*', '*'), '|');
+      // In a word that's bold, or just after it: the bold comes off.
+      expect(wrap('a **bo|ld** b', '**'), 'a bo|ld b');
+      expect(wrap('a **bold**| b', '**'), 'a bold| b');
+      expect(wrap('a ~~|gone~~ b', '~~'), 'a |gone b');
+      // Italic isn't fooled by bold's stars, and bold not by italic's.
+      expect(wrap('a **bo|ld**', '*'), 'a **bo*|*ld**');
+      expect(wrap('a *it|* **b**', '*'), 'a it| **b**');
+      // Outside any: a new pair, as before.
+      expect(wrap('**bold** a|', '**'), '**bold** a**|**');
+    });
   });
 
   group('lines (lists, checkboxes, quotes)', () {
