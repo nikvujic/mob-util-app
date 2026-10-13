@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.27.0] - unreleased
+## [0.27.0] - 2026-10-13
 
 ### Fixed
 - Security: the Hub's lock switch could hide under the phone's own
