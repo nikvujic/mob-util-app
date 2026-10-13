@@ -24,6 +24,10 @@ Release with the installable APK.
   meant for the calendar).
 - Placard: the inflating sound is just the rising tone, no static.
 - Planner: the hour labels a touch further from the edge.
+- Planner: reminder marks a bit bigger, midway between the hour and the
+  timeline. Two reminders share a mark only when they'd overlap (about
+  12 minutes apart, not 27); close ones each keep their own, and a tap
+  goes to the nearer one.
 - Counters: the first click after opening is in step with its buzz.
 
 ## [0.25.0] - 2026-10-13

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -250,20 +252,38 @@ class PlannerTimeline extends StatelessWidget {
       TimeScale.forBlocks(
           [for (final b in blocks) (start: b.start, end: b.end)]);
 
-  /// The reminders, grouped into marks: each takes the ones after it that
-  /// would be closer than a touch target, so marks never overlap.
+  /// The reminders, grouped into marks: each takes the ones after it whose
+  /// icons would overlap it (Round 19: before, any within a touch
+  /// target's height merged, even ones nearly half an hour apart).
   List<List<TimelinePin>> _pinGroups() {
     final sorted = [...pins]..sort((a, b) => a.time.compareTo(b.time));
     final groups = <List<TimelinePin>>[];
     for (final pin in sorted) {
       if (groups.isNotEmpty &&
-          _y(pin.time) - _y(groups.last.first.time) < _PinMark.size) {
+          _y(pin.time) - _y(groups.last.first.time) < _PinMark.apart) {
         groups.last.add(pin);
       } else {
         groups.add([pin]);
       }
     }
     return groups;
+  }
+
+  /// The part of mark [i]'s touch target (top and bottom, in its own
+  /// coordinates) that's nearer to it than to the marks beside it.
+  (double, double) _band(List<List<TimelinePin>> groups, int i) {
+    const half = _PinMark.size / 2;
+    final y = _y(groups[i].first.time);
+    var top = 0.0, bottom = _PinMark.size;
+    if (i > 0) {
+      final above = _y(groups[i - 1].first.time);
+      top = math.max(top, (above + y) / 2 - (y - half));
+    }
+    if (i + 1 < groups.length) {
+      final below = _y(groups[i + 1].first.time);
+      bottom = math.min(bottom, (y + below) / 2 - (y - half));
+    }
+    return (top, bottom);
   }
 
   /// Where [minutes] past midnight is on a timeline with [scale].
@@ -275,6 +295,7 @@ class PlannerTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final groups = _pinGroups();
     return SizedBox(
       // Room below 24:00 so the last hours can scroll clear of buttons.
       height: _y(PlannerTask.dayMinutes) + BottomActions.contentClearance,
@@ -367,7 +388,9 @@ class PlannerTimeline extends StatelessWidget {
             ),
           // On the left edge, by the hour labels: a touch target that ends
           // where the blocks start.
-          for (final group in _pinGroups())
+          // Marks closer than a touch target share the space between them:
+          // a tap goes to the nearer one.
+          for (final (i, group) in groups.indexed)
             Positioned(
               top: _y(group.first.time) - _PinMark.size / 2,
               left: _labelWidth - _PinMark.size,
@@ -376,6 +399,7 @@ class PlannerTimeline extends StatelessWidget {
               child: _PinMark(
                 group,
                 onTap: onPins == null ? null : () => onPins!(group),
+                band: _band(groups, i),
               ),
             ),
         ],
@@ -742,12 +766,28 @@ class _Block extends StatelessWidget {
 /// A reminder mark (P14): a bell at the timeline's left edge, or the
 /// number of reminders it stands for. A touch target of its own.
 class _PinMark extends StatelessWidget {
+  /// Its touch target.
   static const size = 48.0;
+
+  /// The bell, and the count circle (Round 19: a bit bigger).
+  static const icon = 20.0;
+  static const circle = 22.0;
+
+  /// Closer than this, two marks would overlap: they share one.
+  static const apart = circle + 4;
 
   final List<TimelinePin> pins;
   final VoidCallback? onTap;
 
-  const _PinMark(this.pins, {required this.onTap});
+  /// Where in its touch target taps count (top, bottom): next to another
+  /// mark, only its own half of what they share.
+  final (double, double) band;
+
+  const _PinMark(
+    this.pins, {
+    required this.onTap,
+    this.band = (0, size),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -760,38 +800,79 @@ class _PinMark extends StatelessWidget {
       button: true,
       label: label,
       excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 2),
-            child: pins.length == 1
-                ? Icon(Icons.notifications, size: 16, color: colors.accent)
-                : Container(
-                    key: const Key('pinCount'),
-                    width: 18,
-                    height: 18,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colors.accent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${pins.length}',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+      child: _HitBand(
+        top: band.$1,
+        bottom: band.$2,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              // Midway between the hour label and the timeline.
+              padding: const EdgeInsets.only(right: 3),
+              child: pins.length == 1
+                  ? Icon(Icons.notifications, size: icon, color: colors.accent)
+                  : Container(
+                      key: const Key('pinCount'),
+                      width: circle,
+                      height: circle,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: colors.accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${pins.length}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Lets taps through to [child] only between [top] and [bottom].
+class _HitBand extends SingleChildRenderObjectWidget {
+  final double top;
+  final double bottom;
+
+  const _HitBand({
+    required this.top,
+    required this.bottom,
+    required Widget super.child,
+  });
+
+  @override
+  _RenderHitBand createRenderObject(BuildContext context) =>
+      _RenderHitBand(top, bottom);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderHitBand renderObject) {
+    renderObject
+      ..top = top
+      ..bottom = bottom;
+  }
+}
+
+class _RenderHitBand extends RenderProxyBox {
+  double top;
+  double bottom;
+
+  _RenderHitBand(this.top, this.bottom);
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) =>
+      position.dy >= top &&
+      position.dy < bottom &&
+      super.hitTest(result, position: position);
 }
 
 /// [text] in as many whole lines as fit the height it's given (none if

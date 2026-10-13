@@ -6,6 +6,8 @@ import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/widgets/day_strip.dart';
 import 'package:the_app/widgets/selection.dart';
 
+import 'package:the_app/pages/planner/timeline.dart';
+
 import '../helpers.dart';
 
 /// Planner reminders (P14): a title at a time, no end, shown as a mark on
@@ -185,5 +187,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(pinsProvider).map((p) => p.title), ['One', 'Later']);
     expect(mark('One at 11:00'), findsOneWidget, reason: 'alone again');
+  });
+
+  group('marks (Round 19)', () {
+    testWidgets('20 minutes apart: a mark each (they used to merge)',
+        (tester) async {
+      await openPlanner(tester);
+      pins()
+        ..add(today, 'One', time: at(11))
+        ..add(today, 'Two', time: at(11) + 20);
+      await tester.pump();
+      expect(mark('One at 11:00'), findsOneWidget);
+      expect(mark('Two at 11:20'), findsOneWidget);
+      expect(find.byKey(const Key('pinCount')), findsNothing);
+    });
+
+    testWidgets('close marks: a tap goes to the nearer one', (tester) async {
+      await openPlanner(tester);
+      pins()
+        ..add(today, 'One', time: at(11))
+        ..add(today, 'Two', time: at(11) + 20);
+      await tester.pump();
+      await tester.ensureVisible(mark('One at 11:00'));
+      await tester.pumpAndSettle();
+      final one = tester.getCenter(mark('One at 11:00'));
+      final two = tester.getCenter(mark('Two at 11:20'));
+      expect(two.dy - one.dy, lessThan(48), reason: 'their targets overlap');
+
+      // In the overlap, just above halfway: One.
+      final half = (two.dy - one.dy) / 2;
+      expect(one.dy + half - 3, greaterThan(two.dy - 24),
+          reason: 'inside Two\'s target too');
+      await tester.tapAt(one + Offset(0, half - 3));
+      await tester.pumpAndSettle();
+      expect(find.text('One'), findsOneWidget);
+      expect(find.text('Two'), findsNothing);
+      await tester.tapAt(const Offset(5, 5)); // close the menu
+      await tester.pumpAndSettle();
+
+      // In the overlap, just below halfway: Two.
+      await tester.tapAt(two - Offset(0, half - 3));
+      await tester.pumpAndSettle();
+      expect(find.text('Two'), findsOneWidget);
+      expect(find.text('One'), findsNothing);
+    });
+
+    testWidgets('the bell a bit bigger', (tester) async {
+      await openPlanner(tester);
+      pins().add(today, 'One', time: at(11));
+      await tester.pump();
+      final bell = find.descendant(
+        of: find.byType(PlannerTimeline),
+        matching: find.byIcon(Icons.notifications),
+      );
+      expect(tester.getSize(bell).height, 20);
+    });
   });
 }

@@ -333,10 +333,13 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 ### Round 19 — Nikola's notes before the night (2026-10-13)
 
 **1. Reminder marks on the timeline**
-- [ ] The bell marks a little **bigger**, keeping the circle the same
+- [x] The bell marks a little **bigger**, keeping the circle the same
   distance from the timeline and from the hour labels.
-- [ ] A new **merge** rule: two reminders that aren't really close got
-  merged into one mark, which makes them harder to work with.
+- [x] A new **merge** rule: two reminders that aren't really close got
+  merged into one mark, which makes them harder to work with. Now they
+  merge only when their icons would overlap (about 12 minutes apart on a
+  normal hour, was about 27); closer touch targets share the space
+  between them, each tap going to the nearer mark.
 
 **2. Tapping a notification opens what it's about**
 - [ ] A planner block, routine or reminder: the Planner, on that day,
