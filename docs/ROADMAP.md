@@ -330,6 +330,29 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 20 — Nikola's review of 0.26.0 (2026-10-13)
+
+**1. Quick fixes**
+- [ ] Medicine: the card's total a bit higher, level with the drag
+  handle.
+- [ ] Placard: the inflating a bit longer; the pop quieter (the inflate
+  tone is soft, the pop was loud next to it).
+- [ ] Settings: line numbers first.
+- [ ] Notes: **Discard changes** always there (greyed out until there's
+  something to discard), not appearing and shifting the buttons.
+
+**2. Back to top in the medicine histories**
+- [ ] A button that scrolls to the top, in the history of all and in a
+  medicine's own; only once scrolled far (when it helps).
+
+**3. More Markdown, and a formatting bar** (N17)
+- [ ] More formats: inline `code`, code blocks (```), quotes (>),
+  highlighted text (==…==), a divider (---).
+- [ ] Controls for all of them, like the checkbox button: one button
+  (in place of the checkbox one) that opens a row of format buttons
+  above the keyboard, without leaving the text or covering it; tapping
+  one applies it to the selection or the line.
+
 ### Round 19 — Nikola's notes before the night (2026-10-13)
 
 **1. Reminder marks on the timeline**
