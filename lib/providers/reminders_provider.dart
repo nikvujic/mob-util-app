@@ -251,7 +251,7 @@ NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
 
 /// [reminders] as each page's settings say (Round 31): none from the
 /// planner while it's off or paused that day (Medicine and Backup leave
-/// theirs out when planning), each in its page's tint.
+/// theirs out when planning), each with its page's tint and sound.
 List<Reminder> withNotifySettings(
   List<Reminder> reminders,
   Preferences preferences,
@@ -267,8 +267,10 @@ List<Reminder> withNotifySettings(
         (!preferences.plannerReminders || preferences.plannerPausedOn(r.at))) {
       continue;
     }
-    kept.add(r.tinted(
-      BlockColor.fromName(preferences.styleOf(page).colour)?.stripe,
+    final style = preferences.styleOf(page);
+    kept.add(r.styled(
+      colour: BlockColor.fromName(style.colour)?.stripe,
+      sound: style.sound,
     ));
   }
   return kept;

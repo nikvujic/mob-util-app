@@ -39,9 +39,13 @@ abstract final class AppSound {
   static Future<void> fill() => _play('fill');
   static Future<void> stopFill() => _play('stopFill');
 
-  static Future<void> _play(String sound) async {
+  /// A notification sound (Round 31), heard when picking one: its raw
+  /// resource's name, e.g. `notify_chime`.
+  static Future<void> notify(String resource) => _play('notify', resource);
+
+  static Future<void> _play(String sound, [Object? argument]) async {
     try {
-      await _channel.invokeMethod<void>(sound);
+      await _channel.invokeMethod<void>(sound, argument);
     } on MissingPluginException {
       // Not on a phone.
     } on PlatformException {

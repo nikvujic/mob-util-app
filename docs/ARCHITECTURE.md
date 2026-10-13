@@ -271,7 +271,11 @@ or paused and tints each page's reminders (`Reminder.colour` → Android's
 notification colour). The history is `NotificationLog`
 (`notifications.json`, this phone only): each plan is logged; what was
 scheduled and whose time has come, today or yesterday, is the history
-(Android doesn't tell an app which were shown). A tapped entry sets
+(Android doesn't tell an app which were shown). Sounds (E2):
+`NotifySound` names a raw resource (`tool/make_notify_sounds.py`); the
+scheduler gives each sound its own channel (Android fixes a channel's
+sound), and `MainActivity` loads them to play when one is picked. A
+tapped entry sets
 `pendingTargetProvider`, as a tapped notification does. The page is
 `pages/notifications/notifications.dart`, opened from the menu and, by
 name (`AppRoutes.notifications`), from Medicine.

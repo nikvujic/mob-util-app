@@ -115,6 +115,18 @@ void main() {
     expect(container.read(preferencesProvider).plannerPausedUntil,
         DateTime(2026, 10, 8));
 
+    await tap('notifySound-medicine');
+    await tester.tap(find.text('Bell'));
+    await tester.pumpAndSettle();
+    expect(container.read(preferencesProvider).styleOf(NotifyPage.medicine),
+        const NotifyStyle(sound: NotifySound.bell));
+    expect(
+        find.descendant(
+          of: find.byKey(const Key('notifySound-medicine')),
+          matching: find.text('Bell'),
+        ),
+        findsOneWidget);
+
     final colours = find.byKey(const Key('notifyColour-backup'));
     await reveal(tester, colours);
     await tester.tap(find.descendant(

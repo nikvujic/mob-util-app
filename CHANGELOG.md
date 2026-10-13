@@ -10,7 +10,8 @@ Release with the installable APK.
 - **Notifications** in the menu: the latest notifications, even after
   they're cleared from the phone (all of today's and yesterday's a tap
   away; tap one to go to it), and each page's notification settings:
-  on or off, pause, private (no names on the lock screen) and a colour.
+  on or off, pause, private (no names on the lock screen), a sound
+  (the phone's, Chime, Bell, Soft or silent) and a colour.
   The planner's can now be paused or turned off too. Medicine's settings
   moved here (its bell opens them).
 

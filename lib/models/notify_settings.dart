@@ -17,14 +17,18 @@ enum NotifyPage {
 /// it's made, so each is a channel of its own.
 enum NotifySound {
   phone('Phone\'s default'),
-  chime('Chime'),
-  bell('Bell'),
-  soft('Soft'),
+  chime('Chime', 'notify_chime'),
+  bell('Bell', 'notify_bell'),
+  soft('Soft', 'notify_soft'),
   silent('Silent');
 
   final String label;
 
-  const NotifySound(this.label);
+  /// Its sound file (an Android raw resource, `tool/make_notify_sounds.py`);
+  /// none for the phone's own and for silence.
+  final String? resource;
+
+  const NotifySound(this.label, [this.resource]);
 
   static NotifySound fromName(String? name) =>
       values.where((s) => s.name == name).firstOrNull ?? phone;

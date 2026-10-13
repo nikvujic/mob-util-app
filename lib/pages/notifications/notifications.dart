@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
+import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/notification_log.dart';
 import 'package:the_app/models/notification_target.dart';
@@ -215,6 +216,38 @@ class _PageSettings extends ConsumerWidget {
         ),
       );
 
+  /// The sounds to pick from; each the app has its own of plays when
+  /// tapped, and picking closes the sheet.
+  Future<NotifySound?> _pickSound(BuildContext context, NotifySound now) =>
+      showModalBottomSheet<NotifySound>(
+        context: context,
+        builder: (context) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const ListTile(
+                title: Text(
+                  'Sound',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              for (final sound in NotifySound.values)
+                ListTile(
+                  title: Text(sound.label),
+                  selected: sound == now,
+                  trailing: sound == now ? const Icon(Icons.check) : null,
+                  onTap: () {
+                    if (sound.resource case final resource?) {
+                      AppSound.notify(resource);
+                    }
+                    Navigator.of(context).pop(sound);
+                  },
+                ),
+            ],
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
@@ -328,6 +361,21 @@ class _PageSettings extends ConsumerWidget {
                 style.copyWith(private: private),
               ),
             ),
+          ListTile(
+            key: Key('notifySound-${page.name}'),
+            leading: Icon(
+              style.sound == NotifySound.silent
+                  ? Icons.volume_off_outlined
+                  : Icons.volume_up_outlined,
+            ),
+            title: const Text('Sound'),
+            subtitle: Text(style.sound.label, style: muted()),
+            onTap: () async {
+              final picked = await _pickSound(context, style.sound);
+              if (picked == null) return;
+              notifier.setNotifyStyle(page, style.copyWith(sound: picked));
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
             title: const Text('Colour'),

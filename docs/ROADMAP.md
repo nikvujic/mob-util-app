@@ -411,7 +411,7 @@ How it's built (Round 31), in chunks:
 - [x] **The page** (menu → Notifications): the 3 latest in a window,
   tapped: the whole history (tapping one goes to its page); under it,
   each page's settings.
-- [ ] **Sounds**: the phone's default, a few of the app's own, or
+- [x] **Sounds**: the phone's default, a few of the app's own, or
   silent. (Android fixes a channel's sound when it's made, so each sound
   is a channel of its own.)
 - Icon per page: later, if wanted.

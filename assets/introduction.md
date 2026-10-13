@@ -57,7 +57,7 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 
 ## Notifications
 - The menu's **Notifications** shows the latest ones (tap **All** for today's and yesterday's), even after they're gone from the phone; tap one to go to it, **Clear** empties the list.
-- Under it, each page's notifications: on or off, **pause** for a while, **private** (no names on the lock screen) and a **colour**.
+- Under it, each page's notifications: on or off, **pause** for a while, **private** (no names on the lock screen), a **sound** (the phone's, one of the app's, or silent) and a **colour**.
 
 ## Settings
 - Line numbers, the counter click and vibration, whether this introduction comes back after updates (and restoring it if deleted), and **Clear data**.

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/models/notify_settings.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 /// What a reminder is about: each kind has its own Android channel, so
@@ -23,6 +24,9 @@ class Reminder {
   /// Its tint (Round 31), or null: the phone's own.
   final Color? colour;
 
+  /// Its sound (Round 31).
+  final NotifySound sound;
+
   const Reminder({
     required this.at,
     required this.title,
@@ -30,15 +34,19 @@ class Reminder {
     this.kind = ReminderKind.planner,
     this.target,
     this.colour,
+    this.sound = NotifySound.phone,
   });
 
-  Reminder tinted(Color? colour) => Reminder(
+  /// As its page's settings say (Round 31).
+  Reminder styled({Color? colour, NotifySound sound = NotifySound.phone}) =>
+      Reminder(
         at: at,
         title: title,
         body: body,
         kind: kind,
         target: target,
         colour: colour,
+        sound: sound,
       );
 
   @override
@@ -99,20 +107,31 @@ class NotificationReminderScheduler implements ReminderScheduler {
     ),
   };
 
-  /// Its kind's channel, with its tint (Round 31).
+  /// Its kind's channel, with its tint and sound (Round 31). Android fixes
+  /// a channel's sound when it's made, so each sound is a channel of its
+  /// own: the kind's as before for the phone's sound, `…-chime` etc.
   @visibleForTesting
   static AndroidNotificationDetails detailsFor(Reminder reminder) {
     final channel = _channels[reminder.kind]!;
-    final colour = reminder.colour;
-    if (colour == null) return channel;
+    final sound = reminder.sound;
+    final resource = sound.resource;
+    if (reminder.colour == null && sound == NotifySound.phone) return channel;
     return AndroidNotificationDetails(
-      channel.channelId,
-      channel.channelName,
+      sound == NotifySound.phone
+          ? channel.channelId
+          : '${channel.channelId}-${sound.name}',
+      sound == NotifySound.phone
+          ? channel.channelName
+          : '${channel.channelName} (${sound.label.toLowerCase()})',
       channelDescription: channel.channelDescription,
       importance: channel.importance,
       priority: channel.priority,
       category: channel.category,
-      color: colour,
+      color: reminder.colour,
+      playSound: sound != NotifySound.silent,
+      sound: resource == null
+          ? null
+          : RawResourceAndroidNotificationSound(resource),
     );
   }
 

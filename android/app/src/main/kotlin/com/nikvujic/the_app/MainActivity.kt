@@ -16,6 +16,9 @@ class MainActivity: FlutterFragmentActivity() {
     private var pop = 0
     private var fill = 0
 
+    /// The notification sounds (Round 31), heard when picking one.
+    private val notifySounds = mutableMapOf<String, Int>()
+
     /// The hold-to-take sound playing (Round 24), to stop on letting go.
     private var filling = 0
 
@@ -57,6 +60,11 @@ class MainActivity: FlutterFragmentActivity() {
         pop = pool.load(this, R.raw.pop, 1)
         // An important medicine's hold-to-take (Round 24): a glass filling.
         fill = pool.load(this, R.raw.fill, 1)
+        // The notification sounds to pick from (Round 31); notifications
+        // play them themselves, this is for hearing one when picking.
+        notifySounds["notify_chime"] = pool.load(this, R.raw.notify_chime, 1)
+        notifySounds["notify_bell"] = pool.load(this, R.raw.notify_bell, 1)
+        notifySounds["notify_soft"] = pool.load(this, R.raw.notify_soft, 1)
         sounds = pool
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/sound")
             .setMethodCallHandler { call, result ->
@@ -88,6 +96,10 @@ class MainActivity: FlutterFragmentActivity() {
                     "stopFill" -> {
                         if (filling != 0) pool?.stop(filling)
                         filling = 0
+                    }
+                    "notify" -> {
+                        val id = (call.arguments as? String)?.let { notifySounds[it] }
+                        if (id != null) pool?.play(id, 1f, 1f, 1, 0, 1f)
                     }
                     else -> {
                         result.notImplemented()

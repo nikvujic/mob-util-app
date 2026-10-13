@@ -89,6 +89,15 @@ void main() {
         everyElement(isNull));
   });
 
+  test('a page\'s sound is on its notifications only', () async {
+    preferences().setNotifyStyle(
+        NotifyPage.planner, const NotifyStyle(sound: NotifySound.bell));
+    expect((await planned(ReminderKind.planner)).map((r) => r.sound),
+        everyElement(NotifySound.bell));
+    expect(
+        (await planned(ReminderKind.medicine)).single.sound, NotifySound.phone);
+  });
+
   test('kept in preferences.json; a page from a newer app is skipped', () {
     final saved = Preferences(
       plannerReminders: false,
