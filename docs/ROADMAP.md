@@ -355,7 +355,7 @@ Nikola is importing his notes: the extra formats and their buttons now
   buttons above the keyboard, without leaving or covering the text.
 
 **4. Pip's head** (concepts, Nikola choosing)
-- [ ] The screen a little taller (now 14 x 8 looks flat; 14 x 11 too
+- [x] The screen a little taller (now 14 x 8 looks flat; 14 x 11 too
   tall: try one row more), kept simple: no bezel line, solid eyes as
   now. A finer grid is fine, but the pixel look stays (the grass as it
   is). **Chosen: one row more (14 x 9)**, for the room and the app icon
@@ -391,22 +391,22 @@ Nikola is importing his notes: the extra formats and their buttons now
   a finger touching the screen first lets go of a stuck Shift.
 
 **2. Notes for later** (on 1.0.0)
-- [ ] No toast when deleting the Introduction.
-- [ ] Backup: "Last backup" has two spaces between date and time; one
+- [x] No toast when deleting the Introduction.
+- [x] Backup: "Last backup" has two spaces between date and time; one
   there (the notes' dates keep theirs).
-- [ ] Menu header: "The App" a little lower, level with Pip.
-- [ ] The launcher icon looks a bit soft next to other apps' icons:
+- [x] Menu header: "The App" a little lower, level with Pip.
+- [x] The launcher icon looks a bit soft next to other apps' icons:
   sharper (e.g. drawn as a vector, crisp at any size).
 
 **3. More notes for later** (after Pip's room and its revisions)
-- [ ] Markdown lists: slightly bigger dots.
-- [ ] Even smaller headings: `####`, just a bit bigger than the text,
+- [x] Markdown lists: slightly bigger dots.
+- [x] Even smaller headings: `####`, just a bit bigger than the text,
   bold.
 - [ ] **To-do note** (new): a special note at the top of Notes, turned
   on and off like the Introduction; just a list, like Shop without
   sections: add items; tapping one completes (removes) it, with a "Task
   completed" toast and Undo.
-- [ ] A new note's title (the default or "Untitled"): tapping the title
+- [x] A new note's title (the default or "Untitled"): tapping the title
   button selects its text, so it's quick to replace.
 - [ ] **Restore only part of a backup** (a backup extractor): open a
   backup and pick what to bring back (e.g. one note), added to what's
@@ -465,7 +465,7 @@ done without him: kept for now, but he picks the real one, see 6.)
 **5. Install problem** — solved: a bad download (Nikola installed it).
 
 **8. Pip, a virtual pet** (idea; Nikola decides after seeing the cost)
-- [ ] Before v1 maybe: a small **room** at the bottom of the menu (a
+- [x] Before v1 maybe: a small **room** at the bottom of the menu (a
   field); the first time the menu opens, Pip pops out of the ground,
   then stands and walks about. Drawn at a finer pixel scale than the
   icon so walking and squash/stretch look right.
@@ -583,9 +583,9 @@ using the app: a list of what's in v1 and what's later.
   medicine's own; only once scrolled far (when it helps).
 
 **3. More Markdown, and a formatting bar** (N17; after v1, Round 22)
-- [ ] More formats: inline `code`, code blocks (```), quotes (>),
+- [x] More formats: inline `code`, code blocks (```), quotes (>),
   highlighted text (==…==), a divider (---).
-- [ ] Controls for all of them, like the checkbox button: one button
+- [x] Controls for all of them, like the checkbox button: one button
   (in place of the checkbox one) that opens a row of format buttons
   above the keyboard, without leaving the text or covering it; tapping
   one applies it to the selection or the line.
@@ -866,7 +866,7 @@ Chunks, in order (each its own commit; release when a few are in):
 - [x] **Clear data** in Settings (Z1): pick sections (Notes, Shop,
   Planner, Other) and clear everything in them, after typing RESET and,
   with a master password set, entering it. For clearing test data.
-- [ ] Later: **lock each Other page on its own** (like section locks).
+- [x] Later: **lock each Other page on its own** (like section locks).
 - [ ] Later (with E2): **default notification sounds** for tasks,
   routines and reminders separately, and for medicine (Nikola, Round
   17: a sound per kind, picked in the app; each kind already has its own
