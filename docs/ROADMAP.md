@@ -396,6 +396,24 @@ one page in the menu, history and settings together.
   instead of its name, so nothing sensitive shows on the lock screen),
   maybe an icon.
 
+How it's built (Round 31), in chunks:
+- [ ] **Settings per page** (Planner, Medicine, Backup), kept on this
+  phone: on / off; **pause** until a day (Planner, Medicine; Medicine's
+  switch and pause move here from its Hub settings); **private** (the
+  name left out: "A task at 10:00", "A dose is due"); **colour** (the
+  notification's tint); **sound**. The scheduler follows them.
+- [ ] **History**: the app keeps what it scheduled (`notifications.json`,
+  this phone only); those whose time has come, today and yesterday, are
+  the history (Android doesn't tell an app which were shown, but a
+  scheduled one is shown at its time). *Clear* hides them.
+- [ ] **The page** (menu → Notifications): the 3 latest in a window,
+  tapped: the whole history (tapping one goes to its page); under it,
+  each page's settings.
+- [ ] **Sounds**: the phone's default, a few of the app's own, or
+  silent. (Android fixes a channel's sound when it's made, so each sound
+  is a channel of its own.)
+- Icon per page: later, if wanted.
+
 ### Round 27 — polish and note formatting (2026-10-13)
 
 Nikola is importing his notes: the extra formats and their buttons now
