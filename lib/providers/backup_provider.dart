@@ -144,6 +144,9 @@ enum BackupPart {
   medicines
 }
 
+/// A copy's title (Round 30): "Bank" → "Bank (Copy)".
+String copyTitle(String title) => '$title (Copy)';
+
 /// What [BackupImporter.restorePart] did.
 class PartRestore {
   /// Puts things back as they were, like a full restore's.
@@ -378,7 +381,11 @@ class BackupImporter {
         continue;
       }
       copies++;
-      final copy = Note.fromJson({...note.toJson(), 'id': generateId()});
+      final copy = Note.fromJson({
+        ...note.toJson(),
+        'id': generateId(),
+        'title': copyTitle(note.title),
+      });
       if (!note.isLocked) {
         restoredNotes.add(copy);
         continue;
@@ -403,8 +410,9 @@ class BackupImporter {
       BackupPart part,
       String Function(T) idOf,
       Map<String, dynamic> Function(T) toJson,
-      T Function(Map<String, dynamic>) fromJson,
-    ) {
+      T Function(Map<String, dynamic>) fromJson, {
+      required String name,
+    }) {
       final ids = {for (final item in current) idOf(item)};
       final result = [...current];
       for (final item in from) {
@@ -412,7 +420,12 @@ class BackupImporter {
         added++;
         if (ids.contains(idOf(item))) {
           copies++;
-          result.add(fromJson({...toJson(item), 'id': generateId()}));
+          final json = toJson(item);
+          result.add(fromJson({
+            ...json,
+            'id': generateId(),
+            name: copyTitle(json[name] as String),
+          }));
         } else {
           result.add(item);
         }
@@ -437,6 +450,7 @@ class BackupImporter {
           (i) => i.id,
           (i) => i.toJson(),
           TodoItem.fromJson,
+          name: 'text',
         ));
     _ref.read(shopProvider.notifier).replaceAll(merged(
           _ref.read(shopProvider),
@@ -445,6 +459,7 @@ class BackupImporter {
           (i) => i.id,
           (i) => i.toJson(),
           ShopItem.fromJson,
+          name: 'name',
         ));
     _ref.read(pinsProvider.notifier).replaceAll(merged(
           _ref.read(pinsProvider),
@@ -453,6 +468,7 @@ class BackupImporter {
           (p) => p.id,
           (p) => p.toJson(),
           PlannerPin.fromJson,
+          name: 'title',
         ));
     _ref.read(countersProvider.notifier).replaceAll(merged(
           _ref.read(countersProvider),
@@ -461,6 +477,7 @@ class BackupImporter {
           (c) => c.id,
           (c) => c.toJson(),
           Counter.fromJson,
+          name: 'name',
         ));
 
     // Tasks and routines still there, or whose time is taken: left out.
@@ -505,11 +522,15 @@ class BackupImporter {
       if (!chosen(BackupPart.medicines, medicine.id)) continue;
       added++;
       var id = medicine.id;
+      var name = medicine.name;
       if (medicineIds.contains(id)) {
         copies++;
         id = generateId();
+        name = copyTitle(name);
       }
-      medicines.add(Medicine.fromJson({...medicine.toJson(), 'id': id}));
+      medicines.add(
+        Medicine.fromJson({...medicine.toJson(), 'id': id, 'name': name}),
+      );
       for (final mark in source.medicine.taken) {
         if (mark.medicine == medicine.id) {
           marks.add(DoseTaken.fromJson({...mark.toJson(), 'medicine': id}));

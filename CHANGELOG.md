@@ -4,6 +4,16 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- To-do: two lists, like Shop. Tapping a thing moves it down to
+  **Completed** (and back); **Delete completed** clears them, with Undo.
+  The note now sits under the Introduction, and its buttons are on the
+  side of the hand you're using.
+- Restore part of a backup: a wide **Restore** button at the bottom;
+  copies of things still in the app say "(Copy)".
+
 ## [1.3.1] - 2026-10-13
 
 ### Fixed

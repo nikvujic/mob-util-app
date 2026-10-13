@@ -88,3 +88,6 @@ app still reads every version, so an update can never lose existing data.
   version 1): "Call the dentist 🦷", "Pay the bills, šta god", "Water
   the plants", in that order (ids t1–t3).
 - `v15/backup-plain.json` — backup (version 15) with that.
+- `v16/storage/todo.json` — done to-dos (Round 30, todo.json version 2):
+  as v15, "Pay the bills, šta god" done.
+- `v16/backup-plain.json` — backup (version 16) with that.

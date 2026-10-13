@@ -82,8 +82,9 @@ class AppStorage {
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
   static const shopFormatVersion = 3;
 
-  /// Version of `todo.json` (Round 28). History: 1 = first format.
-  static const todoFormatVersion = 1;
+  /// Version of `todo.json` (Round 28). History: 1 = first format; 2 =
+  /// things may be done (`done`, Round 30).
+  static const todoFormatVersion = 2;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;

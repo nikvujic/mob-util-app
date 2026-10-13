@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/todo_provider.dart';
+import 'package:the_app/widgets/bottom_actions.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -16,9 +18,11 @@ void openTodo(BuildContext context) {
   );
 }
 
-/// The to-do note (Round 28): a plain list, like Shop without its
-/// sections. Tapping a thing marks it done: it goes, with "Task completed"
-/// and Undo. Holding one changes its text; the handle moves it.
+/// The to-do note (Round 28): like Shop, two lists (Round 30): the things
+/// to do, and *Completed* below. Tapping one moves it to the other list;
+/// holding one changes its text; the handle moves it within its list.
+/// The buttons sit on the hand's side; *Delete completed* clears the
+/// lower list.
 class TodoPage extends ConsumerStatefulWidget {
   const TodoPage({super.key});
 
@@ -59,22 +63,9 @@ class _TodoPageState extends ConsumerState<TodoPage> {
     });
   }
 
-  void _complete(TodoItem item) {
-    final notifier = _notifier;
-    final at = notifier.complete(item.id);
-    if (at == null) return;
+  void _toggle(TodoItem item) {
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: const Text('Task completed'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => notifier.restore(item, at),
-          ),
-        ),
-      );
+    _notifier.toggle(item.id);
   }
 
   void _edit(TodoItem item) {
@@ -86,61 +77,153 @@ class _TodoPageState extends ConsumerState<TodoPage> {
     );
   }
 
+  Future<void> _deleteCompleted(int count) async {
+    final confirmed = await showDeleteConfirmDialog(
+      context,
+      count: count,
+      singular: 'completed to-do',
+      plural: 'completed to-dos',
+    );
+    if (!confirmed || !mounted) return;
+    final notifier = _notifier;
+    final before = ref.read(todoProvider);
+    notifier.deleteCompleted();
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(count == 1
+              ? '1 completed to-do deleted'
+              : '$count completed to-dos deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => notifier.replaceAll(before),
+          ),
+        ),
+      );
+  }
+
+  Widget _section(List<TodoItem> items, {required bool done}) {
+    return SliverReorderableList(
+      itemCount: items.length,
+      // onReorderItem only exists on newer Flutter than we target.
+      // ignore: deprecated_member_use
+      onReorder: (oldIndex, newIndex) => _notifier.reorder(
+        done: done,
+        oldIndex: oldIndex,
+        newIndex: newIndex,
+      ),
+      proxyDecorator: (child, _, __) => Material(
+        type: MaterialType.transparency,
+        elevation: 6,
+        child: child,
+      ),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Padding(
+          key: ValueKey(item.id),
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: _TodoRow(
+            key: item.id == _addedId ? _addedKey : null,
+            item: item,
+            index: index,
+            onTap: () => _toggle(item),
+            onLongPress: () => _edit(item),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = ref.watch(todoProvider);
+    final open = [
+      for (final i in items)
+        if (!i.done) i
+    ];
+    final done = [
+      for (final i in items)
+        if (i.done) i
+    ];
+    final colors = context.colors;
     return Scaffold(
       appBar: AppBar(title: const Text('To-do')),
       body: items.isEmpty
           ? const EmptyState(icon: Icons.checklist, message: 'Nothing to do')
           : PullDownList(
-              bottomSpace: SelectionActions.listBottomSpace,
+              bottomSpace: BottomActions.contentClearance,
               // Rows stay built, so a new one can be scrolled to.
               cacheExtent: 10000,
               slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.only(top: 8),
-                  sliver: SliverReorderableList(
-                    itemCount: items.length,
-                    // onReorderItem only exists on newer Flutter than we
-                    // target.
-                    // ignore: deprecated_member_use
-                    onReorder: _notifier.reorder,
-                    proxyDecorator: (child, _, __) => Material(
-                      type: MaterialType.transparency,
-                      elevation: 6,
-                      child: child,
+                _SectionHeader(title: 'To do', count: open.length),
+                if (open.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        'Nothing to do',
+                        style: TextStyle(color: colors.textMuted),
+                      ),
                     ),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return Padding(
-                        key: ValueKey(item.id),
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: _TodoRow(
-                          key: item.id == _addedId ? _addedKey : null,
-                          item: item,
-                          index: index,
-                          onTap: () => _complete(item),
-                          onLongPress: () => _edit(item),
-                        ),
-                      );
-                    },
                   ),
-                ),
+                _section(open, done: false),
+                if (done.isNotEmpty) ...[
+                  _SectionHeader(title: 'Completed', count: done.length),
+                  _section(done, done: true),
+                ],
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: null,
-        tooltip: 'Add a to-do',
-        onPressed: _addItems,
-        child: const Icon(Icons.add),
+      floatingActionButton: BottomActions(
+        actions: [
+          BottomAction(
+            icon: Icons.delete_sweep_outlined,
+            tooltip: 'Delete completed',
+            danger: true,
+            enabled: done.isNotEmpty,
+            onPressed: () => _deleteCompleted(done.length),
+          ),
+          BottomAction(
+            icon: Icons.add,
+            tooltip: 'Add a to-do',
+            onPressed: _addItems,
+          ),
+        ],
       ),
     );
   }
 }
 
-/// A compact row, like Shop's: an empty circle (tap anywhere: done), the
-/// text, the handle.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final int count;
+
+  const _SectionHeader({required this.title, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+        child: Text(
+          '${title.toUpperCase()}  ·  $count',
+          style: TextStyle(
+            color: context.colors.accent,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A compact row, like Shop's: an empty circle (done: a tick), the text,
+/// the handle. A tap anywhere on it moves it to the other list.
 class _TodoRow extends StatelessWidget {
   final TodoItem item;
   final int index;
@@ -167,20 +250,26 @@ class _TodoRow extends StatelessWidget {
           content: Row(
             children: [
               Semantics(
-                checked: false,
+                checked: item.done,
                 child: SizedBox.square(
                   dimension: kMinInteractiveDimension,
                   child: Icon(
-                    Icons.radio_button_unchecked,
+                    item.done ? Icons.check : Icons.radio_button_unchecked,
                     size: 22,
-                    color: colors.accent,
+                    color: item.done ? colors.textSecondary : colors.accent,
                   ),
                 ),
               ),
               Expanded(
                 child: Text(
                   item.text,
-                  style: TextStyle(fontSize: 15, color: colors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color:
+                        item.done ? colors.textSecondary : colors.textPrimary,
+                    decoration: item.done ? TextDecoration.lineThrough : null,
+                    decorationColor: colors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -206,7 +295,11 @@ class TodoTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(todoProvider);
+    // What's left to do (Round 30: done ones stay, in Completed).
+    final items = [
+      for (final i in ref.watch(todoProvider))
+        if (!i.done) i,
+    ];
     final colors = context.colors;
     return SelectableCard(
       key: const Key('todoTile'),

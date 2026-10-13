@@ -210,22 +210,24 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                     // Room below the last note for the buttons.
                     bottomSpace: SelectionActions.listBottomSpace,
                     slivers: [
-                      // The to-do note first (Round 28), then the
-                      // Introduction (N16), apart from the notes.
-                      if (todo)
+                      // The Introduction first (N16), then the to-do
+                      // note (Round 28; under it since Round 30), apart
+                      // from the notes.
+                      if (introduction)
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
                           sliver: SliverToBoxAdapter(
-                            child: TodoTile(
+                            child: IntroductionTile(
                               selectionMode: _selection.isActive,
                             ),
                           ),
                         ),
-                      if (introduction)
+                      if (todo)
                         SliverPadding(
-                          padding: EdgeInsets.fromLTRB(0, todo ? 4 : 8, 0, 4),
+                          padding: EdgeInsets.fromLTRB(
+                              0, introduction ? 4 : 8, 0, 4),
                           sliver: SliverToBoxAdapter(
-                            child: IntroductionTile(
+                            child: TodoTile(
                               selectionMode: _selection.isActive,
                             ),
                           ),

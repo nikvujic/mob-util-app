@@ -650,6 +650,38 @@ void main() {
     });
   });
 
+  group('todo.json v2 / v16 backup (done to-dos, Round 30)', () {
+    void expectSample(List<TodoItem> items) {
+      expect(items.map((i) => (i.text, i.done)), [
+        ('Call the dentist 🦷', false),
+        ('Pay the bills, šta god', true),
+        ('Water the plants', false),
+      ]);
+    }
+
+    test('todo.json version 2 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v16/storage'),
+      );
+      expectSample(storage.initialTodo);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v16 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v16/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.todo);
+    });
+
+    test('version 1 things are not done', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v15/storage'),
+      );
+      expect(storage.initialTodo.map((i) => i.done), everyElement(isFalse));
+    });
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -773,6 +805,10 @@ void main() {
           '08cbf1c49b60b341d5c9c55756a77f63340a649b1e8b89222dc5876d96953a7b',
       'test/fixtures/v15/backup-plain.json':
           '7b152eb6450c34821620cf5fc0518aba22231334aa423f298e734a65c6720965',
+      'test/fixtures/v16/storage/todo.json':
+          '49ac46bdc944294b55e21d4edec324a21e06441a74eba602a21084431219f873',
+      'test/fixtures/v16/backup-plain.json':
+          '7fe387a63e7fe6fcfec32b8529001e29e1bfece45683b49be9b3bd19b7d97bef',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

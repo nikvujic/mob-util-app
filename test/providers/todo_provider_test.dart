@@ -26,47 +26,63 @@ void main() {
     expect(todo.state.map((i) => i.id).toSet(), hasLength(2));
   });
 
-  test('done takes it off; undo puts it back where it was', () {
+  List<String> open() => [
+        for (final i in todo.state)
+          if (!i.done) i.text,
+      ];
+  List<String> done() => [
+        for (final i in todo.state)
+          if (i.done) i.text,
+      ];
+
+  test(
+      'done goes to the top of Completed; back, to the end of To do '
+      '(Round 30)', () {
     todo
       ..add('A')
       ..add('B')
       ..add('C');
-    final b = todo.state[1];
-    final at = todo.complete(b.id);
-    expect(texts(), ['A', 'C']);
-    expect(at, 1);
-    todo.restore(b, at!);
-    expect(texts(), ['A', 'B', 'C']);
-    // Twice is harmless; an unknown id does nothing.
-    todo.restore(b, 0);
-    expect(texts(), ['A', 'B', 'C']);
-    expect(todo.complete('nope'), isNull);
+    todo.toggle(idOf('B'));
+    todo.toggle(idOf('A'));
+    expect(open(), ['C']);
+    expect(done(), ['A', 'B'], reason: 'the latest on top');
+    todo.toggle(idOf('B'));
+    expect(open(), ['C', 'B']);
+    todo.add('D');
+    expect(open(), ['C', 'B', 'D'], reason: 'added to To do');
+    todo.toggle('nope'); // nothing
+    expect(todo.state, hasLength(4));
   });
 
-  test('undo after the list got shorter goes to the end', () {
+  test('Delete completed takes only the done ones', () {
     todo
       ..add('A')
       ..add('B')
       ..add('C');
-    final c = todo.state[2];
-    final at = todo.complete(c.id)!;
-    todo.complete(idOf('A'));
-    todo.restore(c, at);
-    expect(texts(), ['B', 'C']);
+    todo
+      ..toggle(idOf('A'))
+      ..toggle(idOf('C'));
+    final gone = todo.deleteCompleted();
+    expect(gone.map((i) => i.text), ['C', 'A']);
+    expect(texts(), ['B']);
+    expect(todo.deleteCompleted(), isEmpty);
   });
 
-  test('edits text (blank leaves it) and reorders', () {
+  test('edits text (blank leaves it); reorders within one list', () {
     todo
       ..add('A')
       ..add('B')
-      ..add('C');
+      ..add('C')
+      ..add('X');
+    todo.toggle(idOf('X'));
     todo.edit(idOf('B'), ' Bee ');
     todo.edit(idOf('Bee'), '  ');
-    expect(texts(), ['A', 'Bee', 'C']);
-    todo.reorder(0, 3); // A to the end
-    expect(texts(), ['Bee', 'C', 'A']);
-    todo.reorder(2, 0);
-    expect(texts(), ['A', 'Bee', 'C']);
+    expect(open(), ['A', 'Bee', 'C']);
+    todo.reorder(done: false, oldIndex: 0, newIndex: 3); // A to the end
+    expect(open(), ['Bee', 'C', 'A']);
+    todo.reorder(done: false, oldIndex: 2, newIndex: 0);
+    expect(open(), ['A', 'Bee', 'C']);
+    expect(done(), ['X'], reason: 'the other list as it was');
   });
 
   test('saved to todo.json and loaded back', () async {

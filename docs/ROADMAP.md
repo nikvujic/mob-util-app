@@ -339,13 +339,13 @@ fixtures for every stored format.
 
 Then the notifications page (Round 28, part 3).
 
-- [ ] To-do: **under** the Introduction (the Introduction stays on top).
-- [ ] To-do: its buttons follow the **hand-side rule** like every page.
-- [ ] To-do: **two lists**: done things go down to a *Completed* list;
+- [x] To-do: **under** the Introduction (the Introduction stays on top).
+- [x] To-do: its buttons follow the **hand-side rule** like every page.
+- [x] To-do: **two lists**: done things go down to a *Completed* list;
   tapping toggles them back; a **Delete completed** button.
-- [ ] Restore part: the **Restore** button is broken (text and icon in
+- [x] Restore part: the **Restore** button is broken (text and icon in
   one line, over the round button's sides).
-- [ ] Restored copies get **(Copy)** in their titles.
+- [x] Restored copies get **(Copy)** in their titles.
 
 ### Round 29 — Nikola's notes on 1.2.0 and 1.2.1 (2026-10-13)
 

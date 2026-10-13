@@ -58,6 +58,12 @@ void main() {
     await openPicker(tester);
     await tester.tap(find.text('Lost note'));
     await tester.pumpAndSettle();
+    // A wide button, its label inside it (Round 30).
+    final button = tester.getRect(find.byKey(const Key('restorePicked')));
+    final label = tester.getRect(find.text('Restore 1'));
+    expect(button.contains(label.topLeft) && button.contains(label.bottomRight),
+        isTrue);
+    expect(button.width, greaterThan(300));
     await tester.tap(find.text('Restore 1'));
     await tester.pumpAndSettle();
 
@@ -99,7 +105,7 @@ void main() {
     await tester.tap(find.text('Restore 1'));
     await tester.pumpAndSettle();
     expect(container.read(notesProvider).map((n) => n.title),
-        ['Lost note', 'Edited']);
+        ['Lost note (Copy)', 'Edited']);
     expect(find.text('1 thing restored; 1 as a copy'), findsOneWidget);
   });
 

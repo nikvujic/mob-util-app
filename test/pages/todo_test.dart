@@ -52,20 +52,21 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('at the top of Notes, above the Introduction and the notes',
+  testWidgets('under the Introduction (Round 30), above the notes',
       (tester) async {
     await start(tester, todo: const [
       TodoItem(id: 't1', text: 'Call the dentist'),
       TodoItem(id: 't2', text: 'Pay rent'),
+      TodoItem(id: 't3', text: 'Done already', done: true),
     ]);
     container.read(notesProvider.notifier).addNote(title: 'A note');
     await tester.pumpAndSettle();
     final intro = find.byKey(const Key('introductionTile'));
     expect(tile, findsOneWidget);
-    expect(tester.getTopLeft(tile).dy, lessThan(tester.getTopLeft(intro).dy));
-    expect(tester.getTopLeft(intro).dy,
+    expect(tester.getTopLeft(intro).dy, lessThan(tester.getTopLeft(tile).dy));
+    expect(tester.getTopLeft(tile).dy,
         lessThan(tester.getTopLeft(find.text('A note')).dy));
-    // The first thing and how many.
+    // The first thing to do and how many are left.
     expect(tester.widget<Text>(find.byKey(const Key('todoSummary'))).data,
         'Call the dentist');
     expect(tester.widget<Text>(find.byKey(const Key('todoCount'))).data, '2');
@@ -100,23 +101,63 @@ void main() {
     expect(find.text('Feed the cow'), findsOneWidget);
   });
 
-  testWidgets('tapping one completes it: gone, "Task completed", Undo',
+  testWidgets('tapping one moves it to Completed, and back again (Round 30)',
       (tester) async {
     await start(tester, todo: const [
       TodoItem(id: 't1', text: 'One'),
       TodoItem(id: 't2', text: 'Two'),
-      TodoItem(id: 't3', text: 'Three'),
     ]);
     await open(tester);
+    expect(find.text('COMPLETED  ·  1'), findsNothing);
     await tester.tap(find.text('Two'));
     await tester.pumpAndSettle();
-    expect(texts(), ['One', 'Three']);
-    expect(find.text('Two'), findsNothing);
-    expect(find.text('Task completed'), findsOneWidget);
+    expect(find.text('TO DO  ·  1'), findsOneWidget);
+    expect(find.text('COMPLETED  ·  1'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Two')).dy,
+        greaterThan(tester.getTopLeft(find.text('COMPLETED  ·  1')).dy));
+    expect(container.read(todoProvider).firstWhere((i) => i.id == 't2').done,
+        isTrue);
 
+    await tester.tap(find.text('Two'));
+    await tester.pumpAndSettle();
+    expect(find.text('TO DO  ·  2'), findsOneWidget);
+    expect(find.text('COMPLETED  ·  1'), findsNothing);
+  });
+
+  testWidgets('Delete completed: asked, then gone, with Undo', (tester) async {
+    await start(tester, todo: const [
+      TodoItem(id: 't1', text: 'Open'),
+      TodoItem(id: 't2', text: 'Done', done: true),
+    ]);
+    await open(tester);
+    await tester.tap(find.byTooltip('Delete completed'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    expect(texts(), ['Open']);
+    expect(find.text('1 completed to-do deleted'), findsOneWidget);
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
-    expect(texts(), ['One', 'Two', 'Three'], reason: 'back where it was');
+    expect(texts(), ['Open', 'Done']);
+  });
+
+  testWidgets('Delete completed does nothing with none done', (tester) async {
+    await start(tester, todo: const [TodoItem(id: 't1', text: 'Open')]);
+    await open(tester);
+    await tester.tap(find.byTooltip('Delete completed'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete'), findsNothing, reason: 'no dialog');
+  });
+
+  testWidgets('its buttons on the side of the hand in use (Round 30)',
+      (tester) async {
+    await start(tester);
+    // Opened with the left hand: the buttons on the left.
+    await tester.tapAt(tester.getCenter(tile) - const Offset(300, 0));
+    await tester.pumpAndSettle();
+    final screen = tester.getSize(find.byType(MaterialApp)).width;
+    expect(tester.getCenter(find.byTooltip('Add a to-do')).dx,
+        lessThan(screen / 2));
   });
 
   testWidgets('holding one changes its text', (tester) async {

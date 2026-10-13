@@ -137,11 +137,12 @@ void main() {
     });
 
     final notes = container.read(notesProvider);
-    expect(notes.map((n) => n.title), ['Wanted', 'Wanted, edited since']);
+    expect(notes.map((n) => n.title), ['Wanted (Copy)', 'Wanted, edited since'],
+        reason: 'a copy says so (Round 30)');
     expect(notes.map((n) => n.id).toSet(), hasLength(2), reason: 'new id');
     expect(notes.first.content, 'Wanted text');
     final shop = container.read(shopProvider);
-    expect(shop.map((i) => i.name), ['Coffee', 'Coffee']);
+    expect(shop.map((i) => i.name), ['Coffee', 'Coffee (Copy)']);
     expect(shop.map((i) => i.id).toSet(), hasLength(2));
     expect((done!.added, done.copies), (2, 2));
   });
@@ -207,6 +208,8 @@ void main() {
     expect(book.medicines, hasLength(2));
     final copy = book.medicines.last;
     expect(copy.id, isNot('m1'));
+    expect(copy.name, 'Iron (Copy)');
+    expect(book.medicines.first.name, 'Iron');
     expect(book.takenFor(copy.id, day, 0), isNotNull, reason: 'its own');
     expect(book.taken, hasLength(2));
   });

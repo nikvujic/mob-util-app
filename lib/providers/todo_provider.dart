@@ -5,14 +5,16 @@ import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/introduction_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 
-/// The to-do note's list (Round 28), in order, saved to `todo.json`.
+/// The to-do note's list (Round 28), saved to `todo.json`: one ordered
+/// list; "to do" and "Completed" (Round 30) are its things filtered by
+/// [TodoItem.done], in list order.
 class TodoNotifier extends StateNotifier<List<TodoItem>> {
   TodoNotifier(AppStorage storage) : super(storage.initialTodo) {
     addListener(storage.saveTodo, fireImmediately: false);
   }
 
-  /// Adds [text] at the end and returns its id; blank text is ignored
-  /// (null).
+  /// Adds [text] at the end of the things to do and returns its id; blank
+  /// text is ignored (null).
   String? add(String text) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return null;
@@ -21,20 +23,29 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     return item.id;
   }
 
-  /// Done: takes it off the list. Returns where it was, to [restore] it
-  /// (Undo); null if it's not there.
-  int? complete(String id) {
+  /// Done, or not done again: to the top of *Completed* (done most
+  /// recently), or back to the end of the things to do. As Shop's toggle.
+  void toggle(String id) {
     final index = state.indexWhere((item) => item.id == id);
-    if (index == -1) return null;
-    state = [...state.take(index), ...state.skip(index + 1)];
-    return index;
+    if (index == -1) return;
+    final moved = state[index].copyWith(done: !state[index].done);
+    final others = [...state.take(index), ...state.skip(index + 1)];
+    state = moved.done ? [moved, ...others] : [...others, moved];
   }
 
-  /// Puts [item] back at [index] (or the end, if the list got shorter).
-  void restore(TodoItem item, int index) {
-    if (state.any((i) => i.id == item.id)) return;
-    final at = index.clamp(0, state.length);
-    state = [...state.take(at), item, ...state.skip(at)];
+  /// Deletes the completed things; returns them (for Undo).
+  List<TodoItem> deleteCompleted() {
+    final done = [
+      for (final item in state)
+        if (item.done) item
+    ];
+    if (done.isNotEmpty) {
+      state = [
+        for (final i in state)
+          if (!i.done) i,
+      ];
+    }
+    return done;
   }
 
   /// A new text for [id]; blank text leaves it as it was.
@@ -47,16 +58,26 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     ];
   }
 
-  /// Follows `ReorderableListView.onReorder` semantics.
-  void reorder(int oldIndex, int newIndex) {
+  /// Reorders within one list ([done] or not). [oldIndex] and [newIndex]
+  /// are positions inside it, with `ReorderableListView.onReorder`
+  /// semantics; the other list stays as it is.
+  void reorder({
+    required bool done,
+    required int oldIndex,
+    required int newIndex,
+  }) {
     if (newIndex > oldIndex) newIndex--;
     if (oldIndex == newIndex) return;
-    final items = [...state];
-    items.insert(newIndex, items.removeAt(oldIndex));
-    state = items;
+    final section = state.where((i) => i.done == done).toList();
+    section.insert(newIndex, section.removeAt(oldIndex));
+    final reordered = section.iterator;
+    state = [
+      for (final item in state)
+        if (item.done == done) (reordered..moveNext()).current else item,
+    ];
   }
 
-  /// Replaces everything (restoring a backup, clearing Notes).
+  /// Replaces everything (restoring a backup, clearing Notes, Undo).
   void replaceAll(List<TodoItem> items) => state = List.unmodifiable(items);
 }
 

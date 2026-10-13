@@ -72,8 +72,9 @@ class Backup {
   /// (`medicine`, as in `medicine.json`, O6); 12 = doses missed or not
   /// sure, taken ones maybe without a time (O13); 13 = a medicine may
   /// remind again after its doses (Round 16); 14 = a medicine may be
-  /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28).
-  static const version = 15;
+  /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28);
+  /// 16 = to-do things may be done (Round 30).
+  static const version = 16;
 
   final DateTime createdAt;
   final String appVersion;

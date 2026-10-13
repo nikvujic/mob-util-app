@@ -225,17 +225,24 @@ class _RestorePartPageState extends ConsumerState<RestorePartPage> {
                 ],
               ],
             ),
-      floatingActionButton: _count == 0
+      // A wide button at the bottom, in thumb reach (Round 30: the round
+      // one couldn't hold its label).
+      bottomNavigationBar: _count == 0
           ? null
-          : FloatingActionButton.extended(
-              key: const Key('restorePicked'),
-              heroTag: null,
-              onPressed: () => Navigator.of(context).pop({
-                for (final MapEntry(:key, :value) in _picked.entries)
-                  if (value.isNotEmpty) key: {...value},
-              }),
-              icon: const Icon(Icons.restore),
-              label: Text('Restore $_count'),
+          : SafeArea(
+              minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: FilledButton.icon(
+                key: const Key('restorePicked'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                onPressed: () => Navigator.of(context).pop({
+                  for (final MapEntry(:key, :value) in _picked.entries)
+                    if (value.isNotEmpty) key: {...value},
+                }),
+                icon: const Icon(Icons.restore),
+                label: Text('Restore $_count'),
+              ),
             ),
     );
   }

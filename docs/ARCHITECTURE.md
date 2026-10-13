@@ -154,7 +154,8 @@ newer planner file aside instead of dropping the times.
 `BackupImporter.restorePart` takes the ids picked, by kind
 (`BackupPart`), and adds those things to what's in the app instead of
 replacing it: notes on top, list items at the end. Something with an id
-still in the app comes back as a copy with a new id (a locked note is
+still in the app comes back as a copy with a new id and "(Copy)" after
+its title (`copyTitle`, Round 30) (a locked note is
 opened and sealed again, as its seal names its id); planner tasks and
 routines go through their notifiers' `restoreTask` / `restore`, so one
 whose time is taken (or that is still there) is left out and counted. A
@@ -246,12 +247,14 @@ back. Most tests don't pass one, so their Notes hold only their notes.
 
 ## The to-do note (N18, Round 28)
 
-Like the Introduction, a tile at the top of Notes (above it) and a page
-(`pages/notes/todo.dart`), not a stored note. Its list is
-`List<TodoItem>` (`models/todo_item.dart`, just id and text) in
-`todo.json` (version 1) and in backups (`todo`, backup v15), counted and
-cleared with Notes (`SectionData`). Done items are removed, not kept;
-Undo puts one back at its place (`TodoNotifier.restore`). The
+Like the Introduction, a tile at the top of Notes (under it, Round 30)
+and a page (`pages/notes/todo.dart`), not a stored note. Its list is
+`List<TodoItem>` (`models/todo_item.dart`: id, text, done) in
+`todo.json` (version 2; 1 had no `done`) and in backups (`todo`, backup
+v15; v16 with `done`), counted and cleared with Notes (`SectionData`).
+Like Shop, one ordered list shown as two (to do, *Completed*);
+`TodoNotifier.toggle` moves a thing between them, `deleteCompleted`
+clears the done ones. The
 `todoNote` preference turns the tile on and off (the list stays); like
 the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
