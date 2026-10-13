@@ -86,4 +86,18 @@ void main() {
     expect(backups, hasLength(1));
     expect(backups.single.readAsStringSync(), '{broken');
   });
+
+  test('any file failing to save is said, and cleared by a retry (D6)',
+      () async {
+    final storage = await AppStorage.open(directory: dir);
+    expect(storage.saveFailing.value, isFalse);
+    final blocker = Directory('${dir.path}/shop.json.tmp')..createSync();
+    await storage.saveShopItems(const []);
+    expect(storage.saveFailing.value, isTrue);
+
+    blocker.deleteSync();
+    await storage.retryFailed();
+    expect(storage.saveFailing.value, isFalse);
+    expect(File('${dir.path}/shop.json').existsSync(), isTrue);
+  });
 }

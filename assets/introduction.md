@@ -37,7 +37,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - **Counters**: count anything with − and +, with a step, limits and a colour.
 - **Placard**: a big line of text, sideways. Hold until it pops to count one up. Tap the top-right corner five times for its settings.
-- **Medicine**: tap a dose when you take it. Each medicine has a history and a calendar. **Reminders** come at dose times (and again later, if a medicine is set to remind again), and a **red dot** shows on the tile and the Hub tab while a dose is due. Its settings are behind the gear.
+- **Medicine**: tap a dose when you take it. Each medicine has a history and a calendar. **Reminders** come at dose times (and again later, if a medicine is set to remind again), and a **red dot** shows on the tile and the Hub tab while a dose is due. Doses due at the same time come as one notification; tapping it opens Medicine. Its settings are behind the gear.
 
 ## Security
 - A **master password** encrypts locked notes and can lock whole sections. Without it, locked data can't be read, so keep it safe.
@@ -52,4 +52,5 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - Backup shows when you last exported. A week later, a **red dot** on the menu and an evening notification remind you to make a new one (turn it off on Backup).
 
 ## Settings
-- Sounds and vibration, line numbers, whether this introduction comes back after updates (and restoring it if deleted), and **Clear data**.
+- Line numbers, the counter click and vibration, whether this introduction comes back after updates (and restoring it if deleted), and **Clear data**.
+- If the phone blocks the app's notifications, Settings says so at the top.

@@ -308,7 +308,7 @@ fixtures for every stored format.
 3. [x] **The app's own icon**: an 8-bit pixel character of our own,
    replacing Flutter's logo (launcher icon and the notification icon's
    look checked).
-4. [ ] **Last pass before v1**: a read through everything that saves
+4. [x] **Last pass before v1**: a read through everything that saves
    (D6's remaining part: updates, crashes while saving, a full disk),
    the Introduction checked against the app, the docs tidied.
 5. [ ] **Release v1.0.0.** Then Nikola clears the test data (Settings →
@@ -347,6 +347,11 @@ notification checks and the last pass.
   close together while idle); a notice the evening before planned
   reminders run out (an app left unopened two weeks went quiet); Settings
   says when notifications are blocked.
+
+- [x] Last pass (D6): saving was already crash-safe; a failed save (a
+  full phone) is now said, kept and retried, with "Saved again" once it
+  works. The Introduction checked against the app (Settings' list,
+  medicine notifications).
 
 **Phone test list (E1)** — for Nikola, on 1.0.0:
 1. Two medicines at the same time: one notification naming both.

@@ -206,7 +206,7 @@ class AppStorage {
       );
     });
 
-    return AppStorage._(
+    final storage = AppStorage._(
       notesStore,
       shopStore,
       securityStore,
@@ -301,6 +301,8 @@ class AppStorage {
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
     );
+    storage._watchSaving();
+    return storage;
   }
 
   /// Reads [store] with [parse]; [empty] if the file doesn't exist yet.
@@ -454,6 +456,44 @@ class AppStorage {
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
       ];
+
+  /// Whether saving fails right now for any file (e.g. the phone's
+  /// storage is full): the app says so, and says when it's saved again.
+  final saveFailing = ValueNotifier<bool>(false);
+
+  List<JsonFileStore> get _stores => [
+        for (final store in [
+          _notesStore,
+          _shopStore,
+          _securityStore,
+          _settingsStore,
+          _plannerStore,
+          _countersStore,
+          _preferencesStore,
+          _routinesStore,
+          _pinsStore,
+          _layoutStore,
+          _placardStore,
+          _medicineStore,
+        ])
+          if (store != null) store,
+      ];
+
+  void _watchSaving() {
+    void update() =>
+        saveFailing.value = _stores.any((store) => store.failing.value);
+    for (final store in _stores) {
+      store.failing.addListener(update);
+    }
+  }
+
+  /// Tries the failed saves again (when the app comes back: space may have
+  /// been freed meanwhile).
+  Future<void> retryFailed() async {
+    for (final store in _stores) {
+      await store.retry();
+    }
+  }
 
   /// Completes when every pending save is on disk. Throws
   /// [StorageWriteException] if one couldn't be saved.

@@ -59,4 +59,21 @@ void main() {
     await store.flush();
     expect(await store.read(), {'n': 3});
   });
+
+  test('a failed write is retried once it can be (D6, Round 23)', () async {
+    await store.write({'n': 1});
+    final blocker = Directory('${store.file.path}.tmp')..createSync();
+    await store.write({'n': 2});
+    expect(store.failing.value, isTrue);
+
+    await store.retry(); // still blocked: still failing, nothing lost
+    expect(store.failing.value, isTrue);
+
+    blocker.deleteSync(); // space was freed
+    await store.retry();
+    expect(store.failing.value, isFalse);
+    expect(await store.read(), {'n': 2}, reason: 'what failed is saved');
+    await store.retry(); // nothing to do
+    expect(await store.read(), {'n': 2});
+  });
 }

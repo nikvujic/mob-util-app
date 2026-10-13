@@ -9,6 +9,9 @@ Release with the installable APK.
 ### Added
 - Settings says when the phone blocks the app's notifications, and
   asks to allow them.
+- If something can't be saved (e.g. the phone's storage is full), the
+  app says so, keeps the change and tries again on the next change or
+  when you come back to it, and says when it's saved again.
 - Reminders are planned two weeks ahead: if the app isn't opened for
   that long, a notice the evening before asks to open it, so they keep
   coming.

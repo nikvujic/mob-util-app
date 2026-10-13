@@ -123,6 +123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.invalidate(medicineDotProvider);
       ref.invalidate(backupDueProvider);
       ref.invalidate(notificationsAllowedProvider);
+      // Saving failed (a full phone?): space may have been freed since.
+      ref.read(retrySavesProvider)();
       // Reminders are planned two weeks ahead: top them up (P10).
       ref.read(reminderPlannerProvider).refresh();
     },
@@ -149,6 +151,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           '${files.join(', ')} could not be read, so the app started '
           'without ${files.length == 1 ? 'it' : 'them'}. The file was kept '
           "aside, not overwritten. Restoring a backup brings the data back.",
+        ),
+        actions: [
+          DialogButton(
+            label: 'OK',
+            primary: true,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Says that changes can't be saved right now.
+  void _tellSaveFailing() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AppDialog(
+        title: "Changes can't be saved",
+        content: const DialogMessage(
+          "The phone's storage may be full. Your changes stay in the app "
+          "while it's open; free some space and they're saved with the next "
+          'change, or when you come back to the app. Making a backup now '
+          'keeps them safe too.',
         ),
         actions: [
           DialogButton(
@@ -220,6 +245,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       },
     );
+
+    // Saving fails (D6): say so once, and again when it works.
+    ref.listen(saveFailingProvider, (was, failing) {
+      if (failing == was) return;
+      if (failing) {
+        _tellSaveFailing();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Saved again')),
+        );
+      }
+    });
 
     // Kept running, so changing the master password turns fingerprint
     // unlock off at once (L6).

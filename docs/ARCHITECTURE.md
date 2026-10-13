@@ -377,3 +377,9 @@ at `maxReminders` and, when it would run on past what's planned, adds a
 `ReminderKind.notice` the evening before the last one asking to open the
 app. `notificationsAllowedProvider` (re-read on resume) shows Settings'
 warning when notifications are blocked.
+
+Failed saves (D6): each `JsonFileStore` keeps the document it couldn't
+write and a `failing` flag; `AppStorage.saveFailing` is true while any
+store fails, `retryFailed` writes the kept documents again (the home
+screen calls it when the app comes back), and the home screen says when
+saving starts failing and when it works again (`saveFailingProvider`).

@@ -26,6 +26,13 @@ class JsonFileStore {
   /// Why the last write failed; null once a write succeeds again.
   Object? _failure;
 
+  /// The document whose write failed, kept for [retry].
+  Object? _unsaved;
+
+  /// Whether the last write failed (e.g. the phone's storage is full);
+  /// false again once one succeeds.
+  final failing = ValueNotifier<bool>(false);
+
   /// Set when the file couldn't be moved aside after a failed read: then
   /// it's never written, so whatever is in it isn't overwritten.
   bool _readOnly = false;
@@ -70,16 +77,27 @@ class JsonFileStore {
         try {
           await _writeNow(json);
           _failure = null;
+          _unsaved = null;
+          failing.value = false;
         } catch (e, st) {
-          // Keep the app running; the next change will try again, and
-          // flush() reports it.
+          // Keep the app running; the next change (or [retry]) tries
+          // again, and flush() reports it.
           _failure = e;
+          _unsaved = json;
+          failing.value = true;
           debugPrint('Failed to write ${file.path}: $e\n$st');
         }
       }
     } finally {
       _running = null;
     }
+  }
+
+  /// Tries again to write what couldn't be written (e.g. once space was
+  /// freed), unless something newer is on its way.
+  Future<void> retry() {
+    if (!failing.value || _hasPending) return _running ?? Future.value();
+    return write(_unsaved!);
   }
 
   Future<void> _writeNow(Object? json) async {
