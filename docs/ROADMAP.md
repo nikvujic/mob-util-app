@@ -333,6 +333,26 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 28 — to-do note, partial restore; the notifications page planned (2026-10-13)
+
+Nikola, after 1.2.1: the to-do note and partial restore now; the
+notifications page later (it is bigger than it looked).
+
+**1. To-do note** (Round 26, part 3) — now.
+
+**2. Restore only part of a backup** (Round 26, part 3) — now.
+
+**3. Notifications page** (later; replaces Round 23's plan and E2/E3):
+one page in the menu, history and settings together.
+- [ ] At the top, a window with the **3 most recent** notifications;
+  tapping it opens the **full history** (each one tapped goes to its
+  page / item; a button clears it).
+- [ ] Under it, **settings for each page** (Planner, Medicine, Backup,
+  ...): mute, sound, pause (Medicine's pause moves here), colour,
+  **plain or private** (private says just "a medicine" / "a task"
+  instead of its name, so nothing sensitive shows on the lock screen),
+  maybe an icon.
+
 ### Round 27 — polish and note formatting (2026-10-13)
 
 Nikola is importing his notes: the extra formats and their buttons now
