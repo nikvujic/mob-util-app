@@ -360,8 +360,15 @@ Nikola is importing his notes: the extra formats and their buttons now
   now. A finer grid is fine, but the pixel look stays (the grass as it
   is). **Chosen: one row more (14 x 9)**, for the room and the app icon
   too.
-- [ ] First: example pictures on his screen, to see whether the screen
-  needs a finer grid.
+- [x] First: example pictures on his screen, to see whether the screen
+  needs a finer grid. **No**: pictures in his own pixels look more
+  natural; a finer screen-only grid is kept for an occasional detailed
+  picture (later, on Pip's page).
+- [ ] The room: the 14 x 9 screen in every frame, and the animations
+  (spawn, hop, walk, blink) checked and improved where needed.
+- [ ] The menu header's Pip and the app icon: the room's idle frame,
+  the same grid (the face a little to one side, as in the room: goofy,
+  and Nikola likes it), not a centred face.
 
 **3. Hub pages: Recipes next** — of the new Hub pages (not the food
   tracker or Pip's page, which have their own places), Recipes is the
