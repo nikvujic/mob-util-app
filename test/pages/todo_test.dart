@@ -124,29 +124,54 @@ void main() {
     expect(find.text('COMPLETED  ·  1'), findsNothing);
   });
 
-  testWidgets('Delete completed: asked, then gone, with Undo', (tester) async {
+  testWidgets(
+      'Delete all, beside Completed: asked, then gone, no Undo (Round 33)',
+      (tester) async {
     await start(tester, todo: const [
       TodoItem(id: 't1', text: 'Open'),
       TodoItem(id: 't2', text: 'Done', done: true),
     ]);
     await open(tester);
-    await tester.tap(find.byTooltip('Delete completed'));
+    final deleteAll = find.byKey(const Key('deleteCompleted'));
+    expect(
+        (tester.getCenter(deleteAll).dy -
+                tester.getCenter(find.text('COMPLETED  ·  1')).dy)
+            .abs(),
+        lessThan(8),
+        reason: 'on the header\'s line');
+    await tester.tap(deleteAll);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     expect(texts(), ['Open']);
-    expect(find.text('1 completed to-do deleted'), findsOneWidget);
-    await tester.tap(find.text('Undo'));
-    await tester.pumpAndSettle();
-    expect(texts(), ['Open', 'Done']);
+    expect(find.text('Undo'), findsNothing, reason: 'it said it can\'t be');
   });
 
-  testWidgets('Delete completed does nothing with none done', (tester) async {
+  testWidgets('none done: no Completed, no Delete all', (tester) async {
     await start(tester, todo: const [TodoItem(id: 't1', text: 'Open')]);
     await open(tester);
-    await tester.tap(find.byTooltip('Delete completed'));
+    expect(find.byKey(const Key('deleteCompleted')), findsNothing);
+  });
+
+  testWidgets('a done one can\'t be changed by holding it (Round 33)',
+      (tester) async {
+    await start(tester,
+        todo: const [TodoItem(id: 't1', text: 'Done', done: true)]);
+    await open(tester);
+    await tester.longPress(find.text('Done'));
     await tester.pumpAndSettle();
-    expect(find.text('Delete'), findsNothing, reason: 'no dialog');
+    expect(find.byType(TextField), findsNothing);
+  });
+
+  testWidgets('+ looks like the other pages\' add button (Round 33)',
+      (tester) async {
+    await start(tester);
+    await open(tester);
+    final add = tester.widget<FloatingActionButton>(find.ancestor(
+      of: find.byIcon(Icons.add),
+      matching: find.byType(FloatingActionButton),
+    ));
+    expect(add.backgroundColor, isNull, reason: 'the theme\'s, as Notes');
   });
 
   testWidgets('its buttons on the side of the hand in use (Round 30)',

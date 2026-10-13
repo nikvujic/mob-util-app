@@ -60,12 +60,17 @@ class BottomAction {
   /// to undo), so the buttons around it keep their places.
   final bool enabled;
 
+  /// The page's main action, e.g. adding (Round 33): the app's add button
+  /// look, as on Notes and Shop.
+  final bool primary;
+
   const BottomAction({
     required this.icon,
     required this.tooltip,
     this.onPressed,
     this.danger = false,
     this.enabled = true,
+    this.primary = false,
   });
 }
 
@@ -119,12 +124,20 @@ class _BottomActionsState extends State<BottomActions> {
   Widget _button(BuildContext context, BottomAction action,
       {bool small = false}) {
     final colors = context.colors;
-    final background = action.danger ? colors.danger : colors.surface;
-    final foreground = !action.enabled
-        ? colors.textHint
+    // The main action: the theme's add button colours (null: its own).
+    final main = action.primary && action.enabled && !action.danger;
+    final background = main
+        ? null
         : action.danger
-            ? colors.background
-            : colors.textPrimary;
+            ? colors.danger
+            : colors.surface;
+    final foreground = main
+        ? null
+        : !action.enabled
+            ? colors.textHint
+            : action.danger
+                ? colors.background
+                : colors.textPrimary;
     final onPressed = action.enabled ? action.onPressed : null;
     final icon = Icon(action.icon);
     // Several on screen at once (and tabs kept alive side by side): no

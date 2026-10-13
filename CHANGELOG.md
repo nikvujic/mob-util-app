@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- To-do: the **+** looks like the add button everywhere else; *Delete
+  all* sits quietly beside Completed; deleting them no longer offers an
+  Undo it said there isn't; done ones can't be edited.
+
 ## [1.4.0] - 2026-10-13
 
 ### Fixed

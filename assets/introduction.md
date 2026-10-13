@@ -11,7 +11,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 - Hold a **drag handle** to move an item up or down.
 
 ## Notes
-- **To-do**, under this note, is a to-do list: **+** adds things, **tap** one when it's done (it moves to Completed; tap it again to bring it back), **hold** one to change it, **Delete completed** clears the done ones. Settings turns it off.
+- **To-do**, under this note, is a to-do list: **+** adds things, **tap** one when it's done (it moves to Completed; tap it again to bring it back), **hold** one to change it, **Delete all** beside Completed clears the done ones. Settings turns it off.
 - **+** starts a note; it's saved as you type.
 - **Markdown**: start a line with a hash and a space for a heading (two, three or four hashes for smaller ones); wrap words in two stars for **bold**, one star for *italic*, two tildes to strike them out. The symbols hide when you're not on that line.
 - **Lists**: start a line with a dash and a space, or a number and a dot. Enter continues the list; Enter on an empty item ends it.

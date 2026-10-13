@@ -77,6 +77,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
     );
   }
 
+  /// Asked first, and it can't be undone (so no Undo after).
   Future<void> _deleteCompleted(int count) async {
     final confirmed = await showDeleteConfirmDialog(
       context,
@@ -85,22 +86,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
       plural: 'completed to-dos',
     );
     if (!confirmed || !mounted) return;
-    final notifier = _notifier;
-    final before = ref.read(todoProvider);
-    notifier.deleteCompleted();
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(count == 1
-              ? '1 completed to-do deleted'
-              : '$count completed to-dos deleted'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => notifier.replaceAll(before),
-          ),
-        ),
-      );
+    _notifier.deleteCompleted();
   }
 
   Widget _section(List<TodoItem> items, {required bool done}) {
@@ -128,7 +114,8 @@ class _TodoPageState extends ConsumerState<TodoPage> {
             item: item,
             index: index,
             onTap: () => _toggle(item),
-            onLongPress: () => _edit(item),
+            // Only the ones to do can be changed (Round 33).
+            onLongPress: done ? null : () => _edit(item),
           ),
         );
       },
@@ -172,7 +159,17 @@ class _TodoPageState extends ConsumerState<TodoPage> {
                   ),
                 _section(open, done: false),
                 if (done.isNotEmpty) ...[
-                  _SectionHeader(title: 'Completed', count: done.length),
+                  _SectionHeader(
+                    title: 'Completed',
+                    count: done.length,
+                    // Quietly beside its list (Round 33: a red round
+                    // button looked out of place).
+                    action: TextButton(
+                      key: const Key('deleteCompleted'),
+                      onPressed: () => _deleteCompleted(done.length),
+                      child: const Text('Delete all'),
+                    ),
+                  ),
                   _section(done, done: true),
                 ],
               ],
@@ -180,15 +177,9 @@ class _TodoPageState extends ConsumerState<TodoPage> {
       floatingActionButton: BottomActions(
         actions: [
           BottomAction(
-            icon: Icons.delete_sweep_outlined,
-            tooltip: 'Delete completed',
-            danger: true,
-            enabled: done.isNotEmpty,
-            onPressed: () => _deleteCompleted(done.length),
-          ),
-          BottomAction(
             icon: Icons.add,
             tooltip: 'Add a to-do',
+            primary: true,
             onPressed: _addItems,
           ),
         ],
@@ -201,21 +192,31 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final int count;
 
-  const _SectionHeader({required this.title, required this.count});
+  /// A button at its end, if any.
+  final Widget? action;
+
+  const _SectionHeader({required this.title, required this.count, this.action});
 
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-        child: Text(
-          '${title.toUpperCase()}  ·  $count',
-          style: TextStyle(
-            color: context.colors.accent,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1,
-          ),
+        padding: EdgeInsets.fromLTRB(16, action == null ? 12 : 4, 8, 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${title.toUpperCase()}  ·  $count',
+                style: TextStyle(
+                  color: context.colors.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+            if (action case final action?) action,
+          ],
         ),
       ),
     );
@@ -228,14 +229,14 @@ class _TodoRow extends StatelessWidget {
   final TodoItem item;
   final int index;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
 
   const _TodoRow({
     super.key,
     required this.item,
     required this.index,
     required this.onTap,
-    required this.onLongPress,
+    this.onLongPress,
   });
 
   @override

@@ -335,6 +335,29 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 33 — Nikola's review of 1.4.0 (2026-10-13)
+
+Then the patch release, then Pip's first round (hatching), with drafts
+first.
+
+- [x] To-do: the round red **Delete completed** was ugly: now a quiet
+  *Delete all* on the Completed header.
+- [x] To-do: **+** in the add-button look of other pages.
+- [x] To-do: deleting completed ones said "cannot be undone" and then
+  offered Undo: no Undo now.
+- [x] To-do: done ones can't be edited by holding them.
+- [x] Why it happened (Nikola asked): the page wasn't checked against
+  others, and the rules weren't written down. Now they are
+  (ARCHITECTURE, "UI conventions").
+- [ ] Later: a **consistency sweep** across pages: buttons (e.g. Medicine's
+  grey +), toasts (when, and with Undo or not), against the conventions.
+- [ ] Later: **new notification sounds**: the current three (Chime,
+  Bell, Soft) go; instead **hacky 8-bit sounds**, several to try, then
+  Nikola picks which stay.
+- [ ] Automatic backup to a folder: not simple (Android needs a folder
+  picked with lasting permission, written through native code, and
+  something to run it): after Pip's first round.
+
 ### Round 32 — Nikola's review of 1.3.1 (2026-10-13)
 
 **1. Formats**

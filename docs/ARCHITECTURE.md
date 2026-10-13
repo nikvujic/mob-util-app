@@ -197,6 +197,31 @@ appear they take that side and keep it — bottom right in order, or bottom
 left mirrored. Content leaves `BottomActions.contentClearance` free below
 it, so nothing hides behind them.
 
+## UI conventions (Round 33)
+
+Written down after the to-do page broke several (Nikola's review of
+1.4.0). Check a new page against these, and against a page like it
+(Shop for lists), before building it.
+
+- **Adding** is the page's main action: a round **+** in the app's add
+  button look (the theme's FAB colours: `FloatingActionButton` on the
+  main tabs, `BottomAction(primary: true)` elsewhere), at the bottom.
+  Not a grey button.
+- **Buttons at the bottom** follow the hand (`BottomActions`), except
+  where Nikola fixed them to the right (Medicine).
+- **Deleting several** (selection, "completed" lists): ask with
+  `showDeleteConfirmDialog` ("This cannot be undone."), and then **no
+  Undo** after it (the dialog said there's none). Deleting **one** thing
+  from its menu: ask or not, but say so with a toast that has **Undo**.
+  Deleting something important (an important medicine, all data): type
+  DELETE (`showTypeToConfirmDialog`).
+- **A list's own action** (e.g. *Delete all* of Completed) is a quiet
+  text button on its section's header line, not a red round button.
+- **Holding** a row selects it, or edits it where there's no selecting
+  (the to-do); done / bought rows can't be edited.
+- **Toasts** only say what happened when it isn't plain on screen, and
+  carry **Undo** when it can be undone.
+
 ## Back button
 
 The home screen owns the only back handler for the main sections (Flutter
