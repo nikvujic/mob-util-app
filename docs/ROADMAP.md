@@ -354,6 +354,12 @@ Nikola is importing his notes: the extra formats and their buttons now
 - [x] A Format button (in place of Checkbox) opening a row of format
   buttons above the keyboard, without leaving or covering the text.
 
+**4. Pip's head** (concepts, Nikola choosing)
+- [ ] The screen a little taller (now 14 x 8 looks flat; 14 x 11 too
+  tall: try one row more), kept simple: no bezel line, solid eyes as
+  now. A finer grid is fine, but the pixel look stays (the grass as it
+  is).
+
 **3. Hub pages: Recipes next** — of the new Hub pages (not the food
   tracker or Pip's page, which have their own places), Recipes is the
   next one built.
