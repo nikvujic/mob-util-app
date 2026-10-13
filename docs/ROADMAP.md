@@ -335,6 +335,57 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 32 — Nikola's review of 1.3.1 (2026-10-13)
+
+**1. Formats**
+- [ ] Bold, italic and strikethrough **toggle**: pressing one again on
+  formatted text takes it off, instead of stacking more symbols.
+- [ ] Later (a lot later): **proper code blocks**, multi-line, with a
+  nicer look, from a button of their own (strikethrough's button can go
+  to make room: it's not used).
+
+**2. Improvements**
+- [ ] Sometimes after an update there are **two of the app** in the
+  recent apps: look into it.
+- [ ] Medicine: deleting an **important** medicine asks to type DELETE,
+  like other places.
+- [ ] Medicine: the **number of doses** can't be changed once added (it
+  confused the history); their times still can.
+
+### Pip, a virtual pet (Nikola's plan, Round 32) — bit by bit, between other features
+
+Nikola wants more say on sprites and visuals: show him drafts first.
+
+**Phase 1: hatching, name, age, his home**
+- [ ] Until he's hatched, the menu's room shows an **egg**; a few taps
+  crack it, and Pip jumps out. His **birthday** is that moment.
+- [ ] Above the room, his **name and age** in tiny pixel text.
+- [ ] **Pip Home** (a Hub page; only once he's hatched, then opened;
+  special, so it can't be locked): his avatar, name (changeable), age,
+  birthday, and the same room as the menu's.
+- [ ] The field's **background follows the time of day**.
+
+**Phase 2: energy and batteries**
+- [ ] A tiny **energy bar** above the room.
+- [ ] **Batteries**: about 3 a day, earned by visiting the app; tap the
+  room to drop one, he runs over and picks it up to fill his energy.
+- [ ] While the phone **charges** (if the app can tell): a charging
+  station, he runs to it and plugs in.
+
+**Later: more life**
+- [ ] Entrances: from the ground (now; also when the app is opened again
+  after a while), falling from the sky, from the sides.
+- [ ] Random events: **bugs** (computer bugs) appear and he draws a sword
+  to fight them; moments where he **shows something on his screen**
+  (also when a notification comes).
+- [ ] **Sleeping** at night; opening the app wakes him.
+- [ ] Careful **flow control**, so things can't clash (no battery during
+  a fight, etc.).
+- [ ] On Pip Home: a **background** pick for the room, and an **info
+  page** playing every animation he has.
+- [ ] Much later: Godville-style items and phrases made to fit him,
+  items and levelling up.
+
 ### Round 30 — Nikola's review of 1.3.0 (2026-10-13)
 
 Then the notifications page (Round 28, part 3).
