@@ -356,7 +356,7 @@ first.
   Nikola picks which stay.
 - [ ] Automatic backup to a folder: not simple (Android needs a folder
   picked with lasting permission, written through native code, and
-  something to run it): after Pip's first round.
+  something to run it): later (Nikola).
 
 ### Round 32 — Nikola's review of 1.3.1 (2026-10-13)
 
@@ -382,6 +382,23 @@ first.
 Nikola wants more say on sprites and visuals: show him drafts first.
 
 **Phase 1: hatching, name, age, his home**
+
+Nikola's picks (Round 34):
+- The **spotted egg**. 7 taps: the first starts the crack, 2 more widen
+  it, 2 more again, and 2 pop him out. A light buzz on each tap, a
+  slightly longer one for the pop.
+- **Text**: the app's own 3 x 5 pixel letters (A–Z, 0–9, a few signs;
+  no č, ć...): drawn on his pixel grid, so they stay crisp (a font file
+  blurs at that size), and any name he's given can be shown. Name then
+  age on one line, on the left (the right is for his battery and the
+  battery stock later).
+- **Age** in days: "1 DAY", "2 DAYS"... (the day he hatched is day 1).
+- Hatched: he's alive, his page appears in the Hub. His data (name,
+  birthday, later his inventory) is in backups; his **age** comes from
+  his birthday, so restored from a backup he's as old as he really is.
+- **Pip Home** isn't another plain page: more like a game. Its look
+  drafted first, for Nikola to pick.
+
 - [ ] Until he's hatched, the menu's room shows an **egg**; a few taps
   crack it, and Pip jumps out. His **birthday** is that moment.
 - [ ] Above the room, his **name and age** in tiny pixel text.
