@@ -89,8 +89,9 @@ class MedicineSettingsPage extends ConsumerWidget {
             secondary: const Icon(Icons.notifications_outlined),
             title: const Text('Reminders'),
             subtitle: Text(
-              'A notification at each dose time, unless it\'s marked. Each '
-              'medicine can also remind again later (in its own settings).',
+              'A notification at each dose time, unless you already set '
+              'that dose as taken, missed or not sure. Each medicine can '
+              'also remind again later (in its own settings).',
               style: muted(),
             ),
             value: preferences.medicineReminders,

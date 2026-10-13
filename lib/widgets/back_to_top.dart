@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// A "back to top" button over a long [PullDownList] in [child] (Round 20):
 /// shown only once it's scrolled far (more than [screens] screens down),
-/// at the bottom on the side of the hand in use; a tap scrolls up
-/// smoothly.
+/// at the bottom right (Round 24: always there); a tap scrolls up
+/// smoothly. The list leaves [room] at its end, so the button never covers
+/// the last entries.
 class BackToTop extends StatefulWidget {
   final Widget child;
   final double screens;
 
   const BackToTop({super.key, required this.child, this.screens = 2});
+
+  /// What the list leaves free at its end ([PullDownList.bottomSpace]):
+  /// the button, its margin and a gap.
+  static const room = 40.0 + 16 + 16;
 
   @override
   State<BackToTop> createState() => _BackToTopState();
@@ -35,7 +39,6 @@ class _BackToTopState extends State<BackToTop> {
 
   @override
   Widget build(BuildContext context) {
-    final right = HandTracker.sideOf(context) == HandSide.right;
     final inset = MediaQuery.paddingOf(context).bottom;
     return Stack(
       children: [
@@ -45,8 +48,7 @@ class _BackToTopState extends State<BackToTop> {
         ),
         Positioned(
           bottom: 16 + inset,
-          left: right ? null : 16,
-          right: right ? 16 : null,
+          right: 16,
           child: ExcludeSemantics(
             excluding: !_shown,
             child: AnimatedScale(

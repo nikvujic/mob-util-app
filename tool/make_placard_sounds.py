@@ -45,7 +45,7 @@ def inflate():
         loud = 0.15 + 0.4 * k
         fade_in = min(1.0, t / 0.08)
         fade_out = min(1.0, (length - t) / 0.05)
-        samples.append(loud * fade_in * fade_out * 0.8 * tone)
+        samples.append(loud * fade_in * fade_out * 1.4 * tone)
     write('inflate', samples)
 
 

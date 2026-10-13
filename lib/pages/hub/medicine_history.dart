@@ -338,6 +338,7 @@ class MedicineHistoryPage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Medicine history')),
       body: BackToTop(
         child: PullDownList(
+          bottomSpace: BackToTop.room,
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
@@ -577,6 +578,7 @@ class _MedicineOwnHistoryPageState
       appBar: AppBar(title: Text(medicine.name)),
       body: BackToTop(
         child: PullDownList(
+          bottomSpace: BackToTop.room,
           slivers: [
             SliverList.list(
               children: [

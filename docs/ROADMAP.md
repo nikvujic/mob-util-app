@@ -346,25 +346,25 @@ done without him: kept for now, but he picks the real one, see 6.)
   a sound while holding (in the spirit of Placard's, not the same).
 - [ ] The **red dot** only for important medicines; the "Red dot"
   switch in Medicine settings goes (the important flag decides).
-- [ ] Settings wording: "at each dose time, unless it's marked" — say
+- [x] Settings wording: "at each dose time, unless it's marked" — say
   what marked means (taken, missed or not sure).
 - [ ] The add / edit view like the routines one: scrolls to the lower
   options, closes only with back. After editing, closing it leaves the
   medicine's menu (history / edit / delete) open.
-- [ ] The tick sound for a normal medicine louder.
+- [x] The tick sound for a normal medicine louder.
 
 **2. Bug**
-- [ ] On an unlocked page, open the menu and lock: the menu closes and
+- [x] On an unlocked page, open the menu and lock: the menu closes and
   shows the page. It should lock silently, the menu staying open.
 
 **3. From the 0.27.0 review**
-- [ ] Hub tiles: the lock icon not in the corner — under the icon,
+- [x] Hub tiles: the lock icon not in the corner — under the icon,
   centred at the bottom (outside the icon's area).
 - [ ] The Introduction keeps up with features (each round).
-- [ ] Back to top in the histories always on the right, and room left
+- [x] Back to top in the histories always on the right, and room left
   at the end so it doesn't cover the last entries.
-- [ ] Placard: the pop timing as before Round 20 (revert that change).
-- [ ] Medicine and Placard sounds louder.
+- [x] Placard: the pop timing as before Round 20 (revert that change).
+- [x] Medicine and Placard sounds louder.
 
 **4. After v1 (v2)**
 - [ ] Medicine: pick weekdays (supplements taken some days only).
@@ -372,7 +372,7 @@ done without him: kept for now, but he picks the real one, see 6.)
 **5. Install problem** — Nikola can't install the app; the message
   is still to come.
 
-**6. The icon** — a prompt for Nikola to ask Claude for icon ideas
+**6. The icon** — (prompt given in chat, Round 24) a prompt for Nikola to ask Claude for icon ideas
   (from the theme and what the app is), and how to send the chosen one
   back (a screenshot, a file, or instructions to draw the same).
 

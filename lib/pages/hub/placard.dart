@@ -20,8 +20,9 @@ class PlacardPage extends ConsumerStatefulWidget {
   const PlacardPage({super.key});
 
   /// How long a hold takes to count.
-  /// About 4 seconds (Nikola: longer again in Rounds 16 and 20).
-  static const holdTime = Duration(milliseconds: 4000);
+  /// About 3 seconds, the inflating sound's length (Nikola: longer in
+  /// Round 16; Round 20's 4 seconds went back in Round 24).
+  static const holdTime = Duration(milliseconds: 3200);
 
   /// The corner that, tapped [cornerTaps] times, opens the settings.
   static const cornerSize = 72.0;
@@ -264,7 +265,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
               final inflate = 1 + inflated * h;
               final shake = popping
                   ? 0.0
-                  : h * h * 0.06 * math.sin(_hold.value * 182 * math.pi);
+                  : h * h * 0.06 * math.sin(_hold.value * 146 * math.pi);
               final scale = popping ? popScale(_pop.value) : inflate;
               return Stack(
                 alignment: Alignment.center,

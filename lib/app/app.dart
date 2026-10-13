@@ -240,8 +240,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(
       sectionClosedProvider(AppSection.values[_selectedIndex]),
       (wasClosed, closed) {
+        // Pages from the menu stay: they show nothing of the section.
         if (closed && wasClosed == false) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).popUntil(
+            (route) =>
+                route.isFirst || route.settings.name == AppRoutes.menuPage,
+          );
         }
       },
     );

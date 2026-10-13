@@ -16,7 +16,19 @@ Release with the installable APK.
   that long, a notice the evening before asks to open it, so they keep
   coming.
 
+### Fixed
+- Locking from the menu (Lock now) keeps the menu open instead of
+  closing it and showing the page behind; a page opened from the menu
+  (e.g. Security) stays open when the app locks.
+
 ### Changed
+- Medicine and Placard sounds are louder; Placard's inflate is back to
+  about 3 seconds (as before 0.27.0), with the pop at full volume.
+- Hub tiles: a locked page's small lock sits under the icon, centred.
+- Medicine histories: back to top always on the right, and the list
+  leaves room at the end so it doesn't cover the last entries.
+- Medicine settings say what stops a reminder: the dose already set as
+  taken, missed or not sure.
 - Doses due at the same time come as **one** notification naming them
   all (Android could hold the second one back for many minutes).
 - **The app's own icon**: a little pixel robot in the Clay colours,

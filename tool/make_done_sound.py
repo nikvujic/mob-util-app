@@ -35,7 +35,7 @@ for i in range(int(RATE * LENGTH)):
     t = i / RATE
     v = bloop(0.0, 170, 430, 0.06, t) + 0.6 * bloop(0.11, 210, 520, 0.05, t)
     fade = min(1.0, (LENGTH - t) / 0.04)  # no click at the end
-    frames.append(int(max(-1.0, min(1.0, v * 0.7 * fade)) * 32767))
+    frames.append(int(max(-1.0, min(1.0, v * 1.0 * fade)) * 32767))
 
 with wave.open('android/app/src/main/res/raw/done.wav', 'wb') as out:
     out.setnchannels(1)

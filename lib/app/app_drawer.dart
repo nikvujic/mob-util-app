@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/security/security.dart';
@@ -17,7 +18,12 @@ class AppDrawer extends ConsumerWidget {
   /// Opens [page] on top, with the menu left open behind it (G16): back
   /// returns to the menu, and back again closes it.
   void _open(BuildContext context, Widget page) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: AppRoutes.menuPage),
+        builder: (_) => page,
+      ),
+    );
   }
 
   @override
@@ -47,13 +53,10 @@ class AppDrawer extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.lock_outline),
                       tooltip: 'Lock now',
-                      onPressed: () {
-                        ref.read(sessionProvider.notifier).lock();
-                        Scaffold.of(context).closeDrawer();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Locked')),
-                        );
-                      },
+                      // Quietly (Round 24): the menu stays open, so the
+                      // page behind it isn't shown; the button going
+                      // away says it's done.
+                      onPressed: ref.read(sessionProvider.notifier).lock,
                     ),
                 ],
               ),

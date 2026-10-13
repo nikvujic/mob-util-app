@@ -98,6 +98,12 @@ void main() {
     expect(find.text('Hub is locked'), findsNothing);
     expect(find.byKey(const Key('toolLock-Medicine')), findsOneWidget);
     expect(find.byKey(const Key('toolLock-Counters')), findsNothing);
+    // Under the icon, centred (Round 24), not over it.
+    final tile = tester.getRect(find.byTooltip('Medicine'));
+    final lock = tester.getRect(find.byKey(const Key('toolLock-Medicine')));
+    expect(lock.center.dx, closeTo(tile.center.dx, 1));
+    expect(lock.top, greaterThan(tile.center.dy + 22),
+        reason: 'below the icon');
 
     await openTile(tester, 'Counters');
     expect(find.text('Push-ups'), findsOneWidget);

@@ -6,6 +6,8 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 
+import 'package:the_app/widgets/pull_down_list.dart';
+
 import '../helpers.dart';
 
 /// The medicine tracker (O6): one tap per dose, with the time; history.
@@ -604,10 +606,20 @@ void main() {
       await tester.pumpAndSettle();
       expect(scale(), 0, reason: 'not far yet');
       for (var i = 0; i < 6; i++) {
-        await tester.drag(list, const Offset(0, -600));
+        // With the left hand: the button stays on the right (Round 24).
+        await tester.dragFrom(tester.getTopLeft(list) + const Offset(20, 300),
+            const Offset(0, -600));
         await tester.pumpAndSettle();
       }
       expect(scale(), 1, reason: 'far down: there');
+      final screen = tester.getSize(find.byType(MaterialApp));
+      expect(tester.getCenter(button).dx, greaterThan(screen.width / 2));
+      // Room at the end, so it doesn't cover the last entries.
+      expect(
+          tester
+              .widget<PullDownList>(find.byType(PullDownList).last)
+              .bottomSpace,
+          greaterThanOrEqualTo(screen.height - tester.getRect(button).top));
       await tester.tap(button);
       await tester.pumpAndSettle();
       expect(scale(), 0, reason: 'back at the top');

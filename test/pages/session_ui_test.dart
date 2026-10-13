@@ -70,16 +70,33 @@ void main() {
   });
 
   group('menu', () {
-    testWidgets('offers Lock now only while unlocked', (tester) async {
+    testWidgets(
+        'offers Lock now only while unlocked; locks quietly, the menu '
+        'staying open (Round 24)', (tester) async {
       await start(tester);
+      container.read(sectionLocksProvider.notifier).lock(AppSection.notes);
       await openMenu(tester);
       await tester.tap(find.byTooltip('Lock now'));
       await tester.pumpAndSettle();
 
       expect(unlocked(), isFalse);
-      expect(find.text('Locked'), findsOneWidget); // snackbar
-      await openMenu(tester);
+      expect(find.byType(Drawer), findsOneWidget, reason: 'still open');
       expect(find.byTooltip('Lock now'), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets(
+        "locking from Security while on a locked section: Security stays "
+        '(Round 24)', (tester) async {
+      await start(tester);
+      container.read(sectionLocksProvider.notifier).lock(AppSection.notes);
+      await openMenu(tester);
+      await tester.tap(find.text('Security'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Lock now'));
+      await tester.pumpAndSettle();
+      expect(unlocked(), isFalse);
+      expect(appBarTitle('Security'), findsOneWidget);
     });
   });
 
