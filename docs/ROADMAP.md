@@ -930,17 +930,17 @@ Chunks, in order (each its own commit; release when a few are in):
 Sorted from one long message. Order of work is at the end.
 
 **A. Planner: the sheet and tapping blocks** ✅
-- [ ] **Save / Add greyed out** until the title is valid (not blank).
-- [ ] **No autofocus on the title when editing** (tapping a small block
+- [x] **Save / Add greyed out** until the title is valid (not blank).
+- [x] **No autofocus on the title when editing** (tapping a small block
   just to see what it is shouldn't open the keyboard). Adding still
   focuses it.
-- [ ] **Tapping a task shows it first** (like a routine): its title,
+- [x] **Tapping a task shows it first** (like a routine): its title,
   time, colour and reminder, with options (Edit, Delete, …); only Edit
   opens the sheet. (P15)
 
 **B. Planner: colours** ✅
-- [ ] **More colours** in the palette.
-- [ ] **Defaults:** new tasks are **blue**, new routines **purple**.
+- [x] **More colours** in the palette.
+- [x] **Defaults:** new tasks are **blue**, new routines **purple**.
 
 **A2. Planner: descriptions** ✅ (Nikola, after chunk 2) — tasks and
   routines get an optional description; it shows on the block when
