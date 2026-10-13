@@ -6,7 +6,16 @@ Release with the installable APK.
 
 ## [1.0.0] - unreleased
 
+### Added
+- Settings says when the phone blocks the app's notifications, and
+  asks to allow them.
+- Reminders are planned two weeks ahead: if the app isn't opened for
+  that long, a notice the evening before asks to open it, so they keep
+  coming.
+
 ### Changed
+- Doses due at the same time come as **one** notification naming them
+  all (Android could hold the second one back for many minutes).
 - **The app's own icon**: a little pixel robot in the Clay colours,
   instead of Flutter's logo. On Android 13 and later it follows the
   phone's themed icons too.

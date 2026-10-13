@@ -134,6 +134,41 @@ void main() {
     );
   });
 
+  group('at the same moment: one notification (Round 23)', () {
+    Medicine at(String id, String name, List<int> times, {int? followUp}) =>
+        Medicine(
+          id: id,
+          name: name,
+          times: times,
+          from: DateTime(2026, 10, 1),
+          until: tomorrow,
+          followUp: followUp,
+        );
+
+    test('two medicines at 20:00: one, naming both', () {
+      final book = MedicineBook(medicines: [
+        at('a', 'Iron', [20 * 60]),
+        at('b', 'Vitamin D', [20 * 60]),
+      ]);
+      expect(plan(book).first,
+          '12 20:0 Iron, Vitamin D: Time to take them · 20:00');
+      expect(plan(book, hideNames: true).first,
+          '12 20:0 Medicine: 2 doses are due at 20:00');
+      expect(plan(book), hasLength(2), reason: 'today and tomorrow');
+    });
+
+    test("one's dose and another's follow-up: both said", () {
+      final book = MedicineBook(medicines: [
+        at('a', 'Iron', [16 * 60], followUp: 240),
+        at('b', 'Zinc', [20 * 60]),
+      ]);
+      expect(plan(book)[1],
+          '12 20:0 Iron, Zinc: Iron not taken yet · 16:00; Zinc 20:00');
+      expect(plan(book, hideNames: true)[1],
+          '12 20:0 Medicine: 2 doses are due or not taken yet');
+    });
+  });
+
   group('a dose due', () {
     test('its time has come today and it is not marked', () {
       final book = MedicineBook(medicines: [pills]);

@@ -301,7 +301,7 @@ fixtures for every stored format.
    export was; after a week without one, a quiet reminder (a dot on the
    menu's Backup and a notification) to export. So a lost or reset phone
    never costs more than a week.
-2. [ ] **Notifications, reliability check** (E1): after a restart of the
+2. [x] **Notifications, reliability check** (E1): after a restart of the
    phone, with the app swiped away, with battery saving on, when the
    clock or time zone changes, with exact alarms not allowed. Fix what's
    missing; a short phone test list for Nikola.
@@ -341,6 +341,26 @@ notification checks and the last pass.
 - [x] Released 0.27.0; the next is 1.0.0.
 - [x] The icon: a pixel robot of our own (`tool/make_icon.py`), legacy
   and adaptive, with a one-colour layer for themed icons.
+- [x] Notifications (E1). Already right: plans again after a restart or
+  an update, exact alarms, absolute times re-planned on every start.
+  Fixed: doses at the same minute come as one (Android holds back alarms
+  close together while idle); a notice the evening before planned
+  reminders run out (an app left unopened two weeks went quiet); Settings
+  says when notifications are blocked.
+
+**Phone test list (E1)** — for Nikola, on 1.0.0:
+1. Two medicines at the same time: one notification naming both.
+2. Restart the phone: the next reminder still comes.
+3. Swipe the app away from recent apps: reminders still come.
+4. Battery: set The App to *Unrestricted* (Settings → Apps → The App →
+   Battery); some phones (Xiaomi, Samsung) stop alarms of restricted
+   apps.
+5. Turn notifications off for The App: Settings in the app says so;
+   tapping it asks again.
+6. Change the time zone (or travel): open the app once afterwards, so
+   reminders move to the new local times.
+7. A week without a backup: the red dot on the menu and an evening
+   notification that opens Backup.
 
 A note for after v1:
 - [ ] **Notifications page** (menu → Notifications; E3): a **history**

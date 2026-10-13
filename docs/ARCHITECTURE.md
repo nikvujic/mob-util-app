@@ -369,3 +369,11 @@ inherited widget, so widgets/ stays free of providers) and re-reads it
 with the medicine dot. `planBackupReminders` adds its notifications
 (their own Android channel, `backup-reminders`) to the reminder plan; a
 `BackupTarget` opens Backup on top of whatever is shown.
+
+Reliability (E1): medicine doses due at the same moment are merged into
+one reminder in `planMedicineReminders` (Android rate-limits exact
+alarms that follow each other while idle). `withKeepGoing` caps the plan
+at `maxReminders` and, when it would run on past what's planned, adds a
+`ReminderKind.notice` the evening before the last one asking to open the
+app. `notificationsAllowedProvider` (re-read on resume) shows Settings'
+warning when notifications are blocked.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/providers/reminders_provider.dart';
 import 'package:the_app/pages/settings/clear_data.dart';
 import 'package:the_app/providers/introduction_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -17,6 +18,25 @@ class SettingsPage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Settings')),
       body: PullDownList.children(
         children: [
+          // Only while the phone blocks them: reminders can't show (E1).
+          if (ref.watch(notificationsAllowedProvider).valueOrNull == false)
+            ListTile(
+              key: const Key('notificationsOff'),
+              leading: Icon(
+                Icons.notifications_off_outlined,
+                color: context.colors.danger,
+              ),
+              title: const Text('Notifications are off'),
+              subtitle: Text(
+                "Reminders can't show. Tap to allow them, or allow them for "
+                "The App in the phone's settings.",
+                style: TextStyle(color: context.colors.textSecondary),
+              ),
+              onTap: () async {
+                await ref.read(reminderPlannerProvider).requestPermission();
+                ref.invalidate(notificationsAllowedProvider);
+              },
+            ),
           SwitchListTile(
             secondary: const Icon(Icons.format_list_numbered),
             title: const Text('Line numbers in notes'),

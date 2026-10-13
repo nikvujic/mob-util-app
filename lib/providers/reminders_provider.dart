@@ -212,8 +212,42 @@ class ReminderPlanner {
     ]..sort((a, b) => a.at.compareTo(b.at));
     await _ref
         .read(reminderSchedulerProvider)
-        .replaceAll(reminders.take(maxReminders).toList());
+        .replaceAll(withKeepGoing(reminders, now: now));
   }
 }
 
+/// [reminders] (sorted) as many as can be scheduled, and when they'd run
+/// on past what is (they're planned [reminderDays] ahead, or cut at
+/// [maxReminders]), a notice the evening before the last one to open the
+/// app, which plans them again (E1, Round 23). Without it, an app left
+/// unopened for two weeks would go quiet with nothing said.
+List<Reminder> withKeepGoing(List<Reminder> reminders,
+    {required DateTime now}) {
+  final kept = reminders.take(maxReminders - 1).toList();
+  if (kept.isEmpty) return kept;
+  final cut = kept.length < reminders.length;
+  final nearEnd = now.add(const Duration(days: reminderDays - 2));
+  if (!cut && !kept.last.at.isAfter(nearEnd)) return kept;
+  final last = kept.last.at;
+  final at = DateTime(last.year, last.month, last.day - 1, 19);
+  if (!at.isAfter(now)) return kept;
+  return [
+    ...kept,
+    Reminder(
+      at: at,
+      kind: ReminderKind.notice,
+      title: 'Open The App',
+      body: 'Reminders are planned two weeks ahead. Open the app to keep '
+          'them coming.',
+    ),
+  ]..sort((a, b) => a.at.compareTo(b.at));
+}
+
 final reminderPlannerProvider = Provider<ReminderPlanner>(ReminderPlanner.new);
+
+/// Whether notifications are allowed (E1): Settings says so when they
+/// aren't. Looked at again when the app comes back (they may have been
+/// turned on in the phone's settings meanwhile).
+final notificationsAllowedProvider = FutureProvider<bool>(
+  (ref) => ref.watch(reminderSchedulerProvider).areAllowed(),
+);

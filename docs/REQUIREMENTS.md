@@ -132,6 +132,14 @@ Status: ✅ done · 🚧 in progress · ⏳ planned · 💭 later / idea
 | P24 | **Tapping a notification opens what it's about** (Round 19): a block, routine or reminder opens the Planner on its day, scrolled to it; a medicine opens the Medicine page. From anywhere in the app (pages on top close). Locks stay as they are: a locked section shows its lock screen, and the "go to" waits there until it's unlocked, also on a later visit. | ✅ |
 | P4 | Scheduler in the style of *TimeTune* (time blocks across the day, routines). | ✅ via P7–P9 |
 
+## E — Notifications
+
+| # | Requirement | Status |
+|---|-------------|--------|
+| E1 | **Reliable reminders**: planned two weeks ahead, again on every start, change and return to the app; kept across phone restarts and app updates; exact where Android allows (USE_EXACT_ALARM). Doses due at the same minute come as **one** notification (Android holds back alarms close together while idle). When reminders would run past what's planned, a notice the evening before asks to open the app. Settings says so when the phone blocks notifications, and asks to allow them. | ✅ Round 23 |
+| E2 | Notification sounds per kind, picked in the app (each kind has its own Android channel meanwhile: planner, medicine, backup, notices). | 💭 after v1 |
+| E3 | **Notifications page** (menu): recent ones (today and yesterday) that open their page, a button to clear them, and E2's settings. | 💭 after v1 |
+
 ## U — UI polish ("fun but practical")
 
 | # | Requirement | Status |

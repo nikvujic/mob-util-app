@@ -209,6 +209,9 @@ class FakeReminderScheduler implements ReminderScheduler {
   }
 
   @override
+  Future<bool> areAllowed() async => allowed;
+
+  @override
   Future<void> replaceAll(List<Reminder> reminders) async {
     scheduled = List.of(reminders);
   }

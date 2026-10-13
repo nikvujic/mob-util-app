@@ -122,6 +122,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // A dose may have come due while away (O13).
       ref.invalidate(medicineDotProvider);
       ref.invalidate(backupDueProvider);
+      ref.invalidate(notificationsAllowedProvider);
       // Reminders are planned two weeks ahead: top them up (P10).
       ref.read(reminderPlannerProvider).refresh();
     },

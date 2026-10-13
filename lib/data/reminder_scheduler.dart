@@ -7,7 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 /// What a reminder is about: each kind has its own Android channel, so
 /// they can be set apart in the phone's settings.
-enum ReminderKind { planner, medicine, backup }
+enum ReminderKind { planner, medicine, backup, notice }
 
 /// A reminder (P10, O13): a notification at [at].
 class Reminder {
@@ -36,6 +36,9 @@ abstract class ReminderScheduler {
   /// Asks for permission to show notifications if needed (Android 13+).
   /// Whether they're allowed.
   Future<bool> requestPermission();
+
+  /// Whether the phone lets the app show notifications at all.
+  Future<bool> areAllowed();
 
   /// Replaces every scheduled reminder with [reminders].
   Future<void> replaceAll(List<Reminder> reminders);
@@ -72,6 +75,12 @@ class NotificationReminderScheduler implements ReminderScheduler {
       'backup-reminders',
       'Backup reminders',
       channelDescription: 'When a week has gone by without a backup',
+      category: AndroidNotificationCategory.reminder,
+    ),
+    ReminderKind.notice: AndroidNotificationDetails(
+      'app-notices',
+      'From the app',
+      channelDescription: 'When the app needs opening to keep reminders',
       category: AndroidNotificationCategory.reminder,
     ),
   };
@@ -130,6 +139,16 @@ class NotificationReminderScheduler implements ReminderScheduler {
   Future<bool> requestPermission() async {
     if (!await _init()) return false;
     return await _android?.requestNotificationsPermission() ?? false;
+  }
+
+  @override
+  Future<bool> areAllowed() async {
+    if (!await _init()) return true;
+    try {
+      return await _android?.areNotificationsEnabled() ?? true;
+    } on PlatformException {
+      return true;
+    }
   }
 
   @override

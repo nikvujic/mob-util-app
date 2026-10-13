@@ -22,6 +22,9 @@ class _SlowScheduler implements ReminderScheduler {
   Future<bool> requestPermission() async => true;
 
   @override
+  Future<bool> areAllowed() async => true;
+
+  @override
   Stream<String> get opened => const Stream.empty();
 
   @override
