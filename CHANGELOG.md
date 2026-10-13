@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.2.1] - 2026-10-13
 
 ### Changed
 - Pip's screen is one row taller, less flat, in his room, in the menu's
