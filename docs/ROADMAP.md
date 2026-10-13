@@ -333,6 +333,21 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 26 — after v1: Pip's room, and notes on 1.0.0 (2026-10-13)
+
+**1. Pip's room in the menu** (now; see Round 24, part 8)
+- [ ] A small field at the bottom of the menu. The first time the menu
+  opens, Pip pops out of the ground; then he stands about and walks.
+  Drawn finer than the icon, crisp, squash and stretch on the jump.
+
+**2. Notes for later** (on 1.0.0)
+- [ ] No toast when deleting the Introduction.
+- [ ] Backup: "Last backup" has two spaces between date and time; one
+  there (the notes' dates keep theirs).
+- [ ] Menu header: "The App" a little lower, level with Pip.
+- [ ] The launcher icon looks a bit soft next to other apps' icons:
+  sharper (e.g. drawn as a vector, crisp at any size).
+
 ### Round 25 — Nikola's notes on 0.28.0, then v1 (2026-10-13)
 
 - [x] Hub tiles: the page lock at the bottom left (outside the icon),
