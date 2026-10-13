@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
@@ -32,11 +33,17 @@ Future<ProviderContainer> pumpApp(
   FakeReminderScheduler? reminders,
   bool introduction = false,
   bool pipMoves = false,
+  bool pipHatched = true,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
     overrides: [
-      appStorageProvider.overrideWithValue(AppStorage.inMemory()),
+      // Pip already out of his egg (Round 34), as on most phones by now;
+      // his egg's own tests pass false.
+      appStorageProvider.overrideWithValue(AppStorage.inMemory(
+        initialPip:
+            pipHatched ? PipLife(born: DateTime(2026, 10, 1)) : PipLife.egg,
+      )),
       appVersionProvider.overrideWithValue(testAppVersion),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
       fingerprintVaultProvider.overrideWithValue(

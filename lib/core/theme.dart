@@ -418,6 +418,7 @@ abstract final class PipColours {
   static const face = Color(0xFF141413); // eyes, mouth
   static const shade = Color(0xFFA84F33); // under the body, feet
   static const light = Color(0xFFF2C07A); // the antenna's light
+  static const eggShade = Color(0xFFD8D0C2); // his egg's shade (Round 34)
 
   // His room (Round 26): grass on dirt.
   static const grass = Color(0xFF5E8C3A);

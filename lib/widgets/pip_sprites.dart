@@ -103,7 +103,60 @@ abstract final class PipSprites {
     PipFrame.tuck: _frame('oh', 'tuck'),
   };
 
+  /// His egg (Round 34, Nikola's pick: spotted), 16 x 19: the shell, a
+  /// shade down its right and bottom edges, spots in his casing colour.
+  static const egg = [
+    '......WWWW......',
+    '.....WWWWWW.....',
+    '....WWWWWWWw....',
+    '...WWWWWWWWWw...',
+    '..WWWLLWWWWWWw..',
+    '..WWWWWWWWWWWw..',
+    '.WWWWWWWWWWWWWw.',
+    '.WWWWWWWWWWLLWw.',
+    '.WWWWWWWWWWWLWw.',
+    'WWWWWWWWWWWWWWWw',
+    'WWWWWWWWWWWWWWWw',
+    'WWWLLWWWWWWWWWWw',
+    'WWWWWWWWWWWWWWWw',
+    'WWWWWWWWWWWWLWWw',
+    '.WWWWWWWWWLWWWw.',
+    '.WWWWWWWWWWWWWw.',
+    '..WWWWWWWWWWWw..',
+    '...wwwwwwwwww...',
+    '.....wwwwww.....',
+  ];
+
+  /// The crack across his egg: a zigzag through its middle, longer at each
+  /// stage (1 to 3), as (x, y) on [egg].
+  static const crackZigzag = [
+    (8, 8), (7, 9), (9, 9), // a first nick
+    (6, 8), (10, 8), (5, 9), (11, 9), // longer
+    (4, 8), (12, 8), (3, 9), (13, 9), (2, 8), (14, 8), (1, 9), // across
+  ];
+  static const crackLength = [0, 3, 7, 14];
+
+  /// [egg] cracked to [stage] (0 to 3).
+  static List<String> crackedEgg(int stage) {
+    final rows = [for (final r in egg) r.split('')];
+    for (final (x, y) in crackZigzag.take(crackLength[stage.clamp(0, 3)])) {
+      if (rows[y][x] != '.') rows[y][x] = 'K';
+    }
+    return [for (final r in rows) r.join()];
+  }
+
+  /// The egg's two halves once he's out: the bottom (rows 9 on, its top
+  /// edge broken) and the top (rows 0 to 8).
+  static final eggBottom = [
+    [
+      for (final (i, c) in egg[9].split('').indexed) i % 3 == 1 ? '.' : c,
+    ].join(),
+    ...egg.skip(10),
+  ];
+  static final eggTop = egg.take(9).toList();
+
   static const colours = {
+    'w': PipColours.eggShade,
     'L': PipColours.casing,
     'O': PipColours.body,
     'S': PipColours.shade,

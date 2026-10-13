@@ -2,6 +2,14 @@ import 'dart:math' as math;
 
 /// What Pip is doing (Round 26).
 enum PipActivity {
+  /// Not hatched yet (Round 34): an egg in the middle of the room, cracked
+  /// a little more by taps.
+  egg,
+
+  /// Out of the egg: its top pops off, he jumps out and lands, the shell
+  /// fades.
+  hatching,
+
   /// The first time the menu opens: the ground cracks, he comes up out
   /// of it, hops and lands.
   spawning,
@@ -24,8 +32,10 @@ enum PipFrame { idle, blink, step1, step2, step3, step4, oh, tuck }
 class PipBrain {
   final math.Random random;
 
-  PipBrain({int roomWidth = 0, math.Random? random})
-      : random = random ?? math.Random() {
+  /// [hatched]: false, and he's still an egg (Round 34).
+  PipBrain({int roomWidth = 0, math.Random? random, bool hatched = true})
+      : random = random ?? math.Random(),
+        activity = hatched ? PipActivity.spawning : PipActivity.egg {
     this.roomWidth = roomWidth;
   }
 
@@ -60,7 +70,7 @@ class PipBrain {
   /// Where his left edge is (0 to [roomWidth] − [width]).
   double x = 0;
   bool facingRight = true;
-  PipActivity activity = PipActivity.spawning;
+  PipActivity activity;
 
   /// Seconds into what he's doing now.
   double _t = 0;
@@ -77,8 +87,66 @@ class PipBrain {
   /// does this time.
   double? _turnAt;
 
-  /// Whether he has come out of the ground (only once).
-  bool get spawned => activity != PipActivity.spawning;
+  /// Whether he has come out of the ground (only once), or out of his egg.
+  bool get spawned =>
+      activity != PipActivity.spawning &&
+      activity != PipActivity.egg &&
+      activity != PipActivity.hatching;
+
+  /// Taps on the egg so far, and how many hatch him (Round 34): the first
+  /// starts the crack, then every two widen it, and two more pop him out.
+  int taps = 0;
+  static const hatchTaps = 7;
+
+  /// How far the egg is cracked: 0 (whole) to 3.
+  int get crack => taps >= 5
+      ? 3
+      : taps >= 3
+          ? 2
+          : taps >= 1
+              ? 1
+              : 0;
+
+  /// The hatching's parts, in seconds from the last tap: the top pops off,
+  /// he jumps out, lands, and the shell fades.
+  static const popEnd = 0.15;
+  static const jumpEnd = 0.65;
+  static const hatchLandEnd = 0.9;
+  static const fadeEnd = 1.8;
+
+  /// A tap on the egg: one more crack. True when it's the one that hatches
+  /// him (the hatching starts).
+  bool tapEgg() {
+    if (activity != PipActivity.egg) return false;
+    taps++;
+    if (taps < hatchTaps) return false;
+    activity = PipActivity.hatching;
+    _t = 0;
+    _eggX = x;
+    // He jumps out to the left (the top flies off to the right).
+    facingRight = false;
+    return true;
+  }
+
+  /// Where his egg was (its left edge as his would be), while hatching.
+  double _eggX = 0;
+  double get eggX => activity == PipActivity.hatching ? _eggX : x;
+
+  /// How far to the left of his egg he lands, in pixels.
+  static const hatchJump = 14.0;
+
+  /// While hatching: how far the egg's top has flown (0 → 1), and how
+  /// faded the shell is (0: there, 1: gone).
+  double get capFlight =>
+      activity == PipActivity.hatching ? (_t / jumpEnd).clamp(0.0, 1.0) : 0;
+  double get shellFade => activity == PipActivity.hatching
+      ? ((_t - hatchLandEnd) / (fadeEnd - hatchLandEnd)).clamp(0.0, 1.0)
+      : 0;
+
+  /// Whether he shows yet while hatching (from the pop on).
+  bool get visible =>
+      activity != PipActivity.egg &&
+      !(activity == PipActivity.hatching && _t < popEnd);
 
   double get _maxX => math.max(0, roomWidth - width).toDouble();
 
@@ -86,6 +154,16 @@ class PipBrain {
   void step(double dt) {
     _t += dt;
     switch (activity) {
+      case PipActivity.egg:
+        break;
+      case PipActivity.hatching:
+        if (_t >= popEnd) {
+          final p = ((_t - popEnd) / (jumpEnd - popEnd)).clamp(0.0, 1.0);
+          x = _eggX - hatchJump * p;
+        }
+        // Landed: he turns to look at his shell.
+        if (_t >= hatchLandEnd) facingRight = true;
+        if (_t >= fadeEnd) _stand();
       case PipActivity.spawning:
         if (_t >= landEnd) _stand();
       case PipActivity.standing:
@@ -145,6 +223,10 @@ class PipBrain {
 
   /// The frame to draw now.
   PipFrame get frame => switch (activity) {
+        PipActivity.egg => PipFrame.idle,
+        PipActivity.hatching => _t < jumpEnd
+            ? PipFrame.oh
+            : (_t < hatchLandEnd ? PipFrame.tuck : PipFrame.idle),
         PipActivity.spawning => _t < hopEnd ? PipFrame.oh : PipFrame.tuck,
         PipActivity.standing => _blinking > 0 ? PipFrame.blink : PipFrame.idle,
         PipActivity.walking => const [
@@ -168,6 +250,11 @@ class PipBrain {
 
   /// How high above the ground (a hop, or a step's bob), in pixels.
   double get lift {
+    if (activity == PipActivity.hatching && _t >= popEnd && _t < jumpEnd) {
+      final p = (_t - popEnd) / (jumpEnd - popEnd);
+      // A little higher than the spawn's hop, still in the room.
+      return 7 * math.sin(math.pi * p);
+    }
     if (activity == PipActivity.spawning && _t >= riseEnd && _t < hopEnd) {
       final p = (_t - riseEnd) / (hopEnd - riseEnd);
       return 6 * math.sin(math.pi * p);
@@ -178,6 +265,19 @@ class PipBrain {
 
   /// Squash and stretch: (width, height) scale.
   (double, double) get stretch {
+    if (activity == PipActivity.hatching) {
+      if (_t >= popEnd && _t < jumpEnd) {
+        final p = (_t - popEnd) / (jumpEnd - popEnd);
+        final s = 0.18 * math.cos(math.pi * p).clamp(0, 1);
+        return (1 - s / 2, 1 + s);
+      }
+      if (_t >= jumpEnd && _t < hatchLandEnd) {
+        final p = (_t - jumpEnd) / (hatchLandEnd - jumpEnd);
+        final s = 0.2 * math.sin(math.pi * p);
+        return (1 + s / 2, 1 - s);
+      }
+      return (1, 1);
+    }
     if (activity != PipActivity.spawning) return (1, 1);
     if (_t >= riseEnd && _t < hopEnd) {
       // Stretched going up, back to size at the top.

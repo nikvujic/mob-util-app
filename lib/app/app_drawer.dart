@@ -10,6 +10,8 @@ import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/pip.dart';
 import 'package:the_app/widgets/pip_room.dart';
@@ -129,6 +131,10 @@ class AppDrawer extends ConsumerWidget {
             PipRoom(
               brain: ref.watch(pipBrainProvider),
               animate: ref.watch(pipAnimatesProvider),
+              // Out of his egg: that's his birthday (Round 34).
+              onHatched: () => ref
+                  .read(pipLifeProvider.notifier)
+                  .hatch(ref.read(clockProvider)()),
             ),
             Padding(
               padding: const EdgeInsets.all(16),

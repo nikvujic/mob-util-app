@@ -61,7 +61,10 @@ void main() {
 
     test('in his colours', () {
       String hex(int v) => v.toRadixString(16).padLeft(2, '0');
+      // The colours his standing frame uses (not the egg's, Round 34).
+      final used = PipSprites.frames[PipFrame.idle]!.join().split('').toSet();
       for (final MapEntry(:key, :value) in PipSprites.colours.entries) {
+        if (!used.contains(key)) continue;
         final rgb = [value.r, value.g, value.b]
             .map((c) => '0x${hex((c * 255).round()).toUpperCase()}')
             .join(', ');

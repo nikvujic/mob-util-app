@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
@@ -78,6 +80,40 @@ void main() {
           tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
       await openMenu(tester); // settles: nothing animates
       expect(pip().spawned, isTrue);
+    });
+  });
+
+  group('his egg (Round 34)', () {
+    testWidgets(
+        'an egg until hatched; 7 taps, and he\'s out: his birthday, '
+        'his page', (tester) async {
+      final container = await pumpApp(tester,
+          pipHatched: false, clock: () => DateTime(2026, 10, 14, 21, 30));
+      await openMenu(tester);
+      expect(container.read(pipBrainProvider).activity, PipActivity.egg);
+      final buzzes = <String>[];
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'HapticFeedback.vibrate') {
+          buzzes.add(call.arguments as String);
+        }
+        return null;
+      });
+      for (var i = 0; i < 6; i++) {
+        await tester.tap(room);
+        await tester.pump();
+      }
+      expect(container.read(pipBrainProvider).crack, 3);
+      expect(container.read(pipLifeProvider).hatched, isFalse);
+      await tester.tap(room);
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      expect(
+          container.read(pipLifeProvider).born, DateTime(2026, 10, 14, 21, 30),
+          reason: 'his birthday');
+      expect(container.read(pipBrainProvider).spawned, isTrue);
+      expect(buzzes.where((b) => b.contains('light')), hasLength(6));
+      expect(buzzes.where((b) => b.contains('heavy')), hasLength(1),
+          reason: 'a longer one for the pop');
     });
   });
 }

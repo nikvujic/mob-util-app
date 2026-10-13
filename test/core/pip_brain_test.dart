@@ -57,7 +57,13 @@ void main() {
       }
       lastX = p.x;
     }
-    expect(seen, containsAll(PipActivity.values));
+    expect(
+        seen,
+        containsAll([
+          PipActivity.spawning,
+          PipActivity.standing,
+          PipActivity.walking,
+        ]));
     expect(
         frames, containsAll([PipFrame.blink, PipFrame.step1, PipFrame.step3]));
   });
@@ -88,5 +94,43 @@ void main() {
     run(p, 40);
     p.roomWidth = 30;
     expect(p.x, inInclusiveRange(0, 30 - PipBrain.width));
+  });
+
+  group('his egg (Round 34)', () {
+    test('cracks with taps: 1, then every 2; the 7th hatches him', () {
+      final p =
+          PipBrain(roomWidth: 120, random: math.Random(7), hatched: false);
+      expect(p.activity, PipActivity.egg);
+      expect(p.spawned, isFalse);
+      final cracks = <int>[];
+      for (var i = 0; i < 6; i++) {
+        expect(p.tapEgg(), isFalse);
+        cracks.add(p.crack);
+      }
+      expect(cracks, [1, 1, 2, 2, 3, 3]);
+      expect(p.tapEgg(), isTrue, reason: 'the 7th');
+      expect(p.activity, PipActivity.hatching);
+      expect(p.tapEgg(), isFalse, reason: 'once');
+    });
+
+    test('hatching: the top pops, he jumps out, lands, the shell fades', () {
+      final p =
+          PipBrain(roomWidth: 120, random: math.Random(7), hatched: false);
+      for (var i = 0; i < 7; i++) {
+        p.tapEgg();
+      }
+      expect(p.visible, isFalse, reason: 'the pop first');
+      run(p, 0.3);
+      expect(p.visible, isTrue);
+      expect(p.lift, greaterThan(0), reason: 'jumping out');
+      expect(p.capFlight, greaterThan(0));
+      run(p, 0.5); // ~0.8 s: landing
+      expect(p.stretch.$2, lessThan(1), reason: 'squashed');
+      run(p, 0.5); // ~1.3 s
+      expect(p.shellFade, inExclusiveRange(0, 1));
+      run(p, 0.6);
+      expect(p.activity, PipActivity.standing);
+      expect(p.spawned, isTrue);
+    });
   });
 }
