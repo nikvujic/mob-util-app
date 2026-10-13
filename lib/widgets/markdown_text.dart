@@ -116,7 +116,8 @@ class MarkdownEditingController extends TextEditingController {
     ];
   }
 
-  /// Each ``` code block (N17), fences included: drawn on a panel.
+  /// Each ``` code block (N17), fences included: drawn on a panel. Only
+  /// closed ones (Round 29), as [markdownRuns] reads them.
   List<({int start, int end})> codeBlocks() {
     final blocks = <({int start, int end})>[];
     int? open;
@@ -134,8 +135,7 @@ class MarkdownEditingController extends TextEditingController {
       if (end >= text.length) break;
       lineStart = end + 1;
     }
-    // Not closed yet (being typed): to the end.
-    if (open != null) blocks.add((start: open, end: text.length));
+    // Not closed (Round 29): not a block, just text.
     return blocks;
   }
 
@@ -151,6 +151,9 @@ class MarkdownEditingController extends TextEditingController {
   /// A bullet's dot, bigger than the text's (Round 27), at the same line
   /// height.
   static const bulletScale = 1.35;
+
+  /// Code's size, relative to the text around it (Round 29).
+  static const codeScale = 0.88;
 
   @override
   TextSpan buildTextSpan({
@@ -191,9 +194,12 @@ class MarkdownEditingController extends TextEditingController {
       // gets a whole panel), highlights on the accent, quotes muted and
       // slanted.
       if (run.code) {
+        // A little smaller than the text (Round 29: wide letters made it
+        // hard to read).
         s = s.copyWith(
           fontFamily: 'monospace',
           fontFamilyFallback: const ['Roboto Mono', 'Courier'],
+          fontSize: (s.fontSize ?? 16) * codeScale,
           backgroundColor: run.block ? null : colors.card,
         );
       }
@@ -238,7 +244,7 @@ class MarkdownEditingController extends TextEditingController {
     bool onRevealedLine(MdRun run) =>
         run.start >= revealed.start && run.end <= revealed.end;
     bool shown(MdRun run) => run.role != MdRole.marker || onRevealedLine(run);
-    final spans = <TextSpan>[];
+    final spans = <InlineSpan>[];
     for (final run in markdownRuns(text)) {
       // A checkbox off the line being edited: its `[` drawn as a box, the
       // other symbols as nothing, the space after it kept (N15).
@@ -303,13 +309,25 @@ class MarkdownEditingController extends TextEditingController {
         final inWord = from >= composing.start && to <= composing.end;
         var piece = text.substring(from, to);
         if (bullet && from == run.start) {
-          // The dot on its own, bigger; the rest as the marker.
+          // The dot on its own: drawn, centred on the text's middle
+          // (Round 29: a bigger "•" sat above it). One character still.
           final size = style.fontSize ?? 16;
-          spans.add(TextSpan(
-            text: '•',
-            style: style.copyWith(
-              fontSize: size * bulletScale,
-              height: (style.height ?? 1.2) / bulletScale,
+          spans.add(WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            style: style,
+            child: SizedBox(
+              key: const Key('listDot'),
+              width: size * 0.55,
+              height: size * bulletScale * 0.3,
+              child: Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: style.color,
+                    shape: BoxShape.circle,
+                  ),
+                  child: SizedBox.square(dimension: size * bulletScale * 0.3),
+                ),
+              ),
             ),
           ));
           piece = piece.substring(1);

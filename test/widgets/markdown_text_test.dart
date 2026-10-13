@@ -26,14 +26,17 @@ void main() {
     );
   }
 
-  /// The styled pieces of the field's text.
+  /// The styled pieces of the field's text; a list's drawn dot as "•".
   List<TextSpan> spans(WidgetTester tester) {
     final span = controller.buildTextSpan(
       context: tester.element(find.byType(TextField)),
       style: const TextStyle(fontSize: 16),
       withComposing: true,
     );
-    return span.children!.cast<TextSpan>();
+    return [
+      for (final s in span.children!)
+        s is WidgetSpan ? TextSpan(text: '•', style: s.style) : s as TextSpan,
+    ];
   }
 
   TextSpan spanOf(WidgetTester tester, String text) =>
@@ -163,13 +166,34 @@ void main() {
     expect(controller.text, '- milk\n* eggs\n1. one', reason: 'unchanged');
   });
 
-  testWidgets('a bullet\'s dot is bigger than the text (Round 27)',
+  testWidgets(
+      'a bullet\'s dot is bigger (Round 27), centred on the text (Round 29)',
       (tester) async {
-    await pumpField(tester, '- milk');
-    final dot = spanOf(tester, '•');
-    expect(dot.style!.fontSize, greaterThan(16));
-    expect(dot.style!.fontSize! * dot.style!.height!, closeTo(16 * 1.2, 0.01),
-        reason: 'the line stays as tall');
+    await pumpField(tester, '- milk\nmilk\nmilk');
+    final dot = find.byKey(const Key('listDot'));
+    expect(dot, findsOneWidget);
+    final circle = tester.getSize(find.descendant(
+      of: dot,
+      matching: find.byType(DecoratedBox),
+    ));
+    expect(circle.width,
+        closeTo(16 * MarkdownEditingController.bulletScale * 0.3, 0.01));
+    // Its middle level with the text's, not above it.
+    final editable = tester.allRenderObjects.whereType<RenderEditable>().single;
+    final word = editable
+        .getBoxesForSelection(
+            const TextSelection(baseOffset: 2, extentOffset: 6))
+        .single
+        .toRect();
+    final wordMiddle = editable.localToGlobal(word.center).dy;
+    expect(tester.getCenter(dot).dy, closeTo(wordMiddle, 1.5));
+    // The line stays as tall as a plain one.
+    double top(int at) => editable
+        .getBoxesForSelection(
+            TextSelection(baseOffset: at, extentOffset: at + 4))
+        .single
+        .top;
+    expect(top(7) - top(2), closeTo(top(12) - top(7), 0.5));
   });
 
   testWidgets('#### is a small heading: bold, a little bigger (Round 27)',

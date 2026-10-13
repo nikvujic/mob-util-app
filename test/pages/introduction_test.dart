@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/changelog.dart';
+import 'package:the_app/core/markdown.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -208,5 +211,19 @@ void main() {
     test('the number of a shown version', () {
       expect(versionNumber('0.24.0 (25)'), '0.24.0');
     });
+  });
+
+  test(
+      'every version\'s "What\'s new" reads as text, no stray code block '
+      '(Round 29: 1.2.0\'s turned mostly into code)', () {
+    final changelog = File('CHANGELOG.md').readAsStringSync();
+    final versions = RegExp(r'^## \[(\d+\.\d+\.\d+)\]', multiLine: true)
+        .allMatches(changelog)
+        .map((m) => m[1]!);
+    for (final version in versions) {
+      final changes = changesFor(changelog, version)!;
+      expect(markdownRuns(changes).where((r) => r.block), isEmpty,
+          reason: version);
+    }
   });
 }

@@ -139,4 +139,25 @@ void main() {
         moreOrLessEquals(field.width, epsilon: 1),
         reason: 'across');
   });
+
+  testWidgets(
+      'a ``` never closed draws no panel; code is a little smaller '
+      '(Round 29)', (tester) async {
+    await openBar(tester, 'text `code`\n```\nnot closed');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    final painter =
+        tester.renderObject<RenderCheckboxBoxes>(find.byType(CheckboxBoxes));
+    expect(painter.paintedPanels, isEmpty);
+
+    final span = content(tester).buildTextSpan(
+      context: tester.element(contentField),
+      style: const TextStyle(fontSize: 16),
+      withComposing: false,
+    );
+    final code = span.children!
+        .whereType<TextSpan>()
+        .firstWhere((s) => s.text == 'code');
+    expect(code.style!.fontSize, 16 * MarkdownEditingController.codeScale);
+  });
 }

@@ -53,12 +53,24 @@ void main() {
       const text = 'x\n```\n# not a heading\n- not a list\n```\ny';
       expect(where(text, (r) => r.block && r.role == MdRole.text).join(),
           contains('# not a heading\n- not a list'));
-      expect(where(text, (r) => r.role == MdRole.marker), ['```', '```']);
+      // With their line breaks (Round 29).
+      expect(where(text, (r) => r.role == MdRole.marker), ['```\n', '```\n']);
       expect(where(text, (r) => r.heading > 0), isEmpty);
       // After the closing fence: plain again.
       final last = markdownRuns(text).last;
       expect((text.substring(last.start, last.end).trim(), last.code),
           ('y', false));
+    });
+
+    test('a ``` never closed is just text, not a block (Round 29)', () {
+      // As in 1.2.0's "What's new": a ``` in a sentence turned the rest
+      // into code.
+      const text = '- code blocks (between\n  ``` lines)\n### Changed\n- x';
+      expect(markdownRuns(text).where((r) => r.code || r.block), isEmpty);
+      expect(where(text, (r) => r.heading > 0), ['### ', 'Changed']);
+      expect(where(text, (r) => r.role == MdRole.listMarker), ['- ', '- ']);
+      // Closed later, it is one.
+      expect(markdownRuns('$text\n```').where((r) => r.block), isNotEmpty);
     });
 
     test('quotes: the > is the marker, the rest quoted (a list inside too)',

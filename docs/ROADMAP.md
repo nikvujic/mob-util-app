@@ -341,16 +341,19 @@ notifications page. (1.2.1: Pip is good.)
 - [ ] Placard: the pop sound a **bubbly pop**, like a bubble bursting.
 - [ ] Introduction: **remembers where it was scrolled to**, unless it's
   new or was just restored.
-- [ ] **Code formatting** looks bad and unreadable; improve it. In the
+- [x] **Code formatting** looks bad and unreadable; improve it. In the
   Introduction (1.2.0) most of "What's new" showed as code, with `- `
   and `### Changed` unformatted: the code example likely opened a block
-  that never closed. Fix both.
+  that never closed. Fix both. *Done:* a block needs its closing ```
+  (a lone one is text); code 0.88 of the text's size; no line numbers
+  beside hidden fences; a test reads every version's "What's new".
 - [ ] The **Format** button's icon (an A with a line under it): pick a
   better one.
 - [ ] The format bar goes **under** the little handle pointing at the
   line being edited; it can go over it (it's easy to close).
-- [ ] The **bigger list dots** sit too high next to the text and the
-  line number (as the checkboxes did once); align them.
+- [x] The **bigger list dots** sit too high next to the text and the
+  line number (as the checkboxes did once); align them. *Done:* drawn
+  as a circle centred on the text's middle (one character still).
 
 ### Round 28 — to-do note, partial restore; the notifications page planned (2026-10-13)
 

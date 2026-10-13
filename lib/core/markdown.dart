@@ -106,13 +106,19 @@ bool isFence(String line) => _fence.hasMatch(line);
 List<MdRun> markdownRuns(String text) {
   final runs = <MdRun>[];
   var lineStart = 0;
-  // Inside a ``` code block (N17): its lines are code, nothing else.
+  // Inside a ``` code block (N17): its lines are code, nothing else. A
+  // block needs its closing fence (Round 29): a lone ``` is just text,
+  // so typing one, or quoting one, doesn't turn the rest into code.
   var inBlock = false;
+  var fencesLeft = text.split('\n').where(isFence).length;
   while (lineStart <= text.length) {
     final newline = text.indexOf('\n', lineStart);
     final lineEnd = newline == -1 ? text.length : newline;
     final line = text.substring(lineStart, lineEnd);
-    if (isFence(line)) {
+    final fence = isFence(line);
+    if (fence) fencesLeft--;
+    final blockFence = fence && (inBlock || fencesLeft > 0);
+    if (blockFence) {
       inBlock = !inBlock;
       if (line.isNotEmpty) {
         _add(
@@ -128,7 +134,13 @@ List<MdRun> markdownRuns(String text) {
       _line(line, lineStart, runs);
     }
     if (newline == -1) break;
-    _add(runs, MdRun(newline, newline + 1, block: inBlock));
+    // A fence's own line break goes with its symbols (Round 29).
+    _add(
+        runs,
+        MdRun(newline, newline + 1,
+            block: inBlock || blockFence,
+            code: blockFence,
+            role: blockFence ? MdRole.marker : MdRole.text));
     lineStart = newline + 1;
   }
   return runs;

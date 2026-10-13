@@ -170,6 +170,19 @@ class RenderLineNumbers extends RenderBox {
     return found;
   }
 
+  /// Whether the line from [start] to [end] (-1: the text's end) is drawn
+  /// as nothing: a code block's fence off the line being edited (Round
+  /// 29). It keeps its number; the number isn't shown.
+  bool _hidden(RenderEditable editable, int start, int end) {
+    final stop = end == -1 ? _controller.text.length : end;
+    if (stop <= start) return false; // an empty line shows its number
+    final boxes = editable.getBoxesForSelection(
+      TextSelection(baseOffset: start, extentOffset: stop),
+    );
+    return boxes.isNotEmpty &&
+        boxes.every((b) => b.bottom - b.top < 1 && b.right - b.left < 1);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final editable = _editable();
@@ -189,7 +202,8 @@ class RenderLineNumbers extends RenderBox {
           .getLocalRectForCaret(TextPosition(offset: start))
           .shift(shift);
       if (row.top > size.height) break; // the rest is below the screen
-      if (row.bottom >= 0) {
+      final next = text.indexOf('\n', start);
+      if (row.bottom >= 0 && !_hidden(editable, start, next)) {
         final label = _painter('$number');
         final y = row.center.dy;
         label.paint(
@@ -199,7 +213,6 @@ class RenderLineNumbers extends RenderBox {
         label.dispose();
         painted.add((number: number, y: y));
       }
-      final next = text.indexOf('\n', start);
       if (next == -1) break;
       start = next + 1;
       number++;

@@ -4,6 +4,15 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Fixed
+- Notes: three backticks without a closing line no longer turn the rest
+  of the note into code (it showed in 1.2.0's "What's new"). Code is a
+  little smaller and easier to read, and the hidden fence lines get no
+  line number.
+- Notes: list dots sit level with the text.
+
 ## [1.3.0] - 2026-10-13
 
 ### Added
