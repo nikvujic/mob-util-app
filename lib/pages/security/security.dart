@@ -117,7 +117,10 @@ class SecurityPage extends ConsumerWidget {
     final hasPassword = ref.watch(securityProvider) != null;
     final locks = ref.watch(sectionLocksProvider);
     final pageLocks = ref.watch(pageLocksProvider);
-    final pages = ref.watch(layoutProvider).hub;
+    final pages = [
+      for (final p in ref.watch(layoutProvider).hub)
+        if (p.lockable) p,
+    ];
     final unlocked = ref.watch(sessionProvider) != null;
 
     return Scaffold(

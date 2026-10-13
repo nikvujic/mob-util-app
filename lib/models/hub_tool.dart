@@ -9,9 +9,19 @@
 enum HubTool {
   counters('Counters'),
   placard('Placard'),
-  medicine('Medicine');
+  medicine('Medicine'),
+
+  /// Pip's home (Round 35): shown once he's hatched. No lock (he's no
+  /// secret) and nothing for Clear data (his life isn't a page's data).
+  pip('Pip');
 
   const HubTool(this.label);
+
+  /// Whether it can have a lock of its own (O7).
+  bool get lockable => this != pip;
+
+  /// Whether Clear data lists it.
+  bool get clearable => this != pip;
 
   /// Shown to the user (and said by screen readers).
   final String label;

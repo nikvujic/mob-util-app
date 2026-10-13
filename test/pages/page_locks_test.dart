@@ -76,9 +76,14 @@ void main() {
     final hub = tester.getTopLeft(find.widgetWithText(SwitchListTile, 'Hub'));
     for (final page in HubTool.values) {
       final tile = find.byKey(Key('pageLock-${page.name}'));
-      expect(tile, findsOneWidget);
+      // Pip Home has no lock (Round 35).
+      expect(tile, page.lockable ? findsOneWidget : findsNothing);
+      if (!page.lockable) continue;
       expect(tester.getTopLeft(tile).dy, greaterThan(hub.dy));
     }
+    expect(HubTool.values.where((p) => !p.lockable), [HubTool.pip]);
+    container.read(pageLocksProvider.notifier).lock(HubTool.pip);
+    expect(pageLocks(), isEmpty, reason: "Pip can't be locked");
     final title =
         find.descendant(of: medicineLock, matching: find.text('Medicine'));
     expect(tester.getTopLeft(title).dx, greaterThan(hub.dx + 48),

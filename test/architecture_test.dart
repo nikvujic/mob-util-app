@@ -118,6 +118,9 @@ const plainScrollAllowed = {
   'pages/planner/pin_menu.dart',
   // A note's text while editing: a pull would move the text being typed.
   'pages/notes/note_detail.dart',
+  // Pip Home's card (Round 35): short lists inside a card at the bottom,
+  // already in reach; a pull would fight the card's swipe.
+  'pages/hub/pip_home.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

@@ -117,7 +117,10 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
       ..watch(countersProvider)
       ..watch(placardProvider)
       ..watch(medicineProvider);
-    final tools = ref.watch(layoutProvider).hub;
+    final tools = [
+      for (final t in ref.watch(layoutProvider).hub)
+        if (t.clearable) t,
+    ];
     final data = ref.read(sectionDataProvider);
     final colors = context.colors;
 

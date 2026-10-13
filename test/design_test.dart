@@ -411,6 +411,31 @@ void main() {
             TextSelection.collapsed(offset: field.controller!.text.length);
         await t.pumpAndSettle();
       },
+      'pip home': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Pip'));
+        await t.pumpAndSettle();
+      },
+      'pip rename': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Pip'));
+        await t.pumpAndSettle();
+        await t.fling(
+            find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('pipRename')));
+        await t.pumpAndSettle();
+      },
+      'pip animations': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Pip'));
+        await t.pumpAndSettle();
+        await t.fling(
+            find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('pipAnimations')));
+        await t.pumpAndSettle();
+      },
       'counters selection mode': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Counters'));

@@ -37,10 +37,13 @@ class PipRoom extends StatefulWidget {
     this.onHatched,
     this.scene,
     this.height = rows,
+    this.pixel = smallPixel,
   });
 
-  /// About how big one of Pip's pixels is.
-  static const pixel = 2.5;
+  /// About how big one of Pip's pixels is: [smallPixel] in the menu,
+  /// bigger in Pip Home.
+  final double pixel;
+  static const smallPixel = 2.5;
 
   /// The room's height, in Pip's pixels: Pip (19), a hop (6), the
   /// ground (5) and a little air.
@@ -127,8 +130,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final ratio = MediaQuery.devicePixelRatioOf(context);
     // Whole device pixels a room pixel.
-    final pixel =
-        math.max(1.0, (PipRoom.pixel * ratio).floorToDouble()) / ratio;
+    final pixel = math.max(1.0, (widget.pixel * ratio).floorToDouble()) / ratio;
     final egg = widget.brain.activity == PipActivity.egg;
     return Semantics(
       key: const Key('pipRoom'),

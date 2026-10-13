@@ -71,6 +71,10 @@ class Preferences {
   /// it's turned off.
   final bool todoNote;
 
+  /// Pip Home's background (Round 35): his field's sky, or the page's own
+  /// colour behind him.
+  final bool pipBackground;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -91,6 +95,7 @@ class Preferences {
     this.backupCountFrom,
     this.backupReminder = true,
     this.todoNote = true,
+    this.pipBackground = true,
   });
 
   /// How long until a backup is due again (D8).
@@ -168,6 +173,7 @@ class Preferences {
     DateTime? Function()? backupCountFrom,
     bool? backupReminder,
     bool? todoNote,
+    bool? pipBackground,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -197,6 +203,7 @@ class Preferences {
             backupCountFrom == null ? this.backupCountFrom : backupCountFrom(),
         backupReminder: backupReminder ?? this.backupReminder,
         todoNote: todoNote ?? this.todoNote,
+        pipBackground: pipBackground ?? this.pipBackground,
       );
 
   Map<String, dynamic> toJson() => {
@@ -228,6 +235,7 @@ class Preferences {
           'backupCountFrom': backupCountFrom!.toIso8601String(),
         'backupReminder': backupReminder,
         'todoNote': todoNote,
+        'pipBackground': pipBackground,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -268,5 +276,6 @@ class Preferences {
             : DateTime.tryParse(json['backupCountFrom'] as String),
         backupReminder: json['backupReminder'] as bool? ?? true,
         todoNote: json['todoNote'] as bool? ?? true,
+        pipBackground: json['pipBackground'] as bool? ?? true,
       );
 }

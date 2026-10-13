@@ -10,6 +10,7 @@ import 'package:the_app/pages/hub/tools.dart';
 import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/providers/hub_dots_provider.dart';
 import 'package:the_app/providers/notification_target_provider.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/layout_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
@@ -35,7 +36,14 @@ class HubPage extends ConsumerWidget {
         _open(context, HubTool.medicine);
       });
     }
-    final order = ref.watch(layoutProvider).hub;
+    // Pip's home only once he's hatched (Round 35). Moves are by place in
+    // the whole order, which holds it either way.
+    final all = ref.watch(layoutProvider).hub;
+    final hatched = ref.watch(pipLifeProvider.select((p) => p.hatched));
+    final order = [
+      for (final t in all)
+        if (t != HubTool.pip || hatched) t,
+    ];
     final locks = ref.watch(pageLocksProvider);
     final layout = ref.read(layoutProvider.notifier);
     return Scaffold(
@@ -58,8 +66,10 @@ class HubPage extends ConsumerWidget {
                 dot: ref.watch(hubToolDotProvider(tool)),
                 locked: locks.contains(tool),
                 // Dragged over another tile: takes its place at once.
-                onHover: (dragged) => layout.moveInHub(dragged, index),
-                onMove: (by) => layout.moveInHub(tool, index + by),
+                onHover: (dragged) =>
+                    layout.moveInHub(dragged, all.indexOf(tool)),
+                onMove: (by) =>
+                    layout.moveInHub(tool, all.indexOf(order[index + by])),
                 canMoveBy: (by) => index + by >= 0 && index + by < order.length,
                 onTap: () => _open(context, tool),
               ),

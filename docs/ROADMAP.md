@@ -402,7 +402,7 @@ Nikola's picks (Round 34):
 - [x] Until he's hatched, the menu's room shows an **egg**; a few taps
   crack it, and Pip jumps out. His **birthday** is that moment.
 - [x] Above the room, his **name and age** in tiny pixel text.
-- [ ] **Pip Home, Nikola's pick (Round 35)**: draft B. A big animated
+- [x] **Pip Home, Nikola's pick (Round 35)**: draft B. A big animated
   scene on top (a tall version of his field's background; the menu's
   room gets the short version, both following the time of day), and
   under it a **card that swipes**:
@@ -413,7 +413,7 @@ Nikola's picks (Round 34):
     overflows), **Animations** (play each one on the scene), and
     **Background** (one for now, day and night being the same one: a
     toggle). Each opens in the card, with a back button.
-- [ ] **One system for what's shown and what he does** (so nothing
+- [x] **One system for what's shown and what he does** (so nothing
   clashes): backgrounds and their decorations say where (menu room /
   Pip Home) and when (time of day, season, dates, weather later) they
   apply, and one place works out what's showing now; his behaviour is a
@@ -422,10 +422,10 @@ Nikola's picks (Round 34):
 - Later: weather (snow when it snows), seasons, a Santa hat in the last
   week of the year.
 - Much later: Pip as a **phone widget**, outside the app.
-- [ ] **Pip Home** (a Hub page; only once he's hatched, then opened;
+- [x] **Pip Home** (a Hub page; only once he's hatched, then opened;
   special, so it can't be locked): his avatar, name (changeable), age,
   birthday, and the same room as the menu's.
-- [ ] The field's **background follows the time of day**.
+- [x] The field's **background follows the time of day**.
 
 **Phase 2: energy and batteries**
 - [ ] A tiny **energy bar** above the room.

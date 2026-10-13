@@ -25,6 +25,7 @@ void main() {
       'assets/icons/counters.svg',
       'assets/icons/placard.svg',
       'assets/icons/medicine.svg',
+      'assets/icons/pip.svg', // hatched (Round 35)
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
     for (final asset in assets) {
@@ -68,7 +69,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(layoutProvider).hub,
-          [HubTool.placard, HubTool.counters, HubTool.medicine]);
+          [HubTool.placard, HubTool.counters, HubTool.medicine, HubTool.pip]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
         moreOrLessEquals(counters.dx, epsilon: 1),
@@ -96,7 +97,37 @@ void main() {
       owner.performAction(node.id, SemanticsAction.customAction, later);
       await tester.pump();
       expect(container.read(layoutProvider).hub,
-          [HubTool.placard, HubTool.counters, HubTool.medicine]);
+          [HubTool.placard, HubTool.counters, HubTool.medicine, HubTool.pip]);
+      semantics.dispose();
+    });
+  });
+
+  group("Pip's home (Round 35)", () {
+    testWidgets('only once he has hatched', (tester) async {
+      await pumpApp(tester, pipHatched: false);
+      await openTab(tester, 'Hub');
+      expect(find.byTooltip('Pip'), findsNothing);
+      expect(find.byTooltip('Counters'), findsOneWidget);
+    });
+
+    testWidgets('hidden, he keeps his place; the others still move right',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      final container = await pumpApp(tester, pipHatched: false);
+      // Stored with him first (moved there before, say).
+      container.read(layoutProvider.notifier).moveInHub(HubTool.pip, 0);
+      await openTab(tester, 'Hub');
+      final node = tester.getSemantics(find.byTooltip('Counters'));
+      node.owner!.performAction(
+        node.id,
+        SemanticsAction.customAction,
+        CustomSemanticsAction.getIdentifier(
+          const CustomSemanticsAction(label: 'Move later'),
+        ),
+      );
+      await tester.pump();
+      expect(container.read(layoutProvider).hub,
+          [HubTool.pip, HubTool.placard, HubTool.counters, HubTool.medicine]);
       semantics.dispose();
     });
   });

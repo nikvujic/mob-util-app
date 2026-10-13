@@ -14,6 +14,10 @@ Release with the installable APK.
   age when restored.
 - Pip's sky follows the time of day: stars and the moon at night, the
   sun by day, dawn and dusk colours in between.
+- **Pip Home**, in the Hub once he's hatched: his field, big, and a card
+  you swipe between his status (name, age, birthday) and his settings:
+  rename him on the card's own pixel keyboard (up to 6), play his
+  animations, turn the background off or on.
 
 ## [1.4.1] - 2026-10-13
 

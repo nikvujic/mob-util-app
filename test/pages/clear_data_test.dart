@@ -78,6 +78,14 @@ void main() {
         reason: 'the planner counts its task, routine and reminder');
     await pick(tester, 'notes');
     expect(enabled(tester, clearButton), isTrue);
+    // Pip's life isn't a page's data (Round 35).
+    await tester.scrollUntilVisible(
+        find.byKey(const Key('clear-medicine')), 100,
+        scrollable: find.byType(Scrollable).last);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('clear-medicine')), findsOneWidget);
+    expect(find.byKey(const Key('clear-pip')), findsNothing);
   });
 
   testWidgets('without a password: RESET clears only the picked sections',

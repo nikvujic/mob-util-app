@@ -43,6 +43,8 @@ class SectionData {
         // Its text and count, once set.
         HubTool.placard => _ref.read(placardProvider).isSet ? 1 : 0,
         HubTool.medicine => _ref.read(medicineProvider).size,
+        // His life isn't cleared with the Hub's pages.
+        HubTool.pip => 0,
       };
 
   /// Empties one of the Hub's pages (saved with the next flush).
@@ -54,6 +56,7 @@ class SectionData {
         _ref.read(placardProvider.notifier).replace(Placard.initial);
       case HubTool.medicine:
         _ref.read(medicineProvider.notifier).replaceAll(MedicineBook.empty);
+      case HubTool.pip:
     }
   }
 

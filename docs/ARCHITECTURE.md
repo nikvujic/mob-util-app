@@ -307,6 +307,15 @@ animation)` in `pip_brain.dart`, and `play` asks it first (nothing
 interrupts the egg, the hatch or coming up). New props and animations
 add a row to these tables; tests check the tables, not each screen.
 
+Pip Home (`pages/hub/pip_home.dart`, `HubTool.pip`): its own `PipBrain`
+(the menu's stays put) in a `PipRoom` with a bigger `pixel` and a
+taller `height`, and a `PageView` card (status, settings) drawn with
+`PixelText` and `widgets/pip_portrait.dart` in `PipColours`' panel
+colours, whatever the theme. `HubTool.lockable` and `clearable` keep it
+out of page locks and Clear data; the Hub shows it once hatched, moving
+tiles by their place in the whole stored order. The background switch is
+the `pipBackground` preference.
+
 ## Notifications page (E3, Round 31)
 
 Settings per page (`models/notify_settings.dart`: `NotifyPage`,

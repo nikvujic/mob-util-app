@@ -439,4 +439,10 @@ abstract final class PipColours {
   static const grassLight = Color(0xFF86B85A);
   static const dirt = Color(0xFF6B4423);
   static const dirtDark = Color(0xFF4E301A);
+
+  // Pip Home's card (Round 35): a game's panel, whatever the theme.
+  static const panel = Color(0xFF231F1D);
+  static const panelEdge = Color(0xFF4A3F38);
+  static const key = Color(0xFF36302C);
+  static const dim = Color(0xFF9A8F86); // quieter words on the panel
 }

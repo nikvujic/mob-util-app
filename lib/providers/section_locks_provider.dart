@@ -78,6 +78,7 @@ class PageLocksNotifier extends StateNotifier<Set<HubTool>> {
     if (_ref.read(securityProvider) == null) {
       throw StateError('Page locks need a master password');
     }
+    if (!page.lockable) return;
     state = {...state, page};
   }
 
