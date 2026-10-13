@@ -4,6 +4,15 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Pip hatches**: the menu's room holds his egg until you tap it open:
+  the first tap starts a crack, every two more widen it, and the 7th
+  pops him out (with a buzz on each tap). That day is his birthday; his
+  name and age show above the room. He's in backups, and keeps his real
+  age when restored.
+
 ## [1.4.1] - 2026-10-13
 
 ### Changed

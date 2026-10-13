@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
+import 'package:the_app/widgets/pixel_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
@@ -91,6 +92,8 @@ void main() {
           pipHatched: false, clock: () => DateTime(2026, 10, 14, 21, 30));
       await openMenu(tester);
       expect(container.read(pipBrainProvider).activity, PipActivity.egg);
+      expect(find.byKey(const Key('pipNameAge')), findsNothing,
+          reason: 'an egg has no name yet');
       final buzzes = <String>[];
       tester.binding.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -111,6 +114,9 @@ void main() {
           container.read(pipLifeProvider).born, DateTime(2026, 10, 14, 21, 30),
           reason: 'his birthday');
       expect(container.read(pipBrainProvider).spawned, isTrue);
+      // His name and age above the room, now he's out.
+      expect(tester.widget<PixelText>(find.byType(PixelText)).label,
+          'Pip, 1 day old');
       expect(buzzes.where((b) => b.contains('light')), hasLength(6));
       expect(buzzes.where((b) => b.contains('heavy')), hasLength(1),
           reason: 'a longer one for the pop');

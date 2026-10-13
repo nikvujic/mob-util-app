@@ -15,6 +15,8 @@ import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/pip.dart';
 import 'package:the_app/widgets/pip_room.dart';
+import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/widgets/pixel_text.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The hamburger menu: app-wide pages, with the app version at the bottom.
@@ -127,6 +129,27 @@ class AppDrawer extends ConsumerWidget {
                 ],
               ),
             ),
+            // His name and age (Round 34), once he's hatched; the right is
+            // kept for his battery later.
+            if (ref.watch(pipLifeProvider) case final pip when pip.hatched)
+              Padding(
+                key: const Key('pipNameAge'),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: PixelText(
+                    [
+                      (pip.name, PipColours.light),
+                      (
+                        '  ${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!)}',
+                        context.colors.textSecondary,
+                      ),
+                    ],
+                    label: '${pip.name}, '
+                        '${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!).toLowerCase()} old',
+                  ),
+                ),
+              ),
             // Pip's room (Round 26).
             PipRoom(
               brain: ref.watch(pipBrainProvider),

@@ -285,6 +285,16 @@ the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
 notes.
 
+## Pip, the pet (Round 34)
+
+`PipLife` (`models/pip_life.dart`: birthday, name) is his lasting data,
+in `pip.json` and backups (v17); his age is worked out from his
+birthday (`ageOn`). `PipBrain` starts as an `egg` when he isn't
+hatched: `tapEgg` counts taps (cracks at 1, 3, 5; the 7th starts
+`hatching`), and the room reports the hatch (`onHatched`), which records
+his birthday. Letters for him are `core/pixel_font.dart` (3 x 5 glyphs)
+drawn by `widgets/pixel_text.dart` on the room's pixel grid.
+
 ## Notifications page (E3, Round 31)
 
 Settings per page (`models/notify_settings.dart`: `NotifyPage`,

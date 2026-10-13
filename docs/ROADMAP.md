@@ -399,9 +399,9 @@ Nikola's picks (Round 34):
 - **Pip Home** isn't another plain page: more like a game. Its look
   drafted first, for Nikola to pick.
 
-- [ ] Until he's hatched, the menu's room shows an **egg**; a few taps
+- [x] Until he's hatched, the menu's room shows an **egg**; a few taps
   crack it, and Pip jumps out. His **birthday** is that moment.
-- [ ] Above the room, his **name and age** in tiny pixel text.
+- [x] Above the room, his **name and age** in tiny pixel text.
 - [ ] **Pip Home** (a Hub page; only once he's hatched, then opened;
   special, so it can't be locked): his avatar, name (changeable), age,
   birthday, and the same room as the menu's.
