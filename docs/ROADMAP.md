@@ -479,6 +479,35 @@ Chunks, in order (each its own commit; release when a few are in):
   that point out what tends to cause trouble** (and what's fine).
   Design to propose first.
 
+  **Proposal (for Nikola's review, nothing built yet):**
+  - *Foods* are a list that grows as you log (name, optional tags like
+    dairy, gluten, spicy, fried, alcohol, caffeine). Typing a name that
+    exists picks it; a new name adds it.
+  - *Logging* a meal: when (breakfast / lunch / dinner / snack, or a
+    time), and the foods in it, picked as chips (the most used first, a
+    search for the rest). Takes a few taps; the last meals can be
+    repeated with one tap.
+  - *How it went*, per meal, rated some hours later (a reminder can ask):
+    five faces from Great to Awful, plus optional symptoms (bloating,
+    heartburn, cramps, nausea, tiredness, headache, other) and a note.
+    Per meal, not per food: rating each ingredient is too much work and
+    no more accurate. (Also a whole-day "how I felt", for days without
+    a clear culprit.)
+  - *Day view*: the day's meals in order, each with its foods and its
+    rating colour; a strip / month calendar coloured by the day's worst
+    rating, like the medicine calendar.
+  - *Statistics*, the point of it: for each food, how meals with it went
+    compared with meals without it (average rating, and how often a
+    symptom followed). Shown as "likely trouble" (clearly worse than
+    your usual, after enough meals, e.g. 5+), "seems fine", and "not
+    enough data yet", with the numbers behind it ("7 meals, 5 rated bad
+    or worse; usually 1 in 5"). The same for tags (e.g. "meals with
+    dairy go worse") and for symptoms (e.g. "bloating follows onions").
+    Honest about uncertainty: a food seen twice is never "trouble".
+  - Stored in its own `food.json`, in backups, with fixtures, like the
+    other pages; a Hub tile (and a settings page for the reminder to
+    rate).
+
 ### Round 14 — Nikola's notes on 0.21–0.22 (2026-10-12)
 
 Chunks, in order (each its own commit; release when a few are in):
