@@ -22,6 +22,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/todo_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -54,6 +55,10 @@ Future<void> seed(ProviderContainer container) async {
   container
       .read(preferencesProvider.notifier)
       .backedUp(designClock().subtract(const Duration(days: 10)));
+  // The to-do note's list (Round 28).
+  container.read(todoProvider.notifier)
+    ..add('Call the dentist')
+    ..add('Pay rent');
   final notes = container.read(notesProvider.notifier)
     ..addNote(title: 'Bank', content: 'PIN')
     ..addNote(
@@ -165,6 +170,11 @@ void main() {
         await t.tap(find.byKey(const Key('introductionTile')));
         await t.pumpAndSettle();
         expect(find.byKey(const Key('introductionText')), findsOneWidget);
+      },
+      'to-do note': (t) async {
+        await t.tap(find.byKey(const Key('todoTile')));
+        await t.pumpAndSettle();
+        expect(find.text('Pay rent'), findsOneWidget);
       },
       'notes selection mode': (t) async {
         await t.longPress(find.text('Groceries'));

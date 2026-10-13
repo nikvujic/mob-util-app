@@ -338,7 +338,9 @@ fixtures for every stored format.
 Nikola, after 1.2.1: the to-do note and partial restore now; the
 notifications page later (it is bigger than it looked).
 
-**1. To-do note** (Round 26, part 3) — now.
+**1. To-do note** (Round 26, part 3) — [x] done (N18): above the
+  Introduction, the first thing and a count on its tile; tap completes
+  (Undo), hold edits, the handle moves; Settings turns it off.
 
 **2. Restore only part of a backup** (Round 26, part 3) — now.
 
@@ -422,7 +424,7 @@ Nikola is importing his notes: the extra formats and their buttons now
 - [x] Markdown lists: slightly bigger dots.
 - [x] Even smaller headings: `####`, just a bit bigger than the text,
   bold.
-- [ ] **To-do note** (new): a special note at the top of Notes, turned
+- [x] **To-do note** (new): a special note at the top of Notes, turned
   on and off like the Introduction; just a list, like Shop without
   sections: add items; tapping one completes (removes) it, with a "Task
   completed" toast and Undo.

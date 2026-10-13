@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **To-do note** at the top of Notes: a plain list. Add things with
+  **+**; tap one when it's done ("Task completed", with Undo); hold one
+  to change it. It can be turned off in Settings, and is in backups.
+
 ## [1.2.1] - 2026-10-13
 
 ### Changed

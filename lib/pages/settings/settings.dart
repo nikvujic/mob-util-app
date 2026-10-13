@@ -60,6 +60,18 @@ class SettingsPage extends ConsumerWidget {
                 ref.read(preferencesProvider.notifier).setCounterFeedback,
           ),
           SwitchListTile(
+            key: const Key('todoNote'),
+            secondary: const Icon(Icons.checklist),
+            title: const Text('To-do note'),
+            subtitle: Text(
+              'A plain to-do list at the top of Notes. Turned off, its list '
+              'is kept for when it comes back.',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.todoNote,
+            onChanged: ref.read(preferencesProvider.notifier).setTodoNote,
+          ),
+          SwitchListTile(
             key: const Key('introOnUpdates'),
             secondary: const Icon(Icons.auto_stories_outlined),
             title: const Text('Introduction after updates'),

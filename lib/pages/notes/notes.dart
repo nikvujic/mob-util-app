@@ -5,9 +5,11 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/pages/notes/introduction.dart';
+import 'package:the_app/pages/notes/todo.dart';
 import 'package:the_app/pages/notes/note_detail.dart';
 import 'package:the_app/pages/notes/note_keys.dart';
 import 'package:the_app/providers/introduction_provider.dart';
+import 'package:the_app/providers/todo_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
@@ -181,6 +183,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
   Widget build(BuildContext context) {
     final allNotes = ref.watch(notesProvider);
     final introduction = ref.watch(introductionShownProvider);
+    final todo = ref.watch(todoShownProvider);
     final notes = _arrivingId == null
         ? allNotes
         : allNotes.where((n) => n.id != _arrivingId).toList();
@@ -200,17 +203,27 @@ class _NotesPageState extends ConsumerState<NotesPage> {
           // always match the stored order.
           body: IgnorePointer(
             ignoring: _arrivingId != null,
-            child: notes.isEmpty && !introduction
+            child: notes.isEmpty && !introduction && !todo
                 ? const EmptyState(
                     icon: Icons.note_outlined, message: 'No notes')
                 : PullDownList(
                     // Room below the last note for the buttons.
                     bottomSpace: SelectionActions.listBottomSpace,
                     slivers: [
-                      // The Introduction first, apart from the notes (N16).
-                      if (introduction)
+                      // The to-do note first (Round 28), then the
+                      // Introduction (N16), apart from the notes.
+                      if (todo)
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+                          sliver: SliverToBoxAdapter(
+                            child: TodoTile(
+                              selectionMode: _selection.isActive,
+                            ),
+                          ),
+                        ),
+                      if (introduction)
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(0, todo ? 4 : 8, 0, 4),
                           sliver: SliverToBoxAdapter(
                             child: IntroductionTile(
                               selectionMode: _selection.isActive,

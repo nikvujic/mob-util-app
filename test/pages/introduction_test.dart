@@ -131,6 +131,7 @@ void main() {
         introVersion: '1.0.0 (1)',
         introDeleted: true,
         introOnUpdates: false,
+        todoNote: false, // nothing else at the top of Notes
       ),
     );
     expect(tile, findsNothing);

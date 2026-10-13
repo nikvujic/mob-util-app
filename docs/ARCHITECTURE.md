@@ -231,6 +231,19 @@ it's new, are preferences: `main()` passes the version this start is
 (`startedVersionProvider`), and a version not seen before brings it
 back. Most tests don't pass one, so their Notes hold only their notes.
 
+## The to-do note (N18, Round 28)
+
+Like the Introduction, a tile at the top of Notes (above it) and a page
+(`pages/notes/todo.dart`), not a stored note. Its list is
+`List<TodoItem>` (`models/todo_item.dart`, just id and text) in
+`todo.json` (version 1) and in backups (`todo`, backup v15), counted and
+cleared with Notes (`SectionData`). Done items are removed, not kept;
+Undo puts one back at its place (`TodoNotifier.restore`). The
+`todoNote` preference turns the tile on and off (the list stays); like
+the Introduction it only shows in the app as started
+(`introductionAvailableProvider`), so tests that don't ask see only their
+notes.
+
 ## Planner routines (P8)
 
 A routine (`models/routine.dart`) is one stored item — times, weekdays,
