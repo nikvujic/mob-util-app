@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.4.0] - 2026-10-13
 
 ### Fixed
 - Notes: pressing bold, italic or strikethrough again takes it off (with

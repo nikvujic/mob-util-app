@@ -20,9 +20,9 @@ changes are not released on their own.
 
 ## Making a release
 
-**Who runs it (agreed with Nikola):** Claude does, but only after asking
-Nikola ("Release vX.Y.Z now?") and getting a yes, every time. A yes covers
-that one release only.
+**Who runs it (agreed with Nikola):** Claude does. Since 1.4.0 (Round
+32) without asking first: when a set of changes is done and checked,
+Claude releases it. (Before, it asked "Release vX.Y.Z now?" every time.)
 Once the release is confirmed published, Claude writes in the chat the
 link and **what changed** in that version (from its CHANGELOG section),
 as a short list — not step-by-step test instructions.
