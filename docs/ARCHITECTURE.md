@@ -126,6 +126,17 @@ encryption: `SectionGate` shows a lock screen instead of the section's
 page while the section is locked and the app is locked, and the home
 screen closes anything open on top of it when that happens.
 
+The Hub's pages lock on their own too (O7): `pageLocksProvider`, saved in
+the same `settings.json` under `pageLocks` (page ids; a file without them
+has none). Every Hub page opens behind a `PageGate` (`pages/hub/`), which
+shows the same `LockedScreen` (widgets/) in place of the page while it's
+locked and the app is locked, and the page itself once unlocked, so a
+notification's target simply waits behind it. A page lock is independent
+of the Hub's; either closes it. Backups ask for the password while any
+page is closed, a password reset clears locked pages' data
+(`SectionData.clearOf`), and medicine reminders leave names out while the
+Medicine page is locked.
+
 The note editor gets a locked note's text already decrypted, plus the key
 to save it with; it closes (after saving) when the session locks, so
 decrypted text never stays on screen after locking.
@@ -334,7 +345,7 @@ Where pages go is `PageLayout` (`layout.json`, its own version): the
 Hub's order as page ids. Unknown ids are dropped and pages missing from it are
 added at the end, so a new page needs no change to stored data. It's a
 setting, like the theme, so it isn't in backups. The quick-access menu,
-sections in the Hub and per-page locks (O10, O7) are meant to be more fields
+sections in the Hub (O10) are meant to be more fields
 of the layout and lists of the same ids, not a rework. Each page keeps its
 data in its own file and, in backups, under its own key.
 

@@ -105,6 +105,10 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog>
             in widget.plan.sections.entries)
           if (count > 0)
             '${section.label} (locked section): ${_what(section, count)}',
+        for (final MapEntry(key: page, value: count)
+            in widget.plan.pages.entries)
+          if (count > 0)
+            '${page.label} (locked page): ${countOf(count, 'item', 'items')}',
       ];
 
   @override

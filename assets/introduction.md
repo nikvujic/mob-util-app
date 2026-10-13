@@ -41,6 +41,7 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 
 ## Security
 - A **master password** encrypts locked notes and can lock whole sections. Without it, locked data can't be read, so keep it safe.
+- **Section locks** hide a whole section while the app is locked; under the Hub, each of its pages can be locked on its own.
 - **Fingerprint** unlock can stand in for typing it.
 - The app locks again a little after you leave it.
 - Forgot the password? **Forgot master password** resets it by deleting what it protects. To make sure it's you, type RESET and then **hold** Reset for 10 seconds; a plain tap turns it off for a day (or until you next unlock).

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/password_reset_provider.dart';
@@ -42,7 +43,10 @@ void main() {
   /// A master password; notes "Plain" and "Bank" (locked); a shop item,
   /// a planner task and a counter; then [locked] sections locked and the
   /// app locked again (the password is forgotten).
-  Future<void> seed({Set<AppSection> locked = const {}}) async {
+  Future<void> seed({
+    Set<AppSection> locked = const {},
+    Set<HubTool> pages = const {},
+  }) async {
     await container.read(securityProvider.notifier).setPassword(password);
     final keys =
         (await container.read(sessionProvider.notifier).unlock(password))!;
@@ -60,8 +64,29 @@ void main() {
     for (final section in locked) {
       container.read(sectionLocksProvider.notifier).lock(section);
     }
+    pages.forEach(container.read(pageLocksProvider.notifier).lock);
     container.read(sessionProvider.notifier).lock();
   }
+
+  test("a locked Hub page loses its content, the Hub's others stay (O7)",
+      () async {
+    await seed(pages: {HubTool.counters, HubTool.placard});
+    final plan = reset().plan();
+    expect(plan.pages, {HubTool.counters: 1, HubTool.placard: 0});
+    expect(plan.deletesAnything, isTrue);
+
+    await reset().run();
+
+    expect(container.read(countersProvider), isEmpty);
+    expect(container.read(shopProvider), hasLength(1));
+    expect(container.read(pageLocksProvider), isEmpty);
+  });
+
+  test('a locked Hub counts its locked pages in the section', () async {
+    await seed(locked: {AppSection.hub}, pages: {HubTool.counters});
+    expect(reset().plan().pages, isEmpty);
+    expect(reset().plan().sections, {AppSection.hub: 1});
+  });
 
   test('deletes only locked notes; everything else stays', () async {
     await seed();

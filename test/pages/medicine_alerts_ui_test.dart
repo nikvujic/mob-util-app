@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -152,6 +153,27 @@ void main() {
         await container.read(sessionProvider.notifier).unlock('password1');
       });
       container.read(sectionLocksProvider.notifier).lock(AppSection.hub);
+      await tester.pumpAndSettle();
+      expect(medicineReminders().first,
+          '12 10:0 Medicine: A dose is due at 10:00');
+    });
+
+    testWidgets('with only the Medicine page locked, no names either (O7)',
+        (tester) async {
+      await start(tester, seed: () {
+        medicine().add('Pills', times: [600], from: today);
+      });
+      await tester.runAsync(() async {
+        await container
+            .read(securityProvider.notifier)
+            .setPassword('password1');
+        await container.read(sessionProvider.notifier).unlock('password1');
+      });
+      container.read(pageLocksProvider.notifier).lock(HubTool.counters);
+      await tester.pumpAndSettle();
+      expect(medicineReminders().first, startsWith('12 10:0 Pills'),
+          reason: "another page's lock doesn't hide them");
+      container.read(pageLocksProvider.notifier).lock(HubTool.medicine);
       await tester.pumpAndSettle();
       expect(medicineReminders().first,
           '12 10:0 Medicine: A dose is due at 10:00');

@@ -5,6 +5,7 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -123,6 +124,7 @@ class ReminderPlanner {
     _ref.listen(routinesProvider, (_, __) => _soon());
     _ref.listen(pinsProvider, (_, __) => _soon());
     _ref.listen(sectionLocksProvider, (_, __) => _soon());
+    _ref.listen(pageLocksProvider, (_, __) => _soon());
     _ref.listen(securityProvider, (_, __) => _soon());
     _ref.listen(medicineProvider, (_, __) => _soon());
     _ref.listen(preferencesProvider, (before, after) {
@@ -195,7 +197,9 @@ class ReminderPlanner {
         book: _ref.read(medicineProvider),
         preferences: _ref.read(preferencesProvider),
         days: reminderDays,
-        hideNames: password && locks.contains(AppSection.hub),
+        hideNames: password &&
+            (locks.contains(AppSection.hub) ||
+                _ref.read(pageLocksProvider).contains(HubTool.medicine)),
       ),
     ]..sort((a, b) => a.at.compareTo(b.at));
     await _ref

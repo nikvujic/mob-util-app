@@ -76,3 +76,6 @@ app still reads every version, so an update can never lose existing data.
   Oct, reminding again 4 h later (`followUp` 240); Vitamin C at 09:00
   with none; Iron's morning dose taken 12 Oct at 08:02.
 - `v13/backup-plain.json` — backup (version 13) with that.
+- `v13/storage/settings.json` — locks (settings.json still version 2;
+  `pageLocks` added in Round 21, after 0.26.0): the Shop section locked,
+  and the Hub's Placard and Medicine pages (O7). Not in backups.

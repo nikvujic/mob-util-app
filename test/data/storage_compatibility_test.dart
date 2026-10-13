@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/models/app_section.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -579,6 +580,14 @@ void main() {
     });
   });
 
+  test('settings.json with page locks (O7, Round 21) loads them', () async {
+    final storage = await AppStorage.open(
+      directory: copyOf('test/fixtures/v13/storage'),
+    );
+    expect(storage.initialSectionLocks, {AppSection.shop});
+    expect(storage.initialPageLocks, {HubTool.placard, HubTool.medicine});
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -686,6 +695,8 @@ void main() {
           '42e2e740aa34861e8564a1eb1552ffcc4ab18fe2f826fdf9ce8e5d10257dbe5a',
       'test/fixtures/v13/backup-plain.json':
           '56b1a7cd9dc07d1e48fa76fc906ea9b94c3f0a8332acb3b35e2fb6c40d25174e',
+      'test/fixtures/v13/storage/settings.json':
+          '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':
           'ea1852cc78ae61fb3570df641bd63de23c59f96b1d37f127c404b25466a551a6',
     };

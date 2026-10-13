@@ -35,7 +35,8 @@ import 'package:the_app/models/shop_item.dart';
 ///     <app documents>/data/preferences.json
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
 ///     <app documents>/data/settings.json
-///         {"version": 2, "sectionLocks": ["shop", ...]}
+///         {"version": 2, "sectionLocks": ["shop", ...],
+///          "pageLocks": ["medicine", ...]}
 ///
 /// Data is loaded once at startup ([open]) and then saved after every change
 /// by the providers.
@@ -110,6 +111,13 @@ class AppStorage {
   /// Sections locked behind the master password (L5).
   final Set<AppSection> initialSectionLocks;
 
+  /// The Hub's pages locked behind the master password (O7).
+  final Set<HubTool> initialPageLocks;
+
+  /// The locks last saved: settings.json holds both kinds.
+  late Set<AppSection> _sectionLocks = initialSectionLocks;
+  late Set<HubTool> _pageLocks = initialPageLocks;
+
   AppStorage._(
     this._notesStore,
     this._shopStore,
@@ -135,6 +143,7 @@ class AppStorage {
     required this.initialMedicine,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
+    required this.initialPageLocks,
   });
 
   /// Storage that keeps nothing (for tests and previews).
@@ -151,6 +160,7 @@ class AppStorage {
     this.initialMedicine = MedicineBook.empty,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
+    this.initialPageLocks = const {},
   })  : _notesStore = null,
         _shopStore = null,
         _securityStore = null,
@@ -182,6 +192,19 @@ class AppStorage {
     final layoutStore = JsonFileStore(File('${dir.path}/layout.json'));
     final placardStore = JsonFileStore(File('${dir.path}/placard.json'));
     final medicineStore = JsonFileStore(File('${dir.path}/medicine.json'));
+    // Unknown sections and pages (from a newer app) are skipped, not fatal.
+    final locks =
+        await _load(settingsStore, (<AppSection>{}, <HubTool>{}), (json) {
+      List<dynamic> ids(String key) => json[key] as List<dynamic>? ?? const [];
+      return (
+        {
+          for (final id in ids('sectionLocks')) AppSection.fromId(id as String),
+        }.whereType<AppSection>().toSet(),
+        {
+          for (final id in ids('pageLocks')) HubTool.fromId(id as String),
+        }.whereType<HubTool>().toSet(),
+      );
+    });
 
     return AppStorage._(
       notesStore,
@@ -275,13 +298,8 @@ class AppStorage {
         maxVersion: medicineFormatVersion,
         MedicineBook.fromJson,
       ),
-      initialSectionLocks: await _load(settingsStore, const {}, (json) {
-        final ids = json['sectionLocks'] as List<dynamic>? ?? const [];
-        // Unknown sections (from a newer app) are skipped, not fatal.
-        return {
-          for (final id in ids) AppSection.fromId(id as String),
-        }.whereType<AppSection>().toSet();
-      }),
+      initialSectionLocks: locks.$1,
+      initialPageLocks: locks.$2,
     );
   }
 
@@ -392,12 +410,26 @@ class AppStorage {
     });
   }
 
-  Future<void> saveSectionLocks(Set<AppSection> sections) async {
+  Future<void> saveSectionLocks(Set<AppSection> sections) {
+    _sectionLocks = sections;
+    return _saveLocks();
+  }
+
+  Future<void> savePageLocks(Set<HubTool> pages) {
+    _pageLocks = pages;
+    return _saveLocks();
+  }
+
+  Future<void> _saveLocks() async {
     await _settingsStore?.write({
       'version': formatVersion,
       'sectionLocks': [
         for (final s in AppSection.values)
-          if (sections.contains(s)) s.name,
+          if (_sectionLocks.contains(s)) s.name,
+      ],
+      'pageLocks': [
+        for (final t in HubTool.values)
+          if (_pageLocks.contains(t)) t.name,
       ],
     });
   }

@@ -16,6 +16,12 @@ Release with the installable APK.
   first (it replaced them without it).
 
 ### Added
+- **Lock each Hub page on its own**: in Security, under the Hub, a
+  switch per page. A locked page asks for the master password while the
+  app is locked (its tile shows a small lock), whether or not the Hub
+  itself is locked. Resetting a forgotten password deletes a locked
+  page's data, and medicine reminders don't name the medicine while its
+  page is locked.
 - Medicine histories: a **back to top** button once you've scrolled far
   down.
 

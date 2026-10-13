@@ -5,11 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/pages/hub/page_gate.dart';
 import 'package:the_app/pages/hub/tools.dart';
 import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/providers/hub_dots_provider.dart';
 import 'package:the_app/providers/notification_target_provider.dart';
 import 'package:the_app/providers/layout_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 
 /// Lists additional tools as square icon tiles, filled in from the bottom
@@ -30,12 +32,11 @@ class HubPage extends ConsumerWidget {
         final pending = ref.read(pendingTargetProvider.notifier);
         if (!context.mounted || pending.state is! MedicineTarget) return;
         pending.state = null;
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => HubTool.medicine.page()),
-        );
+        _open(context, HubTool.medicine);
       });
     }
     final order = ref.watch(layoutProvider).hub;
+    final locks = ref.watch(pageLocksProvider);
     final layout = ref.read(layoutProvider.notifier);
     return Scaffold(
       appBar: const MainAppBar(title: 'Hub'),
@@ -55,16 +56,25 @@ class HubPage extends ConsumerWidget {
                 key: ValueKey(tool),
                 tool: tool,
                 dot: ref.watch(hubToolDotProvider(tool)),
+                locked: locks.contains(tool),
                 // Dragged over another tile: takes its place at once.
                 onHover: (dragged) => layout.moveInHub(dragged, index),
                 onMove: (by) => layout.moveInHub(tool, index + by),
                 canMoveBy: (by) => index + by >= 0 && index + by < order.length,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => tool.page()),
-                ),
+                onTap: () => _open(context, tool),
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Opens [tool] on top, behind its lock (O7): a locked page asks for the
+  /// password there, and opens once it's given.
+  static void _open(BuildContext context, HubTool tool) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PageGate(page: tool, child: tool.page()),
       ),
     );
   }
@@ -75,6 +85,7 @@ class HubPage extends ConsumerWidget {
 class _MovableTile extends StatelessWidget {
   final HubTool tool;
   final bool dot;
+  final bool locked;
   final ValueChanged<HubTool> onHover;
   final ValueChanged<int> onMove;
   final bool Function(int by) canMoveBy;
@@ -84,6 +95,7 @@ class _MovableTile extends StatelessWidget {
     super.key,
     required this.tool,
     required this.dot,
+    required this.locked,
     required this.onHover,
     required this.onMove,
     required this.canMoveBy,
@@ -96,6 +108,7 @@ class _MovableTile extends StatelessWidget {
       icon: tool.icon,
       label: tool.label,
       dot: dot,
+      locked: locked,
       onTap: onTap,
     );
     return DragTarget<HubTool>(
@@ -140,12 +153,16 @@ class _ToolTile extends StatelessWidget {
 
   /// A red dot in the corner: the page asks for attention (O13).
   final bool dot;
+
+  /// A small lock in the other corner: the page has its own lock (O7).
+  final bool locked;
   final VoidCallback onTap;
 
   const _ToolTile({
     required this.icon,
     required this.label,
     required this.dot,
+    required this.locked,
     required this.onTap,
   });
 
@@ -175,6 +192,18 @@ class _ToolTile extends StatelessWidget {
                   excludeFromSemantics: true,
                 ),
               ),
+              if (locked)
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Icon(
+                    Icons.lock_outline,
+                    key: Key('toolLock-$label'),
+                    size: 16,
+                    color: context.colors.textSecondary,
+                    semanticLabel: 'Locked',
+                  ),
+                ),
               if (dot)
                 Positioned(
                   top: 12,

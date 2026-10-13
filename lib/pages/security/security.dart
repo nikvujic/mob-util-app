@@ -7,6 +7,8 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/security/forgot_password.dart';
 import 'package:the_app/pages/security/password_form.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/providers/layout_provider.dart';
 import 'package:the_app/providers/password_reset_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -91,10 +93,31 @@ class SecurityPage extends ConsumerWidget {
     locks.unlock(section);
   }
 
+  /// Turns a Hub page's lock on, or off (which needs the app unlocked).
+  Future<void> _setPageLock(
+    BuildContext context,
+    WidgetRef ref,
+    HubTool page, {
+    required bool lock,
+  }) async {
+    final locks = ref.read(pageLocksProvider.notifier);
+    if (lock) {
+      locks.lock(page);
+      return;
+    }
+    if (ref.read(sessionProvider) == null) {
+      await _unlock(context, ref);
+      if (ref.read(sessionProvider) == null) return; // cancelled
+    }
+    locks.unlock(page);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasPassword = ref.watch(securityProvider) != null;
     final locks = ref.watch(sectionLocksProvider);
+    final pageLocks = ref.watch(pageLocksProvider);
+    final pages = ref.watch(layoutProvider).hub;
     final unlocked = ref.watch(sessionProvider) != null;
 
     return Scaffold(
@@ -180,7 +203,8 @@ class SecurityPage extends ConsumerWidget {
               padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
                 'A locked section opens only while the app is unlocked. '
-                'It hides the section; for encrypted content, lock notes.',
+                'It hides the section; for encrypted content, lock notes. '
+                "The Hub's pages lock on their own, below it.",
                 style: TextStyle(color: context.colors.textMuted),
               ),
             ),
@@ -195,6 +219,22 @@ class SecurityPage extends ConsumerWidget {
                 value: locks.contains(section),
                 onChanged: (lock) =>
                     _setSectionLock(context, ref, section, lock: lock),
+              ),
+            // Each of the Hub's pages on its own (O7), under the Hub:
+            // locked or not whatever the Hub's own switch says.
+            for (final page in pages)
+              SwitchListTile(
+                key: Key('pageLock-${page.name}'),
+                contentPadding: const EdgeInsets.only(left: 48, right: 24),
+                secondary: Icon(
+                  pageLocks.contains(page)
+                      ? Icons.lock_outline
+                      : Icons.lock_open_outlined,
+                ),
+                title: Text(page.label),
+                value: pageLocks.contains(page),
+                onChanged: (lock) =>
+                    _setPageLock(context, ref, page, lock: lock),
               ),
           ],
         ],

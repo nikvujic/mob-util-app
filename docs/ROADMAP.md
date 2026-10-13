@@ -330,6 +330,15 @@ projects. Built on O9, so it adds places to put pages, not a rework.
 Also: the new Other pages (coin flip, days since/until, life
 percentage, birthdays, recipes, workout log), cloud save (D5).
 
+### Round 22 — towards v1 (2026-10-13)
+
+Nikola: Round 20's extra Markdown and the formatting bar wait (v2
+maybe); per-page Hub locks first; then get v1 working so he can start
+using the app: a list of what's in v1 and what's later.
+- [x] Per-page Hub locks (Round 21, part 3).
+- [x] Round 20's Markdown (N17) moved to after v1.
+- [ ] The v1 list and the later list (below, "Goal: v1.0.0").
+
 ### Round 21 — security (2026-10-13), before Round 20's Markdown
 
 **1. Bugs**
@@ -354,8 +363,8 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
   for it; exporting keeps locked notes sealed. **Importing** a backup
   replaced locked notes without it: now asks first.
 
-**3. Lock each Hub page on its own** (O7, noted; built after Markdown)
-- [ ] In Security, under the Hub: a switch per Hub page. The Hub and its
+**3. Lock each Hub page on its own** (O7; built first, Round 22)
+- [x] In Security, under the Hub: a switch per Hub page. The Hub and its
   pages lock independently: a locked Hub with some pages free (for the
   quick-access menu, later), or a free Hub with some pages locked.
 
@@ -374,7 +383,7 @@ percentage, birthdays, recipes, workout log), cloud save (D5).
 - [x] A button that scrolls to the top, in the history of all and in a
   medicine's own; only once scrolled far (when it helps).
 
-**3. More Markdown, and a formatting bar** (N17)
+**3. More Markdown, and a formatting bar** (N17; after v1, Round 22)
 - [ ] More formats: inline `code`, code blocks (```), quotes (>),
   highlighted text (==…==), a divider (---).
 - [ ] Controls for all of them, like the checkbox button: one button

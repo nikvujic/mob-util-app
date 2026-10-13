@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/section_data_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -14,15 +15,25 @@ class PasswordResetPlan {
   /// Each locked section, with how many things in it will be deleted.
   final Map<AppSection, int> sections;
 
-  const PasswordResetPlan({required this.lockedNotes, required this.sections});
+  /// Each locked Hub page outside a locked Hub (O7), with how many things
+  /// in it will be deleted.
+  final Map<HubTool, int> pages;
+
+  const PasswordResetPlan({
+    required this.lockedNotes,
+    required this.sections,
+    this.pages = const {},
+  });
 
   bool get deletesAnything =>
-      lockedNotes > 0 || sections.values.any((count) => count > 0);
+      lockedNotes > 0 ||
+      sections.values.any((count) => count > 0) ||
+      pages.values.any((count) => count > 0);
 }
 
 /// Resets a forgotten master password (L7): deletes everything it
-/// protects — locked notes and the content of locked sections, so a section
-/// lock can't be bypassed this way — then removes the password. Everything
+/// protects — locked notes and the content of locked sections and Hub
+/// pages, so a lock can't be bypassed this way — then removes the password. Everything
 /// else stays.
 class PasswordReset {
   final Ref _ref;
@@ -41,6 +52,11 @@ class PasswordReset {
           if (locks.contains(section))
             section: _ref.read(sectionDataProvider).count(section),
       },
+      pages: {
+        if (!locks.contains(AppSection.hub))
+          for (final page in _ref.read(pageLocksProvider))
+            page: _ref.read(sectionDataProvider).countOf(page),
+      },
     );
   }
 
@@ -52,6 +68,7 @@ class PasswordReset {
     for (final section in locks) {
       data.clear(section);
     }
+    _ref.read(pageLocksProvider).forEach(data.clearOf);
     if (!locks.contains(AppSection.notes)) {
       _ref.read(notesProvider.notifier).removeNotes({
         for (final note in _ref.read(notesProvider))
