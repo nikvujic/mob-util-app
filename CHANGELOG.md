@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [0.26.0] - unreleased
+## [0.26.0] - 2026-10-13
 
 ### Added
 - **Tapping a notification opens what it's about**: a block, routine or
