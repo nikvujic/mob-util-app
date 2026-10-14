@@ -1,0 +1,1 @@
+{"version":5,"medicines":[{"id":"m1","name":"Vitamin D 💊","times":[480],"from":"2026-10-01","weekdays":[1,3,5]},{"id":"m2","name":"Iron","times":[1200],"from":"2026-10-01"}],"taken":[{"medicine":"m1","day":"2026-10-12","dose":0,"at":"2026-10-12T06:30:00.000Z"}]}

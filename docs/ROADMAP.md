@@ -337,7 +337,7 @@ fixtures for every stored format.
 
 ### Round 40 — Medicine weekdays, a tidy roadmap, Recipes spec (2026-10-14)
 
-- [ ] **Medicine: pick weekdays** (supplements taken some days only).
+- [x] **Medicine: pick weekdays** (supplements taken some days only).
 - [ ] **Tidy the ROADMAP**: done items still marked open.
 - [ ] **Recipes: a spec for Nikola** (no building yet), from his notes:
   - The page lists recipes as items that can be **reordered**: name and
@@ -748,7 +748,7 @@ done without him: kept for now, but he picks the real one, see 6.)
 - [x] Medicine and Placard sounds louder.
 
 **4. After v1 (v2)**
-- [ ] Medicine: pick weekdays (supplements taken some days only).
+- [x] Medicine: pick weekdays (supplements taken some days only; Round 40).
 
 **5. Install problem** — solved: a bad download (Nikola installed it).
 

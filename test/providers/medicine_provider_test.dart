@@ -34,6 +34,52 @@ void main() {
     expect(medicine.state.medicines.last.isOn(DateTime(2030, 1, 1)), isTrue);
   });
 
+  group('some weekdays only (Round 40)', () {
+    test('on those days only; every day kept as none chosen', () {
+      // 12 Oct 2026 is a Monday.
+      medicine.add('Vitamin D', times: [480], from: today, weekdays: {1, 3, 5});
+      expect(only().weekdays, {1, 3, 5});
+      expect(only().isOn(today), isTrue, reason: 'Monday');
+      expect(only().isOn(DateTime(2026, 10, 13)), isFalse, reason: 'Tuesday');
+      expect(only().isOn(DateTime(2026, 10, 14)), isTrue, reason: 'Wednesday');
+      expect(
+          Medicine(
+            id: 'x',
+            name: 'All',
+            times: const [480],
+            from: today,
+            weekdays: {1, 2, 3, 4, 5, 6, 7},
+          ).weekdays,
+          isNull);
+      expect(
+          Medicine(
+              id: 'y',
+              name: 'None',
+              times: const [480],
+              from: today,
+              weekdays: {}).weekdays,
+          isNull);
+    });
+
+    test('edited to every day; JSON round trip', () {
+      final id =
+          medicine.add('Iron', times: [480], from: today, weekdays: {2})!;
+      final back = Medicine.fromJson(only().toJson());
+      expect(back.weekdays, {2});
+      medicine.update(id, name: 'Iron', times: [480], from: today);
+      expect(only().weekdays, isNull);
+      expect(only().toJson().containsKey('weekdays'), isFalse);
+    });
+
+    test('filling in the past: only its days count', () {
+      now = DateTime(2026, 10, 19, 9); // the next Monday
+      final id = medicine.add('Mondays',
+          times: [480], from: DateTime(2026, 10, 1), weekdays: {1})!;
+      // Mondays 5 and 12 Oct, before today.
+      expect(medicine.fillPast(id), 2);
+    });
+  });
+
   test('a dose is marked with the time it was tapped, and unmarked', () {
     final id = medicine.add('Pills', times: [480, 1200], from: today)!;
     medicine.toggleDose(id, today, 0);

@@ -13,6 +13,7 @@ typedef MedicineDraft = ({
   DateTime? until,
   int? followUp,
   bool important,
+  Set<int>? weekdays,
 });
 
 /// "Remind again" choices, in minutes after a dose (0: off).
@@ -61,6 +62,9 @@ class _MedicineSheetState extends State<_MedicineSheet> {
   late int _followUp = widget.medicine?.followUp ?? 0;
   late bool _important = widget.medicine?.important ?? false;
 
+  /// The days it's taken (Round 40); empty: every day.
+  late Set<int> _weekdays = {...?widget.medicine?.weekdays};
+
   /// The times it opened with.
   late final List<int> _initialTimes = [..._times];
 
@@ -70,7 +74,13 @@ class _MedicineSheetState extends State<_MedicineSheet> {
       _from != (widget.medicine?.from ?? widget.today) ||
       _until != widget.medicine?.until ||
       _followUp != (widget.medicine?.followUp ?? 0) ||
-      _important != (widget.medicine?.important ?? false);
+      _important != (widget.medicine?.important ?? false) ||
+      !_sameDays;
+
+  bool get _sameDays {
+    final before = widget.medicine?.weekdays ?? const <int>{};
+    return before.length == _weekdays.length && before.containsAll(_weekdays);
+  }
 
   bool get _sameTimes {
     final a = [..._times]..sort();
@@ -181,6 +191,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
       until: _until,
       followUp: _followUp == 0 ? null : _followUp,
       important: _important,
+      weekdays: _weekdays.isEmpty ? null : {..._weekdays},
     ));
   }
 
@@ -274,6 +285,54 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                                   fontSize: 12,
                                 ),
                               ),
+                            ),
+                          // Which days (Round 40): every day, or some.
+                          const SizedBox(height: 8),
+                          Text('Days', style: label),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              ChoiceChip(
+                                key: const Key('medicineEveryDay'),
+                                label: const Text('Every day'),
+                                selected: _weekdays.isEmpty,
+                                onSelected: (_) =>
+                                    setState(() => _weekdays = {}),
+                              ),
+                              ChoiceChip(
+                                key: const Key('medicineSomeDays'),
+                                label: const Text('Some days'),
+                                selected: _weekdays.isNotEmpty,
+                                onSelected: (_) => setState(() {
+                                  if (_weekdays.isEmpty) {
+                                    _weekdays = {_from.weekday};
+                                  }
+                                }),
+                              ),
+                            ],
+                          ),
+                          if (_weekdays.isNotEmpty)
+                            Wrap(
+                              spacing: 4,
+                              children: [
+                                for (var day = 1; day <= 7; day++)
+                                  FilterChip(
+                                    key: Key('medicineDay-$day'),
+                                    label: Text(weekdayName(day)),
+                                    selected: _weekdays.contains(day),
+                                    // At least one; all seven is every day.
+                                    onSelected: (on) => setState(() {
+                                      if (on) {
+                                        _weekdays = {..._weekdays, day};
+                                        if (_weekdays.length == 7) {
+                                          _weekdays = {};
+                                        }
+                                      } else if (_weekdays.length > 1) {
+                                        _weekdays = {..._weekdays}..remove(day);
+                                      }
+                                    }),
+                                  ),
+                              ],
                             ),
                           const SizedBox(height: 8),
                           Wrap(

@@ -56,6 +56,7 @@ class MedicinePage extends ConsumerWidget {
       until: draft.until,
       followUp: draft.followUp,
       important: draft.important,
+      weekdays: draft.weekdays,
     );
     // Started in the past: fill those days in, if wanted (O13; one missed
     // day can then be set in its history).
@@ -137,6 +138,7 @@ class MedicinePage extends ConsumerWidget {
           until: draft.until,
           followUp: draft.followUp,
           important: draft.important,
+          weekdays: draft.weekdays,
         );
       }
       // Not over a lock screen: the page may have been closed meanwhile.
@@ -349,7 +351,8 @@ class MedicinePage extends ConsumerWidget {
   }
 }
 
-/// "08:00, 20:00 · from Thu, 1 Oct" (", until …" when it ends).
+/// "08:00, 20:00 · from Thu, 1 Oct" (", until …" when it ends; "· Mon
+/// Wed Fri" when on some days only).
 String _schedule(Medicine m, DateTime today) {
   final times = m.times.map(formatMinutes).join(', ');
   // No end date: nothing said about one (Nikola).
@@ -357,7 +360,11 @@ String _schedule(Medicine m, DateTime today) {
       m.until == null ? '' : ', until ${formatDay(m.until!, today: today)}';
   final again =
       m.followUp == null ? '' : ' · again after ${m.followUp! ~/ 60} h';
-  return '$times · from ${formatDay(m.from, today: today)}$until$again';
+  // Some days only (Round 40): which.
+  final days = m.weekdays == null
+      ? ''
+      : ' · ${([...m.weekdays!]..sort()).map(weekdayName).join(' ')}';
+  return '$times$days · from ${formatDay(m.from, today: today)}$until$again';
 }
 
 /// A medicine's doses today: a big button each, taken or not.

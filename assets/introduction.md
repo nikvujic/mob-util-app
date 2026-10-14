@@ -40,7 +40,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - **Counters**: count anything with − and +, with a step, limits and a colour.
 - **Placard**: a big line of text, sideways. Hold until it pops to count one up. Tap the top-right corner five times for its settings.
-- **Medicine**: tap a dose when you take it. Each medicine has a history and a calendar. **Reminders** come at dose times (and again later, if a medicine is set to remind again). Mark a medicine **important** and taking it needs the button **held for 5 seconds**, so it isn't ticked by mistake (it fills up, then pops); a **red dot** on the tile and the Hub tab shows while an important medicine's dose is due. Doses due at the same time come as one notification; tapping it opens Medicine. The bell at the top opens its notification settings.
+- **Medicine**: tap a dose when you take it. A medicine can be taken every day or on some days only (pick the weekdays). Each medicine has a history and a calendar. **Reminders** come at dose times (and again later, if a medicine is set to remind again). Mark a medicine **important** and taking it needs the button **held for 5 seconds**, so it isn't ticked by mistake (it fills up, then pops); a **red dot** on the tile and the Hub tab shows while an important medicine's dose is due. Doses due at the same time come as one notification; tapping it opens Medicine. The bell at the top opens its notification settings.
 
 ## Security
 - A **master password** encrypts locked notes and can lock whole sections. Without it, locked data can't be read, so keep it safe.

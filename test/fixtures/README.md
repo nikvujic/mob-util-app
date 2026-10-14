@@ -99,6 +99,10 @@ app still reads every version, so an update can never lose existing data.
   Oct 06:00 UTC, 2 batteries held, the next at 09:15 UTC; seen falling
   asleep the night of 13 Oct; not seen off, nor waking.
 - `v18/backup-plain.json` — backup (version 18) with him.
+- `v19/storage/medicine.json` — a medicine on some weekdays only (Round
+  40, medicine.json version 5): Vitamin D 💊 at 08:00 on Mon, Wed, Fri
+  (taken Mon 12 Oct 06:30 UTC), and Iron at 20:00 every day.
+- `v19/backup-plain.json` — backup (version 19) with them.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

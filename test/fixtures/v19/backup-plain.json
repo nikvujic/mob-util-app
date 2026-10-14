@@ -1,0 +1,55 @@
+{
+  "format": "the-app-backup",
+  "version": 19,
+  "createdAt": "2026-10-14T09:00:00.000Z",
+  "appVersion": "1.8.0 (43)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [
+        {
+          "id": "m1",
+          "name": "Vitamin D 💊",
+          "times": [
+            480
+          ],
+          "from": "2026-10-01",
+          "weekdays": [
+            1,
+            3,
+            5
+          ]
+        },
+        {
+          "id": "m2",
+          "name": "Iron",
+          "times": [
+            1200
+          ],
+          "from": "2026-10-01"
+        }
+      ],
+      "taken": [
+        {
+          "medicine": "m1",
+          "day": "2026-10-12",
+          "dose": 0,
+          "at": "2026-10-12T06:30:00.000Z"
+        }
+      ]
+    },
+    "todo": []
+  }
+}

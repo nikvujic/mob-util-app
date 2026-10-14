@@ -236,6 +236,36 @@ void main() {
     expect(container.read(medicineProvider).medicines, isEmpty);
   });
 
+  testWidgets('some days only (Round 40): picked in the sheet, shown',
+      (tester) async {
+    await openMedicine(tester);
+    await tester.tap(find.byTooltip('Add medicine'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('medicineName')), 'Iron');
+    await tester.tap(find.byKey(const Key('medicineSomeDays')));
+    await tester.pump();
+    // The first day's weekday (Monday, the tests' today) is picked to
+    // start with; switch it to Wednesday.
+    expect(
+        tester
+            .widget<FilterChip>(find.byKey(const Key('medicineDay-1')))
+            .selected,
+        isTrue);
+    await tester.tap(find.byKey(const Key('medicineDay-3')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('medicineDay-1')));
+    await tester.pump();
+    // The last one can't be unpicked.
+    await tester.tap(find.byKey(const Key('medicineDay-3')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('medicineSubmit')));
+    await tester.pumpAndSettle();
+    expect(container.read(medicineProvider).medicines.single.weekdays, {3});
+    // Not on a Monday: listed under Not today, with its day.
+    expect(find.text('Not today'), findsOneWidget);
+    expect(find.textContaining('08:00 · Wed ·'), findsOneWidget);
+  });
+
   testWidgets('the sheet keeps at least one dose', (tester) async {
     await openMedicine(tester);
     await tester.tap(find.byTooltip('Add medicine'));
@@ -595,7 +625,11 @@ void main() {
             .widget<ChoiceChip>(find.byKey(const Key('followUp-120')))
             .selected,
         isTrue);
-    await tester.ensureVisible(find.byKey(const Key('followUp-0')));
+    // Clear of the Save button below (Round 40: the sheet grew).
+    await Scrollable.ensureVisible(
+        tester.element(find.byKey(const Key('followUp-0'))),
+        alignment: 0.5);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('followUp-0')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('medicineSubmit')));

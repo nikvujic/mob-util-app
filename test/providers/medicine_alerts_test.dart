@@ -63,6 +63,21 @@ void main() {
     expect(kinds, everyElement(ReminderKind.medicine));
   });
 
+  test('some weekdays only (Round 40): no reminders on its other days', () {
+    final tuesdays = Medicine(
+      id: 't',
+      name: 'Tuesdays',
+      times: const [8 * 60],
+      from: DateTime(2026, 10, 1),
+      until: DateTime(2026, 10, 20),
+      weekdays: {2},
+    );
+    expect(plan(MedicineBook(medicines: [tuesdays])), [
+      '13 8:0 Tuesdays: Time to take it · 08:00',
+      '20 8:0 Tuesdays: Time to take it · 08:00',
+    ]);
+  });
+
   test('a dose already marked (any way) does not remind', () {
     final reminders = plan(
       MedicineBook(medicines: [

@@ -765,6 +765,34 @@ void main() {
     });
   });
 
+  group('medicine.json v5 / v19 backup (weekdays, Round 40)', () {
+    void expectSample(MedicineBook book) {
+      final vitamin = book.medicines.firstWhere((m) => m.id == 'm1');
+      expect(vitamin.name, 'Vitamin D 💊');
+      expect(vitamin.weekdays, {1, 3, 5});
+      expect(vitamin.isOn(DateTime(2026, 10, 12)), isTrue, reason: 'Monday');
+      expect(vitamin.isOn(DateTime(2026, 10, 13)), isFalse, reason: 'Tuesday');
+      final iron = book.medicines.firstWhere((m) => m.id == 'm2');
+      expect(iron.weekdays, isNull, reason: 'every day');
+      expect(book.taken.single.medicine, 'm1');
+    }
+
+    test('medicine.json version 5 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v19/storage'),
+      );
+      expectSample(storage.initialMedicine);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v19 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v19/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.medicine);
+    });
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -902,6 +930,10 @@ void main() {
           'ec85365016f06a8775e094b0e23246af8c2530a2abd7d4e1a28be700310adc64',
       'test/fixtures/v18/backup-plain.json':
           '1d4a2ab1f41db00e5c7f055bc671601bbaec66596f86b89615373c6bf935a82a',
+      'test/fixtures/v19/storage/medicine.json':
+          '3bbcb12712361c465d53a41034f2b4eb4c833b071b8e72087c1553902d89a4f1',
+      'test/fixtures/v19/backup-plain.json':
+          '8d4b96358cc4c6592a216cf14f69ac5e557c7692d29caed56d9a5119fe0a9835',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

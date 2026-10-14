@@ -21,6 +21,10 @@ class Medicine {
   /// important medicines bring up the red dot.
   final bool important;
 
+  /// The days of the week it's taken (Round 40: 1 Monday to 7 Sunday);
+  /// null: every day.
+  final Set<int>? weekdays;
+
   Medicine({
     required this.id,
     required this.name,
@@ -29,7 +33,12 @@ class Medicine {
     DateTime? until,
     this.followUp,
     this.important = false,
+    Set<int>? weekdays,
   })  : times = List.unmodifiable([...times]..sort()),
+        // Every day (or none picked) is kept as null.
+        weekdays = weekdays == null || weekdays.isEmpty || weekdays.length >= 7
+            ? null
+            : Set.unmodifiable({...weekdays}),
         from = DateTime(from.year, from.month, from.day),
         until = until == null
             ? null
@@ -44,7 +53,9 @@ class Medicine {
   /// Whether it's taken on [day].
   bool isOn(DateTime day) {
     final d = DateTime(day.year, day.month, day.day);
-    return !d.isBefore(from) && (until == null || !d.isAfter(until!));
+    return !d.isBefore(from) &&
+        (until == null || !d.isAfter(until!)) &&
+        (weekdays == null || weekdays!.contains(d.weekday));
   }
 
   Map<String, dynamic> toJson() => {
@@ -55,6 +66,7 @@ class Medicine {
         if (until != null) 'until': PlannerTask.dayToJson(until!),
         if (followUp != null) 'followUp': followUp,
         if (important) 'important': true,
+        if (weekdays != null) 'weekdays': [...weekdays!]..sort(),
       };
 
   factory Medicine.fromJson(Map<String, dynamic> json) => Medicine(
@@ -67,6 +79,9 @@ class Medicine {
             : PlannerTask.dayFromJson(json['until']),
         followUp: json['followUp'] as int?,
         important: json['important'] as bool? ?? false,
+        weekdays: json['weekdays'] == null
+            ? null
+            : {for (final d in json['weekdays'] as List<dynamic>) d as int},
       );
 }
 

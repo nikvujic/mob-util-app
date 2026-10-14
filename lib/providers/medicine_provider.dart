@@ -23,6 +23,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
     DateTime? until,
     int? followUp,
     bool important = false,
+    Set<int>? weekdays,
   }) {
     final trimmed = name.trim();
     if (trimmed.isEmpty || times.isEmpty) return null;
@@ -34,6 +35,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
       until: until,
       followUp: followUp,
       important: important,
+      weekdays: weekdays,
     );
     state = MedicineBook(
       medicines: [...state.medicines, medicine],
@@ -52,6 +54,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
     DateTime? until,
     int? followUp,
     bool important = false,
+    Set<int>? weekdays,
   }) {
     if (times.isEmpty) return;
     state = MedicineBook(
@@ -66,6 +69,7 @@ class MedicineNotifier extends StateNotifier<MedicineBook> {
               until: until,
               followUp: followUp,
               important: important,
+              weekdays: weekdays,
             )
           else
             m,
