@@ -4,6 +4,22 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Pip's energy**: a battery of three segments beside his name (green,
+  orange, red); he gets tired (his face, his pace) as it runs down, and
+  when it's empty he turns off and falls over.
+- **Batteries**: one comes every few hours when you open the app (up to
+  3 held); tap his room to drop one: he walks over and picks it up. Off,
+  it flies to him and he comes back on.
+- **Sleep**: 23:00 to 8:00, using much less energy. Look at him between
+  23:00 and midnight and he falls asleep; between 8:00 and 9:00, he
+  wakes up.
+- Pip Home's status shows his energy, batteries and when the next one
+  comes; Animations has falling asleep and running out.
+- All of it is in backups: restored, he carries on from there.
+
 ## [1.5.2] - 2026-10-14
 
 ### Changed

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/app/app_drawer.dart';
 import 'package:the_app/app/bottom_nav.dart';
 import 'package:the_app/app/privacy_curtain.dart';
@@ -132,15 +134,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(retrySavesProvider)();
       // Reminders are planned two weeks ahead: top them up (P10).
       ref.read(reminderPlannerProvider).refresh();
+      // Pip's battery, if one came while away (Round 37).
+      _collectBattery();
     },
   );
+
+  /// A battery for Pip, if one is due: it comes when the app is opened.
+  void _collectBattery() =>
+      ref.read(pipLifeProvider.notifier).collect(ref.read(clockProvider)());
 
   @override
   void initState() {
     super.initState();
     _lifecycle; // start listening
     _doseCheck; // start looking
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tellUnreadable());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tellUnreadable();
+      _collectBattery();
+    });
   }
 
   /// Says so if some data couldn't be read at startup (the app started

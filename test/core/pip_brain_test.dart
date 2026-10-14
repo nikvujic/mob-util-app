@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
 
 /// Pip in his room (Round 26).
 void main() {
@@ -131,6 +132,139 @@ void main() {
       run(p, 0.6);
       expect(p.activity, PipActivity.standing);
       expect(p.spawned, isTrue);
+    });
+  });
+
+  group('energy, sleep and batteries (Round 37)', () {
+    PipBrain up({int width = 120}) {
+      final p = pip(width: width);
+      run(p, 3); // out of the ground, standing about
+      return p;
+    }
+
+    test('fresh, he appears as his life says, without coming up', () {
+      final asleep = pip()..show(PipShow.asleep);
+      expect(asleep.activity, PipActivity.asleep);
+      expect(asleep.sunk, 0);
+      final off = pip()..show(PipShow.off);
+      expect(off.activity, PipActivity.off);
+      expect(off.tilt, 1);
+      final turning = pip()..show(PipShow.powerOff);
+      expect(turning.activity, PipActivity.poweringOff);
+      final waking = pip()..show(PipShow.wakeUp);
+      expect(waking.activity, PipActivity.wakingUp);
+      final awake = pip()..show(PipShow.awake);
+      expect(awake.activity, PipActivity.spawning, reason: 'still comes up');
+    });
+
+    test('falls asleep: eyes close, he settles, z\'s rise; wakes with a hop',
+        () {
+      final p = up();
+      expect(p.show(PipShow.fallAsleep), isTrue);
+      expect(p.face, PipFace.tired);
+      run(p, 1);
+      expect(p.face, PipFace.asleep);
+      run(p, 1.5);
+      expect(p.activity, PipActivity.asleep);
+      expect(p.frame, PipFrame.tuck);
+      expect(p.zs, hasLength(3));
+      expect(p.show(PipShow.wakeUp), isTrue);
+      run(p, 0.8);
+      expect(p.lift, greaterThan(0), reason: 'the hop');
+      run(p, 1);
+      expect(p.activity, isNot(PipActivity.asleep));
+      expect(p.zs, isEmpty);
+    });
+
+    test('runs out: flickers, falls over, lies there dark', () {
+      final p = up();
+      p.show(PipShow.powerOff);
+      final faces = <PipFace>{};
+      for (var t = 0.0; t < PipBrain.flickerEnd; t += 1 / 60) {
+        faces.add(p.face);
+        p.step(1 / 60);
+      }
+      expect(faces, {PipFace.veryTired, PipFace.off}, reason: 'a flicker');
+      run(p, 1);
+      expect(p.activity, PipActivity.off);
+      expect(p.tilt, 1);
+      expect(p.face, PipFace.off);
+      expect(p.play(PipAnimation.walk), isFalse, reason: 'off: nothing');
+    });
+
+    test('falls where there is room: right, or left at the right wall', () {
+      final p = up();
+      p.x = 0;
+      p.show(PipShow.off);
+      expect(p.fallRight, isTrue);
+      final q = up()..x = 100;
+      q.show(PipShow.off);
+      expect(q.fallRight, isFalse);
+    });
+
+    test('a battery dropped: he walks over and picks it up', () {
+      final p = up();
+      p.x = 10;
+      expect(p.takeBattery(80), isTrue);
+      expect(p.activity, PipActivity.fetching);
+      expect(p.battery!.$2, PipBrain.dropHeight, reason: 'falling in');
+      run(p, 8);
+      expect(p.battery, isNull, reason: 'picked up');
+      expect(p.x, closeTo(80 + PipBrain.batteryWidth / 2 - 10, 0.5));
+      expect(p.activity, isNot(PipActivity.fetching));
+    });
+
+    test('off, a battery flies to him; he comes back on and gets up', () {
+      final p = up()..show(PipShow.off);
+      expect(p.takeBattery(10), isTrue);
+      expect(p.activity, PipActivity.poweringOn);
+      expect(p.battery, isNotNull);
+      run(p, 0.8);
+      expect(p.battery, isNull);
+      run(p, 1.5);
+      expect(p.activity, PipActivity.standing);
+      expect(p.tilt, 0);
+    });
+
+    test('asleep, no battery taken', () {
+      final p = up()..show(PipShow.asleep);
+      run(p, 3);
+      expect(p.canTakeBattery, isFalse);
+      expect(p.takeBattery(10), isFalse);
+    });
+
+    test('his face and pace follow his energy', () {
+      final p = up();
+      expect(p.face, PipFace.normal);
+      p.segments = 2;
+      expect(p.face, PipFace.tired);
+      expect(p.pace, closeTo(PipBrain.speed * 0.7, 1e-9));
+      p.segments = 1;
+      expect(p.face, PipFace.veryTired);
+      expect(p.pace, lessThan(PipBrain.speed * 0.5));
+    });
+
+    test('from the list, asleep and off come back on their own', () {
+      final p = up();
+      expect(p.play(PipAnimation.fallAsleep, demo: true), isTrue);
+      run(p, 6);
+      expect(p.activity, isNot(PipActivity.asleep));
+      expect(p.play(PipAnimation.powerOff, demo: true), isTrue);
+      run(p, 6);
+      expect(p.activity, isNot(PipActivity.off));
+      expect(p.tilt, 0);
+      // Played for real, he stays asleep.
+      p.show(PipShow.asleep);
+      run(p, 6);
+      expect(p.activity, PipActivity.asleep);
+    });
+
+    test('busy, a change waits (and is tried again)', () {
+      final p = up();
+      p.takeBattery(100);
+      expect(p.show(PipShow.asleep), isFalse);
+      run(p, 10);
+      expect(p.show(PipShow.asleep), isTrue);
     });
   });
 }

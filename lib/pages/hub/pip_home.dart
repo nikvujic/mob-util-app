@@ -6,12 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/widgets/pip_energy_bar.dart';
 import 'package:the_app/widgets/pip_portrait.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pixel_text.dart';
@@ -73,6 +75,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
               PipRoom(
                 brain: _brain,
                 animate: ref.watch(pipAnimatesProvider),
+                link: ref.watch(pipLinkProvider),
                 scene: scene,
                 height: rows,
                 pixel: _pixel,
@@ -182,37 +185,114 @@ Widget _words(String text, {Color colour = PipColours.screen, double? pixel}) =>
     PixelText([(text, colour)], pixel: pixel ?? 3, label: text);
 
 /// His status: how he looks, his name, age and birthday.
-class _Status extends ConsumerWidget {
+class _Status extends ConsumerStatefulWidget {
   const _Status();
+
+  @override
+  ConsumerState<_Status> createState() => _StatusState();
+}
+
+class _StatusState extends ConsumerState<_Status> {
+  /// The next battery's countdown, kept current.
+  late final Timer _tick = Timer.periodic(
+    const Duration(seconds: 30),
+    (_) => setState(() {}),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _tick;
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
 
   static String _date(DateTime d) =>
       '${d.day}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 
+  /// "2H 15M", "40M" (at least a minute).
+  static String _until(Duration d) {
+    final minutes = math.max(1, (d.inSeconds / 60).ceil());
+    final h = minutes ~/ 60, m = minutes % 60;
+    return h == 0 ? '${m}M' : (m == 0 ? '${h}H' : '${h}H ${m}M');
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final pip = ref.watch(pipLifeProvider);
+    final life = ref.read(pipLifeProvider.notifier);
     final now = ref.watch(clockProvider)();
     final born = pip.born?.toLocal();
+    final segments = PipEnergy.segments(life.levelAt(now));
+    final show = life.showAt(now);
+    final face = switch (show) {
+      PipShow.off || PipShow.powerOff => PipFace.off,
+      PipShow.asleep => PipFace.asleep,
+      _ => switch (segments) {
+          3 => PipFace.normal,
+          2 => PipFace.tired,
+          _ => PipFace.veryTired,
+        },
+    };
+    final next = pip.nextBatteryAt;
+    // What a tap on his field would do (Round 37).
+    final hint = switch (life.refusalAt(now)) {
+      null => 'TAP THE FIELD TO GIVE HIM ONE',
+      PipRefusal.full => "HE'S FULL",
+      PipRefusal.asleep => "HE'S ASLEEP",
+      PipRefusal.noBatteries || PipRefusal.egg => null,
+    };
     return SingleChildScrollView(
       key: const Key('pipStatus'),
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PipPortrait(),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _words(pip.name, colour: PipColours.light, pixel: 5),
-                const SizedBox(height: 16),
-                _line('AGE', PipLife.ageText(pip.ageOn(now) ?? 1)),
-                const SizedBox(height: 10),
-                if (born != null) _line('BORN', _date(born)),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PipPortrait(face: face),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _words(pip.name, colour: PipColours.light, pixel: 5),
+                    const SizedBox(height: 16),
+                    _line('AGE', PipLife.ageText(pip.ageOn(now) ?? 1)),
+                    const SizedBox(height: 10),
+                    if (born != null) _line('BORN', _date(born)),
+                  ],
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 20),
+          // His energy and batteries (Round 37).
+          Row(
+            children: [
+              _words('ENERGY  ', colour: PipColours.dim),
+              PipEnergyBar(
+                key: const Key('pipStatusEnergy'),
+                segments: segments,
+                pixel: 3,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _line('BATTERIES', '${pip.batteries}/${PipEnergy.maxBatteries}'),
+          if (next != null) ...[
+            const SizedBox(height: 10),
+            _line('NEXT IN', _until(next.difference(now))),
+          ],
+          if (hint != null) ...[
+            const SizedBox(height: 16),
+            _words(hint, colour: PipColours.light),
+          ],
         ],
       ),
     );
@@ -361,7 +441,6 @@ class _Animations extends StatefulWidget {
 }
 
 class _AnimationsState extends State<_Animations> {
-  bool _busy = false;
   Timer? _hide;
 
   @override
@@ -370,16 +449,23 @@ class _AnimationsState extends State<_Animations> {
     super.dispose();
   }
 
+  /// Why he can't now, said on the card for a moment.
+  String? _why;
+
   void _play(PipAnimation animation) {
-    final started = widget.brain.play(animation);
-    if (started) {
+    final brain = widget.brain;
+    if (brain.play(animation, demo: true)) {
       HapticFeedback.selectionClick();
       return;
     }
     _hide?.cancel();
-    setState(() => _busy = true);
+    setState(() => _why = switch (brain.activity) {
+          PipActivity.asleep => "HE'S ASLEEP",
+          PipActivity.off => "HE'S OFF",
+          _ => "HE'S BUSY, A MOMENT",
+        });
     _hide = Timer(const Duration(milliseconds: 1200), () {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() => _why = null);
     });
   }
 
@@ -393,19 +479,20 @@ class _AnimationsState extends State<_Animations> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
               for (final a in PipAnimation.values)
-                _CardRow(
-                  key: Key('pipPlay-${a.name}'),
-                  label: a.label.toUpperCase(),
-                  value: '>',
-                  onTap: () => _play(a),
-                ),
+                if (a.listed)
+                  _CardRow(
+                    key: Key('pipPlay-${a.name}'),
+                    label: a.label.toUpperCase(),
+                    value: '>',
+                    onTap: () => _play(a),
+                  ),
             ],
           ),
         ),
-        if (_busy)
+        if (_why case final why?)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),
-            child: _words("HE'S BUSY, A MOMENT", colour: PipColours.light),
+            child: _words(why, colour: PipColours.light),
           ),
         _back(widget.back),
       ],

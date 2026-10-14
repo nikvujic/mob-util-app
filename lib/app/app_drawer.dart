@@ -11,10 +11,12 @@ import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/pip.dart';
+import 'package:the_app/widgets/pip_energy_bar.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/widgets/pixel_text.dart';
@@ -130,31 +132,42 @@ class AppDrawer extends ConsumerWidget {
                 ],
               ),
             ),
-            // His name and age (Round 34), once he's hatched; the right is
-            // kept for his battery later.
+            // His name and age (Round 34), once he's hatched; on the right
+            // his energy and the batteries held (Round 37).
             if (ref.watch(pipLifeProvider) case final pip when pip.hatched)
               Padding(
                 key: const Key('pipNameAge'),
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: PixelText(
-                    [
-                      (pip.name, PipColours.light),
-                      (
-                        '  ${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!)}',
-                        context.colors.textSecondary,
-                      ),
-                    ],
-                    label: '${pip.name}, '
-                        '${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!).toLowerCase()} old',
-                  ),
+                child: Row(
+                  children: [
+                    PixelText(
+                      [
+                        (pip.name, PipColours.light),
+                        (
+                          '  ${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!)}',
+                          context.colors.textSecondary,
+                        ),
+                      ],
+                      label: '${pip.name}, '
+                          '${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!).toLowerCase()} old',
+                    ),
+                    const Spacer(),
+                    PipEnergyBar(
+                      key: const Key('pipEnergy'),
+                      segments: PipEnergy.segments(ref
+                          .read(pipLifeProvider.notifier)
+                          .levelAt(ref.watch(clockProvider)())),
+                      batteries: pip.batteries,
+                    ),
+                  ],
                 ),
               ),
             // Pip's room (Round 26).
             PipRoom(
               brain: ref.watch(pipBrainProvider),
               animate: ref.watch(pipAnimatesProvider),
+              // His energy, sleep and batteries (Round 37).
+              link: ref.watch(pipLinkProvider),
               // His sky follows the time of day (Round 35).
               scene: PipScene.at(PipPlace.room, ref.watch(clockProvider)()),
               // Out of his egg: that's his birthday (Round 34).

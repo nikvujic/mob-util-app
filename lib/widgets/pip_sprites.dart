@@ -54,6 +54,31 @@ abstract final class PipSprites {
   static Set<(int, int)> _face(String kind, int look) {
     final eyes = [3 + look, 10 + look];
     final mouth = 4 + look;
+    // Round 37: tired, eyes half shut and a flat mouth; very tired, eyes
+    // low and a wobbly mouth; asleep, eyes shut and a small mouth.
+    switch (kind) {
+      case 'tired':
+        return {
+          for (final e in eyes) ...[(e, 3), (e + 1, 3)],
+          for (var i = 1; i <= 4; i++) (mouth + i, 6),
+        };
+      case 'very':
+        return {
+          for (final e in eyes) ...[(e, 4), (e + 1, 4)],
+          (mouth + 1, 6),
+          (mouth + 2, 5),
+          (mouth + 3, 6),
+          (mouth + 4, 5),
+        };
+      case 'asleep':
+        return {
+          for (final e in eyes) ...[(e, 3), (e + 1, 3)],
+          (mouth + 2, 6),
+          (mouth + 3, 6),
+        };
+      case 'off':
+        return const {};
+    }
     return {
       for (final e in eyes)
         ...switch (kind) {
@@ -81,6 +106,20 @@ abstract final class PipSprites {
 
   static List<String> _frame(String face, String legs, {int look = 0}) {
     final rows = [for (final r in _head) r.split('')];
+    // Asleep his screen dims; off it's dark, with a glint (Round 37).
+    final screen = switch (face) { 'asleep' => 'D', 'off' => 'X', _ => null };
+    if (screen != null) {
+      for (var y = 0; y < screenRows; y++) {
+        for (var x = 0; x < screenWidth; x++) {
+          rows[_screenY + y][_screenX + x] = screen;
+        }
+      }
+    }
+    if (face == 'off') {
+      for (final (x, y) in const [(1, 1), (2, 1), (1, 2)]) {
+        rows[_screenY + y][_screenX + x] = 'x';
+      }
+    }
     for (final (x, y) in _face(face, look)) {
       rows[_screenY + y][_screenX + x] = 'K';
     }
@@ -102,6 +141,51 @@ abstract final class PipSprites {
     PipFrame.oh: _frame('oh', 'stand'),
     PipFrame.tuck: _frame('oh', 'tuck'),
   };
+
+  /// [frame] with [face] (Round 37): tired faces by his energy, asleep
+  /// (screen dimmed), off (screen dark). Blinks and surprise keep their
+  /// own faces while he's awake.
+  static List<String> frameOf(PipFrame frame, PipFace face) =>
+      face == PipFace.normal ? frames[frame]! : _faced[(frame, face)]!;
+
+  static final Map<(PipFrame, PipFace), List<String>> _faced = {
+    for (final frame in PipFrame.values)
+      for (final face in PipFace.values)
+        if (face != PipFace.normal) (frame, face): _withFace(frame, face),
+  };
+
+  static List<String> _withFace(PipFrame frame, PipFace face) {
+    final kind = switch (face) {
+      PipFace.asleep => 'asleep',
+      PipFace.off => 'off',
+      _ when frame == PipFrame.blink => 'blink',
+      _ when frame == PipFrame.oh || frame == PipFrame.tuck => 'oh',
+      PipFace.tired => 'tired',
+      _ => 'very',
+    };
+    final (legs, look) = switch (frame) {
+      PipFrame.step1 => ('stepL', 1),
+      PipFrame.step2 || PipFrame.step4 => ('stand', 1),
+      PipFrame.step3 => ('stepR', 1),
+      PipFrame.tuck => ('tuck', 0),
+      _ => ('stand', 0),
+    };
+    return _frame(kind, legs, look: look);
+  }
+
+  /// A battery (Round 37), 4 x 7: its cap, a grey case, green inside.
+  static const battery = [
+    '.hh.',
+    'gGGg',
+    'gGGg',
+    'gGGg',
+    'gGGg',
+    'gGGg',
+    'gggg',
+  ];
+
+  /// A little z rising while he sleeps, 3 x 4.
+  static const z = ['zzz', '..z', '.z.', 'zzz'];
 
   /// His egg (Round 34, Nikola's pick: spotted), 16 x 19: the shell, a
   /// shade down its right and bottom edges, spots in his casing colour.
@@ -163,6 +247,14 @@ abstract final class PipSprites {
     'W': PipColours.screen,
     'K': PipColours.face,
     'A': PipColours.light,
+    // Round 37.
+    'D': PipColours.screenAsleep,
+    'X': PipColours.screenOff,
+    'x': PipColours.screenGlint,
+    'g': PipColours.batteryCase,
+    'G': PipColours.energyFull,
+    'h': PipColours.batteryCap,
+    'z': PipColours.star,
   };
 
   /// How many rows a frame has.

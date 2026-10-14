@@ -349,25 +349,25 @@ fixtures for every stored format.
 Plan proposed to Nikola first; then Pip, then the small notes (8-bit
 sounds, the consistency sweep, multi-line code blocks).
 
-- [ ] **Energy indicator**: a battery with **three segments**: 3 green,
+- [x] **Energy indicator**: a battery with **three segments**: 3 green,
   2 orange, 1 red, 0 empty.
-- [ ] **His face by energy**: 3 as now, 2 tired, 1 very tired; at 0 he's
+- [x] **His face by energy**: 3 as now, 2 tired, 1 very tired; at 0 he's
   **empty**: he falls down and his screen goes off.
-- [ ] **Batteries**: one comes every few hours (with a random offset);
+- [x] **Batteries**: one comes every few hours (with a random offset);
   the time of the next is set, and it's collected when the app is opened
   after it, so they can't stack while away. At most **3** held. He
   loses energy a bit slower than batteries come, on average.
-- [ ] He **moves slower** the lower his energy.
-- [ ] **Running out while away**: the next time he's seen (menu or Hub),
+- [x] He **moves slower** the lower his energy.
+- [x] **Running out while away**: the next time he's seen (menu or Hub),
   instead of coming out of the ground he turns off and falls down; if he
   was already seen off, he's simply lying there off.
-- [ ] **Sleep**: 23:00–8:00, losing energy much slower. Seen between
+- [x] **Sleep**: 23:00–8:00, losing energy much slower. Seen between
   23:00 and 0:00 he plays falling asleep; seen after 0:00 he's simply
   asleep. Waking the same: seen 8:00–9:00 he plays waking up, after
   9:00 he's simply awake. Running out while away at night: **power off
   wins** (seen at night, he plays turning off, unless already seen off).
-- [ ] Powered off, he can't get up: a dropped battery **flies to him**.
-- [ ] Everything about him (energy, batteries, times, what was seen) is
+- [x] Powered off, he can't get up: a dropped battery **flies to him**.
+- [x] Everything about him (energy, batteries, times, what was seen) is
   in **backups**, and a restore carries on from there.
 
 ### Round 36 — Nikola's review of Pip Home (1.5.0, 2026-10-14)

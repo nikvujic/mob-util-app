@@ -1,0 +1,204 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
+import 'package:the_app/providers/pip_provider.dart';
+import 'package:the_app/widgets/pip_energy_bar.dart';
+import 'package:the_app/widgets/pip_room.dart';
+import 'package:the_app/widgets/pixel_text.dart';
+
+import '../helpers.dart';
+
+/// Pip's energy, sleep and batteries on screen (Round 37).
+void main() {
+  late ProviderContainer container;
+  PipBrain brain() => container.read(pipBrainProvider);
+  PipLife life() => container.read(pipLifeProvider);
+
+  /// The app at [now] with [pip], his life real (by that clock).
+  Future<void> start(WidgetTester tester, DateTime now, PipLife pip) async {
+    container =
+        await pumpApp(tester, clock: () => now, pip: pip, realPipLink: true);
+  }
+
+  PipLife pipWith({
+    double energy = 3,
+    required DateTime at,
+    int batteries = 0,
+    DateTime? next,
+    bool offSeen = false,
+  }) =>
+      PipLife(
+        born: DateTime(2026, 10, 1),
+        energy: energy,
+        energyAt: at,
+        batteries: batteries,
+        nextBatteryAt: next ?? at.add(const Duration(hours: 5)),
+        offSeen: offSeen,
+      );
+
+  group('in the menu', () {
+    testWidgets('his energy and batteries beside his name', (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(tester, now, pipWith(energy: 1.5, at: now, batteries: 2));
+      await openMenu(tester);
+      final bar =
+          tester.widget<PipEnergyBar>(find.byKey(const Key('pipEnergy')));
+      expect(bar.segments, 2);
+      expect(bar.batteries, 2);
+      expect(tester.getCenter(find.byKey(const Key('pipEnergy'))).dx,
+          greaterThan(tester.getCenter(find.byKey(const Key('pipNameAge'))).dx),
+          reason: 'on the right');
+      expect(PipEnergyBar.colourOf(2), isNot(PipEnergyBar.colourOf(3)));
+    });
+
+    testWidgets('a battery due when the app opens is collected',
+        (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(
+          tester,
+          now,
+          pipWith(
+              at: now,
+              batteries: 1,
+              next: now.subtract(const Duration(hours: 30))));
+      await tester.pump();
+      expect(life().batteries, 2, reason: 'just one, though long overdue');
+      expect(life().nextBatteryAt!.isAfter(now), isTrue);
+    });
+
+    testWidgets('ran out while away: he turns off (seen once), then is off',
+        (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(tester, now,
+          pipWith(energy: 0.5, at: now.subtract(const Duration(hours: 10))));
+      await openMenu(tester);
+      await tester.pump();
+      expect(brain().activity, PipActivity.off);
+      expect(life().offSeen, isTrue);
+      expect(life().energy, 0);
+    });
+
+    testWidgets('off, a tap gives him a battery: he comes back on',
+        (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(tester, now,
+          pipWith(energy: 0, at: now, batteries: 1, offSeen: true));
+      await openMenu(tester);
+      await tester.pump();
+      expect(brain().activity, PipActivity.off);
+      await tester.tap(find.byType(PipRoom));
+      await tester.pump();
+      await tester.pump();
+      expect(life().batteries, 0);
+      expect(life().offSeen, isFalse);
+      expect(brain().activity, isNot(PipActivity.off));
+      expect(brain().tilt, 0);
+    });
+
+    testWidgets('full, a tap does nothing', (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(tester, now, pipWith(at: now, batteries: 2));
+      await openMenu(tester);
+      await tester.tap(find.byType(PipRoom));
+      await tester.pump();
+      expect(life().batteries, 2);
+    });
+
+    testWidgets('23:00 to 0:00: he falls asleep in front of you, once',
+        (tester) async {
+      final now = DateTime(2026, 10, 14, 23, 20);
+      await start(tester, now, pipWith(at: now));
+      await openMenu(tester);
+      await tester.pump();
+      expect(brain().activity, PipActivity.asleep);
+      expect(life().sleepSeen, '2026-10-14');
+      expect(
+          container.read(pipLifeProvider.notifier).showAt(now), PipShow.asleep);
+    });
+
+    testWidgets('8:00 to 9:00: he wakes up in front of you', (tester) async {
+      final now = DateTime(2026, 10, 15, 8, 15);
+      await start(tester, now, pipWith(energy: 2.5, at: now));
+      await openMenu(tester);
+      await tester.pump();
+      expect(brain().activity, isNot(PipActivity.asleep));
+      expect(life().wakeSeen, '2026-10-15');
+    });
+
+    testWidgets('after 0:00 simply asleep; a tap gives no battery',
+        (tester) async {
+      final now = DateTime(2026, 10, 15, 2);
+      await start(tester, now, pipWith(energy: 1.5, at: now, batteries: 1));
+      await openMenu(tester);
+      await tester.pump();
+      expect(brain().activity, PipActivity.asleep);
+      expect(life().sleepSeen, isNull, reason: 'no animation was played');
+      await tester.tap(find.byType(PipRoom));
+      await tester.pump();
+      expect(life().batteries, 1);
+    });
+
+    testWidgets('a battery when tired: taken, a segment more', (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(tester, now, pipWith(energy: 1.5, at: now, batteries: 1));
+      await openMenu(tester);
+      await tester.pump();
+      expect(brain().segments, 2);
+      await tester.tap(find.byType(PipRoom));
+      await tester.pump();
+      await tester.pump();
+      expect(life().batteries, 0);
+      expect(PipEnergy.segments(life().energy), 3);
+      expect(brain().segments, 3);
+    });
+  });
+
+  group('Pip Home\'s status', () {
+    Iterable<String> words() => find
+        .byType(PixelText)
+        .evaluate()
+        .map((e) => (e.widget as PixelText).label);
+
+    Future<void> openHome(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.625;
+      addTearDown(tester.view.reset);
+      await openTab(tester, 'Hub');
+      await tester.tap(find.byTooltip('Pip'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    testWidgets('energy, batteries, the next one, and what a tap does',
+        (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(
+          tester,
+          now,
+          pipWith(
+              energy: 1.5,
+              at: now,
+              batteries: 2,
+              next: now.add(const Duration(hours: 2, minutes: 15))));
+      await openHome(tester);
+      expect(
+          tester
+              .widget<PipEnergyBar>(find.byKey(const Key('pipStatusEnergy')))
+              .segments,
+          2);
+      expect(words(), containsAll(['BATTERIES 2/3', 'NEXT IN 2H 15M']));
+      expect(words(), contains('TAP THE FIELD TO GIVE HIM ONE'));
+    });
+
+    testWidgets('full: says so', (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      await start(tester, now, pipWith(at: now, batteries: 1));
+      await openHome(tester);
+      expect(words(), contains("HE'S FULL"));
+    });
+  });
+}

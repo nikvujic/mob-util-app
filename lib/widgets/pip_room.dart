@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
@@ -15,9 +16,16 @@ import 'package:the_app/widgets/pip_sprites.dart';
 ///
 /// Before he's hatched (Round 34) it holds his egg: each tap cracks it a
 /// little more, with a buzz; the last one pops him out ([onHatched]).
+///
+/// Round 37: with a [link] to his life, he shows as it says (asleep,
+/// off, falling asleep...), checked every second; his face and pace
+/// follow his energy; a tap drops a battery for him, if he can have one.
 class PipRoom extends StatefulWidget {
   final PipBrain brain;
   final bool animate;
+
+  /// His life: what to show, and batteries; null: he just stands about.
+  final PipLink? link;
 
   /// The tap that hatched him: that moment is his birthday.
   final VoidCallback? onHatched;
@@ -35,6 +43,7 @@ class PipRoom extends StatefulWidget {
     required this.brain,
     this.animate = true,
     this.onHatched,
+    this.link,
     this.scene,
     this.height = rows,
     this.pixel = smallPixel,
@@ -63,9 +72,46 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   void _tick(Duration elapsed) {
     final dt = (elapsed - _last).inMicroseconds / 1e6;
     _last = elapsed;
+    // His life checked every second (Round 37).
+    _sinceCheck += dt;
+    if (_sinceCheck >= 1) {
+      _sinceCheck = 0;
+      _check();
+    }
     // A long pause (e.g. the app away) doesn't jump him across the room.
     setState(() => widget.brain.step(dt.clamp(0, 0.1)));
   }
+
+  double _sinceCheck = 0;
+
+  /// What was last made so from his life; null: nothing yet.
+  PipShow? _shown;
+
+  /// Asks his life what to show and makes it so (once a change, not over
+  /// and over, so a demo from Pip Home's list isn't undone); also his
+  /// energy for his face and pace. Never during a build: it may collect
+  /// a battery.
+  void _check() {
+    final link = widget.link;
+    final brain = widget.brain;
+    if (link == null || !mounted) return;
+    if (brain.activity == PipActivity.egg ||
+        brain.activity == PipActivity.hatching) {
+      return;
+    }
+    final (show, segments) = link.look();
+    brain.segments = segments;
+    if (show != _shown && brain.show(show)) {
+      _shown = show;
+      link.shown(show);
+    }
+    if (!_moving) _finish();
+  }
+
+  void _checkSoon() => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(_check);
+      });
 
   bool get _moving =>
       widget.animate &&
@@ -75,12 +121,14 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _sync();
+    _checkSoon();
   }
 
   @override
   void didUpdateWidget(PipRoom old) {
     super.didUpdateWidget(old);
     _sync();
+    if (!_moving) _checkSoon();
   }
 
   void _sync() {
@@ -90,16 +138,54 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     } else if (!_moving && _ticker.isActive) {
       _ticker.stop();
     }
-    // Not moving: he's simply there, standing (out of the ground, or out
-    // of his egg).
-    if (!_moving) {
-      switch (widget.brain.activity) {
+    if (!_moving) _finish();
+  }
+
+  /// Not moving: whatever he's doing is simply done (out of the ground
+  /// or his egg, asleep, off, back on, a battery picked up).
+  void _finish() {
+    final brain = widget.brain;
+    for (var i = 0; i < 4; i++) {
+      switch (brain.activity) {
         case PipActivity.spawning:
-          widget.brain.step(PipBrain.landEnd);
+          brain.step(PipBrain.landEnd);
         case PipActivity.hatching:
-          widget.brain.step(PipBrain.fadeEnd);
+          brain.step(PipBrain.fadeEnd);
+        case PipActivity.fallingAsleep:
+          brain.step(PipBrain.asleepEnd);
+        case PipActivity.wakingUp:
+          brain.step(PipBrain.wakeHopEnd);
+        case PipActivity.poweringOff:
+          brain.step(PipBrain.offEnd);
+        case PipActivity.poweringOn:
+          brain.step(PipBrain.onEnd);
+        case PipActivity.fetching:
+          // Walking over, then picking it up.
+          for (var s = 0;
+              s < 400 && brain.activity == PipActivity.fetching;
+              s++) {
+            brain.step(0.05);
+          }
         default:
+          return;
       }
+    }
+  }
+
+  /// A tap in his room (Round 37): a battery for him, dropped there, if
+  /// he can have one now; a light buzz if not.
+  void _tapRoom(double atPixel) {
+    final link = widget.link;
+    final brain = widget.brain;
+    if (link == null) return;
+    if (brain.canTakeBattery && link.giveBattery()) {
+      brain.takeBattery(atPixel - PipBrain.batteryWidth / 2);
+      HapticFeedback.mediumImpact();
+      _shown = null; // his energy changed: look again
+      setState(_sync);
+      _checkSoon();
+    } else {
+      HapticFeedback.selectionClick();
     }
   }
 
@@ -132,15 +218,27 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Whole device pixels a room pixel.
     final pixel = math.max(1.0, (widget.pixel * ratio).floorToDouble()) / ratio;
     final egg = widget.brain.activity == PipActivity.egg;
+    final feeds = !egg && widget.link != null;
     return Semantics(
       key: const Key('pipRoom'),
-      label: egg ? "Pip's egg. Tap it to hatch him" : 'Pip, in his room',
-      image: !egg,
-      button: egg,
-      onTap: egg ? _tapEgg : null,
+      label: egg
+          ? "Pip's egg. Tap it to hatch him"
+          : feeds
+              ? 'Pip, in his room. Tap to give him a battery'
+              : 'Pip, in his room',
+      image: !egg && !feeds,
+      button: egg || feeds,
+      onTap: egg
+          ? _tapEgg
+          : feeds
+              ? () => _tapRoom(widget.brain.roomWidth / 2)
+              : null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        // Its taps are told to screen readers above, with what they do.
+        excludeFromSemantics: true,
         onTap: egg ? _tapEgg : null,
+        onTapUp: feeds ? (d) => _tapRoom(d.localPosition.dx / pixel) : null,
         child: LayoutBuilder(
           builder: (context, box) {
             widget.brain.roomWidth = (box.maxWidth / pixel).floor();
@@ -354,7 +452,7 @@ class _RoomPainter extends CustomPainter {
       return;
     }
 
-    final sprite0 = PipSprites.frames[brain.frame]!;
+    final sprite0 = PipSprites.frameOf(brain.frame, brain.face);
     final rows = sprite0.length;
     final (sx, sy) = brain.stretch;
     final centre = brain.x + PipBrain.width / 2;
@@ -372,9 +470,26 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
+    // A battery dropped in his room, or flying to him (Round 37).
+    if (brain.battery case (final left, final up)) {
+      sprite(PipSprites.battery, left, groundTop - up);
+    }
+
     // Pip, clipped at the ground while he comes up.
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, groundTop * pixel));
+    // Falling over (Round 37): turned about the bottom corner of his
+    // casing on the side he falls to.
+    if (brain.tilt > 0) {
+      final right = brain.fallRight;
+      final pivot = Offset(
+        (brain.x + (right ? 18 : 2)) * pixel,
+        groundTop * pixel,
+      );
+      canvas.translate(pivot.dx, pivot.dy);
+      canvas.rotate((right ? 1 : -1) * brain.tilt * math.pi / 2);
+      canvas.translate(-pivot.dx, -pivot.dy);
+    }
     final w = sx * pixel;
     final h = sy * pixel;
     for (var y = 0; y < rows; y++) {
@@ -393,6 +508,10 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
+    // Asleep: little z's rising above his head, fading.
+    for (final (dx, up, fade) in brain.zs) {
+      sprite(PipSprites.z, centre + dx, groundTop - 18 - up, alpha: 1 - fade);
+    }
     // The egg's bottom half in front of him, as he jumps out of it.
     if (hatching) {
       sprite(PipSprites.eggBottom, eggLeft, groundTop, alpha: shell);

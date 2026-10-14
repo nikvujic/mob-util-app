@@ -309,6 +309,21 @@ animation)` in `pip_brain.dart`, and `play` asks it first (nothing
 interrupts the egg, the hatch or coming up). New props and animations
 add a row to these tables; tests check the tables, not each screen.
 
+His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
+as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,
+`emptyAt`, `segments`, `nextBattery`; `pipShowAt` says what to show:
+awake, fallAsleep, asleep, wakeUp, powerOff, off). Nothing runs in the
+background: `PipLife` keeps his energy as a level at a moment, and the
+battery due is collected when the app starts or comes back
+(`HomeScreen`'s lifecycle) or when he's looked at. `PipRoom` reaches his
+life through `PipLink` (`pipLinkProvider`): every second it asks what to
+show, makes a change so with `PipBrain.show` (straight away instead of
+the ground entrance, or with its animation; false while busy, tried
+again), and tells it back (`shown`, so an animation isn't replayed); a
+tap gives a battery (`giveBattery`, then `PipBrain.takeBattery`). Tests
+override the link with `FakePipLink` unless they ask for the real one.
+The brain's new activities all have their row in `mayStart`.
+
 Pip Home (`pages/hub/pip_home.dart`, `HubTool.pip`): its own `PipBrain`
 (the menu's stays put) in a `PipRoom` with the menu's `pixel` (Round 38)
 and half the page's `height`, and a `PageView` card (status, settings) drawn with

@@ -442,6 +442,17 @@ abstract final class PipColours {
   static const dirt = Color(0xFF6B4423);
   static const dirtDark = Color(0xFF4E301A);
 
+  // Round 37: his screen asleep and off; batteries and energy.
+  static const screenAsleep = Color(0xFFD9D2C4);
+  static const screenOff = Color(0xFF2E2C2A);
+  static const screenGlint = Color(0xFF45423F);
+  static const batteryCase = Color(0xFF8C8C88);
+  static const batteryCap = Color(0xFF5A5A58);
+  static const energyFull = Color(0xFF5FBF4A); // green
+  static const energyHalf = Color(0xFFE8963A); // orange
+  static const energyLow = Color(0xFFE0503E); // red
+  static const energyEmpty = Color(0xFF4A4744);
+
   // Pip Home's card (Round 35): a game's panel, whatever the theme.
   static const panel = Color(0xFF231F1D);
   static const panelEdge = Color(0xFF4A3F38);

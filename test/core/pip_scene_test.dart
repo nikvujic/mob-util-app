@@ -113,11 +113,18 @@ void main() {
   });
 
   group('what he may start (the mayStart table)', () {
-    test('nothing while in his egg, hatching or coming up', () {
+    test(
+        'nothing mid-way: egg, hatching, coming up, falling asleep, '
+        'waking, turning off or on, picking up a battery', () {
       for (final doing in [
         PipActivity.egg,
         PipActivity.hatching,
         PipActivity.spawning,
+        PipActivity.fallingAsleep,
+        PipActivity.wakingUp,
+        PipActivity.poweringOff,
+        PipActivity.poweringOn,
+        PipActivity.fetching,
       ]) {
         for (final a in PipAnimation.values) {
           expect(mayStart(doing, a), isFalse,
@@ -126,12 +133,41 @@ void main() {
       }
     });
 
-    test('anything while standing or walking', () {
+    test('up and about: anything but waking or coming back on', () {
       for (final doing in [PipActivity.standing, PipActivity.walking]) {
         for (final a in PipAnimation.values) {
-          expect(mayStart(doing, a), isTrue, reason: '${doing.name} ${a.name}');
+          expect(mayStart(doing, a),
+              a != PipAnimation.wakeUp && a != PipAnimation.powerOn,
+              reason: '${doing.name} ${a.name}');
         }
       }
+    });
+
+    test('asleep: only waking (or running out); off: only back on', () {
+      for (final a in PipAnimation.values) {
+        expect(mayStart(PipActivity.asleep, a),
+            a == PipAnimation.wakeUp || a == PipAnimation.powerOff,
+            reason: 'asleep ${a.name}');
+        expect(mayStart(PipActivity.off, a), a == PipAnimation.powerOn,
+            reason: 'off ${a.name}');
+      }
+    });
+
+    test('every activity has its row', () {
+      for (final doing in PipActivity.values) {
+        for (final a in PipAnimation.values) {
+          mayStart(doing, a); // exhaustive: compiles only with every row
+        }
+      }
+      expect(PipAnimation.values.where((a) => a.listed).map((a) => a.name), [
+        'spawn',
+        'hatch',
+        'walk',
+        'blink',
+        'turn',
+        'fallAsleep',
+        'powerOff'
+      ]);
     });
 
     test('play starts it, or says no', () {

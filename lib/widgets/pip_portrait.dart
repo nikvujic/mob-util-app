@@ -8,9 +8,17 @@ import 'package:the_app/widgets/pip_sprites.dart';
 /// [pixel] logical pixels a dot, snapped to whole device pixels.
 class PipPortrait extends StatelessWidget {
   final PipFrame frame;
+
+  /// His face (Round 37: tired by his energy, asleep, off).
+  final PipFace face;
   final double pixel;
 
-  const PipPortrait({super.key, this.frame = PipFrame.idle, this.pixel = 4});
+  const PipPortrait({
+    super.key,
+    this.frame = PipFrame.idle,
+    this.face = PipFace.normal,
+    this.pixel = 4,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +28,7 @@ class PipPortrait extends StatelessWidget {
       child: SizedBox(
         width: PipBrain.width * dot,
         height: PipBrain.height * dot,
-        child: CustomPaint(painter: _PortraitPainter(frame, dot)),
+        child: CustomPaint(painter: _PortraitPainter(frame, face, dot)),
       ),
     );
   }
@@ -28,14 +36,15 @@ class PipPortrait extends StatelessWidget {
 
 class _PortraitPainter extends CustomPainter {
   final PipFrame frame;
+  final PipFace face;
   final double dot;
 
-  _PortraitPainter(this.frame, this.dot);
+  _PortraitPainter(this.frame, this.face, this.dot);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..isAntiAlias = false;
-    final rows = PipSprites.frames[frame]!;
+    final rows = PipSprites.frameOf(frame, face);
     for (var y = 0; y < rows.length; y++) {
       for (var x = 0; x < rows[y].length; x++) {
         final colour = PipSprites.colours[rows[y][x]];
@@ -50,5 +59,5 @@ class _PortraitPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_PortraitPainter old) =>
-      old.frame != frame || old.dot != dot;
+      old.frame != frame || old.face != face || old.dot != dot;
 }

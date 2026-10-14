@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
@@ -34,6 +36,9 @@ Future<ProviderContainer> pumpApp(
   bool introduction = false,
   bool pipMoves = false,
   bool pipHatched = true,
+  PipLife? pip,
+  PipLink? pipLink,
+  bool realPipLink = false,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -41,8 +46,8 @@ Future<ProviderContainer> pumpApp(
       // Pip already out of his egg (Round 34), as on most phones by now;
       // his egg's own tests pass false.
       appStorageProvider.overrideWithValue(AppStorage.inMemory(
-        initialPip:
-            pipHatched ? PipLife(born: DateTime(2026, 10, 1)) : PipLife.egg,
+        initialPip: pip ??
+            (pipHatched ? PipLife(born: DateTime(2026, 10, 1)) : PipLife.egg),
       )),
       appVersionProvider.overrideWithValue(testAppVersion),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
@@ -56,6 +61,10 @@ Future<ProviderContainer> pumpApp(
       // Pip stands still (an endless animation never settles); his own
       // tests let him move.
       pipAnimatesProvider.overrideWithValue(pipMoves),
+      // His life (Round 37) as a test sets it: awake and full unless it
+      // says; [realPipLink] for the real one, by the test's clock.
+      if (!realPipLink)
+        pipLinkProvider.overrideWithValue(pipLink ?? FakePipLink()),
       // The Introduction note (N16) only where a test asks for it.
       if (introduction)
         startedVersionProvider.overrideWithValue(testAppVersion),
@@ -265,4 +274,32 @@ Future<void> reveal(WidgetTester tester, Finder finder) async {
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
+}
+
+/// Pip's life for tests (Round 37): shows [show] with [segments], and
+/// gives batteries while [batteries] last; records what was shown.
+class FakePipLink implements PipLink {
+  PipShow show;
+  int segments;
+  int batteries;
+  final List<PipShow> seen = [];
+
+  FakePipLink({
+    this.show = PipShow.awake,
+    this.segments = 3,
+    this.batteries = 0,
+  });
+
+  @override
+  (PipShow, int) look() => (show, segments);
+
+  @override
+  void shown(PipShow show) => seen.add(show);
+
+  @override
+  bool giveBattery() {
+    if (batteries == 0) return false;
+    batteries--;
+    return true;
+  }
 }

@@ -4,7 +4,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 
 ## Getting around
 - The bar at the bottom switches between **Notes**, **Shop**, **Planner** and **Hub**.
-- The **menu** (☰, or a swipe right along the bottom bar) has Security, Themes, Backup, Notifications and Settings. Pip, the little robot at its top, is the app's mascot; he lives in the field at the bottom of the menu. Until he's hatched, his egg sits there: tap it until it opens. His name and age show above him. Once he's out, he has his own page in the Hub, **Pip**: swipe his card for his settings (rename him, play his animations, pick his background).
+- The **menu** (☰, or a swipe right along the bottom bar) has Security, Themes, Backup, Notifications and Settings. Pip, the little robot at its top, is the app's mascot; he lives in the field at the bottom of the menu. Until he's hatched, his egg sits there: tap it until it opens. His name and age show above him. Once he's out, he has his own page in the Hub, **Pip**: swipe his card for his settings (rename him, play his animations, pick his background). The battery beside his name is his energy: he gets tired as it runs down, and turns off when it's empty. A battery comes every few hours when you open the app (up to 3); tap his room to give him one. He sleeps from 23:00 to 8:00.
 - Buttons sit at the bottom, on the side of the hand you last touched with.
 - **Reach mode**: at the top of a list, pull down again and the top comes into thumb reach; push up and it springs back.
 - **Hold** an item to select it, then tap others to add them; the buttons at the bottom act on all of them.
