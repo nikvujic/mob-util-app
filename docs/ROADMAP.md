@@ -342,8 +342,8 @@ fixtures for every stored format.
   pick from (one for now, Field); day and night are the same background.
 - [x] The menu's room **at least twice as high** (there's room on
   Nikola's phone; on smaller ones the menu items scroll above it).
-- Noted for later: the **Android home-screen widget** (questions
-  answered: it doesn't keep the app running; see *Later / ideas*).
+- The Android home-screen widget: dropped from the plan (Nikola, after
+  hearing it can't animate smoothly).
 
 ### Round 33 — Nikola's review of 1.4.0 (2026-10-13)
 
@@ -431,10 +431,6 @@ Nikola's picks (Round 34):
   fight: not allowed, or later). Both tested as tables.
 - Later: weather (snow when it snows), seasons, a Santa hat in the last
   week of the year.
-- Much later: Pip as a **phone widget**, outside the app. Android draws
-  it from the app's pictures (the app isn't running); it can be updated
-  every so often (e.g. every 30 minutes, his sky and age) and flip a few
-  frames, but not animate smoothly like in the app. A tap opens the app.
 - [x] **Pip Home** (a Hub page; only once he's hatched, then opened;
   special, so it can't be locked): his avatar, name (changeable), age,
   birthday, and the same room as the menu's.
