@@ -146,6 +146,15 @@ class MarkdownEditingController extends TextEditingController {
     return blocks;
   }
 
+  /// Whether a code block's ``` fences show (Round 42): while [editing]
+  /// with the cursor anywhere in the block, fences included, so an empty
+  /// block can be found and deleted. Elsewhere they're hidden.
+  bool fencesShown(({int start, int end}) block) {
+    final selection = value.selection;
+    if (!_editing || !selection.isValid) return false;
+    return selection.start <= block.end && selection.end >= block.start;
+  }
+
   int _lineEnd(int from) {
     final next = text.indexOf('\n', from);
     return next == -1 ? text.length : next;
@@ -251,7 +260,14 @@ class MarkdownEditingController extends TextEditingController {
     final revealed = _revealed();
     bool onRevealedLine(MdRun run) =>
         run.start >= revealed.start && run.end <= revealed.end;
-    bool shown(MdRun run) => run.role != MdRole.marker || onRevealedLine(run);
+    // The fences of the code block the cursor is in show too (Round 42).
+    final openBlocks = codeBlocks().where(fencesShown).toList();
+    bool inOpenBlock(MdRun run) =>
+        openBlocks.any((b) => run.start >= b.start && run.end <= b.end + 1);
+    bool shown(MdRun run) =>
+        run.role != MdRole.marker ||
+        onRevealedLine(run) ||
+        (run.block && inOpenBlock(run));
     final spans = <InlineSpan>[];
     for (final run in markdownRuns(text)) {
       // A checkbox off the line being edited: its `[` drawn as a box, the
@@ -632,13 +648,23 @@ class RenderCheckboxBoxes extends RenderProxyBox {
     if (laidOut) {
       final width =
           MatrixUtils.transformRect(toHere!, Offset.zero & editable.size);
-      for (final (:start, :end) in _controller.codeBlocks()) {
-        final around = _around(editable, toHere, start, end);
+      final text = _controller.text;
+      for (final block in _controller.codeBlocks()) {
+        final (:start, :end) = block;
+        // Round 42: around the code lines only, the same room above and
+        // below: hidden fences still keep some height of their own,
+        // unequal. With the fences showing (or no code), around them too.
+        final first = text.indexOf('\n', start) + 1;
+        final last = text.lastIndexOf('\n', end - 1);
+        final codeOnly = !_controller.fencesShown(block) && first < last;
+        final around = codeOnly
+            ? _around(editable, toHere, first, last)
+            : _around(editable, toHere, start, end);
         if (around == null) continue;
         // Round 41: room around the code ([codeInset]), rounded corners
         // that show (the field's scroll leaves room for them).
-        final rect = Rect.fromLTRB(width.left - codeInset, around.top - 2,
-            width.right + codeInset, around.bottom + 2);
+        final rect = Rect.fromLTRB(width.left - codeInset, around.top - 6,
+            width.right + codeInset, around.bottom + 6);
         panels.add(rect);
         context.canvas.drawRRect(
           RRect.fromRectAndRadius(rect.shift(offset), const Radius.circular(6)),

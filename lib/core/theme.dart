@@ -452,6 +452,8 @@ abstract final class PipColours {
   static const energyHalf = Color(0xFFE8963A); // orange
   static const energyLow = Color(0xFFE0503E); // red
   static const energyEmpty = Color(0xFF4A4744);
+  // Round 42: a battery's charge is blue (his energy stays green to red).
+  static const batteryCharge = Color(0xFF4A9BE8);
 
   // Pip Home's card (Round 35): a game's panel, whatever the theme.
   static const panel = Color(0xFF231F1D);

@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Fixed
+- Code blocks: the same room above and below the code; while typing in
+  a block its ``` show (faint), so an emptied block can be deleted.
+- Pip's batteries are blue.
+
 ## [1.8.0] - 2026-10-14
 
 ### Added

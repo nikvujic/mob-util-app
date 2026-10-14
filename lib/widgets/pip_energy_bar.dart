@@ -58,11 +58,12 @@ class _BarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..isAntiAlias = false;
     void px(int x, int y, Color colour, [int w = 1, int h = 1]) =>
         canvas.drawRect(
           Rect.fromLTWH(x * dot, y * dot, w * dot, h * dot),
-          paint..color = colour,
+          Paint()
+            ..isAntiAlias = false
+            ..color = colour,
         );
 
     // The case: a 13 x 5 outline and its cap; inside, three segments of
@@ -90,8 +91,8 @@ class _BarPainter extends CustomPainter {
     const at = 17;
     px(at + 1, 0, PipColours.batteryCap);
     px(at, 1, PipColours.batteryCase, 3, 4);
-    px(at + 1, 2, held > 0 ? PipColours.energyFull : PipColours.energyEmpty, 1,
-        2);
+    px(at + 1, 2, held > 0 ? PipColours.batteryCharge : PipColours.energyEmpty,
+        1, 2);
     final glyph = PixelFont.glyphOf('${held.clamp(0, 9)}');
     for (var y = 0; y < glyph.length; y++) {
       for (var x = 0; x < glyph[y].length; x++) {

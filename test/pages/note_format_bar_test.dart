@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -243,5 +244,83 @@ void main() {
         .whereType<TextSpan>()
         .firstWhere((s) => s.text == 'code');
     expect(code.style!.fontSize, 16 * MarkdownEditingController.codeScale);
+  });
+
+  RenderEditable editableOf(WidgetTester tester) => tester
+      .state<EditableTextState>(find.descendant(
+          of: contentField, matching: find.byType(EditableText)))
+      .renderEditable;
+
+  /// Where [start] to [end] of the note's text is, in the painter's box.
+  Rect textRect(WidgetTester tester, int start, int end) {
+    final painter =
+        tester.renderObject<RenderCheckboxBoxes>(find.byType(CheckboxBoxes));
+    final editable = editableOf(tester);
+    final rows = editable.getBoxesForSelection(
+        TextSelection(baseOffset: start, extentOffset: end));
+    var rect = rows.first.toRect();
+    for (final row in rows.skip(1)) {
+      rect = rect.expandToInclude(row.toRect());
+    }
+    return MatrixUtils.transformRect(editable.getTransformTo(painter), rect);
+  }
+
+  /// The styles the note's text is drawn with where it reads [part].
+  List<TextStyle?> stylesOf(WidgetTester tester, String part) {
+    final span = content(tester).buildTextSpan(
+      context: tester.element(contentField),
+      style: const TextStyle(fontSize: 16),
+      withComposing: false,
+    );
+    final styles = <TextStyle?>[];
+    span.visitChildren((s) {
+      if (s is TextSpan && (s.text ?? '').contains(part)) styles.add(s.style);
+      return true;
+    });
+    return styles;
+  }
+
+  testWidgets('a code panel has the same room above and below (Round 42)',
+      (tester) async {
+    await openBar(tester, 'before\n```\nx = 1\ny = 2\n```\nend');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    final painter =
+        tester.renderObject<RenderCheckboxBoxes>(find.byType(CheckboxBoxes));
+    final panel = painter.paintedPanels.single;
+    final text = content(tester).text;
+    final code =
+        textRect(tester, text.indexOf('x = 1'), text.indexOf('y = 2') + 5);
+    final above = code.top - panel.top, below = panel.bottom - code.bottom;
+    expect(above, greaterThan(2));
+    expect(below, moreOrLessEquals(above, epsilon: 0.5));
+  });
+
+  testWidgets(
+      'editing in a code block shows its ``` (faint), so an empty one '
+      'can be found (Round 42)', (tester) async {
+    await openBar(tester, 'before\n```\n```\nafter');
+    // The cursor outside the block: the fences hidden.
+    select(tester, 2, 2);
+    await tester.pump();
+    expect(stylesOf(tester, '```').map((s) => s?.fontSize),
+        everyElement(lessThan(1)));
+    // In it: both show, muted, and the panel takes them in.
+    select(tester, 10, 10);
+    await tester.pump();
+    final shown = stylesOf(tester, '```');
+    expect(shown, isNotEmpty);
+    for (final style in shown) {
+      expect(style!.fontSize, greaterThan(10));
+      expect(style.color, isNot(Colors.transparent));
+    }
+    final painter =
+        tester.renderObject<RenderCheckboxBoxes>(find.byType(CheckboxBoxes));
+    expect(painter.paintedPanels, hasLength(1));
+    // Not editing (focus gone): hidden again.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    expect(stylesOf(tester, '```').map((s) => s?.fontSize),
+        everyElement(lessThan(1)));
   });
 }

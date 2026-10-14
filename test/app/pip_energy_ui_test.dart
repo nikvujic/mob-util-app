@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/widgets/pip_energy_bar.dart';
 import 'package:the_app/widgets/pip_room.dart';
+import 'package:the_app/widgets/pip_sprites.dart';
 import 'package:the_app/widgets/pixel_text.dart';
 
 import '../helpers.dart';
@@ -39,6 +41,34 @@ void main() {
         nextBatteryAt: next ?? at.add(const Duration(hours: 5)),
         offSeen: offSeen,
       );
+
+  group('batteries (Round 42)', () {
+    test('are blue, unlike his energy', () {
+      const blue = PipColours.batteryCharge;
+      expect(blue.b, greaterThan(blue.r));
+      expect(blue.b, greaterThan(blue.g));
+      expect(PipSprites.colours['G'], blue, reason: 'the flying battery');
+      expect(PipSprites.battery.join(), contains('G'));
+      for (final n in [1, 2, 3]) {
+        expect(PipEnergyBar.colourOf(n), isNot(blue));
+      }
+    });
+
+    testWidgets('the one held beside his energy is blue', (tester) async {
+      await tester.pumpWidget(const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+              child: PipEnergyBar(segments: 3, batteries: 2, pixel: 2))));
+      expect(
+          find.byType(CustomPaint),
+          paints
+            // (Compared as 32-bit colours: Paint keeps its own floats.)
+            ..something((method, args) =>
+                method == #drawRect &&
+                (args[1] as Paint).color.toARGB32() ==
+                    PipColours.batteryCharge.toARGB32()));
+    });
+  });
 
   group('in the menu', () {
     testWidgets('his energy and batteries beside his name', (tester) async {

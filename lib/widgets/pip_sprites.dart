@@ -173,7 +173,8 @@ abstract final class PipSprites {
     return _frame(kind, legs, look: look);
   }
 
-  /// A battery (Round 37), 4 x 7: its cap, a grey case, green inside.
+  /// A battery (Round 37), 4 x 7: its cap, a grey case, blue inside
+  /// (Round 42).
   static const battery = [
     '.hh.',
     'gGGg',
@@ -252,7 +253,7 @@ abstract final class PipSprites {
     'X': PipColours.screenOff,
     'x': PipColours.screenGlint,
     'g': PipColours.batteryCase,
-    'G': PipColours.energyFull,
+    'G': PipColours.batteryCharge,
     'h': PipColours.batteryCap,
     'z': PipColours.star,
   };
