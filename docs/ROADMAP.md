@@ -354,6 +354,26 @@ fixtures for every stored format.
   doesn't use it.
 - [ ] Order: **hands** first (specs and sprites, he grabs a cable), then
   the station, then the animation; Nikola sees drafts at each step.
+- [x] Hands (Nikola's pick, drafts `docs/pip_hands_drafts.png`):
+  **floating mitts**, no arms. He has none until he needs them; then
+  they **pop in** (and pop away after), so his other animations stay as
+  they are. Later used for adventuring too.
+- [ ] The station (drafts `docs/pip_charging_drafts.png`): it rises out
+  of the ground, he **hurries** over, stops, his hands pop in, he takes
+  the plug and plugs it into his side, the hands pop away. Unplugged:
+  the same backwards, the station sinks.
+- [ ] While charging his screen changes now and then, at random:
+  happy ^-^, a battery filling up, static.
+- [ ] **Ignores the station when his energy is full.**
+- [ ] He **hurries** to the station, and to batteries too (now his
+  pace follows his energy, so a tired Pip walks slowly to them).
+- Detecting it: Android says if the phone is plugged in (no permission);
+  the app listens while it's open (MainActivity). Plugged in, not
+  "charging": at 100% the phone stops charging but the cable's still in.
+- Ideas for later, while charging: a bolt on his screen; eyes shut,
+  content; a little percentage counting up; sparks at the plug; he
+  hums (notes floating up); he reads the station's light and blinks
+  with it.
 
 **Later**
 - Recipes extras (type filters, search by ingredient): much later, after
