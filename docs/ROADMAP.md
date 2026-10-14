@@ -335,6 +335,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 38 — a quick run before Round 37 (2026-10-14)
+
+- [ ] **The night sky**: fewer stars, none touching the moon; the moon
+  looks like the moon, not the sun.
+- [ ] **The moon's real phase** (worked out from the date): none, thin,
+  half, full.
+- [ ] Pip Home: Pip **the same size as in the menu** (not zoomed in); a
+  bigger field around him instead.
+
 ### Round 37 — Pip's energy, batteries and sleep (2026-10-14)
 
 Plan proposed to Nikola first; then Pip, then the small notes (8-bit
@@ -352,10 +361,12 @@ sounds, the consistency sweep, multi-line code blocks).
 - [ ] **Running out while away**: the next time he's seen (menu or Hub),
   instead of coming out of the ground he turns off and falls down; if he
   was already seen off, he's simply lying there off.
-- [ ] **Sleep**: 23:00–8:00; he falls asleep sometime between 23:00 and
-  0:00 and wakes sometime between 8:00 and 9:00, each with an animation
-  when seen. Asleep he loses energy much slower. Running out while
-  asleep: he's simply seen off.
+- [ ] **Sleep**: 23:00–8:00, losing energy much slower. Seen between
+  23:00 and 0:00 he plays falling asleep; seen after 0:00 he's simply
+  asleep. Waking the same: seen 8:00–9:00 he plays waking up, after
+  9:00 he's simply awake. Running out while away at night: **power off
+  wins** (seen at night, he plays turning off, unless already seen off).
+- [ ] Powered off, he can't get up: a dropped battery **flies to him**.
 - [ ] Everything about him (energy, batteries, times, what was seen) is
   in **backups**, and a restore carries on from there.
 
