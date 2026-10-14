@@ -62,6 +62,45 @@ void main() {
     }
   });
 
+  group('the moon (Round 38)', () {
+    test('its real phase: known new and full moons', () {
+      // New 11 January 2024 11:57 UTC, full 25 January 17:54 UTC.
+      expect(moonAgeAt(DateTime.utc(2024, 1, 11, 11, 57)), closeTo(0, 0.01));
+      expect(moonAgeAt(DateTime.utc(2024, 1, 25, 17, 54)), closeTo(0.5, 0.02));
+      expect(moonPhaseAt(DateTime.utc(2024, 1, 11, 12)), MoonPhase.none);
+      expect(moonPhaseAt(DateTime.utc(2024, 1, 25, 18)), MoonPhase.full);
+    });
+
+    test('through a month: none, thin, half, full, half, thin, none', () {
+      final start = DateTime.utc(2024, 1, 11, 12);
+      final seen = <MoonPhase>[];
+      for (var day = 0; day <= 29; day++) {
+        final phase = moonPhaseAt(start.add(Duration(days: day)));
+        if (seen.isEmpty || seen.last != phase) seen.add(phase);
+      }
+      expect(seen, [
+        MoonPhase.none,
+        MoonPhase.thinGrowing,
+        MoonPhase.halfGrowing,
+        MoonPhase.full,
+        MoonPhase.halfShrinking,
+        MoonPhase.thinShrinking,
+        MoonPhase.none,
+      ]);
+      expect(MoonPhase.thinGrowing.growing, isTrue);
+      expect(MoonPhase.halfShrinking.growing, isFalse);
+    });
+
+    test('at a new moon, none in the sky; otherwise there at night', () {
+      final newMoon = PipScene.at(PipPlace.room, DateTime.utc(2024, 1, 11, 23));
+      expect(newMoon.moon, MoonPhase.none);
+      expect(newMoon.props, isNot(contains(PipProp.moon)));
+      final full = PipScene.at(PipPlace.room, DateTime(2024, 1, 25, 23));
+      expect(full.moon, MoonPhase.full);
+      expect(full.props, contains(PipProp.moon));
+    });
+  });
+
   test('a background by its stored id; an unknown one is his field', () {
     expect(PipBackground.byId('field'), PipBackground.field);
     expect(PipBackground.byId('moon base'), PipBackground.field);

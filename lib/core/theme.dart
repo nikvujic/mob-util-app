@@ -430,7 +430,9 @@ abstract final class PipColours {
   static const duskTop = Color(0xFF2E2A5C);
   static const duskBottom = Color(0xFFD9775A);
   static const star = Color(0xFFF5F0E8);
-  static const moon = Color(0xFFF5E6B0);
+  static const starDim = Color(0xFF7D88AA); // most stars (Round 38)
+  static const moon = Color(0xFFE4E4DC); // pale grey, not the sun's yellow
+  static const moonShade = Color(0xFFB9BAB3); // its seas
   static const sun = Color(0xFFFFD36E);
   static const cloud = Color(0xFFF2F4F8);
 

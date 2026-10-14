@@ -301,15 +301,17 @@ Pip Home's `home`), the `DayPart` from the clock (`dayPartAt`), a
 `PipBackground` (each gives its sky per part of the day), and `PipProp`s
 (stars, moon, sun, clouds; later snow, hats...), each declaring the
 places, parts of the day and backgrounds it shows in. `PipScene.at` is
-the one place that works out what's showing; `PipRoom` only draws it.
+the one place that works out what's showing (Round 38: with the real
+moon's phase, `moonPhaseAt`, counted from a known new moon; no moon
+drawn at a new moon); `PipRoom` only draws it.
 What he does goes through one table too: `mayStart(activity,
 animation)` in `pip_brain.dart`, and `play` asks it first (nothing
 interrupts the egg, the hatch or coming up). New props and animations
 add a row to these tables; tests check the tables, not each screen.
 
 Pip Home (`pages/hub/pip_home.dart`, `HubTool.pip`): its own `PipBrain`
-(the menu's stays put) in a `PipRoom` with a bigger `pixel` and
-half the page's `height`, and a `PageView` card (status, settings) drawn with
+(the menu's stays put) in a `PipRoom` with the menu's `pixel` (Round 38)
+and half the page's `height`, and a `PageView` card (status, settings) drawn with
 `PixelText` and `widgets/pip_portrait.dart` in `PipColours`' panel
 colours, whatever the theme. `HubTool.lockable` and `clearable` keep it
 out of page locks and Clear data; the Hub shows it once hatched, moving

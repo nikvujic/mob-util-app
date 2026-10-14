@@ -337,11 +337,11 @@ fixtures for every stored format.
 
 ### Round 38 — a quick run before Round 37 (2026-10-14)
 
-- [ ] **The night sky**: fewer stars, none touching the moon; the moon
+- [x] **The night sky**: fewer stars, none touching the moon; the moon
   looks like the moon, not the sun.
-- [ ] **The moon's real phase** (worked out from the date): none, thin,
+- [x] **The moon's real phase** (worked out from the date): none, thin,
   half, full.
-- [ ] Pip Home: Pip **the same size as in the menu** (not zoomed in); a
+- [x] Pip Home: Pip **the same size as in the menu** (not zoomed in); a
   bigger field around him instead.
 
 ### Round 37 — Pip's energy, batteries and sleep (2026-10-14)

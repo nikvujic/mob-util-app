@@ -37,8 +37,9 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   int _page = 0;
   _Settings _settings = _Settings.menu;
 
-  /// The scene's pixel, bigger than the menu's.
-  static const _pixel = 4.0;
+  /// The scene's pixel: Pip as big as in the menu (Round 38), in a
+  /// bigger field.
+  static const _pixel = PipRoom.smallPixel;
 
   @override
   void dispose() {
@@ -66,7 +67,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
           // (His pixels are whole device pixels, as PipRoom draws them.)
           final ratio = MediaQuery.devicePixelRatioOf(context);
           final pixel = math.max(1.0, (_pixel * ratio).floorToDouble()) / ratio;
-          final rows = (box.maxHeight * 0.5 / pixel).floor().clamp(40, 160);
+          final rows = (box.maxHeight * 0.5 / pixel).floor().clamp(40, 400);
           return Column(
             children: [
               PipRoom(

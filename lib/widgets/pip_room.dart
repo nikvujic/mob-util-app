@@ -195,6 +195,32 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
+    /// The moon in [phase] (Round 38): pale grey with darker seas, only
+    /// its lit part drawn: a thin sliver, half, or all of it; growing,
+    /// lit on the right.
+    void moon(int cx, int cy, int r, MoonPhase phase) {
+      final seas = {(-2, -1), (-1, -1), (-2, 0), (1, 2), (2, 1), (2, 2)};
+      for (var y = -r; y <= r; y++) {
+        for (var x = -r; x <= r; x++) {
+          if (x * x + y * y > r * r + r) continue;
+          // From the lit side: x > 0 growing, x < 0 shrinking.
+          final side = phase.growing ? x : -x;
+          final lit = switch (phase) {
+            MoonPhase.none => false,
+            MoonPhase.full => true,
+            MoonPhase.halfGrowing || MoonPhase.halfShrinking => side >= 0,
+            // Outside a shadow disc a little to the dark side.
+            MoonPhase.thinGrowing ||
+            MoonPhase.thinShrinking =>
+              (side + r * 0.55) * (side + r * 0.55) + y * y > r * r + r,
+          };
+          if (!lit) continue;
+          dot((cx + x).toDouble(), (cy + y).toDouble(),
+              seas.contains((x, y)) ? PipColours.moonShade : PipColours.moon);
+        }
+      }
+    }
+
     /// A small pixel cloud, its top left at [x], [y].
     void cloud(double x, double y) {
       dot(x + 2, y, PipColours.cloud, 4, 1);
@@ -216,21 +242,50 @@ class _RoomPainter extends CustomPainter {
       }
       // A tall sky gets the bigger sun and moon.
       final home = groundTop > 40;
+      // The sun's or moon's place: high on the right.
+      final bodyX = columns - (home ? 16 : 10);
+      final bodyY = home ? 11 : 6;
+      final bodyR = home ? 6 : 4;
       for (final prop in scene.props) {
         switch (prop) {
           case PipProp.stars:
-            // The same stars every time, in the upper part of the sky.
-            for (var i = 0; i < columns * groundTop ~/ 60; i++) {
-              final x = (i * 7919 + 13) % columns;
-              final y = (i * 104729 + 7) % (groundTop * 0.7).floor();
-              dot(x.toDouble(), y.toDouble(), PipColours.star);
+            // The same stars every time (Round 38: fewer, most of them
+            // dim, a few bright with a twinkle), in the upper sky and
+            // clear of the moon.
+            final top = (groundTop * 0.7).floor();
+            for (var i = 0; i < columns * top ~/ 130; i++) {
+              final h = _hash(i);
+              final x = h % columns;
+              final y = (h ~/ columns) % top;
+              final dx = x - bodyX, dy = y - bodyY;
+              if (dx * dx + dy * dy < (bodyR + 5) * (bodyR + 5)) continue;
+              final bright = i % 6 == 0;
+              dot(x.toDouble(), y.toDouble(),
+                  bright ? PipColours.star : PipColours.starDim);
+              if (bright && i % 12 == 0) {
+                for (final (ox, oy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]) {
+                  dot((x + ox).toDouble(), (y + oy).toDouble(),
+                      PipColours.starDim);
+                }
+              }
             }
           case PipProp.moon:
-            disc(columns - (home ? 14 : 10), home ? 10 : 6, home ? 4 : 3,
-                PipColours.moon);
+            moon(bodyX, bodyY, bodyR, scene.moon);
           case PipProp.sun:
-            disc(columns - (home ? 14 : 10), home ? 10 : 6, home ? 5 : 3,
-                PipColours.sun);
+            // A round sun with short rays (Round 38: unlike the moon).
+            disc(bodyX, bodyY, bodyR - 1, PipColours.sun);
+            final ray = bodyR + 1;
+            for (final (ox, oy) in [(0, 1), (0, -1), (1, 0), (-1, 0)]) {
+              dot((bodyX + ox * ray).toDouble(), (bodyY + oy * ray).toDouble(),
+                  PipColours.sun);
+              dot((bodyX + ox * (ray + 1)).toDouble(),
+                  (bodyY + oy * (ray + 1)).toDouble(), PipColours.sun);
+            }
+            final diagonal = (ray * 0.75).round();
+            for (final (ox, oy) in [(1, 1), (1, -1), (-1, 1), (-1, -1)]) {
+              dot((bodyX + ox * diagonal).toDouble(),
+                  (bodyY + oy * diagonal).toDouble(), PipColours.sun);
+            }
           case PipProp.clouds:
             for (final (cx, cy) in [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)]) {
               cloud((columns * cx).floorToDouble(),
@@ -346,4 +401,12 @@ class _RoomPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RoomPainter old) => true;
+}
+
+/// A well-mixed number for [i], so the stars scatter without lines.
+int _hash(int i) {
+  var h = (i + 1) * 0x9E3779B1;
+  h = (h ^ (h >> 15)) * 0x85EBCA77;
+  h = h ^ (h >> 13);
+  return h & 0x7FFFFFFF;
 }

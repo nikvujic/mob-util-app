@@ -4,6 +4,14 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- Pip's night sky: fewer stars, mostly dim, none touching the moon; the
+  moon is pale grey with seas, in its **real phase** (none, thin, half,
+  full); the sun has rays.
+- Pip Home: Pip is the same size as in the menu, in a bigger field.
+
 ## [1.5.1] - 2026-10-14
 
 ### Changed

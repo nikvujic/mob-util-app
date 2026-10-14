@@ -20,6 +20,43 @@ DayPart dayPartAt(DateTime now) {
   return DayPart.night;
 }
 
+/// The moon's phase (Round 38), as his sky shows it: none (new moon),
+/// thin, half or full, growing (lit on the right) or shrinking (left).
+enum MoonPhase {
+  none,
+  thinGrowing,
+  halfGrowing,
+  full,
+  halfShrinking,
+  thinShrinking;
+
+  /// Lit on the right (growing), else on the left.
+  bool get growing => this == thinGrowing || this == halfGrowing;
+}
+
+/// A new moon to count from (6 January 2000, 18:14 UTC), and the length
+/// of the moon's month, in days.
+final _newMoon = DateTime.utc(2000, 1, 6, 18, 14);
+const _moonMonth = 29.530588853;
+
+/// How far through its month the moon is at [now]: 0 new, 0.5 full.
+double moonAgeAt(DateTime now) {
+  final days = now.toUtc().difference(_newMoon).inMinutes / (24 * 60);
+  return (days / _moonMonth) % 1;
+}
+
+/// The real moon's phase at [now], to the nearest of the four shapes.
+MoonPhase moonPhaseAt(DateTime now) {
+  final age = moonAgeAt(now);
+  if (age < 0.0625) return MoonPhase.none;
+  if (age < 0.1875) return MoonPhase.thinGrowing;
+  if (age < 0.375) return MoonPhase.halfGrowing;
+  if (age < 0.625) return MoonPhase.full;
+  if (age < 0.8125) return MoonPhase.halfShrinking;
+  if (age < 0.9375) return MoonPhase.thinShrinking;
+  return MoonPhase.none;
+}
+
 /// A background for his field (Round 35): a sky for each part of the day.
 /// One for now ("Field"); more can come, each saying how it looks.
 enum PipBackground {
@@ -95,7 +132,11 @@ class PipScene {
   final DayPart part;
   final Set<PipProp> props;
 
-  const PipScene._(this.place, this.background, this.part, this.props);
+  /// The real moon's phase (Round 38); at a new moon there's no moon.
+  final MoonPhase moon;
+
+  const PipScene._(
+      this.place, this.background, this.part, this.props, this.moon);
 
   factory PipScene.at(
     PipPlace place,
@@ -103,11 +144,20 @@ class PipScene {
     PipBackground? background = PipBackground.field,
   }) {
     final part = dayPartAt(now);
-    return PipScene._(place, background, part, {
-      if (background != null)
-        for (final prop in PipProp.values)
-          if (prop.showsIn(place, part, background)) prop,
-    });
+    final moon = moonPhaseAt(now);
+    return PipScene._(
+      place,
+      background,
+      part,
+      {
+        if (background != null)
+          for (final prop in PipProp.values)
+            if (prop.showsIn(place, part, background) &&
+                !(prop == PipProp.moon && moon == MoonPhase.none))
+              prop,
+      },
+      moon,
+    );
   }
 
   /// The sky's top and bottom colours, or null without a background.

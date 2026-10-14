@@ -57,7 +57,8 @@ void main() {
     final page = tester.getSize(find.byType(Scaffold).last).height;
     expect(tester.getSize(find.byType(PipRoom)).height,
         moreOrLessEquals((page - kToolbarHeight) / 2, epsilon: 12));
-    expect(room(tester).pixel, greaterThan(PipRoom.smallPixel));
+    // Pip as big as in the menu (Round 38), in a bigger field.
+    expect(room(tester).pixel, PipRoom.smallPixel);
     // Born 1 October (the helper's), today the 13th: his 13th day.
     expect(words(), containsAll(['Pip', 'AGE 13 DAYS', 'BORN 1.10.2026']));
     expect(tester.getTopLeft(find.byKey(const Key('pipStatus'))).dy,
