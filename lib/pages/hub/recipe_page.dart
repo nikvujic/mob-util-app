@@ -67,10 +67,15 @@ class _RecipePageState extends ConsumerState<RecipePage> {
   late final TextEditingController _name;
   late final MarkdownEditingController _method;
 
-  /// The quantity sheet's text (kept: the sheet still shows it while it
-  /// closes).
-  final _quantity = TextEditingController();
   final _nameFocus = FocusNode();
+
+  /// Ingredients selected (Round 43: holding one), by position, to remove
+  /// several at once.
+  final _selected = <int>{};
+
+  /// The keyboard's height when last built: it closing while typing ends
+  /// the typing, as in notes.
+  double _keyboard = 0;
   final _methodFocus = FocusNode();
 
   /// Set while undo or discard puts text back in the fields.
@@ -116,7 +121,6 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     _lifecycle.dispose();
     _name.dispose();
     _method.dispose();
-    _quantity.dispose();
     _nameFocus.dispose();
     _methodFocus.dispose();
     _formatShown.dispose();
@@ -305,15 +309,44 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       ));
   }
 
+  /// View mode's other actions (Round 43: at the bottom, in reach, not in
+  /// the top bar).
+  Future<void> _more() async {
+    final choice = await showChoicesSheet(context, null, const [
+      (Icons.add_shopping_cart, 'To Shop', 'shop'),
+      (Icons.copy_all_outlined, 'Duplicate', 'duplicate'),
+      (Icons.content_paste_go_outlined, 'Copy to clipboard', 'copy'),
+      (Icons.delete_outline, 'Delete', 'delete'),
+    ]);
+    if (!mounted) return;
+    switch (choice) {
+      case 'shop':
+        _toShop();
+      case 'duplicate':
+        _duplicate();
+      case 'copy':
+        await _copy();
+      case 'delete':
+        _delete();
+    }
+  }
+
   // Edit mode's fields.
 
+  /// Out of the text fields before a sheet or page opens over this one
+  /// (Round 43): else closing it gives the field its focus back, and the
+  /// page jumps to where its cursor was.
+  void _leaveFields() => FocusManager.instance.primaryFocus?.unfocus();
+
   Future<void> _pickPrepTime() async {
+    _leaveFields();
     final picked = await showPrepTimeSheet(context, _recipe.prepMinutes);
     if (picked == null || !mounted) return;
     _change(_recipe.copyWith(prepMinutes: () => picked.minutes));
   }
 
   Future<void> _pickType() async {
+    _leaveFields();
     // Chips, all in reach at once (a list ran off small screens).
     final picked = await showModalBottomSheet<({RecipeType? type})>(
       context: context,
@@ -357,6 +390,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
   }
 
   Future<void> _addIngredients() async {
+    _leaveFields();
     final picked = await pickIngredients(
       context,
       already: {
@@ -372,23 +406,36 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     ]));
   }
 
+  /// A tap on an ingredient (Round 43): its options, Quantity then
+  /// Delete.
+  Future<void> _ingredientOptions(int index) async {
+    _leaveFields();
+    final ingredient = _recipe.ingredients[index];
+    final choice = await showChoicesSheet(context, ingredient.name, const [
+      (Icons.scale_outlined, 'Quantity', 'quantity'),
+      (Icons.delete_outline, 'Delete', 'delete'),
+    ]);
+    if (!mounted) return;
+    switch (choice) {
+      case 'quantity':
+        await _editQuantity(index);
+      case 'delete':
+        _removeIngredients({index});
+    }
+  }
+
+  /// The quantity picker (Round 43), like Shop's; the recipe changes once,
+  /// when it closes.
   Future<void> _editQuantity(int index) async {
     final ingredient = _recipe.ingredients[index];
-    _quantity.value = TextEditingValue(
-      text: ingredient.quantity,
-      selection: TextSelection(
-        baseOffset: 0,
-        extentOffset: ingredient.quantity.length,
-      ),
-    );
-    await showTextInputSheet(
+    final quantity = await showAmountSheet(
       context,
-      hint: 'Quantity, e.g. 200 g',
-      submitLabel: 'Done',
-      controller: _quantity,
+      name: ingredient.name,
+      quantity: ingredient.quantity,
     );
-    final quantity = _quantity.text.trim();
-    if (!mounted || quantity == ingredient.quantity) return;
+    if (!mounted || quantity == null || quantity == ingredient.quantity) {
+      return;
+    }
     _change(_recipe.copyWith(ingredients: [
       for (var i = 0; i < _recipe.ingredients.length; i++)
         i == index
@@ -397,17 +444,32 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     ]));
   }
 
-  void _removeIngredient(int index) {
-    HapticFeedback.mediumImpact();
+  /// Removes the ingredients at [indexes], with Undo.
+  void _removeIngredients(Set<int> indexes) {
+    if (indexes.isEmpty) return;
     final before = _recipe;
-    final removed = _recipe.ingredients[index];
+    final names = [
+      for (final i in indexes.toList()..sort()) _recipe.ingredients[i].name,
+    ];
     _change(_recipe.copyWith(ingredients: [
       for (var i = 0; i < _recipe.ingredients.length; i++)
-        if (i != index) _recipe.ingredients[i],
+        if (!indexes.contains(i)) _recipe.ingredients[i],
     ]));
-    _toast('${removed.name} removed', undo: () {
-      if (!mounted || !_editing) return;
-      _change(before.copyWith(name: _recipe.name, method: _recipe.method));
+    setState(_selected.clear);
+    _toast(
+      names.length == 1 ? '${names.single} removed' : '${names.length} removed',
+      undo: () {
+        if (!mounted || !_editing) return;
+        _change(before.copyWith(name: _recipe.name, method: _recipe.method));
+      },
+    );
+  }
+
+  void _toggleSelected(int index) {
+    _leaveFields();
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (!_selected.remove(index)) _selected.add(index);
     });
   }
 
@@ -454,6 +516,10 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
   /// Back: out of a field first, then edit mode (as Done), then the page.
   void _onBack() {
+    if (_selected.isNotEmpty) {
+      setState(_selected.clear);
+      return;
+    }
     if (_nameFocus.hasFocus || _methodFocus.hasFocus) {
       FocusManager.instance.primaryFocus?.unfocus();
       return;
@@ -475,6 +541,17 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         _applying = false;
       }
     }
+    // The keyboard closed (its back key) while typing: typing ends, the
+    // cursor goes, as in notes (Round 43).
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    if (keyboard == 0 && _keyboard > 0 && _editing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && MediaQuery.viewInsetsOf(context).bottom == 0) {
+          _leaveFields();
+        }
+      });
+    }
+    _keyboard = keyboard;
     final name = _recipe.name.trim();
     return PopScope(
       canPop: !_editing,
@@ -493,82 +570,75 @@ class _RecipePageState extends ConsumerState<RecipePage> {
           title: Text(
             _editing ? 'Edit recipe' : (name.isEmpty ? 'Untitled' : name),
           ),
-          actions: [
-            if (!_editing)
-              PopupMenuButton<String>(
-                key: const Key('recipeMenu'),
-                tooltip: 'More',
-                onSelected: (choice) => switch (choice) {
-                  'duplicate' => _duplicate(),
-                  'copy' => _copy(),
-                  'delete' => _delete(),
-                  _ => null,
-                },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
-                  PopupMenuItem(
-                      value: 'copy', child: Text('Copy to clipboard')),
-                  PopupMenuItem(value: 'delete', child: Text('Delete')),
-                ],
-              ),
-          ],
         ),
         body: _editing ? _editBody(context) : _viewBody(context),
-        floatingActionButton: _editing
+        floatingActionButton: _editing && _selected.isNotEmpty
             ? BottomActions(
-                above: [
-                  if (_methodFocus.hasFocus)
-                    BottomAction(
-                      icon: _formatOpen
-                          ? Icons.keyboard_hide_outlined
-                          : Icons.text_fields,
-                      tooltip: _formatOpen ? 'Close formatting' : 'Format',
-                      onPressed: () {
-                        setState(() => _formatOpen = !_formatOpen);
-                        _formatShown.value = _formatOpen;
-                      },
-                    ),
-                ],
-                bar: _formatOpen && _methodFocus.hasFocus
-                    ? FormatBar(buttons: _formatButtons)
-                    : null,
                 actions: [
                   BottomAction(
-                    icon: Icons.settings_backup_restore,
-                    tooltip: 'Discard changes',
-                    enabled: _original != null && !_recipe.sameAs(_original!),
-                    onPressed: _discard,
-                  ),
-                  BottomAction(
-                    icon: Icons.undo,
-                    tooltip: 'Undo',
-                    enabled: _history.isNotEmpty,
-                    onPressed: _undo,
-                  ),
-                  // Outermost, under the thumb.
-                  BottomAction(
-                    icon: Icons.check,
-                    tooltip: 'Done',
-                    primary: true,
-                    onPressed: _done,
+                    icon: Icons.delete_outline,
+                    tooltip: 'Remove selected',
+                    danger: true,
+                    onPressed: () => _removeIngredients({..._selected}),
                   ),
                 ],
               )
-            : BottomActions(
-                actions: [
-                  BottomAction(
-                    icon: Icons.add_shopping_cart,
-                    tooltip: 'To Shop',
-                    onPressed: _toShop,
+            : _editing
+                ? BottomActions(
+                    above: [
+                      if (_methodFocus.hasFocus)
+                        BottomAction(
+                          icon: _formatOpen
+                              ? Icons.keyboard_hide_outlined
+                              : Icons.text_fields,
+                          tooltip: _formatOpen ? 'Close formatting' : 'Format',
+                          onPressed: () {
+                            setState(() => _formatOpen = !_formatOpen);
+                            _formatShown.value = _formatOpen;
+                          },
+                        ),
+                    ],
+                    bar: _formatOpen && _methodFocus.hasFocus
+                        ? FormatBar(buttons: _formatButtons)
+                        : null,
+                    actions: [
+                      BottomAction(
+                        icon: Icons.settings_backup_restore,
+                        tooltip: 'Discard changes',
+                        enabled:
+                            _original != null && !_recipe.sameAs(_original!),
+                        onPressed: _discard,
+                      ),
+                      BottomAction(
+                        icon: Icons.undo,
+                        tooltip: 'Undo',
+                        enabled: _history.isNotEmpty,
+                        onPressed: _undo,
+                      ),
+                      // Outermost, under the thumb.
+                      BottomAction(
+                        icon: Icons.check,
+                        tooltip: 'Done',
+                        primary: true,
+                        onPressed: _done,
+                      ),
+                    ],
+                  )
+                : BottomActions(
+                    actions: [
+                      BottomAction(
+                        icon: Icons.more_horiz,
+                        tooltip: 'More',
+                        onPressed: _more,
+                      ),
+                      BottomAction(
+                        icon: Icons.edit_outlined,
+                        tooltip: 'Edit',
+                        primary: true,
+                        onPressed: _edit,
+                      ),
+                    ],
                   ),
-                  BottomAction(
-                    icon: Icons.edit_outlined,
-                    tooltip: 'Edit',
-                    primary: true,
-                    onPressed: _edit,
-                  ),
-                ],
-              ),
       ),
     );
   }
@@ -757,13 +827,18 @@ class _RecipePageState extends ConsumerState<RecipePage> {
             ),
             itemBuilder: (context, index) {
               final ingredient = ingredients[index];
+              final selecting = _selected.isNotEmpty;
               return _IngredientRow(
                 key: ValueKey('${ingredient.ingredientId ?? ''}-'
                     '${ingredient.name}-$index'),
                 index: index,
                 ingredient: ingredient,
-                onQuantity: () => _editQuantity(index),
-                onRemove: () => _removeIngredient(index),
+                selectionMode: selecting,
+                selected: _selected.contains(index),
+                onTap: selecting
+                    ? () => _toggleSelected(index)
+                    : () => _ingredientOptions(index),
+                onLongPress: () => _toggleSelected(index),
               );
             },
           ),
@@ -815,76 +890,265 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 }
 
 /// An ingredient in edit mode: plain, no background: its name, its
-/// quantity (a tap changes it), the handle. Holding it removes it.
+/// quantity if it has one (quiet, not a button: Round 43), the handle. A
+/// tap gives its options; holding selects it.
 class _IngredientRow extends StatelessWidget {
   final int index;
   final RecipeIngredient ingredient;
-  final VoidCallback onQuantity;
-  final VoidCallback onRemove;
+  final bool selectionMode;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   const _IngredientRow({
     super.key,
     required this.index,
     required this.ingredient,
-    required this.onQuantity,
-    required this.onRemove,
+    required this.selectionMode,
+    required this.selected,
+    required this.onTap,
+    required this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        key: Key('recipeIngredientRow-$index'),
-        onLongPress: onRemove,
-        child: ReorderableRow(
-          content: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  ingredient.name,
-                  style: TextStyle(color: colors.textPrimary, fontSize: 16),
-                ),
-              ),
-              InkWell(
-                key: Key('recipeQuantity-$index'),
-                onTap: onQuantity,
-                borderRadius: BorderRadius.circular(6),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: kMinInteractiveDimension,
-                    minWidth: kMinInteractiveDimension,
+    return Semantics(
+      selected: selectionMode ? selected : null,
+      child: Material(
+        color: selected ? colors.cardSelected : Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          key: Key('recipeIngredientRow-$index'),
+          borderRadius: BorderRadius.circular(6),
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: ReorderableRow(
+            content: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      ingredient.name,
+                      style: TextStyle(color: colors.textPrimary, fontSize: 16),
+                    ),
                   ),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    widthFactor: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                  if (ingredient.quantity.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
                       child: Text(
-                        ingredient.quantity.isEmpty
-                            ? 'Quantity'
-                            : ingredient.quantity,
+                        ingredient.quantity,
+                        key: Key('recipeQuantity-$index'),
                         style: TextStyle(
-                          color: ingredient.quantity.isEmpty
-                              ? colors.textHint
-                              : colors.textSecondary,
-                          fontSize: 16,
+                          color: colors.textSecondary,
+                          fontSize: 14,
                         ),
                       ),
                     ),
-                  ),
-                ),
+                ],
               ),
-            ],
-          ),
-          indicator: ReorderOrSelectIndicator(
-            index: index,
-            selectionMode: false,
-            selected: false,
+            ),
+            indicator: ReorderOrSelectIndicator(
+              index: index,
+              selectionMode: selectionMode,
+              selected: selected,
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A small sheet of choices at the bottom (one-handed); the value picked,
+/// or null.
+Future<String?> showChoicesSheet(
+  BuildContext context,
+  String? title,
+  List<(IconData, String, String)> choices,
+) =>
+    showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (title != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: context.colors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              )
+            else
+              const SizedBox(height: 8),
+            for (final (icon, label, value) in choices)
+              ListTile(
+                key: Key('choice-$value'),
+                leading: Icon(icon),
+                title: Text(label),
+                onTap: () => Navigator.of(context).pop(value),
+              ),
+          ],
+        ),
+      ),
+    );
+
+/// The quantity picker (Round 43): Shop's kinds (a count, a weight)
+/// and spoons, small and big; big − / + at the bottom, a weight typed
+/// exactly at a tap. Resolves to the quantity as text when closed.
+Future<String?> showAmountSheet(
+  BuildContext context, {
+  required String name,
+  required String quantity,
+}) async {
+  final picked = ValueNotifier<Amount?>(readAmount(quantity));
+  await showModalBottomSheet<void>(
+    context: context,
+    builder: (_) => _AmountSheet(name: name, typed: quantity, picked: picked),
+  );
+  final amount = picked.value;
+  picked.dispose();
+  // Text from before the picker, left as it was.
+  return amount == null ? quantity : amountText(amount);
+}
+
+class _AmountSheet extends StatelessWidget {
+  final String name;
+
+  /// The quantity as it was, shown while it isn't one the picker knows.
+  final String typed;
+  final ValueNotifier<Amount?> picked;
+
+  const _AmountSheet({
+    required this.name,
+    required this.typed,
+    required this.picked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return ValueListenableBuilder(
+      valueListenable: picked,
+      builder: (context, amount, _) {
+        final kind = amount?.kind;
+        Widget step(IconData icon, String tooltip, double? next) =>
+            IconButton.filledTonal(
+              tooltip: tooltip,
+              iconSize: 32,
+              constraints: const BoxConstraints.tightFor(width: 64, height: 64),
+              onPressed: next == null
+                  ? null
+                  : () => picked.value = (kind: kind!, value: next),
+              icon: Icon(icon),
+            );
+
+        Future<void> typeExact() async {
+          final typedGrams = await showTextInputSheet(
+            context,
+            hint: 'Grams',
+            initialValue: amount!.value == amount.value.roundToDouble()
+                ? '${amount.value.toInt()}'
+                : '${amount.value}',
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          );
+          final grams =
+              double.tryParse((typedGrams ?? '').replaceAll(',', '.'));
+          if (grams != null && grams > 0) {
+            picked.value = (kind: AmountKind.weight, value: grams);
+          }
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (amount == null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      typed,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (final option in AmountKind.values)
+                      ChoiceChip(
+                        key: Key('amount-${option.name}'),
+                        label: Text(option.label),
+                        selected: option == kind,
+                        onSelected: (_) => picked.value = option == kind
+                            ? amount
+                            : (kind: option, value: startOf(option)),
+                      ),
+                  ],
+                ),
+                if (amount != null && kind != AmountKind.none) ...[
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      step(Icons.remove, 'Less', amountDown(amount)),
+                      Expanded(
+                        child: kind == AmountKind.weight
+                            // Tap to type an exact weight, as in Shop.
+                            ? TextButton(
+                                key: const Key('amountTypeWeight'),
+                                onPressed: typeExact,
+                                child: Text(
+                                  amountText(amount),
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                amountText(amount),
+                                key: const Key('amountValue'),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.textPrimary,
+                                ),
+                              ),
+                      ),
+                      step(Icons.add, 'More', amountUp(amount)),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

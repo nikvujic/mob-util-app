@@ -370,6 +370,39 @@ void main() {
         await t.tap(find.byKey(const Key('recipeType')));
         await t.pumpAndSettle();
       },
+      'recipe, more sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('More'));
+        await t.pumpAndSettle();
+      },
+      'recipe quantity sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Edit'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('recipeIngredientRow-0')));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('choice-quantity')));
+        await t.pumpAndSettle();
+      },
+      'recipe, ingredients selected': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Edit'));
+        await t.pumpAndSettle();
+        await t.longPress(find.byKey(const Key('recipeIngredientRow-0')));
+        await t.pumpAndSettle();
+      },
       'ingredients': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Recipes'));

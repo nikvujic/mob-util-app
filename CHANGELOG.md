@@ -4,6 +4,23 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- Recipes: a tap on an ingredient (in Edit) gives **Quantity** and
+  **Delete**; quantities are picked like Shop's (a count, a weight), or
+  in **teaspoons** and **tablespoons**; holding selects several to
+  remove. No quantity button on every row.
+- Recipes: the recipe's options (To Shop, Duplicate, Copy, Delete) are
+  under **More** at the bottom, in reach, instead of the top bar.
+- Ingredients list: the first section, *Ingredients*, stays on top; new
+  sections go under it; the others can be moved by their handle.
+
+### Fixed
+- Recipes: editing no longer jumps down to where the method was last
+  typed after picking a type or a quantity; closing the keyboard ends
+  typing in the method, as in notes.
+
 ## [1.9.0] - 2026-10-14
 
 ### Added

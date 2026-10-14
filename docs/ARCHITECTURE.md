@@ -310,7 +310,13 @@ stays whole if the ingredient is deleted or the list isn't restored;
 `IngredientsNotifier.rename` renames it in recipes too. Restoring part of
 a backup brings a recipe's ingredients the list lacks (`withIngredients`).
 *To Shop* (`sendToShop`) reads a quantity as Shop's weight or count
-(`shopQuantityOf`), else none. The pages: `pages/hub/recipes.dart` (the
+(`shopQuantityOf`), else none. Quantities stay text, written by the
+picker (Round 43: `Amount`, `amountText`, `readAmount`; "2", "200 g",
+"1½ tsp", "2 tbsp"), so older typed ones still read. The first
+ingredients section is pinned on top (`moveSection` and
+`deleteSection` leave it). Before a sheet or page opens over a recipe in
+edit mode the text fields lose focus: closing it would give the method
+its focus back and scroll to its cursor. The pages: `pages/hub/recipes.dart` (the
 list), `recipe_page.dart` (view and edit modes; edit saves as it goes,
 with its own Undo and Discard), `ingredients.dart` (edit and pick
 modes; one `SliverReorderableList` of section names and ingredients, so

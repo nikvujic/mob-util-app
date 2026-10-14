@@ -124,12 +124,27 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
   final Ref _ref;
 
   IngredientsNotifier(this._ref, AppStorage storage)
-      : super(storage.initialIngredients) {
+      : super(_firstOnTop(storage.initialIngredients)) {
     addListener(storage.saveIngredients, fireImmediately: false);
   }
 
-  /// The section an empty list starts with when an ingredient is added.
+  /// The first section (Round 43): the default one, "Ingredients", which
+  /// stays at the top; new sections go under it. An empty list makes it
+  /// when the first ingredient or section is added.
   static const firstSectionName = 'Ingredients';
+
+  /// 1.9.0 put new sections on top: its "Ingredients" goes back up.
+  static IngredientBook _firstOnTop(IngredientBook book) {
+    final at = book.sections.indexWhere((s) => s.name == firstSectionName);
+    if (at <= 0) return book;
+    final sections = [...book.sections];
+    return IngredientBook([sections.removeAt(at), ...sections]);
+  }
+
+  /// The sections, with the first one made if there's none.
+  List<IngredientSection> _withFirst() => state.sections.isEmpty
+      ? [IngredientSection(id: generateId(), name: firstSectionName)]
+      : state.sections;
 
   /// Adds [name] at the top of the first section (made if there's none);
   /// returns its id, or null for a blank name.
@@ -137,9 +152,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
     final item = Ingredient(id: generateId(), name: trimmed);
-    final sections = state.sections.isEmpty
-        ? [IngredientSection(id: generateId(), name: firstSectionName)]
-        : state.sections;
+    final sections = _withFirst();
     state = IngredientBook([
       sections.first.copyWith(items: [item, ...sections.first.items]),
       ...sections.skip(1),
@@ -147,12 +160,14 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     return item.id;
   }
 
-  /// A new section at the top; returns its id, or null for a blank name.
+  /// A new section just under the first one (Round 43); returns its id,
+  /// or null for a blank name.
   String? addSection(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
     final section = IngredientSection(id: generateId(), name: trimmed);
-    state = IngredientBook([section, ...state.sections]);
+    final sections = _withFirst();
+    state = IngredientBook([sections.first, section, ...sections.skip(1)]);
     return section.id;
   }
 
@@ -166,26 +181,17 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
   }
 
   /// Deletes a section; its ingredients move to the end of the section
-  /// above (the one below for the first). The last section can only go
-  /// when it's empty. Returns the book as it was (for Undo), or null if
-  /// nothing changed.
+  /// above. The first one stays (Round 43). Returns the book as it was
+  /// (for Undo), or null if nothing changed.
   IngredientBook? deleteSection(String id) {
     final sections = [...state.sections];
     final index = sections.indexWhere((s) => s.id == id);
-    if (index == -1) return null;
+    if (index < 1) return null;
     final items = sections[index].items;
-    if (sections.length == 1 && items.isNotEmpty) return null;
     final before = state;
     sections.removeAt(index);
-    if (items.isNotEmpty) {
-      final into = index == 0 ? 0 : index - 1;
-      final target = sections[into];
-      sections[into] = target.copyWith(
-        items: index == 0
-            ? [...items, ...target.items]
-            : [...target.items, ...items],
-      );
-    }
+    final target = sections[index - 1];
+    sections[index - 1] = target.copyWith(items: [...target.items, ...items]);
     state = IngredientBook(sections);
     return before;
   }
@@ -242,13 +248,14 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     ]);
   }
 
-  /// Moves a whole section to [index] among the sections.
+  /// Moves a whole section to [index] among the sections (Round 43);
+  /// never above the first one, which doesn't move.
   void moveSection(String id, int index) {
     final sections = [...state.sections];
     final from = sections.indexWhere((s) => s.id == id);
-    if (from == -1) return;
+    if (from < 1) return;
     final section = sections.removeAt(from);
-    sections.insert(index.clamp(0, sections.length), section);
+    sections.insert(index.clamp(1, sections.length), section);
     state = IngredientBook(sections);
   }
 

@@ -41,7 +41,8 @@ Future<List<Ingredient>?> pickIngredients(
 
 /// The ingredients list (Round 42), in sections: one list for all
 /// recipes. **Edit mode** (from Recipes): + adds ingredients (to the top
-/// of the first section), Section adds a section (at the top), the handle
+/// of the first section), Section adds a section (under the first, which
+/// stays on top: Round 43; the others move by their handle), the handle
 /// drags an ingredient (between sections too), holding one or a
 /// section's name renames or deletes it. **Pick mode** (from a recipe):
 /// boxes to tick and a wide Add button; Edit switches to edit mode, and
@@ -104,6 +105,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
   void _addSection() {
     showTextInputSheet(
       context,
+      // Under the first section (Round 43).
       hint: 'Section, e.g. Dairy',
       submitLabel: 'Add',
       onSubmit: _notifier.addSection,
@@ -114,7 +116,10 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
   /// section above where it lands. Sections themselves don't move.
   void _reorder(List<_Row> rows, int oldIndex, int newIndex) {
     final moving = rows[oldIndex].item;
-    if (moving == null) return;
+    if (moving == null) {
+      _moveSection(rows, oldIndex, newIndex);
+      return;
+    }
     if (newIndex > oldIndex) newIndex--;
     final rest = [...rows]..removeAt(oldIndex);
     // Above the first section's name: the top of the first section.
@@ -130,6 +135,18 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
                 ) +
             1;
     _notifier.move(moving.id, sectionId: above.section.id, index: index);
+  }
+
+  /// A section's name dropped at [newIndex] (Round 43): the section goes
+  /// after the sections whose names are above that place (never above the
+  /// first one).
+  void _moveSection(List<_Row> rows, int oldIndex, int newIndex) {
+    final section = rows[oldIndex].section;
+    final before = rows
+        .take(newIndex)
+        .where((r) => r.item == null && r.section.id != section.id)
+        .length;
+    _notifier.moveSection(section.id, before);
   }
 
   Future<void> _sectionMenu(IngredientSection section) async {
@@ -149,7 +166,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       case 'delete':
         final before = _notifier.deleteSection(section.id);
         if (before == null) {
-          _toast('The last section can go once it’s empty');
+          _toast('The first section stays');
         } else {
           _toast(
             section.items.isEmpty
@@ -228,26 +245,38 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
     ]);
   }
 
-  Widget _header(IngredientSection section, {Key? key}) {
+  /// A section's name; in edit mode, held for its options, and (all but
+  /// the first, which stays on top: Round 43) with a handle to move it.
+  Widget _header(IngredientSection section, {Key? key, int? index}) {
     final colors = context.colors;
+    final title = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      child: Text(
+        '${section.name.toUpperCase()}  ·  ${section.items.length}',
+        key: Key('ingredientSection-${section.id}'),
+        style: TextStyle(
+          color: colors.accent,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1,
+        ),
+      ),
+    );
     return GestureDetector(
       key: key,
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: true,
       onLongPress: _picking ? null : () => _sectionMenu(section),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-        child: Text(
-          '${section.name.toUpperCase()}  ·  ${section.items.length}',
-          key: Key('ingredientSection-${section.id}'),
-          style: TextStyle(
-            color: colors.accent,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1,
-          ),
-        ),
-      ),
+      child: index == null
+          ? title
+          : ReorderableRow(
+              content: Align(alignment: Alignment.bottomLeft, child: title),
+              indicator: ReorderOrSelectIndicator(
+                index: index,
+                selectionMode: false,
+                selected: false,
+              ),
+            ),
     );
   }
 
@@ -365,8 +394,12 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
               final row = rows[index];
               final item = row.item;
               if (item == null) {
-                return _header(row.section,
-                    key: ValueKey('section-${row.section.id}'));
+                final first = row.section.id == book.sections.first.id;
+                return Material(
+                  key: ValueKey('section-${row.section.id}'),
+                  type: MaterialType.transparency,
+                  child: _header(row.section, index: first ? null : index),
+                );
               }
               return Padding(
                 key: ValueKey(item.id),

@@ -1,3 +1,5 @@
+import 'package:the_app/models/shop_item.dart';
+
 /// What kind of dish a recipe is (Round 40): a fixed list (Round 41).
 /// The [name] is stored, so a type is never renamed here, only its
 /// [label].
@@ -170,6 +172,104 @@ String prepTimeLabel(int minutes) {
   if (hours == 0) return '$minutes min';
   return rest == 0 ? '$hours h' : '$hours h ${rest.toString().padLeft(2, '0')}';
 }
+
+/// The kinds of quantity a recipe's ingredient picks from (Round 43): as
+/// Shop's (a count, a weight), and spoons, small and big.
+enum AmountKind {
+  none('None'),
+  count('Count'),
+  weight('Weight'),
+  teaspoon('Teaspoon'),
+  tablespoon('Tablespoon');
+
+  const AmountKind(this.label);
+
+  final String label;
+
+  /// Spoons step by halves.
+  bool get isSpoon => this == teaspoon || this == tablespoon;
+}
+
+/// A quantity as picked: its kind and how much (a count, grams, spoons).
+typedef Amount = ({AmountKind kind, double value});
+
+/// Where each kind starts when picked.
+double startOf(AmountKind kind) => switch (kind) {
+      AmountKind.none => 0,
+      AmountKind.count => 1,
+      AmountKind.weight => ShopItem.defaultGrams,
+      AmountKind.teaspoon || AmountKind.tablespoon => 1,
+    };
+
+/// The most spoons, or pieces.
+const maxSpoons = 20.0;
+const maxCount = 999.0;
+
+/// [amount] as a recipe keeps it: "2", "200 g", "1½ tsp", "2 tbsp"; empty
+/// for none. Shop reads the first two (`shopQuantityOf`).
+String amountText(Amount amount) {
+  final value = amount.value;
+  String spoons(String unit) {
+    final whole = value.floor();
+    final half = value - whole >= 0.5;
+    final number = whole == 0 && half ? '½' : '$whole${half ? '½' : ''}';
+    return '$number $unit';
+  }
+
+  return switch (amount.kind) {
+    AmountKind.none => '',
+    AmountKind.count => '${value.round()}',
+    AmountKind.weight => formatGrams(value),
+    AmountKind.teaspoon => spoons('tsp'),
+    AmountKind.tablespoon => spoons('tbsp'),
+  };
+}
+
+final _amount = RegExp(
+  r'^(\d+(?:[.,]\d+)?)?(½)?\s*(kg|g|tsp|tbsp)?$',
+);
+
+/// [text] read back as an [Amount] (to start the picker where it is);
+/// null for text it doesn't know (typed before Round 43, e.g. "a pinch").
+Amount? readAmount(String text) {
+  final trimmed = text.trim();
+  if (trimmed.isEmpty) return (kind: AmountKind.none, value: 0);
+  final match = _amount.firstMatch(trimmed.toLowerCase());
+  if (match == null || (match[1] == null && match[2] == null)) return null;
+  final number = double.tryParse((match[1] ?? '0').replaceAll(',', '.'));
+  if (number == null) return null;
+  final value = number + (match[2] == null ? 0 : 0.5);
+  return switch (match[3]) {
+    'kg' => (kind: AmountKind.weight, value: value * 1000),
+    'g' => (kind: AmountKind.weight, value: value),
+    'tsp' => (kind: AmountKind.teaspoon, value: value),
+    'tbsp' => (kind: AmountKind.tablespoon, value: value),
+    _ => value == value.roundToDouble() && value >= 1
+        ? (kind: AmountKind.count, value: value)
+        : null,
+  };
+}
+
+/// The next amount up from [amount] (null at the end): a count by one,
+/// a weight through Shop's common weights, spoons by halves.
+double? amountUp(Amount amount) => switch (amount.kind) {
+      AmountKind.none => null,
+      AmountKind.count => amount.value < maxCount ? amount.value + 1 : null,
+      AmountKind.weight => gramsUp(amount.value),
+      AmountKind.teaspoon ||
+      AmountKind.tablespoon =>
+        amount.value < maxSpoons ? amount.value + 0.5 : null,
+    };
+
+/// The next amount down (null at the start).
+double? amountDown(Amount amount) => switch (amount.kind) {
+      AmountKind.none => null,
+      AmountKind.count => amount.value > 1 ? amount.value - 1 : null,
+      AmountKind.weight => gramsDown(amount.value),
+      AmountKind.teaspoon ||
+      AmountKind.tablespoon =>
+        amount.value > 0.5 ? amount.value - 0.5 : null,
+    };
 
 /// One ingredient in the list (Round 40).
 class Ingredient {

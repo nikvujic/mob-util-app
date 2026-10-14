@@ -102,13 +102,42 @@ void main() {
       expect(book().all.map((i) => i.name), ['Sugar', 'Flour']);
     });
 
-    test('sections go to the top; ingredients to the first one', () {
+    test(
+        'the first section stays on top; new ones go under it '
+        '(Round 43)', () {
       ingredients().add('Flour');
       final dairy = ingredients().addSection('Dairy')!;
+      ingredients().addSection('Fruit');
       ingredients().add('Milk');
-      expect(book().sections.map((s) => s.name), ['Dairy', 'Ingredients']);
-      expect(book().sections.first.id, dairy);
-      expect(book().sections.first.items.single.name, 'Milk');
+      expect(book().sections.map((s) => s.name),
+          ['Ingredients', 'Fruit', 'Dairy']);
+      expect(book().sections.first.items.map((i) => i.name), ['Milk', 'Flour']);
+      // Sections move, never above the first; the first doesn't move.
+      ingredients().moveSection(dairy, 0);
+      expect(book().sections.map((s) => s.name),
+          ['Ingredients', 'Dairy', 'Fruit']);
+      ingredients().moveSection(book().sections.first.id, 2);
+      expect(book().sections.first.name, 'Ingredients');
+    });
+
+    test('a section first made on an empty list comes under the default', () {
+      ingredients().addSection('Dairy');
+      expect(book().sections.map((s) => s.name), ['Ingredients', 'Dairy']);
+    });
+
+    test("1.9.0's lists: Ingredients goes back to the top", () {
+      final storage = AppStorage.inMemory(
+        initialIngredients: IngredientBook([
+          IngredientSection(id: 'a', name: 'Dairy'),
+          IngredientSection(id: 'b', name: 'Ingredients'),
+        ]),
+      );
+      final restarted = ProviderContainer(overrides: [
+        appStorageProvider.overrideWithValue(storage),
+      ]);
+      addTearDown(restarted.dispose);
+      expect(restarted.read(ingredientsProvider).sections.map((s) => s.id),
+          ['b', 'a']);
     });
 
     test('moved within and between sections', () {
@@ -117,10 +146,11 @@ void main() {
       final baking = book().sections.single.id;
       final dairy = ingredients().addSection('Dairy')!;
       ingredients().move(flour, sectionId: dairy, index: 0);
-      expect(book().sections.first.items.single.name, 'Flour');
+      expect(book().sections.last.items.single.name, 'Flour');
       ingredients().move(flour, sectionId: baking, index: 1);
-      expect(book().sections.last.items.map((i) => i.name), ['Sugar', 'Flour']);
-      expect(book().sections.first.items, isEmpty);
+      expect(
+          book().sections.first.items.map((i) => i.name), ['Sugar', 'Flour']);
+      expect(book().sections.last.items, isEmpty);
     });
 
     test('a deleted section gives its ingredients to the one above', () {
@@ -129,17 +159,15 @@ void main() {
       ingredients().add('Milk');
       ingredients().addSection('Fruit');
       ingredients().add('Apple');
-      // Fruit, Dairy, Ingredients: Dairy's go to Fruit (above it).
-      final dairy = book().sections[1].id;
+      // Ingredients, Fruit, Dairy: Dairy's go to Fruit (above it).
+      final dairy = book().sections[2].id;
       final before = ingredients().deleteSection(dairy);
-      expect(book().sections.map((s) => s.name), ['Fruit', 'Ingredients']);
-      expect(book().sections.first.items.map((i) => i.name), ['Apple', 'Milk']);
-      // The first one's go to the one below, at its top.
-      ingredients().deleteSection(book().sections.first.id);
-      expect(book().sections.single.items.map((i) => i.name),
+      expect(book().sections.map((s) => s.name), ['Ingredients', 'Fruit']);
+      // (All three went to the first section: it's where + adds.)
+      expect(book().sections.first.items.map((i) => i.name),
           ['Apple', 'Milk', 'Flour']);
-      // The last one, not empty: stays.
-      expect(ingredients().deleteSection(book().sections.single.id), isNull);
+      // The first one stays (Round 43).
+      expect(ingredients().deleteSection(book().sections.first.id), isNull);
       ingredients().replaceAll(before!);
       expect(book().sections, hasLength(3));
     });
@@ -159,6 +187,39 @@ void main() {
       ingredients().delete(flour);
       expect(book().all, isEmpty);
       expect(recipes().byId(id)!.ingredients.first.name, 'Rye flour');
+    });
+  });
+
+  group('quantities (Round 43)', () {
+    test('written as picked, read back', () {
+      for (final (amount, text) in [
+        ((kind: AmountKind.none, value: 0.0), ''),
+        ((kind: AmountKind.count, value: 3.0), '3'),
+        ((kind: AmountKind.weight, value: 200.0), '200 g'),
+        ((kind: AmountKind.weight, value: 1500.0), '1.5 kg'),
+        ((kind: AmountKind.teaspoon, value: 0.5), '½ tsp'),
+        ((kind: AmountKind.teaspoon, value: 1.5), '1½ tsp'),
+        ((kind: AmountKind.tablespoon, value: 2.0), '2 tbsp'),
+      ]) {
+        expect(amountText(amount), text);
+        expect(readAmount(text), amount, reason: text);
+      }
+      expect(readAmount('a pinch'), isNull, reason: 'typed before');
+      expect(readAmount('1.5'), isNull, reason: 'half a piece');
+    });
+
+    test(
+        'stepped like Shop: weights through the common ones, spoons by '
+        'halves', () {
+      expect(amountUp((kind: AmountKind.weight, value: 200)), 250);
+      expect(amountDown((kind: AmountKind.weight, value: 200)), 150);
+      expect(amountUp((kind: AmountKind.count, value: 2)), 3);
+      expect(amountDown((kind: AmountKind.count, value: 1)), isNull);
+      expect(amountUp((kind: AmountKind.tablespoon, value: 1)), 1.5);
+      expect(amountDown((kind: AmountKind.teaspoon, value: 0.5)), isNull);
+      // Spoons aren't a Shop amount: the name only there.
+      expect(shopQuantityOf('2 tbsp').quantity, isNull);
+      expect(shopQuantityOf('1.5 kg').quantity, Quantity.weight);
     });
   });
 
@@ -305,7 +366,8 @@ void main() {
       );
       // Dairy is here already (by name), Milk not.
       ingredients().addSection('Dairy');
-      ingredients().add('Butter');
+      ingredients().move(ingredients().add('Butter')!,
+          sectionId: book().sections.last.id, index: 0);
       final importer = container.read(backupImporterProvider);
       final picked = importer
           .read(Uint8List.fromList(utf8.encode(backup.encode()))) as PlainPick;
@@ -314,9 +376,9 @@ void main() {
       });
       expect(all().single.name, 'Pancakes');
       expect(done!.added, 1);
-      expect(book().sections.map((s) => s.name), ['Dairy', 'Baking']);
-      expect(
-          book().sections.first.items.map((i) => i.name), ['Butter', 'Milk']);
+      expect(book().sections.map((s) => s.name),
+          ['Ingredients', 'Dairy', 'Baking']);
+      expect(book().sections[1].items.map((i) => i.name), ['Butter', 'Milk']);
       expect(book().sections.last.items.map((i) => i.name), ['Flour'],
           reason: 'only what the recipe needs');
 
