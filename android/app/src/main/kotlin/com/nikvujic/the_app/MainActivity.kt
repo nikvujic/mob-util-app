@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.SoundPool
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -49,6 +50,21 @@ class MainActivity: FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // A recipe open (Round 42): the screen stays on while the app is in
+        // front (Android lets it go dark again in the background).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/screen")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "keepOn") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                if (call.arguments == true) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+                result.success(null)
+            }
         // Automatic backup to a folder picked once (Round 39).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/backup_folder")
             .setMethodCallHandler { call, result ->

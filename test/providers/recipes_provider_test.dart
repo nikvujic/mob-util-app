@@ -8,10 +8,12 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
+import 'package:the_app/providers/section_data_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
@@ -235,6 +237,18 @@ void main() {
       shop.replaceAll(done.before);
       expect(container.read(shopProvider), hasLength(3));
     });
+  });
+
+  test('Clear data counts and empties recipes with the ingredients list', () {
+    ingredients().add('Flour');
+    recipes().add();
+    final data = container.read(sectionDataProvider);
+    expect(data.countOf(HubTool.recipes), 2);
+    expect(HubTool.recipes.clearable, isTrue);
+    expect(HubTool.recipes.lockable, isTrue);
+    data.clearOf(HubTool.recipes);
+    expect(all(), isEmpty);
+    expect(book().sections, isEmpty);
   });
 
   group('backups', () {

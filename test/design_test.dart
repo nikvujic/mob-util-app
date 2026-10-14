@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/recipe.dart';
 import 'package:the_app/app/app.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
@@ -16,6 +17,7 @@ import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
+import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -150,6 +152,30 @@ Future<void> seed(ProviderContainer container) async {
     ..toggleDose(pills, today, 0)
     ..add('Course',
         times: [540], from: addDays(today, -20), until: addDays(today, -10));
+  // Recipes (Round 42): one with everything, the ingredients in sections.
+  container.read(ingredientsProvider.notifier).replaceAll(IngredientBook([
+        IngredientSection(id: 's1', name: 'Baking', items: const [
+          Ingredient(id: 'i1', name: 'Flour'),
+          Ingredient(id: 'i2', name: 'Sugar'),
+        ]),
+        IngredientSection(id: 's2', name: 'Dairy', items: const [
+          Ingredient(id: 'i3', name: 'Milk'),
+        ]),
+      ]));
+  container.read(recipesProvider.notifier).replaceAll([
+    Recipe(
+      id: 'r1',
+      name: 'Pancakes',
+      prepMinutes: 25,
+      type: RecipeType.breakfast,
+      ingredients: const [
+        RecipeIngredient(ingredientId: 'i1', name: 'Flour', quantity: '200 g'),
+        RecipeIngredient(ingredientId: 'i3', name: 'Milk'),
+      ],
+      method: '## Steps\n1. Mix\n2. Fry',
+      createdAt: today,
+    ),
+  ]);
 }
 
 /// A fake file picker that returns a small backup when importing.
@@ -299,6 +325,71 @@ void main() {
         await t.tap(find.byTooltip('Counters'));
         await t.pumpAndSettle();
         await t.tap(find.byTooltip('New counter'));
+        await t.pumpAndSettle();
+      },
+      'recipes': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+      },
+      'recipe, view mode': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+      },
+      'recipe, edit mode': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Edit'));
+        await t.pumpAndSettle();
+      },
+      'recipe prep time sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Edit'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('recipePrepTime')));
+        await t.pumpAndSettle();
+      },
+      'recipe type sheet': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Edit'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('recipeType')));
+        await t.pumpAndSettle();
+      },
+      'ingredients': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Ingredients'));
+        await t.pumpAndSettle();
+      },
+      'ingredients, picking': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Recipes'));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Pancakes'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Edit'));
+        await t.pumpAndSettle();
+        await t.ensureVisible(find.byKey(const Key('recipeAddIngredients')));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('recipeAddIngredients')));
+        await t.pumpAndSettle();
+        await t.tap(find.text('Sugar'));
         await t.pumpAndSettle();
       },
       'medicine': (t) async {

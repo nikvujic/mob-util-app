@@ -299,6 +299,27 @@ its own files beyond 7 deleted, off the main thread). The folder, its
 name, the last time and a failure flag are in `Preferences` (this phone
 only). Tests use `FakeBackupFolder`.
 
+## Recipes (Round 42)
+
+`models/recipe.dart`: `Recipe` (name, prep minutes, `RecipeType`, its
+`RecipeIngredient`s, the method as Markdown) and the ingredients list
+(`IngredientBook` → `IngredientSection` → `Ingredient`), in
+`recipes.json` and `ingredients.json` (both version 1) and backups
+(v20). A recipe's ingredient keeps the list's id **and** its name, so it
+stays whole if the ingredient is deleted or the list isn't restored;
+`IngredientsNotifier.rename` renames it in recipes too. Restoring part of
+a backup brings a recipe's ingredients the list lacks (`withIngredients`).
+*To Shop* (`sendToShop`) reads a quantity as Shop's weight or count
+(`shopQuantityOf`), else none. The pages: `pages/hub/recipes.dart` (the
+list), `recipe_page.dart` (view and edit modes; edit saves as it goes,
+with its own Undo and Discard), `ingredients.dart` (edit and pick
+modes; one `SliverReorderableList` of section names and ingredients, so
+a drag can cross sections). The pages opened from Recipes sit in a
+`PageGate` too, so a locked Recipes page closes them. While a recipe is
+open the screen stays on: `core/screen.dart` → `MainActivity` over
+`the_app/screen` (`FLAG_KEEP_SCREEN_ON`, which Android drops in the
+background by itself).
+
 ## Pip, the pet (Round 34)
 
 `PipLife` (`models/pip_life.dart`: birthday, name) is his lasting data,

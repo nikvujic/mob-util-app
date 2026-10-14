@@ -1,6 +1,6 @@
 # Recipes — spec (Round 40; settled in Rounds 41–42)
 
-Being built (Round 42). From Nikola's notes (ROADMAP, Round 40); the drafts are
+Built in Round 42 (v1.9.0); type filters and search are for later. From Nikola's notes (ROADMAP, Round 40); the drafts are
 in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
 
 ## 1. The Recipes page (a Hub page)

@@ -346,7 +346,8 @@ fixtures for every stored format.
 
 **Recipes** (`docs/RECIPES_SPEC.md`)
 - [x] Decided: a recipe's ingredients are **one flat list** (no groups).
-- [ ] Build it (the spec's five chunks), then release.
+- [x] Build it (the spec's five chunks), then release (v1.9.0).
+  Later: type filters on the list, search by ingredient.
 
 **Idea: a planner notification that stays** (later; Nikola's)
 - [ ] While a planner **block** or **routine** is on, a notification

@@ -4,6 +4,7 @@ import 'package:the_app/pages/hub/counters.dart';
 import 'package:the_app/pages/hub/medicine.dart';
 import 'package:the_app/pages/hub/pip_home.dart';
 import 'package:the_app/pages/hub/placard.dart';
+import 'package:the_app/pages/hub/recipes.dart';
 
 /// How each of the Hub's pages (O9) looks and opens. Exhaustive: a new
 /// [HubTool] doesn't compile until it's here.
@@ -13,6 +14,7 @@ extension HubToolPage on HubTool {
         HubTool.counters => 'assets/icons/counters.svg',
         HubTool.placard => 'assets/icons/placard.svg',
         HubTool.medicine => 'assets/icons/medicine.svg',
+        HubTool.recipes => 'assets/icons/recipes.svg',
         HubTool.pip => 'assets/icons/pip.svg',
       };
 
@@ -20,6 +22,7 @@ extension HubToolPage on HubTool {
         HubTool.counters => const CountersPage(),
         HubTool.placard => const PlacardPage(),
         HubTool.medicine => const MedicinePage(),
+        HubTool.recipes => const RecipesPage(),
         HubTool.pip => const PipHomePage(),
       };
 }

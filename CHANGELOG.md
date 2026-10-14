@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Recipes** in the Hub: recipes with their prep time, type,
+  ingredients and how they're made; a recipe keeps the screen on while
+  it's open; **To Shop** puts its ingredients on the Shop list; an
+  **ingredients list** in sections to pick from. In backups, Clear data
+  and the locks.
+
 ### Fixed
 - Code blocks: the same room above and below the code; while typing in
   a block its ``` show (faint), so an emptied block can be deleted.

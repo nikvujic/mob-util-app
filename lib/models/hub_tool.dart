@@ -11,6 +11,9 @@ enum HubTool {
   placard('Placard'),
   medicine('Medicine'),
 
+  /// Recipes (Round 42), with the ingredients list they pick from.
+  recipes('Recipes'),
+
   /// Pip's home (Round 35): shown once he's hatched. No lock (he's no
   /// secret) and nothing for Clear data (his life isn't a page's data).
   pip('Pip');

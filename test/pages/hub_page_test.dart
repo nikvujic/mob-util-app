@@ -25,6 +25,7 @@ void main() {
       'assets/icons/counters.svg',
       'assets/icons/placard.svg',
       'assets/icons/medicine.svg',
+      'assets/icons/recipes.svg', // Round 42
       'assets/icons/pip.svg', // hatched (Round 35)
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
@@ -68,8 +69,13 @@ void main() {
       await drag.up();
       await tester.pumpAndSettle();
 
-      expect(container.read(layoutProvider).hub,
-          [HubTool.placard, HubTool.counters, HubTool.medicine, HubTool.pip]);
+      expect(container.read(layoutProvider).hub, [
+        HubTool.placard,
+        HubTool.counters,
+        HubTool.medicine,
+        HubTool.recipes,
+        HubTool.pip,
+      ]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
         moreOrLessEquals(counters.dx, epsilon: 1),
@@ -96,8 +102,13 @@ void main() {
       );
       owner.performAction(node.id, SemanticsAction.customAction, later);
       await tester.pump();
-      expect(container.read(layoutProvider).hub,
-          [HubTool.placard, HubTool.counters, HubTool.medicine, HubTool.pip]);
+      expect(container.read(layoutProvider).hub, [
+        HubTool.placard,
+        HubTool.counters,
+        HubTool.medicine,
+        HubTool.recipes,
+        HubTool.pip,
+      ]);
       semantics.dispose();
     });
   });
@@ -126,8 +137,13 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(container.read(layoutProvider).hub,
-          [HubTool.pip, HubTool.placard, HubTool.counters, HubTool.medicine]);
+      expect(container.read(layoutProvider).hub, [
+        HubTool.pip,
+        HubTool.placard,
+        HubTool.counters,
+        HubTool.medicine,
+        HubTool.recipes,
+      ]);
       semantics.dispose();
     });
   });

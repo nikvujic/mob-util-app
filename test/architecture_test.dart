@@ -123,6 +123,9 @@ const plainScrollAllowed = {
   // Pip Home's card (Round 35): short lists inside a card at the bottom,
   // already in reach; a pull would fight the card's swipe.
   'pages/hub/pip_home.dart',
+  // A recipe in view mode (Round 42): Nikola wants no reach mode there,
+  // only in edit mode (which has it).
+  'pages/hub/recipe_page.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

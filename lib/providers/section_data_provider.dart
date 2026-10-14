@@ -4,6 +4,7 @@ import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/placard.dart';
+import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
@@ -11,6 +12,7 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
@@ -43,6 +45,9 @@ class SectionData {
         // Its text and count, once set.
         HubTool.placard => _ref.read(placardProvider).isSet ? 1 : 0,
         HubTool.medicine => _ref.read(medicineProvider).size,
+        // With the ingredients list.
+        HubTool.recipes => _ref.read(recipesProvider).length +
+            _ref.read(ingredientsProvider).size,
         // His life isn't cleared with the Hub's pages.
         HubTool.pip => 0,
       };
@@ -56,6 +61,11 @@ class SectionData {
         _ref.read(placardProvider.notifier).replace(Placard.initial);
       case HubTool.medicine:
         _ref.read(medicineProvider.notifier).replaceAll(MedicineBook.empty);
+      case HubTool.recipes:
+        _ref.read(recipesProvider.notifier).replaceAll(const []);
+        _ref
+            .read(ingredientsProvider.notifier)
+            .replaceAll(IngredientBook.empty);
       case HubTool.pip:
     }
   }
