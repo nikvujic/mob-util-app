@@ -7,6 +7,7 @@ import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
+import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
@@ -132,6 +133,19 @@ class _RestorePartPageState extends ConsumerState<RestorePartPage> {
           for (final m in b.medicines) plain(m.id, m.name, 'With its history'),
         ],
         ids(ref.watch(medicineProvider).medicines, (m) => m.id),
+      ),
+      (
+        BackupPart.recipes,
+        'Recipes',
+        [
+          for (final r in b.recipes)
+            plain(
+              r.id,
+              r.name.isEmpty ? 'Untitled' : r.name,
+              countOf(r.ingredients.length, 'ingredient', 'ingredients'),
+            ),
+        ],
+        ids(ref.watch(recipesProvider), (r) => r.id),
       ),
     ];
   }

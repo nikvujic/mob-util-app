@@ -9,6 +9,7 @@ import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/models/todo_item.dart';
@@ -76,8 +77,10 @@ class Backup {
   /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28);
   /// 16 = to-do things may be done (Round 30); 17 = Pip, the pet (`pip`,
   /// Round 34); 18 = his energy and batteries (Round 37); 19 = a medicine
-  /// may be taken on some weekdays only (Round 40).
-  static const version = 19;
+  /// may be taken on some weekdays only (Round 40); 20 = recipes and the
+  /// ingredients list (`recipes`, `ingredients`, as in their files,
+  /// Round 42).
+  static const version = 20;
 
   final DateTime createdAt;
   final String appVersion;
@@ -105,6 +108,11 @@ class Backup {
   /// those leaves him as he is.
   final PipLife? pip;
 
+  /// Recipes and the ingredients list (Round 42); none in backups from
+  /// before them.
+  final List<Recipe> recipes;
+  final IngredientBook ingredients;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -121,6 +129,8 @@ class Backup {
     this.medicine = MedicineBook.empty,
     this.todo = const [],
     this.pip,
+    this.recipes = const [],
+    this.ingredients = IngredientBook.empty,
     this.masterPassword,
   });
 
@@ -153,6 +163,8 @@ class Backup {
           'medicine': medicine.toJson(),
           'todo': [for (final t in todo) t.toJson()],
           if (pip != null) 'pip': pip!.toJson(),
+          'recipes': [for (final r in recipes) r.toJson()],
+          'ingredients': ingredients.toJson(),
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -256,6 +268,14 @@ class Backup {
         pip: data['pip'] == null
             ? null
             : PipLife.fromJson(data['pip'] as Map<String, dynamic>),
+        recipes: [
+          for (final r in data['recipes'] as List<dynamic>? ?? const [])
+            Recipe.fromJson(r as Map<String, dynamic>),
+        ],
+        ingredients: data['ingredients'] == null
+            ? IngredientBook.empty
+            : IngredientBook.fromJson(
+                data['ingredients'] as Map<String, dynamic>),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(
@@ -274,7 +294,10 @@ class Backup {
         !unique(backup.plannerTasks.map((t) => t.id)) ||
         !unique(backup.plannerPins.map((p) => p.id)) ||
         !unique(backup.counters.map((c) => c.id)) ||
-        !unique(backup.todo.map((t) => t.id))) {
+        !unique(backup.todo.map((t) => t.id)) ||
+        !unique(backup.recipes.map((r) => r.id)) ||
+        !unique(backup.ingredients.all.map((i) => i.id)) ||
+        !unique(backup.ingredients.sections.map((s) => s.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
     return backup;

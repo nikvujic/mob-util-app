@@ -1,0 +1,317 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/app_info.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/data/backup.dart';
+import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/models/recipe.dart';
+import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/providers/backup_provider.dart';
+import 'package:the_app/providers/recipes_provider.dart';
+import 'package:the_app/providers/shop_provider.dart';
+
+import '../helpers.dart';
+
+/// Recipes and the ingredients list (Round 42).
+void main() {
+  late ProviderContainer container;
+  var now = DateTime(2026, 10, 14, 12);
+
+  setUp(() {
+    now = DateTime(2026, 10, 14, 12);
+    container = ProviderContainer(
+      overrides: [
+        appStorageProvider.overrideWithValue(AppStorage.inMemory()),
+        appVersionProvider.overrideWithValue('1.9.0 (44)'),
+        backupFilesProvider.overrideWithValue(FakeBackupFiles()),
+        clockProvider.overrideWithValue(() => now),
+      ],
+    );
+    addTearDown(container.dispose);
+  });
+
+  RecipesNotifier recipes() => container.read(recipesProvider.notifier);
+  IngredientsNotifier ingredients() =>
+      container.read(ingredientsProvider.notifier);
+  List<Recipe> all() => container.read(recipesProvider);
+  IngredientBook book() => container.read(ingredientsProvider);
+
+  group('recipes', () {
+    test('a new one is empty, at the top', () {
+      final first = recipes().add();
+      final second = recipes().add();
+      expect(all().map((r) => r.id), [second, first]);
+      expect(all().first.isEmpty, isTrue);
+      expect(all().first.createdAt, now);
+    });
+
+    test('saved: modified moves on only when something changed', () {
+      final id = recipes().add();
+      now = now.add(const Duration(minutes: 5));
+      recipes().save(recipes().byId(id)!);
+      expect(recipes().byId(id)!.modifiedAt, DateTime(2026, 10, 14, 12));
+      recipes().save(recipes().byId(id)!.copyWith(name: 'Soup'));
+      expect(recipes().byId(id)!.name, 'Soup');
+      expect(recipes().byId(id)!.modifiedAt, now);
+      expect(recipes().byId(id)!.isEmpty, isFalse);
+    });
+
+    test('duplicate: "… (Copy)" just below, its own id', () {
+      final a = recipes().add();
+      recipes().save(recipes().byId(a)!.copyWith(
+        name: 'Soup',
+        prepMinutes: () => 40,
+        ingredients: const [RecipeIngredient(name: 'Leek')],
+      ));
+      final b = recipes().add();
+      final copy = recipes().duplicate(a)!;
+      expect(all().map((r) => r.id), [b, a, copy]);
+      final duplicate = recipes().byId(copy)!;
+      expect(duplicate.name, 'Soup (Copy)');
+      expect(duplicate.prepMinutes, 40);
+      expect(duplicate.ingredients.single.name, 'Leek');
+    });
+
+    test('removed and put back where they were', () {
+      final a = recipes().add(), b = recipes().add(), c = recipes().add();
+      final removed = recipes().remove({a, c});
+      expect(all().map((r) => r.id), [b]);
+      recipes().undoRemove(removed);
+      expect(all().map((r) => r.id), [c, b, a]);
+    });
+
+    test('reordered', () {
+      final a = recipes().add(), b = recipes().add(), c = recipes().add();
+      recipes().reorder(0, 3);
+      expect(all().map((r) => r.id), [b, a, c]);
+    });
+  });
+
+  group('ingredients', () {
+    test('the first one makes a section; new ones go to its top', () {
+      ingredients().add('Flour');
+      ingredients().add('  Sugar ');
+      expect(ingredients().add('  '), isNull);
+      expect(book().sections.single.name, IngredientsNotifier.firstSectionName);
+      expect(book().all.map((i) => i.name), ['Sugar', 'Flour']);
+    });
+
+    test('sections go to the top; ingredients to the first one', () {
+      ingredients().add('Flour');
+      final dairy = ingredients().addSection('Dairy')!;
+      ingredients().add('Milk');
+      expect(book().sections.map((s) => s.name), ['Dairy', 'Ingredients']);
+      expect(book().sections.first.id, dairy);
+      expect(book().sections.first.items.single.name, 'Milk');
+    });
+
+    test('moved within and between sections', () {
+      final flour = ingredients().add('Flour')!;
+      ingredients().add('Sugar');
+      final baking = book().sections.single.id;
+      final dairy = ingredients().addSection('Dairy')!;
+      ingredients().move(flour, sectionId: dairy, index: 0);
+      expect(book().sections.first.items.single.name, 'Flour');
+      ingredients().move(flour, sectionId: baking, index: 1);
+      expect(book().sections.last.items.map((i) => i.name), ['Sugar', 'Flour']);
+      expect(book().sections.first.items, isEmpty);
+    });
+
+    test('a deleted section gives its ingredients to the one above', () {
+      ingredients().add('Flour');
+      ingredients().addSection('Dairy');
+      ingredients().add('Milk');
+      ingredients().addSection('Fruit');
+      ingredients().add('Apple');
+      // Fruit, Dairy, Ingredients: Dairy's go to Fruit (above it).
+      final dairy = book().sections[1].id;
+      final before = ingredients().deleteSection(dairy);
+      expect(book().sections.map((s) => s.name), ['Fruit', 'Ingredients']);
+      expect(book().sections.first.items.map((i) => i.name), ['Apple', 'Milk']);
+      // The first one's go to the one below, at its top.
+      ingredients().deleteSection(book().sections.first.id);
+      expect(book().sections.single.items.map((i) => i.name),
+          ['Apple', 'Milk', 'Flour']);
+      // The last one, not empty: stays.
+      expect(ingredients().deleteSection(book().sections.single.id), isNull);
+      ingredients().replaceAll(before!);
+      expect(book().sections, hasLength(3));
+    });
+
+    test('renamed: recipes that use it follow; deleted: recipes keep it', () {
+      final flour = ingredients().add('Flour')!;
+      final id = recipes().add();
+      recipes().save(recipes().byId(id)!.copyWith(ingredients: [
+        RecipeIngredient(ingredientId: flour, name: 'Flour', quantity: '1 kg'),
+        const RecipeIngredient(name: 'Salt'),
+      ]));
+      ingredients().rename(flour, 'Rye flour');
+      expect(book().all.single.name, 'Rye flour');
+      expect(recipes().byId(id)!.ingredients.map((i) => i.name),
+          ['Rye flour', 'Salt']);
+      expect(recipes().byId(id)!.ingredients.first.quantity, '1 kg');
+      ingredients().delete(flour);
+      expect(book().all, isEmpty);
+      expect(recipes().byId(id)!.ingredients.first.name, 'Rye flour');
+    });
+  });
+
+  group('To Shop (Round 41)', () {
+    test('quantities as Shop reads them', () {
+      ({Quantity? q, num n}) read(String text) {
+        final r = shopQuantityOf(text);
+        return (
+          q: r.quantity,
+          n: switch (r.quantity) {
+            Quantity.weight => r.grams,
+            Quantity.count => r.count,
+            null => 0,
+          },
+        );
+      }
+
+      expect(read('200 g'), (q: Quantity.weight, n: 200));
+      expect(read('200g'), (q: Quantity.weight, n: 200));
+      expect(read('1.5 kg'), (q: Quantity.weight, n: 1500));
+      expect(read('0,5 KG'), (q: Quantity.weight, n: 500));
+      expect(read('2'), (q: Quantity.count, n: 2));
+      expect(read('3 pcs'), (q: Quantity.count, n: 3));
+      expect(read('1.5'), (q: null, n: 0), reason: 'half a piece');
+      expect(read('1 tbsp'), (q: null, n: 0));
+      expect(read('a pinch'), (q: null, n: 0));
+      expect(read(''), (q: null, n: 0));
+      expect(read('300 ml'), (q: null, n: 0));
+    });
+
+    test(
+        'all to the to-buy list: put back, or added, a copy for another '
+        'quantity', () {
+      final shop = container.read(shopProvider.notifier);
+      shop.replaceAll(const [
+        // Bought, same quantity: put back.
+        ShopItem(
+            id: 'a',
+            name: 'flour',
+            toBuy: false,
+            quantity: Quantity.weight,
+            grams: 200),
+        // Bought, another quantity: a copy beside it.
+        ShopItem(
+            id: 'b',
+            name: 'Eggs',
+            toBuy: false,
+            quantity: Quantity.count,
+            count: 6),
+        // Already to buy, no quantity either: left as it is.
+        ShopItem(id: 'c', name: 'Salt'),
+      ]);
+      final recipe = Recipe(
+        id: 'r',
+        name: 'Pancakes',
+        createdAt: now,
+        ingredients: const [
+          RecipeIngredient(name: 'Flour', quantity: '200 g'),
+          RecipeIngredient(name: 'Eggs', quantity: '2'),
+          RecipeIngredient(name: 'Salt', quantity: 'a pinch'),
+          RecipeIngredient(name: 'Milk', quantity: '300 ml'),
+        ],
+      );
+      final done = sendToShop(container.read, recipe);
+      final items = container.read(shopProvider);
+      expect((done.added, done.putBack), (2, 1));
+      expect(items.firstWhere((i) => i.id == 'a').toBuy, isTrue);
+      final eggs = items.where((i) => i.name == 'Eggs').toList();
+      expect(eggs, hasLength(2));
+      expect(eggs.last.toBuy, isTrue);
+      expect((eggs.last.quantity, eggs.last.count), (Quantity.count, 2));
+      expect(items.where((i) => i.name == 'Salt'), hasLength(1));
+      final milk = items.singleWhere((i) => i.name == 'Milk');
+      expect((milk.toBuy, milk.quantity), (true, null));
+      // Undo: Shop as it was.
+      shop.replaceAll(done.before);
+      expect(container.read(shopProvider), hasLength(3));
+    });
+  });
+
+  group('backups', () {
+    test('in a backup and back, with the ingredients list', () async {
+      ingredients().add('Flour');
+      final id = recipes().add();
+      recipes().save(recipes().byId(id)!.copyWith(name: 'Bread'));
+      final backup = container.read(backupExporterProvider).snapshot();
+      final decoded = Backup.decode(backup.encode());
+      expect(decoded.recipes.single.name, 'Bread');
+      expect(decoded.ingredients.all.single.name, 'Flour');
+
+      final importer = container.read(backupImporterProvider);
+      recipes().replaceAll(const []);
+      ingredients().replaceAll(IngredientBook.empty);
+      final picked = importer
+          .read(Uint8List.fromList(utf8.encode(backup.encode()))) as PlainPick;
+      final undo = await importer.restore(picked.backup);
+      expect(all().single.name, 'Bread');
+      expect(book().all.single.name, 'Flour');
+      await importer.undo(undo!);
+      expect(all(), isEmpty);
+      expect(book().sections, isEmpty);
+    });
+
+    test('part of a backup: a recipe brings the ingredients it needs',
+        () async {
+      final backup = Backup(
+        createdAt: DateTime(2026, 10, 14),
+        appVersion: '1.9.0 (44)',
+        notes: const [],
+        shopItems: const [],
+        recipes: [
+          Recipe(
+            id: 'r1',
+            name: 'Pancakes',
+            createdAt: now,
+            ingredients: const [
+              RecipeIngredient(ingredientId: 'i1', name: 'Flour'),
+              RecipeIngredient(ingredientId: 'i3', name: 'Milk'),
+            ],
+          ),
+          Recipe(id: 'r2', name: 'Not wanted', createdAt: now),
+        ],
+        ingredients: IngredientBook([
+          IngredientSection(id: 's1', name: 'Baking', items: const [
+            Ingredient(id: 'i1', name: 'Flour'),
+            Ingredient(id: 'i2', name: 'Sugar'),
+          ]),
+          IngredientSection(id: 's2', name: 'Dairy', items: const [
+            Ingredient(id: 'i3', name: 'Milk'),
+          ]),
+        ]),
+      );
+      // Dairy is here already (by name), Milk not.
+      ingredients().addSection('Dairy');
+      ingredients().add('Butter');
+      final importer = container.read(backupImporterProvider);
+      final picked = importer
+          .read(Uint8List.fromList(utf8.encode(backup.encode()))) as PlainPick;
+      final done = await importer.restorePart(picked.backup, {
+        BackupPart.recipes: {'r1'},
+      });
+      expect(all().single.name, 'Pancakes');
+      expect(done!.added, 1);
+      expect(book().sections.map((s) => s.name), ['Dairy', 'Baking']);
+      expect(
+          book().sections.first.items.map((i) => i.name), ['Butter', 'Milk']);
+      expect(book().sections.last.items.map((i) => i.name), ['Flour'],
+          reason: 'only what the recipe needs');
+
+      // Again: a copy, and no ingredient twice.
+      await importer.restorePart(picked.backup, {
+        BackupPart.recipes: {'r1'},
+      });
+      expect(all().map((r) => r.name), ['Pancakes', 'Pancakes (Copy)']);
+      expect(book().size, 3);
+    });
+  });
+}

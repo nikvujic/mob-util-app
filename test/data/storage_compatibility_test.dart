@@ -14,6 +14,7 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/models/todo_item.dart';
@@ -793,6 +794,61 @@ void main() {
     });
   });
 
+  group('recipes.json, ingredients.json v1 / v20 backup (Round 42)', () {
+    void expectSample(List<Recipe> recipes, IngredientBook ingredients) {
+      expect(recipes.map((r) => r.id), ['r1', 'r2'], reason: 'in order');
+      final pancakes = recipes.first;
+      expect(pancakes.name, 'Palačinke 🥞');
+      expect(pancakes.prepMinutes, 25);
+      expect(pancakes.type, RecipeType.breakfast);
+      expect(
+        [
+          for (final i in pancakes.ingredients)
+            (i.ingredientId, i.name, i.quantity)
+        ],
+        [
+          ('i1', 'Flour', '200 g'),
+          ('i3', 'Milk', '300 ml'),
+          ('i4', 'Eggs 🥚', '2'),
+          (null, 'Salt', 'a pinch'),
+        ],
+      );
+      expect(pancakes.method, startsWith('## Steps'));
+      expect(pancakes.createdAt.toUtc(), DateTime.utc(2026, 10, 14, 9));
+      expect(pancakes.modifiedAt.toUtc(), DateTime.utc(2026, 10, 14, 9, 30));
+      final tea = recipes.last;
+      expect(tea.prepMinutes, isNull);
+      expect(tea.type, isNull);
+      expect(tea.ingredients, isEmpty);
+      expect(ingredients.sections.map((s) => s.name), ['Baking', 'Dairy']);
+      expect(ingredients.all.map((i) => i.name),
+          ['Flour', 'Sugar', 'Milk', 'Eggs 🥚']);
+    }
+
+    test('recipes.json and ingredients.json version 1 load', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v20/storage'),
+      );
+      expectSample(storage.initialRecipes, storage.initialIngredients);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v20 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v20/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.recipes, file.backup.ingredients);
+    });
+
+    test('a backup from before them has none', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v19/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.recipes, isEmpty);
+      expect(file.backup.ingredients.sections, isEmpty);
+    });
+  });
+
   test('settings.json with page locks (O7, Round 21) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
@@ -934,6 +990,12 @@ void main() {
           '3bbcb12712361c465d53a41034f2b4eb4c833b071b8e72087c1553902d89a4f1',
       'test/fixtures/v19/backup-plain.json':
           '8d4b96358cc4c6592a216cf14f69ac5e557c7692d29caed56d9a5119fe0a9835',
+      'test/fixtures/v20/storage/recipes.json':
+          '82f5947b18f812b7c04b3afc38586615afdb0b918374a8d51eddfec6fc6971d5',
+      'test/fixtures/v20/storage/ingredients.json':
+          '08c1962f89598343a67a8a3033da564b1ecc062a8675062d0e7bff8b5a3da0ec',
+      'test/fixtures/v20/backup-plain.json':
+          '152bb759732f5e3e7536b54c4faf1e043e2cadba7066b5a348d77d42039bd991',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

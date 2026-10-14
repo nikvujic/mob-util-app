@@ -14,6 +14,7 @@ import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/models/todo_item.dart';
@@ -23,6 +24,7 @@ import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -61,6 +63,8 @@ class BackupExporter {
       medicine: _ref.read(medicineProvider),
       todo: _ref.read(todoProvider),
       pip: _ref.read(pipLifeProvider),
+      recipes: _ref.read(recipesProvider),
+      ingredients: _ref.read(ingredientsProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -123,6 +127,7 @@ class RestorableBackup {
   int get pinCount => _backup.plannerPins.length;
   int get counterCount => _backup.counters.length;
   int get todoCount => _backup.todo.length;
+  int get recipeCount => _backup.recipes.length;
 
   // What's in it, to pick from (restoring part of it, Round 28).
   List<Note> get notes => _backup.notes;
@@ -133,6 +138,7 @@ class RestorableBackup {
   List<PlannerPin> get plannerPins => _backup.plannerPins;
   List<Counter> get counters => _backup.counters;
   List<Medicine> get medicines => _backup.medicine.medicines;
+  List<Recipe> get recipes => _backup.recipes;
 }
 
 /// The kinds of things in a backup, to restore some of them (Round 28).
@@ -144,7 +150,35 @@ enum BackupPart {
   routines,
   reminders,
   counters,
-  medicines
+  medicines,
+  recipes
+}
+
+/// [book] with the ingredients [ids] from [from] it doesn't have yet,
+/// each into the section of the same id there (or its name), made at the
+/// end if missing (Round 42: restoring part of a backup).
+IngredientBook withIngredients(
+  IngredientBook book,
+  IngredientBook from,
+  Set<String> ids,
+) {
+  final sections = [...book.sections];
+  for (final section in from.sections) {
+    final missing = [
+      for (final i in section.items)
+        if (ids.contains(i.id) && book.byId(i.id) == null) i,
+    ];
+    if (missing.isEmpty) continue;
+    var at = sections.indexWhere((s) => s.id == section.id);
+    if (at == -1) at = sections.indexWhere((s) => s.name == section.name);
+    if (at == -1) {
+      sections.add(IngredientSection(id: section.id, name: section.name));
+      at = sections.length - 1;
+    }
+    sections[at] =
+        sections[at].copyWith(items: [...sections[at].items, ...missing]);
+  }
+  return IngredientBook(sections);
 }
 
 /// A copy's title (Round 30): "Bank" → "Bank (Copy)".
@@ -321,6 +355,8 @@ class BackupImporter {
       source.medicine,
       source.todo,
       source.pip,
+      source.recipes,
+      source.ingredients,
     );
     return RestoreUndo._(
       previous,
@@ -545,6 +581,31 @@ class BackupImporter {
         .read(medicineProvider.notifier)
         .replaceAll(MedicineBook(medicines: medicines, taken: marks));
 
+    // Recipes (Round 42), each bringing its ingredients the list doesn't
+    // have yet (by id), into a section of the backup's name.
+    final pickedRecipes = [
+      for (final r in source.recipes)
+        if (chosen(BackupPart.recipes, r.id)) r,
+    ];
+    if (pickedRecipes.isNotEmpty) {
+      _ref.read(recipesProvider.notifier).replaceAll(merged(
+            _ref.read(recipesProvider),
+            pickedRecipes,
+            BackupPart.recipes,
+            (r) => r.id,
+            (r) => r.toJson(),
+            Recipe.fromJson,
+            name: 'name',
+          ));
+      final wanted = {
+        for (final r in pickedRecipes)
+          for (final i in r.ingredients)
+            if (i.ingredientId != null) i.ingredientId!,
+      };
+      _ref.read(ingredientsProvider.notifier).replaceAll(withIngredients(
+          _ref.read(ingredientsProvider), source.ingredients, wanted));
+    }
+
     await _ref.read(appStorageProvider).flush();
     return PartRestore._(
       RestoreUndo._(
@@ -571,6 +632,8 @@ class BackupImporter {
       undo._previous.medicine,
       undo._previous.todo,
       undo._previous.pip,
+      undo._previous.recipes,
+      undo._previous.ingredients,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -646,6 +709,8 @@ class BackupImporter {
     MedicineBook medicine,
     List<TodoItem> todo,
     PipLife? pip,
+    List<Recipe> recipes,
+    IngredientBook ingredients,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -658,6 +723,8 @@ class BackupImporter {
     _ref.read(todoProvider.notifier).replaceAll(todo);
     // From before him: he stays as he is.
     if (pip != null) _ref.read(pipLifeProvider.notifier).replace(pip);
+    _ref.read(recipesProvider.notifier).replaceAll(recipes);
+    _ref.read(ingredientsProvider.notifier).replaceAll(ingredients);
     await _ref.read(appStorageProvider).flush();
   }
 }

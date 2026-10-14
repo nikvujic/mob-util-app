@@ -103,6 +103,14 @@ app still reads every version, so an update can never lose existing data.
   40, medicine.json version 5): Vitamin D 💊 at 08:00 on Mon, Wed, Fri
   (taken Mon 12 Oct 06:30 UTC), and Iron at 20:00 every day.
 - `v19/backup-plain.json` — backup (version 19) with them.
+- `v20/storage/recipes.json` — recipes (Round 42, recipes.json version
+  1): "Palačinke 🥞", 25 min, breakfast, with Flour 200 g, Milk 300 ml,
+  Eggs 🥚 2 (each from the list: i1, i3, i4) and Salt "a pinch" (not
+  from the list), a Markdown method; then "Tea", with nothing set.
+- `v20/storage/ingredients.json` — the ingredients list (Round 42,
+  ingredients.json version 1): Baking (Flour, Sugar), Dairy (Milk, Eggs
+  🥚).
+- `v20/backup-plain.json` — backup (version 20) with both.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
