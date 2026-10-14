@@ -344,7 +344,7 @@ released (v1.7.0 waits for the morning).
   hacky 8-bit ones instead, to try (Round 33).
 - [x] **Consistency sweep**: buttons and toasts on every page against
   the UI conventions (e.g. Medicine's grey +) (Round 33).
-- [ ] **Multi-line code blocks** in notes with their own button on the
+- [x] **Multi-line code blocks** in notes with their own button on the
   format bar; strikethrough's button goes to make room (Round 32).
 - [ ] **Automatic backup** to a folder Nikola picks (Round 33, D8's
   second part).
@@ -422,7 +422,7 @@ first.
 **1. Formats**
 - [x] Bold, italic and strikethrough **toggle**: pressing one again on
   formatted text takes it off, instead of stacking more symbols.
-- [ ] Later (a lot later): **proper code blocks**, multi-line, with a
+- [x] (Round 39) **proper code blocks**, multi-line, with a
   nicer look, from a button of their own (strikethrough's button can go
   to make room: it's not used).
 

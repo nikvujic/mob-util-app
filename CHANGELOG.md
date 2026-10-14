@@ -12,6 +12,10 @@ Release with the installable APK.
   an old one gets the nearest new one).
 - Medicine's **+** is the app's add button, as on every other page.
 - A new message replaces the one showing instead of waiting behind it.
+- Notes: the **code block** button (several lines of code in a panel)
+  is up front on the format bar, in view without scrolling; the
+  strikethrough button is gone to make room (~~text~~ still shows struck
+  through).
 
 ### Fixed
 - Medicine history: *Mark past days taken* can be undone.

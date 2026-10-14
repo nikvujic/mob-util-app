@@ -92,19 +92,32 @@ void main() {
       'Heading',
       'Bold',
       'Italic',
-      'Strikethrough',
+      'Code block',
+      'Code',
       'Highlight',
       'Quote',
-      'Code',
-      'Code block',
       'Divider',
     ]) {
       expect(find.byTooltip(tooltip, skipOffstage: false), findsOneWidget,
           reason: tooltip);
     }
+    // Round 39: Strikethrough went, to make room for code blocks.
+    expect(find.byTooltip('Strikethrough', skipOffstage: false), findsNothing);
     await tester.tap(find.byTooltip('Close formatting'));
     await tester.pump();
     expect(bar, findsNothing);
+  });
+
+  testWidgets('on a phone, Code block is in view without scrolling the bar',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.reset);
+    await openBar(tester, 'Pancakes');
+    final button = tester.getRect(find.byTooltip('Code block'));
+    final row = tester.getRect(bar);
+    expect(button.right, lessThanOrEqualTo(row.right));
+    expect(button.left, greaterThanOrEqualTo(row.left));
   });
 
   testWidgets('formats the selection, still typing', (tester) async {

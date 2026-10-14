@@ -211,16 +211,17 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         () => _format((t, s, e) => toggleWrap(t, s, e, '**'))),
     FormatButton(Icons.format_italic, 'Italic',
         () => _format((t, s, e) => toggleWrap(t, s, e, '*'))),
-    FormatButton(Icons.format_strikethrough, 'Strikethrough',
-        () => _format((t, s, e) => toggleWrap(t, s, e, '~~'))),
+    // Round 39: multi-line code blocks up front, in view without scrolling
+    // the bar; Strikethrough's button went to make room (unused; ~~ still
+    // shows struck through).
+    FormatButton(
+        Icons.data_object, 'Code block', () => _format(toggleCodeBlock)),
+    FormatButton(Icons.code, 'Code',
+        () => _format((t, s, e) => toggleWrap(t, s, e, '`'))),
     FormatButton(Icons.border_color_outlined, 'Highlight',
         () => _format((t, s, e) => toggleWrap(t, s, e, '=='))),
     FormatButton(Icons.format_quote, 'Quote',
         () => _format((t, s, e) => toggleLines(t, s, e, MdLine.quote))),
-    FormatButton(Icons.code, 'Code',
-        () => _format((t, s, e) => toggleWrap(t, s, e, '`'))),
-    FormatButton(
-        Icons.data_object, 'Code block', () => _format(toggleCodeBlock)),
     FormatButton(Icons.horizontal_rule, 'Divider',
         () => _format((t, s, e) => insertDivider(t, e))),
   ];
