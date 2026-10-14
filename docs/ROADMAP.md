@@ -335,6 +335,37 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 43 — Nikola's notes on 1.9.0 (2026-10-14)
+
+**Recipes patches**
+- [ ] Editing jumps: after changing the type, a quantity, or closing a
+  sheet, the page jumped down to where the method was last edited. The
+  method should work like a note: a tap puts the cursor there, nothing
+  else moves.
+- [ ] Closing the keyboard (back) ends editing the method (the cursor
+  goes), as in notes.
+- [ ] Ingredients list: the first section ("Ingredients", the default)
+  stays at the top; new sections go under it; sections can be dragged.
+- [ ] View mode: no To Shop button of its own; the top bar's menu
+  (out of reach) becomes a bottom button with its options.
+- [ ] Edit mode: ingredients show no quantity button; a tap gives
+  options, **Quantity** then **Delete**; holding selects (to delete
+  several), no hold-to-delete.
+- [ ] Quantity: pickers like Shop's (count, weight), plus **teaspoon**
+  and **tablespoon** (small and big spoons).
+
+**Idea: Pip's adventures** (later; Nikola's)
+- [ ] Two modes: **normal** (the pet, as now) and **adventure**. From
+  Pip Home's first card (under his info): first time, a **Register as
+  adventurer** button, only between **13:00 and 15:00** (so it isn't
+  skipped); registering fills his batteries.
+- [ ] In adventure mode the first card shows his **level** and main
+  **inventory**; swiping shows the inventory (instead of animations and
+  settings). He carries a **sword**.
+- [ ] He adventures **12:00–16:00** each day, slowly gaining **XP** on
+  his own (an idle RPG). It fits the energy system: batteries still fly
+  to him, and he can power down.
+
 ### Round 42 — Nikola's notes on 1.8.0, and Recipes (2026-10-14)
 
 **Patches**
