@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.14.0] - 2026-10-14
 
 ### Added
 - Food statistics in depth: a tap on a food (or kind) opens its page:
