@@ -364,7 +364,17 @@ fixtures for every stored format.
   the same backwards, the station sinks.
 - [ ] While charging his screen changes now and then, at random:
   happy ^-^, a battery filling up, static.
-- [ ] **Ignores the station when his energy is full.**
+- [ ] **Ignores the station when his energy is full.** It's only for
+  looks: it doesn't fill his battery (Nikola: else he'd always be full,
+  and running out would hardly ever be seen).
+- [ ] While plugged in he **can't lose power** (his energy stays).
+- [ ] The station looks like a **power station**, bigger, more detail
+  (drafts v2: `docs/pip_station_drafts.png`); it never appears on top
+  of him (it rises where he isn't).
+- [ ] Charging: his **antenna's tip lights up**, brighter at night.
+- [ ] All the charging screens now: ^-^, a battery filling, static, a
+  bolt, eyes shut and content, a percentage counting up, sparks at the
+  plug, humming (notes float up), blinking with the station's light.
 - [ ] He **hurries** to the station, and to batteries too (now his
   pace follows his energy, so a tired Pip walks slowly to them).
 - Detecting it: Android says if the phone is plugged in (no permission);
