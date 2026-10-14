@@ -109,7 +109,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
 
   /// Its kind's channel, with its tint and sound (Round 31). Android fixes
   /// a channel's sound when it's made, so each sound is a channel of its
-  /// own: the kind's as before for the phone's sound, `…-chime` etc.
+  /// own: the kind's as before for the phone's sound, `…-coin` etc.
   @visibleForTesting
   static AndroidNotificationDetails detailsFor(Reminder reminder) {
     final channel = _channels[reminder.kind]!;

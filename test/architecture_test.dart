@@ -116,6 +116,8 @@ const plainScrollAllowed = {
   'pages/hub/medicine_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
+  // The sounds to pick from (Round 39): a short list in a bottom sheet.
+  'pages/notifications/notifications.dart',
   // A note's text while editing: a pull would move the text being typed.
   'pages/notes/note_detail.dart',
   // Pip Home's card (Round 35): short lists inside a card at the bottom,

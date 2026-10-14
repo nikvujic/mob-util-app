@@ -222,8 +222,10 @@ class _PageSettings extends ConsumerWidget {
       showModalBottomSheet<NotifySound>(
         context: context,
         builder: (context) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          // Round 39: more sounds than a short screen holds: it scrolls.
+          child: ListView(
+            key: const Key('notifySounds'),
+            shrinkWrap: true,
             children: [
               const ListTile(
                 title: Text(

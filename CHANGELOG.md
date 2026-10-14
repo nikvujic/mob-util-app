@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- **8-bit notification sounds**: Chime, Bell and Soft are gone; pick
+  from Coin, Power-up, Blip, Alert, Zap and Jingle instead (a page set to
+  an old one gets the nearest new one).
+
 ## [1.6.0] - 2026-10-14
 
 ### Added

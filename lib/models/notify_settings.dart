@@ -17,9 +17,13 @@ enum NotifyPage {
 /// it's made, so each is a channel of its own.
 enum NotifySound {
   phone('Phone\'s default'),
-  chime('Chime', 'notify_chime'),
-  bell('Bell', 'notify_bell'),
-  soft('Soft', 'notify_soft'),
+  // Round 39: hacky 8-bit ones, to try (Chime, Bell and Soft are gone).
+  coin('Coin', 'notify_coin'),
+  powerUp('Power-up', 'notify_powerup'),
+  blip('Blip', 'notify_blip'),
+  alert('Alert', 'notify_alert'),
+  zap('Zap', 'notify_zap'),
+  jingle('Jingle', 'notify_jingle'),
   silent('Silent');
 
   final String label;
@@ -30,8 +34,16 @@ enum NotifySound {
 
   const NotifySound(this.label, [this.resource]);
 
+  /// The one stored as [name]; the gone ones (Round 39) as the nearest
+  /// new one; unknown: the phone's.
   static NotifySound fromName(String? name) =>
-      values.where((s) => s.name == name).firstOrNull ?? phone;
+      values.where((s) => s.name == name).firstOrNull ??
+      switch (name) {
+        'chime' => coin,
+        'bell' => alert,
+        'soft' => blip,
+        _ => phone,
+      };
 }
 
 /// How one page's notifications look and sound (Round 31).

@@ -62,9 +62,13 @@ class MainActivity: FlutterFragmentActivity() {
         fill = pool.load(this, R.raw.fill, 1)
         // The notification sounds to pick from (Round 31); notifications
         // play them themselves, this is for hearing one when picking.
-        notifySounds["notify_chime"] = pool.load(this, R.raw.notify_chime, 1)
-        notifySounds["notify_bell"] = pool.load(this, R.raw.notify_bell, 1)
-        notifySounds["notify_soft"] = pool.load(this, R.raw.notify_soft, 1)
+        // Round 39: 8-bit ones.
+        notifySounds["notify_coin"] = pool.load(this, R.raw.notify_coin, 1)
+        notifySounds["notify_powerup"] = pool.load(this, R.raw.notify_powerup, 1)
+        notifySounds["notify_blip"] = pool.load(this, R.raw.notify_blip, 1)
+        notifySounds["notify_alert"] = pool.load(this, R.raw.notify_alert, 1)
+        notifySounds["notify_zap"] = pool.load(this, R.raw.notify_zap, 1)
+        notifySounds["notify_jingle"] = pool.load(this, R.raw.notify_jingle, 1)
         sounds = pool
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/sound")
             .setMethodCallHandler { call, result ->

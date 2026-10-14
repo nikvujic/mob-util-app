@@ -91,9 +91,9 @@ void main() {
 
   test('a page\'s sound is on its notifications only', () async {
     preferences().setNotifyStyle(
-        NotifyPage.planner, const NotifyStyle(sound: NotifySound.bell));
+        NotifyPage.planner, const NotifyStyle(sound: NotifySound.alert));
     expect((await planned(ReminderKind.planner)).map((r) => r.sound),
-        everyElement(NotifySound.bell));
+        everyElement(NotifySound.alert));
     expect(
         (await planned(ReminderKind.medicine)).single.sound, NotifySound.phone);
   });
@@ -104,7 +104,7 @@ void main() {
       plannerPausedUntil: today,
       notifyStyles: const {
         NotifyPage.planner: NotifyStyle(private: true, colour: 'blue'),
-        NotifyPage.backup: NotifyStyle(sound: NotifySound.chime),
+        NotifyPage.backup: NotifyStyle(sound: NotifySound.coin),
       },
     ).toJson();
     final back = Preferences.fromJson({
@@ -119,7 +119,7 @@ void main() {
     expect(back.plannerPausedOn(DateTime(2026, 10, 14)), isFalse);
     expect(back.styleOf(NotifyPage.planner),
         const NotifyStyle(private: true, colour: 'blue'));
-    expect(back.styleOf(NotifyPage.backup).sound, NotifySound.chime);
+    expect(back.styleOf(NotifyPage.backup).sound, NotifySound.coin);
     expect(back.styleOf(NotifyPage.medicine), NotifyStyle.plain);
     expect(back.notifyStyles.keys, hasLength(2));
     // Older files: all as before.

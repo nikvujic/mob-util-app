@@ -43,11 +43,11 @@ void main() {
     expect(phone.sound, isNull);
 
     final chime = NotificationReminderScheduler.detailsFor(
-        reminder(ReminderKind.planner, sound: NotifySound.chime));
-    expect(chime.channelId, 'planner-reminders-chime');
-    expect(chime.channelName, 'Planner reminders (chime)');
+        reminder(ReminderKind.planner, sound: NotifySound.coin));
+    expect(chime.channelId, 'planner-reminders-coin');
+    expect(chime.channelName, 'Planner reminders (coin)');
     expect((chime.sound! as RawResourceAndroidNotificationSound).sound,
-        'notify_chime');
+        'notify_coin');
     expect(chime.playSound, isTrue);
 
     final silent = NotificationReminderScheduler.detailsFor(

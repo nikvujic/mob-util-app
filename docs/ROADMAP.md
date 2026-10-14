@@ -340,7 +340,7 @@ fixtures for every stored format.
 Nikola's notes from earlier rounds, done overnight while he sleeps; not
 released (v1.7.0 waits for the morning).
 
-- [ ] **8-bit notification sounds**: Chime, Bell and Soft go; several
+- [x] **8-bit notification sounds**: Chime, Bell and Soft go; several
   hacky 8-bit ones instead, to try (Round 33).
 - [ ] **Consistency sweep**: buttons and toasts on every page against
   the UI conventions (e.g. Medicine's grey +) (Round 33).

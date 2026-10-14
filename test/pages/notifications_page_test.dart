@@ -116,14 +116,19 @@ void main() {
         DateTime(2026, 10, 8));
 
     await tap('notifySound-medicine');
-    await tester.tap(find.text('Bell'));
+    // More sounds than the screen holds (Round 39): it scrolls.
+    await tester.scrollUntilVisible(find.text('Alert'), 100,
+        scrollable: find.descendant(
+            of: find.byKey(const Key('notifySounds')),
+            matching: find.byType(Scrollable)));
+    await tester.tap(find.text('Alert'));
     await tester.pumpAndSettle();
     expect(container.read(preferencesProvider).styleOf(NotifyPage.medicine),
-        const NotifyStyle(sound: NotifySound.bell));
+        const NotifyStyle(sound: NotifySound.alert));
     expect(
         find.descendant(
           of: find.byKey(const Key('notifySound-medicine')),
-          matching: find.text('Bell'),
+          matching: find.text('Alert'),
         ),
         findsOneWidget);
 
