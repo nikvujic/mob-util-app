@@ -70,6 +70,45 @@ void main() {
     });
   });
 
+  group('his charging station (Round 44)', () {
+    testWidgets(
+        'opened while the phone charges: he\'s at his station, charging; '
+        'Pip Home says so', (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      container = await pumpApp(tester,
+          clock: () => now,
+          pip: pipWith(energy: 1.5, at: now, batteries: 1),
+          realPipLink: true,
+          power: FakePower(isPlugged: true));
+      await openMenu(tester);
+      await tester.pump();
+      await tester.pump();
+      expect(brain().station, isNotNull);
+      expect(brain().activity, PipActivity.charging);
+      // No battery while he's at it.
+      expect(container.read(pipLifeProvider.notifier).refusalAt(now),
+          PipRefusal.charging);
+    });
+
+    testWidgets('plugged in while watching: the station rises', (tester) async {
+      final now = DateTime(2026, 10, 14, 12);
+      final power = FakePower();
+      container = await pumpApp(tester,
+          clock: () => now,
+          pip: pipWith(energy: 1.5, at: now),
+          realPipLink: true,
+          power: power);
+      await openMenu(tester);
+      await tester.pump(const Duration(seconds: 1));
+      expect(brain().station, isNull);
+      power.plug(true);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(brain().station, isNotNull);
+    });
+  });
+
   group('in the menu', () {
     testWidgets('his energy and batteries beside his name', (tester) async {
       final now = DateTime(2026, 10, 14, 12);

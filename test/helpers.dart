@@ -15,6 +15,7 @@ import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/data/backup_folder.dart';
+import 'package:the_app/data/power.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/app/app.dart';
@@ -44,6 +45,7 @@ Future<ProviderContainer> pumpApp(
   bool realPipLink = false,
   BackupFolder? backupFolder,
   Preferences? preferences,
+  PowerSource? power,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -59,6 +61,8 @@ Future<ProviderContainer> pumpApp(
       backupFolderProvider
           .overrideWithValue(backupFolder ?? FakeBackupFolder()),
       appVersionProvider.overrideWithValue(testAppVersion),
+      // The phone's power (Round 44): a fake, unplugged unless told.
+      powerSourceProvider.overrideWithValue(power ?? FakePower()),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
       fingerprintVaultProvider.overrideWithValue(
         fingerprint ?? FakeFingerprintVault(available: false),
@@ -310,6 +314,30 @@ class FakePipLink implements PipLink {
     if (batteries == 0) return false;
     batteries--;
     return true;
+  }
+
+  /// The phone plugged in (Round 44).
+  @override
+  bool plugged = false;
+}
+
+/// Whether the phone is plugged in, in tests (Round 44): [isPlugged]
+/// now; [plug] tells the app it changed.
+class FakePower implements PowerSource {
+  bool isPlugged;
+  final _changes = StreamController<bool>.broadcast();
+
+  FakePower({this.isPlugged = false});
+
+  @override
+  Future<bool> plugged() async => isPlugged;
+
+  @override
+  Stream<bool> get changes => _changes.stream;
+
+  void plug(bool plugged) {
+    isPlugged = plugged;
+    _changes.add(plugged);
   }
 }
 

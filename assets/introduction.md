@@ -49,6 +49,7 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - His **name and age** show above him; on the right, his **energy** (a battery: green, orange, red) and the batteries you hold.
 - He gets tired as his energy runs down, and turns off when it's empty. A **battery** comes every few hours when you open the app (up to 3); **tap his room** to give him one.
 - He **sleeps** from 23:00 to 8:00; look in on him around then and you may see him fall asleep or wake up.
+- While your phone is **plugged in**, his **charging station** stands in his field. If he isn't full, he hurries over, his hands pop in, and he plugs himself in: his antenna lights up (brighter at night) and his screen changes now and then. Plugged in, he can't lose power (it doesn't fill him, though). Full, asleep or off, he leaves it be. **Charging**, among his animations, shows it without a cable.
 - His page in the Hub, **Pip**: his field, big, and a card; swipe it for his settings (rename him, play his animations, pick his background).
 
 ## Security

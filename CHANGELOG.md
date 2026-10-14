@@ -4,6 +4,20 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Pip's charging station**: while the phone is plugged in, a power
+  station stands in his field; he hurries over, his hands pop in, and
+  he plugs himself in (unplugged, he unplugs and it sinks back). His
+  antenna lights up (brighter at night), his screen changes now and
+  then (a battery filling, static, a bolt, a percentage, notes...).
+  Plugged in he can't lose power; full, asleep or off he leaves it be.
+  *Charging* is among his animations too.
+
+### Changed
+- Pip hurries to a battery, whatever his energy.
+
 ## [1.10.1] - 2026-10-14
 
 ### Changed

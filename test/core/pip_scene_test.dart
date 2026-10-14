@@ -125,6 +125,11 @@ void main() {
         PipActivity.poweringOff,
         PipActivity.poweringOn,
         PipActivity.fetching,
+        // Round 44: at his station, or on his way.
+        PipActivity.toStation,
+        PipActivity.plugging,
+        PipActivity.charging,
+        PipActivity.unplugging,
       ]) {
         for (final a in PipAnimation.values) {
           expect(mayStart(doing, a), isFalse,
@@ -166,7 +171,8 @@ void main() {
         'blink',
         'turn',
         'fallAsleep',
-        'powerOff'
+        'powerOff',
+        'charge',
       ]);
     });
 

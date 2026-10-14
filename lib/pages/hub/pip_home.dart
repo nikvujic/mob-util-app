@@ -244,6 +244,7 @@ class _StatusState extends ConsumerState<_Status> {
       null => 'TAP THE FIELD TO GIVE HIM ONE',
       PipRefusal.full => "HE'S FULL",
       PipRefusal.asleep => "HE'S ASLEEP",
+      PipRefusal.charging => "HE'S CHARGING",
       PipRefusal.noBatteries || PipRefusal.egg => null,
     };
     return SingleChildScrollView(

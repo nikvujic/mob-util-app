@@ -85,6 +85,11 @@ class Preferences {
   /// unknown one is his field.
   final String pipBackground;
 
+  /// The phone was plugged in when last seen (Round 44: Pip's charging
+  /// station); so after a restart, time away plugged in still counts as
+  /// charging. This phone only.
+  final bool pipPlugged;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -110,6 +115,7 @@ class Preferences {
     this.autoBackupFolderName,
     this.lastAutoBackupAt,
     this.autoBackupFailed = false,
+    this.pipPlugged = false,
   });
 
   /// How long until a backup is due again (D8).
@@ -192,6 +198,7 @@ class Preferences {
     String? Function()? autoBackupFolderName,
     DateTime? Function()? lastAutoBackupAt,
     bool? autoBackupFailed,
+    bool? pipPlugged,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -232,6 +239,7 @@ class Preferences {
             ? this.lastAutoBackupAt
             : lastAutoBackupAt(),
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
+        pipPlugged: pipPlugged ?? this.pipPlugged,
       );
 
   Map<String, dynamic> toJson() => {
@@ -270,6 +278,7 @@ class Preferences {
         if (lastAutoBackupAt != null)
           'lastAutoBackupAt': lastAutoBackupAt!.toUtc().toIso8601String(),
         'autoBackupFailed': autoBackupFailed,
+        if (pipPlugged) 'pipPlugged': true,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -321,5 +330,6 @@ class Preferences {
             ? null
             : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
+        pipPlugged: json['pipPlugged'] as bool? ?? false,
       );
 }

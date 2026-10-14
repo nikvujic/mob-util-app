@@ -11,6 +11,7 @@ import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/data/power.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
@@ -228,6 +229,7 @@ void main() {
         )),
         clockProvider.overrideWithValue(() => DateTime(2026, 10, 14, 12)),
         pipRandomProvider.overrideWithValue(math.Random(1)),
+        powerSourceProvider.overrideWithValue(FakePower()),
       ]);
       addTearDown(container.dispose);
       final link = container.read(pipLinkProvider);

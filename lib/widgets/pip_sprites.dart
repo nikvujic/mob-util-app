@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pixel_font.dart';
 import 'package:the_app/core/theme.dart';
 
 /// Pip's frames on a 20-wide grid (Round 26), one letter a pixel ('.'
@@ -185,6 +188,169 @@ abstract final class PipSprites {
     'gggg',
   ];
 
+  // Round 44: his charging station, his hands, his charging screens.
+
+  /// The power station (Round 44: drafts v2), 14 x 27, its socket and
+  /// hook on its left (mirrored when it stands on his left): a lamp on
+  /// top, a roof, a screen with a bolt, a little panel of lights, vents,
+  /// a hazard band, a base with bolts. Its own colours ([stationColours]).
+  static const station = [
+    '......ee......',
+    '.....eqqe.....',
+    '...HHHHHHHH...',
+    '..HGGGGGGGGH..',
+    '.HHHHHHHHHHHH.',
+    '.HggggggggggH.',
+    '.HgkkkkkkkkgH.',
+    '.HgkkkkyykkgH.',
+    '.HgkkkyykkkgH.',
+    '.HgkkyyyykkgH.',
+    '.HgkkkyykkkgH.',
+    '.HgkkyykkkkgH.',
+    '.HgkkkkkkkkgH.',
+    '.HggggggggggH.',
+    '.HgGGGGGGGGgH.',
+    '.HgGhrGGeGGgH.',
+    '.HgGGGGGGGGgH.',
+    'hHggggggggggH.',
+    'cHghhhhhhhhgH.',
+    'hHggggggggggH.',
+    '.HghhhhhhhhgH.',
+    '.HggggggggggH.',
+    '.HyKyKyKyKyKH.',
+    '.HKyKyKyKyKyH.',
+    '.HHHHHHHHHHHH.',
+    'hhhhhhhhhhhhhh',
+    'hKhhhhhhhhhhKh',
+  ];
+
+  static const stationColours = {
+    'H': PipColours.stationEdge,
+    'g': PipColours.stationBody,
+    'G': PipColours.stationLight,
+    'h': PipColours.stationDark,
+    'k': PipColours.stationPanel,
+    'y': PipColours.stationBolt,
+    'K': PipColours.face,
+    'r': PipColours.energyLow,
+    'e': PipColours.lampOff,
+    'q': PipColours.lampOn,
+    'c': PipColours.cable,
+  };
+
+  /// [station] with its lamp off (it blinks).
+  static final stationLampOff = [
+    for (final row in station) row.replaceAll('q', 'e'),
+  ];
+
+  /// A floating hand (Round 44: no arms, they pop in when needed), 2 x 3.
+  static const mitt = ['LL', 'LL', 'SS'];
+
+  /// The plug, 2 x 2: grey, its darker end.
+  static const plug = ['gg', 'hh'];
+
+  /// A note floating up while he hums, 3 x 3.
+  static const note = ['.KK', '.K.', 'KK.'];
+
+  /// His standing frame with [screen] showing while he charges, [t]
+  /// seconds into it; [lamp]: the station's lamp on (he blinks with it).
+  static List<String> chargingFrame(ChargeScreen screen, double t,
+      {bool lamp = true}) {
+    final rows = [for (final r in frames[PipFrame.idle]!) r.split('')];
+    for (var y = 0; y < screenRows; y++) {
+      for (var x = 0; x < screenWidth; x++) {
+        rows[_screenY + y][_screenX + x] = 'W';
+      }
+    }
+    void k(int x, int y, [String c = 'K']) {
+      if (x >= 0 && x < screenWidth && y >= 0 && y < screenRows) {
+        rows[_screenY + y][_screenX + x] = c;
+      }
+    }
+
+    const smile = [(4, 5), (9, 5), (5, 6), (6, 6), (7, 6), (8, 6)];
+    void eyes(List<(int, int)> eye) {
+      for (final e in const [3, 10]) {
+        for (final (x, y) in eye) {
+          k(e + x, y);
+        }
+      }
+    }
+
+    switch (screen) {
+      case ChargeScreen.happy || ChargeScreen.sparks:
+        // ^ ^ eyes.
+        eyes(const [(0, 3), (1, 2), (2, 3)]);
+        for (final (x, y) in smile) {
+          k(x, y);
+        }
+      case ChargeScreen.battery:
+        // A battery outline filling up, a bar at a time.
+        for (var x = 3; x < 11; x++) {
+          k(x, 2);
+          k(x, 6);
+        }
+        for (var y = 2; y < 7; y++) {
+          k(3, y);
+          k(10, y);
+        }
+        for (final y in const [3, 4, 5]) {
+          k(11, y);
+        }
+        final bars = (t / 0.5).floor() % 4;
+        for (var i = 0; i < bars; i++) {
+          for (var y = 3; y < 6; y++) {
+            for (var x = 4 + 2 * i; x < 6 + 2 * i; x++) {
+              k(x, y, 'B');
+            }
+          }
+        }
+      case ChargeScreen.static:
+        // Snow: new every tenth of a second.
+        final r = math.Random((t * 10).floor());
+        for (var y = 0; y < screenRows; y++) {
+          for (var x = 0; x < screenWidth; x++) {
+            k(x, y, const ['W', 'W', 'n', 'n', 'd', 'K'][r.nextInt(6)]);
+          }
+        }
+      case ChargeScreen.bolt:
+        const bolt = ['...yy', '..yy.', '.yyyy', '..yy.', '.yy..', 'yy...'];
+        for (var y = 0; y < bolt.length; y++) {
+          for (var x = 0; x < bolt[y].length; x++) {
+            if (bolt[y][x] == 'y') k(4 + x, 1 + y, 'Y');
+          }
+        }
+      case ChargeScreen.content || ChargeScreen.humming:
+        // Eyes shut, a small smile.
+        eyes(const [(0, 3), (1, 3)]);
+        k(6, 6);
+        k(7, 6);
+      case ChargeScreen.percent:
+        // Counting up to 100%, then staying there.
+        final p = math.min(100, (t * 30).floor());
+        final text = '$p%';
+        var x = (screenWidth - text.length * 4 + 1) ~/ 2;
+        for (final ch in text.split('')) {
+          final glyph = PixelFont.glyphOf(ch);
+          for (var y = 0; y < glyph.length; y++) {
+            for (var gx = 0; gx < glyph[y].length; gx++) {
+              if (glyph[y][gx] == '#') k(x + gx, 2 + y);
+            }
+          }
+          x += 4;
+        }
+      case ChargeScreen.blinking:
+        // His eyes close when the station's lamp goes off.
+        eyes(lamp
+            ? const [(0, 2), (1, 2), (0, 3), (1, 3)]
+            : const [(0, 3), (1, 3)]);
+        for (final (x, y) in smile) {
+          k(x, y);
+        }
+    }
+    return [for (final r in rows) r.join()];
+  }
+
   /// A little z rising while he sleeps, 3 x 4.
   static const z = ['zzz', '..z', '.z.', 'zzz'];
 
@@ -256,6 +422,11 @@ abstract final class PipSprites {
     'G': PipColours.batteryCharge,
     'h': PipColours.batteryCap,
     'z': PipColours.star,
+    // Round 44: his charging screens.
+    'B': PipColours.batteryCharge,
+    'Y': PipColours.stationBolt,
+    'n': PipColours.staticLight,
+    'd': PipColours.staticDark,
   };
 
   /// How many rows a frame has.

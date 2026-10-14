@@ -208,7 +208,13 @@ void main() {
       expect(p.takeBattery(80), isTrue);
       expect(p.activity, PipActivity.fetching);
       expect(p.battery!.$2, PipBrain.dropHeight, reason: 'falling in');
-      run(p, 8);
+      // Hurrying (Round 44), whatever his energy.
+      p.segments = 1;
+      run(p, 1);
+      expect(p.x, closeTo(10 + PipBrain.hurry, 1));
+      for (var i = 0; i < 400 && p.activity == PipActivity.fetching; i++) {
+        p.step(0.05);
+      }
       expect(p.battery, isNull, reason: 'picked up');
       expect(p.x, closeTo(80 + PipBrain.batteryWidth / 2 - 10, 0.5));
       expect(p.activity, isNot(PipActivity.fetching));

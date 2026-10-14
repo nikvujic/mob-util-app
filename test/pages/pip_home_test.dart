@@ -197,4 +197,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('pipAnimations')), findsOneWidget);
   });
+
+  testWidgets('Charging (Round 44) plays in his field: the station rises',
+      (tester) async {
+    await open(tester);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAnimations')));
+    await tester.pumpAndSettle();
+    final brain = room(tester).brain;
+    // The last in the list: scrolled all the way down to it.
+    await tester.drag(
+      find.descendant(
+        of: find.byKey(const Key('pipAnimationList')),
+        matching: find.byType(Scrollable),
+      ),
+      const Offset(0, -600),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipPlay-charge')));
+    await tester.pump();
+    expect(brain.station, isNotNull);
+    // (The rest, him plugging in and out, is the brain's: its tests.)
+    expect(words(), isNot(contains("HE'S BUSY, A MOMENT")));
+  });
 }

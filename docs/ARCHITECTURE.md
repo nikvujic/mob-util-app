@@ -328,6 +328,19 @@ background by itself).
 
 ## Pip, the pet (Round 34)
 
+Charging station (Round 44): `data/power.dart` asks `MainActivity` over
+`the_app/power` (the sticky battery state: plugged in or not) and hears
+`the_app/power_changes` (power connected / disconnected, a receiver
+registered only while listened to). `PipPowerNotifier`
+(`pip_life_provider.dart`) asks at first and again while he's looked at (every 5 s at most),
+keeps the answer in `Preferences.pipPlugged` (this phone only), and
+tells `PipLifeNotifier.setCharging`, which takes his energy as it is
+then: while charging `PipEnergy.chargingLevelAt` keeps it (full, down to
+just below). His room reads `PipLink.plugged` every second and calls
+`PipBrain.setPlugged` (animated only once he's been looked at). The
+brain owns the station (where, how far up), the plug and his floating
+hands as positions; `pip_room.dart` only draws them.
+
 `PipLife` (`models/pip_life.dart`: birthday, name) is his lasting data,
 in `pip.json` and backups (v17); his age is worked out from his
 birthday (`ageOn`). `PipBrain` starts as an `egg` when he isn't

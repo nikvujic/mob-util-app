@@ -101,6 +101,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     final (show, segments) = link.look();
     brain.segments = segments;
+    // Round 44: plugged in or out; seen happening only once he's been
+    // looked at (opened while charging, he's simply there, charging).
+    brain.setPlugged(link.plugged, animate: _shown != null && _moving);
     if (show != _shown && brain.show(show)) {
       _shown = show;
       link.shown(show);
@@ -145,7 +148,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// or his egg, asleep, off, back on, a battery picked up).
   void _finish() {
     final brain = widget.brain;
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 6; i++) {
       switch (brain.activity) {
         case PipActivity.spawning:
           brain.step(PipBrain.landEnd);
@@ -159,15 +162,20 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
           brain.step(PipBrain.offEnd);
         case PipActivity.poweringOn:
           brain.step(PipBrain.onEnd);
-        case PipActivity.fetching:
-          // Walking over, then picking it up.
-          for (var s = 0;
-              s < 400 && brain.activity == PipActivity.fetching;
-              s++) {
+        case PipActivity.fetching ||
+              PipActivity.toStation ||
+              PipActivity.plugging ||
+              PipActivity.unplugging:
+          // Walking over, then picking it up (or plugging in or out).
+          final doing = brain.activity;
+          for (var s = 0; s < 400 && brain.activity == doing; s++) {
             brain.step(0.05);
           }
         default:
-          return;
+          // The station up or gone at once (Round 44), and whatever he
+          // then does (off to plug in) done too.
+          if (!brain.stationMoving) return;
+          brain.step(PipBrain.stationRise);
       }
     }
   }
@@ -406,13 +414,17 @@ class _RoomPainter extends CustomPainter {
     }
 
     /// A sprite's pixels, its bottom left at [left], [bottom] (in room
-    /// pixels); faded by [alpha]; upside down with [flip].
+    /// pixels); faded by [alpha]; upside down with [flip]; mirrored with
+    /// [mirror]; in [colours] (his own by default).
     void sprite(List<String> rows, double left, double bottom,
-        {double alpha = 1, bool flip = false}) {
+        {double alpha = 1,
+        bool flip = false,
+        bool mirror = false,
+        Map<String, Color> colours = PipSprites.colours}) {
       for (var y = 0; y < rows.length; y++) {
         final row = rows[flip ? rows.length - 1 - y : y];
         for (var x = 0; x < row.length; x++) {
-          final colour = PipSprites.colours[row[x]];
+          final colour = colours[row[mirror ? row.length - 1 - x : x]];
           if (colour == null) continue;
           dot(left + x, bottom - rows.length + y,
               colour.withValues(alpha: colour.a * alpha));
@@ -452,7 +464,56 @@ class _RoomPainter extends CustomPainter {
       return;
     }
 
-    final sprite0 = PipSprites.frameOf(brain.frame, brain.face);
+    // Round 44: his charging station, rising out of the ground (clipped
+    // there), its socket facing him; the cable from it to the plug.
+    if (brain.station case (final sx, final up, final right)) {
+      canvas.save();
+      canvas.clipRect(Rect.fromLTWH(0, 0, size.width, groundTop * pixel));
+      sprite(
+        brain.stationLamp ? PipSprites.station : PipSprites.stationLampOff,
+        sx,
+        groundTop + (1 - up) * PipBrain.stationHeight,
+        mirror: !right,
+        colours: PipSprites.stationColours,
+      );
+      canvas.restore();
+      if (up >= 1) {
+        if (brain.plug case (final px, final py)) {
+          final (cx, cy) = brain.socket;
+          // From the socket to the plug's end that faces the station.
+          final endX = right ? px + 1 : px;
+          _line(dot, cx, groundTop - cy - 1, endX, groundTop - py - 1,
+              PipColours.cable);
+          sprite(PipSprites.plug, px, groundTop - py);
+        }
+      }
+    }
+
+    // His antenna lit while he charges: a glow, bigger at night.
+    final lit = brain.antennaLit;
+    final tipX = brain.x + (brain.facingRight ? 9 : 10);
+    final tipY = groundTop - PipBrain.height;
+    if (lit) {
+      final r = switch (scene?.part) {
+        DayPart.night => 3,
+        DayPart.dawn || DayPart.dusk => 2,
+        _ => 1,
+      };
+      for (var dy = -r; dy <= r; dy++) {
+        for (var dx = -r; dx <= r; dx++) {
+          final d = dx * dx + dy * dy;
+          if (d == 0 || d > r * r) continue;
+          dot(tipX + dx, tipY + dy,
+              d <= 2 ? PipColours.glowNear : PipColours.glowFar);
+        }
+      }
+    }
+
+    final charge = brain.chargeScreen;
+    final sprite0 = charge == null
+        ? PipSprites.frameOf(brain.frame, brain.face)
+        : PipSprites.chargingFrame(charge.$1, charge.$2,
+            lamp: brain.stationLamp);
     final rows = sprite0.length;
     final (sx, sy) = brain.stretch;
     final centre = brain.x + PipBrain.width / 2;
@@ -508,6 +569,36 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
+    if (lit) dot(tipX, tipY, PipColours.glowNear);
+    // His hands (Round 44), popping in and away (a sparkle as they do).
+    for (final (mx, my, size) in brain.mitts) {
+      if (size <= 0.05) continue;
+      final w = PipSprites.mitt[0].length * size;
+      final h = PipSprites.mitt.length * size;
+      final cx = mx + 1, cy = groundTop - my - 1.5;
+      for (var y = 0; y < PipSprites.mitt.length; y++) {
+        for (var x = 0; x < PipSprites.mitt[y].length; x++) {
+          final colour = PipSprites.colours[PipSprites.mitt[y][x]]!;
+          dot(cx - w / 2 + x * size, cy - h / 2 + y * size, colour, size, size);
+        }
+      }
+      if (size < 1) {
+        final out = 1 + 2 * (1 - size);
+        for (final (ox, oy) in const [(-1, -1), (1, -1), (-1, 1), (1, 1)]) {
+          dot((cx + ox * (out + 0.5)).floorToDouble(),
+              (cy + oy * (out + 0.5)).floorToDouble(), PipColours.stationBolt);
+        }
+      }
+    }
+    for (final (x, up) in brain.sparks) {
+      dot(x.floorToDouble(), (groundTop - up - 1).floorToDouble(),
+          PipColours.stationBolt);
+    }
+    // Humming: notes floating up, fading.
+    for (final (dx, up, fade) in brain.notes) {
+      sprite(PipSprites.note, centre + dx, groundTop - 18 - up,
+          alpha: 1 - fade);
+    }
     // Asleep: little z's rising above his head, fading.
     for (final (dx, up, fade) in brain.zs) {
       sprite(PipSprites.z, centre + dx, groundTop - 18 - up, alpha: 1 - fade);
@@ -520,6 +611,17 @@ class _RoomPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RoomPainter old) => true;
+}
+
+/// A line of pixels from [x0], [y0] to [x1], [y1] (the cable).
+void _line(void Function(double, double, Color) dot, double x0, double y0,
+    double x1, double y1, Color colour) {
+  final steps = math.max((x1 - x0).abs(), (y1 - y0).abs()).ceil();
+  for (var i = 0; i <= steps; i++) {
+    final p = steps == 0 ? 0.0 : i / steps;
+    dot((x0 + (x1 - x0) * p).roundToDouble(),
+        (y0 + (y1 - y0) * p).roundToDouble(), colour);
+  }
 }
 
 /// A well-mixed number for [i], so the stars scatter without lines.

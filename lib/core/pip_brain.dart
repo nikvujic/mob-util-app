@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'package:the_app/core/pip_energy.dart';
 
 /// What Pip is doing (Round 26).
@@ -43,6 +45,33 @@ enum PipActivity {
 
   /// A battery dropped in his room: he walks over and picks it up.
   fetching,
+
+  /// Round 44: the phone plugged in, he hurries to his charging station.
+  toStation,
+
+  /// At the station: his hands pop in, he takes the plug off its hook,
+  /// plugs it into his side, and the hands pop away.
+  plugging,
+
+  /// Plugged in, his antenna lit, his screen changing now and then.
+  charging,
+
+  /// Unplugging: the same as plugging in, backwards.
+  unplugging,
+}
+
+/// What his screen shows while he charges (Round 44), now and then
+/// another, at random.
+enum ChargeScreen {
+  happy,
+  battery,
+  static,
+  bolt,
+  content,
+  percent,
+  sparks,
+  humming,
+  blinking,
 }
 
 /// How his face looks (Round 37): by his energy, asleep, or off.
@@ -62,7 +91,9 @@ enum PipAnimation {
   powerOff('Running out'),
   wakeUp('Waking up', listed: false),
   powerOn('Back on', listed: false),
-  fetch('Picking up a battery', listed: false);
+  fetch('Picking up a battery', listed: false),
+  // Round 44: the station rises, he plugs in, charges a while, unplugs.
+  charge('Charging');
 
   final String label;
 
@@ -82,6 +113,9 @@ enum PipAnimation {
 /// or picking up a battery, nothing starts either. Asleep, he can only
 /// wake (or run out); off, only come back on (a battery). Up and about,
 /// anything but waking or coming back on.
+///
+/// Round 44: hurrying to his station, plugging in or out, or charging,
+/// nothing starts (asleep at night, he first unplugs: [PipBrain.show]).
 bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.egg ||
       PipActivity.hatching ||
@@ -90,7 +124,11 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.wakingUp ||
       PipActivity.poweringOff ||
       PipActivity.poweringOn ||
-      PipActivity.fetching =>
+      PipActivity.fetching ||
+      PipActivity.toStation ||
+      PipActivity.plugging ||
+      PipActivity.charging ||
+      PipActivity.unplugging =>
         false,
       PipActivity.asleep =>
         next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
@@ -231,6 +269,12 @@ class PipBrain {
         if (_battery == null) _t = flyEnd;
       case PipAnimation.fetch:
         return false; // only with a battery: [takeBattery]
+      case PipAnimation.charge:
+        // Only where there's room for the station, and not if the phone
+        // is plugged in already (he's at it, or will be).
+        if (phonePlugged || !_stationFits) return false;
+        _demoCharge = 0;
+        _setStation(true, animate: true);
     }
     return true;
   }
@@ -253,6 +297,10 @@ class PipBrain {
   /// Walking speed now: slower the less energy he has (Round 37).
   double get pace =>
       speed * switch (segments) { 3 => 1.0, 2 => 0.7, _ => 0.45 };
+
+  /// Hurrying (Round 44: to a battery, or his station), whatever his
+  /// energy: quicker than his best walk.
+  static const hurry = speed * 1.6;
 
   /// The battery dropped in his room: its left edge, and how high above
   /// the ground it still is (it falls); null when there's none.
@@ -323,6 +371,13 @@ class PipBrain {
   /// he's just appeared (instead of coming out of the ground), or with
   /// its animation. False if he's busy now (try again later).
   bool show(PipShow show) {
+    // Round 44: plugged in at bedtime, he unplugs first (then sleeps;
+    // the station stays, unused, while the phone's plugged in).
+    _bedtime = show == PipShow.asleep || show == PipShow.fallAsleep;
+    if (activity == PipActivity.charging && _bedtime) {
+      _startUnplugging();
+      return false;
+    }
     final fresh = activity == PipActivity.spawning && _t == 0;
     if (fresh && show != PipShow.awake) _stand();
     switch (show) {
@@ -493,6 +548,7 @@ class PipBrain {
   /// Moves on by [dt] seconds.
   void step(double dt) {
     _t += dt;
+    _stepStation(dt);
     switch (activity) {
       case PipActivity.egg:
         break;
@@ -554,7 +610,7 @@ class PipBrain {
         _batteryHeight = math.max(0, _batteryHeight - fallSpeed * dt);
         final picking = _picking;
         if (picking == null) {
-          final distance = pace * dt;
+          final distance = hurry * dt;
           if ((_target - x).abs() <= distance) {
             x = _target;
             if (_batteryHeight == 0) _picking = 0;
@@ -566,8 +622,372 @@ class PipBrain {
           if (_picking! >= pickAt) _battery = null;
           if (_picking! >= pickEnd) _stand();
         }
+      case PipActivity.toStation:
+        final distance = hurry * dt;
+        if ((_target - x).abs() <= distance) {
+          x = _target;
+          facingRight = stationOnRight;
+          _start(PipActivity.plugging);
+        } else {
+          x += _target > x ? distance : -distance;
+        }
+      case PipActivity.plugging:
+        if (_t >= plugEnd) {
+          _start(PipActivity.charging);
+          _nextScreen();
+        }
+      case PipActivity.charging:
+        _screenT += dt;
+        _screenFor -= dt;
+        if (_screenFor <= 0) _nextScreen();
+        final demo = _demoCharge;
+        if (demo != null) {
+          _demoCharge = demo + dt;
+          if (_demoCharge! >= demoChargeHold) {
+            _demoCharge = null;
+            _setStation(phonePlugged, animate: true);
+          }
+        }
+      case PipActivity.unplugging:
+        if (_t >= unplugEnd) {
+          _stand();
+          // The phone unplugged: the station goes too.
+          if (!_wantsStation) _sinkStation();
+        }
     }
+    if (activity == PipActivity.standing) _maybeCharge();
     x = x.clamp(0, _maxX);
+  }
+
+  // Round 44: his charging station.
+
+  /// The station's size, in pixels; how far from it he stands to plug
+  /// in; how long it takes to rise out of the ground (or sink back).
+  static const stationWidth = 14;
+  static const stationHeight = 27;
+  static const stationGap = 6;
+  static const stationRise = 0.9;
+
+  /// Plugging in, in seconds: his hands pop in, the near one flies to
+  /// the hook, takes the plug, carries it to his side, pushes it in, and
+  /// the hands pop away.
+  static const mittsInEnd = 0.25;
+  static const toHookEnd = 0.75;
+  static const grabEnd = 0.95;
+  static const carryEnd = 1.55;
+  static const pushEnd = 1.75;
+  static const plugEnd = 2.0;
+
+  /// Unplugging: the hands pop in, the near one takes the plug out,
+  /// carries it back to the hook, and they pop away.
+  static const toPortEnd = 0.6;
+  static const pullEnd = 0.8;
+  static const backEnd = 1.4;
+  static const hangEnd = 1.6;
+  static const unplugEnd = 1.85;
+
+  /// Played from Pip Home's list: how long he charges before unplugging.
+  static const demoChargeHold = 6.0;
+
+  /// The phone plugged in (from his room, checked every second).
+  bool phonePlugged = false;
+
+  /// The demo (Pip Home's list): seconds charging so far, or null.
+  double? _demoCharge;
+
+  /// Whether the station should be up: the phone plugged in, or a demo.
+  bool get _wantsStation => phonePlugged || _demoCharge != null;
+
+  /// The station's left edge (null: none), how far up it is (0 in the
+  /// ground, 1 up), and which way it's going (1 rising, −1 sinking).
+  double? _stationX;
+  double _stationUp = 0;
+  int _stationDir = 0;
+  bool _stationRight = true;
+
+  /// The station: its left edge, how far up (0 to 1), and whether its
+  /// socket faces left (it's on his right); null when there's none.
+  (double, double, bool)? get station {
+    final sx = _stationX;
+    if (sx == null) return null;
+    return (sx, _stationUp, _stationRight);
+  }
+
+  /// The station rising or sinking now.
+  bool get stationMoving => _stationDir != 0;
+
+  /// Which side of him the station is on (it rises on the side with more
+  /// room, so never on top of him).
+  bool get stationOnRight => _stationRight;
+
+  /// Room for the station and him beside it, with some to spare.
+  bool get _stationFits =>
+      roomWidth >= 2 * width + stationWidth + stationGap + 8;
+
+  /// Where he stands to plug in.
+  double get _plugX => _stationRight
+      ? _stationX! - stationGap - width
+      : _stationX! + stationWidth + stationGap;
+
+  /// The phone plugged in or not, as now known; [animate]: seen happening
+  /// (the station rises or sinks, he plugs in or out), else made so at
+  /// once (the app opened while charging: he's simply there, charging).
+  void setPlugged(bool plugged, {bool animate = true}) {
+    if (plugged == phonePlugged && (_stationX != null) == _wantsStation) {
+      return;
+    }
+    phonePlugged = plugged;
+    // A demo going on: it ends on its own.
+    if (_demoCharge != null) return;
+    _setStation(plugged, animate: animate);
+  }
+
+  void _setStation(bool up, {required bool animate}) {
+    if (up) {
+      if (!_stationFits) return;
+      if (_stationX == null) {
+        // The side with more room: never on top of him.
+        _stationRight = x + width / 2 <= roomWidth / 2;
+        _stationX =
+            _stationRight ? (roomWidth - stationWidth - 4).toDouble() : 4;
+        _stationUp = animate ? 0 : 1;
+        _stationDir = animate ? 1 : 0;
+      } else if (_stationDir < 0) {
+        _stationDir = 1; // sinking: back up
+      }
+      if (!animate && _goesCharging) {
+        // Simply there, charging.
+        x = _plugX;
+        facingRight = _stationRight;
+        _start(PipActivity.charging);
+        _nextScreen();
+      }
+      return;
+    }
+    switch (activity) {
+      case PipActivity.charging || PipActivity.plugging:
+        if (animate) {
+          _startUnplugging();
+          return; // the station sinks once he's done
+        }
+        _stand();
+      case PipActivity.toStation:
+        _stand();
+      case PipActivity.unplugging when animate:
+        return;
+      default:
+    }
+    if (activity == PipActivity.unplugging) _stand();
+    animate ? _sinkStation() : _stationX = null;
+  }
+
+  void _sinkStation() {
+    if (_stationX == null) return;
+    _stationDir = -1;
+  }
+
+  void _startUnplugging() {
+    _start(PipActivity.unplugging);
+    facingRight = _stationRight;
+  }
+
+  void _stepStation(double dt) {
+    _stationClock += dt;
+    if (_stationX == null || _stationDir == 0) return;
+    _stationUp += _stationDir * dt / stationRise;
+    if (_stationUp >= 1) {
+      _stationUp = 1;
+      _stationDir = 0;
+    } else if (_stationUp <= 0) {
+      _stationX = null;
+      _stationUp = 0;
+      _stationDir = 0;
+    }
+  }
+
+  /// Bedtime (his life says asleep): he doesn't go and plug in.
+  bool _bedtime = false;
+
+  /// He'd go and plug in now: the station up, he isn't full (it's for
+  /// looks: he ignores it full, Nikola), or it's a demo; not at bedtime.
+  bool get _goesCharging =>
+      _stationX != null &&
+      _wantsStation &&
+      !_bedtime &&
+      (segments < 3 || _demoCharge != null) &&
+      (activity == PipActivity.standing ||
+          activity == PipActivity.walking ||
+          activity == PipActivity.spawning);
+
+  /// Standing about with the station up and wanted: off he hurries.
+  void _maybeCharge() {
+    if (_stationDir != 0 || !_goesCharging) return;
+    _target = _plugX;
+    if ((_target - x).abs() < 0.5) {
+      x = _target;
+      facingRight = _stationRight;
+      _start(PipActivity.plugging);
+      return;
+    }
+    facingRight = _target > x;
+    _start(PipActivity.toStation);
+  }
+
+  /// What his screen shows while he charges, and seconds into it.
+  ChargeScreen _screen = ChargeScreen.happy;
+  double _screenT = 0;
+  double _screenFor = 0;
+
+  void _nextScreen() {
+    final others = [
+      for (final s in ChargeScreen.values)
+        if (s != _screen) s,
+    ];
+    _screen = others[random.nextInt(others.length)];
+    _screenT = 0;
+    // A demo shows more of them.
+    _screenFor = _demoCharge != null ? 1.5 : 4 + random.nextDouble() * 3;
+  }
+
+  /// Shows [screen], [t] seconds in (for tests and pictures).
+  @visibleForTesting
+  void debugScreen(ChargeScreen screen, double t) {
+    _screen = screen;
+    _screenT = t;
+    _screenFor = 100;
+  }
+
+  /// While charging: what his screen shows, and how far into it.
+  (ChargeScreen, double)? get chargeScreen =>
+      activity == PipActivity.charging ? (_screen, _screenT) : null;
+
+  /// His antenna's tip lit (Round 44: plugged in).
+  bool get antennaLit =>
+      activity == PipActivity.charging ||
+      (activity == PipActivity.plugging && _t >= pushEnd) ||
+      (activity == PipActivity.unplugging && _t < pullEnd);
+
+  /// The station's lamp: blinking slowly while it's up.
+  bool get stationLamp => _stationClock % 1.2 < 0.6;
+  double _stationClock = 0;
+
+  /// His port (where the plug goes) and the station's hook and socket, as
+  /// (x, height above the ground) in room pixels.
+  (double, double) get _port => (_stationRight ? x + width - 2 : x, portUp);
+  (double, double) get _hook => (
+        _stationRight ? _stationX! - 3 : _stationX! + stationWidth + 1,
+        hookUp,
+      );
+  (double, double) get socket => (
+        _stationRight ? _stationX! - 1 : _stationX! + stationWidth,
+        socketUp,
+      );
+  static const portUp = 9.0;
+  static const hookUp = 5.0;
+  static const socketUp = 8.0;
+
+  /// Where his floating hands are (Round 44: they pop in when he needs
+  /// them, and away after): each (x, height above the ground, size 0–1),
+  /// the near one (towards the station) first; none when not needed.
+  List<(double, double, double)> get mitts {
+    final plugging = activity == PipActivity.plugging;
+    if (!plugging && activity != PipActivity.unplugging) return const [];
+    final near = _stationRight ? x + width + 2 : x - 4;
+    final far = _stationRight ? x - 4 : x + width + 2;
+    const rest = 8.0;
+    final double size;
+    if (_t < mittsInEnd) {
+      size = _t / mittsInEnd;
+    } else {
+      final out = plugging ? pushEnd : hangEnd;
+      final end = plugging ? plugEnd : unplugEnd;
+      size = _t < out ? 1 : 1 - ((_t - out) / (end - out)).clamp(0.0, 1.0);
+    }
+    final hand = _plugPoint ?? (near, rest);
+    // Before it takes the plug, and after it lets go: on its way.
+    final (hx, hy) = switch (plugging) {
+      true when _t < toHookEnd => _lerp(
+          (near, rest),
+          (_hook.$1, _hook.$2 - 1),
+          _ease((_t - mittsInEnd) / (toHookEnd - mittsInEnd)),
+        ),
+      false when _t < toPortEnd => _lerp(
+          (near, rest),
+          (_port.$1, _port.$2 - 2),
+          _ease((_t - mittsInEnd) / (toPortEnd - mittsInEnd)),
+        ),
+      _ when _plugPoint != null => (hand.$1, hand.$2 - 2),
+      _ => (near, rest),
+    };
+    return [(hx, hy, size), (far, rest, size)];
+  }
+
+  /// Where the plug is (x, height above the ground) while a hand carries
+  /// it; null when it's on the hook or in his side ([plug] says).
+  (double, double)? get _plugPoint {
+    if (activity == PipActivity.plugging && _t >= toHookEnd && _t < carryEnd) {
+      final p = _t < grabEnd ? 0.0 : (_t - grabEnd) / (carryEnd - grabEnd);
+      return _lerp(_hook, _port, _ease(p));
+    }
+    if (activity == PipActivity.unplugging && _t >= pullEnd && _t < backEnd) {
+      return _lerp(_port, _hook, _ease((_t - pullEnd) / (backEnd - pullEnd)));
+    }
+    return null;
+  }
+
+  /// The plug (x, height above the ground): on the hook, carried, or in
+  /// his side; null without a station.
+  (double, double)? get plug {
+    if (_stationX == null) return null;
+    final carried = _plugPoint;
+    if (carried != null) return carried;
+    final inPort = switch (activity) {
+      PipActivity.charging => true,
+      PipActivity.plugging => _t >= carryEnd,
+      PipActivity.unplugging => _t < pullEnd,
+      _ => false,
+    };
+    return inPort ? _port : _hook;
+  }
+
+  /// Sparks at the plug: pushed in, and the charging screen that has
+  /// them; each (x, height above the ground).
+  List<(double, double)> get sparks {
+    final pushing =
+        activity == PipActivity.plugging && _t >= carryEnd && _t < pushEnd;
+    final screen = activity == PipActivity.charging &&
+        _screen == ChargeScreen.sparks &&
+        (_screenT * 6).floor().isEven;
+    if (!pushing && !screen) return const [];
+    final (px, py) = _port;
+    final out = _stationRight ? 1.0 : -1.0;
+    final t = (_t * 10).floor();
+    return [
+      for (var i = 0; i < 4; i++)
+        (px + out * (2 + (t + i * 3) % 4), py + (i.isEven ? 2 : -1) + i % 2),
+    ];
+  }
+
+  /// Humming (a charging screen): little notes floating up, each (x from
+  /// his middle, y above his head, how faded 0–1).
+  List<(double, double, double)> get notes {
+    if (activity != PipActivity.charging || _screen != ChargeScreen.humming) {
+      return const [];
+    }
+    return [
+      for (var i = 0; i < 2; i++)
+        if (((_screenT / 2.2 + i / 2) % 1) case final p)
+          ((i.isEven ? 5 : -7) + 3 * p, 2 + 10 * p, p),
+    ];
+  }
+
+  static (double, double) _lerp(
+          (double, double) a, (double, double) b, double p) =>
+      (a.$1 + (b.$1 - a.$1) * p, a.$2 + (b.$2 - a.$2) * p);
+
+  static double _ease(double p) {
+    final c = p.clamp(0.0, 1.0);
+    return c * c * (3 - 2 * c);
   }
 
   void _stand() {
@@ -587,9 +1007,18 @@ class PipBrain {
       _stand();
       return;
     }
+    // Round 44: not into his station, if it's up.
+    var low = 0.0, high = max;
+    if (_stationX != null) {
+      if (_stationRight) {
+        high = math.min(high, _plugX);
+      } else {
+        low = math.max(low, _plugX);
+      }
+    }
     var target = x;
     for (var i = 0; i < 10 && (target - x).abs() < 6; i++) {
-      target = random.nextDouble() * max;
+      target = low + random.nextDouble() * math.max(0, high - low);
     }
     if ((target - x).abs() < 6) {
       _stand();
@@ -621,14 +1050,23 @@ class PipBrain {
         PipActivity.fetching => _picking == null
             ? (_atTarget ? PipFrame.idle : _stepFrame)
             : (_picking! < pickAt ? PipFrame.tuck : PipFrame.idle),
+        PipActivity.toStation => _stepFrame,
+        PipActivity.plugging ||
+        PipActivity.charging ||
+        PipActivity.unplugging =>
+          PipFrame.idle,
       };
 
+  /// Hurrying, his steps come quicker too (Round 44).
   PipFrame get _stepFrame => const [
         PipFrame.step1,
         PipFrame.step2,
         PipFrame.step3,
         PipFrame.step4,
-      ][(_t / stepTime).floor() % 4];
+      ][(_t / (_hurrying ? stepTime * speed / hurry : stepTime)).floor() % 4];
+
+  bool get _hurrying =>
+      activity == PipActivity.toStation || activity == PipActivity.fetching;
 
   bool get _atTarget => (_target - x).abs() < 0.01;
 

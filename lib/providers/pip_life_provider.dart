@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/data/power.dart';
 import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 
 /// Pip, the pet (Round 34): an egg until hatched, then his birthday and
 /// name; his energy and batteries (Round 37). Saved to `pip.json`.
@@ -58,8 +61,28 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     );
   }
 
+  /// The phone is plugged in (Round 44): he can't lose power meanwhile.
+  bool _charging = false;
+  bool get charging => _charging;
+
+  /// Whether the phone is plugged in, as known at [now]: his energy is
+  /// taken as it is then, and from then on kept (charging) or used
+  /// (not).
+  void setCharging(bool charging, DateTime now) {
+    if (charging == _charging) return;
+    if (state.hatched) {
+      state = state.copyWith(energy: levelAt(now), energyAt: () => now);
+    }
+    _charging = charging;
+  }
+
+  /// Plugged in when last seen (after a restart): charging since then,
+  /// his energy as it was.
+  void resumeCharging(bool charging) => _charging = charging;
+
   /// His energy at [now].
-  double levelAt(DateTime now) => PipEnergy.levelAt(
+  double levelAt(DateTime now) =>
+      (_charging ? PipEnergy.chargingLevelAt : PipEnergy.levelAt)(
         state.energy,
         state.energyAt ?? now,
         now,
@@ -122,6 +145,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     if (PipEnergy.segments(level) >= 3) return PipRefusal.full;
     final show = showAt(now);
     if (show == PipShow.asleep) return PipRefusal.asleep;
+    // Round 44: plugged in (at his station), not now.
+    if (_charging && show != PipShow.off) return PipRefusal.charging;
     return null;
   }
 
@@ -144,7 +169,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
 }
 
 /// Why he can't have a battery now.
-enum PipRefusal { egg, noBatteries, full, asleep }
+enum PipRefusal { egg, noBatteries, full, asleep, charging }
 
 /// Picks battery times; tests give their own.
 final pipRandomProvider = Provider<math.Random>((ref) => math.Random());
@@ -169,6 +194,8 @@ class _Link implements PipLink {
 
   @override
   (PipShow, int) look() {
+    // Plugged in or not first (Round 44): it decides his energy.
+    _ref.read(pipPowerProvider.notifier).refresh();
     final now = _now;
     _pip.collect(now);
     return (_pip.showAt(now), PipEnergy.segments(_pip.levelAt(now)));
@@ -179,6 +206,60 @@ class _Link implements PipLink {
 
   @override
   bool giveBattery() => _pip.giveBattery(_now);
+
+  @override
+  bool get plugged => _ref.read(pipPowerProvider);
 }
+
+/// Whether the phone is plugged in (Round 44: Pip's charging station):
+/// asked of Android at first and again while he's looked at (every few
+/// seconds at most: so also when the app comes back), and told as it
+/// changes while the app is open. Kept in his life (he can't lose power
+/// meanwhile) and in this phone's preferences (for after a restart).
+class PipPowerNotifier extends StateNotifier<bool> {
+  final Ref _ref;
+  StreamSubscription<bool>? _changes;
+
+  PipPowerNotifier(this._ref)
+      : super(_ref.read(preferencesProvider).pipPlugged) {
+    _ref.read(pipLifeProvider.notifier).resumeCharging(state);
+    final source = _ref.read(powerSourceProvider);
+    _changes = source.changes.listen(_set);
+    _ask();
+  }
+
+  /// Since it was last asked (a real clock, whatever the app's).
+  final _sinceAsked = Stopwatch()..start();
+  static const askEvery = Duration(seconds: 5);
+
+  /// Asks again if it's been a while (the app may have been away).
+  void refresh() {
+    if (_sinceAsked.elapsed < askEvery) return;
+    _ask();
+  }
+
+  Future<void> _ask() async {
+    _sinceAsked.reset();
+    final plugged = await _ref.read(powerSourceProvider).plugged();
+    if (mounted) _set(plugged);
+  }
+
+  void _set(bool plugged) {
+    final now = _ref.read(clockProvider)();
+    _ref.read(pipLifeProvider.notifier).setCharging(plugged, now);
+    _ref.read(preferencesProvider.notifier).setPipPlugged(plugged);
+    state = plugged;
+  }
+
+  @override
+  void dispose() {
+    _changes?.cancel();
+    super.dispose();
+  }
+}
+
+final pipPowerProvider = StateNotifierProvider<PipPowerNotifier, bool>(
+  PipPowerNotifier.new,
+);
 
 final pipLinkProvider = Provider<PipLink>((ref) => _Link(ref));

@@ -1,14 +1,20 @@
 package com.nikvujic.the_app
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 // A FragmentActivity: Android's fingerprint prompt (biometric_storage) needs
@@ -50,6 +56,42 @@ class MainActivity: FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Pip's charging station (Round 44): whether the phone is plugged
+        // in (no permission needed), now and as it changes while the app
+        // is open.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/power")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "plugged") result.success(isPlugged())
+                else result.notImplemented()
+            }
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/power_changes")
+            .setStreamHandler(object : EventChannel.StreamHandler {
+                private var receiver: BroadcastReceiver? = null
+
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
+                    val listening = object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            events.success(intent.action == Intent.ACTION_POWER_CONNECTED)
+                        }
+                    }
+                    receiver = listening
+                    // System broadcasts only: not open to other apps.
+                    ContextCompat.registerReceiver(
+                        this@MainActivity,
+                        listening,
+                        IntentFilter().apply {
+                            addAction(Intent.ACTION_POWER_CONNECTED)
+                            addAction(Intent.ACTION_POWER_DISCONNECTED)
+                        },
+                        ContextCompat.RECEIVER_NOT_EXPORTED,
+                    )
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    receiver?.let { unregisterReceiver(it) }
+                    receiver = null
+                }
+            })
         // A recipe open (Round 42): the screen stays on while the app is in
         // front (Android lets it go dark again in the background).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/screen")
@@ -255,5 +297,12 @@ class MainActivity: FlutterFragmentActivity() {
         sounds?.release()
         sounds = null
         super.onDestroy()
+    }
+
+    /// Plugged in (charger, USB or wireless), charging or already full:
+    /// the battery's last state, which Android keeps for anyone to read.
+    private fun isPlugged(): Boolean {
+        val battery = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        return (battery?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0) != 0
     }
 }

@@ -73,4 +73,71 @@ void main() {
       expect(PipSprites.colours['A'], PipColours.light);
     });
   });
+
+  group('his charging station (Round 44)', () {
+    test('the station: 14 x 27, every pixel in its colours', () {
+      expect(PipSprites.station, hasLength(PipBrain.stationHeight));
+      for (final row in [...PipSprites.station, ...PipSprites.stationLampOff]) {
+        expect(row.length, PipBrain.stationWidth);
+        for (final c in row.split('')) {
+          if (c == '.') continue;
+          expect(PipSprites.stationColours, contains(c), reason: c);
+        }
+      }
+      // Its socket on its left, where his port's height is.
+      final socketRow = PipBrain.stationHeight - 1 - PipBrain.socketUp.toInt();
+      expect(PipSprites.station[socketRow][0], 'c');
+      // The lamp blinks: lit in one, off in the other.
+      expect(PipSprites.station.join(), contains('q'));
+      expect(PipSprites.stationLampOff.join(), isNot(contains('q')));
+    });
+
+    test('mitts, plug and notes in his colours', () {
+      for (final row in [
+        ...PipSprites.mitt,
+        ...PipSprites.plug,
+        ...PipSprites.note,
+      ]) {
+        for (final c in row.split('')) {
+          if (c != '.') expect(PipSprites.colours, contains(c), reason: c);
+        }
+      }
+    });
+
+    test('every charging screen: his frame, his colours', () {
+      final idle = PipSprites.frames[PipFrame.idle]!;
+      for (final screen in ChargeScreen.values) {
+        for (final t in [0.0, 0.7, 1.6, 5.0]) {
+          final frame = PipSprites.chargingFrame(screen, t, lamp: t < 1);
+          expect(frame, hasLength(idle.length), reason: screen.name);
+          for (var y = 0; y < frame.length; y++) {
+            expect(frame[y].length, idle[y].length);
+            for (final c in frame[y].split('')) {
+              if (c != '.') {
+                expect(PipSprites.colours, contains(c), reason: screen.name);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    test(
+        'the screens move: the battery fills, the percentage counts, the '
+        'static changes, his eyes follow the lamp', () {
+      String screen(ChargeScreen s, double t, {bool lamp = true}) =>
+          PipSprites.chargingFrame(s, t, lamp: lamp).join('\n');
+      expect(screen(ChargeScreen.battery, 0), isNot(contains('B')));
+      expect(screen(ChargeScreen.battery, 1.6), contains('B'));
+      expect(screen(ChargeScreen.percent, 0),
+          isNot(screen(ChargeScreen.percent, 2)));
+      expect(screen(ChargeScreen.percent, 10), screen(ChargeScreen.percent, 20),
+          reason: 'stays at 100%');
+      expect(screen(ChargeScreen.static, 0.05),
+          isNot(screen(ChargeScreen.static, 0.25)));
+      expect(screen(ChargeScreen.blinking, 0, lamp: true),
+          isNot(screen(ChargeScreen.blinking, 0, lamp: false)));
+      expect(screen(ChargeScreen.bolt, 0), contains('Y'));
+    });
+  });
 }

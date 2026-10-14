@@ -344,38 +344,38 @@ fixtures for every stored format.
 - [x] The add-a-section button looked like "new folder": another icon.
 
 **Pip's charging station** (next; drafts first)
-- [ ] While the phone charges, a **charging station** stands in his
+- [x] While the phone charges, a **charging station** stands in his
   field and he's plugged in. Opened while charging: he's simply there,
   charging. Plugged in or out while watching: the animation (the
   station appears, he walks over, plugs in; or unplugs, the station
   goes).
-- [ ] It doesn't fill his battery (just for looks).
-- [ ] Busy (asleep, adventuring, off…): the station appears, but he
+- [x] It doesn't fill his battery (just for looks).
+- [x] Busy (asleep, adventuring, off…): the station appears, but he
   doesn't use it.
-- [ ] Order: **hands** first (specs and sprites, he grabs a cable), then
+- [x] Order: **hands** first (specs and sprites, he grabs a cable), then
   the station, then the animation; Nikola sees drafts at each step.
 - [x] Hands (Nikola's pick, drafts `docs/pip_hands_drafts.png`):
   **floating mitts**, no arms. He has none until he needs them; then
   they **pop in** (and pop away after), so his other animations stay as
   they are. Later used for adventuring too.
-- [ ] The station (drafts `docs/pip_charging_drafts.png`): it rises out
+- [x] The station (drafts `docs/pip_charging_drafts.png`): it rises out
   of the ground, he **hurries** over, stops, his hands pop in, he takes
   the plug and plugs it into his side, the hands pop away. Unplugged:
   the same backwards, the station sinks.
-- [ ] While charging his screen changes now and then, at random:
+- [x] While charging his screen changes now and then, at random:
   happy ^-^, a battery filling up, static.
-- [ ] **Ignores the station when his energy is full.** It's only for
+- [x] **Ignores the station when his energy is full.** It's only for
   looks: it doesn't fill his battery (Nikola: else he'd always be full,
   and running out would hardly ever be seen).
-- [ ] While plugged in he **can't lose power** (his energy stays).
-- [ ] The station looks like a **power station**, bigger, more detail
+- [x] While plugged in he **can't lose power** (his energy stays).
+- [x] The station looks like a **power station**, bigger, more detail
   (drafts v2: `docs/pip_station_drafts.png`); it never appears on top
   of him (it rises where he isn't).
-- [ ] Charging: his **antenna's tip lights up**, brighter at night.
-- [ ] All the charging screens now: ^-^, a battery filling, static, a
+- [x] Charging: his **antenna's tip lights up**, brighter at night.
+- [x] All the charging screens now: ^-^, a battery filling, static, a
   bolt, eyes shut and content, a percentage counting up, sparks at the
   plug, humming (notes float up), blinking with the station's light.
-- [ ] He **hurries** to the station, and to batteries too (now his
+- [x] He **hurries** to the station, and to batteries too (now his
   pace follows his energy, so a tired Pip walks slowly to them).
 - Detecting it: Android says if the phone is plugged in (no permission);
   the app listens while it's open (MainActivity). Plugged in, not
@@ -655,8 +655,8 @@ Nikola's picks (Round 34):
 - [x] A tiny **energy bar** above the room (Round 37: beside his name).
 - [x] (Round 37) **Batteries**: about 3 a day, earned by visiting the app; tap the
   room to drop one, he runs over and picks it up to fill his energy.
-- [ ] While the phone **charges** (if the app can tell): a charging
-  station, he runs to it and plugs in. (Round 44: being built.)
+- [x] While the phone **charges** (if the app can tell): a charging
+  station, he runs to it and plugs in. (Round 44: done.)
 
 **Later: more life**
 - [ ] Entrances: from the ground (now; also when the app is opened again

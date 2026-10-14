@@ -54,6 +54,14 @@ abstract final class PipEnergy {
   static double levelAt(double level, DateTime since, DateTime now) =>
       math.max(0, level - usedBetween(since, now));
 
+  /// Charging (Round 44): plugged in, he can't lose power. The station
+  /// doesn't fill him (just for looks), so he keeps [level] (from when
+  /// it was plugged in); only full, he can drop to just below full (then
+  /// he goes to the station, which he ignores while full).
+  static const chargingFloor = full - 1;
+  static double chargingLevelAt(double level, DateTime since, DateTime now) =>
+      math.max(levelAt(level, since, now), math.min(level, chargingFloor));
+
   /// When [level] at [since] runs out (a minute's precision), or null
   /// if it's already empty.
   static DateTime? emptyAt(double level, DateTime since) {
@@ -154,4 +162,7 @@ abstract class PipLink {
   /// A battery given, if there's one and he isn't full or asleep: true
   /// if it was (he then gets its energy).
   bool giveBattery();
+
+  /// The phone is plugged in now (Round 44): his charging station.
+  bool get plugged;
 }

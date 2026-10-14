@@ -97,6 +97,13 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
       );
   void autoBackupFailed() => state = state.copyWith(autoBackupFailed: true);
 
+  /// Whether the phone was plugged in when last seen (Round 44).
+  void setPipPlugged(bool plugged) {
+    if (plugged != state.pipPlugged) {
+      state = state.copyWith(pipPlugged: plugged);
+    }
+  }
+
   void setPipBackground(String id) => state = state.copyWith(pipBackground: id);
 
   /// The Introduction was opened: no longer new.
