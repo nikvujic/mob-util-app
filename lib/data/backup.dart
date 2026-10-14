@@ -75,8 +75,8 @@ class Backup {
   /// remind again after its doses (Round 16); 14 = a medicine may be
   /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28);
   /// 16 = to-do things may be done (Round 30); 17 = Pip, the pet (`pip`,
-  /// Round 34).
-  static const version = 17;
+  /// Round 34); 18 = his energy and batteries (Round 37).
+  static const version = 18;
 
   final DateTime createdAt;
   final String appVersion;

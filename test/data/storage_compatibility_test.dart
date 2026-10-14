@@ -710,6 +710,10 @@ void main() {
         directory: copyOf('test/fixtures/v17/storage'),
       );
       expectSample(storage.initialPip);
+      // From before his energy (Round 37): full, no batteries yet.
+      expect(storage.initialPip.energy, PipLife.fullEnergy);
+      expect(storage.initialPip.energyAt, isNull);
+      expect(storage.initialPip.batteries, 0);
       expect(storage.unreadable, isEmpty);
     });
 
@@ -729,6 +733,35 @@ void main() {
         File('test/fixtures/v16/backup-plain.json').readAsStringSync(),
       ) as PlainBackupFile;
       expect(file.backup.pip, isNull);
+    });
+  });
+
+  group('pip.json v2 / v18 backup (his energy, Round 37)', () {
+    void expectSample(PipLife? pip) {
+      expect(pip!.name, 'Bip 3');
+      expect(pip.born!.toUtc(), DateTime.utc(2026, 10, 13, 20, 30));
+      expect(pip.energy, 1.5);
+      expect(pip.energyAt!.toUtc(), DateTime.utc(2026, 10, 14, 6));
+      expect(pip.batteries, 2);
+      expect(pip.nextBatteryAt!.toUtc(), DateTime.utc(2026, 10, 14, 9, 15));
+      expect(pip.offSeen, isFalse);
+      expect(pip.sleepSeen, '2026-10-13');
+      expect(pip.wakeSeen, isNull);
+    }
+
+    test('pip.json version 2 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v18/storage'),
+      );
+      expectSample(storage.initialPip);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v18 backup restores him where he was', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v18/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.pip);
     });
   });
 
@@ -865,6 +898,10 @@ void main() {
           '42af9cbe1b6e4f6787bf7b551c2662e736698733ea8e4855a8479791bffc8524',
       'test/fixtures/v17/backup-plain.json':
           'b9bfd92486de0d507b725942431714bdd522a299bfa978514abb2106a44e79bf',
+      'test/fixtures/v18/storage/pip.json':
+          'ec85365016f06a8775e094b0e23246af8c2530a2abd7d4e1a28be700310adc64',
+      'test/fixtures/v18/backup-plain.json':
+          '1d4a2ab1f41db00e5c7f055bc671601bbaec66596f86b89615373c6bf935a82a',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

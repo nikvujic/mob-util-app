@@ -35,7 +35,8 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/medicine.json
 ///         {"version": 2, "medicines": [...], "taken": [...]}
 ///     <app documents>/data/todo.json {"version": 2, "items": [...]}
-///     <app documents>/data/pip.json {"version": 1, "born": …, "name": …}
+///     <app documents>/data/pip.json
+///         {"version": 2, "born": …, "name": …, "energy": …, ...}
 ///     <app documents>/data/notifications.json
 ///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
@@ -97,8 +98,8 @@ class AppStorage {
   static const notificationsFormatVersion = 1;
 
   /// Version of `pip.json` (Round 34): Pip, the pet. History: 1 = first
-  /// format.
-  static const pipFormatVersion = 1;
+  /// format; 2 = his energy, batteries and what was shown (Round 37).
+  static const pipFormatVersion = 2;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;

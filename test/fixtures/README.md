@@ -94,6 +94,11 @@ app still reads every version, so an update can never lose existing data.
 - `v17/storage/pip.json` — Pip, the pet (Round 34, pip.json version 1):
   hatched 13 Oct 2026 20:30 UTC, named "Bip 2".
 - `v17/backup-plain.json` — backup (version 17) with him.
+- `v18/storage/pip.json` — Pip with his energy (Round 37, pip.json
+  version 2): "Bip 3", hatched 13 Oct 2026 20:30 UTC, energy 1.5 at 14
+  Oct 06:00 UTC, 2 batteries held, the next at 09:15 UTC; seen falling
+  asleep the night of 13 Oct; not seen off, nor waking.
+- `v18/backup-plain.json` — backup (version 18) with him.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
