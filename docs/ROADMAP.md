@@ -452,8 +452,9 @@ Nikola's picks (Round 34):
 - [ ] **Sleeping** at night; opening the app wakes him.
 - [ ] Careful **flow control**, so things can't clash (no battery during
   a fight, etc.).
-- [ ] On Pip Home: a **background** pick for the room, and an **info
-  page** playing every animation he has.
+- [x] On Pip Home: a **background** pick for the room, and an **info
+  page** playing every animation he has (Rounds 35–36: Settings,
+  Background and Animations).
 - [ ] Much later: Godville-style items and phrases made to fit him,
   items and levelling up.
 
