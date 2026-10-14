@@ -83,17 +83,21 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
     try {
       await ref.read(sectionDataProvider).clearAll(sections, tools: tools);
     } on StorageWriteException {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text("Couldn't save on the phone (is its storage full?). "
-              'The data may come back when the app restarts.'),
-        ),
-      );
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't save on the phone (is its storage full?). "
+                'The data may come back when the app restarts.'),
+          ),
+        );
       return;
     }
-    messenger.showSnackBar(
-      SnackBar(content: Text('Cleared ${names.join(', ')}')),
-    );
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('Cleared ${names.join(', ')}')),
+      );
     navigator.pop();
   }
 

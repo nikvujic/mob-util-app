@@ -342,7 +342,7 @@ released (v1.7.0 waits for the morning).
 
 - [x] **8-bit notification sounds**: Chime, Bell and Soft go; several
   hacky 8-bit ones instead, to try (Round 33).
-- [ ] **Consistency sweep**: buttons and toasts on every page against
+- [x] **Consistency sweep**: buttons and toasts on every page against
   the UI conventions (e.g. Medicine's grey +) (Round 33).
 - [ ] **Multi-line code blocks** in notes with their own button on the
   format bar; strikethrough's button goes to make room (Round 32).
@@ -408,7 +408,7 @@ first.
 - [x] Why it happened (Nikola asked): the page wasn't checked against
   others, and the rules weren't written down. Now they are
   (ARCHITECTURE, "UI conventions").
-- [ ] Later: a **consistency sweep** across pages: buttons (e.g. Medicine's
+- [x] Later (done in Round 39): a **consistency sweep** across pages: buttons (e.g. Medicine's
   grey +), toasts (when, and with Undo or not), against the conventions.
 - [ ] Later: **new notification sounds**: the current three (Chime,
   Bell, Soft) go; instead **hacky 8-bit sounds**, several to try, then

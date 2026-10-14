@@ -27,7 +27,9 @@ class SecurityPage extends ConsumerWidget {
       MaterialPageRoute(builder: (_) => PasswordFormPage(mode: mode)),
     );
     if (done != null) {
-      messenger.showSnackBar(SnackBar(content: Text(done)));
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(done)));
     }
   }
 
@@ -61,17 +63,21 @@ class SecurityPage extends ConsumerWidget {
     try {
       await reset.run();
     } on StorageWriteException {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text("Couldn't save on the phone (is its storage full?), "
-              'so the master password was kept.'),
-        ),
-      );
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't save on the phone (is its storage full?), "
+                'so the master password was kept.'),
+          ),
+        );
       return;
     }
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Master password reset')),
-    );
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(content: Text('Master password reset')),
+      );
   }
 
   /// Turns a section lock on, or off (which needs the app unlocked).
@@ -295,15 +301,17 @@ class _FingerprintTileState extends ConsumerState<_FingerprintTile> {
       if (!mounted || ref.read(sessionProvider) == null) return; // cancelled
     }
     final done = await fingerprint.turnOn();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          done
-              ? 'Fingerprint unlock is on'
-              : 'Fingerprint unlock wasn\'t turned on',
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            done
+                ? 'Fingerprint unlock is on'
+                : 'Fingerprint unlock wasn\'t turned on',
+          ),
         ),
-      ),
-    );
+      );
   }
 
   @override

@@ -33,6 +33,15 @@ void main() {
   testWidgets('add one: once a day at 08:00 by default', (tester) async {
     await openMedicine(tester);
     expect(find.text('No medicines'), findsOneWidget);
+    // The app's add button, like every page's (Round 39: it was grey).
+    expect(
+        tester
+            .widget<FloatingActionButton>(find.ancestor(
+                of: find.byTooltip('Add medicine'),
+                matching: find.byType(FloatingActionButton)))
+            .backgroundColor,
+        isNull,
+        reason: "the theme's add button colours");
     await tester.tap(find.byTooltip('Add medicine'));
     await tester.pumpAndSettle();
     final add = find.byKey(const Key('medicineSubmit'));
@@ -351,6 +360,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(total(), '13 doses', reason: '30 Sep–11 Oct, and today');
       expect(find.byKey(const Key('fillPast')), findsNothing);
+      // It can be undone (Round 39).
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(total(), '1 dose');
     });
 
     testWidgets('ten or fewer not set: no "Mark past days taken" (Round 16)',

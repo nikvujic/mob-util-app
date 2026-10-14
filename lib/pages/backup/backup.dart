@@ -39,14 +39,16 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   bool get _busy => _exporting || _importing;
 
   void _showMessage(String text, {SnackBarAction? action}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-        action: action,
-        // Long enough to reach Undo.
-        duration: Duration(seconds: action == null ? 4 : 10),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text),
+          action: action,
+          // Long enough to reach Undo.
+          duration: Duration(seconds: action == null ? 4 : 10),
+        ),
+      );
   }
 
   /// The master password's key: from the unlocked session, or else asked
@@ -123,22 +125,26 @@ class _BackupPageState extends ConsumerState<BackupPage> {
         ref
             .read(preferencesProvider.notifier)
             .backedUp(ref.read(clockProvider)());
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              key == null ? 'Backup saved' : 'Encrypted backup saved',
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                key == null ? 'Backup saved' : 'Encrypted backup saved',
+              ),
             ),
-          ),
-        );
+          );
       }
       // Cancelled: the user closed the dialog on purpose; nothing to say.
     } catch (e, st) {
       debugPrint('Export failed: $e\n$st');
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text("Couldn't save the backup. Please try again."),
-        ),
-      );
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't save the backup. Please try again."),
+          ),
+        );
     } finally {
       if (mounted) setState(() => _exporting = false);
     }

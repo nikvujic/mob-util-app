@@ -220,7 +220,9 @@ Written down after the to-do page broke several (Nikola's review of
 - **Holding** a row selects it, or edits it where there's no selecting
   (the to-do); done / bought rows can't be edited.
 - **Toasts** only say what happened when it isn't plain on screen, and
-  carry **Undo** when it can be undone.
+  carry **Undo** when it can be undone. A new one **replaces** the one
+  showing (`hideCurrentSnackBar` first; Round 39), so they never queue
+  up; the architecture test checks it.
 
 ## Back button
 

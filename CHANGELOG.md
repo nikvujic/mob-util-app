@@ -10,6 +10,11 @@ Release with the installable APK.
 - **8-bit notification sounds**: Chime, Bell and Soft are gone; pick
   from Coin, Power-up, Blip, Alert, Zap and Jingle instead (a page set to
   an old one gets the nearest new one).
+- Medicine's **+** is the app's add button, as on every other page.
+- A new message replaces the one showing instead of waiting behind it.
+
+### Fixed
+- Medicine history: *Mark past days taken* can be undone.
 
 ## [1.6.0] - 2026-10-14
 

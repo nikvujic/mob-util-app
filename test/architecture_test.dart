@@ -128,6 +128,20 @@ const plainScrollAllowed = {
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');
 final _print = RegExp(r'(?<![A-Za-z_.])print\(');
 
+/// Toasts shown without first hiding the one showing (UI conventions,
+/// Round 39): within the three lines before.
+List<String> toastViolations(String path, String source) {
+  final lines = source.split('\n');
+  return [
+    for (var i = 0; i < lines.length; i++)
+      if (lines[i].contains('showSnackBar(') &&
+          !lines
+              .sublist((i - 3).clamp(0, i), i + 1)
+              .any((l) => l.contains('hideCurrentSnackBar')))
+        '$path:${i + 1}: a toast that queues: hideCurrentSnackBar first',
+  ];
+}
+
 /// Content rule violations for one file.
 List<String> contentViolations(String path, String source) {
   final violations = <String>[];
@@ -188,6 +202,18 @@ void main() {
         ),
     ];
     expect(violations, isEmpty, reason: violations.join('\n'));
+  });
+
+  test('a toast replaces the one showing, never queues (Round 39)', () {
+    final violations = [
+      for (final f in files) ...toastViolations(f.path, f.source),
+    ];
+    expect(violations, isEmpty, reason: violations.join('\n'));
+    expect(toastViolations('pages/a.dart', 'm.showSnackBar(x);'), hasLength(1));
+    expect(
+        toastViolations('pages/a.dart',
+            'm\n  ..hideCurrentSnackBar()\n  ..showSnackBar(x);'),
+        isEmpty);
   });
 
   test('no raw colors outside the theme, no print(), lists have reach mode',

@@ -53,7 +53,9 @@ Future<DataKey?> lockingKey(BuildContext context, WidgetRef ref) async {
     final done = await Navigator.of(context)
         .pushNamed<String>(AppRoutes.setMasterPassword);
     if (done == null || !context.mounted) return null;
-    messenger.showSnackBar(SnackBar(content: Text(done)));
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(done)));
   }
   return unlockNotesKey(
     context,

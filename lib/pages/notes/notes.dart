@@ -40,9 +40,11 @@ class _NotesPageState extends ConsumerState<NotesPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(message)),
+      );
   }
 
   /// Opens a note; a locked one is decrypted first, asking for the master

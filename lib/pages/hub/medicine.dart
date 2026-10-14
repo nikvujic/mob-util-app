@@ -336,9 +336,11 @@ class MedicinePage extends ConsumerWidget {
               ),
             ),
           ),
+          // The page's main action: the app's add button (Round 39).
           BottomAction(
             icon: Icons.add,
             tooltip: 'Add medicine',
+            primary: true,
             onPressed: () => _add(context, ref),
           ),
         ],

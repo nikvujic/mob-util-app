@@ -284,9 +284,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (failing) {
         _tellSaveFailing();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Saved again')),
-        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('Saved again')),
+          );
       }
     });
 

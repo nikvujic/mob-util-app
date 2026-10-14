@@ -655,13 +655,21 @@ class _MedicineOwnHistoryPageState
     WidgetRef ref,
     Medicine medicine,
   ) async {
-    final marked = ref.read(medicineProvider.notifier).fillPast(medicine.id);
+    final notifier = ref.read(medicineProvider.notifier);
+    final before = ref.read(medicineProvider);
+    final marked = notifier.fillPast(medicine.id);
     if (!context.mounted || marked == 0) return;
+    // It can be undone, so it says so (Round 39: the conventions).
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-            content: Text('${countOf(marked, 'dose', 'doses')} marked taken')),
+          content: Text('${countOf(marked, 'dose', 'doses')} marked taken'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => notifier.replaceAll(before),
+          ),
+        ),
       );
   }
 }
