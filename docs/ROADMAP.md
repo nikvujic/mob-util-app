@@ -335,6 +335,33 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 44 — Nikola's notes on 1.10.0; Pip's charging station (2026-10-14)
+
+**Patches**
+- [ ] Recipes list: a card's prep time and type as **chips**.
+- [ ] Ingredients list: a section's handle level with its name (the
+  touch area as big as now).
+- [ ] The add-a-section button looked like "new folder": another icon.
+
+**Pip's charging station** (next; drafts first)
+- [ ] While the phone charges, a **charging station** stands in his
+  field and he's plugged in. Opened while charging: he's simply there,
+  charging. Plugged in or out while watching: the animation (the
+  station appears, he walks over, plugs in; or unplugs, the station
+  goes).
+- [ ] It doesn't fill his battery (just for looks).
+- [ ] Busy (asleep, adventuring, off…): the station appears, but he
+  doesn't use it.
+- [ ] Order: **hands** first (specs and sprites, he grabs a cable), then
+  the station, then the animation; Nikola sees drafts at each step.
+
+**Later**
+- Recipes extras (type filters, search by ingredient): much later, after
+  the new Hub pages, maybe never.
+- **AI help** (much later, after the backend service): e.g. on a
+  recipe, a Complete button sends the draft to an agent, which returns
+  it filled in, in a form the app turns into the recipe.
+
 ### Round 43 — Nikola's notes on 1.9.0 (2026-10-14)
 
 **Recipes patches**
@@ -599,7 +626,7 @@ Nikola's picks (Round 34):
 - [x] (Round 37) **Batteries**: about 3 a day, earned by visiting the app; tap the
   room to drop one, he runs over and picks it up to fill his energy.
 - [ ] While the phone **charges** (if the app can tell): a charging
-  station, he runs to it and plugs in.
+  station, he runs to it and plugs in. (Round 44: being built.)
 
 **Later: more life**
 - [ ] Entrances: from the ground (now; also when the app is opened again
