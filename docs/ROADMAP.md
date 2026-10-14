@@ -313,7 +313,7 @@ fixtures for every stored format.
 4. [x] **Last pass before v1**: a read through everything that saves
    (D6's remaining part: updates, crashes while saving, a full disk),
    the Introduction checked against the app, the docs tidied.
-5. [ ] **Release v1.0.0.** Then Nikola clears the test data (Settings →
+5. [x] **Release v1.0.0.** (13 Oct 2026) Then Nikola clears the test data (Settings →
    Clear data) and starts using it.
 
 **After v1** (v1.x / v2, roughly by size):
@@ -338,7 +338,7 @@ fixtures for every stored format.
 ### Round 40 — Medicine weekdays, a tidy roadmap, Recipes spec (2026-10-14)
 
 - [x] **Medicine: pick weekdays** (supplements taken some days only).
-- [ ] **Tidy the ROADMAP**: done items still marked open.
+- [x] **Tidy the ROADMAP**: done items still marked open.
 - [ ] **Recipes: a spec for Nikola** (no building yet), from his notes:
   - The page lists recipes as items that can be **reordered**: name and
     prep time. An **Ingredients** button opens the ingredients list.
@@ -443,7 +443,7 @@ first.
   (ARCHITECTURE, "UI conventions").
 - [x] Later (done in Round 39): a **consistency sweep** across pages: buttons (e.g. Medicine's
   grey +), toasts (when, and with Undo or not), against the conventions.
-- [ ] Later: **new notification sounds**: the current three (Chime,
+- [x] (Round 39) **new notification sounds**: the current three (Chime,
   Bell, Soft) go; instead **hacky 8-bit sounds**, several to try, then
   Nikola picks which stay.
 - [x] (Round 39) Automatic backup to a folder: not simple (Android needs a folder
@@ -519,8 +519,8 @@ Nikola's picks (Round 34):
 - [x] The field's **background follows the time of day**.
 
 **Phase 2: energy and batteries**
-- [ ] A tiny **energy bar** above the room.
-- [ ] **Batteries**: about 3 a day, earned by visiting the app; tap the
+- [x] A tiny **energy bar** above the room (Round 37: beside his name).
+- [x] (Round 37) **Batteries**: about 3 a day, earned by visiting the app; tap the
   room to drop one, he runs over and picks it up to fill his energy.
 - [ ] While the phone **charges** (if the app can tell): a charging
   station, he runs to it and plugs in.
@@ -531,8 +531,9 @@ Nikola's picks (Round 34):
 - [ ] Random events: **bugs** (computer bugs) appear and he draws a sword
   to fight them; moments where he **shows something on his screen**
   (also when a notification comes).
-- [ ] **Sleeping** at night; opening the app wakes him.
-- [ ] Careful **flow control**, so things can't clash (no battery during
+- [x] **Sleeping** at night (Round 37: 23:00–8:00; he's seen falling
+  asleep and waking, not woken by the app).
+- [x] (Round 35/37: the `mayStart` table) Careful **flow control**, so things can't clash (no battery during
   a fight, etc.).
 - [x] On Pip Home: a **background** pick for the room, and an **info
   page** playing every animation he has (Rounds 35–36: Settings,
@@ -757,10 +758,10 @@ done without him: kept for now, but he picks the real one, see 6.)
   field); the first time the menu opens, Pip pops out of the ground,
   then stands and walks about. Drawn at a finer pixel scale than the
   icon so walking and squash/stretch look right.
-- [ ] Later: his own Hub page (tamagotchi-like); doing things by
+- [x] (Round 35: Pip Home) Later: his own Hub page (tamagotchi-like); doing things by
   himself: sleeping at night, something on his screen, waking up after
   the app was away.
-- [ ] On his page, a section that **plays each of his animations** on
+- [x] (Round 35) On his page, a section that **plays each of his animations** on
   demand (pop out, hop, walk, blink, …) (Nikola, Round 26).
 - [ ] On his page, besides the pet side: **Godville-style random
   events** (Nikola, Round 26): little things happening to him by
@@ -809,7 +810,7 @@ notification checks and the last pass.
    notification that opens Backup.
 
 A note for after v1:
-- [ ] **Notifications page** (menu → Notifications; E3): a **history**
+- [x] (Round 31) **Notifications page** (menu → Notifications; E3): a **history**
   of recent notifications — today and yesterday — because ones cleared
   from the phone's drawer (e.g. by opening the app instead of tapping
   them) are otherwise gone unseen. Tapping one goes to its page / item
@@ -1156,11 +1157,11 @@ Chunks, in order (each its own commit; release when a few are in):
   Planner, Other) and clear everything in them, after typing RESET and,
   with a master password set, entering it. For clearing test data.
 - [x] Later: **lock each Other page on its own** (like section locks).
-- [ ] Later (with E2): **default notification sounds** for tasks,
+- [x] (Rounds 31, 39: per page) Later (with E2): **default notification sounds** for tasks,
   routines and reminders separately, and for medicine (Nikola, Round
   17: a sound per kind, picked in the app; each kind already has its own
   Android channel, so Android's per-channel sound works meanwhile).
-- [ ] Later (with D6): **what if the app is deleted?** Uninstalling
+- [x] (Round 39: automatic backup to a folder) Later (with D6): **what if the app is deleted?** Uninstalling
   deletes the app's files; ways to survive it: Android's backup (on, see
   ARCHITECTURE), exports, an automatic export to a folder the user picks
   (outside the app, so it stays), cloud save (D5).
@@ -1201,13 +1202,13 @@ Sorted from one long message. Order of work is at the end.
   today only, moving with the clock. (P16)
 
 **E. Notifications**
-- [ ] **Make them solid** (P17): they must arrive with the app open, in
+- [x] (E1, before v1) **Make them solid** (P17): they must arrive with the app open, in
   the background, swiped away, the screen off and the phone locked, and
   after a restart. Check: exact alarms (and the permission on Android
   12+), Doze, battery optimisation (ask to be exempt if needed), boot
   rescheduling, notifications while the app is in front, and what the
   phone maker's battery savers do. Test each state on the phone.
-- [ ] **Notification settings** in Settings (P18): sound (Android lets a
+- [x] (Round 31: on the Notifications page) **Notification settings** in Settings (P18): sound (Android lets a
   channel's sound be chosen in its system settings; offer that, or a few
   channels), and the notification's **colour**: the block's colour where
   it has one, else the accent; or set per reminder.
@@ -1259,7 +1260,7 @@ Sorted from one long message. Order of work is at the end.
   - **History**: each day, and the time each dose was marked taken.
 
 **M. Later**
-- [ ] **Data-safety sweep** (D6): everything that could lose data
+- [x] (before v1) **Data-safety sweep** (D6): everything that could lose data
   (storage, updates, restore, locks, crashes, phone changes), how safe
   export is, and when cloud saving should come in.
 - [ ] **Cloud save** (D5): the server is **typed in** (connection
@@ -1275,15 +1276,15 @@ Sorted from one long message. Order of work is at the end.
 1. [x] G + H — switching tabs clears state; empty notes go away.
 2. [x] A + B — the planner sheet and tapping a task; colours.
 3. [x] D — the "now" line.
-4. [ ] C — reminders as marks on the timeline.
-5. [ ] E1 — notifications: check every state, fix what's missing; a
+4. [x] C — reminders as marks on the timeline.
+5. [x] E1 — notifications: check every state, fix what's missing; a
    phone test list.
-6. [ ] E2 — notification settings (sound, colour).
-7. [ ] F — toasts.
-8. [ ] I — shop quantities.
-9. [ ] J — counters options and style.
-10. [ ] K — Džoni back, configurable.
-11. [ ] L — medicine tracker (model and storage, then the page).
+6. [x] E2 — notification settings (sound, colour).
+7. [x] F — toasts.
+8. [x] I — shop quantities.
+9. [x] J — counters options and style.
+10. [x] K — Džoni back, configurable (as Placard).
+11. [x] L — medicine tracker (model and storage, then the page).
 12. [ ] New Other pages, one per chunk (see *Later / ideas*).
 M (data-safety sweep, cloud) later.
 
