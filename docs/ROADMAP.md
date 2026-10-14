@@ -335,6 +335,28 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 41 — Nikola's notes on 1.7.0, and his answers on Recipes (2026-10-14)
+
+**Patches**
+- [ ] Medicine: the hold-to-take button's circle doesn't fill to 100%
+  before its finishing animation.
+- [ ] The menu: a small gap between Pip's name/age/battery line and his
+  room (half a pixel if a whole one is too much).
+- [ ] The Introduction: check it's still right.
+- [ ] Code blocks in notes look better: rounded corners, room on the
+  left, maybe a different (monospace) font, bundled with the app (no
+  fetching: it works offline).
+- [ ] Notifications are loud: a **volume** for each one.
+
+**Recipes, Nikola's answers** (the spec updated)
+- No servings, no ticking ingredients, no timer.
+- Duplicate yes; share = **copy to the clipboard** only.
+- Search by ingredient: later.
+- To Shop: an item with the same name but another quantity is added as
+  a copy; everything goes to the to-buy list (he moves what he has).
+- Prep time: a picker. Type: a fixed list. Ingredients deleted: recipes
+  keep theirs; renamed: recipes follow.
+
 ### Round 40 — Medicine weekdays, a tidy roadmap, Recipes spec (2026-10-14)
 
 - [x] **Medicine: pick weekdays** (supplements taken some days only).
