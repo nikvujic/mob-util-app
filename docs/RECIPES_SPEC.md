@@ -1,6 +1,6 @@
-# Recipes — spec (Round 40, draft for Nikola)
+# Recipes — spec (Round 40; settled in Rounds 41–42)
 
-Not built yet. From Nikola's notes (ROADMAP, Round 40); the drafts are
+Being built (Round 42). From Nikola's notes (ROADMAP, Round 40); the drafts are
 in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
 
 ## 1. The Recipes page (a Hub page)
@@ -122,9 +122,8 @@ so picking is quick. Opened from Recipes (to manage it) or from a recipe
 - No servings, no ticking off ingredients, no timer, no photos.
 - Duplicate and copy to the clipboard: yes (the recipe's menu).
 - Search by ingredient ("what can I make with eggs?"): later.
-- Still to settle: **ingredient groups** (one recipe's ingredients in
-  parts, e.g. a cake's "Dough" and "Filling", each with its own list):
-  needed?
+- Ingredient groups (a cake's "Dough" and "Filling"): **no**, one flat
+  list per recipe (Round 42).
 
 **Quantities, explained**: a recipe's quantity is any text ("200 g",
 "2", "1 tbsp", "a pinch"). Shop only knows a count (×2) or a weight

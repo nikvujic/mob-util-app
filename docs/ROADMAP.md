@@ -335,6 +335,25 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 42 — Nikola's notes on 1.8.0, and Recipes (2026-10-14)
+
+**Patches**
+- [ ] Code blocks: the room above and below the text don't match.
+- [ ] Code blocks while editing: the ``` fences are hidden, so a block
+  emptied of its text stays as an empty panel with nothing to delete.
+  Show the fences (faint), like `###` on a heading.
+- [ ] Pip's batteries are **blue**, not green.
+
+**Recipes** (`docs/RECIPES_SPEC.md`)
+- [ ] Decided: a recipe's ingredients are **one flat list** (no groups).
+- [ ] Build it (the spec's five chunks), then release.
+
+**Idea: a planner notification that stays** (later; Nikola's)
+- [ ] While a planner **block** or **routine** is on, a notification
+  that can't be swiped away shows what it is ("what I should be doing
+  now"). It goes when the task is ticked, perhaps with a **Done** button
+  on the notification itself. Planner blocks and routines only.
+
 ### Round 41 — Nikola's notes on 1.7.0, and his answers on Recipes (2026-10-14)
 
 **Patches**
