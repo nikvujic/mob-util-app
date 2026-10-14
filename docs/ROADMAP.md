@@ -335,6 +335,30 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 37 — Pip's energy, batteries and sleep (2026-10-14)
+
+Plan proposed to Nikola first; then Pip, then the small notes (8-bit
+sounds, the consistency sweep, multi-line code blocks).
+
+- [ ] **Energy indicator**: a battery with **three segments**: 3 green,
+  2 orange, 1 red, 0 empty.
+- [ ] **His face by energy**: 3 as now, 2 tired, 1 very tired; at 0 he's
+  **empty**: he falls down and his screen goes off.
+- [ ] **Batteries**: one comes every few hours (with a random offset);
+  the time of the next is set, and it's collected when the app is opened
+  after it, so they can't stack while away. At most **3** held. He
+  loses energy a bit slower than batteries come, on average.
+- [ ] He **moves slower** the lower his energy.
+- [ ] **Running out while away**: the next time he's seen (menu or Hub),
+  instead of coming out of the ground he turns off and falls down; if he
+  was already seen off, he's simply lying there off.
+- [ ] **Sleep**: 23:00–8:00; he falls asleep sometime between 23:00 and
+  0:00 and wakes sometime between 8:00 and 9:00, each with an animation
+  when seen. Asleep he loses energy much slower. Running out while
+  asleep: he's simply seen off.
+- [ ] Everything about him (energy, batteries, times, what was seen) is
+  in **backups**, and a restore carries on from there.
+
 ### Round 36 — Nikola's review of Pip Home (1.5.0, 2026-10-14)
 
 - [x] Pip Home's scene takes **half the screen**.
