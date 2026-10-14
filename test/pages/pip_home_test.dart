@@ -17,6 +17,10 @@ void main() {
   late ProviderContainer container;
 
   Future<void> open(WidgetTester tester, {int hour = 12}) async {
+    // A phone's size (Nikola's): half of it is his field.
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.reset);
     container =
         await pumpApp(tester, clock: () => DateTime(2026, 10, 13, hour));
     await openTab(tester, 'Hub');
@@ -49,7 +53,10 @@ void main() {
     final scene = room(tester).scene!;
     expect(scene.place, PipPlace.home);
     expect(scene.part, DayPart.night);
-    expect(room(tester).height, greaterThan(PipRoom.rows));
+    // Half the page, below the app bar (Round 36).
+    final page = tester.getSize(find.byType(Scaffold).last).height;
+    expect(tester.getSize(find.byType(PipRoom)).height,
+        moreOrLessEquals((page - kToolbarHeight) / 2, epsilon: 12));
     expect(room(tester).pixel, greaterThan(PipRoom.smallPixel));
     // Born 1 October (the helper's), today the 13th: his 13th day.
     expect(words(), containsAll(['Pip', 'AGE 13 DAYS', 'BORN 1.10.2026']));
@@ -65,26 +72,33 @@ void main() {
     expect(find.byKey(const Key('pipBackground')), findsOneWidget);
   });
 
-  testWidgets('the background: off, his field on the page; on again',
-      (tester) async {
+  testWidgets('the background: picked from a list (Round 36)', (tester) async {
     await open(tester);
+    expect(room(tester).scene!.background, PipBackground.field);
     await toSettings(tester);
-    expect(words(), contains('ON'));
+    expect(words(), contains('FIELD >'), reason: 'the one in use');
     await tester.tap(find.byKey(const Key('pipBackground')));
+    await tester.pumpAndSettle();
+    for (final b in PipBackground.values) {
+      expect(find.byKey(Key('pipBackground-${b.name}')), findsOneWidget);
+    }
+    expect(words(), contains('IN USE'));
+    await tester.tap(find.byKey(const Key('pipBackground-field')));
     await tester.pump();
-    expect(container.read(preferencesProvider).pipBackground, isFalse);
-    expect(room(tester).scene!.sky, isNull);
-    expect(words(), contains('OFF'));
-    await tester.tap(find.byKey(const Key('pipBackground')));
-    await tester.pump();
-    expect(room(tester).scene!.sky, isNotNull);
+    expect(container.read(preferencesProvider).pipBackground, 'field');
+    expect(room(tester).scene!.background, PipBackground.field);
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('pipRename')), findsOneWidget);
   });
 
-  test('the background setting is kept (on unless turned off)', () {
-    expect(const Preferences().pipBackground, isTrue);
-    expect(Preferences.fromJson(const {}).pipBackground, isTrue);
-    final off = const Preferences(pipBackground: false);
-    expect(Preferences.fromJson(off.toJson()).pipBackground, isFalse);
+  test('the background picked is kept; 1.5.0\'s on/off reads as Field', () {
+    expect(const Preferences().pipBackground, 'field');
+    expect(Preferences.fromJson(const {}).pipBackground, 'field');
+    const picked = Preferences(pipBackground: 'meadow');
+    expect(Preferences.fromJson(picked.toJson()).pipBackground, 'meadow');
+    expect(Preferences.fromJson(const {'pipBackground': false}).pipBackground,
+        'field');
   });
 
   group('rename, on the card\'s own keyboard', () {
@@ -136,6 +150,18 @@ void main() {
       await tester.pumpAndSettle();
       expect(container.read(pipLifeProvider).name, 'Pip');
       semantics.dispose();
+    });
+
+    testWidgets('a narrow phone (360 wide): the keys fit', (tester) async {
+      await openRename(tester);
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3;
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('pipKeyMode')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'no overflow');
+      expect(tester.getSize(find.byKey(const Key('pipKeyDelete'))).width,
+          greaterThan(40));
     });
 
     testWidgets('while renaming, the card stays put', (tester) async {

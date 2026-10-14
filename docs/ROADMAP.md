@@ -337,10 +337,10 @@ fixtures for every stored format.
 
 ### Round 36 — Nikola's review of Pip Home (1.5.0, 2026-10-14)
 
-- [ ] Pip Home's scene takes **half the screen**.
-- [ ] **Background is a choice, not on/off**: a list of backgrounds to
+- [x] Pip Home's scene takes **half the screen**.
+- [x] **Background is a choice, not on/off**: a list of backgrounds to
   pick from (one for now, Field); day and night are the same background.
-- [ ] The menu's room **at least twice as high** (there's room on
+- [x] The menu's room **at least twice as high** (there's room on
   Nikola's phone; on smaller ones the menu items scroll above it).
 - Noted for later: the **Android home-screen widget** (questions
   answered: it doesn't keep the app running; see *Later / ideas*).

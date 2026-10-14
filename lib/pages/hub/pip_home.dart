@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +18,7 @@ import 'package:the_app/widgets/pixel_text.dart';
 
 /// Pip Home (Round 35): his field, big, on top, following the time of
 /// day; under it a card in his own pixel letters, swiped between his
-/// status and his settings (rename, animations, background). Everything
+/// status and his settings (rename, animations, backgrounds). Everything
 /// happens in the card: renaming has its own keyboard.
 class PipHomePage extends ConsumerStatefulWidget {
   const PipHomePage({super.key});
@@ -27,7 +28,7 @@ class PipHomePage extends ConsumerStatefulWidget {
 }
 
 /// What the settings side of the card shows.
-enum _Settings { menu, rename, animations }
+enum _Settings { menu, rename, animations, backgrounds }
 
 class _PipHomePageState extends ConsumerState<PipHomePage> {
   /// His own, here: the menu's Pip stays where he was.
@@ -49,20 +50,23 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final background = ref.watch(
-      preferencesProvider.select((p) => p.pipBackground),
+    final background = PipBackground.byId(
+      ref.watch(preferencesProvider.select((p) => p.pipBackground)),
     );
     final scene = PipScene.at(
       PipPlace.home,
       ref.watch(clockProvider)(),
-      background: background ? PipBackground.field : null,
+      background: background,
     );
     return Scaffold(
       appBar: AppBar(title: const Text('Pip')),
       body: LayoutBuilder(
         builder: (context, box) {
-          // About two fifths of the page for his field.
-          final rows = (box.maxHeight * 0.4 / _pixel).floor().clamp(40, 90);
+          // Half the page for his field (Round 36).
+          // (His pixels are whole device pixels, as PipRoom draws them.)
+          final ratio = MediaQuery.devicePixelRatioOf(context);
+          final pixel = math.max(1.0, (_pixel * ratio).floorToDouble()) / ratio;
+          final rows = (box.maxHeight * 0.5 / pixel).floor().clamp(40, 160);
           return Column(
             children: [
               PipRoom(
@@ -100,6 +104,10 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                   ),
                                 _Settings.animations => _Animations(
                                     brain: _brain,
+                                    back: () => _show(_Settings.menu),
+                                  ),
+                                _Settings.backgrounds => _Backgrounds(
+                                    current: background,
                                     back: () => _show(_Settings.menu),
                                   ),
                               },
@@ -260,14 +268,14 @@ class _CardRow extends StatelessWidget {
 }
 
 /// Settings: rename, animations, background.
-class _SettingsMenu extends ConsumerWidget {
-  final bool background;
+class _SettingsMenu extends StatelessWidget {
+  final PipBackground background;
   final ValueChanged<_Settings> open;
 
   const _SettingsMenu({required this.background, required this.open});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return ListView(
       key: const Key('pipSettings'),
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -284,16 +292,49 @@ class _SettingsMenu extends ConsumerWidget {
           value: '>',
           onTap: () => open(_Settings.animations),
         ),
-        // Only one for now (day and night are the same one): on or off.
+        // Picked from a list (Round 36); the one in use beside it.
         _CardRow(
           key: const Key('pipBackground'),
           label: 'BACKGROUND',
-          value: background ? 'ON' : 'OFF',
-          valueColour: background ? PipColours.light : PipColours.dim,
-          onTap: () => ref
-              .read(preferencesProvider.notifier)
-              .setPipBackground(!background),
+          value: '${background.label.toUpperCase()} >',
+          onTap: () => open(_Settings.backgrounds),
         ),
+      ],
+    );
+  }
+}
+
+/// His backgrounds to pick from (Round 36: one for now, Field; day and
+/// night are the same one), the one in use marked.
+class _Backgrounds extends ConsumerWidget {
+  final PipBackground current;
+  final VoidCallback back;
+
+  const _Backgrounds({required this.current, required this.back});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      key: const Key('pipBackgroundList'),
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              for (final b in PipBackground.values)
+                _CardRow(
+                  key: Key('pipBackground-${b.name}'),
+                  label: b.label.toUpperCase(),
+                  value: b == current ? 'IN USE' : null,
+                  valueColour: PipColours.light,
+                  onTap: () => ref
+                      .read(preferencesProvider.notifier)
+                      .setPipBackground(b.name),
+                ),
+            ],
+          ),
+        ),
+        _back(back),
       ],
     );
   }
@@ -386,9 +427,10 @@ class _RenameState extends ConsumerState<_Rename> {
   late String _name = ref.read(pipLifeProvider).name.toUpperCase();
   bool _numbers = false;
 
-  /// Seven keys a row, each a full tap target.
+  /// Seven keys a row at most (the last row's end has space and delete),
+  /// each a full tap target, so a phone's width holds them.
   static const _letters = ['ABCDEFG', 'HIJKLMN', 'OPQRSTU', 'VWXYZ'];
-  static const _digits = ['1234567', '890-.!?'];
+  static const _digits = ['1234567', '890-.'];
 
   void _type(String char) {
     if (_name.length >= PipLifeNotifier.maxName) return;
@@ -436,25 +478,31 @@ class _RenameState extends ConsumerState<_Rename> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       for (final char in row.split(''))
-                        _Key(
-                          label: char,
-                          said: char,
-                          onTap: full ? null : () => _type(char),
+                        Flexible(
+                          child: _Key(
+                            label: char,
+                            said: char,
+                            onTap: full ? null : () => _type(char),
+                          ),
                         ),
                       // The last row's end: a space and delete.
                       if (i == rows.length - 1) ...[
-                        _Key(
-                          label: '_',
-                          said: 'Space',
-                          onTap: full || _name.isEmpty || _name.endsWith(' ')
-                              ? null
-                              : () => _type(' '),
+                        Flexible(
+                          child: _Key(
+                            label: '_',
+                            said: 'Space',
+                            onTap: full || _name.isEmpty || _name.endsWith(' ')
+                                ? null
+                                : () => _type(' '),
+                          ),
                         ),
-                        _Key(
-                          key: const Key('pipKeyDelete'),
-                          label: '<',
-                          said: 'Delete',
-                          onTap: _name.isEmpty ? null : _delete,
+                        Flexible(
+                          child: _Key(
+                            key: const Key('pipKeyDelete'),
+                            label: '<',
+                            said: 'Delete',
+                            onTap: _name.isEmpty ? null : _delete,
+                          ),
                         ),
                       ],
                     ],
@@ -517,20 +565,24 @@ class _Key extends StatelessWidget {
       enabled: on,
       label: said,
       child: ExcludeSemantics(
-        child: SizedBox(
-          width: wide ? 64 : 48,
-          height: 48,
-          child: Padding(
-            padding: const EdgeInsets.all(3),
-            child: Material(
-              color: highlight && on ? PipColours.body : PipColours.key,
-              child: InkWell(
-                onTap: onTap,
-                child: Center(
-                  child: _words(
-                    label,
-                    colour: on ? PipColours.screen : PipColours.panelEdge,
-                    pixel: 3,
+        // Up to 48 wide; a little less on a narrow phone, in a row.
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: wide ? 64 : 48),
+          child: SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Material(
+                color: highlight && on ? PipColours.body : PipColours.key,
+                child: InkWell(
+                  onTap: onTap,
+                  child: Center(
+                    child: _words(
+                      label,
+                      colour: on ? PipColours.screen : PipColours.panelEdge,
+                      pixel: 3,
+                    ),
                   ),
                 ),
               ),

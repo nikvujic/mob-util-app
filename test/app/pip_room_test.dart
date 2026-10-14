@@ -37,6 +37,8 @@ void main() {
     expect(scene.place, PipPlace.room);
     expect(scene.part, DayPart.night);
     expect(scene.props, {PipProp.stars, PipProp.moon});
+    // Twice the first strip's 32 rows (Round 36): about 160 dp.
+    expect(tester.getSize(find.byType(PipRoom)).height, greaterThan(140));
   });
 
   group('moving', () {

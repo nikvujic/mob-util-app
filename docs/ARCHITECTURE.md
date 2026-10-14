@@ -308,13 +308,13 @@ interrupts the egg, the hatch or coming up). New props and animations
 add a row to these tables; tests check the tables, not each screen.
 
 Pip Home (`pages/hub/pip_home.dart`, `HubTool.pip`): its own `PipBrain`
-(the menu's stays put) in a `PipRoom` with a bigger `pixel` and a
-taller `height`, and a `PageView` card (status, settings) drawn with
+(the menu's stays put) in a `PipRoom` with a bigger `pixel` and
+half the page's `height`, and a `PageView` card (status, settings) drawn with
 `PixelText` and `widgets/pip_portrait.dart` in `PipColours`' panel
 colours, whatever the theme. `HubTool.lockable` and `clearable` keep it
 out of page locks and Clear data; the Hub shows it once hatched, moving
 tiles by their place in the whole stored order. The background switch is
-the `pipBackground` preference.
+the `pipBackground` preference: a background's id (`PipBackground.byId`; 1.5.0's on/off reads as Field).
 
 ## Notifications page (E3, Round 31)
 

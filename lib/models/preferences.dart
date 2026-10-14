@@ -71,9 +71,9 @@ class Preferences {
   /// it's turned off.
   final bool todoNote;
 
-  /// Pip Home's background (Round 35): his field's sky, or the page's own
-  /// colour behind him.
-  final bool pipBackground;
+  /// Pip Home's background (Round 36: picked from a list), by id; an
+  /// unknown one is his field.
+  final String pipBackground;
 
   const Preferences({
     this.theme = 'clay',
@@ -95,7 +95,7 @@ class Preferences {
     this.backupCountFrom,
     this.backupReminder = true,
     this.todoNote = true,
-    this.pipBackground = true,
+    this.pipBackground = 'field',
   });
 
   /// How long until a backup is due again (D8).
@@ -173,7 +173,7 @@ class Preferences {
     DateTime? Function()? backupCountFrom,
     bool? backupReminder,
     bool? todoNote,
-    bool? pipBackground,
+    String? pipBackground,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -276,6 +276,10 @@ class Preferences {
             : DateTime.tryParse(json['backupCountFrom'] as String),
         backupReminder: json['backupReminder'] as bool? ?? true,
         todoNote: json['todoNote'] as bool? ?? true,
-        pipBackground: json['pipBackground'] as bool? ?? true,
+        // 1.5.0 kept an on/off here (Round 35): his field either way.
+        pipBackground: switch (json['pipBackground']) {
+          final String id => id,
+          _ => 'field',
+        },
       );
 }

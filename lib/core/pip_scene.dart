@@ -29,6 +29,10 @@ enum PipBackground {
 
   const PipBackground(this.label);
 
+  /// The one stored as [id]; his field if there's none (Round 36).
+  static PipBackground byId(String id) =>
+      values.where((b) => b.name == id).firstOrNull ?? field;
+
   /// The sky's top and bottom colours at [part].
   (Color, Color) skyAt(DayPart part) => switch (part) {
         DayPart.night => (PipColours.nightTop, PipColours.nightBottom),
@@ -58,9 +62,9 @@ enum PipProp {
     parts: {DayPart.day, DayPart.dawn},
     backgrounds: {PipBackground.field},
   ),
-  // The menu's strip is too low for clouds.
+  // In both since the menu's room grew (Round 36).
   clouds(
-    places: {PipPlace.home},
+    places: {PipPlace.room, PipPlace.home},
     parts: {DayPart.day, DayPart.dawn, DayPart.dusk},
     backgrounds: {PipBackground.field},
   );

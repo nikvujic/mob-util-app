@@ -80,7 +80,7 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   /// The to-do note on or off (Round 28).
   void setTodoNote(bool on) => state = state.copyWith(todoNote: on);
 
-  void setPipBackground(bool on) => state = state.copyWith(pipBackground: on);
+  void setPipBackground(String id) => state = state.copyWith(pipBackground: id);
 
   /// The Introduction was opened: no longer new.
   void readIntro() {

@@ -426,6 +426,16 @@ void main() {
         await t.tap(find.byKey(const Key('pipRename')));
         await t.pumpAndSettle();
       },
+      'pip backgrounds': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Pip'));
+        await t.pumpAndSettle();
+        await t.fling(
+            find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('pipBackground')));
+        await t.pumpAndSettle();
+      },
       'pip animations': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));

@@ -32,7 +32,8 @@ void main() {
   test('what shows where, and when', () {
     final room = PipScene.at(PipPlace.room, at(12, 0));
     expect(room.part, DayPart.day);
-    expect(room.props, {PipProp.sun}, reason: 'no clouds in the low strip');
+    expect(room.props, {PipProp.sun, PipProp.clouds},
+        reason: 'clouds since the room grew (Round 36)');
     expect(PipScene.at(PipPlace.home, at(12, 0)).props,
         {PipProp.sun, PipProp.clouds});
     expect(PipScene.at(PipPlace.room, at(23, 0)).props,
@@ -61,7 +62,12 @@ void main() {
     }
   });
 
-  test('with the background off: no sky, nothing in it', () {
+  test('a background by its stored id; an unknown one is his field', () {
+    expect(PipBackground.byId('field'), PipBackground.field);
+    expect(PipBackground.byId('moon base'), PipBackground.field);
+  });
+
+  test('with no background: no sky, nothing in it', () {
     final off = PipScene.at(PipPlace.home, at(23, 0), background: null);
     expect(off.sky, isNull);
     expect(off.props, isEmpty);

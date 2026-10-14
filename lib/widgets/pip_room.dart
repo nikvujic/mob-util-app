@@ -45,9 +45,9 @@ class PipRoom extends StatefulWidget {
   final double pixel;
   static const smallPixel = 2.5;
 
-  /// The room's height, in Pip's pixels: Pip (19), a hop (6), the
-  /// ground (5) and a little air.
-  static const rows = 32;
+  /// The menu room's height, in Pip's pixels (Round 36: twice the first
+  /// one's 32): Pip (19), a hop, the ground (5) and his sky.
+  static const rows = 64;
 
   /// The ground's depth, in pixels (the top one grass).
   static const ground = 5;
@@ -214,7 +214,8 @@ class _RoomPainter extends CustomPainter {
         dot(0, i * band, Color.lerp(top, bottom, i / (bands - 1))!,
             columns.toDouble(), band);
       }
-      final home = scene.place == PipPlace.home;
+      // A tall sky gets the bigger sun and moon.
+      final home = groundTop > 40;
       for (final prop in scene.props) {
         switch (prop) {
           case PipProp.stars:

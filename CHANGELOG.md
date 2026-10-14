@@ -4,6 +4,17 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- Pip Home: his field takes half the screen; the background is picked
+  from a list (one for now, Field) instead of switched off and on.
+- The menu's room is twice as high, with clouds by day.
+
+### Fixed
+- Pip Home: the rename keyboard's numbers fit on the screen, and the
+  keys fit on narrow phones.
+
 ## [1.5.0] - 2026-10-13
 
 ### Added
