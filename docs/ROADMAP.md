@@ -325,6 +325,8 @@ fixtures for every stored format.
 - **Automatic backup** to a folder Nikola picks (D8, second part), then
   a self-hosted cloud backup (D5).
 - **Food tracker** (O14, design waiting for Nikola's review).
+- **Bills** (Round 45, Nikola): what he pays every month. The next new
+  Hub page after the food tracker.
 - **Page organizer** (O10): a quick-access menu from the right side
   with pages picked for it, maybe sections in the Hub, later pages for
   Nikola's servers and connectors to his projects. Built on O9, so it
@@ -357,9 +359,17 @@ Waiting for Nikola to try the charging station (1.11.0) first.
   things dragged between them; a tap still moves one to *Completed*.
   Off, waiting things show with the rest (kept marked, back when it's
   on again).
-- [ ] **Lock**: like a note's lock (master password).
+- [ ] **Lock**: just a password (Nikola): the list closed behind the
+  master password while the app is locked, like a locked Hub page (not
+  encrypted).
 - [ ] The to-do note's switch in Settings only shows or hides its card:
   the list, its Waiting and its lock stay as they are.
+
+**Pip patches**
+- [ ] Pip Home's *Charging* said "busy" when he wasn't: it refused
+  whenever the phone was plugged in (e.g. he's full and ignores the
+  station). Play it then too; if he's at the station already, say
+  "HE'S CHARGING".
 
 **Idea: Pip's entrances** (later)
 - [ ] Flying in from the side, only in the side menu: as if the menu's
