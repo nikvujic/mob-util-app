@@ -324,7 +324,7 @@ fixtures for every stored format.
 - More Markdown and a formatting bar (N17, Round 20).
 - **Automatic backup** to a folder Nikola picks (D8, second part), then
   a self-hosted cloud backup (D5).
-- **Food tracker** (O14, design waiting for Nikola's review).
+- [x] **Food tracker** (O14): built in Round 46 (1.13.0).
 - **Bills** (Round 45, Nikola): what he pays every month. The next new
   Hub page after the food tracker.
 - **Page organizer** (O10): a quick-access menu from the right side
@@ -344,26 +344,26 @@ proposal (O14); 1.12.0 checked and fine. His two answers: foods can be
 **added from the ingredients list**; **no reminders, no notifications**.
 The rest are Claude's calls, to change after he's tried it.
 
-- [ ] A Hub page, **Food**: a day at a time (‹ date ›, a week strip
+- [x] A Hub page, **Food**: a day at a time (‹ date ›, a week strip
   coloured by each day's worst rating, a tap picks a day), its meals in
   order.
-- [ ] **+** logs a meal: breakfast / lunch / dinner / snack (guessed from
+- [x] **+** logs a meal: breakfast / lunch / dinner / snack (guessed from
   the time) and a time, the foods as chips (most used first), typing a
   new name adds a food, **From ingredients** picks from the recipes'
   ingredients list (a food of the same name is reused), and the last
   meals can be repeated with one tap.
-- [ ] A tap on a meal **rates** it: five faces (Great, Good, OK, Bad,
+- [x] A tap on a meal **rates** it: five faces (Great, Good, OK, Bad,
   Awful), symptoms (bloating, heartburn, cramps, nausea, tiredness,
   headache, other) and a note; also edit its foods and time, or delete
   it (Undo). Per meal, not per food. No reminder to rate.
-- [ ] **Foods**: rename, tags (dairy, gluten, spicy, fried, sugar,
+- [x] **Foods**: rename, tags (dairy, gluten, spicy, fried, sugar,
   alcohol, caffeine, meat, fish), delete (meals keep its name).
-- [ ] **Statistics**: per food and per tag, how rated meals with it went
+- [x] **Statistics**: per food and per tag, how rated meals with it went
   against meals without it: *likely trouble* (5+ rated meals, bad or
   awful clearly more often than without it), *seems fine*, *not enough
   data yet*, with the numbers ("7 meals, 5 bad; without it 1 in 5") and
   the symptom that most often followed.
-- [ ] `food.json` v1, backup v22 (`food`), fixtures; lockable, in Clear
+- [x] `food.json` v1, backup v22 (`food`), fixtures; lockable, in Clear
   data. Not in partial restore yet (a backup restores it whole).
 - Later: a whole-day "how I felt", a month calendar, partial restore.
 
@@ -1235,13 +1235,14 @@ Chunks, in order (each its own commit; release when a few are in):
 - [x] A Settings switch: don't bring it back on updates.
 
 **3. Food tracker** (O14) — first in line when new Hub pages come
-- [ ] A Hub page for what was eaten each day and how well it agreed
+- [x] A Hub page for what was eaten each day and how well it agreed
   (asked for by someone; details left to Claude): a list of foods,
   each day's meals from it with a rating, a day view, and **statistics
   that point out what tends to cause trouble** (and what's fine).
-  Design to propose first.
+  Design to propose first. (Built in Round 46 without his review, at
+  his ask: see there for what changed from this.)
 
-  **Proposal (for Nikola's review, nothing built yet):**
+  **Proposal:**
   - *Foods* are a list that grows as you log (name, optional tags like
     dairy, gluten, spicy, fried, alcohol, caffeine). Typing a name that
     exists picks it; a new name adds it.

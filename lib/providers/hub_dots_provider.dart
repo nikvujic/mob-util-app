@@ -10,6 +10,7 @@ final hubToolDotProvider = Provider.family<bool, HubTool>(
     HubTool.placard => false,
     HubTool.medicine => ref.watch(medicineDotProvider),
     HubTool.recipes => false,
+    HubTool.food => false,
     HubTool.pip => false,
   },
 );

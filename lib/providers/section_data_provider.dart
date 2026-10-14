@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
+import 'package:the_app/models/food.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/counters_provider.dart';
+import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
@@ -48,6 +50,8 @@ class SectionData {
         // With the ingredients list.
         HubTool.recipes => _ref.read(recipesProvider).length +
             _ref.read(ingredientsProvider).size,
+        // Its foods and meals.
+        HubTool.food => _ref.read(foodProvider).size,
         // His life isn't cleared with the Hub's pages.
         HubTool.pip => 0,
       };
@@ -66,6 +70,8 @@ class SectionData {
         _ref
             .read(ingredientsProvider.notifier)
             .replaceAll(IngredientBook.empty);
+      case HubTool.food:
+        _ref.read(foodProvider.notifier).replaceAll(FoodBook.empty);
       case HubTool.pip:
     }
   }

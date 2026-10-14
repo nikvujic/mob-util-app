@@ -26,6 +26,7 @@ void main() {
       'assets/icons/placard.svg',
       'assets/icons/medicine.svg',
       'assets/icons/recipes.svg', // Round 42
+      'assets/icons/food.svg', // Round 46
       'assets/icons/pip.svg', // hatched (Round 35)
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
@@ -74,6 +75,7 @@ void main() {
         HubTool.counters,
         HubTool.medicine,
         HubTool.recipes,
+        HubTool.food,
         HubTool.pip,
       ]);
       expect(
@@ -107,6 +109,7 @@ void main() {
         HubTool.counters,
         HubTool.medicine,
         HubTool.recipes,
+        HubTool.food,
         HubTool.pip,
       ]);
       semantics.dispose();
@@ -143,6 +146,7 @@ void main() {
         HubTool.counters,
         HubTool.medicine,
         HubTool.recipes,
+        HubTool.food,
       ]);
       semantics.dispose();
     });

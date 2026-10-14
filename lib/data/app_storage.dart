@@ -16,6 +16,7 @@ import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
+import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -41,6 +42,8 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/recipes.json {"version": 1, "recipes": [...]}
 ///     <app documents>/data/ingredients.json
 ///         {"version": 1, "sections": [...]}
+///     <app documents>/data/food.json
+///         {"version": 1, "foods": [...], "meals": [...]}
 ///     <app documents>/data/notifications.json
 ///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
@@ -115,6 +118,10 @@ class AppStorage {
   /// from. History: 1 = first format.
   static const ingredientsFormatVersion = 1;
 
+  /// Version of `food.json` (Round 46), the food tracker. History: 1 =
+  /// first format.
+  static const foodFormatVersion = 1;
+
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
@@ -132,6 +139,7 @@ class AppStorage {
   final JsonFileStore? _pipStore;
   final JsonFileStore? _recipesStore;
   final JsonFileStore? _ingredientsStore;
+  final JsonFileStore? _foodStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -149,6 +157,7 @@ class AppStorage {
   final PipLife initialPip;
   final List<Recipe> initialRecipes;
   final IngredientBook initialIngredients;
+  final FoodBook initialFood;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -184,7 +193,8 @@ class AppStorage {
     this._notificationsStore,
     this._pipStore,
     this._recipesStore,
-    this._ingredientsStore, {
+    this._ingredientsStore,
+    this._foodStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -200,6 +210,7 @@ class AppStorage {
     required this.initialPip,
     required this.initialRecipes,
     required this.initialIngredients,
+    required this.initialFood,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
     required this.initialPageLocks,
@@ -223,6 +234,7 @@ class AppStorage {
     this.initialPip = PipLife.egg,
     this.initialRecipes = const [],
     this.initialIngredients = IngredientBook.empty,
+    this.initialFood = FoodBook.empty,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
     this.initialPageLocks = const {},
@@ -244,6 +256,7 @@ class AppStorage {
         _pipStore = null,
         _recipesStore = null,
         _ingredientsStore = null,
+        _foodStore = null,
         initialNotificationLog =
             initialNotificationLog ?? NotificationLog.empty,
         initialLayout = initialLayout ?? PageLayout.initial;
@@ -272,6 +285,7 @@ class AppStorage {
     final recipesStore = JsonFileStore(File('${dir.path}/recipes.json'));
     final ingredientsStore =
         JsonFileStore(File('${dir.path}/ingredients.json'));
+    final foodStore = JsonFileStore(File('${dir.path}/food.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
     final locks = await _load(
         settingsStore, (<AppSection>{}, <HubTool>{}, false), (json) {
@@ -305,6 +319,7 @@ class AppStorage {
       pipStore,
       recipesStore,
       ingredientsStore,
+      foodStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -419,6 +434,12 @@ class AppStorage {
         IngredientBook.empty,
         maxVersion: ingredientsFormatVersion,
         IngredientBook.fromJson,
+      ),
+      initialFood: await _load(
+        foodStore,
+        FoodBook.empty,
+        maxVersion: foodFormatVersion,
+        FoodBook.fromJson,
       ),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
@@ -556,6 +577,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveFood(FoodBook book) async {
+    await _foodStore?.write({
+      'version': foodFormatVersion,
+      ...book.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': countersFormatVersion,
@@ -621,6 +649,7 @@ class AppStorage {
           _pipStore,
           _recipesStore,
           _ingredientsStore,
+          _foodStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -649,6 +678,7 @@ class AppStorage {
           _pipStore,
           _recipesStore,
           _ingredientsStore,
+          _foodStore,
         ])
           if (store != null) store,
       ];
@@ -689,6 +719,7 @@ class AppStorage {
     await _pipStore?.flush();
     await _recipesStore?.flush();
     await _ingredientsStore?.flush();
+    await _foodStore?.flush();
   }
 }
 

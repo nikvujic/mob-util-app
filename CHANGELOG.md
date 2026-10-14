@@ -4,6 +4,18 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Food** in the Hub, a food tracker: log meals (the kind guessed from
+  the time; foods typed, suggested most eaten first, picked from the
+  ingredients list, or the same as a recent meal), rate how each went
+  (five faces, symptoms, a note), see the week coloured by each day's
+  worst meal, keep a list of foods with tags (dairy, gluten, spicy...),
+  and **Statistics** that point out which foods and kinds of food tend
+  to go badly (and which are fine), only once there are enough rated
+  meals to tell. No reminders. In backups, Clear data and the locks.
+
 ## [1.12.0] - 2026-10-14
 
 ### Added

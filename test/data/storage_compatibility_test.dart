@@ -17,6 +17,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/food.dart';
 import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -717,6 +718,57 @@ void main() {
     });
   });
 
+  group('food.json v1 / v22 backup (the food tracker, Round 46)', () {
+    void expectSample(FoodBook book) {
+      expect(
+          book.foods
+              .map((f) => (f.id, f.name, f.tags.map((t) => t.name).join(','))),
+          [
+            ('f1', 'Burek 🥟', 'gluten,fried'),
+            ('f2', 'Jogurt', 'dairy'),
+            ('f3', 'Kafa', 'caffeine'),
+          ]);
+      final (first, second) = (book.meals.first, book.meals.last);
+      expect(first.at, DateTime.utc(2026, 10, 14, 6, 30));
+      expect(first.kind, MealKind.breakfast);
+      expect(first.foods.map((f) => (f.foodId, f.name)),
+          [('f1', 'Burek 🥟'), ('f2', 'Jogurt')]);
+      expect(first.rating, MealRating.bad);
+      expect(first.symptoms, {Symptom.bloating, Symptom.heartburn});
+      expect(first.note, 'Previše, šta god');
+      expect(second.kind, MealKind.snack);
+      expect(second.rating, isNull);
+      expect(second.foods.map((f) => (f.foodId, f.name)),
+          [('f3', 'Kafa'), (null, 'Keks')]);
+    }
+
+    test('food.json version 1 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v22/storage'),
+      );
+      expectSample(storage.initialFood);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v22 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v22/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.food);
+    });
+
+    test('older backups and storage have none', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v21/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.food.size, 0);
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v21/storage'),
+      );
+      expect(storage.initialFood.size, 0);
+    });
+  });
+
   test('notifications.json version 1 (Round 31) loads', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v16/storage'),
@@ -1048,6 +1100,10 @@ void main() {
           'b49d8b8d8fae3bd37633f7e47e446b56b6792be80d6e0251feb3a2e3dc524c97',
       'test/fixtures/v21/backup-plain.json':
           '008ed9a7d9292d768ef92a16a6bb8f79abbd3a180203685bc6a0975647a76736',
+      'test/fixtures/v22/storage/food.json':
+          '3f63df4096c910d142d4531435cf055d6cf9031fbca4708b0df5082b3bafd753',
+      'test/fixtures/v22/backup-plain.json':
+          '4791669538d2706799a1203342118f1ff4cc4e4f27a17236237d8c3ff840308d',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

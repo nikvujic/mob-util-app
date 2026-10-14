@@ -410,6 +410,17 @@ abstract final class DoseColours {
   static const unsure = Color(0xFFFFB300);
 }
 
+/// How a meal went (Round 46), green to red like a dose's, whatever the
+/// theme; [ink] (a face, a day's number) reads on each of them.
+abstract final class RatingColours {
+  static const great = DoseColours.taken;
+  static const good = Color(0xFF9CCC65);
+  static const ok = DoseColours.unsure;
+  static const bad = Color(0xFFFF7043);
+  static const awful = DoseColours.missed;
+  static const ink = Color(0xFF000000);
+}
+
 /// Pip's own colours (Round 25), the launcher icon's, whatever the theme.
 abstract final class PipColours {
   static const casing = Color(0xFFD97757); // head casing, antenna

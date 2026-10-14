@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/pages/hub/counters.dart';
+import 'package:the_app/pages/hub/food.dart';
 import 'package:the_app/pages/hub/medicine.dart';
 import 'package:the_app/pages/hub/pip_home.dart';
 import 'package:the_app/pages/hub/placard.dart';
@@ -15,6 +16,7 @@ extension HubToolPage on HubTool {
         HubTool.placard => 'assets/icons/placard.svg',
         HubTool.medicine => 'assets/icons/medicine.svg',
         HubTool.recipes => 'assets/icons/recipes.svg',
+        HubTool.food => 'assets/icons/food.svg',
         HubTool.pip => 'assets/icons/pip.svg',
       };
 
@@ -23,6 +25,7 @@ extension HubToolPage on HubTool {
         HubTool.placard => const PlacardPage(),
         HubTool.medicine => const MedicinePage(),
         HubTool.recipes => const RecipesPage(),
+        HubTool.food => const FoodPage(),
         HubTool.pip => const PipHomePage(),
       };
 }

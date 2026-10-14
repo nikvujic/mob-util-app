@@ -1,0 +1,93 @@
+{
+  "format": "the-app-backup",
+  "version": 22,
+  "createdAt": "2026-10-14T19:00:00.000Z",
+  "appVersion": "1.13.0 (49)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [],
+    "recipes": [],
+    "ingredients": {
+      "sections": []
+    },
+    "food": {
+      "foods": [
+        {
+          "id": "f1",
+          "name": "Burek 🥟",
+          "tags": [
+            "gluten",
+            "fried"
+          ]
+        },
+        {
+          "id": "f2",
+          "name": "Jogurt",
+          "tags": [
+            "dairy"
+          ]
+        },
+        {
+          "id": "f3",
+          "name": "Kafa",
+          "tags": [
+            "caffeine"
+          ]
+        }
+      ],
+      "meals": [
+        {
+          "id": "m1",
+          "at": "2026-10-14T06:30:00.000Z",
+          "kind": "breakfast",
+          "foods": [
+            {
+              "food": "f1",
+              "name": "Burek 🥟"
+            },
+            {
+              "food": "f2",
+              "name": "Jogurt"
+            }
+          ],
+          "rating": "bad",
+          "symptoms": [
+            "bloating",
+            "heartburn"
+          ],
+          "note": "Previše, šta god"
+        },
+        {
+          "id": "m2",
+          "at": "2026-10-14T11:00:00.000Z",
+          "kind": "snack",
+          "foods": [
+            {
+              "food": "f3",
+              "name": "Kafa"
+            },
+            {
+              "name": "Keks"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

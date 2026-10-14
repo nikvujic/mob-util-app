@@ -14,6 +14,7 @@ import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -24,6 +25,7 @@ import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
@@ -65,6 +67,7 @@ class BackupExporter {
       pip: _ref.read(pipLifeProvider),
       recipes: _ref.read(recipesProvider),
       ingredients: _ref.read(ingredientsProvider),
+      food: _ref.read(foodProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -357,6 +360,7 @@ class BackupImporter {
       source.pip,
       source.recipes,
       source.ingredients,
+      source.food,
     );
     return RestoreUndo._(
       previous,
@@ -634,6 +638,7 @@ class BackupImporter {
       undo._previous.pip,
       undo._previous.recipes,
       undo._previous.ingredients,
+      undo._previous.food,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -711,6 +716,7 @@ class BackupImporter {
     PipLife? pip,
     List<Recipe> recipes,
     IngredientBook ingredients,
+    FoodBook food,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -725,6 +731,7 @@ class BackupImporter {
     if (pip != null) _ref.read(pipLifeProvider.notifier).replace(pip);
     _ref.read(recipesProvider.notifier).replaceAll(recipes);
     _ref.read(ingredientsProvider.notifier).replaceAll(ingredients);
+    _ref.read(foodProvider.notifier).replaceAll(food);
     await _ref.read(appStorageProvider).flush();
   }
 }
