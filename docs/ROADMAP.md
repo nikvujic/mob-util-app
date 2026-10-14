@@ -335,6 +335,36 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 45 — Nikola's notes on 1.10.1 and the charging station (2026-10-14)
+
+Waiting for Nikola to try the charging station (1.11.0) first.
+
+**Charging station, changes**
+- [ ] No lit antenna while charging.
+- [ ] Of the charging screens, drop the **percentage**; keep the rest.
+
+**Patches**
+- [ ] Notes: scrolled down, hold and Select all: the selection's handle
+  (the arrow at its start) shows way up, over the app bar. Hide a
+  handle whose end of the selection is out of view.
+- [ ] Ingredients list: sections' handles **invisible**; touching a
+  section's name and moving drags it; a tap opens its menu.
+
+**To-do note**
+- [ ] A button beside Add with the list's options: a **Waiting**
+  section on or off, and **Lock** the to-do list.
+- [ ] **Waiting**: the "to do" part split in two, *To do* and *Waiting*:
+  things dragged between them; a tap still moves one to *Completed*.
+  Off, waiting things show with the rest (kept marked, back when it's
+  on again).
+- [ ] **Lock**: like a note's lock (master password).
+- [ ] The to-do note's switch in Settings only shows or hides its card:
+  the list, its Waiting and its lock stay as they are.
+
+**Idea: Pip's entrances** (later)
+- [ ] Flying in from the side, only in the side menu: as if the menu's
+  swing threw him in. Then he's **angry** for a bit, shaking a hand.
+
 ### Round 44 — Nikola's notes on 1.10.0; Pip's charging station (2026-10-14)
 
 **Patches**
