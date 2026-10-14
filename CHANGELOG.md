@@ -4,13 +4,12 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.8.0] - 2026-10-14
 
 ### Added
 - Medicine: a medicine can be taken on **some days only** (Days → Some
   days, then the weekdays); on its other days it's under *Not today*,
   with no reminders.
-
 - **Notification volume**: Loud, Medium or Quiet for each page's sound
   (the app's own sounds; the phone's follows the phone's volume).
 - Code blocks in notes: rounded, with room around the code, in their
