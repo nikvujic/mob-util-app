@@ -339,7 +339,8 @@ fixtures for every stored format.
 
 - [x] **Medicine: pick weekdays** (supplements taken some days only).
 - [x] **Tidy the ROADMAP**: done items still marked open.
-- [ ] **Recipes: a spec for Nikola** (no building yet), from his notes:
+- [x] **Recipes: a spec for Nikola** (no building yet; `docs/RECIPES_SPEC.md`,
+  drafts `docs/recipes_drafts.png`), from his notes:
   - The page lists recipes as items that can be **reordered**: name and
     prep time. An **Ingredients** button opens the ingredients list.
   - A recipe opens in **view mode**, which keeps the screen on (set the
