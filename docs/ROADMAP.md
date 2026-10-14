@@ -337,6 +337,21 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 48 — symptoms, the Hub's order, recipes in the food index (2026-10-14, patch 1.14.1)
+
+- [ ] Statistics **by symptom**: for each symptom logged, the foods it
+  follows clearly more often than without them (the same fair
+  comparison and minimums as the verdicts). Symptoms stay **separate**
+  from the verdicts (Nikola): those still come from the faces alone.
+- [ ] The Hub's **default order**: Counters, Medicine, Placard, Pip,
+  Recipes, Food (Nikola wrote "ingredients" for the last: the Food
+  page). An order already arranged by hand stays.
+- [ ] The food index gets a **Recipes** section: a tap on a recipe opens
+  its ingredients, ticked, to choose which to add (each becomes a food,
+  the same name reused).
+- [ ] A patch, 1.14.1: the Introduction's *What's new* shows 1.14.0 and
+  1.14.1 (a patch shows its whole minor version's changes).
+
 ### Round 47 — Nikola's notes on the food tracker (1.13.0, 2026-10-14)
 
 - [x] Adding a food that's already in the meal: its chip **flashes**
