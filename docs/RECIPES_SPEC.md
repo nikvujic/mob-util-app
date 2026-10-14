@@ -31,21 +31,17 @@ in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
   each ingredient's name on the left and its quantity on the right, no
   handles, no adding; then the **method**, the recipe's text shown as a
   note shows it (Markdown rendered, nothing editable).
-- Proposed extra: **tap an ingredient to tick it off** while cooking
-  (struck through; not saved, gone when leaving). Q.
 - No pull-down reach mode here (Nikola): only in edit mode.
 - Bottom buttons: **Edit** (outermost) and **To Shop**.
 
 ### To Shop
 
 - Puts the recipe's ingredients on the Shop list, with their quantities.
-- Proposed: it first shows the recipe's ingredients **all ticked**;
-  untick what's already at home, then *Add N to Shop*. Q.
+- All of them go on the **to-buy** list (Nikola moves what he has).
 - An item already in Shop with the same name (ignoring case) and the
-  same quantity is just put back on the to-buy list (Nikola's rule);
-  otherwise a new item is added. Q: same name but another quantity:
-  a new item (as said), or update that one's quantity and put it on the
-  to-buy list? Proposed: update it (no near-duplicates in Shop).
+  same quantity is just put back on the to-buy list; with another
+  quantity, a **copy** is added (two items, two quantities: easier than
+  changing one each time).
 - Quantities are free text in a recipe (below); Shop's are a count or
   a weight. Read when possible: "200 g", "1.5 kg" → a weight; "2",
   "3 pcs" → a count; anything else ("1 tbsp", "a pinch") → no quantity
@@ -55,12 +51,10 @@ in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
 
 ## 3. A recipe, edit mode
 
-- Everything becomes editable: the **name**, the **prep time** (Q: free
-  text like "25 min", or a minutes picker shown as "25 min" / "1 h 30";
-  proposed: the picker, so recipes can later be sorted or filtered by
-  time), the **type** (a dropdown; Q: a fixed list — Breakfast, Lunch,
-  Dinner, Snack, Cake, Drink, Other — or one you can add to; proposed:
-  fixed to start).
+- Everything becomes editable: the **name**, the **prep time** (a
+  **picker**, shown as "25 min" / "1 h 30"; decided), the **type** (a
+  dropdown from a **fixed list**: Breakfast, Lunch, Dinner, Snack, Cake,
+  Drink, Other; decided).
 - **Ingredients**: a plain box of rows, no background on the rows:
   name, quantity, and a **grab handle** on the right to drag. Tap a
   quantity to change it (a small text sheet: "200 g", "2", "a pinch").
@@ -76,8 +70,10 @@ in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
   how it was when Edit was pressed).
 - A new recipe left with no name and nothing in it is dropped (like an
   empty note).
-- Q: one recipe deleted from its own page: a **Delete** in a menu (top
-  bar ⋮) with Undo. Proposed.
+- A menu (top bar ⋮) in view mode: **Duplicate** (a copy named
+  "… (Copy)", opened in edit mode), **Copy to clipboard** (the name,
+  time, type, ingredients with quantities and the method, as plain
+  text), **Delete** (with Undo). Decided: share is the clipboard only.
 
 ## 4. Ingredients (not in the Hub)
 
@@ -95,8 +91,8 @@ so picking is quick. Opened from Recipes (to manage it) or from a recipe
   to rename or delete it (its items move to the section above; Q).
 - Drag rows within and **between sections**; hold a row to rename or
   delete it.
-- Q: an ingredient used by recipes and deleted here: recipes keep it
-  (their own copy of the name), proposed. See *Data* below.
+- An ingredient used by recipes and deleted here: recipes keep it
+  (their own copy of the name). Decided.
 
 ### Pick mode (from a recipe's + Add)
 
@@ -116,29 +112,25 @@ so picking is quick. Opened from Recipes (to manage it) or from a recipe
   ingredients (id, name) in order.
 - A recipe's ingredient keeps the **name too**, so a recipe stays whole
   if an ingredient is deleted or the list isn't restored; renaming an
-  ingredient renames it in recipes that link to it (Q).
+  ingredient renames it in recipes that link to it (decided).
 - Both in backups (backup version +1, new `recipes` and `ingredients`),
   with frozen fixtures; partial restore lists recipes (each brings its
   ingredients that aren't in the list yet).
 
-## 6. What may be missing (Nikola's question)
+## 6. Decided (Round 41)
 
-1. **Servings** ("serves 4"), and maybe scaling the quantities (×2) —
-   only possible for quantities that are numbers. Proposed: a servings
-   field now, scaling later if wanted.
-2. **Two groups of ingredients** in one recipe (dough / filling).
-   Proposed: later; for now one list (the same ingredient can be added
-   twice).
-3. **Ticking off ingredients and steps while cooking** (view mode).
-4. **A timer** from the prep time or from a step ("10 minutes") — maybe
-   with the Hub's timer page, later.
-5. **Photos** of the dish: not now (storage, backups grow).
-6. **Duplicate a recipe** (to make a variant): small, could go in v1 of
-   the page.
-7. **Searching** recipes by name or ingredient ("what can I make with
-   eggs?"): later.
-8. **Sharing** a recipe as text (to send to someone): small (the
-   phone's share sheet), could go in.
+- No servings, no ticking off ingredients, no timer, no photos.
+- Duplicate and copy to the clipboard: yes (the recipe's menu).
+- Search by ingredient ("what can I make with eggs?"): later.
+- Still to settle: **ingredient groups** (one recipe's ingredients in
+  parts, e.g. a cake's "Dough" and "Filling", each with its own list):
+  needed?
+
+**Quantities, explained**: a recipe's quantity is any text ("200 g",
+"2", "1 tbsp", "a pinch"). Shop only knows a count (×2) or a weight
+(grams). So for *To Shop*, "200 g" and "1.5 kg" become a Shop weight,
+"2" or "2 pcs" a Shop count; "1 tbsp" or "a pinch" can't, so that item
+goes to Shop with its name only (no quantity).
 
 ## 7. Build in chunks
 
