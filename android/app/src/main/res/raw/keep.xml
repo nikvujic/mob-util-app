@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Resources only named from Dart (not from code or the manifest), so
-     release builds don't shrink them away. -->
+     release builds don't shrink them away: the notification icon, and
+     the notification sounds' quieter copies (Round 41). -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/ic_notification" />
+    tools:keep="@drawable/ic_notification,@raw/notify_*" />

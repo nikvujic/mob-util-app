@@ -11,6 +11,11 @@ Release with the installable APK.
   days, then the weekdays); on its other days it's under *Not today*,
   with no reminders.
 
+- **Notification volume**: Loud, Medium or Quiet for each page's sound
+  (the app's own sounds; the phone's follows the phone's volume).
+- Code blocks in notes: rounded, with room around the code, in their
+  own font (JetBrains Mono, part of the app: no internet needed).
+
 ### Fixed
 - Medicine: holding to take an important dose fills the circle all the
   way before it pops.

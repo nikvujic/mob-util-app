@@ -132,6 +132,18 @@ void main() {
         ),
         findsOneWidget);
 
+    // How loud (Round 41): for the app's sounds.
+    await tester
+        .ensureVisible(find.byKey(const Key('notifyVolume-medicine-quiet')));
+    await tester.tap(find.byKey(const Key('notifyVolume-medicine-quiet')));
+    await tester.pumpAndSettle();
+    expect(
+        container.read(preferencesProvider).styleOf(NotifyPage.medicine),
+        const NotifyStyle(
+            sound: NotifySound.alert, volume: NotifyVolume.quiet));
+    expect(find.byKey(const Key('notifyVolume-planner-quiet')), findsNothing,
+        reason: "the phone's own sound: no volume of ours");
+
     final colours = find.byKey(const Key('notifyColour-backup'));
     await reveal(tester, colours);
     await tester.tap(find.descendant(

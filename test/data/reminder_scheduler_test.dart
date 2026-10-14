@@ -50,6 +50,21 @@ void main() {
         'notify_coin');
     expect(chime.playSound, isTrue);
 
+    // Round 41: quieter, its own copy of the sound and its own channel.
+    final quiet = NotificationReminderScheduler.detailsFor(
+        reminder(ReminderKind.planner, sound: NotifySound.coin)
+            .styled(sound: NotifySound.coin, volume: NotifyVolume.quiet));
+    expect(quiet.channelId, 'planner-reminders-coin-quiet');
+    expect(quiet.channelName, 'Planner reminders (coin, quiet)');
+    expect((quiet.sound! as RawResourceAndroidNotificationSound).sound,
+        'notify_coin_quiet');
+    // The phone's own sound: no volume of ours.
+    final phoneQuiet = NotificationReminderScheduler.detailsFor(
+        reminder(ReminderKind.planner).styled(
+            colour: const Color(0xFF00FF00), volume: NotifyVolume.quiet));
+    expect(phoneQuiet.channelId, 'planner-reminders');
+    expect(phoneQuiet.sound, isNull);
+
     final silent = NotificationReminderScheduler.detailsFor(
         reminder(ReminderKind.medicine, sound: NotifySound.silent));
     expect(silent.channelId, 'medicine-reminders-silent');

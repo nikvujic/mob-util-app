@@ -40,8 +40,9 @@ abstract final class AppSound {
   static Future<void> stopFill() => _play('stopFill');
 
   /// A notification sound (Round 31), heard when picking one: its raw
-  /// resource's name, e.g. `notify_coin`.
-  static Future<void> notify(String resource) => _play('notify', resource);
+  /// resource's name, e.g. `notify_coin`, at [volume] (Round 41: 0 to 1).
+  static Future<void> notify(String resource, {double volume = 1}) =>
+      _play('notify', {'sound': resource, 'volume': volume});
 
   static Future<void> _play(String sound, [Object? argument]) async {
     try {

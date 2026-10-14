@@ -589,7 +589,14 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             Divider(height: 1, color: context.colors.divider),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(lineNumbers ? 6 : 16, 8, 16, 16),
+                // Round 41: [codeInset] of this is inside the scroll below,
+                // so code blocks' panels show whole (it clips).
+                padding: EdgeInsets.fromLTRB(
+                  lineNumbers ? 0 : 16 - codeInset,
+                  8,
+                  16 - codeInset,
+                  16,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -609,7 +616,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                         builder: (context, box) => SingleChildScrollView(
                           key: const Key('noteContentScroll'),
                           controller: _contentScroll,
-                          padding: EdgeInsets.only(bottom: _clearance),
+                          padding: EdgeInsets.fromLTRB(
+                            codeInset,
+                            0,
+                            codeInset,
+                            _clearance,
+                          ),
                           child: ConstrainedBox(
                             // At least the page tall: a tap anywhere below
                             // short text still starts typing.

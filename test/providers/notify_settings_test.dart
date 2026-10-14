@@ -91,9 +91,14 @@ void main() {
 
   test('a page\'s sound is on its notifications only', () async {
     preferences().setNotifyStyle(
-        NotifyPage.planner, const NotifyStyle(sound: NotifySound.alert));
+        NotifyPage.planner,
+        const NotifyStyle(
+            sound: NotifySound.alert, volume: NotifyVolume.medium));
     expect((await planned(ReminderKind.planner)).map((r) => r.sound),
         everyElement(NotifySound.alert));
+    // And how loud (Round 41).
+    expect((await planned(ReminderKind.planner)).map((r) => r.volume),
+        everyElement(NotifyVolume.medium));
     expect(
         (await planned(ReminderKind.medicine)).single.sound, NotifySound.phone);
   });

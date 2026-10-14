@@ -24,8 +24,9 @@ class Reminder {
   /// Its tint (Round 31), or null: the phone's own.
   final Color? colour;
 
-  /// Its sound (Round 31).
+  /// Its sound (Round 31), and how loud (Round 41).
   final NotifySound sound;
+  final NotifyVolume volume;
 
   const Reminder({
     required this.at,
@@ -35,10 +36,15 @@ class Reminder {
     this.target,
     this.colour,
     this.sound = NotifySound.phone,
+    this.volume = NotifyVolume.loud,
   });
 
   /// As its page's settings say (Round 31).
-  Reminder styled({Color? colour, NotifySound sound = NotifySound.phone}) =>
+  Reminder styled({
+    Color? colour,
+    NotifySound sound = NotifySound.phone,
+    NotifyVolume volume = NotifyVolume.loud,
+  }) =>
       Reminder(
         at: at,
         title: title,
@@ -47,6 +53,7 @@ class Reminder {
         target: target,
         colour: colour,
         sound: sound,
+        volume: volume,
       );
 
   @override
@@ -114,15 +121,21 @@ class NotificationReminderScheduler implements ReminderScheduler {
   static AndroidNotificationDetails detailsFor(Reminder reminder) {
     final channel = _channels[reminder.kind]!;
     final sound = reminder.sound;
-    final resource = sound.resource;
+    // Round 41: a quieter copy of the sound for a quieter volume, each its
+    // own channel too (`…-coin-quiet`).
+    final volume = sound.resource == null ? NotifyVolume.loud : reminder.volume;
+    final resource = volume.resourceOf(sound);
+    final quieter = volume == NotifyVolume.loud ? '' : '-${volume.name}';
+    final quieterName =
+        volume == NotifyVolume.loud ? '' : ', ${volume.label.toLowerCase()}';
     if (reminder.colour == null && sound == NotifySound.phone) return channel;
     return AndroidNotificationDetails(
       sound == NotifySound.phone
           ? channel.channelId
-          : '${channel.channelId}-${sound.name}',
+          : '${channel.channelId}-${sound.name}$quieter',
       sound == NotifySound.phone
           ? channel.channelName
-          : '${channel.channelName} (${sound.label.toLowerCase()})',
+          : '${channel.channelName} (${sound.label.toLowerCase()}$quieterName)',
       channelDescription: channel.channelDescription,
       importance: channel.importance,
       priority: channel.priority,

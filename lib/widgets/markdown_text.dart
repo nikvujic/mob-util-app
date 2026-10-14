@@ -10,6 +10,13 @@ import 'package:the_app/core/theme.dart';
 /// Formatting symbols (`##`, `**`, …) are hidden, except on the line being
 /// edited while [editing] (live preview): there they show, muted, so they
 /// can be changed. The text itself is never changed, only how it looks.
+/// The font code is set in (Round 41): bundled, so it works offline.
+const codeFont = 'JetBrainsMono';
+
+/// How far a code block's panel reaches past the text on each side; the
+/// page leaves this much room inside its scroll, so it isn't cut off.
+const codeInset = 8.0;
+
 class MarkdownEditingController extends TextEditingController {
   MarkdownEditingController({super.text});
 
@@ -197,8 +204,9 @@ class MarkdownEditingController extends TextEditingController {
         // A little smaller than the text (Round 29: wide letters made it
         // hard to read).
         s = s.copyWith(
-          fontFamily: 'monospace',
-          fontFamilyFallback: const ['Roboto Mono', 'Courier'],
+          // Round 41: JetBrains Mono, bundled with the app.
+          fontFamily: codeFont,
+          fontFamilyFallback: const ['monospace', 'Roboto Mono'],
           fontSize: (s.fontSize ?? 16) * codeScale,
           backgroundColor: run.block ? null : colors.card,
         );
@@ -627,8 +635,10 @@ class RenderCheckboxBoxes extends RenderProxyBox {
       for (final (:start, :end) in _controller.codeBlocks()) {
         final around = _around(editable, toHere, start, end);
         if (around == null) continue;
-        final rect = Rect.fromLTRB(
-            width.left - 4, around.top - 2, width.right + 4, around.bottom + 2);
+        // Round 41: room around the code ([codeInset]), rounded corners
+        // that show (the field's scroll leaves room for them).
+        final rect = Rect.fromLTRB(width.left - codeInset, around.top - 2,
+            width.right + codeInset, around.bottom + 2);
         panels.add(rect);
         context.canvas.drawRRect(
           RRect.fromRectAndRadius(rect.shift(offset), const Radius.circular(6)),

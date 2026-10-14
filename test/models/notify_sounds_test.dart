@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/notify_settings.dart';
@@ -46,5 +47,59 @@ void main() {
     expect(NotifySound.fromName(null), NotifySound.phone);
     expect(
         NotifyStyle.fromJson(const {'sound': 'bell'}).sound, NotifySound.alert);
+  });
+
+  group('volume (Round 41)', () {
+    /// A wav file's loudest sample.
+    int peakOf(String resource) {
+      final bytes =
+          File('android/app/src/main/res/raw/$resource.wav').readAsBytesSync();
+      final data = ByteData.sublistView(bytes, 44);
+      var peak = 0;
+      for (var i = 0; i + 1 < data.lengthInBytes; i += 2) {
+        final v = data.getInt16(i, Endian.little).abs();
+        if (v > peak) peak = v;
+      }
+      return peak;
+    }
+
+    test('each sound at each volume, quieter as it goes', () {
+      for (final sound in NotifySound.values) {
+        if (sound.resource == null) {
+          expect(NotifyVolume.quiet.resourceOf(sound), isNull);
+          continue;
+        }
+        final peaks = [
+          for (final v in NotifyVolume.values) peakOf(v.resourceOf(sound)!),
+        ];
+        expect(peaks[1], closeTo(peaks[0] / 2, peaks[0] * 0.02),
+            reason: '${sound.name}: medium is half');
+        expect(peaks[2], closeTo(peaks[0] / 4, peaks[0] * 0.02),
+            reason: '${sound.name}: quiet is a quarter');
+      }
+      expect(NotifyVolume.medium.resourceOf(NotifySound.coin),
+          'notify_coin_medium');
+    });
+
+    test('quieter copies are kept in release builds', () {
+      expect(File('android/app/src/main/res/raw/keep.xml').readAsStringSync(),
+          contains('@raw/notify_*'));
+    });
+
+    test('the preview plays at the volume picked', () {
+      expect(kotlin, contains('args?.get("volume")'));
+    });
+
+    test('kept with the page\'s style; loud unless set', () {
+      expect(const NotifyStyle().volume, NotifyVolume.loud);
+      const quiet =
+          NotifyStyle(sound: NotifySound.zap, volume: NotifyVolume.quiet);
+      expect(NotifyStyle.fromJson(quiet.toJson()), quiet);
+      expect(
+          const NotifyStyle(sound: NotifySound.zap)
+              .toJson()
+              .containsKey('volume'),
+          isFalse);
+    });
   });
 }

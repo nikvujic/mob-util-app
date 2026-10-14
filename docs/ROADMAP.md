@@ -343,10 +343,12 @@ fixtures for every stored format.
 - [x] The menu: a small gap between Pip's name/age/battery line and his
   room (half a pixel if a whole one is too much).
 - [x] The Introduction: check it's still right.
-- [ ] Code blocks in notes look better: rounded corners, room on the
+- [x] Code blocks in notes look better: rounded corners, room on the
   left, maybe a different (monospace) font, bundled with the app (no
   fetching: it works offline).
-- [ ] Notifications are loud: a **volume** for each one.
+- [x] Notifications are loud: a **volume** for each one (Loud, Medium,
+  Quiet: quieter copies of the app's sounds; the phone's own sound can't
+  be turned down by the app).
 
 **Recipes, Nikola's answers** (the spec updated)
 - No servings, no ticking ingredients, no timer.

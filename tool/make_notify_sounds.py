@@ -11,6 +11,9 @@ Soft are gone):
 - notify_zap.wav: a laser: a square wave diving down, with grit.
 - notify_jingle.wav: a tiny four-note tune, triangle under square.
 
+Round 41: each also as a quieter copy, `_medium` (half as loud) and
+`_quiet` (a quarter), for the volume picked per page.
+
 Run from the repo root: python3 tool/make_notify_sounds.py
 """
 import math
@@ -21,15 +24,22 @@ import wave
 RATE = 44100
 
 
+# The volumes (Round 41): how loud against the loud one, and the names'
+# endings.
+VOLUMES = [('', 1.0), ('_medium', 0.5), ('_quiet', 0.25)]
+
+
 def write(name, samples):
     peak = max(abs(v) for v in samples) or 1.0
-    with wave.open('android/app/src/main/res/raw/%s.wav' % name, 'wb') as out:
-        out.setnchannels(1)
-        out.setsampwidth(2)
-        out.setframerate(RATE)
-        out.writeframes(struct.pack(
-            '<%dh' % len(samples),
-            *[int(0.8 * v / peak * 32767) for v in samples]))
+    for suffix, level in VOLUMES:
+        path = 'android/app/src/main/res/raw/%s%s.wav' % (name, suffix)
+        with wave.open(path, 'wb') as out:
+            out.setnchannels(1)
+            out.setsampwidth(2)
+            out.setframerate(RATE)
+            out.writeframes(struct.pack(
+                '<%dh' % len(samples),
+                *[int(0.8 * level * v / peak * 32767) for v in samples]))
 
 
 def note(name):

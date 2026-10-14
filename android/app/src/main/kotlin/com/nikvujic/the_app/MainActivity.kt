@@ -143,9 +143,13 @@ class MainActivity: FlutterFragmentActivity() {
                         if (filling != 0) pool?.stop(filling)
                         filling = 0
                     }
+                    // Round 41: at the volume picked (0 to 1).
                     "notify" -> {
-                        val id = (call.arguments as? String)?.let { notifySounds[it] }
-                        if (id != null) pool?.play(id, 1f, 1f, 1, 0, 1f)
+                        val args = call.arguments as? Map<*, *>
+                        val name = args?.get("sound") as? String ?: call.arguments as? String
+                        val volume = (args?.get("volume") as? Number)?.toFloat() ?: 1f
+                        val id = name?.let { notifySounds[it] }
+                        if (id != null) pool?.play(id, volume, volume, 1, 0, 1f)
                     }
                     else -> {
                         result.notImplemented()

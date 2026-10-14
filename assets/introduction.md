@@ -66,7 +66,7 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 
 ## Notifications
 - The menu's **Notifications** shows the latest ones (tap **All** for today's and yesterday's), even after they're gone from the phone; tap one to go to it, **Clear** empties the list.
-- Under it, each page's notifications: on or off, **pause** for a while, **private** (no names on the lock screen), a **sound** (the phone's, one of the app's 8-bit ones, or silent) and a **colour**.
+- Under it, each page's notifications: on or off, **pause** for a while, **private** (no names on the lock screen), a **sound** (the phone's, one of the app's 8-bit ones, or silent) with its **volume** (Loud, Medium, Quiet), and a **colour**.
 - If the phone blocks the app's notifications, this page says so at the top.
 
 ## Settings

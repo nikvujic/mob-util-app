@@ -218,7 +218,11 @@ class _PageSettings extends ConsumerWidget {
 
   /// The sounds to pick from; each the app has its own of plays when
   /// tapped, and picking closes the sheet.
-  Future<NotifySound?> _pickSound(BuildContext context, NotifySound now) =>
+  Future<NotifySound?> _pickSound(
+    BuildContext context,
+    NotifySound now,
+    NotifyVolume volume,
+  ) =>
       showModalBottomSheet<NotifySound>(
         context: context,
         builder: (context) => SafeArea(
@@ -240,7 +244,7 @@ class _PageSettings extends ConsumerWidget {
                   trailing: sound == now ? const Icon(Icons.check) : null,
                   onTap: () {
                     if (sound.resource case final resource?) {
-                      AppSound.notify(resource);
+                      AppSound.notify(resource, volume: volume.level);
                     }
                     Navigator.of(context).pop(sound);
                   },
@@ -373,11 +377,36 @@ class _PageSettings extends ConsumerWidget {
             title: const Text('Sound'),
             subtitle: Text(style.sound.label, style: muted()),
             onTap: () async {
-              final picked = await _pickSound(context, style.sound);
+              final picked =
+                  await _pickSound(context, style.sound, style.volume);
               if (picked == null) return;
               notifier.setNotifyStyle(page, style.copyWith(sound: picked));
             },
           ),
+          // How loud (Round 41): the app's own sounds only (the phone's
+          // follows the phone's volume).
+          if (style.sound.resource case final resource?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(72, 0, 16, 8),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  for (final volume in NotifyVolume.values)
+                    ChoiceChip(
+                      key: Key('notifyVolume-${page.name}-${volume.name}'),
+                      label: Text(volume.label),
+                      selected: style.volume == volume,
+                      onSelected: (_) {
+                        AppSound.notify(resource, volume: volume.level);
+                        notifier.setNotifyStyle(
+                          page,
+                          style.copyWith(volume: volume),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
             title: const Text('Colour'),

@@ -271,6 +271,7 @@ List<Reminder> withNotifySettings(
     kept.add(r.styled(
       colour: BlockColor.fromName(style.colour)?.stripe,
       sound: style.sound,
+      volume: style.volume,
     ));
   }
   return kept;

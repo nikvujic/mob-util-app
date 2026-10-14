@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -183,6 +185,43 @@ void main() {
     expect(painter.paintedRules.single.width,
         moreOrLessEquals(field.width, epsilon: 1),
         reason: 'across');
+  });
+
+  testWidgets(
+      'a code panel shows whole, with room round the code; the '
+      'bundled font (Round 41)', (tester) async {
+    await openBar(tester, '```\nx = 1\n```\nend');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    final painter =
+        tester.renderObject<RenderCheckboxBoxes>(find.byType(CheckboxBoxes));
+    final box = painter.localToGlobal(Offset.zero);
+    final panel = painter.paintedPanels.single.shift(box);
+    final field = tester.getRect(contentField);
+    expect(field.left - panel.left, moreOrLessEquals(codeInset));
+    // Inside what the scroll shows (it clips): its corners aren't cut.
+    final scroll = tester.getRect(find.byKey(const Key('noteContentScroll')));
+    expect(panel.left, greaterThanOrEqualTo(scroll.left - 0.5));
+    expect(panel.right, lessThanOrEqualTo(scroll.right + 0.5));
+
+    final span = content(tester).buildTextSpan(
+      context: tester.element(contentField),
+      style: const TextStyle(fontSize: 16),
+      withComposing: false,
+    );
+    final fonts = <String?>{};
+    span.visitChildren((s) {
+      if (s is TextSpan && (s.text ?? '').contains('x = 1')) {
+        fonts.add(s.style?.fontFamily);
+      }
+      return true;
+    });
+    expect(fonts, {codeFont});
+    // Bundled with the app (no fetching), its licence beside it.
+    expect(File('assets/fonts/JetBrainsMono-Regular.ttf').existsSync(), isTrue);
+    expect(File('assets/fonts/JetBrainsMono-OFL.txt').existsSync(), isTrue);
+    expect(
+        File('pubspec.yaml').readAsStringSync(), contains('family: $codeFont'));
   });
 
   testWidgets(
