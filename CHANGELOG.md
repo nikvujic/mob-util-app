@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- Recipes: a card shows its prep time and type as chips.
+- Ingredients list: a section's handle sits level with its name; adding
+  a section has its own icon (not a folder's).
+
 ## [1.10.0] - 2026-10-14
 
 ### Changed

@@ -88,7 +88,17 @@ void main() {
       container.read(recipesProvider.notifier).replaceAll([pancakes()]);
       await tester.pumpAndSettle();
       expect(find.text('Pancakes'), findsOneWidget);
-      expect(find.text('25 min  ·  Breakfast'), findsOneWidget);
+      // As chips (Round 44).
+      expect(
+          find.descendant(
+              of: find.byKey(const Key('recipeChip-time')),
+              matching: find.text('25 min')),
+          findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.byKey(const Key('recipeChip-type')),
+              matching: find.text('Breakfast')),
+          findsOneWidget);
     });
 
     testWidgets('+ opens a new one in edit mode; left empty, it is dropped',
@@ -515,6 +525,19 @@ void main() {
             matching: find.byIcon(Icons.drag_handle),
           );
       expect(handleOf('s1'), findsNothing, reason: 'the first stays');
+      // Level with the name (Round 44), its touch area still full height.
+      expect(
+          tester.getCenter(handleOf('s2')).dy,
+          moreOrLessEquals(tester.getCenter(find.text('DAIRY  ·  2')).dy,
+              epsilon: 3));
+      expect(tester.getSize(find.byKey(const Key('sectionHandle-s2'))).height,
+          greaterThanOrEqualTo(kMinInteractiveDimension));
+      // Adding a section: a list with a plus, not a folder.
+      expect(
+          find.descendant(
+              of: find.byTooltip('Add a section'),
+              matching: find.byIcon(Icons.playlist_add)),
+          findsOneWidget);
       final handle = handleOf('s2');
       expect(handle, findsOneWidget);
       // Dairy dragged above Baking's ingredients: it can't pass the first.

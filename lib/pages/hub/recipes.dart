@@ -25,15 +25,6 @@ void openRecipe(BuildContext context, String id, {bool isNew = false}) {
   );
 }
 
-/// "25 min · Breakfast", or null with neither set.
-String? recipeSummary(Recipe recipe) {
-  final parts = [
-    if (recipe.prepMinutes case final minutes?) prepTimeLabel(minutes),
-    if (recipe.type case final type?) type.label,
-  ];
-  return parts.isEmpty ? null : parts.join('  ·  ');
-}
-
 /// Recipes (Round 42): cards with the name and "prep time · type", in
 /// the user's order (the handle moves them). A tap opens one; holding one
 /// selects it (to delete several, asked first). + makes a new one, opened
@@ -183,7 +174,6 @@ class _RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final summary = recipeSummary(recipe);
     final untitled = recipe.name.trim().isEmpty;
     return SelectableCard(
       key: Key('recipe-${recipe.id}'),
@@ -206,11 +196,26 @@ class _RecipeCard extends StatelessWidget {
                   color: untitled ? colors.textSecondary : colors.textPrimary,
                 ),
               ),
-              if (summary != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  summary,
-                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
+              // Its time and type as chips (Round 44).
+              if (recipe.prepMinutes != null || recipe.type != null) ...[
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (recipe.prepMinutes case final minutes?)
+                      _Chip(
+                        key: const Key('recipeChip-time'),
+                        icon: Icons.timer_outlined,
+                        text: prepTimeLabel(minutes),
+                      ),
+                    if (recipe.type case final type?)
+                      _Chip(
+                        key: const Key('recipeChip-type'),
+                        icon: Icons.restaurant_outlined,
+                        text: type.label,
+                      ),
+                  ],
                 ),
               ],
             ],
@@ -221,6 +226,35 @@ class _RecipeCard extends StatelessWidget {
           selectionMode: selectionMode,
           selected: selected,
         ),
+      ),
+    );
+  }
+}
+
+/// A small chip on a recipe's card: its prep time, or its type.
+class _Chip extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _Chip({super.key, required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: colors.textSecondary),
+          const SizedBox(width: 4),
+          Text(text,
+              style: TextStyle(fontSize: 12, color: colors.textSecondary)),
+        ],
       ),
     );
   }

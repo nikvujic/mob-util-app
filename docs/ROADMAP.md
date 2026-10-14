@@ -338,10 +338,10 @@ fixtures for every stored format.
 ### Round 44 — Nikola's notes on 1.10.0; Pip's charging station (2026-10-14)
 
 **Patches**
-- [ ] Recipes list: a card's prep time and type as **chips**.
-- [ ] Ingredients list: a section's handle level with its name (the
+- [x] Recipes list: a card's prep time and type as **chips**.
+- [x] Ingredients list: a section's handle level with its name (the
   touch area as big as now).
-- [ ] The add-a-section button looked like "new folder": another icon.
+- [x] The add-a-section button looked like "new folder": another icon.
 
 **Pip's charging station** (next; drafts first)
 - [ ] While the phone charges, a **charging station** stands in his

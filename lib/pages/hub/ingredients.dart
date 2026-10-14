@@ -269,13 +269,42 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       onLongPress: _picking ? null : () => _sectionMenu(section),
       child: index == null
           ? title
-          : ReorderableRow(
-              content: Align(alignment: Alignment.bottomLeft, child: title),
-              indicator: ReorderOrSelectIndicator(
-                index: index,
-                selectionMode: false,
-                selected: false,
-              ),
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(child: title),
+                // Its handle (Round 44): level with the name, the whole
+                // height (at least a touch target) still taking the drag.
+                ReorderableDragStartListener(
+                  key: Key('sectionHandle-${section.id}'),
+                  index: index,
+                  child: ColoredBox(
+                    color: Colors.transparent,
+                    child: SizedBox(
+                      width: ReorderOrSelectIndicator.width,
+                      height: kMinInteractiveDimension,
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Padding(
+                          // The name's line: 6 below it, ~15 tall.
+                          padding: const EdgeInsets.only(
+                            right: ReorderOrSelectIndicator.iconInset,
+                          ),
+                          child: SizedBox(
+                            height: 6 + 15 + 3,
+                            child: ExcludeSemantics(
+                              child: Icon(
+                                Icons.drag_handle,
+                                color: colors.textHint,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -436,7 +465,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
             : BottomActions(
                 actions: [
                   BottomAction(
-                    icon: Icons.create_new_folder_outlined,
+                    icon: Icons.playlist_add,
                     tooltip: 'Add a section',
                     onPressed: _addSection,
                   ),

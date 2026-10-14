@@ -190,8 +190,11 @@ void main() {
 
       final file = File('${dir.path}/notes.json').readAsStringSync();
       expect(file, contains('lockedContent'));
-      expect(file, isNot(contains('4711')));
-      expect(file, isNot(contains('9876')));
+      // With the space: encrypted text is base64, which has none, so it
+      // can't hold these by chance (the digits alone sometimes turned up
+      // in it).
+      expect(file, isNot(contains('PIN 4711')));
+      expect(file, isNot(contains('PIN 9876')));
 
       // And it loads back, still locked and readable with the key.
       final reloaded = (await AppStorage.open(directory: dir)).initialNotes;
