@@ -335,6 +335,39 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 40 — Medicine weekdays, a tidy roadmap, Recipes spec (2026-10-14)
+
+- [ ] **Medicine: pick weekdays** (supplements taken some days only).
+- [ ] **Tidy the ROADMAP**: done items still marked open.
+- [ ] **Recipes: a spec for Nikola** (no building yet), from his notes:
+  - The page lists recipes as items that can be **reordered**: name and
+    prep time. An **Ingredients** button opens the ingredients list.
+  - A recipe opens in **view mode**, which keeps the screen on (set the
+    phone aside while cooking): its name, a small **prep time** field
+    and a **type** (breakfast, snack, cake...) beside it, then its
+    **ingredients** with their quantities (no handles, no adding), then
+    a **description** area that works like a note (Markdown; only to
+    look at in view mode). A **Send to shop** button adds its
+    ingredients to Shop with their quantities (an item already there
+    with the same name and quantity is just put back on the to-buy
+    list).
+  - An **Edit** button: everything becomes editable. The ingredients
+    look simple: a box of text items (no background), name and quantity
+    as plain text, a grab handle on the right (only in edit) to drag;
+    quantity adjustable; hold to remove; an **add** button opens the
+    ingredients list to pick from. The description works like a note:
+    view, and a tap to edit (Markdown). Pull down to reach (reach mode)
+    only in edit.
+  - **Ingredients list** (not in the Hub; opened from Recipes, or from a
+    recipe to pick): a simple list like the to-do, in **sections**; an
+    Edit button lets you add sections and drag items between them; add
+    is a simple sheet like the to-do's, new items (and sections) going
+    to the top of the first section. Two modes: **pick** (checkboxes,
+    like selection, and a button to accept; Edit is a button there too,
+    and back returns to picking) and **edit** (the default when opened
+    from Recipes' button).
+  - Nikola asked what's missing for a page like this.
+
 ### Round 39 — the night shift (2026-10-14, for v1.7.0)
 
 Nikola's notes from earlier rounds, done overnight while he sleeps; not
