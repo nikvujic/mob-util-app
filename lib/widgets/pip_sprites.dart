@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:the_app/core/pip_brain.dart';
-import 'package:the_app/core/pixel_font.dart';
 import 'package:the_app/core/theme.dart';
 
 /// Pip's frames on a 20-wide grid (Round 26), one letter a pixel ('.'
@@ -325,20 +324,6 @@ abstract final class PipSprites {
         eyes(const [(0, 3), (1, 3)]);
         k(6, 6);
         k(7, 6);
-      case ChargeScreen.percent:
-        // Counting up to 100%, then staying there.
-        final p = math.min(100, (t * 30).floor());
-        final text = '$p%';
-        var x = (screenWidth - text.length * 4 + 1) ~/ 2;
-        for (final ch in text.split('')) {
-          final glyph = PixelFont.glyphOf(ch);
-          for (var y = 0; y < glyph.length; y++) {
-            for (var gx = 0; gx < glyph[y].length; gx++) {
-              if (glyph[y][gx] == '#') k(x + gx, 2 + y);
-            }
-          }
-          x += 4;
-        }
       case ChargeScreen.blinking:
         // His eyes close when the station's lamp goes off.
         eyes(lamp

@@ -227,7 +227,7 @@ class _StatusState extends ConsumerState<_Status> {
     final life = ref.read(pipLifeProvider.notifier);
     final now = ref.watch(clockProvider)();
     final born = pip.born?.toLocal();
-    final segments = PipEnergy.segments(life.levelAt(now));
+    final segments = life.segmentsAt(now);
     final show = life.showAt(now);
     final face = switch (show) {
       PipShow.off || PipShow.powerOff => PipFace.off,
@@ -463,6 +463,12 @@ class _AnimationsState extends State<_Animations> {
     setState(() => _why = switch (brain.activity) {
           PipActivity.asleep => "HE'S ASLEEP",
           PipActivity.off => "HE'S OFF",
+          // Round 45: at his station (the phone plugged in).
+          PipActivity.toStation ||
+          PipActivity.plugging ||
+          PipActivity.charging ||
+          PipActivity.unplugging =>
+            "HE'S CHARGING",
           _ => "HE'S BUSY, A MOMENT",
         });
     _hide = Timer(const Duration(milliseconds: 1200), () {

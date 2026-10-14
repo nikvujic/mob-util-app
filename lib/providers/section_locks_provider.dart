@@ -105,6 +105,51 @@ final pageClosedProvider = Provider.family<bool, HubTool>((ref, page) {
       ref.watch(sessionProvider) == null;
 });
 
+/// The to-do note locked behind the master password (Round 45). Like a
+/// Hub page's lock it hides, not encrypts, and needs a master password.
+/// Saved in `settings.json`; the Settings switch for the note's card
+/// leaves it as it is.
+class TodoLockNotifier extends StateNotifier<bool> {
+  final Ref _ref;
+
+  TodoLockNotifier(this._ref, AppStorage storage)
+      : super(storage.initialTodoLocked) {
+    addListener(storage.saveTodoLocked, fireImmediately: false);
+    _ref.listen(securityProvider, (_, verifier) {
+      if (verifier == null) state = false;
+    });
+  }
+
+  /// Locks the to-do note. Needs a master password.
+  void lock() {
+    if (_ref.read(securityProvider) == null) {
+      throw StateError('The to-do lock needs a master password');
+    }
+    state = true;
+  }
+
+  /// Removes the lock. Throws [AppLockedException] while the app is
+  /// locked.
+  void unlock() {
+    if (_ref.read(sessionProvider) == null) {
+      throw const AppLockedException();
+    }
+    state = false;
+  }
+}
+
+final todoLockProvider = StateNotifierProvider<TodoLockNotifier, bool>(
+  (ref) => TodoLockNotifier(ref, ref.watch(appStorageProvider)),
+);
+
+/// Whether the to-do note is closed right now: locked, with the app
+/// locked.
+final todoClosedProvider = Provider<bool>((ref) {
+  return ref.watch(todoLockProvider) &&
+      ref.watch(securityProvider) != null &&
+      ref.watch(sessionProvider) == null;
+});
+
 /// Whether [page] is hidden right now, by its own lock or the Hub's.
 final pageHiddenProvider = Provider.family<bool, HubTool>((ref, page) {
   return ref.watch(pageClosedProvider(page)) ||
@@ -116,9 +161,10 @@ final anyPageClosedProvider = Provider<bool>((ref) {
   return HubTool.values.any((t) => ref.watch(pageClosedProvider(t)));
 });
 
-/// Whether any section or Hub page is closed right now (e.g. backups need
-/// unlocking).
+/// Whether any section, Hub page or the to-do note (Round 45) is closed
+/// right now (e.g. backups need unlocking).
 final anySectionClosedProvider = Provider<bool>((ref) {
   return AppSection.values.any((s) => ref.watch(sectionClosedProvider(s))) ||
-      HubTool.values.any((t) => ref.watch(pageClosedProvider(t)));
+      HubTool.values.any((t) => ref.watch(pageClosedProvider(t))) ||
+      ref.watch(todoClosedProvider);
 });

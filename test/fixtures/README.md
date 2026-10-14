@@ -111,6 +111,13 @@ app still reads every version, so an update can never lose existing data.
   ingredients.json version 1): Baking (Flour, Sugar), Dairy (Milk, Eggs
   🥚).
 - `v20/backup-plain.json` — backup (version 20) with both.
+- `v21/storage/todo.json` — waiting to-dos (Round 45, todo.json version
+  3): "Call the dentist 🦷", "Pay the bills, šta god" (done), "Parcel
+  from Ana 📦" (**waiting**), "Water the plants" (ids t1–t4).
+- `v21/storage/settings.json` — the to-do note locked (Round 45,
+  `todoLocked`; settings.json still version 2), no other locks. Not in
+  backups.
+- `v21/backup-plain.json` — backup (version 21) with the to-dos.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

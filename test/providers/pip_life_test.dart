@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'dart:math' as math;
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
@@ -106,7 +104,6 @@ void main() {
       return PipLifeNotifier(
         AppStorage.inMemory(initialPip: pip ?? PipLife.egg),
         clock: () => now,
-        random: math.Random(4),
       );
     }
 
@@ -116,7 +113,7 @@ void main() {
       expect(pip.state.energyAt, DateTime(2026, 10, 14, 9));
       expect(pip.state.batteries, 0);
       final gap = pip.state.nextBatteryAt!.difference(pip.state.energyAt!);
-      expect(gap.inMinutes, inInclusiveRange(270, 450));
+      expect(gap, PipEnergy.batteryEvery);
     });
 
     test('a Pip from before: full from now on', () {
@@ -126,19 +123,24 @@ void main() {
       expect(pip.levelAt(now), 3);
     });
 
-    test('a battery when the app is opened after its time; never piled up', () {
+    test(
+        'batteries come on the clock and pile up while away, up to 3 '
+        '(Round 45)', () {
       final pip = start()..hatch(now);
       final due = pip.state.nextBatteryAt!;
       pip.collect(due.subtract(const Duration(minutes: 1)));
       expect(pip.state.batteries, 0, reason: 'not yet');
-      // Away three days: still just the one.
-      final later = due.add(const Duration(days: 3));
+      // Away a little over 5 hours past it: two came.
+      final later = due.add(const Duration(hours: 5, minutes: 10));
       pip.collect(later);
-      expect(pip.state.batteries, 1);
-      expect(pip.state.nextBatteryAt!.isAfter(later), isTrue,
-          reason: 'the next timed from now');
+      expect(pip.state.batteries, 2);
+      expect(pip.state.nextBatteryAt, due.add(const Duration(hours: 10)),
+          reason: 'on the clock, not from now');
       pip.collect(later);
-      expect(pip.state.batteries, 1);
+      expect(pip.state.batteries, 2, reason: 'no more for looking again');
+      // Away three days: three, no more.
+      pip.collect(later.add(const Duration(days: 3)));
+      expect(pip.state.batteries, PipEnergy.maxBatteries);
     });
 
     test('at most 3 held', () {
@@ -160,8 +162,8 @@ void main() {
       );
       expect(pip.refusalAt(now), PipRefusal.full);
       expect(pip.giveBattery(now), isFalse);
-      // Ten hours on: two segments left.
-      final later = DateTime(2026, 10, 14, 19);
+      // Eight hours on (Round 45): two segments left.
+      final later = DateTime(2026, 10, 14, 17);
       expect(PipEnergy.segments(pip.levelAt(later)), 2);
       expect(pip.giveBattery(later), isTrue);
       expect(pip.state.batteries, 0);
@@ -228,7 +230,6 @@ void main() {
           ),
         )),
         clockProvider.overrideWithValue(() => DateTime(2026, 10, 14, 12)),
-        pipRandomProvider.overrideWithValue(math.Random(1)),
         powerSourceProvider.overrideWithValue(FakePower()),
       ]);
       addTearDown(container.dispose);
@@ -249,7 +250,7 @@ void main() {
         nextBatteryAt: DateTime(2026, 10, 14, 12),
       ));
       // Two hours since the backup: one asleep (to 8:00), one awake.
-      expect(pip.levelAt(now), closeTo(2 - 1 / 36 - 1 / 10, 1e-9));
+      expect(pip.levelAt(now), closeTo(2 - 1 / 36 - 1 / 8, 1e-9));
       expect(pip.state.batteries, 2);
     });
   });

@@ -287,6 +287,16 @@ the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
 notes.
 
+Its options (Round 45): `TodoItem.waiting` (`todo.json` v3, backup v21)
+and the `todoWaiting` preference. With it on, *To do*, a Waiting header
+and the waiting ones are one `SliverReorderableList`, so a drag can cross
+the header; `TodoNotifier.place` takes both lists' ids and sets each
+one's flag by where it landed. The lock is `TodoLockNotifier`
+(`section_locks_provider.dart`, `todoLocked` in `settings.json`), as a Hub
+page's: `todoClosedProvider` turns the page into a `LockedScreen` and the
+tile into *Locked*, counts in `anySectionClosedProvider` (backups ask),
+and the app closes the page when it locks while on Notes.
+
 ## Automatic backup (Round 39)
 
 `providers/auto_backup_provider.dart` (`AutoBackup.run`) writes a plain
@@ -335,8 +345,10 @@ registered only while listened to). `PipPowerNotifier`
 (`pip_life_provider.dart`) asks at first and again while he's looked at (every 5 s at most),
 keeps the answer in `Preferences.pipPlugged` (this phone only), and
 tells `PipLifeNotifier.setCharging`, which takes his energy as it is
-then: while charging `PipEnergy.chargingLevelAt` keeps it (full, down to
-just below). His room reads `PipLink.plugged` every second and calls
+then: while charging `PipEnergy.chargingLevelAt` lets it drain as ever
+but never below `chargingFloor` (Round 45), and `segmentsAt` shows the
+segments he had when plugged in until he's unplugged (the menu, Pip
+Home and the full check all read it). His room reads `PipLink.plugged` every second and calls
 `PipBrain.setPlugged` (animated only once he's been looked at). The
 brain owns the station (where, how far up), the plug and his floating
 hands as positions; `pip_room.dart` only draws them.
@@ -365,7 +377,8 @@ add a row to these tables; tests check the tables, not each screen.
 
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,
-`emptyAt`, `segments`, `nextBattery`; `pipShowAt` says what to show:
+`emptyAt`, `segments`, `nextBattery`, `batteriesAt`: one every 5 h on
+the clock, piling up while away, Round 45; `pipShowAt` says what to show:
 awake, fallAsleep, asleep, wakeUp, powerOff, off). Nothing runs in the
 background: `PipLife` keeps his energy as a level at a moment, and the
 battery due is collected when the app starts or comes back

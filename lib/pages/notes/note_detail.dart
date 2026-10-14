@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/crypto.dart';
@@ -91,7 +92,60 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
   /// While it is, the cursor's handle isn't shown (Round 29).
   final _formatShown = ValueNotifier(false);
-  late final _selectionControls = FormatBarSelectionControls(_formatShown);
+  late final _selectionControls =
+      FormatBarSelectionControls(_formatShown, offScreen: _offScreen);
+
+  /// The selection's handles whose end is scrolled out of view (Round
+  /// 45): not drawn, else they'd show over the app bar.
+  final _offScreen = ValueNotifier<Set<TextSelectionHandleType>>(const {});
+
+  /// Works out [_offScreen] after this frame's layout.
+  void _checkHandles() => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _offScreen.value = _handlesOffScreen();
+      });
+
+  Set<TextSelectionHandleType> _handlesOffScreen() {
+    final selection = _contentController.selection;
+    final view = _scrollKey.currentContext?.findRenderObject();
+    RenderEditable? editable;
+    void visit(RenderObject child) {
+      if (editable != null) return;
+      if (child is RenderEditable) {
+        editable = child;
+      } else {
+        child.visitChildren(visit);
+      }
+    }
+
+    _contentFieldKey.currentContext?.findRenderObject()?.visitChildren(visit);
+    final field = editable;
+    if (!selection.isValid ||
+        field == null ||
+        !field.hasSize ||
+        view is! RenderBox ||
+        !view.hasSize) {
+      return const {};
+    }
+    final top = view.localToGlobal(Offset.zero).dy;
+    final bottom = top + view.size.height;
+    // A handle hangs from the bottom of its line.
+    bool out(Offset point) {
+      final y = field.localToGlobal(point).dy;
+      return y < top || y > bottom;
+    }
+
+    final points = field.getEndpointsForSelection(selection);
+    if (selection.isCollapsed) {
+      return out(points.first.point) ? {TextSelectionHandleType.collapsed} : {};
+    }
+    return {
+      if (out(points.first.point)) TextSelectionHandleType.left,
+      if (out(points.last.point)) TextSelectionHandleType.right,
+    };
+  }
+
+  final _scrollKey = GlobalKey();
 
   /// The text field, for the line numbers (N12) to follow.
   final _contentFieldKey = GlobalKey();
@@ -140,6 +194,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _contentController.addListener(_onEdit);
     _titleController.addListener(_scheduleAutosave);
     _contentController.addListener(_scheduleAutosave);
+    _contentController.addListener(_checkHandles);
+    _contentScroll.addListener(_checkHandles);
     _lifecycleListener = AppLifecycleListener(onHide: _autosave);
   }
 
@@ -151,6 +207,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _contentController.dispose();
     _contentFocusNode.dispose();
     _formatShown.dispose();
+    _offScreen.dispose();
     _titleFocusNode.dispose();
     _contentScroll.dispose();
     _history.dispose();
@@ -612,60 +669,65 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                       // rise above the buttons; nothing covers it, and taps
                       // between the buttons reach it (Round 15: padding
                       // inside the field hid the lines under it).
-                      child: LayoutBuilder(
-                        builder: (context, box) => SingleChildScrollView(
-                          key: const Key('noteContentScroll'),
-                          controller: _contentScroll,
-                          padding: EdgeInsets.fromLTRB(
-                            codeInset,
-                            0,
-                            codeInset,
-                            _clearance,
-                          ),
-                          child: ConstrainedBox(
-                            // At least the page tall: a tap anywhere below
-                            // short text still starts typing.
-                            constraints:
-                                BoxConstraints(minHeight: box.maxHeight),
-                            child: KeyedSubtree(
-                              key: _contentFieldKey,
-                              // Tapping a checkbox ticks it (N15).
-                              child: CheckboxTaps(
-                                controller: _contentController,
-                                child: CheckboxBoxes(
+                      child: KeyedSubtree(
+                        // What the scroll shows (Round 45: handles out
+                        // of it aren't drawn).
+                        key: _scrollKey,
+                        child: LayoutBuilder(
+                          builder: (context, box) => SingleChildScrollView(
+                            key: const Key('noteContentScroll'),
+                            controller: _contentScroll,
+                            padding: EdgeInsets.fromLTRB(
+                              codeInset,
+                              0,
+                              codeInset,
+                              _clearance,
+                            ),
+                            child: ConstrainedBox(
+                              // At least the page tall: a tap anywhere below
+                              // short text still starts typing.
+                              constraints:
+                                  BoxConstraints(minHeight: box.maxHeight),
+                              child: KeyedSubtree(
+                                key: _contentFieldKey,
+                                // Tapping a checkbox ticks it (N15).
+                                child: CheckboxTaps(
                                   controller: _contentController,
-                                  child: TextField(
-                                    key: const Key('noteContentField'),
+                                  child: CheckboxBoxes(
                                     controller: _contentController,
-                                    selectionControls: _selectionControls,
-                                    focusNode: _contentFocusNode,
-                                    autofocus: widget.isNew,
-                                    keyboardType: TextInputType.multiline,
-                                    textCapitalization:
-                                        TextCapitalization.sentences,
-                                    maxLines: null,
-                                    // No magnifier while selecting (Round 15).
-                                    magnifierConfiguration:
-                                        TextMagnifierConfiguration.disabled,
-                                    // The line typed on stays above the
-                                    // buttons.
-                                    scrollPadding: EdgeInsets.fromLTRB(
-                                        20, 20, 20, _clearance + 20),
-                                    // Enter continues a list (N9).
-                                    inputFormatters: const [
-                                      MarkdownListFormatter(),
-                                    ],
-                                    style: TextStyle(
-                                      color: context.colors.textPrimary,
-                                      fontSize: 16,
-                                    ),
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: 'Start writing…',
-                                      hintStyle: TextStyle(
-                                        color: context.colors.textHint,
+                                    child: TextField(
+                                      key: const Key('noteContentField'),
+                                      controller: _contentController,
+                                      selectionControls: _selectionControls,
+                                      focusNode: _contentFocusNode,
+                                      autofocus: widget.isNew,
+                                      keyboardType: TextInputType.multiline,
+                                      textCapitalization:
+                                          TextCapitalization.sentences,
+                                      maxLines: null,
+                                      // No magnifier while selecting (Round 15).
+                                      magnifierConfiguration:
+                                          TextMagnifierConfiguration.disabled,
+                                      // The line typed on stays above the
+                                      // buttons.
+                                      scrollPadding: EdgeInsets.fromLTRB(
+                                          20, 20, 20, _clearance + 20),
+                                      // Enter continues a list (N9).
+                                      inputFormatters: const [
+                                        MarkdownListFormatter(),
+                                      ],
+                                      style: TextStyle(
+                                        color: context.colors.textPrimary,
+                                        fontSize: 16,
                                       ),
-                                      contentPadding: EdgeInsets.zero,
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: 'Start writing…',
+                                        hintStyle: TextStyle(
+                                          color: context.colors.textHint,
+                                        ),
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
                                     ),
                                   ),
                                 ),

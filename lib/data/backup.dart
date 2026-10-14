@@ -79,8 +79,8 @@ class Backup {
   /// Round 34); 18 = his energy and batteries (Round 37); 19 = a medicine
   /// may be taken on some weekdays only (Round 40); 20 = recipes and the
   /// ingredients list (`recipes`, `ingredients`, as in their files,
-  /// Round 42).
-  static const version = 20;
+  /// Round 42); 21 = to-do things may be waiting (Round 45).
+  static const version = 21;
 
   final DateTime createdAt;
   final String appVersion;

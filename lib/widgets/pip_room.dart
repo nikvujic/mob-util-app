@@ -489,26 +489,6 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    // His antenna lit while he charges: a glow, bigger at night.
-    final lit = brain.antennaLit;
-    final tipX = brain.x + (brain.facingRight ? 9 : 10);
-    final tipY = groundTop - PipBrain.height;
-    if (lit) {
-      final r = switch (scene?.part) {
-        DayPart.night => 3,
-        DayPart.dawn || DayPart.dusk => 2,
-        _ => 1,
-      };
-      for (var dy = -r; dy <= r; dy++) {
-        for (var dx = -r; dx <= r; dx++) {
-          final d = dx * dx + dy * dy;
-          if (d == 0 || d > r * r) continue;
-          dot(tipX + dx, tipY + dy,
-              d <= 2 ? PipColours.glowNear : PipColours.glowFar);
-        }
-      }
-    }
-
     final charge = brain.chargeScreen;
     final sprite0 = charge == null
         ? PipSprites.frameOf(brain.frame, brain.face)
@@ -569,7 +549,6 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
-    if (lit) dot(tipX, tipY, PipColours.glowNear);
     // His hands (Round 44), popping in and away (a sparkle as they do).
     for (final (mx, my, size) in brain.mitts) {
       if (size <= 0.05) continue;

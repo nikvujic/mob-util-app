@@ -71,6 +71,10 @@ class Preferences {
   /// it's turned off.
   final bool todoNote;
 
+  /// The to-do note's *Waiting* list (Round 45): off, waiting things show
+  /// with the rest, still marked.
+  final bool todoWaiting;
+
   /// Automatic backup (Round 39): the folder picked (Android's uri for it,
   /// and its name to show), or null: off. This phone only.
   final String? autoBackupFolder;
@@ -110,6 +114,7 @@ class Preferences {
     this.backupCountFrom,
     this.backupReminder = true,
     this.todoNote = true,
+    this.todoWaiting = false,
     this.pipBackground = 'field',
     this.autoBackupFolder,
     this.autoBackupFolderName,
@@ -193,6 +198,7 @@ class Preferences {
     DateTime? Function()? backupCountFrom,
     bool? backupReminder,
     bool? todoNote,
+    bool? todoWaiting,
     String? pipBackground,
     String? Function()? autoBackupFolder,
     String? Function()? autoBackupFolderName,
@@ -228,6 +234,7 @@ class Preferences {
             backupCountFrom == null ? this.backupCountFrom : backupCountFrom(),
         backupReminder: backupReminder ?? this.backupReminder,
         todoNote: todoNote ?? this.todoNote,
+        todoWaiting: todoWaiting ?? this.todoWaiting,
         pipBackground: pipBackground ?? this.pipBackground,
         autoBackupFolder: autoBackupFolder == null
             ? this.autoBackupFolder
@@ -271,6 +278,7 @@ class Preferences {
           'backupCountFrom': backupCountFrom!.toIso8601String(),
         'backupReminder': backupReminder,
         'todoNote': todoNote,
+        if (todoWaiting) 'todoWaiting': true,
         'pipBackground': pipBackground,
         if (autoBackupFolder != null) 'autoBackupFolder': autoBackupFolder,
         if (autoBackupFolderName != null)
@@ -319,6 +327,7 @@ class Preferences {
             : DateTime.tryParse(json['backupCountFrom'] as String),
         backupReminder: json['backupReminder'] as bool? ?? true,
         todoNote: json['todoNote'] as bool? ?? true,
+        todoWaiting: json['todoWaiting'] as bool? ?? false,
         // 1.5.0 kept an on/off here (Round 35): his field either way.
         pipBackground: switch (json['pipBackground']) {
           final String id => id,

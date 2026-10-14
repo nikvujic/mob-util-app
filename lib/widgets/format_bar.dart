@@ -5,11 +5,19 @@ import 'package:the_app/core/theme.dart';
 /// The text field's usual selection handles, but no cursor handle (the
 /// pointer under the caret) while [hideCursor] is true (Round 29): with
 /// the format bar open it sat over the bar. Selection handles stay.
+///
+/// Round 45: also no handle whose end of the selection is out of view
+/// ([offScreen]): a note's text scrolls inside a bigger scroll, so
+/// Flutter would draw it anyway, over the app bar.
 class FormatBarSelectionControls extends MaterialTextSelectionControls
     with TextSelectionHandleControls {
   final ValueListenable<bool> hideCursor;
+  final ValueListenable<Set<TextSelectionHandleType>> offScreen;
 
-  FormatBarSelectionControls(this.hideCursor);
+  FormatBarSelectionControls(
+    this.hideCursor, {
+    ValueListenable<Set<TextSelectionHandleType>>? offScreen,
+  }) : offScreen = offScreen ?? ValueNotifier(const {});
 
   @override
   Widget buildHandle(
@@ -19,13 +27,20 @@ class FormatBarSelectionControls extends MaterialTextSelectionControls
     VoidCallback? onTap,
   ]) {
     final handle = super.buildHandle(context, type, textHeight, onTap);
-    if (type != TextSelectionHandleType.collapsed) return handle;
+    final shown = ValueListenableBuilder(
+      valueListenable: offScreen,
+      builder: (_, off, child) => off.contains(type)
+          ? SizedBox.shrink(key: Key('handleOffScreen-${type.name}'))
+          : child!,
+      child: handle,
+    );
+    if (type != TextSelectionHandleType.collapsed) return shown;
     return ValueListenableBuilder(
       valueListenable: hideCursor,
       builder: (_, hidden, child) => hidden
           ? const SizedBox.shrink(key: Key('cursorHandleHidden'))
           : child!,
-      child: handle,
+      child: shown,
     );
   }
 }

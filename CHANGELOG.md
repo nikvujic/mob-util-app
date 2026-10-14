@@ -4,6 +4,30 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- To-do: an options button beside **+**: a **Waiting** list under *To
+  do* (drag things you're waiting on into it and back; a tap still
+  completes one; off, they show with the rest, marked with an
+  hourglass), and a **Lock**: with a master password, the to-do note
+  opens only while the app is unlocked (its card says *Locked*).
+
+### Changed
+- Pip's batteries: one every **5 hours** on the clock, piling up while
+  the app is closed (up to 3), instead of one at a time when it's
+  opened. He uses a segment every 8 hours awake (was 10).
+- Charging is for fun: he uses energy as ever, but his battery doesn't
+  drop while he's plugged in (it catches up when unplugged), and he
+  can't run out. No lit antenna and no percentage screen.
+- Ingredients list: sections have no handle shown; touch a section's
+  name and move to drag it, tap it for its menu.
+
+### Fixed
+- Pip Home's *Charging* animation said he was busy when he wasn't.
+- Notes: after Select all, scrolled down, the selection's handle no
+  longer shows over the top bar.
+
 ## [1.11.0] - 2026-10-14
 
 ### Added

@@ -1,0 +1,49 @@
+{
+  "format": "the-app-backup",
+  "version": 21,
+  "createdAt": "2026-10-14T15:00:00.000Z",
+  "appVersion": "1.12.0 (48)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [
+      {
+        "id": "t1",
+        "text": "Call the dentist 🦷"
+      },
+      {
+        "id": "t2",
+        "text": "Pay the bills, šta god",
+        "done": true
+      },
+      {
+        "id": "t3",
+        "text": "Parcel from Ana 📦",
+        "waiting": true
+      },
+      {
+        "id": "t4",
+        "text": "Water the plants"
+      }
+    ],
+    "recipes": [],
+    "ingredients": {
+      "sections": []
+    }
+  }
+}

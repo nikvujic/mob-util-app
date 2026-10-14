@@ -5,7 +5,12 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/notes_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
+import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
@@ -223,5 +228,184 @@ void main() {
         todo: const [TodoItem(id: 't1', text: 'Kept')],
         preferences: const Preferences(todoNote: false));
     expect(tile, findsNothing);
+  });
+
+  group('options (Round 45)', () {
+    Future<void> options(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('To-do options'));
+      await tester.pumpAndSettle();
+    }
+
+    Finder handleOf(String id) => find.descendant(
+        of: find.byKey(ValueKey(id)),
+        matching: find.byType(ReorderOrSelectIndicator));
+
+    bool waiting(String id) =>
+        container.read(todoProvider).firstWhere((i) => i.id == id).waiting;
+
+    testWidgets('a button beside Add; the Waiting list turned on and off',
+        (tester) async {
+      await start(tester, todo: const [TodoItem(id: 't1', text: 'One')]);
+      await open(tester);
+      expect(
+          (tester.getCenter(find.byTooltip('To-do options')).dy -
+                  tester.getCenter(find.byTooltip('Add a to-do')).dy)
+              .abs(),
+          lessThan(1),
+          reason: 'beside it');
+      expect(find.textContaining('WAITING'), findsNothing);
+      await options(tester);
+      await tester.tap(find.byKey(const Key('todoWaiting')));
+      await tester.pumpAndSettle();
+      expect(container.read(preferencesProvider).todoWaiting, isTrue);
+      await tester.tapAt(const Offset(200, 100)); // closes the sheet
+      await tester.pumpAndSettle();
+      expect(find.text('WAITING  ·  0'), findsOneWidget);
+      expect(find.text("Drag here what you're waiting on"), findsOneWidget);
+    });
+
+    testWidgets('dragged from To do into Waiting and back', (tester) async {
+      await start(tester,
+          todo: const [
+            TodoItem(id: 't1', text: 'One'),
+            TodoItem(id: 't2', text: 'Two'),
+          ],
+          preferences: const Preferences(todoWaiting: true));
+      await open(tester);
+      Future<void> drag(String id, Offset to) async {
+        final from = tester.getCenter(handleOf(id));
+        final gesture = await tester.startGesture(from);
+        await tester.pump(const Duration(milliseconds: 100));
+        for (var i = 1; i <= 10; i++) {
+          await gesture
+              .moveTo(Offset.lerp(from, Offset(from.dx, to.dy), i / 10)!);
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.up();
+        await tester.pumpAndSettle();
+      }
+
+      await drag(
+          't1',
+          tester.getBottomLeft(find.text('WAITING  ·  0')) +
+              const Offset(0, 40));
+      expect(waiting('t1'), isTrue);
+      expect(waiting('t2'), isFalse);
+      expect(find.text('WAITING  ·  1'), findsOneWidget);
+      expect(find.byKey(const Key('waiting-t1')), findsOneWidget,
+          reason: 'an hourglass');
+      expect(tester.getTopLeft(find.text('One')).dy,
+          greaterThan(tester.getTopLeft(find.text('WAITING  ·  1')).dy));
+
+      // Back up, above Two.
+      await drag(
+          't1', tester.getTopLeft(find.text('Two')) - const Offset(0, 10));
+      expect(waiting('t1'), isFalse);
+      expect(texts(), ['One', 'Two']);
+    });
+
+    testWidgets('a tap on a waiting one still completes it', (tester) async {
+      await start(tester,
+          todo: const [TodoItem(id: 't1', text: 'Parcel', waiting: true)],
+          preferences: const Preferences(todoWaiting: true));
+      await open(tester);
+      await tester.tap(find.text('Parcel'));
+      await tester.pumpAndSettle();
+      expect(find.text('COMPLETED  ·  1'), findsOneWidget);
+      expect(find.text('WAITING  ·  0'), findsOneWidget);
+    });
+
+    testWidgets('the list off: waiting ones show with the rest, still marked',
+        (tester) async {
+      await start(tester, todo: const [
+        TodoItem(id: 't1', text: 'One'),
+        TodoItem(id: 't2', text: 'Parcel', waiting: true),
+      ]);
+      await open(tester);
+      expect(find.text('TO DO  ·  2'), findsOneWidget);
+      expect(find.textContaining('WAITING'), findsNothing);
+      Finder hourglass(String id) => find.descendant(
+          of: find.byKey(ValueKey(id)),
+          matching: find.byIcon(Icons.hourglass_empty));
+      expect(hourglass('t2'), findsOneWidget);
+      expect(hourglass('t1'), findsNothing);
+    });
+
+    testWidgets("the card names one to do first, not one that's waiting",
+        (tester) async {
+      await start(tester, todo: const [
+        TodoItem(id: 't1', text: 'Parcel', waiting: true),
+        TodoItem(id: 't2', text: 'Call mum'),
+      ]);
+      expect(tester.widget<Text>(find.byKey(const Key('todoSummary'))).data,
+          'Call mum');
+      expect(tester.widget<Text>(find.byKey(const Key('todoCount'))).data, '2');
+    });
+
+    group('the lock', () {
+      const password = 'password1';
+
+      Future<void> withPassword(WidgetTester tester) async {
+        await tester.runAsync(() async {
+          await container.read(securityProvider.notifier).setPassword(password);
+          await container.read(sessionProvider.notifier).unlock(password);
+        });
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('no master password: it says to set one', (tester) async {
+        await start(tester);
+        await open(tester);
+        await options(tester);
+        expect(find.text('Set a master password first'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('todoLock')));
+        await tester.pumpAndSettle();
+        expect(container.read(todoLockProvider), isFalse);
+      });
+
+      testWidgets(
+          'locked, the app locking closes it; the card hides what it holds; '
+          'the password opens it', (tester) async {
+        await start(tester, todo: const [TodoItem(id: 't1', text: 'Secret')]);
+        await withPassword(tester);
+        await open(tester);
+        await options(tester);
+        await tester.tap(find.byKey(const Key('todoLock')));
+        await tester.pumpAndSettle();
+        expect(container.read(todoLockProvider), isTrue);
+        expect(find.text('Secret'), findsOneWidget, reason: 'unlocked still');
+
+        container.read(sessionProvider.notifier).lock();
+        await tester.pumpAndSettle();
+        expect(find.text('Secret'), findsNothing);
+        expect(appBarTitle('To-do'), findsNothing, reason: 'closed, back home');
+        expect(tester.widget<Text>(find.byKey(const Key('todoSummary'))).data,
+            'Locked');
+        expect(find.byKey(const Key('todoCount')), findsNothing);
+
+        await open(tester);
+        expect(find.text('To-do is locked'), findsOneWidget);
+        expect(find.text('Secret'), findsNothing);
+        await tester.tap(find.text('Unlock'));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+            find.byKey(const Key('promptPassword')), password);
+        await tester.tap(find.text('Unlock').last);
+        await settleBusy(tester);
+        expect(find.text('Secret'), findsOneWidget);
+      });
+
+      testWidgets('turned off again from the same switch', (tester) async {
+        await start(tester);
+        await withPassword(tester);
+        container.read(todoLockProvider.notifier).lock();
+        await open(tester);
+        await options(tester);
+        await tester.tap(find.byKey(const Key('todoLock')));
+        await tester.pumpAndSettle();
+        expect(container.read(todoLockProvider), isFalse);
+      });
+    });
   });
 }

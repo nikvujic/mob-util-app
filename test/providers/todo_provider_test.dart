@@ -109,4 +109,75 @@ void main() {
     data.clear(AppSection.notes);
     expect(container.read(todoProvider), isEmpty);
   });
+
+  group('waiting (Round 45)', () {
+    List<String> waiting() => [
+          for (final i in todo.state)
+            if (!i.done && i.waiting) i.text,
+        ];
+    List<String> toDo() => [
+          for (final i in todo.state)
+            if (!i.done && !i.waiting) i.text,
+        ];
+
+    test('placed between To do and Waiting, in the order given', () {
+      todo
+        ..add('A')
+        ..add('B')
+        ..add('C')
+        ..add('Done');
+      todo.toggle(idOf('Done'));
+      todo.place(toDo: [idOf('C'), idOf('A')], waiting: [idOf('B')]);
+      expect(toDo(), ['C', 'A']);
+      expect(waiting(), ['B']);
+      expect(done(), ['Done'], reason: 'Completed as it was');
+      // And back.
+      todo.place(toDo: [idOf('B'), idOf('C'), idOf('A')], waiting: []);
+      expect(toDo(), ['B', 'C', 'A']);
+      expect(waiting(), isEmpty);
+    });
+
+    test('ones not given (or done) are kept, not lost or moved', () {
+      todo
+        ..add('A')
+        ..add('B')
+        ..add('Done');
+      todo.toggle(idOf('Done'));
+      todo.place(toDo: [idOf('Done')], waiting: [idOf('A')]);
+      expect(texts(), containsAll(['A', 'B', 'Done']));
+      expect(done(), ['Done']);
+      expect(waiting(), ['A']);
+      expect(toDo(), ['B']);
+    });
+
+    test('done, it is no longer waiting; back, it is to do', () {
+      todo.add('A');
+      todo.place(toDo: [], waiting: [idOf('A')]);
+      todo.toggle(idOf('A'));
+      expect(todo.state.single.waiting, isFalse);
+      todo.toggle(idOf('A'));
+      expect(toDo(), ['A']);
+    });
+
+    test('kept in todo.json (only when waiting)', () async {
+      final dir = Directory.systemTemp.createTempSync('todo_waiting');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final storage = await AppStorage.open(directory: dir);
+      final notifier = TodoNotifier(storage)
+        ..add('One')
+        ..add('Two');
+      notifier.place(toDo: [
+        notifier.state.first.id
+      ], waiting: [
+        notifier.state.last.id,
+      ]);
+      await storage.flush();
+      final json = File('${dir.path}/todo.json').readAsStringSync();
+      expect(json, contains('"version":3'));
+      expect('waiting'.allMatches(json), hasLength(1));
+      final again = await AppStorage.open(directory: dir);
+      expect(again.initialTodo.map((i) => (i.text, i.waiting)),
+          [('One', false), ('Two', true)]);
+    });
+  });
 }

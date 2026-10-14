@@ -684,6 +684,39 @@ void main() {
     });
   });
 
+  group('todo.json v3 / v21 backup (waiting to-dos, Round 45)', () {
+    void expectSample(List<TodoItem> items) {
+      expect(items.map((i) => (i.text, i.done, i.waiting)), [
+        ('Call the dentist 🦷', false, false),
+        ('Pay the bills, šta god', true, false),
+        ('Parcel from Ana 📦', false, true),
+        ('Water the plants', false, false),
+      ]);
+    }
+
+    test('todo.json version 3 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v21/storage'),
+      );
+      expectSample(storage.initialTodo);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v21 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v21/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.todo);
+    });
+
+    test('older things are not waiting', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v16/storage'),
+      );
+      expect(storage.initialTodo.map((i) => i.waiting), everyElement(isFalse));
+    });
+  });
+
   test('notifications.json version 1 (Round 31) loads', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v16/storage'),
@@ -857,6 +890,19 @@ void main() {
     expect(storage.initialPageLocks, {HubTool.placard, HubTool.medicine});
   });
 
+  test('settings.json with the to-do lock (Round 45) loads it', () async {
+    final storage = await AppStorage.open(
+      directory: copyOf('test/fixtures/v21/storage'),
+    );
+    expect(storage.initialTodoLocked, isTrue);
+    final older = await AppStorage.open(
+      directory: copyOf('test/fixtures/v13/storage'),
+    );
+    expect(older.initialTodoLocked, isFalse);
+    expect(older.initialPageLocks, {HubTool.placard, HubTool.medicine},
+        reason: 'the others as they were');
+  });
+
   test('backups from before the planner restore with no tasks', () {
     for (final path in [
       'test/fixtures/v1/backup-plain.json',
@@ -996,6 +1042,12 @@ void main() {
           '08c1962f89598343a67a8a3033da564b1ecc062a8675062d0e7bff8b5a3da0ec',
       'test/fixtures/v20/backup-plain.json':
           '152bb759732f5e3e7536b54c4faf1e043e2cadba7066b5a348d77d42039bd991',
+      'test/fixtures/v21/storage/todo.json':
+          '44ca98b389c273ed0f0ae695161844a5d087c08dfc415fba243919adcdb1be7b',
+      'test/fixtures/v21/storage/settings.json':
+          'b49d8b8d8fae3bd37633f7e47e446b56b6792be80d6e0251feb3a2e3dc524c97',
+      'test/fixtures/v21/backup-plain.json':
+          '008ed9a7d9292d768ef92a16a6bb8f79abbd3a180203685bc6a0975647a76736',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

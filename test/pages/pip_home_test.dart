@@ -16,13 +16,14 @@ import '../helpers.dart';
 void main() {
   late ProviderContainer container;
 
-  Future<void> open(WidgetTester tester, {int hour = 12}) async {
+  Future<void> open(WidgetTester tester,
+      {int hour = 12, FakePipLink? link}) async {
     // A phone's size (Nikola's): half of it is his field.
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
-    container =
-        await pumpApp(tester, clock: () => DateTime(2026, 10, 13, hour));
+    container = await pumpApp(tester,
+        clock: () => DateTime(2026, 10, 13, hour), pipLink: link);
     await openTab(tester, 'Hub');
     await tester.tap(find.byTooltip('Pip'));
     await tester.pumpAndSettle();
@@ -219,5 +220,25 @@ void main() {
     expect(brain.station, isNotNull);
     // (The rest, him plugging in and out, is the brain's: its tests.)
     expect(words(), isNot(contains("HE'S BUSY, A MOMENT")));
+  });
+
+  testWidgets("at his station, Charging says so (Round 45)", (tester) async {
+    await open(tester, link: FakePipLink(segments: 2)..plugged = true);
+    final brain = room(tester).brain;
+    expect(brain.activity, PipActivity.charging);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAnimations')));
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.descendant(
+        of: find.byKey(const Key('pipAnimationList')),
+        matching: find.byType(Scrollable),
+      ),
+      const Offset(0, -600),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipPlay-charge')));
+    await tester.pump();
+    expect(words(), contains("HE'S CHARGING"));
   });
 }

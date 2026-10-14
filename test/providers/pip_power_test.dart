@@ -36,8 +36,9 @@ void main() {
 
   setUp(() => now = DateTime(2026, 10, 14, 10));
 
-  test('plugged in: he can\'t lose power; unplugged: he uses it again',
-      () async {
+  test(
+      'plugged in (Round 45): he uses energy as ever, but his icon doesn\'t '
+      'drop till unplugged, and he can\'t run out', () async {
     final power = FakePower(isPlugged: true);
     final container = start(power);
     final link = container.read(pipLinkProvider);
@@ -47,15 +48,18 @@ void main() {
     expect(container.read(preferencesProvider).pipPlugged, isTrue,
         reason: 'kept for after a restart');
     final pip = container.read(pipLifeProvider.notifier);
-    now = now.add(const Duration(hours: 5));
-    expect(pip.levelAt(now), 1.5, reason: 'kept while plugged in');
+    now = now.add(const Duration(hours: 6));
+    expect(pip.levelAt(now), closeTo(0.75, 0.001), reason: 'used as ever');
+    expect(pip.segmentsAt(now), 2, reason: 'shown as when plugged in');
+    now = now.add(const Duration(hours: 20));
+    expect(pip.levelAt(now), PipEnergy.chargingFloor, reason: 'never out');
+    expect(pip.showAt(now), isNot(PipShow.powerOff));
 
     power.plug(false);
     await pumpEventQueue();
     expect(link.plugged, isFalse);
     expect(container.read(preferencesProvider).pipPlugged, isFalse);
-    now = now.add(const Duration(hours: 5));
-    expect(pip.levelAt(now), closeTo(1.0, 0.001), reason: 'used again');
+    expect(pip.segmentsAt(now), 1, reason: 'the drop shows now');
   });
 
   test('asked again while he\'s looked at, every few seconds at most',
@@ -84,9 +88,10 @@ void main() {
     container.read(pipLinkProvider).look();
     final pip = container.read(pipLifeProvider.notifier);
     expect(pip.charging, isTrue, reason: 'straight away');
-    now = now.add(const Duration(hours: 8));
+    now = now.add(const Duration(hours: 4));
     await pumpEventQueue();
-    expect(pip.levelAt(now), 1.5);
+    expect(pip.segmentsAt(now), 2, reason: 'still shown as when plugged in');
+    expect(pip.levelAt(now), closeTo(1.0, 0.001));
   });
 
   test('plugged in, no battery taken: "he\'s charging"', () async {

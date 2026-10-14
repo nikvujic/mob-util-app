@@ -68,7 +68,6 @@ enum ChargeScreen {
   static,
   bolt,
   content,
-  percent,
   sparks,
   humming,
   blinking,
@@ -270,9 +269,9 @@ class PipBrain {
       case PipAnimation.fetch:
         return false; // only with a battery: [takeBattery]
       case PipAnimation.charge:
-        // Only where there's room for the station, and not if the phone
-        // is plugged in already (he's at it, or will be).
-        if (phonePlugged || !_stationFits) return false;
+        // Only where there's room for the station. The phone plugged in
+        // and him not at it (full, say): it plays all the same (Round 45).
+        if (!_stationFits) return false;
         _demoCharge = 0;
         _setStation(true, animate: true);
     }
@@ -645,7 +644,10 @@ class PipBrain {
           _demoCharge = demo + dt;
           if (_demoCharge! >= demoChargeHold) {
             _demoCharge = null;
-            _setStation(phonePlugged, animate: true);
+            // The phone plugged in: he stays plugged in if he'd be anyway
+            // (not full); else he unplugs (the station stays while the
+            // phone's plugged in, else it sinks).
+            if (!phonePlugged || segments >= 3) _startUnplugging();
           }
         }
       case PipActivity.unplugging:
@@ -860,12 +862,6 @@ class PipBrain {
   /// While charging: what his screen shows, and how far into it.
   (ChargeScreen, double)? get chargeScreen =>
       activity == PipActivity.charging ? (_screen, _screenT) : null;
-
-  /// His antenna's tip lit (Round 44: plugged in).
-  bool get antennaLit =>
-      activity == PipActivity.charging ||
-      (activity == PipActivity.plugging && _t >= pushEnd) ||
-      (activity == PipActivity.unplugging && _t < pullEnd);
 
   /// The station's lamp: blinking slowly while it's up.
   bool get stationLamp => _stationClock % 1.2 < 0.6;

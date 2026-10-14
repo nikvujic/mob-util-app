@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_energy.dart';
 
@@ -18,8 +16,8 @@ void main() {
   });
 
   group('energy used', () {
-    test('awake: a segment every 10 hours', () {
-      expect(PipEnergy.usedBetween(at(14, 9), at(14, 19)), closeTo(1, 1e-9));
+    test('awake: a segment every 8 hours (Round 45)', () {
+      expect(PipEnergy.usedBetween(at(14, 9), at(14, 17)), closeTo(1, 1e-9));
     });
 
     test('asleep: much slower, a segment every 36 hours', () {
@@ -30,13 +28,13 @@ void main() {
     test('across the night: each part at its own rate', () {
       // 20:00 → 9:00: 3 h awake, 9 h asleep, 1 h awake.
       expect(PipEnergy.usedBetween(at(14, 20), at(15, 9)),
-          closeTo(4 / 10 + 9 / 36, 1e-9));
+          closeTo(4 / 8 + 9 / 36, 1e-9));
     });
 
-    test('a day: less than two segments', () {
+    test('a day: about two segments (Round 45)', () {
       final day = PipEnergy.usedBetween(at(14, 9), at(15, 9));
-      expect(day, closeTo(15 / 10 + 9 / 36, 1e-9));
-      expect(day, lessThan(2));
+      expect(day, closeTo(15 / 8 + 9 / 36, 1e-9));
+      expect(day, inInclusiveRange(2, 2.2));
     });
 
     test('the clock gone back: nothing used', () {
@@ -49,9 +47,9 @@ void main() {
     });
 
     test('when it runs out', () {
-      expect(PipEnergy.emptyAt(1, at(14, 9)), at(14, 19));
-      // 2 at 20:00: 0.3 by 23:00, 0.25 overnight, 1.45 more from 8:00.
-      expect(PipEnergy.emptyAt(2, at(14, 20)), at(15, 22, 30));
+      expect(PipEnergy.emptyAt(1, at(14, 9)), at(14, 17));
+      // 2 at 20:00: 0.375 by 23:00, 0.25 overnight, 1.375 more from 8:00.
+      expect(PipEnergy.emptyAt(2, at(14, 20)), at(15, 19));
       expect(PipEnergy.emptyAt(0, at(14, 9)), isNull);
       final empty = PipEnergy.emptyAt(3, at(14, 9))!;
       expect(PipEnergy.levelAt(3, at(14, 9), empty), closeTo(0, 0.01));
@@ -67,13 +65,18 @@ void main() {
     expect(PipEnergy.segments(0), 0);
   });
 
-  test('the next battery: 6 hours, give or take 90 minutes', () {
-    final random = math.Random(1);
-    for (var i = 0; i < 200; i++) {
-      final gap =
-          PipEnergy.nextBattery(at(14, 9), random).difference(at(14, 9));
-      expect(gap.inMinutes, inInclusiveRange(270, 450));
-    }
+  test(
+      'batteries on the clock (Round 45): every 5 hours, piling up while '
+      'away, at most 3', () {
+    final next = at(14, 12);
+    expect(PipEnergy.nextBattery(at(14, 7)), next);
+    expect(PipEnergy.batteriesAt(0, next, at(14, 11)), (0, next),
+        reason: 'not yet');
+    expect(PipEnergy.batteriesAt(0, next, at(14, 12)), (1, at(14, 17)));
+    // Eleven hours past: three came (12:00, 17:00, 22:00).
+    expect(PipEnergy.batteriesAt(0, next, at(14, 23)), (3, at(15, 3)));
+    // Held two already: only one more fits; the clock keeps going.
+    expect(PipEnergy.batteriesAt(2, next, at(14, 23)), (3, at(15, 3)));
   });
 
   group('what to show', () {

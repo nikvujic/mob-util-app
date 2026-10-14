@@ -13,14 +13,11 @@ import 'package:the_app/providers/preferences_provider.dart';
 /// name; his energy and batteries (Round 37). Saved to `pip.json`.
 class PipLifeNotifier extends StateNotifier<PipLife> {
   final DateTime Function() _clock;
-  final math.Random _random;
 
   PipLifeNotifier(
     AppStorage storage, {
     DateTime Function()? clock,
-    math.Random? random,
   })  : _clock = clock ?? DateTime.now,
-        _random = random ?? math.Random(),
         super(storage.initialPip) {
     state = _started(state);
     addListener(storage.savePip, fireImmediately: false);
@@ -33,8 +30,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     final now = _clock();
     return pip.copyWith(
       energyAt: () => now,
-      nextBatteryAt: () =>
-          pip.nextBatteryAt ?? PipEnergy.nextBattery(now, _random),
+      nextBatteryAt: () => pip.nextBatteryAt ?? PipEnergy.nextBattery(now),
     );
   }
 
@@ -46,7 +42,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       born: now,
       energy: PipLife.fullEnergy,
       energyAt: () => now,
-      nextBatteryAt: () => PipEnergy.nextBattery(now, _random),
+      nextBatteryAt: () => PipEnergy.nextBattery(now),
     );
   }
 
@@ -80,6 +76,13 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// his energy as it was.
   void resumeCharging(bool charging) => _charging = charging;
 
+  /// His battery icon's segments at [now]: plugged in, it doesn't drop
+  /// (Round 45: the drop shows once he's unplugged).
+  int segmentsAt(DateTime now) => _charging
+      ? math.max(
+          PipEnergy.segments(levelAt(now)), PipEnergy.segments(state.energy))
+      : PipEnergy.segments(levelAt(now));
+
   /// His energy at [now].
   double levelAt(DateTime now) =>
       (_charging ? PipEnergy.chargingLevelAt : PipEnergy.levelAt)(
@@ -88,20 +91,18 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
         now,
       );
 
-  /// The battery due by [now], if any: held (up to 3), and the next one
-  /// timed from now, so they can't pile up while the app is closed.
+  /// The batteries due by [now] (Round 45: every few hours on the clock,
+  /// piling up while away, up to 3 held).
   void collect(DateTime now) {
     if (!state.hatched) return;
     final next = state.nextBatteryAt;
     if (next == null) {
-      state = state.copyWith(
-        nextBatteryAt: () => PipEnergy.nextBattery(now, _random),
-      );
-    } else if (!now.isBefore(next)) {
-      state = state.copyWith(
-        batteries: math.min(PipEnergy.maxBatteries, state.batteries + 1),
-        nextBatteryAt: () => PipEnergy.nextBattery(now, _random),
-      );
+      state = state.copyWith(nextBatteryAt: () => PipEnergy.nextBattery(now));
+      return;
+    }
+    final (held, after) = PipEnergy.batteriesAt(state.batteries, next, now);
+    if (after != next) {
+      state = state.copyWith(batteries: held, nextBatteryAt: () => after);
     }
   }
 
@@ -141,8 +142,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   PipRefusal? refusalAt(DateTime now) {
     if (!state.hatched) return PipRefusal.egg;
     if (state.batteries == 0) return PipRefusal.noBatteries;
-    final level = levelAt(now);
-    if (PipEnergy.segments(level) >= 3) return PipRefusal.full;
+    if (segmentsAt(now) >= 3) return PipRefusal.full;
     final show = showAt(now);
     if (show == PipShow.asleep) return PipRefusal.asleep;
     // Round 44: plugged in (at his station), not now.
@@ -171,14 +171,10 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
 /// Why he can't have a battery now.
 enum PipRefusal { egg, noBatteries, full, asleep, charging }
 
-/// Picks battery times; tests give their own.
-final pipRandomProvider = Provider<math.Random>((ref) => math.Random());
-
 final pipLifeProvider = StateNotifierProvider<PipLifeNotifier, PipLife>(
   (ref) => PipLifeNotifier(
     ref.watch(appStorageProvider),
     clock: ref.watch(clockProvider),
-    random: ref.watch(pipRandomProvider),
   ),
 );
 
@@ -198,7 +194,7 @@ class _Link implements PipLink {
     _ref.read(pipPowerProvider.notifier).refresh();
     final now = _now;
     _pip.collect(now);
-    return (_pip.showAt(now), PipEnergy.segments(_pip.levelAt(now)));
+    return (_pip.showAt(now), _pip.segmentsAt(now));
   }
 
   @override

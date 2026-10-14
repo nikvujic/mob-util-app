@@ -517,20 +517,19 @@ void main() {
       expect(book().sections.map((s) => s.name), ['Baking', 'Fruit', 'Dairy']);
     });
 
-    testWidgets("a section moved by its handle; the first one has none",
-        (tester) async {
+    testWidgets(
+        'a section moved by touching and moving its name (Round 45: no '
+        'handle shown); the first one stays', (tester) async {
       await openList(tester);
-      Finder handleOf(String id) => find.descendant(
-            of: find.byKey(ValueKey('section-$id')),
-            matching: find.byIcon(Icons.drag_handle),
-          );
+      Finder handleOf(String id) => find.byKey(Key('sectionHandle-$id'));
       expect(handleOf('s1'), findsNothing, reason: 'the first stays');
-      // Level with the name (Round 44), its touch area still full height.
       expect(
-          tester.getCenter(handleOf('s2')).dy,
-          moreOrLessEquals(tester.getCenter(find.text('DAIRY  ·  2')).dy,
-              epsilon: 3));
-      expect(tester.getSize(find.byKey(const Key('sectionHandle-s2'))).height,
+          find.descendant(
+              of: find.byKey(const ValueKey('section-s2')),
+              matching: find.byIcon(Icons.drag_handle)),
+          findsNothing,
+          reason: 'no handle drawn');
+      expect(tester.getSize(handleOf('s2')).height,
           greaterThanOrEqualTo(kMinInteractiveDimension));
       // Adding a section: a list with a plus, not a folder.
       expect(
@@ -591,10 +590,10 @@ void main() {
     });
 
     testWidgets(
-        "holding a section's name deletes it, its ingredients "
-        'moved up', (tester) async {
+        "a tap on a section's name opens its menu (Round 45); delete moves "
+        'its ingredients up', (tester) async {
       await openList(tester);
-      await tester.longPress(find.text('DAIRY  ·  2'));
+      await tester.tap(find.text('DAIRY  ·  2'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Delete section'));
       await tester.pumpAndSettle();

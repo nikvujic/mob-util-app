@@ -455,7 +455,7 @@ abstract final class PipColours {
   // Round 42: a battery's charge is blue (his energy stays green to red).
   static const batteryCharge = Color(0xFF4A9BE8);
 
-  // Round 44: his charging station, its cable and plug, his lit antenna.
+  // Round 44: his charging station, its cable and plug.
   static const stationEdge = Color(0xFF3A3B40);
   static const stationBody = Color(0xFF9A9CA0);
   static const stationLight = Color(0xFFB8BBC0);
@@ -465,8 +465,6 @@ abstract final class PipColours {
   static const lampOn = Color(0xFF7FE06A);
   static const lampOff = Color(0xFF3E7A33);
   static const cable = Color(0xFF2E2C2A);
-  static const glowNear = Color(0xFFFFE9B0);
-  static const glowFar = Color(0xFFFFD98A);
   static const staticLight = Color(0xFFC8C4BC);
   static const staticDark = Color(0xFF9A958C);
 

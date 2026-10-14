@@ -70,6 +70,32 @@ void main() {
     expect(hidden, findsNothing);
   });
 
+  testWidgets(
+      'scrolled down, Select all: the handle at its start (out of view) '
+      'isn\'t drawn over the app bar (Round 45)', (tester) async {
+    container = await pumpApp(tester);
+    final text = [for (var i = 1; i <= 80; i++) 'Line number $i'].join('\n');
+    container
+        .read(notesProvider.notifier)
+        .addNote(title: 'Long', content: text);
+    await tester.pump();
+    await tester.tap(find.text('Long'));
+    await tester.pumpAndSettle();
+    final scroll = find.byKey(const Key('noteContentScroll'));
+    await tester.drag(scroll, const Offset(0, -3000));
+    await tester.pumpAndSettle();
+    // Hold a word in view, then Select all.
+    await tester.longPressAt(tester.getCenter(scroll));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Select all'));
+    await tester.pumpAndSettle();
+    expect(content(tester).selection.start, 0);
+    expect(find.byKey(const Key('handleOffScreen-left')), findsOneWidget,
+        reason: 'its line is far above, out of view');
+    expect(find.byKey(const Key('handleOffScreen-right')), findsNothing,
+        reason: 'the end is in view');
+  });
+
   void select(WidgetTester tester, int start, int end) =>
       content(tester).selection =
           TextSelection(baseOffset: start, extentOffset: end);

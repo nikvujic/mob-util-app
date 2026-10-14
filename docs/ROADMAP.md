@@ -339,34 +339,44 @@ fixtures for every stored format.
 
 ### Round 45 — Nikola's notes on 1.10.1 and the charging station (2026-10-14)
 
-Waiting for Nikola to try the charging station (1.11.0) first.
+Built after Nikola tried 1.11.0 ("do it, except the segment drop time").
 
 **Charging station, changes**
-- [ ] No lit antenna while charging.
-- [ ] Of the charging screens, drop the **percentage**; keep the rest.
+- [x] No lit antenna while charging.
+- [x] Of the charging screens, drop the **percentage**; keep the rest.
 
 **Patches**
-- [ ] Notes: scrolled down, hold and Select all: the selection's handle
+- [x] Notes: scrolled down, hold and Select all: the selection's handle
   (the arrow at its start) shows way up, over the app bar. Hide a
   handle whose end of the selection is out of view.
-- [ ] Ingredients list: sections' handles **invisible**; touching a
+- [x] Ingredients list: sections' handles **invisible**; touching a
   section's name and moving drags it; a tap opens its menu.
 
 **To-do note**
-- [ ] A button beside Add with the list's options: a **Waiting**
+- [x] A button beside Add with the list's options: a **Waiting**
   section on or off, and **Lock** the to-do list.
-- [ ] **Waiting**: the "to do" part split in two, *To do* and *Waiting*:
+- [x] **Waiting**: the "to do" part split in two, *To do* and *Waiting*:
   things dragged between them; a tap still moves one to *Completed*.
   Off, waiting things show with the rest (kept marked, back when it's
   on again).
-- [ ] **Lock**: just a password (Nikola): the list closed behind the
+- [x] **Lock**: just a password (Nikola): the list closed behind the
   master password while the app is locked, like a locked Hub page (not
   encrypted).
-- [ ] The to-do note's switch in Settings only shows or hides its card:
+- [x] The to-do note's switch in Settings only shows or hides its card:
   the list, its Waiting and its lock stay as they are.
 
+**Pip's batteries and energy, a better system** (Nikola: no batteries
+all day, no drain seen, with the app in his recent apps)
+- [x] A battery every **5 hours on the clock** (no random spread),
+  piling up while he's away, up to 3: time away counts, open or not.
+- [x] He uses a segment every **8 hours awake** (was 10).
+- [x] Plugged in: he uses energy as ever, but his battery icon keeps its
+  segments until unplugged (so it doesn't drop while he charges), and he
+  can't run out. For fun more than to save him.
+- [x] Not done (Nikola): a "a segment less in X h" line in his Status.
+
 **Pip patches**
-- [ ] Pip Home's *Charging* said "busy" when he wasn't: it refused
+- [x] Pip Home's *Charging* said "busy" when he wasn't: it refused
   whenever the phone was plugged in (e.g. he's full and ignores the
   station). Play it then too; if he's at the station already, say
   "HE'S CHARGING".

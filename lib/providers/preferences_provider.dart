@@ -81,6 +81,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   /// The to-do note on or off (Round 28).
   void setTodoNote(bool on) => state = state.copyWith(todoNote: on);
 
+  /// The to-do note's *Waiting* list on or off (Round 45).
+  void setTodoWaiting(bool on) => state = state.copyWith(todoWaiting: on);
+
   /// Automatic backup into [folder] (Round 39), or off with null.
   void setAutoBackupFolder(PickedFolder? folder) => state = state.copyWith(
         autoBackupFolder: () => folder?.uri,

@@ -213,6 +213,15 @@ void main() {
         await t.pumpAndSettle();
         expect(find.text('Pay rent'), findsOneWidget);
       },
+      'to-do with its Waiting list': (t) async {
+        await t.tap(find.byKey(const Key('todoTile')));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('To-do options'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('todoWaiting')));
+        await t.pumpAndSettle();
+        expect(find.text('Waiting list'), findsOneWidget);
+      },
       'notes selection mode': (t) async {
         await t.longPress(find.text('Groceries'));
         await t.pumpAndSettle();

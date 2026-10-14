@@ -35,7 +35,7 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/placard.json {"version": 1, "text": …, "count": …}
 ///     <app documents>/data/medicine.json
 ///         {"version": 2, "medicines": [...], "taken": [...]}
-///     <app documents>/data/todo.json {"version": 2, "items": [...]}
+///     <app documents>/data/todo.json {"version": 3, "items": [...]}
 ///     <app documents>/data/pip.json
 ///         {"version": 2, "born": …, "name": …, "energy": …, ...}
 ///     <app documents>/data/recipes.json {"version": 1, "recipes": [...]}
@@ -48,7 +48,7 @@ import 'package:the_app/models/todo_item.dart';
 ///         {"version": 2, "theme": "green", "counterFeedback": true}
 ///     <app documents>/data/settings.json
 ///         {"version": 2, "sectionLocks": ["shop", ...],
-///          "pageLocks": ["medicine", ...]}
+///          "pageLocks": ["medicine", ...], "todoLocked": true}
 ///
 /// Data is loaded once at startup ([open]) and then saved after every change
 /// by the providers.
@@ -95,8 +95,9 @@ class AppStorage {
   static const shopFormatVersion = 3;
 
   /// Version of `todo.json` (Round 28). History: 1 = first format; 2 =
-  /// things may be done (`done`, Round 30).
-  static const todoFormatVersion = 2;
+  /// things may be done (`done`, Round 30); 3 = or waiting (`waiting`,
+  /// Round 45).
+  static const todoFormatVersion = 3;
 
   /// Version of `notifications.json` (Round 31): what was scheduled, for
   /// the history. This phone only, not in backups. History: 1 = first
@@ -158,9 +159,13 @@ class AppStorage {
   /// The Hub's pages locked behind the master password (O7).
   final Set<HubTool> initialPageLocks;
 
-  /// The locks last saved: settings.json holds both kinds.
+  /// The to-do note locked behind the master password (Round 45).
+  final bool initialTodoLocked;
+
+  /// The locks last saved: settings.json holds every kind.
   late Set<AppSection> _sectionLocks = initialSectionLocks;
   late Set<HubTool> _pageLocks = initialPageLocks;
+  late bool _todoLocked = initialTodoLocked;
 
   AppStorage._(
     this._notesStore,
@@ -198,6 +203,7 @@ class AppStorage {
     required this.initialMasterPassword,
     required this.initialSectionLocks,
     required this.initialPageLocks,
+    required this.initialTodoLocked,
   });
 
   /// Storage that keeps nothing (for tests and previews).
@@ -220,6 +226,7 @@ class AppStorage {
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
     this.initialPageLocks = const {},
+    this.initialTodoLocked = false,
   })  : _notesStore = null,
         _shopStore = null,
         _securityStore = null,
@@ -266,8 +273,8 @@ class AppStorage {
     final ingredientsStore =
         JsonFileStore(File('${dir.path}/ingredients.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
-    final locks =
-        await _load(settingsStore, (<AppSection>{}, <HubTool>{}), (json) {
+    final locks = await _load(
+        settingsStore, (<AppSection>{}, <HubTool>{}, false), (json) {
       List<dynamic> ids(String key) => json[key] as List<dynamic>? ?? const [];
       return (
         {
@@ -276,6 +283,7 @@ class AppStorage {
         {
           for (final id in ids('pageLocks')) HubTool.fromId(id as String),
         }.whereType<HubTool>().toSet(),
+        json['todoLocked'] as bool? ?? false,
       );
     });
 
@@ -414,6 +422,7 @@ class AppStorage {
       ),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
+      initialTodoLocked: locks.$3,
     );
     storage._watchSaving();
     return storage;
@@ -571,6 +580,11 @@ class AppStorage {
     return _saveLocks();
   }
 
+  Future<void> saveTodoLocked(bool locked) {
+    _todoLocked = locked;
+    return _saveLocks();
+  }
+
   Future<void> _saveLocks() async {
     await _settingsStore?.write({
       'version': formatVersion,
@@ -582,6 +596,7 @@ class AppStorage {
         for (final t in HubTool.values)
           if (_pageLocks.contains(t)) t.name,
       ],
+      if (_todoLocked) 'todoLocked': true,
     });
   }
 

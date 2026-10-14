@@ -123,16 +123,12 @@ void main() {
     });
 
     test(
-        'the screens move: the battery fills, the percentage counts, the '
+        'the screens move: the battery fills, the '
         'static changes, his eyes follow the lamp', () {
       String screen(ChargeScreen s, double t, {bool lamp = true}) =>
           PipSprites.chargingFrame(s, t, lamp: lamp).join('\n');
       expect(screen(ChargeScreen.battery, 0), isNot(contains('B')));
       expect(screen(ChargeScreen.battery, 1.6), contains('B'));
-      expect(screen(ChargeScreen.percent, 0),
-          isNot(screen(ChargeScreen.percent, 2)));
-      expect(screen(ChargeScreen.percent, 10), screen(ChargeScreen.percent, 20),
-          reason: 'stays at 100%');
       expect(screen(ChargeScreen.static, 0.05),
           isNot(screen(ChargeScreen.static, 0.25)));
       expect(screen(ChargeScreen.blinking, 0, lamp: true),

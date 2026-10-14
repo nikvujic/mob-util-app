@@ -8,14 +8,15 @@ abstract final class PipEnergy {
   /// Full: three segments of his battery.
   static const full = 3.0;
 
-  /// Energy used an hour awake, and asleep (much less, so he rarely runs
-  /// out in the night).
-  static const awakePerHour = 1 / 10;
+  /// Energy used an hour awake (Round 45: a segment every 8 hours, so a
+  /// day shows it), and asleep (much less, so he rarely runs out in the
+  /// night).
+  static const awakePerHour = 1 / 8;
   static const asleepPerHour = 1 / 36;
 
-  /// A battery comes every [batteryEvery], give or take [batterySpread].
-  static const batteryEvery = Duration(hours: 6);
-  static const batterySpread = Duration(minutes: 90);
+  /// A battery comes every [batteryEvery] (Round 45: on the clock, they
+  /// pile up while away, up to [maxBatteries]).
+  static const batteryEvery = Duration(hours: 5);
 
   /// At most this many held.
   static const maxBatteries = 3;
@@ -54,13 +55,16 @@ abstract final class PipEnergy {
   static double levelAt(double level, DateTime since, DateTime now) =>
       math.max(0, level - usedBetween(since, now));
 
-  /// Charging (Round 44): plugged in, he can't lose power. The station
-  /// doesn't fill him (just for looks), so he keeps [level] (from when
-  /// it was plugged in); only full, he can drop to just below full (then
-  /// he goes to the station, which he ignores while full).
-  static const chargingFloor = full - 1;
+  /// Charging (Round 45): for fun more than use. He uses energy as ever,
+  /// but can't run out: plugged in, he stops at [chargingFloor] (unless
+  /// he was out already). His battery icon doesn't show a drop meanwhile
+  /// (the provider keeps the segments he was plugged in with).
+  static const chargingFloor = 0.05;
   static double chargingLevelAt(double level, DateTime since, DateTime now) =>
-      math.max(levelAt(level, since, now), math.min(level, chargingFloor));
+      level <= 0
+          ? 0
+          : math.max(
+              levelAt(level, since, now), math.min(level, chargingFloor));
 
   /// When [level] at [since] runs out (a minute's precision), or null
   /// if it's already empty.
@@ -85,13 +89,21 @@ abstract final class PipEnergy {
   static int segments(double level) =>
       level <= 0 ? 0 : level.ceil().clamp(1, 3);
 
-  /// When the battery after one at [now] comes: [batteryEvery], give or
-  /// take up to [batterySpread], picked by [random].
-  static DateTime nextBattery(DateTime now, math.Random random) {
-    final spread = batterySpread.inMinutes;
-    final minutes =
-        batteryEvery.inMinutes - spread + random.nextInt(2 * spread + 1);
-    return now.add(Duration(minutes: minutes));
+  /// When the battery after [now] comes.
+  static DateTime nextBattery(DateTime now) => now.add(batteryEvery);
+
+  /// Batteries come on the clock (Round 45): with [held] and the next due
+  /// at [next], at [now] how many are held (at most [maxBatteries]) and
+  /// when the next comes. Time away counts; the clock keeps going while
+  /// he's full of them.
+  static (int, DateTime) batteriesAt(int held, DateTime next, DateTime now) {
+    if (now.isBefore(next)) return (held, next);
+    final every = batteryEvery.inMinutes;
+    final due = now.difference(next).inMinutes ~/ every + 1;
+    return (
+      math.min(maxBatteries, held + due),
+      next.add(Duration(minutes: due * every)),
+    );
   }
 }
 

@@ -124,7 +124,7 @@ void main() {
       expect(PipEnergyBar.colourOf(2), isNot(PipEnergyBar.colourOf(3)));
     });
 
-    testWidgets('a battery due when the app opens is collected',
+    testWidgets('batteries due when the app opens are collected',
         (tester) async {
       final now = DateTime(2026, 10, 14, 12);
       await start(
@@ -135,7 +135,8 @@ void main() {
               batteries: 1,
               next: now.subtract(const Duration(hours: 30))));
       await tester.pump();
-      expect(life().batteries, 2, reason: 'just one, though long overdue');
+      expect(life().batteries, 3,
+          reason: 'piled up while away (Round 45), at most 3');
       expect(life().nextBatteryAt!.isAfter(now), isTrue);
     });
 

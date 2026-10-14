@@ -11,7 +11,6 @@ import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/core/clock.dart';
-import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -160,9 +159,9 @@ class AppDrawer extends ConsumerWidget {
                     const Spacer(),
                     PipEnergyBar(
                       key: const Key('pipEnergy'),
-                      segments: PipEnergy.segments(ref
+                      segments: ref
                           .read(pipLifeProvider.notifier)
-                          .levelAt(ref.watch(clockProvider)())),
+                          .segmentsAt(ref.watch(clockProvider)()),
                       batteries: pip.batteries,
                     ),
                   ],

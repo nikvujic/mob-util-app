@@ -7,7 +7,8 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 /// The to-do note's list (Round 28), saved to `todo.json`: one ordered
 /// list; "to do" and "Completed" (Round 30) are its things filtered by
-/// [TodoItem.done], in list order.
+/// [TodoItem.done], in list order, and "Waiting" (Round 45, when on) the
+/// ones to do that are [TodoItem.waiting].
 class TodoNotifier extends StateNotifier<List<TodoItem>> {
   TodoNotifier(AppStorage storage) : super(storage.initialTodo) {
     addListener(storage.saveTodo, fireImmediately: false);
@@ -25,10 +26,12 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
 
   /// Done, or not done again: to the top of *Completed* (done most
   /// recently), or back to the end of the things to do. As Shop's toggle.
+  /// Done, it's no longer waiting.
   void toggle(String id) {
     final index = state.indexWhere((item) => item.id == id);
     if (index == -1) return;
-    final moved = state[index].copyWith(done: !state[index].done);
+    final moved =
+        state[index].copyWith(done: !state[index].done, waiting: false);
     final others = [...state.take(index), ...state.skip(index + 1)];
     state = moved.done ? [moved, ...others] : [...others, moved];
   }
@@ -74,6 +77,28 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     state = [
       for (final item in state)
         if (item.done == done) (reordered..moveNext()).current else item,
+    ];
+  }
+
+  /// The things to do placed anew (Round 45: dragged within or between
+  /// *To do* and *Waiting*): [toDo] then [waiting], by id, in order; each
+  /// waiting or not by its list. Completed ones stay as they are; ids not
+  /// given (or done) are left out of the move, kept after.
+  void place({required List<String> toDo, required List<String> waiting}) {
+    final byId = {
+      for (final item in state)
+        if (!item.done) item.id: item
+    };
+    final placed = <TodoItem>[
+      for (final id in toDo)
+        if (byId.remove(id) case final item?) item.copyWith(waiting: false),
+      for (final id in waiting)
+        if (byId.remove(id) case final item?) item.copyWith(waiting: true),
+    ];
+    state = [
+      ...placed,
+      for (final item in state)
+        if (item.done || byId.containsKey(item.id)) item,
     ];
   }
 

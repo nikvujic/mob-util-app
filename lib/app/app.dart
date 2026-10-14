@@ -282,6 +282,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
 
+    // The to-do note locking (Round 45) closes it and what's over it
+    // (its options, an edit), while on Notes.
+    ref.listen(todoClosedProvider, (wasClosed, closed) {
+      if (closed &&
+          wasClosed == false &&
+          AppSection.values[_selectedIndex] == AppSection.notes) {
+        _closeOpenPages();
+      }
+    });
+
     // Saving fails (D6): say so once, and again when it works.
     ref.listen(saveFailingProvider, (was, failing) {
       if (failing == was) return;

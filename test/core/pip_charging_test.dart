@@ -60,7 +60,6 @@ void main() {
     until(p, PipActivity.plugging);
     expect(p.activity, PipActivity.charging);
     expect(p.mitts, isEmpty, reason: 'popped away');
-    expect(p.antennaLit, isTrue);
     expect(p.chargeScreen, isNotNull);
   });
 
@@ -108,7 +107,6 @@ void main() {
     expect(p.station!.$2, 1);
     expect(p.activity, PipActivity.charging);
     expect(p.plug, isNotNull);
-    expect(p.antennaLit, isTrue);
   });
 
   test('unplugged while watching: he unplugs, the station sinks', () {
@@ -177,30 +175,42 @@ void main() {
     expect(p.station, isNull);
   });
 
-  test('the demo isn\'t played while the phone is plugged in', () {
-    final p = up(x: 60)..setPlugged(true, animate: false);
-    expect(p.play(PipAnimation.charge), isFalse);
+  test(
+      'the demo with the phone plugged in (Round 45): plays if he isn\'t '
+      'at the station (full); not while he is', () {
+    final full = up(segments: 3, x: 20)..setPlugged(true, animate: false);
+    expect(full.activity, isNot(PipActivity.charging), reason: 'ignores it');
+    expect(full.play(PipAnimation.charge), isTrue);
+    until(full, PipActivity.standing, limit: 3);
+    until(full, PipActivity.toStation);
+    until(full, PipActivity.plugging);
+    until(full, PipActivity.charging, limit: PipBrain.demoChargeHold + 1);
+    expect(full.activity, PipActivity.unplugging, reason: 'full: off again');
+    until(full, PipActivity.unplugging);
+    run(full, 1);
+    expect(full.station, isNotNull, reason: 'the phone is still plugged in');
+
+    final charging = up(x: 60)..setPlugged(true, animate: false);
+    expect(charging.play(PipAnimation.charge), isFalse);
   });
 
-  group('energy while plugged in', () {
+  group('energy while plugged in (Round 45: for fun, not to save him)', () {
     final at = DateTime(2026, 10, 14, 10);
 
-    test("he can't lose power", () {
+    test('he uses it as ever', () {
       expect(
-          PipEnergy.chargingLevelAt(1.5, at, at.add(const Duration(hours: 9))),
-          1.5);
+          PipEnergy.chargingLevelAt(2.5, at, at.add(const Duration(hours: 4))),
+          closeTo(2.0, 1e-9));
     });
 
-    test('full, only down to just below full (then he goes to it)', () {
-      expect(PipEnergy.chargingLevelAt(3, at, at.add(const Duration(hours: 4))),
-          closeTo(2.6, 0.01));
+    test("but can't run out", () {
       expect(
-          PipEnergy.chargingLevelAt(3, at, at.add(const Duration(hours: 30))),
+          PipEnergy.chargingLevelAt(1, at, at.add(const Duration(hours: 30))),
           PipEnergy.chargingFloor);
-      expect(PipEnergy.segments(PipEnergy.chargingFloor), 2);
+      expect(PipEnergy.segments(PipEnergy.chargingFloor), 1);
     });
 
-    test('empty stays empty (the station doesn\'t fill him)', () {
+    test("out already, he stays out (the station doesn't fill him)", () {
       expect(PipEnergy.chargingLevelAt(0, at, at.add(const Duration(hours: 4))),
           0);
     });

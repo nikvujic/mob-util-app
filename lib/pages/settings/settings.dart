@@ -45,7 +45,7 @@ class SettingsPage extends ConsumerWidget {
             title: const Text('To-do note'),
             subtitle: Text(
               'A plain to-do list at the top of Notes. Turned off, its list '
-              'is kept for when it comes back.',
+              'and options are kept for when it comes back.',
               style: TextStyle(color: context.colors.textSecondary),
             ),
             value: preferences.todoNote,

@@ -245,67 +245,50 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
     ]);
   }
 
-  /// A section's name; in edit mode, held for its options, and (all but
-  /// the first, which stays on top: Round 43) with a handle to move it.
+  /// A section's name; in edit mode, a tap gives its options, and
+  /// (Round 45, all but the first, which stays on top) touching it and
+  /// moving drags it: no handle shown.
   Widget _header(IngredientSection section, {Key? key, int? index}) {
     final colors = context.colors;
-    final title = Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-      child: Text(
-        '${section.name.toUpperCase()}  ·  ${section.items.length}',
-        key: Key('ingredientSection-${section.id}'),
-        style: TextStyle(
-          color: colors.accent,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1,
+    Widget header = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+      child: Align(
+        alignment: Alignment.bottomLeft,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+          child: Text(
+            '${section.name.toUpperCase()}  ·  ${section.items.length}',
+            key: Key('ingredientSection-${section.id}'),
+            style: TextStyle(
+              color: colors.accent,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
+            ),
+          ),
         ),
       ),
     );
-    return GestureDetector(
-      key: key,
+    if (_picking) return KeyedSubtree(key: key, child: header);
+    header = GestureDetector(
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: true,
-      onLongPress: _picking ? null : () => _sectionMenu(section),
-      child: index == null
-          ? title
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(child: title),
-                // Its handle (Round 44): level with the name, the whole
-                // height (at least a touch target) still taking the drag.
-                ReorderableDragStartListener(
-                  key: Key('sectionHandle-${section.id}'),
-                  index: index,
-                  child: ColoredBox(
-                    color: Colors.transparent,
-                    child: SizedBox(
-                      width: ReorderOrSelectIndicator.width,
-                      height: kMinInteractiveDimension,
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Padding(
-                          // The name's line: 6 below it, ~15 tall.
-                          padding: const EdgeInsets.only(
-                            right: ReorderOrSelectIndicator.iconInset,
-                          ),
-                          child: SizedBox(
-                            height: 6 + 15 + 3,
-                            child: ExcludeSemantics(
-                              child: Icon(
-                                Icons.drag_handle,
-                                color: colors.textHint,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      onTap: () => _sectionMenu(section),
+      child: SizedBox(width: double.infinity, child: header),
+    );
+    if (index != null) {
+      // A move (past a touch's slop) drags; a tap stays a tap.
+      header = ReorderableDragStartListener(
+        key: Key('sectionHandle-${section.id}'),
+        index: index,
+        child: header,
+      );
+    }
+    return Semantics(
+      key: key,
+      button: true,
+      onTap: () => _sectionMenu(section),
+      child: header,
     );
   }
 
