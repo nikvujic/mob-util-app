@@ -69,6 +69,12 @@ void main() {
     await typeFood(tester, 'Bread');
     await typeFood(tester, 'sarma'); // the same food: not twice
     expect(book().foods.map((f) => f.name), ['Sarma', 'Bread']);
+    // Round 47: its chip flashes instead (it's there already).
+    await tester.enterText(find.byKey(const Key('mealFoodField')), 'Sarma');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('flash-Sarma-2')), findsOneWidget);
+    await tester.pumpAndSettle();
     expect(book().meals.single.foods.map((f) => f.name), ['Sarma', 'Bread']);
     // A tap on one takes it out.
     await typeFood(tester, 'Oops');
@@ -101,8 +107,9 @@ void main() {
     expect(find.text('No meals logged'), findsOneWidget);
   });
 
-  testWidgets('foods suggested most eaten first; the last meal repeated',
-      (tester) async {
+  testWidgets(
+      'the index under the field (Round 47): foods most eaten first, '
+      'narrowed as you type; the last meal repeated', (tester) async {
     await openFood(tester,
         start: FoodBook(foods: [
           Food(id: 'Eggs', name: 'Eggs'),
@@ -114,18 +121,23 @@ void main() {
           meal('m2', DateTime(2026, 10, 12, 8), ['Toast']),
         ]));
     await tapTooltip(tester, 'Log a meal');
-    final toast =
-        tester.getTopLeft(find.byKey(const Key('foodSuggestion-Toast')));
-    final kiwi =
-        tester.getTopLeft(find.byKey(const Key('foodSuggestion-Kiwi')));
-    expect(toast.dx, lessThan(kiwi.dx), reason: 'eaten twice: first');
-    // Typing narrows them.
+    expect(find.byKey(const Key('foodIndex')), findsNothing,
+        reason: 'only while typing a food');
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    final toast = tester.getTopLeft(find.byKey(const Key('indexFood-Toast')));
+    final kiwi = tester.getTopLeft(find.byKey(const Key('indexFood-Kiwi')));
+    expect(toast.dy, lessThan(kiwi.dy), reason: 'eaten twice: first');
+    // Typing narrows it; a new name can be added from it.
     await tester.enterText(find.byKey(const Key('mealFoodField')), 'ki');
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('foodSuggestion-Toast')), findsNothing);
-    await tester.tap(find.byKey(const Key('foodSuggestion-Kiwi')));
+    expect(find.byKey(const Key('indexFood-Toast')), findsNothing);
+    expect(find.byKey(const Key('indexNew-ki')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('indexFood-Kiwi')));
     await tester.pumpAndSettle();
     expect(book().meals.last.foods.map((f) => f.name), ['Kiwi']);
+    expect(find.byKey(const Key('indexFood-Kiwi')), findsNothing,
+        reason: 'in the meal now');
 
     // Another: Same as yesterday's breakfast.
     await pressBack(tester);
@@ -137,8 +149,9 @@ void main() {
         ['Eggs', 'Toast']);
   });
 
-  testWidgets('From ingredients: picked ones become foods (same names reused)',
-      (tester) async {
+  testWidgets(
+      "the index's Ingredients: the recipes' ones not foods yet; picked, "
+      'they become foods', (tester) async {
     await openFood(tester,
         start:
             FoodBook(foods: [Food(id: 'f1', name: 'Milk')], meals: const []));
@@ -149,12 +162,18 @@ void main() {
           ]),
         ]));
     await tapTooltip(tester, 'Log a meal');
-    await tester.tap(find.byKey(const Key('fromIngredients')));
+    expect(find.byKey(const Key('fromIngredients')), findsNothing,
+        reason: 'no separate button (Round 47)');
+    await tester.tap(find.byKey(const Key('mealFoodField')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Flour'));
-    await tester.tap(find.text('milk'));
+    expect(find.text('INGREDIENTS'), findsOneWidget);
+    expect(find.byKey(const Key('indexIngredient-Flour')), findsOneWidget);
+    expect(find.byKey(const Key('indexIngredient-milk')), findsNothing,
+        reason: 'a food already: under Foods');
+    expect(find.byKey(const Key('indexFood-Milk')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('indexIngredient-Flour')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Add 2'));
+    await tester.tap(find.byKey(const Key('indexFood-Milk')));
     await tester.pumpAndSettle();
     expect(book().meals.single.foods.map((f) => (f.foodId, f.name)),
         [(book().foodNamed('Flour')!.id, 'Flour'), ('f1', 'Milk')]);
@@ -162,33 +181,41 @@ void main() {
   });
 
   testWidgets(
-      'the week strip: days coloured by their worst meal; a tap shows a '
-      "day's meals; arrows move a week", (tester) async {
+      'the month calendar (Round 47): days coloured by their worst meal; a '
+      "tap shows a day's meals; ‹ goes back a month", (tester) async {
     await openFood(tester,
         start: FoodBook(foods: const [], meals: [
           meal('a', DateTime(2026, 10, 12, 8), ['Oats'],
               rating: MealRating.great),
           meal('b', DateTime(2026, 10, 12, 13), ['Beans'],
               rating: MealRating.awful),
-          meal('c', DateTime(2026, 10, 7, 13), ['Old soup']),
+          meal('c', DateTime(2026, 9, 28, 13), ['Old soup']),
         ]));
-    BoxDecoration dot(String key) => tester
-        .widget<Container>(find.descendant(
-            of: find.byKey(Key(key)), matching: find.byType(Container)))
-        .decoration! as BoxDecoration;
+    BoxDecoration dot(String key) =>
+        tester.widget<Container>(find.byKey(Key(key))).decoration!
+            as BoxDecoration;
+    expect(find.text('October 2026'), findsOneWidget);
     expect(dot('foodDay-2026-10-12').color, const Color(0xFFEF5350),
         reason: 'awful wins');
     expect(dot('foodDay-2026-10-13').color, isNull);
+    expect(tester.getSize(find.byKey(const Key('foodDay-2026-10-12'))).width,
+        greaterThanOrEqualTo(40),
+        reason: 'bigger than a line of dots');
     await tester.tap(find.byKey(const Key('foodDay-2026-10-12')));
     await tester.pumpAndSettle();
     expect(find.text('MON, 12 OCT'), findsOneWidget);
     expect(find.text('Oats'), findsOneWidget);
     expect(find.text('Beans'), findsOneWidget);
-    await tapTooltip(tester, 'Week before');
-    expect(find.text('MON, 5 OCT'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('foodDay-2026-10-7')));
+    await tapTooltip(tester, 'Month before');
+    expect(find.text('September 2026'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('foodDay-2026-9-28')));
     await tester.pumpAndSettle();
     expect(find.text('Old soup'), findsOneWidget);
+    // Days to come can't be picked.
+    await tapTooltip(tester, 'Month after');
+    await tester.tap(find.byKey(const Key('foodDay-2026-10-20')));
+    await tester.pumpAndSettle();
+    expect(find.text('MON, 28 SEP'), findsOneWidget);
   });
 
   testWidgets('a meal opened to rate later; deleted, with Undo',
@@ -210,7 +237,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(book().meals.single.rating, isNull);
 
-    await tapTooltip(tester, 'Delete meal');
+    // Faces from bad to good (Round 47).
+    expect(tester.getCenter(find.byKey(const Key('rating-awful'))).dx,
+        lessThan(tester.getCenter(find.byKey(const Key('rating-great'))).dx));
+    // Delete at the end of the page, not in the top bar.
+    expect(find.byTooltip('Delete meal'), findsNothing);
+    await tester.scrollUntilVisible(find.byKey(const Key('deleteMeal')), 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.byKey(const Key('deleteMeal')));
+    await tester.pumpAndSettle();
     expect(book().meals, isEmpty);
     expect(find.text('Breakfast deleted'), findsOneWidget);
     await tester.tap(find.text('Undo'));
@@ -302,5 +337,35 @@ void main() {
     expect(find.text('Bloating after 5'), findsWidgets);
     expect(find.text('BY KIND'), findsOneWidget);
     expect(find.byKey(const Key('verdict-Spicy')), findsOneWidget);
+
+    // A food's own page (Round 47).
+    await tester.tap(find.byKey(const Key('finding-Onion')));
+    await tester.pumpAndSettle();
+    expect(appBarTitle('Onion'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const Key('findingVerdict'))).data,
+        'Likely trouble');
+    expect(find.textContaining('5 rated meals with it (5 bad or awful), 7 '),
+        findsOneWidget);
+    expect(find.byKey(const Key('ratingBar-awful')), findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('ratingBar-awful')),
+            matching: find.text('5 · 0')),
+        findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('symptomAfter-bloating')),
+            matching: find.text('5 of 5 meals')),
+        findsOneWidget);
+    expect(find.text('MEALS WITH IT  ·  5'), findsOneWidget);
+    // Its history, newest first, with dates; a tap opens the meal.
+    await tester.scrollUntilVisible(find.byKey(const ValueKey('o4')), 200,
+        scrollable: find.byType(Scrollable).last);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -200));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Mon, 5 Oct  ·  Lunch'), findsOneWidget);
+    await tester.tap(find.textContaining('Mon, 5 Oct  ·  Lunch'));
+    await tester.pumpAndSettle();
+    expect(appBarTitle('Meal'), findsOneWidget);
   });
 }

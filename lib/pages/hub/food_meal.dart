@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -6,14 +7,19 @@ import 'package:the_app/core/id.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/pages/hub/food.dart';
-import 'package:the_app/pages/hub/ingredients.dart';
 import 'package:the_app/providers/food_provider.dart';
+import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// A meal (Round 46): what kind and when, its foods, and how it went.
 /// Saved as it goes; a new one ([at]) is kept once it has a food, a
 /// rating or a note, so one left empty is dropped. Opened for an
-/// existing one ([mealId]), its menu deletes it (with Undo).
+/// existing one ([mealId]), a button at the end deletes it (with Undo).
+///
+/// Round 47: foods are added from an index under the field (while it's
+/// focused), in sections: *Foods* already used and the recipes'
+/// *Ingredients* not foods yet, narrowed as you type, so names repeat
+/// the same way. A food added twice flashes its chip instead.
 class MealPage extends ConsumerStatefulWidget {
   final String? mealId;
 
@@ -37,6 +43,12 @@ class _MealPageState extends ConsumerState<MealPage> {
 
   late final _note = TextEditingController(text: _meal.note);
   final _food = TextEditingController();
+  final _foodFocus = FocusNode();
+
+  /// The food whose chip flashes (added again), and a count so a second
+  /// flash starts over.
+  String? _flashing;
+  int _flashes = 0;
 
   FoodNotifier get _notifier => ref.read(foodProvider.notifier);
 
@@ -47,12 +59,14 @@ class _MealPageState extends ConsumerState<MealPage> {
   void initState() {
     super.initState();
     _food.addListener(() => setState(() {}));
+    _foodFocus.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _note.dispose();
     _food.dispose();
+    _foodFocus.dispose();
     super.dispose();
   }
 
@@ -71,7 +85,15 @@ class _MealPageState extends ConsumerState<MealPage> {
     final food = _notifier.foodNamed(name);
     if (food == null) return;
     final meal = _meal;
-    if (meal.foods.any((f) => f.foodId == food.id)) return;
+    if (meal.foods.any((f) => f.foodId == food.id)) {
+      // There already: its chip flashes.
+      HapticFeedback.lightImpact();
+      setState(() {
+        _flashing = food.id;
+        _flashes++;
+      });
+      return;
+    }
     _change(meal.copyWith(
       foods: [...meal.foods, MealFood(foodId: food.id, name: food.name)],
     ));
@@ -80,14 +102,6 @@ class _MealPageState extends ConsumerState<MealPage> {
   void _typed(String name) {
     _addFood(name);
     _food.clear();
-  }
-
-  Future<void> _fromIngredients() async {
-    final picked = await pickIngredients(context, already: const {});
-    if (picked == null || !mounted) return;
-    for (final ingredient in picked) {
-      _addFood(ingredient.name);
-    }
   }
 
   Future<void> _pickTime() async {
@@ -147,25 +161,30 @@ class _MealPageState extends ConsumerState<MealPage> {
     final local = meal.at.toLocal();
     final inMeal = {for (final f in meal.foods) f.foodId};
     final typed = _food.text.trim().toLowerCase();
-    final suggestions = [
+    bool matches(String name) =>
+        typed.isEmpty || name.toLowerCase().contains(typed);
+    // The index (Round 47): foods most eaten first, then ingredients that
+    // aren't foods yet, by name.
+    final indexFoods = [
       for (final f in book.foodsByUse)
-        if (!inMeal.contains(f.id) &&
-            (typed.isEmpty || f.name.toLowerCase().contains(typed)))
-          f,
-    ].take(12).toList();
+        if (!inMeal.contains(f.id) && matches(f.name)) f,
+    ];
+    final indexIngredients = {
+      for (final i in ref.watch(ingredientsProvider).all)
+        if (book.foodNamed(i.name) == null && matches(i.name))
+          i.name.toLowerCase(): i.name,
+    }.values.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    final isNew = typed.isNotEmpty &&
+        book.foodNamed(typed) == null &&
+        !indexIngredients.any((n) => n.toLowerCase() == typed);
+    final showIndex = _foodFocus.hasFocus &&
+        (isNew || indexFoods.isNotEmpty || indexIngredients.isNotEmpty);
     final recent = meal.foods.isEmpty ? book.recentMeals() : const <Meal>[];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.mealId == null && !saved ? 'New meal' : 'Meal'),
-        actions: [
-          if (saved)
-            IconButton(
-              tooltip: 'Delete meal',
-              icon: const Icon(Icons.delete_outline),
-              onPressed: _delete,
-            ),
-        ],
       ),
       body: PullDownList.children(
         children: [
@@ -204,25 +223,31 @@ class _MealPageState extends ConsumerState<MealPage> {
                 runSpacing: 4,
                 children: [
                   for (final f in meal.foods)
-                    // A tap takes it out (Round 46: a chip's own small
-                    // delete button is too small a target).
-                    InputChip(
-                      key: Key('mealFood-${f.name}'),
-                      tooltip: 'Remove ${f.name}',
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(f.name),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.close, size: 16),
-                        ],
+                    _Flash(
+                      key: f.foodId != null && f.foodId == _flashing
+                          ? ValueKey('flash-${f.name}-$_flashes')
+                          : ValueKey('chip-${f.name}'),
+                      on: f.foodId != null && f.foodId == _flashing,
+                      // A tap takes it out (Round 46: a chip's own small
+                      // delete button is too small a target).
+                      child: InputChip(
+                        key: Key('mealFood-${f.name}'),
+                        tooltip: 'Remove ${f.name}',
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(f.name),
+                            const SizedBox(width: 6),
+                            const Icon(Icons.close, size: 16),
+                          ],
+                        ),
+                        selected: true,
+                        showCheckmark: false,
+                        onPressed: () => _change(meal.copyWith(foods: [
+                          for (final other in meal.foods)
+                            if (other != f) other,
+                        ])),
                       ),
-                      selected: true,
-                      showCheckmark: false,
-                      onPressed: () => _change(meal.copyWith(foods: [
-                        for (final other in meal.foods)
-                          if (other != f) other,
-                      ])),
                     ),
                 ],
               ),
@@ -232,6 +257,7 @@ class _MealPageState extends ConsumerState<MealPage> {
             child: TextField(
               key: const Key('mealFoodField'),
               controller: _food,
+              focusNode: _foodFocus,
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
@@ -247,37 +273,17 @@ class _MealPageState extends ConsumerState<MealPage> {
               onSubmitted: _typed,
             ),
           ),
-          if (suggestions.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  for (final f in suggestions)
-                    ActionChip(
-                      key: Key('foodSuggestion-${f.name}'),
-                      label: Text(f.name),
-                      onPressed: () {
-                        _addFood(f.name);
-                        _food.clear();
-                      },
-                    ),
-                ],
-              ),
+          if (showIndex)
+            _FoodIndex(
+              typed: _food.text.trim(),
+              isNew: isNew,
+              foods: [for (final f in indexFoods) f.name],
+              ingredients: indexIngredients,
+              onPick: (name) {
+                _addFood(name);
+                _food.clear();
+              },
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 16, 0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: const Key('fromIngredients'),
-                icon: const Icon(Icons.playlist_add),
-                label: const Text('From ingredients'),
-                onPressed: _fromIngredients,
-              ),
-            ),
-          ),
           if (recent.isNotEmpty) ...[
             _heading('SAME AS'),
             for (final r in recent)
@@ -303,7 +309,8 @@ class _MealPageState extends ConsumerState<MealPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                for (final rating in MealRating.values)
+                // From bad to good (Round 47).
+                for (final rating in MealRating.values.reversed)
                   _RatingButton(
                     rating: rating,
                     selected: meal.rating == rating,
@@ -347,7 +354,130 @@ class _MealPageState extends ConsumerState<MealPage> {
               onChanged: (text) => _change(_meal.copyWith(note: text)),
             ),
           ),
+          // At the end of the page, not up top nor round (Round 47).
+          if (saved)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const Key('deleteMeal'),
+                  style: TextButton.styleFrom(foregroundColor: colors.danger),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete meal'),
+                  onPressed: _delete,
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+/// A food's chip, flashing once in the accent when [on] (Round 47: added
+/// again, it's there already).
+class _Flash extends StatelessWidget {
+  final bool on;
+  final Widget child;
+
+  const _Flash({super.key, required this.on, required this.child});
+
+  static const duration = Duration(milliseconds: 900);
+
+  @override
+  Widget build(BuildContext context) {
+    if (!on) return child;
+    final accent = context.colors.accent;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: duration,
+      builder: (context, t, child) {
+        // Two pulses, then gone.
+        final glow = t >= 1 ? 0.0 : (1 - (2 * t % 1 - 0.5).abs() * 2);
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              if (glow > 0)
+                BoxShadow(
+                  color: accent.withValues(alpha: glow),
+                  blurRadius: 10 * glow,
+                  spreadRadius: 3 * glow,
+                ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+}
+
+/// The index under the food field (Round 47): a new name to add, the
+/// foods already used, and the recipes' ingredients that aren't foods
+/// yet, each in its section.
+class _FoodIndex extends StatelessWidget {
+  final String typed;
+  final bool isNew;
+  final List<String> foods;
+  final List<String> ingredients;
+  final ValueChanged<String> onPick;
+
+  const _FoodIndex({
+    required this.typed,
+    required this.isNew,
+    required this.foods,
+    required this.ingredients,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    Widget heading(String text) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: colors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
+            ),
+          ),
+        );
+    Widget row(String name, String kind, {IconData? icon}) => ListTile(
+          key: Key('$kind-$name'),
+          dense: true,
+          minTileHeight: kMinInteractiveDimension,
+          leading: icon == null ? null : Icon(icon, size: 20),
+          title: Text(name),
+          onTap: () => onPick(name),
+        );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+      child: Material(
+        key: const Key('foodIndex'),
+        color: colors.card,
+        borderRadius: BorderRadius.circular(8),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isNew) row(typed, 'indexNew', icon: Icons.add),
+            if (foods.isNotEmpty) ...[
+              heading('FOODS'),
+              for (final name in foods) row(name, 'indexFood'),
+            ],
+            if (ingredients.isNotEmpty) ...[
+              heading('INGREDIENTS'),
+              for (final name in ingredients) row(name, 'indexIngredient'),
+            ],
+            const SizedBox(height: 4),
+          ],
+        ),
       ),
     );
   }

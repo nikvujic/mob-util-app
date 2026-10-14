@@ -339,18 +339,18 @@ fixtures for every stored format.
 
 ### Round 47 — Nikola's notes on the food tracker (1.13.0, 2026-10-14)
 
-- [ ] Adding a food that's already in the meal: its chip **flashes**
+- [x] Adding a food that's already in the meal: its chip **flashes**
   (it's there already).
-- [ ] The five faces the other way round: from bad to good.
-- [ ] A meal's **Delete** not in the top bar and not a round button: a
+- [x] The five faces the other way round: from bad to good.
+- [x] A meal's **Delete** not in the top bar and not a round button: a
   button at the end of the page.
-- [ ] The week strip becomes a **month calendar** like Medicine's
+- [x] The week strip becomes a **month calendar** like Medicine's
   history (bigger), still circles coloured by the day's worst meal.
-- [ ] Adding foods: an **index** under the field, in sections, *Foods*
+- [x] Adding foods: an **index** under the field, in sections, *Foods*
   (ones already used) and *Ingredients* (from Recipes' list, not foods
   yet), narrowed as you type; so the same names get reused and the
   statistics track them. No separate *From ingredients* button.
-- [ ] **Statistics, more of it** (Nikola wants it extensive): a tap on a
+- [x] **Statistics, more of it** (Nikola wants it extensive): a tap on a
   food (or kind) opens its page: the verdict and numbers, how its meals
   were rated (a bar per face), with it vs without it, the symptoms after
   it, and **its meals' history** with dates, the other foods eaten with

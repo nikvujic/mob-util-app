@@ -385,6 +385,26 @@ void main() {
         await t.pumpAndSettle();
         expect(find.text('Likely trouble'), findsWidgets);
       },
+      "a food's statistics": (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Food'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Statistics'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('finding-Burek')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('findingVerdict')), findsOneWidget);
+      },
+      'food, the index of foods': (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Food'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Log a meal'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('mealFoodField')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('foodIndex')), findsOneWidget);
+      },
       'foods list': (t) async {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Food'));

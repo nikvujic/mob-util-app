@@ -5,6 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/pages/hub/food_calendar.dart';
 import 'package:the_app/pages/hub/food_foods.dart';
 import 'package:the_app/pages/hub/food_meal.dart';
 import 'package:the_app/pages/hub/food_stats.dart';
@@ -43,9 +44,9 @@ void openFoodPage(BuildContext context, Widget page) {
   );
 }
 
-/// The food tracker (O14, Round 46): a day at a time. A week strip on
-/// top (each day coloured by its worst rated meal; a tap picks one, the
-/// arrows move a week), the day's meals in order (a tap opens one to rate
+/// The food tracker (O14, Round 46): a day at a time. A month calendar
+/// on top (Round 47; each day coloured by its worst rated meal, a tap
+/// picks one), the day's meals in order (a tap opens one to rate
 /// or change it), and + logs a meal. Statistics and the foods list are
 /// beside +. No reminders (Nikola).
 class FoodPage extends ConsumerStatefulWidget {
@@ -81,11 +82,14 @@ class _FoodPageState extends ConsumerState<FoodPage> {
         bottomSpace: BottomActions.contentClearance,
         slivers: [
           SliverToBoxAdapter(
-            child: _WeekStrip(
-              day: _day,
-              today: today,
-              book: book,
-              onPick: (day) => setState(() => _day = day),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: FoodCalendar(
+                book: book,
+                today: today,
+                picked: _day,
+                onDay: (day) => setState(() => _day = day),
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -122,7 +126,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                   key: ValueKey(meal.id),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                  child: _MealCard(
+                  child: MealCard(
                     meal: meal,
                     onTap: () =>
                         openFoodPage(context, MealPage(mealId: meal.id)),
@@ -156,140 +160,20 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   }
 }
 
-/// A week, Monday to Sunday, around the day shown: each day's number on
-/// its worst rating's colour (none rated: plain), the picked day ringed.
-class _WeekStrip extends StatelessWidget {
-  final DateTime day;
-  final DateTime today;
-  final FoodBook book;
-  final ValueChanged<DateTime> onPick;
-
-  const _WeekStrip({
-    required this.day,
-    required this.today,
-    required this.book,
-    required this.onPick,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final monday = addDays(day, 1 - day.weekday);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: 'Week before',
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () => onPick(addDays(day, -7)),
-          ),
-          for (var i = 0; i < 7; i++)
-            Expanded(
-              child: _DayDot(
-                day: addDays(monday, i),
-                picked: addDays(monday, i) == day,
-                isToday: addDays(monday, i) == today,
-                worst: book.worstOn(addDays(monday, i)),
-                logged: book.mealsOn(addDays(monday, i)).isNotEmpty,
-                onTap: () => onPick(addDays(monday, i)),
-              ),
-            ),
-          IconButton(
-            tooltip: 'Week after',
-            icon: const Icon(Icons.chevron_right),
-            color: colors.textSecondary,
-            onPressed: () => onPick(addDays(day, 7)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DayDot extends StatelessWidget {
-  final DateTime day;
-  final bool picked;
-  final bool isToday;
-  final MealRating? worst;
-  final bool logged;
-  final VoidCallback onTap;
-
-  const _DayDot({
-    required this.day,
-    required this.picked,
-    required this.isToday,
-    required this.worst,
-    required this.logged,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final fill = worst?.colour;
-    return Semantics(
-      button: true,
-      selected: picked,
-      label: '${formatDayLong(day)}'
-          '${worst == null ? (logged ? ', not rated' : '') : ', ${worst!.label}'}',
-      excludeSemantics: true,
-      child: InkResponse(
-        key: Key('foodDay-${day.year}-${day.month}-${day.day}'),
-        onTap: onTap,
-        child: SizedBox(
-          height: kMinInteractiveDimension + 18,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                weekdayShort(day).substring(0, 1),
-                style: TextStyle(
-                  color: isToday ? colors.accent : colors.textMuted,
-                  fontSize: 11,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: fill,
-                  border: Border.all(
-                    color: picked
-                        ? colors.accent
-                        : logged && fill == null
-                            ? colors.textMuted
-                            : Colors.transparent,
-                    width: picked ? 2.5 : 1,
-                  ),
-                ),
-                child: Text(
-                  '${day.day}',
-                  style: TextStyle(
-                    color:
-                        fill == null ? colors.textPrimary : RatingColours.ink,
-                    fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// A meal: its kind and time, its foods, and its rating (a coloured face)
-/// or "Not rated".
-class _MealCard extends StatelessWidget {
+/// or "Not rated". With [today] it shows its date too (a food's history,
+/// Round 47).
+class MealCard extends StatelessWidget {
   final Meal meal;
   final VoidCallback onTap;
+  final DateTime? today;
 
-  const _MealCard({required this.meal, required this.onTap});
+  const MealCard({
+    super.key,
+    required this.meal,
+    required this.onTap,
+    this.today,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -308,6 +192,7 @@ class _MealCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
+                    '${today == null ? '' : '${formatDay(local, today: today!)}  ·  '}'
                     '${meal.kind.label}  ·  '
                     '${formatMinutes(local.hour * 60 + local.minute)}',
                     style: TextStyle(color: colors.textSecondary, fontSize: 12),

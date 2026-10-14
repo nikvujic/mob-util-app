@@ -15,8 +15,9 @@ class FoodFinding {
   /// The food's name, or the tag's label.
   final String label;
 
-  /// The food (null for a tag).
+  /// The food (null for a tag), and its key in meals ([MealFood.key]).
   final String? foodId;
+  final String? foodKey;
   final FoodTag? tag;
 
   /// Rated meals with it, and how many of them were bad or awful.
@@ -34,6 +35,7 @@ class FoodFinding {
   const FoodFinding({
     required this.label,
     this.foodId,
+    this.foodKey,
     this.tag,
     required this.meals,
     required this.bad,
@@ -88,7 +90,7 @@ abstract final class FoodStats {
     return _sorted([
       for (final key in names.keys)
         _finding(book.meals, (m) => m.foods.any((f) => f.key == key),
-            label: names[key]!, foodId: ids[key]),
+            label: names[key]!, foodId: ids[key], foodKey: key),
     ]);
   }
 
@@ -116,6 +118,7 @@ abstract final class FoodStats {
     bool Function(Meal) has, {
     required String label,
     String? foodId,
+    String? foodKey,
     FoodTag? tag,
   }) {
     var withIt = 0, bad = 0, without = 0, badWithout = 0;
@@ -146,6 +149,7 @@ abstract final class FoodStats {
     return FoodFinding(
       label: label,
       foodId: foodId,
+      foodKey: foodKey,
       tag: tag,
       meals: withIt,
       bad: bad,
@@ -154,6 +158,75 @@ abstract final class FoodStats {
       symptom: symptom,
       symptomCount: symptomCount,
     );
+  }
+
+  /// The meals with [finding]'s food (or tag), newest first (Round 47: a
+  /// food's own page).
+  static List<Meal> mealsWith(FoodBook book, FoodFinding finding) => [
+        for (final m in book.meals.reversed)
+          if (_has(book, finding, m)) m,
+      ];
+
+  /// The same, without it.
+  static List<Meal> mealsWithout(FoodBook book, FoodFinding finding) => [
+        for (final m in book.meals.reversed)
+          if (!_has(book, finding, m)) m,
+      ];
+
+  static bool _has(FoodBook book, FoodFinding finding, Meal meal) {
+    final tag = finding.tag;
+    if (tag != null) {
+      return meal.foods.any((f) =>
+          f.foodId != null &&
+          (book.foodById(f.foodId!)?.tags.contains(tag) ?? false));
+    }
+    return meal.foods.any((f) => f.key == finding.foodKey);
+  }
+
+  /// How [meals] were rated: a count for each rating (unrated left out).
+  static Map<MealRating, int> ratings(Iterable<Meal> meals) => {
+        for (final rating in MealRating.values)
+          rating: meals.where((m) => m.rating == rating).length,
+      };
+
+  /// The symptoms after [meals], most often first, with how many meals.
+  static List<(Symptom, int)> symptoms(Iterable<Meal> meals) => [
+        for (final s in Symptom.values)
+          if (meals.where((m) => m.symptoms.contains(s)).length case final n
+              when n > 0)
+            (s, n),
+      ]..sort((a, b) => b.$2.compareTo(a.$2));
+
+  /// The other foods eaten in [meals] with [finding]'s food, most often
+  /// first (at most [count]), with how many of those meals were bad.
+  static List<(String, int, int)> eatenWith(
+    FoodBook book,
+    Iterable<Meal> meals,
+    FoodFinding finding, {
+    int count = 5,
+  }) {
+    final names = <String, String>{};
+    final together = <String, int>{};
+    final bad = <String, int>{};
+    for (final m in meals) {
+      for (final f in m.foods) {
+        if (finding.foodKey != null && f.key == finding.foodKey) continue;
+        final food = f.foodId == null ? null : book.foodById(f.foodId!);
+        names[f.key] = food?.name ?? f.name;
+        together[f.key] = (together[f.key] ?? 0) + 1;
+        if (m.rating?.isBad ?? false) bad[f.key] = (bad[f.key] ?? 0) + 1;
+      }
+    }
+    final keys = together.keys.toList()
+      ..sort((a, b) {
+        final byCount = together[b]!.compareTo(together[a]!);
+        return byCount != 0
+            ? byCount
+            : names[a]!.toLowerCase().compareTo(names[b]!.toLowerCase());
+      });
+    return [
+      for (final k in keys.take(count)) (names[k]!, together[k]!, bad[k] ?? 0),
+    ];
   }
 
   static List<FoodFinding> _sorted(List<FoodFinding> findings) => findings

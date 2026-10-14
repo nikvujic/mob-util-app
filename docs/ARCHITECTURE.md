@@ -349,8 +349,11 @@ too little data. Pages: `pages/hub/food.dart` (the day and its week
 strip, `RatingColours`), `food_meal.dart` (a meal, saved as it goes
 through `FoodNotifier.saveMeal`, which adds a new one once it holds
 something), `food_foods.dart`, `food_stats.dart`; each opened through
-`openFoodPage`, behind the page's lock. "From ingredients" reuses
-Recipes' pick mode (`pickIngredients`) and turns names into foods.
+`openFoodPage`, behind the page's lock. Round 47: `food_calendar.dart`
+(a month calendar shaped like Medicine's), the meal page's index of
+foods and ingredients (ingredient names become foods when picked), and
+`FoodFindingPage` in `food_stats.dart`, fed by `FoodStats.mealsWith`,
+`ratings`, `symptoms` and `eatenWith`.
 
 ## Pip, the pet (Round 34)
 

@@ -217,5 +217,47 @@ void main() {
       expect(FoodStats.foods(once).single.symptom, isNull,
           reason: 'once is no pattern');
     });
+
+    test(
+        "a food's own page (Round 47): its meals, ratings, symptoms, "
+        'what it was eaten with', () {
+      final book = FoodBook(foods: [
+        Food(id: 'milk', name: 'Milk', tags: {FoodTag.dairy}),
+      ], meals: [
+        meal('1', ['milk', 'bread'],
+            rating: MealRating.bad,
+            symptoms: {Symptom.cramps},
+            at: DateTime(2026, 10, 1)),
+        meal('2', ['milk', 'bread', 'jam'],
+            rating: MealRating.good,
+            symptoms: {Symptom.bloating, Symptom.cramps},
+            at: DateTime(2026, 10, 2)),
+        meal('3', ['milk'], at: DateTime(2026, 10, 3)),
+        meal('4', ['rice'],
+            rating: MealRating.awful, at: DateTime(2026, 10, 4)),
+      ]);
+      final milk = FoodStats.foods(book).firstWhere((f) => f.foodId == 'milk');
+      expect(FoodStats.mealsWith(book, milk).map((m) => m.id), ['3', '2', '1'],
+          reason: 'newest first, unrated too');
+      expect(FoodStats.mealsWithout(book, milk).map((m) => m.id), ['4']);
+      final ratings = FoodStats.ratings(FoodStats.mealsWith(book, milk));
+      expect(ratings[MealRating.bad], 1);
+      expect(ratings[MealRating.good], 1);
+      expect(ratings.values.fold(0, (a, b) => a + b), 2);
+      expect(FoodStats.symptoms(FoodStats.mealsWith(book, milk)),
+          [(Symptom.cramps, 2), (Symptom.bloating, 1)],
+          reason: 'most often first');
+      expect(FoodStats.eatenWith(book, FoodStats.mealsWith(book, milk), milk),
+          [('BREAD', 2, 1), ('JAM', 1, 0)]);
+      // By kind: the same, through the food's tags.
+      final dairy = FoodStats.tags(book).single;
+      expect(
+          FoodStats.mealsWith(book, dairy).map((m) => m.id), ['3', '2', '1']);
+      expect(
+          FoodStats.eatenWith(book, FoodStats.mealsWith(book, dairy), dairy)
+              .map((e) => e.$1),
+          contains('Milk'),
+          reason: 'a kind lists its foods');
+    });
   });
 }

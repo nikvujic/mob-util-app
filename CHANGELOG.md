@@ -4,6 +4,24 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- Food statistics in depth: a tap on a food (or kind) opens its page:
+  the verdict and why, how its meals were rated against meals without
+  it (a bar per face), the symptoms after it, what it was eaten with,
+  and every meal with it, dated (a tap opens one).
+
+### Changed
+- Food: a **month calendar** like Medicine's history instead of a week's
+  line, each day a circle in its worst meal's colour.
+- Food: foods are added from an **index** under the field, in sections
+  (*Foods* used before, the recipes' *Ingredients*), narrowed as you
+  type; no separate From ingredients button. A food added twice flashes
+  its chip.
+- A meal's faces go from bad to good; **Delete meal** is a button at the
+  end of the page.
+
 ## [1.13.0] - 2026-10-14
 
 ### Added
