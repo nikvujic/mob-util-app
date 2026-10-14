@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.10.0] - 2026-10-14
 
 ### Changed
 - Recipes: a tap on an ingredient (in Edit) gives **Quantity** and
