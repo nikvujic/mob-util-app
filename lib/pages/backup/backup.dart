@@ -5,6 +5,8 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/pages/backup/restore_part.dart';
+import 'package:the_app/models/preferences.dart';
+import 'package:the_app/providers/auto_backup_provider.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -96,6 +98,35 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       ),
     );
     return keys != null;
+  }
+
+  /// What automatic backup is doing, under its switch.
+  String _autoBackupText(Preferences preferences) {
+    final name = preferences.autoBackupFolderName ?? 'the folder';
+    if (preferences.autoBackupFolder == null) {
+      return 'Once a day when the app is opened, into a folder you pick '
+          '(the last 7 are kept there)';
+    }
+    if (preferences.autoBackupFailed) {
+      return "Couldn't write to $name: pick it again";
+    }
+    final last = preferences.lastAutoBackupAt;
+    return last == null
+        ? 'Once a day into $name, when the app is opened'
+        : 'Once a day into $name · last ${formatDateTime(last, gap: ' ')}';
+  }
+
+  /// Picks the folder (again) and backs up into it now.
+  Future<void> _pickAutoFolder() async {
+    final result = await ref.read(autoBackupProvider).pickFolder();
+    if (result == null || !mounted) return;
+    _showMessage(switch (result) {
+      AutoBackupResult.written => 'Backed up into the folder',
+      AutoBackupResult.locked =>
+        'Automatic backup is on; it starts once the app is unlocked',
+      AutoBackupResult.failed => "Couldn't write to that folder",
+      _ => 'Automatic backup is on',
+    });
   }
 
   Future<void> _export() async {
@@ -413,6 +444,38 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             ),
             onTap: _busy ? null : _importPart,
           ),
+          // Automatic backup (Round 39): daily, into a folder picked once.
+          SwitchListTile(
+            key: const Key('autoBackup'),
+            secondary: const Icon(Icons.folder_outlined),
+            title: const Text('Automatic backup'),
+            subtitle: Text(
+              _autoBackupText(preferences),
+              key: const Key('autoBackupText'),
+              style: TextStyle(
+                color: preferences.autoBackupFailed
+                    ? context.colors.danger
+                    : context.colors.textSecondary,
+              ),
+            ),
+            value: preferences.autoBackupFolder != null,
+            onChanged: _busy
+                ? null
+                : (on) => on
+                    ? _pickAutoFolder()
+                    : ref.read(autoBackupProvider).turnOff(),
+          ),
+          if (preferences.autoBackupFolder != null)
+            ListTile(
+              key: const Key('autoBackupFolder'),
+              leading: const SizedBox.shrink(),
+              title: Text(preferences.autoBackupFolderName ?? 'Folder'),
+              subtitle: Text(
+                'Tap to pick another folder',
+                style: TextStyle(color: context.colors.textSecondary),
+              ),
+              onTap: _busy ? null : _pickAutoFolder,
+            ),
           SwitchListTile(
             key: const Key('backupReminder'),
             secondary: const Icon(Icons.notifications_outlined),

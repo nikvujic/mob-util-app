@@ -17,6 +17,11 @@ Release with the installable APK.
   strikethrough button is gone to make room (~~text~~ still shows struck
   through).
 
+### Added
+- **Automatic backup** (Backup → Automatic backup): pick a folder once,
+  and a backup is written there once a day when you open the app; the
+  last 7 are kept.
+
 ### Fixed
 - Medicine history: *Mark past days taken* can be undone.
 

@@ -71,6 +71,16 @@ class Preferences {
   /// it's turned off.
   final bool todoNote;
 
+  /// Automatic backup (Round 39): the folder picked (Android's uri for it,
+  /// and its name to show), or null: off. This phone only.
+  final String? autoBackupFolder;
+  final String? autoBackupFolderName;
+
+  /// When the last automatic backup was written; and whether the last try
+  /// failed (the folder gone, or its permission taken back).
+  final DateTime? lastAutoBackupAt;
+  final bool autoBackupFailed;
+
   /// Pip Home's background (Round 36: picked from a list), by id; an
   /// unknown one is his field.
   final String pipBackground;
@@ -96,6 +106,10 @@ class Preferences {
     this.backupReminder = true,
     this.todoNote = true,
     this.pipBackground = 'field',
+    this.autoBackupFolder,
+    this.autoBackupFolderName,
+    this.lastAutoBackupAt,
+    this.autoBackupFailed = false,
   });
 
   /// How long until a backup is due again (D8).
@@ -174,6 +188,10 @@ class Preferences {
     bool? backupReminder,
     bool? todoNote,
     String? pipBackground,
+    String? Function()? autoBackupFolder,
+    String? Function()? autoBackupFolderName,
+    DateTime? Function()? lastAutoBackupAt,
+    bool? autoBackupFailed,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -204,6 +222,16 @@ class Preferences {
         backupReminder: backupReminder ?? this.backupReminder,
         todoNote: todoNote ?? this.todoNote,
         pipBackground: pipBackground ?? this.pipBackground,
+        autoBackupFolder: autoBackupFolder == null
+            ? this.autoBackupFolder
+            : autoBackupFolder(),
+        autoBackupFolderName: autoBackupFolderName == null
+            ? this.autoBackupFolderName
+            : autoBackupFolderName(),
+        lastAutoBackupAt: lastAutoBackupAt == null
+            ? this.lastAutoBackupAt
+            : lastAutoBackupAt(),
+        autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
       );
 
   Map<String, dynamic> toJson() => {
@@ -236,6 +264,12 @@ class Preferences {
         'backupReminder': backupReminder,
         'todoNote': todoNote,
         'pipBackground': pipBackground,
+        if (autoBackupFolder != null) 'autoBackupFolder': autoBackupFolder,
+        if (autoBackupFolderName != null)
+          'autoBackupFolderName': autoBackupFolderName,
+        if (lastAutoBackupAt != null)
+          'lastAutoBackupAt': lastAutoBackupAt!.toUtc().toIso8601String(),
+        'autoBackupFailed': autoBackupFailed,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -281,5 +315,11 @@ class Preferences {
           final String id => id,
           _ => 'field',
         },
+        autoBackupFolder: json['autoBackupFolder'] as String?,
+        autoBackupFolderName: json['autoBackupFolderName'] as String?,
+        lastAutoBackupAt: json['lastAutoBackupAt'] == null
+            ? null
+            : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
+        autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
       );
 }

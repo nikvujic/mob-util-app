@@ -287,6 +287,18 @@ the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
 notes.
 
+## Automatic backup (Round 39)
+
+`providers/auto_backup_provider.dart` (`AutoBackup.run`) writes a plain
+snapshot (`BackupExporter.snapshot`) once a day into the folder picked,
+when `HomeScreen` starts or comes back; not while a section is closed.
+The folder is Android's: `data/backup_folder.dart` talks to
+`MainActivity` over `the_app/backup_folder` (`pick`: the folder picker,
+with a persisted permission; `write`: a new document, then the oldest of
+its own files beyond 7 deleted, off the main thread). The folder, its
+name, the last time and a failure flag are in `Preferences` (this phone
+only). Tests use `FakeBackupFolder`.
+
 ## Pip, the pet (Round 34)
 
 `PipLife` (`models/pip_life.dart`: birthday, name) is his lasting data,

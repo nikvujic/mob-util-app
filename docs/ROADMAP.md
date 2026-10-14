@@ -346,7 +346,7 @@ released (v1.7.0 waits for the morning).
   the UI conventions (e.g. Medicine's grey +) (Round 33).
 - [x] **Multi-line code blocks** in notes with their own button on the
   format bar; strikethrough's button goes to make room (Round 32).
-- [ ] **Automatic backup** to a folder Nikola picks (Round 33, D8's
+- [x] **Automatic backup** to a folder Nikola picks (Round 33, D8's
   second part).
 
 ### Round 38 — a quick run before Round 37 (2026-10-14)
@@ -413,7 +413,7 @@ first.
 - [ ] Later: **new notification sounds**: the current three (Chime,
   Bell, Soft) go; instead **hacky 8-bit sounds**, several to try, then
   Nikola picks which stay.
-- [ ] Automatic backup to a folder: not simple (Android needs a folder
+- [x] (Round 39) Automatic backup to a folder: not simple (Android needs a folder
   picked with lasting permission, written through native code, and
   something to run it): later (Nikola).
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/providers/auto_backup_provider.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/app/app_drawer.dart';
@@ -136,6 +137,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(reminderPlannerProvider).refresh();
       // Pip's battery, if one came while away (Round 37).
       _collectBattery();
+      // A day's automatic backup, if due (Round 39).
+      ref.read(autoBackupProvider).run();
     },
   );
 
@@ -151,6 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tellUnreadable();
       _collectBattery();
+      ref.read(autoBackupProvider).run();
     });
   }
 

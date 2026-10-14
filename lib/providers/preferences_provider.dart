@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/data/backup_folder.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
@@ -79,6 +80,22 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
 
   /// The to-do note on or off (Round 28).
   void setTodoNote(bool on) => state = state.copyWith(todoNote: on);
+
+  /// Automatic backup into [folder] (Round 39), or off with null.
+  void setAutoBackupFolder(PickedFolder? folder) => state = state.copyWith(
+        autoBackupFolder: () => folder?.uri,
+        autoBackupFolderName: () => folder?.name,
+        lastAutoBackupAt: () => null,
+        autoBackupFailed: false,
+      );
+
+  /// An automatic backup written at [at], or failed.
+  void autoBackedUp(DateTime at) => state = state.copyWith(
+        lastAutoBackupAt: () => at,
+        lastBackupAt: () => at,
+        autoBackupFailed: false,
+      );
+  void autoBackupFailed() => state = state.copyWith(autoBackupFailed: true);
 
   void setPipBackground(String id) => state = state.copyWith(pipBackground: id);
 

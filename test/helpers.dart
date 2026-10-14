@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,8 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/models/preferences.dart';
+import 'package:the_app/data/backup_folder.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/app/app.dart';
@@ -39,6 +42,8 @@ Future<ProviderContainer> pumpApp(
   PipLife? pip,
   PipLink? pipLink,
   bool realPipLink = false,
+  BackupFolder? backupFolder,
+  Preferences? preferences,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -48,7 +53,11 @@ Future<ProviderContainer> pumpApp(
       appStorageProvider.overrideWithValue(AppStorage.inMemory(
         initialPip: pip ??
             (pipHatched ? PipLife(born: DateTime(2026, 10, 1)) : PipLife.egg),
+        initialPreferences: preferences ?? const Preferences(),
       )),
+      // Automatic backup's folder (Round 39): a fake, never Android's.
+      backupFolderProvider
+          .overrideWithValue(backupFolder ?? FakeBackupFolder()),
       appVersionProvider.overrideWithValue(testAppVersion),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
       fingerprintVaultProvider.overrideWithValue(
@@ -300,6 +309,40 @@ class FakePipLink implements PipLink {
   bool giveBattery() {
     if (batteries == 0) return false;
     batteries--;
+    return true;
+  }
+}
+
+/// A folder for automatic backups in tests (Round 39): [picks] what
+/// [pick] returns, [works] whether writing does; records what's written.
+class FakeBackupFolder implements BackupFolder {
+  PickedFolder? picks;
+  bool works;
+  final List<
+          ({String folder, String name, String text, String prefix, int keep})>
+      written = [];
+
+  FakeBackupFolder({this.picks, this.works = true});
+
+  @override
+  Future<PickedFolder?> pick() async => picks;
+
+  @override
+  Future<bool> write({
+    required String folder,
+    required String name,
+    required Uint8List bytes,
+    required String prefix,
+    required int keep,
+  }) async {
+    if (!works) return false;
+    written.add((
+      folder: folder,
+      name: name,
+      text: utf8.decode(bytes),
+      prefix: prefix,
+      keep: keep,
+    ));
     return true;
   }
 }

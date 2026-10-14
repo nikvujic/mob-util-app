@@ -1,7 +1,11 @@
 package com.nikvujic.the_app
 
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.SoundPool
+import android.net.Uri
+import android.provider.DocumentsContract
+import androidx.activity.result.contract.ActivityResultContracts
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -25,6 +29,12 @@ class MainActivity: FlutterFragmentActivity() {
     /// The Placard's inflating sound while it plays (0: none), to stop it.
     private var inflating = 0
 
+    /// Automatic backup (Round 39): the folder picker's answer goes here.
+    private var folderPicked: MethodChannel.Result? = null
+    private val pickFolder = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri -> folderChosen(uri) }
+
     companion object {
         private const val CLICK_VOLUME = 0.35f
         /// The medicine's gulp and Placard's sounds at full volume
@@ -39,6 +49,38 @@ class MainActivity: FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Automatic backup to a folder picked once (Round 39).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/backup_folder")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "pick" -> {
+                        folderPicked?.success(null)
+                        folderPicked = result
+                        pickFolder.launch(null)
+                    }
+                    "write" -> {
+                        val folder = call.argument<String>("folder")
+                        val name = call.argument<String>("name")
+                        val bytes = call.argument<ByteArray>("bytes")
+                        val prefix = call.argument<String>("prefix") ?: ""
+                        val keep = call.argument<Int>("keep") ?: 7
+                        if (folder == null || name == null || bytes == null) {
+                            result.success(false)
+                        } else {
+                            // Off the main thread: it's file work.
+                            Thread {
+                                val ok = try {
+                                    writeToFolder(Uri.parse(folder), name, bytes, prefix, keep)
+                                } catch (e: Exception) {
+                                    false
+                                }
+                                runOnUiThread { result.success(ok) }
+                            }.start()
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
         // The counters' click (U6): our own short sound, so it plays even
         // with the phone's "touch sounds" off. Played as game audio, so it
         // follows the media volume (Round 16: it had followed the system
@@ -112,6 +154,81 @@ class MainActivity: FlutterFragmentActivity() {
                 }
                 result.success(null)
             }
+    }
+
+    /// A folder picked: kept writable across restarts, and told to Dart
+    /// with its name (null: cancelled).
+    private fun folderChosen(uri: Uri?) {
+        val result = folderPicked ?: return
+        folderPicked = null
+        if (uri == null) {
+            result.success(null)
+            return
+        }
+        try {
+            contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            result.success(mapOf("uri" to uri.toString(), "name" to folderName(uri)))
+        } catch (e: Exception) {
+            result.error("folder", e.message, null)
+        }
+    }
+
+    /// The folder's own document, from its tree [uri].
+    private fun folderDocument(uri: Uri): Uri =
+        DocumentsContract.buildDocumentUriUsingTree(
+            uri, DocumentsContract.getTreeDocumentId(uri)
+        )
+
+    private fun folderName(uri: Uri): String {
+        contentResolver.query(
+            folderDocument(uri),
+            arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
+            null, null, null
+        )?.use { if (it.moveToFirst()) return it.getString(0) }
+        return uri.lastPathSegment ?: "Folder"
+    }
+
+    /// Writes [bytes] as a new [name] file in the folder [uri], then
+    /// deletes the oldest files starting with [prefix] beyond [keep].
+    private fun writeToFolder(
+        uri: Uri, name: String, bytes: ByteArray, prefix: String, keep: Int
+    ): Boolean {
+        val file = DocumentsContract.createDocument(
+            contentResolver, folderDocument(uri), "application/json", name
+        ) ?: return false
+        contentResolver.openOutputStream(file, "w")?.use { it.write(bytes) }
+            ?: return false
+        // Older ones, by name (a name holds its date and time).
+        val children = DocumentsContract.buildChildDocumentsUriUsingTree(
+            uri, DocumentsContract.getTreeDocumentId(uri)
+        )
+        val ours = mutableListOf<Pair<String, String>>()
+        contentResolver.query(
+            children,
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME
+            ),
+            null, null, null
+        )?.use {
+            while (it.moveToNext()) {
+                val shown = it.getString(1) ?: continue
+                if (shown.startsWith(prefix)) ours.add(it.getString(0) to shown)
+            }
+        }
+        for ((id, _) in ours.sortedByDescending { it.second }.drop(keep)) {
+            try {
+                DocumentsContract.deleteDocument(
+                    contentResolver, DocumentsContract.buildDocumentUriUsingTree(uri, id)
+                )
+            } catch (_: Exception) {
+            }
+        }
+        return true
     }
 
     override fun onDestroy() {
