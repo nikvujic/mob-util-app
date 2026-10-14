@@ -335,6 +335,20 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 39 — the night shift (2026-10-14, for v1.7.0)
+
+Nikola's notes from earlier rounds, done overnight while he sleeps; not
+released (v1.7.0 waits for the morning).
+
+- [ ] **8-bit notification sounds**: Chime, Bell and Soft go; several
+  hacky 8-bit ones instead, to try (Round 33).
+- [ ] **Consistency sweep**: buttons and toasts on every page against
+  the UI conventions (e.g. Medicine's grey +) (Round 33).
+- [ ] **Multi-line code blocks** in notes with their own button on the
+  format bar; strikethrough's button goes to make room (Round 32).
+- [ ] **Automatic backup** to a folder Nikola picks (Round 33, D8's
+  second part).
+
 ### Round 38 — a quick run before Round 37 (2026-10-14)
 
 - [x] **The night sky**: fewer stars, none touching the moon; the moon
