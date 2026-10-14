@@ -337,6 +337,36 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 46 — the food tracker, built from the proposal (2026-10-14)
+
+Nikola, busy: "whip out the page without my input" from the Round 15
+proposal (O14); 1.12.0 checked and fine. His two answers: foods can be
+**added from the ingredients list**; **no reminders, no notifications**.
+The rest are Claude's calls, to change after he's tried it.
+
+- [ ] A Hub page, **Food**: a day at a time (‹ date ›, a week strip
+  coloured by each day's worst rating, a tap picks a day), its meals in
+  order.
+- [ ] **+** logs a meal: breakfast / lunch / dinner / snack (guessed from
+  the time) and a time, the foods as chips (most used first), typing a
+  new name adds a food, **From ingredients** picks from the recipes'
+  ingredients list (a food of the same name is reused), and the last
+  meals can be repeated with one tap.
+- [ ] A tap on a meal **rates** it: five faces (Great, Good, OK, Bad,
+  Awful), symptoms (bloating, heartburn, cramps, nausea, tiredness,
+  headache, other) and a note; also edit its foods and time, or delete
+  it (Undo). Per meal, not per food. No reminder to rate.
+- [ ] **Foods**: rename, tags (dairy, gluten, spicy, fried, sugar,
+  alcohol, caffeine, meat, fish), delete (meals keep its name).
+- [ ] **Statistics**: per food and per tag, how rated meals with it went
+  against meals without it: *likely trouble* (5+ rated meals, bad or
+  awful clearly more often than without it), *seems fine*, *not enough
+  data yet*, with the numbers ("7 meals, 5 bad; without it 1 in 5") and
+  the symptom that most often followed.
+- [ ] `food.json` v1, backup v22 (`food`), fixtures; lockable, in Clear
+  data. Not in partial restore yet (a backup restores it whole).
+- Later: a whole-day "how I felt", a month calendar, partial restore.
+
 ### Round 45 — Nikola's notes on 1.10.1 and the charging station (2026-10-14)
 
 Built after Nikola tried 1.11.0 ("do it, except the segment drop time").
