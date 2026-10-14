@@ -30,6 +30,21 @@ void main() {
     expect(container.read(pipBrainProvider).spawned, isTrue);
   });
 
+  testWidgets('his name line sits a pixel clear of his room (Round 41)',
+      (tester) async {
+    await pumpApp(tester);
+    await openMenu(tester);
+    final line = tester.getBottomLeft(find.byKey(const Key('pipNameAge'))).dy;
+    final text = tester
+        .getBottomLeft(find.descendant(
+            of: find.byKey(const Key('pipNameAge')),
+            matching: find.byType(PixelText)))
+        .dy;
+    final room = tester.getTopLeft(find.byType(PipRoom)).dy;
+    expect(line, room);
+    expect(room - text, greaterThanOrEqualTo(2));
+  });
+
   testWidgets('his sky follows the clock (Round 35)', (tester) async {
     await pumpApp(tester, clock: () => DateTime(2026, 10, 13, 23));
     await openMenu(tester);

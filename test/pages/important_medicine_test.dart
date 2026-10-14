@@ -9,6 +9,16 @@ import '../helpers.dart';
 /// Important medicines (Round 24): set in the sheet; a dose is taken only
 /// by holding a button for 5 seconds.
 void main() {
+  test('full means full: no gap left under the rim (Round 41)', () {
+    const centre = 100.0, inner = 60.0;
+    // Full: even a wave's trough is above the glass's top.
+    expect(surfaceTop(centre, inner, 1) + maxWave, lessThan(centre - inner));
+    // Empty: even a wave's crest is below its bottom.
+    expect(surfaceTop(centre, inner, 0) - maxWave, greaterThan(centre + inner));
+    // Half: about the middle.
+    expect(surfaceTop(centre, inner, 0.5), closeTo(centre, 0.01));
+  });
+
   late ProviderContainer container;
   final today = DateTime(2026, 10, 12);
 

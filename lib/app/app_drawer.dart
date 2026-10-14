@@ -137,7 +137,13 @@ class AppDrawer extends ConsumerWidget {
             if (ref.watch(pipLifeProvider) case final pip when pip.hatched)
               Padding(
                 key: const Key('pipNameAge'),
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                // One of his pixels clear of his room below (Round 41).
+                padding: const EdgeInsets.fromLTRB(
+                  12,
+                  8,
+                  12,
+                  PipRoom.smallPixel,
+                ),
                 child: Row(
                   children: [
                     PixelText(

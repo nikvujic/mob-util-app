@@ -11,6 +11,14 @@ Release with the installable APK.
   days, then the weekdays); on its other days it's under *Not today*,
   with no reminders.
 
+### Fixed
+- Medicine: holding to take an important dose fills the circle all the
+  way before it pops.
+- The menu: a little room between Pip's name line and his field.
+- The Introduction: Pip has his own part; where the notifications-off
+  notice is, the planner's reminder button, and Format's buttons put
+  right.
+
 ## [1.7.0] - 2026-10-14
 
 ### Changed

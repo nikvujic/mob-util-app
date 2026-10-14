@@ -235,6 +235,20 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
 
 /// A round glass filling up to [fill] (0–1), its surface waving with
 /// [wave] (0–1, a cycle), inside a ring that goes round as it fills.
+/// The liquid's surface (its waves' middle) in a glass of [inner] radius
+/// around [centerY], [fill] full (Round 41): from below the bottom to
+/// past the top by more than a wave is high, so it's really full at 1
+/// (the waves' troughs had left a gap under the rim).
+@visibleForTesting
+double surfaceTop(double centerY, double inner, double fill) {
+  const beyond = maxWave + 1;
+  return centerY + inner + beyond - (2 * inner + 2 * beyond) * fill;
+}
+
+/// How high the surface's waves reach above and below it.
+@visibleForTesting
+const maxWave = 5.0;
+
 class _GlassPainter extends CustomPainter {
   final double fill;
   final double wave;
@@ -268,12 +282,12 @@ class _GlassPainter extends CustomPainter {
       canvas.save();
       canvas.clipPath(
           Path()..addOval(Rect.fromCircle(center: center, radius: inner)));
-      final top = center.dy + inner - 2 * inner * fill;
+      final top = surfaceTop(center.dy, inner, fill);
       final phase = wave * 2 * math.pi;
       // Two waves, the back one lighter, moving the other way.
       for (final (shift, alpha, height) in [
-        (math.pi, 0.45, 5.0),
-        (0.0, 1.0, 4.0),
+        (math.pi, 0.45, maxWave),
+        (0.0, 1.0, maxWave - 1),
       ]) {
         final path = Path()..moveTo(center.dx - inner, size.height);
         for (var x = -inner; x <= inner; x += 4) {

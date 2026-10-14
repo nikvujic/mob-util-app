@@ -338,11 +338,11 @@ fixtures for every stored format.
 ### Round 41 — Nikola's notes on 1.7.0, and his answers on Recipes (2026-10-14)
 
 **Patches**
-- [ ] Medicine: the hold-to-take button's circle doesn't fill to 100%
+- [x] Medicine: the hold-to-take button's circle doesn't fill to 100%
   before its finishing animation.
-- [ ] The menu: a small gap between Pip's name/age/battery line and his
+- [x] The menu: a small gap between Pip's name/age/battery line and his
   room (half a pixel if a whole one is too much).
-- [ ] The Introduction: check it's still right.
+- [x] The Introduction: check it's still right.
 - [ ] Code blocks in notes look better: rounded corners, room on the
   left, maybe a different (monospace) font, bundled with the app (no
   fetching: it works offline).
