@@ -53,6 +53,17 @@ void main() {
         reason: 'next, leftwards');
   });
 
+  test("the default order (Round 48, Nikola's)", () {
+    expect(PageLayout.initial.hub, [
+      HubTool.counters,
+      HubTool.medicine,
+      HubTool.placard,
+      HubTool.pip,
+      HubTool.recipes,
+      HubTool.food,
+    ]);
+  });
+
   group('arranging (O8)', () {
     testWidgets('hold a tile and drag it onto another: they swap places',
         (tester) async {
@@ -74,9 +85,9 @@ void main() {
         HubTool.placard,
         HubTool.counters,
         HubTool.medicine,
+        HubTool.pip,
         HubTool.recipes,
         HubTool.food,
-        HubTool.pip,
       ]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
@@ -105,12 +116,12 @@ void main() {
       owner.performAction(node.id, SemanticsAction.customAction, later);
       await tester.pump();
       expect(container.read(layoutProvider).hub, [
-        HubTool.placard,
-        HubTool.counters,
         HubTool.medicine,
+        HubTool.counters,
+        HubTool.placard,
+        HubTool.pip,
         HubTool.recipes,
         HubTool.food,
-        HubTool.pip,
       ]);
       semantics.dispose();
     });
@@ -142,9 +153,9 @@ void main() {
       await tester.pump();
       expect(container.read(layoutProvider).hub, [
         HubTool.pip,
-        HubTool.placard,
-        HubTool.counters,
         HubTool.medicine,
+        HubTool.counters,
+        HubTool.placard,
         HubTool.recipes,
         HubTool.food,
       ]);

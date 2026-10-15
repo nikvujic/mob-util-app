@@ -7,19 +7,21 @@
 /// `pages/hub/tools.dart` and `providers/section_data_provider.dart`):
 /// those switches don't compile until a new page is in all of them.
 enum HubTool {
+  // Their order is the Hub's default (Round 48: Nikola's), for a Hub not
+  // arranged by hand.
   counters('Counters'),
-  placard('Placard'),
   medicine('Medicine'),
+  placard('Placard'),
+
+  /// Pip's home (Round 35): shown once he's hatched. No lock (he's no
+  /// secret) and nothing for Clear data (his life isn't a page's data).
+  pip('Pip'),
 
   /// Recipes (Round 42), with the ingredients list they pick from.
   recipes('Recipes'),
 
   /// The food tracker (O14, Round 46).
-  food('Food'),
-
-  /// Pip's home (Round 35): shown once he's hatched. No lock (he's no
-  /// secret) and nothing for Clear data (his life isn't a page's data).
-  pip('Pip');
+  food('Food');
 
   const HubTool(this.label);
 

@@ -384,6 +384,8 @@ void main() {
         await t.tap(find.byTooltip('Statistics'));
         await t.pumpAndSettle();
         expect(find.text('Likely trouble'), findsWidgets);
+        await t.scrollUntilVisible(find.text('BY SYMPTOM'), 200,
+            scrollable: find.byType(Scrollable).last);
       },
       "a food's statistics": (t) async {
         await openTab(t, 'Hub');
@@ -404,6 +406,18 @@ void main() {
         await t.tap(find.byKey(const Key('mealFoodField')));
         await t.pumpAndSettle();
         expect(find.byKey(const Key('foodIndex')), findsOneWidget);
+      },
+      "food, a recipe's ingredients": (t) async {
+        await openTab(t, 'Hub');
+        await t.tap(find.byTooltip('Food'));
+        await t.pumpAndSettle();
+        await t.tap(find.byTooltip('Log a meal'));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('mealFoodField')));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('indexRecipe-Pancakes')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('addFromRecipe')), findsOneWidget);
       },
       'foods list': (t) async {
         await openTab(t, 'Hub');

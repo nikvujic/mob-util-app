@@ -247,6 +247,32 @@ void main() {
       expect(changesFor('# Nothing', '0.1.0'), isNull);
     });
 
+    test(
+        "a patch shows its whole minor version's changes, newest first "
+        '(Round 48)', () {
+      const patched = '''
+## [0.3.1] - unreleased
+
+### Fixed
+- Three
+
+## [0.3.0] - 2026-01-03
+
+### Added
+- Big
+
+## [0.2.0] - 2026-01-02
+
+### Added
+- Two
+''';
+      expect(changesFor(patched, '0.3.1'),
+          '## 0.3.1\n\n### Fixed\n- Three\n\n## 0.3.0\n\n### Added\n- Big');
+      expect(changesFor(patched, '0.3.0'), '### Added\n- Big',
+          reason: 'not the patch after it');
+      expect(changesFor(patched, '0.2.0'), '### Added\n- Two');
+    });
+
     test('the number of a shown version', () {
       expect(versionNumber('0.24.0 (25)'), '0.24.0');
     });

@@ -6,7 +6,9 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/id.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/food.dart';
+import 'package:the_app/models/recipe.dart';
 import 'package:the_app/pages/hub/food.dart';
+import 'package:the_app/pages/hub/food_recipe_sheet.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
@@ -104,6 +106,21 @@ class _MealPageState extends ConsumerState<MealPage> {
     _food.clear();
   }
 
+  /// A recipe's ingredients, all ticked, to choose which to add (Round
+  /// 48); each becomes a food (the same name reused).
+  Future<void> _fromRecipe(Recipe recipe) async {
+    final picked = await showModalBottomSheet<List<String>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => RecipeIngredientsSheet(recipe: recipe),
+    );
+    if (picked == null || !mounted) return;
+    for (final name in picked) {
+      _addFood(name);
+    }
+    _food.clear();
+  }
+
   Future<void> _pickTime() async {
     final local = _meal.at.toLocal();
     final picked = await showTimePicker(
@@ -175,11 +192,22 @@ class _MealPageState extends ConsumerState<MealPage> {
           i.name.toLowerCase(): i.name,
     }.values.toList()
       ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    // Round 48: recipes too, by name; a tap opens its ingredients.
+    final indexRecipes = [
+      for (final recipe in ref.watch(recipesProvider))
+        if (recipe.name.trim().isNotEmpty &&
+            recipe.ingredients.isNotEmpty &&
+            matches(recipe.name))
+          recipe,
+    ];
     final isNew = typed.isNotEmpty &&
         book.foodNamed(typed) == null &&
         !indexIngredients.any((n) => n.toLowerCase() == typed);
     final showIndex = _foodFocus.hasFocus &&
-        (isNew || indexFoods.isNotEmpty || indexIngredients.isNotEmpty);
+        (isNew ||
+            indexFoods.isNotEmpty ||
+            indexRecipes.isNotEmpty ||
+            indexIngredients.isNotEmpty);
     final recent = meal.foods.isEmpty ? book.recentMeals() : const <Meal>[];
 
     return Scaffold(
@@ -278,6 +306,8 @@ class _MealPageState extends ConsumerState<MealPage> {
               typed: _food.text.trim(),
               isNew: isNew,
               foods: [for (final f in indexFoods) f.name],
+              recipes: indexRecipes,
+              onRecipe: _fromRecipe,
               ingredients: indexIngredients,
               onPick: (name) {
                 _addFood(name);
@@ -422,6 +452,8 @@ class _FoodIndex extends StatelessWidget {
   final String typed;
   final bool isNew;
   final List<String> foods;
+  final List<Recipe> recipes;
+  final ValueChanged<Recipe> onRecipe;
   final List<String> ingredients;
   final ValueChanged<String> onPick;
 
@@ -429,6 +461,8 @@ class _FoodIndex extends StatelessWidget {
     required this.typed,
     required this.isNew,
     required this.foods,
+    required this.recipes,
+    required this.onRecipe,
     required this.ingredients,
     required this.onPick,
   });
@@ -470,6 +504,19 @@ class _FoodIndex extends StatelessWidget {
             if (foods.isNotEmpty) ...[
               heading('FOODS'),
               for (final name in foods) row(name, 'indexFood'),
+            ],
+            if (recipes.isNotEmpty) ...[
+              heading('RECIPES'),
+              for (final recipe in recipes)
+                ListTile(
+                  key: Key('indexRecipe-${recipe.name}'),
+                  dense: true,
+                  minTileHeight: kMinInteractiveDimension,
+                  leading: const Icon(Icons.menu_book_outlined, size: 20),
+                  title: Text(recipe.name),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => onRecipe(recipe),
+                ),
             ],
             if (ingredients.isNotEmpty) ...[
               heading('INGREDIENTS'),

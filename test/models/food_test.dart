@@ -259,5 +259,43 @@ void main() {
           contains('Milk'),
           reason: 'a kind lists its foods');
     });
+
+    test(
+        'by symptom (Round 48): the foods a symptom follows clearly more '
+        'often, apart from the faces', () {
+      final book = FoodBook(foods: const [], meals: [
+        // Burek: heartburn 4 of 5 times, though rated fine.
+        for (var i = 0; i < 4; i++)
+          meal('b$i', ['burek'],
+              rating: MealRating.good, symptoms: {Symptom.heartburn}),
+        meal('b4', ['burek'], rating: MealRating.good),
+        // Soup: heartburn once in 6, unrated meals count too.
+        meal('s0', ['soup'], symptoms: {Symptom.heartburn}),
+        for (var i = 1; i < 6; i++) meal('s$i', ['soup']),
+        // Tea: once, with bloating.
+        meal('t', ['tea'], symptoms: {Symptom.bloating}),
+      ]);
+      final result = FoodStats.bySymptom(book);
+      expect(result.map((r) => (r.$1, r.$2)),
+          [(Symptom.heartburn, 5), (Symptom.bloating, 1)],
+          reason: 'most often first; unlogged ones left out');
+      final heartburn = result.first.$3;
+      expect(heartburn.map((f) => f.label), ['BUREK']);
+      expect((
+        heartburn.single.bad,
+        heartburn.single.meals,
+        heartburn.single.badWithout,
+        heartburn.single.mealsWithout
+      ), (
+        4,
+        5,
+        1,
+        7
+      ));
+      expect(result.last.$3, isEmpty, reason: 'once is too little');
+      // The verdicts are still the faces': all good.
+      expect(FoodStats.foods(book).map((f) => f.verdict),
+          isNot(contains(FoodVerdict.trouble)));
+    });
   });
 }

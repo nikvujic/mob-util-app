@@ -181,6 +181,45 @@ void main() {
   });
 
   testWidgets(
+      "the index's Recipes (Round 48): a tap opens its ingredients, all "
+      'ticked, to choose which to add', (tester) async {
+    await openFood(tester,
+        start:
+            FoodBook(foods: [Food(id: 'f1', name: 'Milk')], meals: const []));
+    container.read(recipesProvider.notifier).replaceAll([
+      Recipe(
+        id: 'r1',
+        name: 'Pancakes',
+        ingredients: const [
+          RecipeIngredient(name: 'Flour', quantity: '200 g'),
+          RecipeIngredient(name: 'milk'),
+          RecipeIngredient(name: 'Sugar'),
+        ],
+        createdAt: DateTime(2026, 10, 1),
+      ),
+      Recipe(id: 'r2', name: 'Tea', createdAt: DateTime(2026, 10, 1)),
+    ]);
+    await tapTooltip(tester, 'Log a meal');
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    expect(find.text('RECIPES'), findsOneWidget);
+    expect(find.byKey(const Key('indexRecipe-Tea')), findsNothing,
+        reason: 'nothing in it to add');
+    await tester.enterText(find.byKey(const Key('mealFoodField')), 'panc');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('indexRecipe-Pancakes')));
+    await tester.pumpAndSettle();
+    expect(find.text('Add 3'), findsOneWidget, reason: 'all ticked');
+    await tester.tap(find.byKey(const Key('recipeIngredient-Sugar')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('addFromRecipe')));
+    await tester.pumpAndSettle();
+    expect(book().meals.single.foods.map((f) => f.name), ['Flour', 'Milk'],
+        reason: 'milk is the food Milk');
+    expect(book().foods.map((f) => f.name), ['Milk', 'Flour']);
+  });
+
+  testWidgets(
       'the month calendar (Round 47): days coloured by their worst meal; a '
       "tap shows a day's meals; ‹ goes back a month", (tester) async {
     await openFood(tester,
@@ -337,6 +376,18 @@ void main() {
     expect(find.text('Bloating after 5'), findsWidgets);
     expect(find.text('BY KIND'), findsOneWidget);
     expect(find.byKey(const Key('verdict-Spicy')), findsOneWidget);
+
+    // By symptom (Round 48): bloating after every onion meal, never
+    // without it.
+    expect(find.text('BY SYMPTOM'), findsOneWidget);
+    await tester.scrollUntilVisible(
+        find.byKey(const Key('symptomFood-bloating-Onion')), 200,
+        scrollable: find.byType(Scrollable).last);
+    expect(find.text('Bloating  ·  after 5 meals'), findsOneWidget);
+    expect(find.text('after 5 of 5 · without it 0 of 7'), findsOneWidget);
+    await tester.scrollUntilVisible(
+        find.byKey(const Key('finding-Onion')), -200,
+        scrollable: find.byType(Scrollable).last);
 
     // A food's own page (Round 47).
     await tester.tap(find.byKey(const Key('finding-Onion')));

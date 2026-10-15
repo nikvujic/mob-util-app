@@ -4,6 +4,22 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.14.1] - 2026-10-15
+
+### Added
+- Food statistics **by symptom**: for each symptom you've logged, the
+  foods it follows clearly more often than without them (the same fair
+  comparison as the verdicts; symptoms don't change the verdicts, which
+  come from the faces).
+- Food: the index of foods has a **Recipes** section: a tap on a recipe
+  opens its ingredients, all ticked, to choose which to add.
+
+### Changed
+- The Hub's tiles in a new default order: Counters, Medicine, Placard,
+  Pip, Recipes, Food (tiles you've arranged stay as they are).
+- The Introduction's *What's new* after a patch shows its whole version
+  (here 1.14.0 and 1.14.1).
+
 ## [1.14.0] - 2026-10-14
 
 ### Added

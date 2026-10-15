@@ -353,7 +353,10 @@ something), `food_foods.dart`, `food_stats.dart`; each opened through
 (a month calendar shaped like Medicine's), the meal page's index of
 foods and ingredients (ingredient names become foods when picked), and
 `FoodFindingPage` in `food_stats.dart`, fed by `FoodStats.mealsWith`,
-`ratings`, `symptoms` and `eatenWith`.
+`ratings`, `symptoms` and `eatenWith`. Round 48: `FoodStats.bySymptom`
+runs the same comparison with every meal counted and a symptom as the
+outcome, and the index lists recipes, whose ingredients open in a sheet
+to pick from.
 
 ## Pip, the pet (Round 34)
 

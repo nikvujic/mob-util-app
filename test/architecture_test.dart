@@ -114,6 +114,9 @@ const plainScrollAllowed = {
   'pages/hub/counter_sheet.dart',
   // The same, for a medicine.
   'pages/hub/medicine_sheet.dart',
+  // A recipe's ingredients to tick, in a bottom sheet (Round 48): already
+  // at the bottom.
+  'pages/hub/food_recipe_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
   // The sounds to pick from (Round 39): a short list in a bottom sheet.

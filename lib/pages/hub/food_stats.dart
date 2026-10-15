@@ -26,6 +26,7 @@ class FoodStatsPage extends ConsumerWidget {
     final (rated, bad) = FoodStats.usual(book);
     final foods = FoodStats.foods(book);
     final tags = FoodStats.tags(book);
+    final bySymptom = FoodStats.bySymptom(book);
 
     Widget heading(String text) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
@@ -42,7 +43,7 @@ class FoodStatsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Statistics')),
-      body: rated == 0
+      body: rated == 0 && bySymptom.isEmpty
           ? const EmptyState(
               icon: Icons.insights,
               message: 'Rate meals to see what agrees with you',
@@ -67,9 +68,96 @@ class FoodStatsPage extends ConsumerWidget {
                   heading('BY KIND'),
                   for (final f in tags) _FindingRow(finding: f),
                 ],
+                // Round 48: apart from the verdicts above (those come
+                // from the faces alone).
+                if (bySymptom.isNotEmpty) ...[
+                  heading('BY SYMPTOM'),
+                  for (final (symptom, count, likely) in bySymptom)
+                    _SymptomBlock(
+                      symptom: symptom,
+                      count: count,
+                      likely: likely,
+                    ),
+                ],
                 const SizedBox(height: 24),
               ],
             ),
+    );
+  }
+}
+
+/// A symptom, how many meals it followed, and the foods it follows
+/// clearly more often than without them (a tap opens the food's page).
+class _SymptomBlock extends StatelessWidget {
+  final Symptom symptom;
+  final int count;
+  final List<FoodFinding> likely;
+
+  const _SymptomBlock({
+    required this.symptom,
+    required this.count,
+    required this.likely,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      key: Key('bySymptom-${symptom.name}'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
+          child: Text(
+            '${symptom.label}  ·  after $count '
+            '${count == 1 ? 'meal' : 'meals'}',
+            style: TextStyle(
+              color: colors.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        if (likely.isEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+            child: Text(
+              'No food stands out yet',
+              style: TextStyle(color: colors.textMuted, fontSize: 12),
+            ),
+          ),
+        for (final f in likely)
+          InkWell(
+            key: Key('symptomFood-${symptom.name}-${f.label}'),
+            onTap: () => openFoodPage(
+              context,
+              FoodFindingPage(foodKey: f.foodKey, label: f.label),
+            ),
+            child: ConstrainedBox(
+              constraints:
+                  const BoxConstraints(minHeight: kMinInteractiveDimension),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(28, 4, 16, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        f.label,
+                        style: TextStyle(color: colors.textPrimary),
+                      ),
+                    ),
+                    Text(
+                      'after ${f.bad} of ${f.meals} · without it '
+                      '${f.badWithout} of ${f.mealsWithout}',
+                      style:
+                          TextStyle(color: colors.textSecondary, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

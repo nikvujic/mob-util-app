@@ -106,6 +106,41 @@ abstract final class FoodStats {
     ]);
   }
 
+  /// By symptom (Round 48), kept apart from the verdicts: for each
+  /// symptom logged (most often first), how many meals it followed, and
+  /// the foods it follows clearly more often than without them (the same
+  /// test as [FoodFinding.verdict]: there [FoodFinding.bad] counts the
+  /// meals with the symptom), the biggest difference first.
+  static List<(Symptom, int, List<FoodFinding>)> bySymptom(FoodBook book) {
+    final keys = <String, (String, String?)>{};
+    for (final m in book.meals) {
+      for (final f in m.foods) {
+        final food = f.foodId == null ? null : book.foodById(f.foodId!);
+        keys[f.key] = (food?.name ?? f.name, f.foodId);
+      }
+    }
+    final result = <(Symptom, int, List<FoodFinding>)>[];
+    for (final symptom in Symptom.values) {
+      final after = book.meals.where((m) => m.symptoms.contains(symptom));
+      if (after.isEmpty) continue;
+      final likely = [
+        for (final MapEntry(key: key, value: (name, id)) in keys.entries)
+          _finding(
+            book.meals,
+            (m) => m.foods.any((f) => f.key == key),
+            label: name,
+            foodId: id,
+            foodKey: key,
+            counted: (_) => true,
+            outcome: (m) => m.symptoms.contains(symptom),
+          ),
+      ].where((f) => f.verdict == FoodVerdict.trouble).toList();
+      result.add((symptom, after.length, _sorted(likely)));
+    }
+    result.sort((a, b) => b.$2.compareTo(a.$2));
+    return result;
+  }
+
   /// How many rated meals there are, and how many were bad or awful: the
   /// usual, to compare with.
   static (int, int) usual(FoodBook book) {
@@ -120,7 +155,13 @@ abstract final class FoodStats {
     String? foodId,
     String? foodKey,
     FoodTag? tag,
+    bool Function(Meal)? counted,
+    bool Function(Meal)? outcome,
   }) {
+    // By default rated meals count, and bad ones are the outcome; by
+    // symptom (Round 48) every meal counts, and the symptom is.
+    counted ??= (m) => m.rating != null;
+    outcome ??= (m) => m.rating!.isBad;
     var withIt = 0, bad = 0, without = 0, badWithout = 0;
     final symptoms = <Symptom, int>{};
     for (final m in meals) {
@@ -130,14 +171,14 @@ abstract final class FoodStats {
           symptoms[s] = (symptoms[s] ?? 0) + 1;
         }
       }
-      final rating = m.rating;
-      if (rating == null) continue;
+      if (!counted(m)) continue;
+      final hit = outcome(m);
       if (contains) {
         withIt++;
-        if (rating.isBad) bad++;
+        if (hit) bad++;
       } else {
         without++;
-        if (rating.isBad) badWithout++;
+        if (hit) badWithout++;
       }
     }
     Symptom? symptom;
