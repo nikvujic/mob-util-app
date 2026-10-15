@@ -347,7 +347,11 @@ Bills not now. The order: **Birthdays & dates**, **Packing lists**,
   important dates; a date has a title, a note, a type, and up to 3
   reminders (days before, time); the usual patterns (Notifications page
   settings, lock, backup, Clear data). Pip wears a **party hat** on a
-  birthday. Waiting on Nikola's go and the spec's questions.
+  birthday. Nikola's answers: named **Dates**; a new date reminds **1
+  day before**; a **green dot** on birthdays, gone once the page is
+  opened; the hat on **Pip's own birthday** too (not the day he
+  hatched); asleep, the hat **beside him**; and a **Hats** list on Pip
+  Home to try hats on (not kept once you leave it).
 
 ### Round 56 — Nikola: the index's scroll on (2026-10-15; patch 1.17.2)
 

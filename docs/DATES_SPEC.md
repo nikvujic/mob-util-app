@@ -2,14 +2,12 @@
 
 From Nikola's notes (ROADMAP, Round 57): a calendar of important dates,
 each with a title, a note, a type and up to three reminders; Pip in a
-party hat on a birthday. Built from the app's usual patterns. Marked
-**Q** where Nikola decides; everything else is a proposal to build as
-written.
+party hat on a birthday. Built from the app's usual patterns. Nikola's
+answers are in (Round 57); **Decided** marks them.
 
 ## 1. The page (a Hub page, "Dates")
 
-- Q: its name in the Hub: **Dates** (short, fits the tile), or
-  *Birthdays*, or *Birthdays & dates*.
+- Its name in the Hub: **Dates** (decided).
 - **A month calendar** on top, the same kind as Food's (weeks as rows,
   Monday first, swipe or ‹ › for other months; this month first). A day
   with a date on it shows a **small dot in its type's colour** (two or
@@ -35,8 +33,8 @@ Opened from a card or **+**; saved as you go, like a meal or a recipe
 
 - **Title** (needed): "Ana", "Mum & Dad", "Exam".
 - **Type**, a picker from a fixed list, each with an icon and a colour:
-  **Birthday**, **Anniversary**, **Holiday**, **Event**, **Other**.
-  Q: the list (e.g. add *Name day*, *Memorial*).
+  **Birthday**, **Anniversary**, **Holiday**, **Event**, **Other**
+  (more can be added later).
 - **Date**: day and month, and the **year** if known (a birthday
   without a year still works; it just doesn't say the age).
 - **Every year** (a switch): on by default for Birthday, Anniversary
@@ -47,7 +45,7 @@ Opened from a card or **+**; saved as you go, like a meal or a recipe
   a tap changes it (a sheet: how many days before, picked from *on the
   day, 1, 2, 3, 5, 7, 14, 30 days*, and the time); a row's ✕ removes
   it; **Add a reminder** while fewer than 3. A new date starts with
-  one: **on the day, 09:00**. Q: that default, or *1 day before*.
+  one: **1 day before, 09:00** (decided).
 - **Delete** at the end of the page (like a meal's), with Undo.
 
 ## 3. Notifications
@@ -68,17 +66,18 @@ Opened from a card or **+**; saved as you go, like a meal or a recipe
 - Locked page: notifications still come, without the title ("A
   birthday tomorrow"), as the Planner does when locked.
 - **29 February** in a year without it: on 28 February.
-- Q: a **red dot** on the Dates tile (and the Hub tab) on a day with a
-  date, gone once the page is opened that day. Proposed: no (the
-  notification is enough), or yes for birthdays only.
+- **A green dot** on the Dates tile on a day with a **birthday**, gone
+  once the Dates page is opened that day (decided: green, not red: red
+  is for something to do, like a dose or a backup). The Hub tab shows
+  it too, unless a red dot is there (red wins).
 
 ## 4. Pip's party hat
 
 - On a day with a **Birthday** (any of them), Pip wears a **party hat**
   all day: a small striped cone with a pompom, on his head beside the
   antenna.
-- Q: also on **his own birthday** (the day he hatched, each year).
-  Proposed: yes, and maybe a few confetti specks now and then.
+- Also on **his own birthday**: the day he hatched, each year after,
+  not the day he hatched itself (decided).
 
 ### Is it hard to keep consistent? No.
 
@@ -93,8 +92,8 @@ that uses his body frames, with nothing to redo.
 
 What needs a thought, once each (done in this change):
 - Not on the **egg** or while hatching (he isn't out yet).
-- **Asleep** (his body tucked lower): the hat follows the head down, or
-  is put beside him while he sleeps. Proposed: it stays on.
+- **Asleep**: the hat **sits beside him** on the ground while he sleeps
+  (decided), and goes back on when he wakes.
 - Off (**lying on his side**): it tilts with him.
 - Thrown in **tumbling**: it spins with him (or flies off and lands
   next to him: more fun, a bit more work; proposed: spins with him).
@@ -104,6 +103,21 @@ Tests check the hat sits on his head's top row in every frame kind
 (standing, walking, tucked, falling over, charging, each screen), so a
 new animation that moves the head without the frame grid would fail
 and be caught.
+
+### Hats on Pip Home (decided, Round 57)
+
+- Pip Home's settings card gets **Hats** (beside Rename, Animations,
+  Backgrounds): a list of hats to try on him: **party hat**, **crown**,
+  **top hat**, **wizard hat**, **cap**, **beanie** (a few to start; more
+  later). A tap puts it on him; the hat he has on is ticked; **None**
+  takes it off.
+- Only for trying on: he **doesn't keep it**. Back to the settings
+  menu, a swipe back to his info card, or leaving Pip Home, and it's
+  gone. The menu's Pip never wears it (Pip Home has its own Pip).
+- On a birthday he's in the party hat anyway; trying another swaps it
+  while on Hats, and the party hat comes back after.
+- Every hat is drawn the same way as the party hat (one sprite on his
+  head's top row, inside his moves), so the same tests cover them all.
 
 ## 5. Stored
 
@@ -119,15 +133,7 @@ and be caught.
 1. Data: the model, storage, backup v23, fixtures.
 2. The page: the calendar, upcoming, the date's page, the type picker.
 3. Reminders: planning, the Notifications page entry, tapping a
-   notification to open it.
-4. Pip's party hat.
+   notification to open it; the green dot.
+4. Pip's hats: the party hat on birthdays (and his own), beside him
+   asleep; the Hats list on Pip Home.
 5. Introduction, docs, full suite, release.
-
-## Q — for Nikola
-
-1. The page's name: **Dates**?
-2. The types: Birthday, Anniversary, Holiday, Event, Other — more?
-3. A new date's reminder: **on the day at 09:00**, or 1 day before?
-4. A red dot on the tile on the day: no / birthdays only / every date?
-5. The hat on **Pip's own birthday** too?
-6. The hat while asleep: on, or beside him?
