@@ -4,6 +4,28 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Pip's entrances**: besides coming out of the ground, he **drops in
+  from the sky**, or, in the menu, is **thrown in from the side** by its
+  swing, and is **angry** about it for a moment (a scowl, a shaken fist,
+  cross words). One at random the first time, and again when you're back
+  after a while.
+- **Things happen in his field** now and then: **bugs** he fights off
+  with a **sword**, a **flower** he picks and holds, a **butterfly** he
+  watches, a **ball** he kicks away, a **little dance**, pictures on his
+  **screen** (a heart, music, star eyes, HI…), and at dusk or night a
+  **shooting star**. When a **notification** comes, his screen shows one.
+  All of them are in Pip Home's Animations.
+
+### Changed
+- **Richer skies**: more colours from top to bottom (dusk goes from
+  indigo through purple and pink to orange and gold), smoother bands,
+  clouds with light and shade (warm at dawn and dusk), a sun with a glow
+  (low and orange at dawn), a moon with a halo and craters, and stars in
+  a few colours.
+
 ## [1.14.4] - 2026-10-15
 
 ### Changed

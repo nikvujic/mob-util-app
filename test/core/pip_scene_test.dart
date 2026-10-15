@@ -182,6 +182,8 @@ void main() {
         'flower',
         'butterfly',
         'ball',
+        'shootingStar',
+        'dance',
       ]);
     });
 

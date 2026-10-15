@@ -343,28 +343,35 @@ Nikola, going to sleep: "start pip work without waiting for me … make
 it a bigger change". Decisions Claude's.
 
 **Entrances** (all three)
-- [ ] **From the side, only in the side menu**: thrown in by the menu's
+- [x] **From the side, only in the side menu**: thrown in by the menu's
   swing, he tumbles in, lands, and is **angry** for a bit (a scowl,
   shaking a fist with his floating hands).
-- [ ] **From the sky**: he drops in, lands with a squash and a little
+- [x] **From the sky**: he drops in, lands with a squash and a little
   dust.
-- [ ] **Coming back after a while** away (the app opened again): one of
+- [x] **Coming back after a while** away (the app opened again): one of
   the entrances, not always the ground.
 
 **Random events**
-- [ ] **Bugs**: little computer bugs crawl into his field; he pops out a
+- [x] **Bugs**: little computer bugs crawl into his field; he pops out a
   **sword** and fights them off (the sword is for the adventures later).
-- [ ] **His screen** shows things now and then: when a notification
+- [x] **His screen** shows things now and then: when a notification
   comes, a few kinds (an envelope, a bell, a "!" blinking); and random
   ones (a heart, a note, a question mark, a loading bar…).
-- [ ] **Little things in his field**: a **flower** he walks to and
+- [x] **Little things in his field**: a **flower** he walks to and
   picks (and holds for a while), and more of the kind (a butterfly he
   watches, a ball he kicks…).
-- [ ] All of them in Pip Home's Animations list, and in the `mayStart`
+- [x] All of them in Pip Home's Animations list, and in the `mayStart`
   table so nothing clashes (no bug fight while charging or asleep).
 
+**More of the kind** (Claude's, as asked)
+- [x] A **little dance** (hops to a beat, turning, music on his screen).
+- [x] At dusk or night, a **shooting star** he looks up at.
+
+Pictures: `docs/pip_round52_events.png`, `…_screens.png`,
+`…_skies.png`.
+
 **Backgrounds** (Nikola's note)
-- [ ] Richer skies: more colours in the bands (the evening's tinted
+- [x] Richer skies: more colours in the bands (the evening's tinted
   lines, but with more hues), more detail on **clouds**, the **sun** and
   the **moon**. The ground stays as it is.
 
@@ -519,7 +526,7 @@ all day, no drain seen, with the app in his recent apps)
   "HE'S CHARGING".
 
 **Idea: Pip's entrances** (later)
-- [ ] Flying in from the side, only in the side menu: as if the menu's
+- [x] (Round 52) Flying in from the side, only in the side menu: as if the menu's
   swing threw him in. Then he's **angry** for a bit, shaking a hand.
 
 ### Round 44 — Nikola's notes on 1.10.0; Pip's charging station (2026-10-14)
@@ -846,11 +853,11 @@ Nikola's picks (Round 34):
   station, he runs to it and plugs in. (Round 44: done.)
 
 **Later: more life**
-- [ ] Entrances: from the ground (now; also when the app is opened again
-  after a while), falling from the sky, from the sides.
-- [ ] Random events: **bugs** (computer bugs) appear and he draws a sword
+- [x] Entrances: from the ground (now; also when the app is opened again
+  after a while), falling from the sky, from the sides. (Round 52.)
+- [x] Random events: **bugs** (computer bugs) appear and he draws a sword
   to fight them; moments where he **shows something on his screen**
-  (also when a notification comes).
+  (also when a notification comes). (Round 52.)
 - [x] **Sleeping** at night (Round 37: 23:00–8:00; he's seen falling
   asleep and waking, not woken by the app).
 - [x] (Round 35/37: the `mayStart` table) Careful **flow control**, so things can't clash (no battery during

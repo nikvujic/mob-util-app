@@ -207,7 +207,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
               PipActivity.showing ||
               PipActivity.flower ||
               PipActivity.butterfly ||
-              PipActivity.ball:
+              PipActivity.ball ||
+              PipActivity.stargazing ||
+              PipActivity.dancing:
           // Walking over, then picking it up (or plugging in or out).
           final doing = brain.activity;
           for (var s = 0; s < 1200 && brain.activity == doing; s++) {
@@ -296,6 +298,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
           builder: (context, box) {
             widget.brain.roomWidth = (box.maxWidth / pixel).floor();
             widget.brain.skyRows = widget.height - PipRoom.ground;
+            widget.brain.dark = widget.scene?.part == DayPart.night ||
+                widget.scene?.part == DayPart.dusk;
             return SizedBox(
               width: box.maxWidth,
               height: widget.height * pixel,
@@ -812,6 +816,18 @@ class _RoomPainter extends CustomPainter {
       final words = PipSprites.crossWords[(brain.zsClock * 4).floor() % 2];
       sprite(words, centre - 3, groundTop - PipBrain.height - 6,
           colours: PipSprites.fieldColours);
+    }
+    // A shooting star: its head and a fading tail.
+    if (brain.shootingStar case (final sx, final sy, _)) {
+      final back = brain.shootingStarFromLeft ? -1 : 1;
+      dot(sx.floorToDouble(), sy.floorToDouble() - 1, PipColours.star, 2, 2);
+      for (var i = 1; i < 14; i++) {
+        dot(
+            (sx + back * i).floorToDouble(),
+            (sy - i * 0.35).floorToDouble(),
+            Color.lerp(PipColours.star, PipColours.starWarm, i / 14)!
+                .withValues(alpha: 1 - i / 16));
+      }
     }
     // A butterfly fluttering by.
     if (brain.butterfly case (final bx, final up, final wingsUp)) {

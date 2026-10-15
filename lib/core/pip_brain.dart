@@ -85,6 +85,12 @@ enum PipActivity {
 
   /// A ball rolls in; he walks up and kicks it away.
   ball,
+
+  /// At dusk or night: a shooting star streaks over; he looks up at it.
+  stargazing,
+
+  /// A little dance: hops, turning to the beat, music on his screen.
+  dancing,
 }
 
 /// How he comes into his field (Round 52): out of the ground, from the
@@ -162,7 +168,9 @@ enum PipAnimation {
   notified('A notification'),
   flower('Picking a flower'),
   butterfly('Watching a butterfly'),
-  ball('Kicking a ball');
+  ball('Kicking a ball'),
+  shootingStar('A shooting star'),
+  dance('A little dance');
 
   final String label;
 
@@ -210,7 +218,9 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.showing ||
       PipActivity.flower ||
       PipActivity.butterfly ||
-      PipActivity.ball =>
+      PipActivity.ball ||
+      PipActivity.stargazing ||
+      PipActivity.dancing =>
         false,
       PipActivity.asleep =>
         next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
@@ -376,6 +386,11 @@ class PipBrain {
       case PipAnimation.ball:
         if (!_eventRoom) return false;
         _startBall();
+      case PipAnimation.shootingStar:
+        _start(PipActivity.stargazing);
+        _starFromLeft = random.nextBool();
+      case PipAnimation.dance:
+        _start(PipActivity.dancing);
     }
     return true;
   }
@@ -778,6 +793,17 @@ class PipBrain {
         _stepButterfly(dt);
       case PipActivity.ball:
         _stepBall(dt);
+      case PipActivity.stargazing:
+        // He turns to follow it across.
+        if (shootingStar case (final sx, _, _)) {
+          facingRight = sx > x + width / 2;
+        }
+        if (_t >= starTime + 1.2) _stand();
+      case PipActivity.dancing:
+        // Turning on each beat.
+        final beat = (_t / beatTime).floor();
+        facingRight = beat.isEven;
+        if (_t >= danceTime) _stand();
     }
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
@@ -1207,7 +1233,12 @@ class PipBrain {
   bool _maybeEvent() {
     if (!_eventRoom || _wantsStation || _bedtime) return false;
     if (random.nextDouble() >= eventChance) return false;
-    final pick = random.nextInt(10);
+    // At dusk or night, now and then a shooting star.
+    if (dark && random.nextInt(4) == 0) {
+      play(PipAnimation.shootingStar);
+      return true;
+    }
+    final pick = random.nextInt(11);
     switch (pick) {
       case 0 || 1:
         _startBugs();
@@ -1217,11 +1248,35 @@ class PipBrain {
         _startFlower();
       case 7 || 8:
         _startButterfly();
-      default:
+      case 9:
         _startBall();
+      default:
+        _start(PipActivity.dancing);
     }
     return true;
   }
+
+  /// Dusk or night in his sky (the room says): shooting stars then.
+  bool dark = false;
+
+  // A shooting star.
+  bool _starFromLeft = true;
+  bool get shootingStarFromLeft => _starFromLeft;
+  static const starTime = 1.1;
+
+  /// The shooting star: (x, rows down from the top of the sky, how far
+  /// across 0–1); null when there's none.
+  (double, double, double)? get shootingStar {
+    if (activity != PipActivity.stargazing || _t >= starTime) return null;
+    final p = _t / starTime;
+    final from = _starFromLeft ? roomWidth * 0.1 : roomWidth * 0.9;
+    final to = _starFromLeft ? roomWidth * 0.75 : roomWidth * 0.25;
+    return (from + (to - from) * p, 4 + skyRows * 0.25 * p, p);
+  }
+
+  /// A little dance: its length and beat, in seconds.
+  static const danceTime = 4.0;
+  static const beatTime = 0.5;
 
   /// A notification came (his room heard): his screen shows one, with a
   /// hop, if he's up and about; else nothing (asleep, busy, charging).
@@ -1256,6 +1311,7 @@ class PipBrain {
   /// showing], and after a bug fight (proud) or holding a flower (happy).
   (PipScreen, double)? get screenShow => switch (activity) {
         PipActivity.showing => (_screenShow, _t),
+        PipActivity.dancing => (PipScreen.music, _t),
         PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
         PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
         _ => null,
@@ -1654,6 +1710,9 @@ class PipBrain {
                 ? PipFrame.tuck
                 : PipFrame.idle,
         PipActivity.butterfly => _butterflyClose ? PipFrame.oh : PipFrame.idle,
+        PipActivity.stargazing => PipFrame.oh,
+        PipActivity.dancing =>
+          (_t / beatTime * 2).floor().isEven ? PipFrame.step1 : PipFrame.step3,
         PipActivity.ball => switch (_ballPhase) {
             1 => _stepFrame,
             2 => PipFrame.step1,
@@ -1696,6 +1755,10 @@ class PipBrain {
     }
     if (activity == PipActivity.thrown && _t < throwTime) {
       return _throwHigh * math.sin(math.pi * _t / throwTime);
+    }
+    if (activity == PipActivity.dancing) {
+      // A hop on every beat.
+      return 3 * math.sin(math.pi * ((_t / beatTime) % 1)).abs();
     }
     if (activity == PipActivity.showing &&
         _screenShow.notification &&

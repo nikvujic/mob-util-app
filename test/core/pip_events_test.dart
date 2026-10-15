@@ -227,6 +227,39 @@ void main() {
       expect(pip.ball, isNull);
     });
 
+    test(
+        'a shooting star: it streaks across the sky; he looks up, turning '
+        'to follow it', () {
+      final pip = up(seed: 4)..x = 60;
+      expect(pip.play(PipAnimation.shootingStar), isTrue);
+      final first = pip.shootingStar!;
+      expect(pip.frame, PipFrame.oh);
+      run(pip, 0.5);
+      final later = pip.shootingStar!;
+      expect(later.$3, greaterThan(first.$3));
+      expect(later.$2, greaterThan(first.$2), reason: 'falling a little');
+      until(pip, PipActivity.stargazing);
+      expect(pip.activity, PipActivity.standing);
+      expect(pip.shootingStar, isNull);
+    });
+
+    test('a little dance: a hop on each beat, turning, music on his screen',
+        () {
+      final pip = up()..play(PipAnimation.dance);
+      final facings = <bool>{};
+      var hopped = false;
+      for (var i = 0; i < 60 * 3; i++) {
+        pip.step(1 / 60);
+        facings.add(pip.facingRight);
+        hopped |= pip.lift > 1.5;
+        expect(pip.screenShow?.$1, PipScreen.music);
+      }
+      expect(hopped, isTrue);
+      expect(facings, {true, false});
+      until(pip, PipActivity.dancing);
+      expect(pip.activity, PipActivity.standing);
+    });
+
     test('a narrow room: nothing comes in (no room to)', () {
       final pip = up(width: 50);
       expect(pip.play(PipAnimation.bugs), isFalse);
@@ -243,6 +276,15 @@ void main() {
         pip.step(1 / 60);
         seen.add(pip.activity);
       }
+      expect(seen, isNot(contains(PipActivity.stargazing)),
+          reason: 'shooting stars only at dusk and night');
+      final night = up(seed: 11)..dark = true;
+      final atNight = <PipActivity>{};
+      for (var i = 0; i < 60 * 60 * 20; i++) {
+        night.step(1 / 60);
+        atNight.add(night.activity);
+      }
+      expect(atNight, contains(PipActivity.stargazing));
       expect(
           seen.intersection({
             PipActivity.bugHunt,

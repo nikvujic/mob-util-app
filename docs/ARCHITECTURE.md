@@ -397,6 +397,21 @@ animation)` in `pip_brain.dart`, and `play` asks it first (nothing
 interrupts the egg, the hatch or coming up). New props and animations
 add a row to these tables; tests check the tables, not each screen.
 
+Round 52: `PipBrain.enter(PipEntrance)` (ground, sky, side) and the
+events (`bugHunt`, `showing`, `flower`, `butterfly`, `ball`,
+`stargazing`, `dancing`) are activities like the others, each with its
+row in `mayStart`, started now and then from standing (`_maybeEvent`) or
+from Pip Home's list (`play`), and run to their end by the room when it
+doesn't animate. The brain gives positions (`bug`, `sword`, `flower`,
+`butterfly`, `ball`, `shootingStar`, `fist`, `landingDust`, `spin`) and
+`screenShow` (a `PipScreen` on his screen); `pip_room.dart` draws them
+and `PipSprites.screenFrame` the screen pictures. The room picks an
+entrance from its `entrances` (the menu all three, Pip Home ground and
+sky) the first time and after `PipBrain.awayFor`, using `PipLink.now`
+and `leftAt`; `PipLink.notifiedBetween` (the notification log) says a
+notification came since its last look. The sky's colours are stops
+(`PipBackground.stopsAt`), sampled into bands.
+
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,
 `emptyAt`, `segments`, `nextBattery`, `batteriesAt`: one every 5 h on
