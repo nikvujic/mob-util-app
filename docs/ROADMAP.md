@@ -337,6 +337,46 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 52 — Pip: entrances, random events, richer skies (2026-10-15, 1.15.0)
+
+Nikola, going to sleep: "start pip work without waiting for me … make
+it a bigger change". Decisions Claude's.
+
+**Entrances** (all three)
+- [ ] **From the side, only in the side menu**: thrown in by the menu's
+  swing, he tumbles in, lands, and is **angry** for a bit (a scowl,
+  shaking a fist with his floating hands).
+- [ ] **From the sky**: he drops in, lands with a squash and a little
+  dust.
+- [ ] **Coming back after a while** away (the app opened again): one of
+  the entrances, not always the ground.
+
+**Random events**
+- [ ] **Bugs**: little computer bugs crawl into his field; he pops out a
+  **sword** and fights them off (the sword is for the adventures later).
+- [ ] **His screen** shows things now and then: when a notification
+  comes, a few kinds (an envelope, a bell, a "!" blinking); and random
+  ones (a heart, a note, a question mark, a loading bar…).
+- [ ] **Little things in his field**: a **flower** he walks to and
+  picks (and holds for a while), and more of the kind (a butterfly he
+  watches, a ball he kicks…).
+- [ ] All of them in Pip Home's Animations list, and in the `mayStart`
+  table so nothing clashes (no bug fight while charging or asleep).
+
+**Backgrounds** (Nikola's note)
+- [ ] Richer skies: more colours in the bands (the evening's tinted
+  lines, but with more hues), more detail on **clouds**, the **sun** and
+  the **moon**. The ground stays as it is.
+
+### Round 51 — the food tracker's calendar and legend (2026-10-15, patch 1.14.4)
+
+- [ ] The calendar's days as small as the week line's were (the month
+  grid stays).
+- [ ] The legend under the bars: a mini coloured bar "With it", a grey
+  one "Without", a divider, then "with · without" for the counts.
+- [ ] "Bad or awful: x% with it, y% without" as a statistic: two
+  labelled bars, not a line of text.
+
 ### Round 50 — a sweep of the food tracker (2026-10-15, patch 1.14.3)
 
 Nikola: the page was someone's request; sweep it so it holds up for
