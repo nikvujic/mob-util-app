@@ -18,7 +18,7 @@ Release with the installable APK.
 
 ### Changed
 - Pip uses **energy twice as fast** (a segment every 4 hours awake),
-  a little faster than the batteries alone keep up with.
+  a little less than the batteries bring if each is given as it comes.
 - Pip's **hats** sit in the middle of his head (over his antenna); the
   **party hat** is bigger, striped, with a pompom.
 - **Shop**: adding an item that's there already moves it to the list
