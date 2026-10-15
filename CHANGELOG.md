@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.17.2] - 2026-10-15
 
 ### Fixed
 - **Food**: scrolled to the index's end, a drag on it scrolls the page
