@@ -525,9 +525,11 @@ abstract final class PipColours {
 
   // Round 52: things in his field, and his sword.
   static const bug = Color(0xFF6CC24A); // a computer bug: green
+  static const bugDark = Color(0xFF3E7A2C);
   static const bugEye = Color(0xFFE0503E);
   static const blade = Color(0xFFDDE3EA);
   static const bladeEdge = Color(0xFF9AA4B0);
+  static const bladeShine = Color(0xFFFFFFFF);
   static const guard = Color(0xFFE0B040);
   static const hilt = Color(0xFF7A4A2A);
   static const petal = Color(0xFFF07AA8);

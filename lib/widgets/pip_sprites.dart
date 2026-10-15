@@ -403,83 +403,21 @@ abstract final class PipSprites {
         if (blink) {
           draw(const ['##', '##', '##', '##', '..', '##'], 6, 1, 'R');
         }
-      case PipScreen.heart:
-        // A heart, beating.
-        final big = (t * 2.5).floor().isEven;
-        draw(
-            big
-                ? const [
-                    '.##.##.',
-                    '#######',
-                    '#######',
-                    '.#####.',
-                    '..###..',
-                    '...#...',
-                  ]
-                : const [
-                    '.#.#.',
-                    '#####',
-                    '.###.',
-                    '..#..',
-                  ],
-            big ? 3 : 4,
-            big ? 1 : 2,
-            'R');
+      case PipScreen.pill:
+        // A capsule, half red, half white, hopping: medicine time.
+        final hop = (t * 3).floor().isEven ? 0 : 1;
+        draw(const [
+          '.########.',
+          '#........#',
+          '#........#',
+          '.########.',
+        ], 2, 2 - hop);
+        draw(const ['####', '####'], 3, 3 - hop, 'R');
       case PipScreen.music:
         // Two notes, bobbing in turn.
         final a = (t * 3).floor().isEven ? 0 : 1;
         draw(const ['.##', '.#.', '.#.', '##.', '##.'], 3, 1 + a);
         draw(const ['.##', '.#.', '.#.', '##.', '##.'], 8, 2 - a);
-      case PipScreen.question:
-        draw(
-            const ['.###.', '#...#', '...#.', '..#..', '.....', '..#..'], 4, 1);
-      case PipScreen.loading:
-        // A bar filling up, then again.
-        draw(const ['##########', '#........#', '##########'], 2, 3);
-        final filled = ((t / 0.35).floor() % 9);
-        for (var i = 0; i < filled; i++) {
-          k(3 + i, 4, 'B');
-        }
-      case PipScreen.wink:
-        // One eye open, one shut, a smile.
-        for (final (x, y) in const [(3, 2), (4, 2), (3, 3), (4, 3)]) {
-          k(x, y);
-        }
-        k(10, 3);
-        k(11, 3);
-        for (final (x, y) in const [
-          (4, 5),
-          (9, 5),
-          (5, 6),
-          (6, 6),
-          (7, 6),
-          (8, 6),
-        ]) {
-          k(x, y);
-        }
-      case PipScreen.starEyes:
-        for (final e in const [3, 10]) {
-          draw(const ['.#.', '###', '.#.'], e, 1, blink ? 'Y' : 'R');
-        }
-        for (final (x, y) in const [
-          (4, 5),
-          (9, 5),
-          (5, 6),
-          (6, 6),
-          (7, 6),
-          (8, 6),
-        ]) {
-          k(x, y);
-        }
-      case PipScreen.hi:
-        // "HI", big.
-        draw(const [
-          '#..#.###',
-          '#..#..#.',
-          '####..#.',
-          '#..#..#.',
-          '#..#.###',
-        ], 3, 2);
       case PipScreen.happy:
         // ^ ^ and a big smile: proud, or glad.
         for (final e in const [3, 10]) {
@@ -501,25 +439,46 @@ abstract final class PipSprites {
     return [for (final r in rows) r.join()];
   }
 
-  /// A computer bug (Round 52), 5 x 4, its legs up or down: green, a red
-  /// eye at the front (its left: it's mirrored going right).
-  static const bugUp = ['.K.K.', 'rbbbb', 'bbbbb', 'K.K.K'];
-  static const bugDown = ['.K.K.', 'rbbbb', 'bbbbb', '.K.K.'];
-
-  /// His sword, 3 x 11, pointing up: blade, guard, hilt.
-  static const sword = [
-    '.s.',
-    'sse',
-    'sse',
-    'sse',
-    'sse',
-    'sse',
-    'sse',
-    'ggg',
-    '.t.',
-    '.t.',
-    '.g.',
+  /// A computer bug (Round 52; Round 53 bigger), 8 x 6, its legs one
+  /// way or the other: green with darker stripes and belly, a red eye
+  /// and two feelers at the front (its left: it's mirrored going right).
+  static const bugUp = [
+    'K..K....',
+    '.KK.bbb.',
+    '.rbbBbBb',
+    'bbbbBbBb',
+    '.BBBBBB.',
+    '.K..K..K',
   ];
+  static const bugDown = [
+    'K..K....',
+    '.KK.bbb.',
+    '.rbbBbBb',
+    'bbbbBbBb',
+    '.BBBBBB.',
+    'K..K..K.',
+  ];
+
+  /// His sword (Round 53 redrawn), 5 x 13, pointing up: a blade with a
+  /// shine down it, a gold guard with a red gem, the grip, a pommel.
+  static const sword = [
+    '..h..',
+    '.hse.',
+    '.hse.',
+    '.hse.',
+    '.hse.',
+    '.hse.',
+    '.hse.',
+    '.hse.',
+    'ggrgg',
+    '..t..',
+    '..t..',
+    '..t..',
+    '.ggg.',
+  ];
+
+  /// The sword's grip row the hand holds (the middle of the grip).
+  static const swordGrip = 10;
 
   /// A flower, 5 x 7: petals, its heart, a stem with a leaf.
   static const flower = [
@@ -554,6 +513,21 @@ abstract final class PipSprites {
     ['.oo.', 'ooio', 'ooio', '.oo.'],
   ];
 
+  /// [frame] with what's on his screen turned left to right (Round 53):
+  /// drawn mirrored when he faces left, his screen then reads right.
+  static List<String> screenTurned(List<String> frame) => [
+        for (final (y, row) in frame.indexed)
+          y < _screenY || y >= _screenY + screenRows
+              ? row
+              : row.substring(0, _screenX) +
+                  row
+                      .substring(_screenX, _screenX + screenWidth)
+                      .split('')
+                      .reversed
+                      .join() +
+                  row.substring(_screenX + screenWidth),
+      ];
+
   /// His cross words over his head (#!), two ways, 7 x 5.
   static const crossWords = [
     ['.#.#..#', '#####.#', '.#.#..#', '#####..', '.#.#..#'],
@@ -563,7 +537,9 @@ abstract final class PipSprites {
   static const fieldColours = {
     'K': PipColours.face,
     'b': PipColours.bug,
+    'B': PipColours.bugDark,
     'r': PipColours.bugEye,
+    'h': PipColours.bladeShine,
     's': PipColours.blade,
     'e': PipColours.bladeEdge,
     'g': PipColours.guard,

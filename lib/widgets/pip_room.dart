@@ -87,6 +87,17 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     // A long pause (e.g. the app away) doesn't jump him across the room.
     setState(() => widget.brain.step(dt.clamp(0, 0.1)));
+    // Round 53: a buzz where something hits (a landing, a strike, a kick).
+    for (final buzz in widget.brain.takeBuzzes()) {
+      switch (buzz) {
+        case PipBuzz.light:
+          HapticFeedback.lightImpact();
+        case PipBuzz.medium:
+          HapticFeedback.mediumImpact();
+        case PipBuzz.heavy:
+          HapticFeedback.heavyImpact();
+      }
+    }
   }
 
   double _sinceCheck = 0;
@@ -215,6 +226,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
           for (var s = 0; s < 1200 && brain.activity == doing; s++) {
             brain.step(0.05);
           }
+          brain.takeBuzzes(); // run past unseen: no buzzes for it
         default:
           // The station up or gone at once (Round 44), and whatever he
           // then does (off to plug in) done too.
@@ -646,7 +658,11 @@ class _RoomPainter extends CustomPainter {
             lamp: brain.stationLamp)
         : shown != null
             // Round 52: something on his screen.
-            ? PipSprites.screenFrame(shown.$1, shown.$2)
+            // Round 53: its picture turned, so it reads right mirrored.
+            ? (brain.facingRight
+                ? PipSprites.screenFrame(shown.$1, shown.$2)
+                : PipSprites.screenTurned(
+                    PipSprites.screenFrame(shown.$1, shown.$2)))
             : PipSprites.frameOf(brain.frame, brain.face);
     final rows = sprite0.length;
     final (sx, sy) = brain.stretch;
@@ -791,10 +807,10 @@ class _RoomPainter extends CustomPainter {
         for (var x = 0; x < blade[y].length; x++) {
           final colour = PipSprites.fieldColours[blade[y][x]];
           if (colour == null) continue;
-          // The grip (two rows up from the bottom) in the hand.
+          // The middle of the grip in the hand.
           canvas.drawRect(
-            Rect.fromLTWH((x - 1.5) * pixel, (y - blade.length + 2) * pixel,
-                pixel, pixel),
+            Rect.fromLTWH((x - blade[y].length / 2) * pixel,
+                (y - PipSprites.swordGrip - 0.5) * pixel, pixel, pixel),
             paint..color = colour,
           );
         }
@@ -814,7 +830,10 @@ class _RoomPainter extends CustomPainter {
     if (brain.fist case (final fx, final fy)) {
       sprite(PipSprites.mitt, fx, groundTop - fy);
       final words = PipSprites.crossWords[(brain.zsClock * 4).floor() % 2];
-      sprite(words, centre - 3, groundTop - PipBrain.height - 6,
+      // Round 53: lower, just over his head beside his antenna, away
+      // from the fist.
+      sprite(words, brain.facingRight ? centre - 10 : centre + 3,
+          groundTop - PipBrain.height + 1,
           colours: PipSprites.fieldColours);
     }
     // A shooting star: its head and a fading tail.

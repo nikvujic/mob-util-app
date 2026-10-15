@@ -93,7 +93,6 @@ void main() {
     test('only up and about: asleep, off, charging, mid-entrance: no', () {
       final events = [
         PipAnimation.bugs,
-        PipAnimation.screen,
         PipAnimation.notified,
         PipAnimation.flower,
         PipAnimation.butterfly,
@@ -153,12 +152,10 @@ void main() {
     });
 
     test('his screen: a picture a while, then his face again', () {
-      final pip = up()..debugShow(PipScreen.heart);
-      expect(pip.screenShow?.$1, PipScreen.heart);
+      final pip = up()..debugShow(PipScreen.pill);
+      expect(pip.screenShow?.$1, PipScreen.pill);
       until(pip, PipActivity.showing);
       expect(pip.screenShow, isNull);
-      expect(pip.play(PipAnimation.screen), isTrue);
-      expect(pip.screenShow!.$1.notification, isFalse, reason: 'for fun');
     });
 
     test(

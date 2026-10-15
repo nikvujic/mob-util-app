@@ -177,7 +177,6 @@ void main() {
         'fromSky',
         'fromSide',
         'bugs',
-        'screen',
         'notified',
         'flower',
         'butterfly',

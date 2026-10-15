@@ -150,6 +150,44 @@ void main() {
   });
 
   testWidgets(
+      'the index (Round 53): an X closes it; long, it scrolls inside a '
+      'capped height', (tester) async {
+    await openFood(tester,
+        start: FoodBook(foods: [
+          for (var i = 0; i < 30; i++) Food(id: 'f$i', name: 'Food $i'),
+        ], meals: const []));
+    await tapTooltip(tester, 'Log a meal');
+    expect(find.byKey(const Key('closeFoodIndex')), findsNothing);
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(const Key('foodIndex'))).height,
+        lessThanOrEqualTo(300));
+    expect(
+        tester.getTopLeft(find.byKey(const Key('indexFood-Food 29'))).dy,
+        greaterThan(
+            tester.getBottomLeft(find.byKey(const Key('foodIndex'))).dy),
+        reason: 'further down, inside');
+    await tester.scrollUntilVisible(
+        find.byKey(const Key('indexFood-Food 28')), 100,
+        scrollable: find.descendant(
+            of: find.byKey(const Key('foodIndexScroll')),
+            matching: find.byType(Scrollable)));
+    expect(find.byKey(const Key('indexFood-Food 29')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('mealFoodField')), 'Fo');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('closeFoodIndex')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('foodIndex')), findsNothing);
+    expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('mealFoodField')))
+            .controller!
+            .text,
+        isEmpty);
+  });
+
+  testWidgets(
       "the index's Ingredients: the recipes' ones not foods yet; picked, "
       'they become foods', (tester) async {
     await openFood(tester,

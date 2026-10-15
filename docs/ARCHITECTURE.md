@@ -411,6 +411,11 @@ sky) the first time and after `PipBrain.awayFor`, using `PipLink.now`
 and `leftAt`; `PipLink.notifiedBetween` (the notification log) says a
 notification came since its last look. The sky's colours are stops
 (`PipBackground.stopsAt`), sampled into bands.
+Round 53: the brain queues `PipBuzz`es where something hits;
+`takeBuzzes()` hands them to the room's tick, which buzzes the phone
+(and drops them when it runs an event to its end unseen).
+`PipSprites.screenTurned` turns a screen picture so it reads right when
+he's drawn mirrored.
 
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,

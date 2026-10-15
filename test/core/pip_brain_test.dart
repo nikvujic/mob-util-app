@@ -169,7 +169,7 @@ void main() {
       expect(p.frame, PipFrame.tuck);
       expect(p.zs, hasLength(3));
       expect(p.show(PipShow.wakeUp), isTrue);
-      run(p, 0.8);
+      run(p, 2.1);
       expect(p.lift, greaterThan(0), reason: 'the hop');
       run(p, 1);
       expect(p.activity, isNot(PipActivity.asleep));

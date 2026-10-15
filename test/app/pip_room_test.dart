@@ -169,6 +169,33 @@ void main() {
       expect(pip().screenShow?.$1.notification, isTrue);
     });
 
+    testWidgets('a ball kicked: the phone buzzes with it (Round 53)',
+        (tester) async {
+      final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(7))),
+      ]);
+      await openMenuMoving(tester);
+      for (var i = 0; i < 330; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final buzzes = <String>[];
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'HapticFeedback.vibrate') {
+          buzzes.add(call.arguments as String);
+        }
+        return null;
+      });
+      expect(pip().play(PipAnimation.ball), isTrue);
+      for (var i = 0; i < 60 * 30 && pip().activity == PipActivity.ball; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().activity, isNot(PipActivity.ball));
+      expect(buzzes, [contains('medium')]);
+    });
+
     testWidgets('the phone set to remove animations: he just stands',
         (tester) async {
       container = await pumpApp(tester, pipMoves: true);

@@ -4,6 +4,28 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- **Food**: the index under the food field has an **X** to close it,
+  and stays a set height, scrolling inside when it's longer.
+- **Pip** wakes up more slowly (eyes shut a moment, a stretch, then the
+  hop); his **sword** is new (a shining blade, a gold guard with a red
+  gem) and held out away from him; **bugs** are bigger, with feelers and
+  stripes; the **#!** when he's angry sits lower, just over his head; a
+  picked **flower**'s stem is in his hand; picking something up, he
+  crouches with his feet on the ground.
+- The phone gives a little **buzz** when he kicks the ball, strikes a
+  bug, or lands from the sky or a throw.
+
+### Removed
+- The pictures on Pip's screen just for fun (the ?, HI, star eyes and
+  their flashing red, the heart, loading, the wink). Notifications
+  still show there.
+
+### Fixed
+- Facing left, what's on his screen was mirrored.
+
 ## [1.15.0] - 2026-10-15
 
 ### Added

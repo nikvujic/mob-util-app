@@ -340,20 +340,20 @@ fixtures for every stored format.
 ### Round 53 — Nikola's notes on 1.15.0 (2026-10-15; patch 1.15.1, then 1.16.0)
 
 **Patch (1.15.1)**
-- [ ] Food, the index under the field: an **X** in the field closes it;
+- [x] Food, the index under the field: an **X** in the field closes it;
   the index at most so tall, scrolling inside when longer.
-- [ ] Pip's **waking up** after sleep a bit longer.
-- [ ] His **sword** better looking, held pointing up and away from him
+- [x] Pip's **waking up** after sleep a bit longer.
+- [x] His **sword** better looking, held pointing up and away from him
   (not angled into his body); **bugs** bigger and better.
-- [ ] No more pictures on his screen for fun (the ?, HI, star eyes with
+- [x] No more pictures on his screen for fun (the ?, HI, star eyes with
   their flashing red, the heart, loading, the wink): that kind of event
   goes. His screen still shows notifications.
-- [ ] Words on his screen never mirrored (they were, facing left).
-- [ ] The **#!** when angry a bit lower.
-- [ ] Holding the flower: its stem in his hand, not floating above it.
-- [ ] Picking something up (a flower, a battery) and landing: he
+- [x] Words on his screen never mirrored (they were, facing left).
+- [x] The **#!** when angry a bit lower.
+- [x] Holding the flower: its stem in his hand, not floating above it.
+- [x] Picking something up (a flower, a battery) and landing: he
   crouches, feet on the ground (the legs floated for a frame).
-- [ ] **Buzzes** at moments: the ball kicked, a bug struck, landing from
+- [x] **Buzzes** at moments: the ball kicked, a bug struck, landing from
   the sky or a throw.
 
 **New (1.16.0)**

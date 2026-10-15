@@ -117,6 +117,9 @@ const plainScrollAllowed = {
   // A recipe's ingredients to tick, in a bottom sheet (Round 48): already
   // at the bottom.
   'pages/hub/food_recipe_sheet.dart',
+  // The food index under its field (Round 53): a short list capped in
+  // height, right under the thumb already.
+  'pages/hub/food_index.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
   // The sounds to pick from (Round 39): a short list in a bottom sheet.
