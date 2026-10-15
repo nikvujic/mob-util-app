@@ -1,5 +1,7 @@
 # Birthdays & dates — spec (Round 57)
 
+Built in Round 57 (v1.18.0).
+
 From Nikola's notes (ROADMAP, Round 57): a calendar of important dates,
 each with a title, a note, a type and up to three reminders; Pip in a
 party hat on a birthday. Built from the app's usual patterns. Nikola's
@@ -59,10 +61,10 @@ Opened from a card or **+**; saved as you go, like a meal or a recipe
   Medicine's doses).
 - On the **Notifications page**: a **Dates** entry with the usual
   settings: on/off, sound, volume, pause, and the log.
-- Planned ahead like the others, but further: the app plans its
-  reminders 14 days ahead (re-planned whenever it's opened); a date's
-  reminder can be 30 days before, so dates are planned **45 days**
-  ahead (a few each; well under Android's alarm limit).
+- Planned like the others: the app plans what's due in the next 14
+  days (again whenever it's opened), by when each reminder comes; a
+  reminder 30 days before a date is planned once its time is within
+  those 14 days.
 - Locked page: notifications still come, without the title ("A
   birthday tomorrow"), as the Planner does when locked.
 - **29 February** in a year without it: on 28 February.

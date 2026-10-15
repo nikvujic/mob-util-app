@@ -12,7 +12,6 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
-import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/pip_energy_bar.dart';
 import 'package:the_app/widgets/pip_portrait.dart';
 import 'package:the_app/widgets/pip_room.dart';
@@ -30,7 +29,7 @@ class PipHomePage extends ConsumerStatefulWidget {
 }
 
 /// What the settings side of the card shows.
-enum _Settings { menu, rename, animations, backgrounds }
+enum _Settings { menu, rename, animations, backgrounds, hats }
 
 class _PipHomePageState extends ConsumerState<PipHomePage> {
   /// His own, here: the menu's Pip stays where he was.
@@ -38,6 +37,15 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   final _pages = PageController();
   int _page = 0;
   _Settings _settings = _Settings.menu;
+
+  /// Previews (Round 57): a background and a hat tried, together with
+  /// his animations; back to his info card (or leaving), they're gone.
+  PipBackground _background = PipBackground.field;
+
+  void _endPreviews() {
+    _background = PipBackground.field;
+    _brain.stopTryingOn();
+  }
 
   /// The scene's pixel: Pip as big as in the menu (Round 38), in a
   /// bigger field.
@@ -53,9 +61,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final background = PipBackground.byId(
-      ref.watch(preferencesProvider.select((p) => p.pipBackground)),
-    );
+    final background = _background;
     final scene = PipScene.at(
       PipPlace.home,
       ref.watch(clockProvider)(),
@@ -97,8 +103,10 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                             physics: _settings == _Settings.menu
                                 ? null
                                 : const NeverScrollableScrollPhysics(),
-                            onPageChanged: (page) =>
-                                setState(() => _page = page),
+                            onPageChanged: (page) => setState(() {
+                              _page = page;
+                              if (page == 0) _endPreviews();
+                            }),
                             children: [
                               const _Status(),
                               switch (_settings) {
@@ -115,6 +123,14 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                   ),
                                 _Settings.backgrounds => _Backgrounds(
                                     current: background,
+                                    pick: (b) =>
+                                        setState(() => _background = b),
+                                    back: () => _show(_Settings.menu),
+                                  ),
+                                _Settings.hats => _Hats(
+                                    current: _brain.hat,
+                                    pick: (hat) =>
+                                        setState(() => _brain.tryOn(hat)),
                                     back: () => _show(_Settings.menu),
                                   ),
                               },
@@ -377,12 +393,20 @@ class _SettingsMenu extends StatelessWidget {
           value: '>',
           onTap: () => open(_Settings.animations),
         ),
-        // Picked from a list (Round 36); the one in use beside it.
+        // Picked from a list (Round 36); the one in use beside it. Round
+        // 57: a preview, like a hat.
         _CardRow(
           key: const Key('pipBackground'),
           label: 'BACKGROUND',
           value: '${background.label.toUpperCase()} >',
           onTap: () => open(_Settings.backgrounds),
+        ),
+        // Round 57: hats to try on him.
+        _CardRow(
+          key: const Key('pipHats'),
+          label: 'HATS',
+          value: '>',
+          onTap: () => open(_Settings.hats),
         ),
       ],
     );
@@ -390,15 +414,21 @@ class _SettingsMenu extends StatelessWidget {
 }
 
 /// His backgrounds to pick from (Round 36: one for now, Field; day and
-/// night are the same one), the one in use marked.
-class _Backgrounds extends ConsumerWidget {
+/// night are the same one), the one in use marked. Round 57: a preview,
+/// not kept.
+class _Backgrounds extends StatelessWidget {
   final PipBackground current;
+  final ValueChanged<PipBackground> pick;
   final VoidCallback back;
 
-  const _Backgrounds({required this.current, required this.back});
+  const _Backgrounds({
+    required this.current,
+    required this.pick,
+    required this.back,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Column(
       key: const Key('pipBackgroundList'),
       children: [
@@ -412,9 +442,42 @@ class _Backgrounds extends ConsumerWidget {
                   label: b.label.toUpperCase(),
                   value: b == current ? 'IN USE' : null,
                   valueColour: PipColours.light,
-                  onTap: () => ref
-                      .read(preferencesProvider.notifier)
-                      .setPipBackground(b.name),
+                  onTap: () => pick(b),
+                ),
+            ],
+          ),
+        ),
+        _back(back),
+      ],
+    );
+  }
+}
+
+/// Hats to try on him (Round 57): a tap puts one on (None takes it off),
+/// the one he has marked. Not kept: back to his info card, it's gone.
+class _Hats extends StatelessWidget {
+  final PipHat? current;
+  final ValueChanged<PipHat?> pick;
+  final VoidCallback back;
+
+  const _Hats({required this.current, required this.pick, required this.back});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: const Key('pipHatList'),
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              for (final hat in [null, ...PipHat.values])
+                _CardRow(
+                  key: Key('pipHat-${hat?.name ?? 'none'}'),
+                  label: (hat?.label ?? 'None').toUpperCase(),
+                  value: hat == current ? 'ON' : null,
+                  valueColour: PipColours.light,
+                  onTap: () => pick(hat),
                 ),
             ],
           ),

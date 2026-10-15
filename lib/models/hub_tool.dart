@@ -21,7 +21,10 @@ enum HubTool {
   recipes('Recipes'),
 
   /// The food tracker (O14, Round 46).
-  food('Food');
+  food('Food'),
+
+  /// Birthdays & dates (Round 57).
+  dates('Dates');
 
   const HubTool(this.label);
 

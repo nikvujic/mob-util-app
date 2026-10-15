@@ -279,11 +279,16 @@ class _PageSettings extends ConsumerWidget {
           'When a week has gone by without a backup (with a dot on the '
               'menu).',
         ),
+      NotifyPage.dates => (
+          preferences.datesReminders,
+          'Before birthdays and dates, as each one is set to remind.',
+        ),
     };
     final pausedUntil = switch (page) {
       NotifyPage.planner => preferences.plannerPausedUntil,
       NotifyPage.medicine => preferences.medicinePausedUntil,
       NotifyPage.backup => null,
+      NotifyPage.dates => preferences.datesPausedUntil,
     };
     final paused = pausedUntil != null && !today.isAfter(pausedUntil);
 
@@ -317,6 +322,8 @@ class _PageSettings extends ConsumerWidget {
                 notifier.setMedicineReminders(on);
               case NotifyPage.backup:
                 notifier.setBackupReminder(on);
+              case NotifyPage.dates:
+                notifier.setDatesReminders(on);
             }
             if (on) allowNotifications(context, ref);
           },
@@ -346,6 +353,8 @@ class _PageSettings extends ConsumerWidget {
                     notifier.pausePlannerUntil(until);
                   case NotifyPage.medicine:
                     notifier.pauseMedicineUntil(until);
+                  case NotifyPage.dates:
+                    notifier.pauseDatesUntil(until);
                   case NotifyPage.backup:
                 }
               },
@@ -356,9 +365,12 @@ class _PageSettings extends ConsumerWidget {
               secondary: const Icon(Icons.visibility_off_outlined),
               title: const Text('Private'),
               subtitle: Text(
-                page == NotifyPage.planner
-                    ? 'Without names: "A block starts at 10:00"'
-                    : 'Without names: "A dose is due at 08:00"',
+                switch (page) {
+                  NotifyPage.planner =>
+                    'Without names: "A block starts at 10:00"',
+                  NotifyPage.dates => 'Without names: "A birthday tomorrow"',
+                  _ => 'Without names: "A dose is due at 08:00"',
+                },
                 style: muted(),
               ),
               value: style.private,

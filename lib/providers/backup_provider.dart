@@ -14,6 +14,7 @@ import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -25,6 +26,7 @@ import 'package:the_app/providers/placard_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
+import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
@@ -68,6 +70,7 @@ class BackupExporter {
       recipes: _ref.read(recipesProvider),
       ingredients: _ref.read(ingredientsProvider),
       food: _ref.read(foodProvider),
+      dates: _ref.read(datesProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -142,6 +145,7 @@ class RestorableBackup {
   List<Counter> get counters => _backup.counters;
   List<Medicine> get medicines => _backup.medicine.medicines;
   List<Recipe> get recipes => _backup.recipes;
+  List<DateEntry> get dates => _backup.dates.dates;
 }
 
 /// The kinds of things in a backup, to restore some of them (Round 28).
@@ -154,7 +158,10 @@ enum BackupPart {
   reminders,
   counters,
   medicines,
-  recipes
+  recipes,
+
+  /// Birthdays & dates (Round 57).
+  dates
 }
 
 /// [book] with the ingredients [ids] from [from] it doesn't have yet,
@@ -361,6 +368,7 @@ class BackupImporter {
       source.recipes,
       source.ingredients,
       source.food,
+      source.dates,
     );
     return RestoreUndo._(
       previous,
@@ -610,6 +618,23 @@ class BackupImporter {
           _ref.read(ingredientsProvider), source.ingredients, wanted));
     }
 
+    // Dates (Round 57).
+    final pickedDates = [
+      for (final d in source.dates.dates)
+        if (chosen(BackupPart.dates, d.id)) d,
+    ];
+    if (pickedDates.isNotEmpty) {
+      _ref.read(datesProvider.notifier).replaceAll(DateBook(merged(
+            _ref.read(datesProvider).dates,
+            pickedDates,
+            BackupPart.dates,
+            (d) => d.id,
+            (d) => d.toJson(),
+            DateEntry.fromJson,
+            name: 'title',
+          )));
+    }
+
     await _ref.read(appStorageProvider).flush();
     return PartRestore._(
       RestoreUndo._(
@@ -639,6 +664,7 @@ class BackupImporter {
       undo._previous.recipes,
       undo._previous.ingredients,
       undo._previous.food,
+      undo._previous.dates,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -717,6 +743,7 @@ class BackupImporter {
     List<Recipe> recipes,
     IngredientBook ingredients,
     FoodBook food,
+    DateBook dates,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -732,6 +759,7 @@ class BackupImporter {
     _ref.read(recipesProvider.notifier).replaceAll(recipes);
     _ref.read(ingredientsProvider.notifier).replaceAll(ingredients);
     _ref.read(foodProvider.notifier).replaceAll(food);
+    _ref.read(datesProvider.notifier).replaceAll(dates);
     await _ref.read(appStorageProvider).flush();
   }
 }

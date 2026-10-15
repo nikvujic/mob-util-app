@@ -1,0 +1,225 @@
+/// What kind of date a date is (Round 57): a fixed list, each shown with
+/// its icon and colour. The [name] is stored, so a type is never renamed
+/// here, only its [label].
+enum DateType {
+  birthday('Birthday', yearly: true),
+  anniversary('Anniversary', yearly: true),
+  holiday('Holiday', yearly: true),
+  event('Event'),
+  other('Other');
+
+  const DateType(this.label, {this.yearly = false});
+
+  final String label;
+
+  /// Whether a new date of this type is every year.
+  final bool yearly;
+
+  /// The type stored as [id]; unknown (e.g. from a newer app): other.
+  static DateType fromId(String? id) =>
+      values.where((t) => t.name == id).firstOrNull ?? other;
+}
+
+/// A date's reminder (Round 57): [daysBefore] it (0: on the day), at
+/// [minutes] into that day.
+class DateReminder {
+  final int daysBefore;
+  final int minutes;
+
+  const DateReminder({required this.daysBefore, required this.minutes});
+
+  /// A new date's (Round 57, Nikola): the day before, at 09:00.
+  static const standard = DateReminder(daysBefore: 1, minutes: 9 * 60);
+
+  /// The choices for [daysBefore].
+  static const daysChoices = [0, 1, 2, 3, 5, 7, 14, 30];
+
+  /// At most this many a date.
+  static const most = 3;
+
+  DateReminder copyWith({int? daysBefore, int? minutes}) => DateReminder(
+        daysBefore: daysBefore ?? this.daysBefore,
+        minutes: minutes ?? this.minutes,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is DateReminder &&
+      other.daysBefore == daysBefore &&
+      other.minutes == minutes;
+
+  @override
+  int get hashCode => Object.hash(daysBefore, minutes);
+
+  Map<String, dynamic> toJson() => {
+        'daysBefore': daysBefore,
+        'minutes': minutes,
+      };
+
+  factory DateReminder.fromJson(Map<String, dynamic> json) => DateReminder(
+        daysBefore: (json['daysBefore'] as num?)?.toInt() ?? 0,
+        minutes: (json['minutes'] as num?)?.toInt() ?? 9 * 60,
+      );
+}
+
+/// An important date (Round 57): a birthday, an anniversary, a holiday,
+/// an event. Its [day] and [month], and its [year] if known (needed for
+/// a one-off: [yearly] off). A birthday on 29 February comes on 28
+/// February in a year without it.
+class DateEntry {
+  final String id;
+  final String title;
+  final DateType type;
+  final int day;
+  final int month;
+  final int? year;
+  final bool yearly;
+  final String note;
+  final List<DateReminder> reminders;
+
+  const DateEntry({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.day,
+    required this.month,
+    this.year,
+    this.yearly = true,
+    this.note = '',
+    this.reminders = const [DateReminder.standard],
+  });
+
+  DateEntry copyWith({
+    String? title,
+    DateType? type,
+    int? day,
+    int? month,
+    int? Function()? year,
+    bool? yearly,
+    String? note,
+    List<DateReminder>? reminders,
+  }) =>
+      DateEntry(
+        id: id,
+        title: title ?? this.title,
+        type: type ?? this.type,
+        day: day ?? this.day,
+        month: month ?? this.month,
+        year: year == null ? this.year : year(),
+        yearly: yearly ?? this.yearly,
+        note: note ?? this.note,
+        reminders: reminders ?? this.reminders,
+      );
+
+  /// When it falls in [inYear] (29 February on the 28th in a year without
+  /// it); null for a one-off in another year.
+  DateTime? inYear(int inYear) {
+    if (!yearly && year != inYear) return null;
+    final last = DateTime(inYear, month + 1, 0).day;
+    return DateTime(inYear, month, day > last ? last : day);
+  }
+
+  /// Whether it falls on [date] (a day, local).
+  bool on(DateTime date) {
+    final at = inYear(date.year);
+    return at != null && at.month == date.month && at.day == date.day;
+  }
+
+  /// The next time it falls, on [from] or after (a day); null if never
+  /// again (a one-off gone by).
+  DateTime? nextFrom(DateTime from) {
+    final start = DateTime(from.year, from.month, from.day);
+    for (final y in [from.year, from.year + 1]) {
+      final at = inYear(y);
+      if (at != null && !at.isBefore(start)) return at;
+    }
+    return null;
+  }
+
+  /// How many years it is on [date], with a year known and only after
+  /// it ("turns 31", "10 years"); null otherwise.
+  int? yearsOn(DateTime date) {
+    final from = year;
+    if (from == null || date.year <= from) return null;
+    return date.year - from;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'type': type.name,
+        'day': day,
+        'month': month,
+        if (year != null) 'year': year,
+        'yearly': yearly,
+        'note': note,
+        'reminders': [for (final r in reminders) r.toJson()],
+      };
+
+  factory DateEntry.fromJson(Map<String, dynamic> json) => DateEntry(
+        id: json['id'] as String,
+        title: json['title'] as String? ?? '',
+        type: DateType.fromId(json['type'] as String?),
+        day: (json['day'] as num).toInt(),
+        month: (json['month'] as num).toInt(),
+        year: (json['year'] as num?)?.toInt(),
+        yearly: json['yearly'] as bool? ?? true,
+        note: json['note'] as String? ?? '',
+        reminders: [
+          for (final r in (json['reminders'] as List? ?? const []))
+            DateReminder.fromJson(r as Map<String, dynamic>),
+        ],
+      );
+}
+
+/// A date on the day it next falls (for the upcoming list).
+typedef DateOn = ({DateEntry date, DateTime on});
+
+/// The dates (Round 57), in the order they were added.
+class DateBook {
+  final List<DateEntry> dates;
+
+  const DateBook(this.dates);
+
+  static const empty = DateBook([]);
+
+  DateEntry? byId(String id) => dates.where((d) => d.id == id).firstOrNull;
+
+  /// The dates falling on [day].
+  List<DateEntry> on(DateTime day) => [
+        for (final d in dates)
+          if (d.on(day)) d,
+      ];
+
+  /// What's coming from [today] for [days] days, soonest first (the same
+  /// day by title).
+  List<DateOn> upcoming(DateTime today, {int days = 366}) {
+    final start = DateTime(today.year, today.month, today.day);
+    final end = DateTime(start.year, start.month, start.day + days);
+    final found = <DateOn>[
+      for (final d in dates)
+        if (d.nextFrom(start) case final at? when at.isBefore(end))
+          (date: d, on: at),
+    ]..sort((a, b) {
+        final byDay = a.on.compareTo(b.on);
+        return byDay != 0
+            ? byDay
+            : a.date.title.toLowerCase().compareTo(b.date.title.toLowerCase());
+      });
+    return found;
+  }
+
+  /// Whether someone has a birthday on [day] (Pip's party hat, the
+  /// green dot).
+  bool birthdayOn(DateTime day) =>
+      dates.any((d) => d.type == DateType.birthday && d.on(day));
+
+  Map<String, dynamic> toJson() => {
+        'dates': [for (final d in dates) d.toJson()],
+      };
+
+  factory DateBook.fromJson(Map<String, dynamic> json) => DateBook([
+        for (final d in (json['dates'] as List? ?? const []))
+          DateEntry.fromJson(d as Map<String, dynamic>),
+      ]);
+}

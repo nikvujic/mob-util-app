@@ -17,6 +17,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/models/pip_life.dart';
@@ -769,6 +770,69 @@ void main() {
     });
   });
 
+  group('dates.json v1 / v23 backup (birthdays & dates, Round 57)', () {
+    void expectSample(DateBook book) {
+      expect(
+          book.dates.map((d) => (
+                d.id,
+                d.title,
+                d.type,
+                d.day,
+                d.month,
+                d.year,
+                d.yearly,
+                d.note,
+              )),
+          [
+            (
+              'd1',
+              'Ana 🎂',
+              DateType.birthday,
+              24,
+              10,
+              1995,
+              true,
+              'Knjiga, čokolada'
+            ),
+            ('d2', 'Mama i tata', DateType.anniversary, 29, 2, null, true, ''),
+            ('d3', 'Ispit', DateType.event, 3, 11, 2026, false, 'Sala 4'),
+          ]);
+      expect(book.dates[0].reminders, const [
+        DateReminder(daysBefore: 1, minutes: 540),
+        DateReminder(daysBefore: 7, minutes: 1200),
+      ]);
+      expect(book.dates[1].reminders, isEmpty);
+      expect(book.dates[2].reminders,
+          const [DateReminder(daysBefore: 0, minutes: 420)]);
+    }
+
+    test('dates.json version 1 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v23/storage'),
+      );
+      expectSample(storage.initialDates);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v23 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v23/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.dates);
+    });
+
+    test('older backups and storage have none', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v22/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.dates.dates, isEmpty);
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v22/storage'),
+      );
+      expect(storage.initialDates.dates, isEmpty);
+    });
+  });
+
   test('notifications.json version 1 (Round 31) loads', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v16/storage'),
@@ -1104,6 +1168,10 @@ void main() {
           '3f63df4096c910d142d4531435cf055d6cf9031fbca4708b0df5082b3bafd753',
       'test/fixtures/v22/backup-plain.json':
           '4791669538d2706799a1203342118f1ff4cc4e4f27a17236237d8c3ff840308d',
+      'test/fixtures/v23/storage/dates.json':
+          '263b76a17f5dd3f9d24a9f8bc4c2d6ece5954983034f39ffc56a48385e2dc057',
+      'test/fixtures/v23/backup-plain.json':
+          'b7fe1f4ea2a469b4bb1950691900d53afa7eb581af11f13ddae3f6cc66c561ce',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

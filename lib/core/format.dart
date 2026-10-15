@@ -89,6 +89,11 @@ String formatMinutes(int minutes) =>
     '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
     '${(minutes % 60).toString().padLeft(2, '0')}';
 
+/// `24 October`, or `24 October 1995` with a [year] (Round 57: a date
+/// with its year not known).
+String formatDayMonth(int day, int month, [int? year]) =>
+    '$day ${_monthsLong[month - 1]}${year == null ? '' : ' $year'}';
+
 /// `October 2026` (a month's title, e.g. on a calendar).
 String formatMonth(DateTime month) =>
     '${_monthsLong[month.month - 1]} ${month.year}';

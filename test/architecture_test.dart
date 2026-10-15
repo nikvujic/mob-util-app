@@ -120,6 +120,9 @@ const plainScrollAllowed = {
   // The food index under its field (Round 53): a short list capped in
   // height, right under the thumb already.
   'pages/hub/food_index.dart',
+  // A date's reminder sheet (Round 57): a few chips and a time, scrolled
+  // on a short screen; no list to reach.
+  'pages/hub/date_reminder_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
   // The sounds to pick from (Round 39): a short list in a bottom sheet.

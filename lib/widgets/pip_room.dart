@@ -148,6 +148,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 53: a medicine due, he reminds; a recipe read within the
     // hour, he eats (once for it).
     brain.medicineDue = link.medicineDue;
+    // Round 57: a birthday, the party hat.
+    brain.birthday = link.partyHat;
     final read = link.recipeReadAt;
     if (_moving &&
         read != null &&
@@ -666,19 +668,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    final charge = brain.chargeScreen;
-    final shown = brain.screenShow;
-    final sprite0 = charge != null
-        ? PipSprites.chargingFrame(charge.$1, charge.$2,
-            lamp: brain.stationLamp)
-        : shown != null
-            // Round 52: something on his screen.
-            // Round 53: its picture turned, so it reads right mirrored.
-            ? (brain.facingRight
-                ? PipSprites.screenFrame(shown.$1, shown.$2)
-                : PipSprites.screenTurned(
-                    PipSprites.screenFrame(shown.$1, shown.$2)))
-            : PipSprites.frameOf(brain.frame, brain.face);
+    final sprite0 = pipFrameOf(brain);
     final rows = sprite0.length;
     final (sx, sy) = brain.stretch;
     final centre = brain.x + PipBrain.width / 2;
@@ -754,22 +744,48 @@ class _RoomPainter extends CustomPainter {
     }
     final w = sx * pixel;
     final h = sy * pixel;
+
+    /// A pixel of his at [x], [y] on his frame (rows may run above it:
+    /// his hat): mirrored when facing left, scaled about his feet.
+    void own(int x, int y, Color colour) {
+      final gx = brain.facingRight ? x : PipBrain.width - 1 - x;
+      final left = centre * pixel + (gx - PipBrain.width / 2) * w;
+      final top = bottom * pixel - (rows - y) * h;
+      canvas.drawRect(Rect.fromLTWH(left, top, w, h), paint..color = colour);
+    }
+
     for (var y = 0; y < rows; y++) {
       final row = sprite0[y];
       for (var x = 0; x < row.length; x++) {
         final colour = PipSprites.colours[row[x]];
-        if (colour == null) continue;
-        // Mirrored when facing left; scaled about his feet's centre.
-        final gx = brain.facingRight ? x : row.length - 1 - x;
-        final left = centre * pixel + (gx - PipBrain.width / 2) * w;
-        final top = bottom * pixel - (rows - y) * h;
-        canvas.drawRect(
-          Rect.fromLTWH(left, top, w, h),
-          paint..color = colour,
-        );
+        if (colour != null) own(x, y, colour);
+      }
+    }
+    // Round 57: his hat, on his head: moved with him whatever he does.
+    if (brain.hat case final hat? when !brain.hatBeside) {
+      final art = PipSprites.hats[hat]!;
+      final top = PipSprites.hatBottom - art.length + 1;
+      for (var y = 0; y < art.length; y++) {
+        for (var x = 0; x < art[y].length; x++) {
+          final colour = PipSprites.hatColours[art[y][x]];
+          if (colour != null) own(PipSprites.hatLeft + x, top + y, colour);
+        }
       }
     }
     canvas.restore();
+    // Asleep, it's on the ground beside him (on the side with room).
+    if (brain.hat case final hat? when brain.hatBeside) {
+      final art = PipSprites.hats[hat]!;
+      final right = brain.x + PipBrain.width + 1;
+      sprite(
+        art,
+        right + art.first.length <= size.width / pixel
+            ? right
+            : brain.x - art.first.length - 1,
+        groundTop,
+        colours: PipSprites.hatColours,
+      );
+    }
     // Round 54: the slot in his side, open while his battery's changed.
     // Scaled with him, as he crouches.
     if (brain.batterySlot case final column?) {
@@ -943,4 +959,21 @@ int _hash(int i) {
   h = (h ^ (h >> 15)) * 0x85EBCA77;
   h = h ^ (h >> 13);
   return h & 0x7FFFFFFF;
+}
+
+/// His frame now, as drawn before mirroring (facing left): his body and
+/// face, or a picture on his screen (charging, Round 44; something to
+/// show, Round 52). A picture is turned first when he faces left, so it
+/// reads the right way drawn mirrored (Round 53: notifications; Round 57:
+/// all of them, the charging ones too: the bolt, the battery).
+List<String> pipFrameOf(PipBrain brain) {
+  final charge = brain.chargeScreen;
+  final shown = brain.screenShow;
+  final picture = charge != null
+      ? PipSprites.chargingFrame(charge.$1, charge.$2, lamp: brain.stationLamp)
+      : shown != null
+          ? PipSprites.screenFrame(shown.$1, shown.$2)
+          : null;
+  if (picture == null) return PipSprites.frameOf(brain.frame, brain.face);
+  return brain.facingRight ? picture : PipSprites.screenTurned(picture);
 }

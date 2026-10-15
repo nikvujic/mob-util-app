@@ -8,11 +8,15 @@ class BottomNav extends StatelessWidget {
   /// A red dot on the Hub tab: one of its pages asks for attention (O13).
   final bool hubDot;
 
+  /// A green one, without a red one (Round 57): something new to see.
+  final bool hubNews;
+
   const BottomNav({
     super.key,
     required this.selectedIndex,
     required this.onItemTapped,
     this.hubDot = false,
+    this.hubNews = false,
   });
 
   @override
@@ -24,7 +28,14 @@ class BottomNav extends StatelessWidget {
             backgroundColor: context.colors.danger,
             child: Semantics(label: 'Needs attention', child: Icon(icon)),
           )
-        : Icon(icon);
+        : hubNews
+            ? Badge(
+                key: const Key('hubNews'),
+                smallSize: 9,
+                backgroundColor: DateColours.seen,
+                child: Semantics(label: 'Something new', child: Icon(icon)),
+              )
+            : Icon(icon);
     return BottomNavigationBar(
       currentIndex: selectedIndex,
       onTap: onItemTapped,

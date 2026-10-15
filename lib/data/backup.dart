@@ -9,6 +9,7 @@ import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -81,8 +82,9 @@ class Backup {
   /// may be taken on some weekdays only (Round 40); 20 = recipes and the
   /// ingredients list (`recipes`, `ingredients`, as in their files,
   /// Round 42); 21 = to-do things may be waiting (Round 45); 22 = the
-  /// food tracker (`food`, as in `food.json`, Round 46).
-  static const version = 22;
+  /// food tracker (`food`, as in `food.json`, Round 46); 23 = birthdays &
+  /// dates (`dates`, as in `dates.json`, Round 57).
+  static const version = 23;
 
   final DateTime createdAt;
   final String appVersion;
@@ -118,6 +120,9 @@ class Backup {
   /// The food tracker (Round 46); empty in backups from before it.
   final FoodBook food;
 
+  /// Birthdays & dates (Round 57); empty in backups from before them.
+  final DateBook dates;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -137,6 +142,7 @@ class Backup {
     this.recipes = const [],
     this.ingredients = IngredientBook.empty,
     this.food = FoodBook.empty,
+    this.dates = DateBook.empty,
     this.masterPassword,
   });
 
@@ -172,6 +178,7 @@ class Backup {
           'recipes': [for (final r in recipes) r.toJson()],
           'ingredients': ingredients.toJson(),
           'food': food.toJson(),
+          'dates': [for (final d in dates.dates) d.toJson()],
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -286,6 +293,7 @@ class Backup {
         food: data['food'] == null
             ? FoodBook.empty
             : FoodBook.fromJson(data['food'] as Map<String, dynamic>),
+        dates: DateBook.fromJson({'dates': data['dates'] ?? const []}),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(
@@ -309,7 +317,8 @@ class Backup {
         !unique(backup.ingredients.all.map((i) => i.id)) ||
         !unique(backup.ingredients.sections.map((s) => s.id)) ||
         !unique(backup.food.foods.map((f) => f.id)) ||
-        !unique(backup.food.meals.map((m) => m.id))) {
+        !unique(backup.food.meals.map((m) => m.id)) ||
+        !unique(backup.dates.dates.map((d) => d.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
     return backup;

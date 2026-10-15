@@ -124,6 +124,13 @@ app still reads every version, so an update can never lose existing data.
   **bad**, bloating and heartburn, note "Previše, šta god"; a snack at
   11:00 UTC with Kafa and "Keks" (not from the list), not rated.
 - `v22/backup-plain.json` — backup (version 22) with it.
+- `v23/storage/dates.json` — birthdays & dates (Round 57, dates.json
+  version 1): "Ana 🎂", a birthday 24 Oct 1995, every year, note
+  "Knjiga, čokolada", reminders 1 day before at 09:00 and 7 days before
+  at 20:00; "Mama i tata", an anniversary on 29 Feb, no year, no
+  reminders; "Ispit", an event 3 Nov 2026, once, note "Sala 4", a
+  reminder on the day at 07:00.
+- `v23/backup-plain.json` — backup (version 23) with them (no food).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

@@ -96,6 +96,21 @@ enum PipActivity {
   eating,
 }
 
+/// A hat on his head (Round 57): the party hat on a birthday, or one
+/// tried on in Pip Home's Hats.
+enum PipHat {
+  party('Party hat'),
+  crown('Crown'),
+  topHat('Top hat'),
+  wizard('Wizard hat'),
+  cap('Cap'),
+  beanie('Beanie');
+
+  final String label;
+
+  const PipHat(this.label);
+}
+
 /// A buzz of the phone, how strong (Round 53).
 enum PipBuzz { light, medium, heavy }
 
@@ -152,6 +167,9 @@ enum PipFace {
 
   /// Round 52: thrown in, and cross about it.
   angry,
+
+  /// Round 57: waking up, a big yawn (eyes shut, mouth wide).
+  yawn,
 }
 
 /// His animations that can be played on request (Round 35: Pip Home's
@@ -614,11 +632,15 @@ class PipBrain {
   static const settleAt = 1.4;
   static const asleepEnd = 1.9;
 
-  /// Waking's parts (Round 53: slower): eyes open, a stretch, then up
-  /// with a hop.
-  static const eyesOpenAt = 1.0;
-  static const stretchEnd = 1.8;
-  static const wakeHopEnd = 2.4;
+  /// Waking's parts (Round 53: slower; Round 57: slower still, with a
+  /// yawn): eyes shut a while, legs out (eyes still shut), a big yawn as
+  /// he stretches up, a blink, eyes open, then up with a hop.
+  static const legsOutAt = 1.2;
+  static const yawnAt = 1.6;
+  static const yawnEnd = 3.0;
+  static const eyesOpenAt = 3.3;
+  static const wakeHopStart = 3.6;
+  static const wakeHopEnd = 4.3;
 
   /// Turning off: the screen flickers out, he falls over, bounces.
   static const flickerEnd = 0.9;
@@ -778,7 +800,9 @@ class PipBrain {
       case PipActivity.fallingAsleep:
         return _t < eyesCloseAt ? PipFace.tired : PipFace.asleep;
       case PipActivity.wakingUp:
-        return _t < eyesOpenAt ? PipFace.asleep : byEnergy();
+        if (_t < legsOutAt) return PipFace.asleep;
+        if (_t >= yawnAt && _t < yawnEnd) return PipFace.yawn;
+        return byEnergy();
       case PipActivity.off:
         return PipFace.off;
       case PipActivity.poweringOff:
@@ -1493,6 +1517,45 @@ class PipBrain {
     return (from + (to - from) * p, 4 + skyRows * 0.25 * p, p);
   }
 
+  // Round 57: his hats.
+
+  /// Someone's birthday today, or his own (the room says): the party hat.
+  bool birthday = false;
+
+  /// A hat tried on (Pip Home's Hats; null: none, even on a birthday),
+  /// while [_tryingOn].
+  PipHat? _triedOn;
+  bool _tryingOn = false;
+
+  /// Tries [hat] on (none: null), instead of what he'd wear.
+  void tryOn(PipHat? hat) {
+    _tryingOn = true;
+    _triedOn = hat;
+  }
+
+  /// Back to what he wears himself (a party hat on a birthday).
+  void stopTryingOn() {
+    _tryingOn = false;
+    _triedOn = null;
+  }
+
+  /// The hat he has: tried on, or the party hat on a birthday; none in
+  /// his egg or while he hatches.
+  PipHat? get hat {
+    if (activity == PipActivity.egg || activity == PipActivity.hatching) {
+      return null;
+    }
+    return _tryingOn ? _triedOn : (birthday ? PipHat.party : null);
+  }
+
+  /// Asleep (settled, legs tucked): his hat on the ground beside him.
+  bool get hatBeside =>
+      hat != null &&
+      frame == PipFrame.tuck &&
+      (activity == PipActivity.asleep ||
+          activity == PipActivity.fallingAsleep ||
+          activity == PipActivity.wakingUp);
+
   // Round 53: his medicine reminder.
 
   /// A medicine due and not marked (the room says, from the red dot).
@@ -1994,7 +2057,12 @@ class PipBrain {
         PipActivity.fallingAsleep =>
           _t < settleAt ? PipFrame.idle : PipFrame.tuck,
         PipActivity.asleep => PipFrame.tuck,
-        PipActivity.wakingUp => _t < eyesOpenAt ? PipFrame.tuck : PipFrame.idle,
+        PipActivity.wakingUp => _t < legsOutAt
+            ? PipFrame.tuck
+            // Eyes still shut, before the yawn and after it.
+            : _t < yawnAt || (_t >= yawnEnd && _t < eyesOpenAt)
+                ? PipFrame.blink
+                : PipFrame.idle,
         PipActivity.poweringOff ||
         PipActivity.off ||
         PipActivity.poweringOn =>
@@ -2101,7 +2169,7 @@ class PipBrain {
     }
     switch (activity) {
       case PipActivity.wakingUp:
-        return hop(stretchEnd, wakeHopEnd, 3);
+        return hop(wakeHopStart, wakeHopEnd, 3);
       case PipActivity.poweringOn:
         return hop(riseUpEnd, onEnd, 3);
       case PipActivity.fetching when _picking != null:
@@ -2118,11 +2186,8 @@ class PipBrain {
   (double, double) get stretch {
     // Round 53: waking, a stretch up; picking something up, a crouch (his
     // feet stay on the ground, his legs don't float).
-    if (activity == PipActivity.wakingUp &&
-        _t >= eyesOpenAt &&
-        _t < stretchEnd) {
-      final s = 0.12 *
-          math.sin(math.pi * (_t - eyesOpenAt) / (stretchEnd - eyesOpenAt));
+    if (activity == PipActivity.wakingUp && _t >= yawnAt && _t < yawnEnd) {
+      final s = 0.12 * math.sin(math.pi * (_t - yawnAt) / (yawnEnd - yawnAt));
       return (1 - s / 2, 1 + s);
     }
     final crouch = switch (activity) {

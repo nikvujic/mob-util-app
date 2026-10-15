@@ -421,6 +421,18 @@ abstract final class RatingColours {
   static const ink = Color(0xFF000000);
 }
 
+/// Each kind of date's colour (Round 57), whatever the theme: its dots on
+/// the calendar and its icon's circle.
+abstract final class DateColours {
+  static const birthday = Color(0xFFEC6FA0);
+  static const anniversary = Color(0xFFE0503E);
+  static const holiday = Color(0xFF4CAF7A);
+  static const event = Color(0xFF4F8FE0);
+  static const other = Color(0xFF9A8F86);
+  static const ink = Color(0xFFFFFFFF); // its icon, on the colour
+  static const seen = Color(0xFF4CAF50); // the green dot (a birthday)
+}
+
 /// Pip's own colours (Round 25), the launcher icon's, whatever the theme.
 abstract final class PipColours {
   static const casing = Color(0xFFD97757); // head casing, antenna
@@ -543,6 +555,16 @@ abstract final class PipColours {
   static const cross = Color(0xFFE0503E); // his cross words (#!)
   static const heart = Color(0xFFE0503E);
   static const puff = Color(0xFFF2F4F8);
+  // Round 57: his hats.
+  static const hatPink = Color(0xFFF07AA8);
+  static const hatYellow = Color(0xFFFFD36E);
+  static const hatGold = Color(0xFFE8B23A);
+  static const hatRuby = Color(0xFFE0503E);
+  static const hatSapphire = Color(0xFF4F8FE0);
+  static const hatBlack = Color(0xFF2B2826);
+  static const hatPurple = Color(0xFF6A4FB5);
+  static const hatGreen = Color(0xFF3F9E6A);
+  static const hatWhite = Color(0xFFF5F2EA);
   // Round 53: his plate and meal.
   static const plate = Color(0xFFF5F2EA);
   static const plateShade = Color(0xFFB9B4AA);

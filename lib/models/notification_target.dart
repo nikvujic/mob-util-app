@@ -21,6 +21,8 @@ sealed class NotificationTarget {
         return const MedicineTarget();
       case ['backup']:
         return const BackupTarget();
+      case ['dates']:
+        return const DatesTarget();
     }
     return null;
   }
@@ -71,4 +73,15 @@ class BackupTarget extends NotificationTarget {
 
   @override
   String toString() => 'BackupTarget()';
+}
+
+/// The Dates page (Round 57: a date's reminder).
+class DatesTarget extends NotificationTarget {
+  const DatesTarget();
+
+  @override
+  String get payload => 'dates';
+
+  @override
+  String toString() => 'DatesTarget()';
 }

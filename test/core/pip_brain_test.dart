@@ -169,7 +169,7 @@ void main() {
       expect(p.frame, PipFrame.tuck);
       expect(p.zs, hasLength(3));
       expect(p.show(PipShow.wakeUp), isTrue);
-      run(p, 2.1);
+      run(p, PipBrain.wakeHopStart + 0.3); // Round 57: a longer wake
       expect(p.lift, greaterThan(0), reason: 'the hop');
       run(p, 1);
       expect(p.activity, isNot(PipActivity.asleep));
@@ -254,7 +254,7 @@ void main() {
     test('from the list, asleep and off come back on their own', () {
       final p = up();
       expect(p.play(PipAnimation.fallAsleep, demo: true), isTrue);
-      run(p, 6);
+      run(p, 9);
       expect(p.activity, isNot(PipActivity.asleep));
       expect(p.play(PipAnimation.powerOff, demo: true), isTrue);
       run(p, 6);

@@ -3,7 +3,10 @@
 enum NotifyPage {
   planner('Planner'),
   medicine('Medicine'),
-  backup('Backup');
+  backup('Backup'),
+
+  /// Birthdays & dates (Round 57).
+  dates('Dates');
 
   final String label;
 

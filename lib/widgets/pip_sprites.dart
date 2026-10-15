@@ -80,6 +80,16 @@ abstract final class PipSprites {
         };
       case 'off':
         return const {};
+      case 'yawn':
+        // Round 57: eyes shut, mouth wide open.
+        return {
+          for (final e in eyes) ...[(e, 3), (e + 1, 3)],
+          (mouth + 2, 4), (mouth + 3, 4), //
+          (mouth + 1, 5), (mouth + 4, 5),
+          (mouth + 1, 6), (mouth + 4, 6),
+          (mouth + 1, 7), (mouth + 4, 7),
+          (mouth + 2, 8), (mouth + 3, 8),
+        };
       case 'angry':
         // Round 52: brows down to the middle, a frown.
         return {
@@ -169,6 +179,7 @@ abstract final class PipSprites {
       PipFace.angry => 'angry',
       PipFace.asleep => 'asleep',
       PipFace.off => 'off',
+      PipFace.yawn => 'yawn',
       _ when frame == PipFrame.blink => 'blink',
       _ when frame == PipFrame.oh || frame == PipFrame.tuck => 'oh',
       PipFace.tired => 'tired',
@@ -557,6 +568,71 @@ abstract final class PipSprites {
         1 => const ['....mM....'],
         _ => const <String>[],
       };
+
+  /// His hats (Round 57), each at most 8 wide, drawn on his head right
+  /// of his antenna (facing right; mirrored with him), from [hatLeft]
+  /// on his frame, its bottom row just above his casing ([hatBottom]).
+  static const hats = {
+    PipHat.party: [
+      '...o...',
+      '...p...',
+      '..pyp..',
+      '..ypy..',
+      '.pypyp.',
+      'yyyyyyy',
+    ],
+    PipHat.crown: [
+      'g..g..g',
+      'gg.g.gg',
+      'ggggggg',
+      'grgbgrg',
+    ],
+    PipHat.topHat: [
+      '.kkkkk.',
+      '.kkkkk.',
+      '.kkkkk.',
+      '.rrrrr.',
+      'kkkkkkk',
+    ],
+    PipHat.wizard: [
+      '....u..',
+      '...uu..',
+      '..uuu..',
+      '..uyu..',
+      '.uuuuu.',
+      '.uyuuu.',
+      'uuuuuuu',
+    ],
+    PipHat.cap: [
+      '..ccc...',
+      '.ccccc..',
+      'cccccccc',
+    ],
+    PipHat.beanie: [
+      '...w...',
+      '.bbbbb.',
+      'bbbbbbb',
+      'wbwbwbw',
+    ],
+  };
+
+  /// Where a hat sits on his frame: its left column, and the row its
+  /// bottom is on.
+  static const hatLeft = 10;
+  static const hatBottom = 1;
+
+  static const hatColours = {
+    'o': PipColours.hatWhite,
+    'p': PipColours.hatPink,
+    'y': PipColours.hatYellow,
+    'g': PipColours.hatGold,
+    'r': PipColours.hatRuby,
+    'b': PipColours.hatSapphire,
+    'k': PipColours.hatBlack,
+    'u': PipColours.hatPurple,
+    'c': PipColours.hatGreen,
+    'w': PipColours.hatWhite,
+  };
 
   static const fieldColours = {
     'q': PipColours.plate,

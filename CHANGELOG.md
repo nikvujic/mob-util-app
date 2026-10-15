@@ -4,6 +4,31 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Dates**, a new Hub page: birthdays, anniversaries, holidays and
+  events on a month calendar, with what's coming ("in 9 days",
+  "turns 31"). Each has a title, a kind, its day (the year if known),
+  every year or once, a note, and up to 3 reminders (days before and
+  a time; a new one reminds the day before at 09:00). A green dot on
+  the tile on someone's birthday, until you open it. Notifications
+  with the usual settings; lockable, in backups (and restoring part of
+  one), in Clear data.
+- **Pip's hats**: a party hat on someone's birthday and on his own
+  (beside him while he sleeps), and on Pip Home's settings card a list
+  of hats to try on him (party hat, crown, top hat, wizard hat, cap,
+  beanie).
+
+### Changed
+- Pip **wakes up** more slowly, with a big yawn as he stretches.
+- Pip Home's **animations, background and hats** are previews that go
+  together, gone when you swipe back to his card or leave.
+
+### Fixed
+- Pictures on Pip's screen (the charging bolt, the battery…) were
+  mirrored when he faced left.
+
 ## [1.17.2] - 2026-10-15
 
 ### Fixed

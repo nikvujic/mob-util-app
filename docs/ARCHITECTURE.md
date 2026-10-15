@@ -431,6 +431,22 @@ Round 54: hands go by his casing, not his box: `PipBrain.bodyInset` and
 (pulled out, thrown), `batterySlot` and the hand in `mitts`. The old
 and new ones are drawn before him, so in the slot they're behind his
 casing.
+Round 57: `pipFrameOf(brain)` (pip_room.dart) picks his frame: his
+body and face, or a screen picture (charging or shown), turned
+(`PipSprites.screenTurned`) when he faces left so it reads right
+mirrored. Hats: `PipBrain.hat` (the party hat while `birthday`, which
+the room sets from `PipLink.partyHat`; or one `tryOn`'d, Pip Home's
+Hats), drawn by the painter right after his body inside the same moves
+(mirror, stretch, tilt, spin), from `PipSprites.hatLeft`/`hatBottom`;
+`hatBeside` (asleep) puts it on the ground beside him.
+
+Dates (Round 57): `models/date_entry.dart` (`DateEntry`, `DateBook`:
+`on`, `nextFrom`, `upcoming`, `birthdayOn`), `datesProvider`
+(dates.json), `planDateReminders` and `datesDotProvider` (the green dot,
+via `hubToolNewsProvider`/`hubNewsProvider`, red winning) in
+`dates_alerts_provider.dart`; `DatesTarget` opens the page from a
+notification. Preferences keep `datesReminders`, `datesPausedUntil` and
+`datesSeenOn`.
 
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,

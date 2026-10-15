@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_scene.dart';
-import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
-import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pixel_text.dart';
 
@@ -87,20 +85,74 @@ void main() {
     expect(words(), contains('IN USE'));
     await tester.tap(find.byKey(const Key('pipBackground-field')));
     await tester.pump();
-    expect(container.read(preferencesProvider).pipBackground, 'field');
     expect(room(tester).scene!.background, PipBackground.field);
     await tester.tap(find.byKey(const Key('pipBack')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('pipRename')), findsOneWidget);
   });
 
-  test('the background picked is kept; 1.5.0\'s on/off reads as Field', () {
-    expect(const Preferences().pipBackground, 'field');
-    expect(Preferences.fromJson(const {}).pipBackground, 'field');
-    const picked = Preferences(pipBackground: 'meadow');
-    expect(Preferences.fromJson(picked.toJson()).pipBackground, 'meadow');
-    expect(Preferences.fromJson(const {'pipBackground': false}).pipBackground,
-        'field');
+  testWidgets(
+      'hats (Round 57): tried on him, kept while trying other things (an '
+      'animation, the background); back to his info card, gone',
+      (tester) async {
+    await open(tester);
+    final brain = room(tester).brain;
+    expect(brain.hat, isNull);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipHats')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('pipHat-none')), findsOneWidget);
+    for (final hat in PipHat.values) {
+      expect(find.byKey(Key('pipHat-${hat.name}')), findsOneWidget);
+    }
+    await tester.tap(find.byKey(const Key('pipHat-crown')));
+    await tester.pump();
+    expect(brain.hat, PipHat.crown);
+    expect(words(), contains('ON'));
+    // To the animations: still on.
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipAnimations')));
+    await tester.pumpAndSettle();
+    expect(brain.hat, PipHat.crown);
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    // None takes it off.
+    await tester.tap(find.byKey(const Key('pipHats')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipHat-none')));
+    await tester.pump();
+    expect(brain.hat, isNull);
+    await tester.tap(find.byKey(const Key('pipHat-topHat')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    // Back to his info card: gone.
+    await tester.fling(
+        find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(brain.hat, isNull);
+  });
+
+  testWidgets(
+      'a birthday: the party hat; trying another, then gone, it\'s back',
+      (tester) async {
+    await open(tester, link: FakePipLink()..partyHat = true);
+    final brain = room(tester).brain;
+    await tester.pump(const Duration(seconds: 2));
+    expect(brain.hat, PipHat.party);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipHats')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipHat-wizard')));
+    await tester.pump();
+    expect(brain.hat, PipHat.wizard);
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    await tester.fling(
+        find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(brain.hat, PipHat.party);
   });
 
   group('rename, on the card\'s own keyboard', () {

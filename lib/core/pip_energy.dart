@@ -192,4 +192,7 @@ abstract class PipLink {
   /// When a recipe was last read a while (Round 53): he eats, seen within
   /// the hour after.
   DateTime? get recipeReadAt;
+
+  /// Someone's birthday today, or his own (Round 57): the party hat.
+  bool get partyHat;
 }

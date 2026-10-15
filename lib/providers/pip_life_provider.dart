@@ -8,6 +8,7 @@ import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/power.dart';
 import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notification_log_provider.dart';
@@ -223,6 +224,13 @@ class _Link implements PipLink {
 
   @override
   DateTime? get recipeReadAt => _ref.read(recipeReadProvider);
+
+  @override
+  bool get partyHat {
+    final today = dayOf(_now);
+    return _ref.read(datesProvider).birthdayOn(today) ||
+        _ref.read(pipLifeProvider).birthdayOn(today);
+  }
 
   @override
   bool notifiedBetween(DateTime from, DateTime to) => _ref

@@ -28,12 +28,23 @@ class HubPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // A medicine notification tapped (Round 19): its page, once the Hub
     // is open (locked, it waits for the next visit).
-    if (ref.watch(pendingTargetProvider) is MedicineTarget) {
+    // A notification tapped: its page (Round 57: Dates too).
+    final target = switch (ref.watch(pendingTargetProvider)) {
+      MedicineTarget() => HubTool.medicine,
+      DatesTarget() => HubTool.dates,
+      _ => null,
+    };
+    if (target != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final pending = ref.read(pendingTargetProvider.notifier);
-        if (!context.mounted || pending.state is! MedicineTarget) return;
+        final still = switch (pending.state) {
+          MedicineTarget() => HubTool.medicine,
+          DatesTarget() => HubTool.dates,
+          _ => null,
+        };
+        if (!context.mounted || still != target) return;
         pending.state = null;
-        _open(context, HubTool.medicine);
+        _open(context, target);
       });
     }
     // Pip's home only once he's hatched (Round 35). Moves are by place in
@@ -64,6 +75,7 @@ class HubPage extends ConsumerWidget {
                 key: ValueKey(tool),
                 tool: tool,
                 dot: ref.watch(hubToolDotProvider(tool)),
+                news: ref.watch(hubToolNewsProvider(tool)),
                 locked: locks.contains(tool),
                 // Dragged over another tile: takes its place at once.
                 onHover: (dragged) =>
@@ -95,6 +107,7 @@ class HubPage extends ConsumerWidget {
 class _MovableTile extends StatelessWidget {
   final HubTool tool;
   final bool dot;
+  final bool news;
   final bool locked;
   final ValueChanged<HubTool> onHover;
   final ValueChanged<int> onMove;
@@ -105,6 +118,7 @@ class _MovableTile extends StatelessWidget {
     super.key,
     required this.tool,
     required this.dot,
+    this.news = false,
     required this.locked,
     required this.onHover,
     required this.onMove,
@@ -118,6 +132,7 @@ class _MovableTile extends StatelessWidget {
       icon: tool.icon,
       label: tool.label,
       dot: dot,
+      news: news,
       locked: locked,
       onTap: onTap,
     );
@@ -164,6 +179,10 @@ class _ToolTile extends StatelessWidget {
   /// A red dot in the corner: the page asks for attention (O13).
   final bool dot;
 
+  /// A green one, without a red one (Round 57): something to see (a
+  /// birthday today), gone once it's been seen.
+  final bool news;
+
   /// A small lock in the bottom left corner, clear of the icon: the page
   /// has its own lock (O7; Rounds 24–25).
   final bool locked;
@@ -173,6 +192,7 @@ class _ToolTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.dot,
+    this.news = false,
     required this.locked,
     required this.onTap,
   });
@@ -227,6 +247,23 @@ class _ToolTile extends StatelessWidget {
                       height: 12,
                       decoration: BoxDecoration(
                         color: context.colors.danger,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                )
+              else if (news)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Semantics(
+                    label: 'Something new',
+                    child: Container(
+                      key: const Key('toolNews'),
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: DateColours.seen,
                         shape: BoxShape.circle,
                       ),
                     ),

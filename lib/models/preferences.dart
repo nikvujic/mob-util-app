@@ -29,6 +29,13 @@ class Preferences {
   final bool plannerReminders;
   final DateTime? plannerPausedUntil;
 
+  /// Birthdays & dates' notifications (Round 57): on, and paused through
+  /// a day; and the day the Dates page was last opened (the green dot on
+  /// a birthday goes once it's been looked at that day).
+  final bool datesReminders;
+  final DateTime? datesPausedUntil;
+  final DateTime? datesSeenOn;
+
   /// How each page's notifications look and sound (Round 31); a page not
   /// here is [NotifyStyle.plain].
   final Map<NotifyPage, NotifyStyle> notifyStyles;
@@ -85,10 +92,6 @@ class Preferences {
   final DateTime? lastAutoBackupAt;
   final bool autoBackupFailed;
 
-  /// Pip Home's background (Round 36: picked from a list), by id; an
-  /// unknown one is his field.
-  final String pipBackground;
-
   /// The phone was plugged in when last seen (Round 44: Pip's charging
   /// station); so after a restart, time away plugged in still counts as
   /// charging. This phone only.
@@ -103,6 +106,9 @@ class Preferences {
     this.medicinePausedUntil,
     this.plannerReminders = true,
     this.plannerPausedUntil,
+    this.datesReminders = true,
+    this.datesPausedUntil,
+    this.datesSeenOn,
     this.notifyStyles = const {},
     this.introDeleted = false,
     this.introOnUpdates = true,
@@ -115,7 +121,6 @@ class Preferences {
     this.backupReminder = true,
     this.todoNote = true,
     this.todoWaiting = false,
-    this.pipBackground = 'field',
     this.autoBackupFolder,
     this.autoBackupFolderName,
     this.lastAutoBackupAt,
@@ -171,6 +176,9 @@ class Preferences {
   /// Whether the planner's notifications are paused on [day] (Round 31).
   bool plannerPausedOn(DateTime day) => _pausedOn(plannerPausedUntil, day);
 
+  /// Whether the dates' notifications are paused on [day] (Round 57).
+  bool datesPausedOn(DateTime day) => _pausedOn(datesPausedUntil, day);
+
   static bool _pausedOn(DateTime? until, DateTime day) =>
       until != null && !DateTime(day.year, day.month, day.day).isAfter(until);
 
@@ -187,6 +195,9 @@ class Preferences {
     DateTime? Function()? medicinePausedUntil,
     bool? plannerReminders,
     DateTime? Function()? plannerPausedUntil,
+    bool? datesReminders,
+    DateTime? Function()? datesPausedUntil,
+    DateTime? Function()? datesSeenOn,
     Map<NotifyPage, NotifyStyle>? notifyStyles,
     bool? introDeleted,
     bool? introOnUpdates,
@@ -199,7 +210,6 @@ class Preferences {
     bool? backupReminder,
     bool? todoNote,
     bool? todoWaiting,
-    String? pipBackground,
     String? Function()? autoBackupFolder,
     String? Function()? autoBackupFolderName,
     DateTime? Function()? lastAutoBackupAt,
@@ -220,6 +230,11 @@ class Preferences {
         plannerPausedUntil: plannerPausedUntil == null
             ? this.plannerPausedUntil
             : plannerPausedUntil(),
+        datesReminders: datesReminders ?? this.datesReminders,
+        datesPausedUntil: datesPausedUntil == null
+            ? this.datesPausedUntil
+            : datesPausedUntil(),
+        datesSeenOn: datesSeenOn == null ? this.datesSeenOn : datesSeenOn(),
         notifyStyles: notifyStyles ?? this.notifyStyles,
         introDeleted: introDeleted ?? this.introDeleted,
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
@@ -235,7 +250,6 @@ class Preferences {
         backupReminder: backupReminder ?? this.backupReminder,
         todoNote: todoNote ?? this.todoNote,
         todoWaiting: todoWaiting ?? this.todoWaiting,
-        pipBackground: pipBackground ?? this.pipBackground,
         autoBackupFolder: autoBackupFolder == null
             ? this.autoBackupFolder
             : autoBackupFolder(),
@@ -260,6 +274,11 @@ class Preferences {
         'plannerReminders': plannerReminders,
         if (plannerPausedUntil != null)
           'plannerPausedUntil': PlannerTask.dayToJson(plannerPausedUntil!),
+        'datesReminders': datesReminders,
+        if (datesPausedUntil != null)
+          'datesPausedUntil': PlannerTask.dayToJson(datesPausedUntil!),
+        if (datesSeenOn != null)
+          'datesSeenOn': PlannerTask.dayToJson(datesSeenOn!),
         if (notifyStyles.isNotEmpty)
           'notifyStyles': {
             for (final MapEntry(:key, :value) in notifyStyles.entries)
@@ -279,7 +298,6 @@ class Preferences {
         'backupReminder': backupReminder,
         'todoNote': todoNote,
         if (todoWaiting) 'todoWaiting': true,
-        'pipBackground': pipBackground,
         if (autoBackupFolder != null) 'autoBackupFolder': autoBackupFolder,
         if (autoBackupFolderName != null)
           'autoBackupFolderName': autoBackupFolderName,
@@ -303,6 +321,13 @@ class Preferences {
         plannerPausedUntil: json['plannerPausedUntil'] == null
             ? null
             : PlannerTask.dayFromJson(json['plannerPausedUntil']),
+        datesReminders: json['datesReminders'] as bool? ?? true,
+        datesPausedUntil: json['datesPausedUntil'] == null
+            ? null
+            : PlannerTask.dayFromJson(json['datesPausedUntil']),
+        datesSeenOn: json['datesSeenOn'] == null
+            ? null
+            : PlannerTask.dayFromJson(json['datesSeenOn']),
         // Pages unknown here (from a newer app) are skipped.
         notifyStyles: {
           for (final MapEntry(:key, :value)
@@ -328,11 +353,6 @@ class Preferences {
         backupReminder: json['backupReminder'] as bool? ?? true,
         todoNote: json['todoNote'] as bool? ?? true,
         todoWaiting: json['todoWaiting'] as bool? ?? false,
-        // 1.5.0 kept an on/off here (Round 35): his field either way.
-        pipBackground: switch (json['pipBackground']) {
-          final String id => id,
-          _ => 'field',
-        },
         autoBackupFolder: json['autoBackupFolder'] as String?,
         autoBackupFolderName: json['autoBackupFolderName'] as String?,
         lastAutoBackupAt: json['lastAutoBackupAt'] == null

@@ -343,7 +343,7 @@ Bills not now. The order: **Birthdays & dates**, **Packing lists**,
 **Days since / until**, **Life percentage**, **Coin flip**, then the
 **planner notification that stays**.
 
-- [ ] **Birthdays & dates** (spec `docs/DATES_SPEC.md`): a calendar of
+- [x] **Birthdays & dates** (spec `docs/DATES_SPEC.md`): a calendar of
   important dates; a date has a title, a note, a type, and up to 3
   reminders (days before, time); the usual patterns (Notifications page
   settings, lock, backup, Clear data). Pip wears a **party hat** on a
@@ -352,6 +352,14 @@ Bills not now. The order: **Birthdays & dates**, **Packing lists**,
   opened; the hat on **Pip's own birthday** too (not the day he
   hatched); asleep, the hat **beside him**; and a **Hats** list on Pip
   Home to try hats on (not kept once you leave it).
+- [x] Go (Nikola). Pip Home's **Animations, Backgrounds and Hats** are
+  all previews that combine (a hat and a background, an animation in
+  them); swiping back to his info card or leaving Pip Home resets them.
+- [x] Pip: **waking up** is still too quick when you happen to see it:
+  longer, with a **yawn** and a **stretch**.
+- [x] Pip: what's on his screen gets **mirrored** in a few cases (HI
+  reads IH, the lightning bolt faces the wrong way): find them all and
+  fix them.
 
 ### Round 56 — Nikola: the index's scroll on (2026-10-15; patch 1.17.2)
 

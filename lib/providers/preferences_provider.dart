@@ -107,8 +107,6 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
     }
   }
 
-  void setPipBackground(String id) => state = state.copyWith(pipBackground: id);
-
   /// The Introduction was opened: no longer new.
   void readIntro() {
     if (state.introUnread) state = state.copyWith(introUnread: false);
@@ -129,6 +127,23 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
       state = state.copyWith(
         notifyStyles: {...state.notifyStyles, page: style},
       );
+
+  /// Birthdays & dates' notifications on or off (Round 57).
+  void setDatesReminders(bool on) => state = state.copyWith(datesReminders: on);
+
+  /// Pauses the dates' notifications through [day]; null resumes.
+  void pauseDatesUntil(DateTime? day) => state = state.copyWith(
+        datesPausedUntil: () =>
+            day == null ? null : DateTime(day.year, day.month, day.day),
+      );
+
+  /// The Dates page was opened on [day] (its green dot goes).
+  void sawDates(DateTime day) {
+    final seen = DateTime(day.year, day.month, day.day);
+    if (state.datesSeenOn != seen) {
+      state = state.copyWith(datesSeenOn: () => seen);
+    }
+  }
 
   /// Pauses medicine reminders and the dot through [day]; null resumes.
   void pauseMedicineUntil(DateTime? day) => state = state.copyWith(

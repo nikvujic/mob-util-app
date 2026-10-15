@@ -30,20 +30,7 @@ void main() {
     return p;
   }
 
-  test('waking up takes longer: eyes shut a while, a stretch, then the hop',
-      () {
-    final p = asleep()..show(PipShow.wakeUp);
-    run(p, 0.8);
-    expect(p.face, PipFace.asleep, reason: 'eyes still shut');
-    run(p, 0.5); // 1.3 s: stretching up, on the ground
-    expect(p.stretch.$2, greaterThan(1.05));
-    expect(p.lift, lessThanOrEqualTo(0));
-    run(p, 0.8); // 2.1 s: the hop
-    expect(p.lift, greaterThan(0));
-    expect(p.activity, PipActivity.wakingUp);
-    run(p, 0.5);
-    expect(p.activity, isNot(PipActivity.wakingUp));
-  });
+  // Waking up: Round 57 made it longer still (pip_round57_test).
 
   test('picking a flower: he crouches, his feet staying on the ground', () {
     final p = up(seed: 5)..play(PipAnimation.flower);
@@ -322,7 +309,7 @@ void main() {
       expect(p.screenShow, isNull);
       // Woken: the reminder first.
       p.show(PipShow.wakeUp);
-      run(p, 3);
+      run(p, PipBrain.wakeHopEnd + 0.5);
       expect(p.reminding, isTrue);
       expect(p.show(PipShow.powerOff), isTrue);
       expect(p.activity, PipActivity.poweringOff);

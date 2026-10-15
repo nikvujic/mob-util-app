@@ -115,6 +115,13 @@ void main() {
       expect(errorFor(json), 'This backup is damaged.');
     });
 
+    test('rejects duplicate date ids (Round 57)', () {
+      final json = validJson();
+      final date = {'id': 'd1', 'title': 'Ana', 'day': 24, 'month': 10};
+      (json['data'] as Map<String, dynamic>)['dates'] = [date, date];
+      expect(errorFor(json), 'This backup is damaged.');
+    });
+
     test('rejects damaged backups', () {
       const damaged = 'This backup is damaged.';
       expect(errorFor(validJson()..['version'] = 'one'), damaged);

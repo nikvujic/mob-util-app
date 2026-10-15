@@ -1,0 +1,82 @@
+{
+  "format": "the-app-backup",
+  "version": 23,
+  "createdAt": "2026-10-15T19:00:00.000Z",
+  "appVersion": "1.18.0 (61)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [],
+    "recipes": [],
+    "ingredients": {
+      "sections": []
+    },
+    "food": {
+      "foods": [],
+      "meals": []
+    },
+    "dates": [
+      {
+        "id": "d1",
+        "title": "Ana 🎂",
+        "type": "birthday",
+        "day": 24,
+        "month": 10,
+        "year": 1995,
+        "yearly": true,
+        "note": "Knjiga, čokolada",
+        "reminders": [
+          {
+            "daysBefore": 1,
+            "minutes": 540
+          },
+          {
+            "daysBefore": 7,
+            "minutes": 1200
+          }
+        ]
+      },
+      {
+        "id": "d2",
+        "title": "Mama i tata",
+        "type": "anniversary",
+        "day": 29,
+        "month": 2,
+        "yearly": true,
+        "note": "",
+        "reminders": []
+      },
+      {
+        "id": "d3",
+        "title": "Ispit",
+        "type": "event",
+        "day": 3,
+        "month": 11,
+        "year": 2026,
+        "yearly": false,
+        "note": "Sala 4",
+        "reminders": [
+          {
+            "daysBefore": 0,
+            "minutes": 420
+          }
+        ]
+      }
+    ]
+  }
+}

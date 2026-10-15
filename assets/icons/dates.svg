@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- A birthday cake with a candle. -->
+  <path d="M8 40V28a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v12"/>
+  <path d="M5 40h38"/>
+  <path d="M8 32c3 3 6 3 8 0s5-3 8 0 5 3 8 0 5-3 8 0"/>
+  <path d="M24 24v-8"/>
+  <path d="M24 10c-2 2-2 4 0 4s2-2 0-4z"/>
+</svg>

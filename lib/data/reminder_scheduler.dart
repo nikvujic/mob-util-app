@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 /// What a reminder is about: each kind has its own Android channel, so
 /// they can be set apart in the phone's settings.
-enum ReminderKind { planner, medicine, backup, notice }
+enum ReminderKind { planner, medicine, backup, notice, dates }
 
 /// A reminder (P10, O13): a notification at [at].
 class Reminder {

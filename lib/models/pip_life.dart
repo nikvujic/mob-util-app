@@ -66,6 +66,16 @@ class PipLife {
     return days < 0 ? 1 : days + 1;
   }
 
+  /// Whether [day] is his birthday (Round 57: the party hat): the day he
+  /// hatched, each year after (not that day itself); 29 February on the
+  /// 28th in a year without it.
+  bool birthdayOn(DateTime day) {
+    final b = born?.toLocal();
+    if (b == null || day.year <= b.year) return false;
+    final last = DateTime(day.year, b.month + 1, 0).day;
+    return day.month == b.month && day.day == (b.day > last ? last : b.day);
+  }
+
   /// "1 DAY", "12 DAYS".
   static String ageText(int days) => days == 1 ? '1 DAY' : '$days DAYS';
 

@@ -14,6 +14,8 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
+import 'package:the_app/providers/dates_alerts_provider.dart';
+import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notification_log_provider.dart';
@@ -132,6 +134,7 @@ class ReminderPlanner {
     _ref.listen(pageLocksProvider, (_, __) => _soon());
     _ref.listen(securityProvider, (_, __) => _soon());
     _ref.listen(medicineProvider, (_, __) => _soon());
+    _ref.listen(datesProvider, (_, __) => _soon());
     // Whether notifications are allowed, known for the history.
     _ref.listen(notificationsAllowedProvider, (_, __) {});
     _ref.listen(preferencesProvider, (before, after) {
@@ -140,6 +143,8 @@ class ReminderPlanner {
           before.medicinePausedUntil != after.medicinePausedUntil ||
           before.plannerReminders != after.plannerReminders ||
           before.plannerPausedUntil != after.plannerPausedUntil ||
+          before.datesReminders != after.datesReminders ||
+          before.datesPausedUntil != after.datesPausedUntil ||
           !_sameStyles(before.notifyStyles, after.notifyStyles) ||
           before.backupDueAt != after.backupDueAt ||
           before.lastBackupAt != after.lastBackupAt) {
@@ -224,6 +229,16 @@ class ReminderPlanner {
                     _ref.read(pageLocksProvider).contains(HubTool.medicine)) ||
             private(NotifyPage.medicine),
       ),
+      ...planDateReminders(
+        now: now,
+        book: _ref.read(datesProvider),
+        preferences: preferences,
+        days: reminderDays,
+        hideNames: password &&
+                (locks.contains(AppSection.hub) ||
+                    _ref.read(pageLocksProvider).contains(HubTool.dates)) ||
+            private(NotifyPage.dates),
+      ),
       ...planBackupReminders(
         now: now,
         preferences: preferences,
@@ -246,6 +261,7 @@ NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
       ReminderKind.planner => NotifyPage.planner,
       ReminderKind.medicine => NotifyPage.medicine,
       ReminderKind.backup => NotifyPage.backup,
+      ReminderKind.dates => NotifyPage.dates,
       ReminderKind.notice => null,
     };
 

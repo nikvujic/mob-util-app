@@ -24,6 +24,7 @@ import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/fingerprint_provider.dart';
 import 'package:the_app/providers/hub_dots_provider.dart';
 import 'package:the_app/models/notification_target.dart';
+import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/notification_target_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -119,6 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const Duration(seconds: 30),
     (_) => ref
       ..invalidate(medicineDotProvider)
+      ..invalidate(datesDotProvider)
       ..invalidate(backupDueProvider),
   );
 
@@ -129,6 +131,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(sessionProvider.notifier).appShown();
       // A dose may have come due while away (O13).
       ref.invalidate(medicineDotProvider);
+      ref.invalidate(datesDotProvider);
       ref.invalidate(backupDueProvider);
       ref.invalidate(notificationsAllowedProvider);
       // Saving failed (a full phone?): space may have been freed since.
@@ -323,7 +326,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       switch (target) {
         case PlannerTarget():
           _show(AppSection.planner);
-        case MedicineTarget():
+        case MedicineTarget() || DatesTarget():
           _show(AppSection.hub);
         // Not a section: Backup opens on top of the one shown.
         case BackupTarget():
@@ -389,6 +392,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: BottomNav(
           selectedIndex: _selectedIndex,
           hubDot: ref.watch(hubDotProvider),
+          hubNews: ref.watch(hubNewsProvider),
           onItemTapped: (index) {
             // Going elsewhere drops a tapped notification's "go to"
             // (Round 21): it was for where the app took you.
