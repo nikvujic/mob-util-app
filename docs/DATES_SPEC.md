@@ -13,7 +13,10 @@ answers are in (Round 57); **Decided** marks them.
 - **A month calendar** on top, the same kind as Food's (weeks as rows,
   Monday first, swipe or ‹ › for other months; this month first). A day
   with a date on it shows a **small dot in its type's colour** (two or
-  more: up to three dots); today is ringed. Unlike Food it goes forward
+  more: up to three dots); today is ringed. Round 60: instead, the day's
+  circle is in its dates' colours (as Food's rated days): one kind
+  filled, several kinds in slices, two or more of one kind with a
+  border; the picked day ringed. Unlike Food it goes forward
   too (months to come), a year each way.
 - **A tap on a day** shows that day's dates under the calendar (title,
   type, "turns 31"), and **+** then adds one on that day.

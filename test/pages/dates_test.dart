@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/date_entry.dart';
+import 'package:the_app/pages/hub/dates.dart';
+import 'package:the_app/pages/hub/dates_calendar.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 
@@ -105,10 +107,15 @@ void main() {
       date('Wed', 24, 10, type: DateType.anniversary),
       date('Nov', 3, 11, type: DateType.holiday),
     ]);
-    Iterable<Widget> dots(String day) =>
-        tester.widget<Row>(find.byKey(Key('datesDots-$day'))).children;
-    expect(dots('2026-10-24'), hasLength(2));
-    expect(dots('2026-10-23'), isEmpty);
+    DateMarkPainter mark(String day) =>
+        tester.widget<CustomPaint>(find.byKey(Key('datesMark-$day'))).painter!
+            as DateMarkPainter;
+    // Round 60: the circle in their colours, split; a border for several
+    // of one colour.
+    expect(mark('2026-10-24').colours,
+        [DateType.birthday.colour, DateType.anniversary.colour]);
+    expect(mark('2026-10-24').several, isFalse);
+    expect(mark('2026-10-23').colours, isEmpty);
     await tester.tap(find.byKey(const Key('datesDay-2026-10-24')));
     await tester.pumpAndSettle();
     expect(find.text('SAT, 24 OCT'), findsOneWidget);
@@ -122,7 +129,7 @@ void main() {
     expect(find.text('UPCOMING'), findsOneWidget);
     await tap(tester, find.byKey(const Key('datesMonthAfter')));
     expect(find.text('November 2026'), findsOneWidget);
-    expect(dots('2026-11-3'), hasLength(1));
+    expect(mark('2026-11-3').colours, [DateType.holiday.colour]);
   });
 
   testWidgets(
@@ -268,14 +275,34 @@ void main() {
     expect(find.text('2 days'), findsOneWidget, reason: 'an event lasts too');
     await pressBack(tester);
     final id = book().dates.single.id;
-    Iterable<Widget> dots(String day) =>
-        tester.widget<Row>(find.byKey(Key('datesDots-$day'))).children;
-    expect(dots('2026-10-24'), hasLength(1));
-    expect(dots('2026-10-25'), hasLength(1));
-    expect(dots('2026-10-26'), isEmpty);
+    List<Color> mark(String day) =>
+        (tester.widget<CustomPaint>(find.byKey(Key('datesMark-$day'))).painter!
+                as DateMarkPainter)
+            .colours;
+    expect(mark('2026-10-24'), [DateType.event.colour]);
+    expect(mark('2026-10-25'), [DateType.event.colour]);
+    expect(mark('2026-10-26'), isEmpty);
     // Picked on its second day: shown from its first.
     await tester.tap(find.byKey(const Key('datesDay-2026-10-25')));
     await tester.pumpAndSettle();
     expect(whenOf(tester, id), 'Sat, 24 Oct – Sun, 25 Oct  ·  in 9 days');
+  });
+
+  testWidgets(
+      'a day with two dates of one kind (Round 60): its colour once, with '
+      'a border; picked, ringed', (tester) async {
+    await openDates(tester, start: [
+      date('Ana', 24, 10),
+      date('Bo', 24, 10),
+    ]);
+    DateMarkPainter mark() => tester
+        .widget<CustomPaint>(find.byKey(const Key('datesMark-2026-10-24')))
+        .painter! as DateMarkPainter;
+    expect(mark().colours, [DateType.birthday.colour]);
+    expect(mark().several, isTrue);
+    expect(mark().picked, isNull);
+    await tester.tap(find.byKey(const Key('datesDay-2026-10-24')));
+    await tester.pumpAndSettle();
+    expect(mark().picked, isNotNull);
   });
 }

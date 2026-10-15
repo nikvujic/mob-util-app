@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.21.0] - 2026-10-15
+
+### Changed
+- **Dates**: a day with dates is shown as a circle in their colours (as
+  Food shows rated days) instead of dots under it: one kind filled,
+  several kinds split in slices, two or more of one kind with a border.
+
 ## [1.20.0] - 2026-10-15
 
 ### Added

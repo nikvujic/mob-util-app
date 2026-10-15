@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
@@ -6,8 +9,9 @@ import 'package:the_app/pages/hub/dates.dart';
 
 /// Birthdays & dates on a month calendar (Round 57; like Food's, but it
 /// goes forward too): weeks as rows, Monday first, a day with dates
-/// shows a dot in each one's colour (up to three), today's number in the
-/// accent, the picked day ringed. A year back and a year ahead; it opens
+/// in their colours (Round 60: its circle filled, split if several;
+/// before, dots under it), today's number in the accent, the picked day
+/// ringed. A year back and a year ahead; it opens
 /// on this month.
 class DatesCalendar extends StatefulWidget {
   final DateBook book;
@@ -197,6 +201,15 @@ class _Day extends StatelessWidget {
     final colors = context.colors;
     final isToday = day == today;
     final isPicked = day == picked;
+    // Round 60: the day's circle in its dates' colours (like Food's rated
+    // days): one colour filled, several split in slices; several of one
+    // colour, a border.
+    final kinds = [
+      for (final d in dates)
+        if (!dates.takeWhile((o) => o != d).any((o) => o.type == d.type))
+          d.type.colour,
+    ];
+    final key = '${day.year}-${day.month}-${day.day}';
     return Semantics(
       button: true,
       selected: isPicked,
@@ -204,54 +217,104 @@ class _Day extends StatelessWidget {
           '${dates.isEmpty ? '' : ', ${dates.map((d) => d.title).join(', ')}'}',
       excludeSemantics: true,
       child: GestureDetector(
-        key: Key('datesDay-${day.year}-${day.month}-${day.day}'),
+        key: Key('datesDay-$key'),
         behavior: HitTestBehavior.opaque,
         onTap: () => onDay(day),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
+        child: Center(
+          child: CustomPaint(
+            key: Key('datesMark-$key'),
+            painter: DateMarkPainter(
+              colours: kinds,
+              several: dates.length > kinds.length,
+              border: colors.textPrimary,
+              picked: isPicked ? colors.accent : null,
+            ),
+            child: SizedBox(
               width: DatesCalendar.cell,
-              height: DatesCalendar.cell - 6,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(13),
-                border: isPicked
-                    ? Border.all(color: colors.accent, width: 2.5)
-                    : null,
-              ),
-              child: Text(
-                '${day.day}',
-                style: TextStyle(
-                  color: isToday ? colors.accent : colors.textPrimary,
-                  fontWeight: isToday || dates.isNotEmpty
-                      ? FontWeight.w700
-                      : FontWeight.w400,
+              height: DatesCalendar.cell,
+              child: Center(
+                child: Text(
+                  '${day.day}',
+                  style: TextStyle(
+                    color: kinds.isNotEmpty
+                        ? DateColours.ink
+                        : isToday
+                            ? colors.accent
+                            : colors.textPrimary,
+                    fontWeight: isToday || dates.isNotEmpty
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                  ),
                 ),
               ),
             ),
-            SizedBox(
-              height: 8,
-              child: Row(
-                key: Key('datesDots-${day.year}-${day.month}-${day.day}'),
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (final d in dates.take(3))
-                    Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: d.type.colour,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// A day's mark on the Dates calendar (Round 60): a circle in its dates'
+/// [colours] (each a slice, from the top, clockwise), with a [border] when
+/// it has [several] dates of one colour, and a ring in [picked] when it's
+/// the picked day.
+class DateMarkPainter extends CustomPainter {
+  final List<Color> colours;
+  final bool several;
+  final Color border;
+  final Color? picked;
+
+  const DateMarkPainter({
+    required this.colours,
+    required this.several,
+    required this.border,
+    this.picked,
+  });
+
+  /// The circle's radius, within the cell (room for the picked ring).
+  static const radius = 13.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centre = size.center(Offset.zero);
+    final circle = Rect.fromCircle(center: centre, radius: radius);
+    final paint = Paint()..isAntiAlias = true;
+    if (colours.length == 1) {
+      canvas.drawCircle(centre, radius, paint..color = colours.single);
+    } else {
+      final sweep = 2 * math.pi / colours.length;
+      for (final (i, colour) in colours.indexed) {
+        canvas.drawArc(circle, -math.pi / 2 + i * sweep, sweep, true,
+            paint..color = colour);
+      }
+    }
+    if (several && colours.isNotEmpty) {
+      canvas.drawCircle(
+          centre,
+          radius - 1,
+          paint
+            ..color = border
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2);
+    }
+    final ring = picked;
+    if (ring != null) {
+      canvas.drawCircle(
+          centre,
+          radius + 2.5,
+          Paint()
+            ..isAntiAlias = true
+            ..color = ring
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.5);
+    }
+  }
+
+  @override
+  bool shouldRepaint(DateMarkPainter old) =>
+      !listEquals(old.colours, colours) ||
+      old.several != several ||
+      old.border != border ||
+      old.picked != picked;
 }

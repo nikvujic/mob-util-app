@@ -337,6 +337,16 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 60 — Nikola (2026-10-15)
+
+- [x] Dates: a day's dates shown **around the date** (its circle in
+  their colours, like Food's rated days) instead of dots under it;
+  colours that meet split it in sections; the same colour, a border.
+
+Done (1.21.0): `DateMarkPainter` (one colour a filled circle, several
+in slices from the top, several of one colour a border, the picked day
+ringed outside).
+
 ### Round 59 — Nikola's notes on 1.19.0 (2026-10-15)
 
 - [x] Dates: a **Holiday** (and an **Event**) has a **length**: pick how
