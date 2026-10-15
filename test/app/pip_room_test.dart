@@ -169,6 +169,51 @@ void main() {
       expect(pip().screenShow?.$1.notification, isTrue);
     });
 
+    testWidgets('a medicine due: he reminds of it (Round 53)', (tester) async {
+      final link = FakePipLink()
+        ..at = DateTime(2026, 10, 15, 12)
+        ..medicineDue = true;
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(2))),
+      ]);
+      await openMenuMoving(tester);
+      var pill = false;
+      for (var i = 0; i < 60 * 12 && !pill; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        pill = pip().screenShow?.$1 == PipScreen.pill;
+      }
+      expect(pill, isTrue);
+    });
+
+    testWidgets(
+        'a recipe read within the hour: he eats, once for it; longer ago, '
+        'not (Round 53)', (tester) async {
+      final link = FakePipLink()
+        ..at = DateTime(2026, 10, 15, 12)
+        ..recipeReadAt = DateTime(2026, 10, 15, 11, 10);
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(2))),
+      ]);
+      await openMenuMoving(tester);
+      var ate = 0;
+      var was = false;
+      for (var i = 0; i < 60 * 30; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        final eating = pip().activity == PipActivity.eating;
+        if (eating && !was) ate++;
+        was = eating;
+      }
+      expect(ate, 1);
+      // Another read, but 2 hours ago: not.
+      link.recipeReadAt = DateTime(2026, 10, 15, 10);
+      for (var i = 0; i < 60 * 5; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(pip().activity, isNot(PipActivity.eating));
+      }
+    });
+
     testWidgets('a ball kicked: the phone buzzes with it (Round 53)',
         (tester) async {
       final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);

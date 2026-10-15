@@ -145,6 +145,18 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     final since = _lastLook;
     if (since != null && link.notifiedBetween(since, now)) brain.notify();
     _lastLook = now;
+    // Round 53: a medicine due, he reminds; a recipe read within the
+    // hour, he eats (once for it).
+    brain.medicineDue = link.medicineDue;
+    final read = link.recipeReadAt;
+    if (_moving &&
+        read != null &&
+        read != brain.ateFor &&
+        !now.isBefore(read) &&
+        now.difference(read) < PipBrain.eatsWithin &&
+        brain.eat()) {
+      brain.ateFor = read;
+    }
     // Round 44: plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
     brain.setPlugged(link.plugged, animate: _shown != null && _moving);
@@ -220,7 +232,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
               PipActivity.butterfly ||
               PipActivity.ball ||
               PipActivity.stargazing ||
-              PipActivity.dancing:
+              PipActivity.dancing ||
+              PipActivity.eating:
           // Walking over, then picking it up (or plugging in or out).
           final doing = brain.activity;
           for (var s = 0; s < 1200 && brain.activity == doing; s++) {
@@ -747,6 +760,21 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
+    // Round 53: his plate, its meal, crumbs falling (his hands on it
+    // next).
+    if (brain.plate case (final px, final py, final taken, final size)
+        when size > 0.05) {
+      final bottom = (groundTop - py).floorToDouble();
+      sprite(PipSprites.plate, px.floorToDouble(), bottom,
+          colours: PipSprites.fieldColours, alpha: size);
+      sprite(PipSprites.meal(PipBrain.bites.length - taken), px.floorToDouble(),
+          bottom - PipSprites.plate.length,
+          colours: PipSprites.fieldColours, alpha: size);
+    }
+    for (final (cx, cy) in brain.crumbs) {
+      dot(cx.floorToDouble(), (groundTop - cy).floorToDouble(),
+          PipColours.meal);
+    }
     // His hands (Round 44), popping in and away (a sparkle as they do).
     for (final (mx, my, size) in brain.mitts) {
       if (size <= 0.05) continue;

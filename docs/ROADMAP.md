@@ -357,9 +357,9 @@ fixtures for every stored format.
   the sky or a throw.
 
 **New (1.16.0)**
-- [ ] **Medicine reminder**: while the medicine red dot is on, he
+- [x] **Medicine reminder**: while the medicine red dot is on, he
   reminds now and then (a pill on his screen, a hop).
-- [ ] **Eating**: after a recipe was open 5 minutes or more, the next
+- [x] **Eating**: after a recipe was open 5 minutes or more, the next
   time he's seen within the hour he's eating (a plate in his hands,
   bites, crumbs).
 

@@ -534,7 +534,24 @@ abstract final class PipSprites {
     ['#.#...#', '#####.#', '#.#...#', '#####..', '#.#...#'],
   ];
 
+  /// His plate (Round 53), 10 x 2.
+  static const plate = ['QqqqqqqqqQ', '.QQQQQQQQ.'];
+
+  /// What's on his plate with [left] bites left (3 to 0), 10 wide: a
+  /// heap with a green leaf on top, smaller each bite.
+  static List<String> meal(int left) => switch (left) {
+        >= 3 => const ['...uumm...', '..mmmmMm..', '.mMmmmmmm.'],
+        2 => const ['....um....', '...mmMm...'],
+        1 => const ['....mM....'],
+        _ => const <String>[],
+      };
+
   static const fieldColours = {
+    'q': PipColours.plate,
+    'Q': PipColours.plateShade,
+    'm': PipColours.meal,
+    'M': PipColours.mealDark,
+    'u': PipColours.stem,
     'K': PipColours.face,
     'b': PipColours.bug,
     'B': PipColours.bugDark,

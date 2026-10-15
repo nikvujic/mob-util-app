@@ -91,6 +91,9 @@ enum PipActivity {
 
   /// A little dance: hops, turning to the beat, music on his screen.
   dancing,
+
+  /// Round 53: eating from a plate in his hands, a few bites, crumbs.
+  eating,
 }
 
 /// A buzz of the phone, how strong (Round 53).
@@ -119,6 +122,9 @@ enum PipScreen {
   /// Shown when a notification comes (Round 53: no more pictures for fun:
   /// the others go with an event).
   final bool notification;
+
+  /// Shown with a hop: a notification, or his medicine reminder.
+  bool get hops => notification || this == PipScreen.pill;
 
   const PipScreen({this.notification = false});
 }
@@ -174,7 +180,10 @@ enum PipAnimation {
   butterfly('Watching a butterfly'),
   ball('Kicking a ball'),
   shootingStar('A shooting star'),
-  dance('A little dance');
+  dance('A little dance'),
+  // Round 53: a medicine due (the red dot), and after a recipe.
+  medicine('A medicine reminder'),
+  eat('Eating');
 
   final String label;
 
@@ -224,7 +233,8 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.butterfly ||
       PipActivity.ball ||
       PipActivity.stargazing ||
-      PipActivity.dancing =>
+      PipActivity.dancing ||
+      PipActivity.eating =>
         false,
       PipActivity.asleep =>
         next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
@@ -393,6 +403,10 @@ class PipBrain {
         _starFromLeft = random.nextBool();
       case PipAnimation.dance:
         _start(PipActivity.dancing);
+      case PipAnimation.medicine:
+        _startShowing(PipScreen.pill);
+      case PipAnimation.eat:
+        _start(PipActivity.eating);
     }
     return true;
   }
@@ -816,7 +830,10 @@ class PipBrain {
         final beat = (_t / beatTime).floor();
         facingRight = beat.isEven;
         if (_t >= danceTime) _stand();
+      case PipActivity.eating:
+        if (_t >= eatTime) _stand();
     }
+    _stepMedicine(dt);
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
     if (activity != PipActivity.thrown) x = x.clamp(0, _maxX);
@@ -1047,6 +1064,10 @@ class PipBrain {
   /// them, and away after): each (x, height above the ground, size 0–1),
   /// the near one (towards the station) first; none when not needed.
   List<(double, double, double)> get mitts {
+    // Round 53: holding his plate, one each side.
+    if (plate case (final px, final py, _, final size)) {
+      return [(px - 1, py - 0.5, size), (px + plateWidth - 1, py - 0.5, size)];
+    }
     final plugging = activity == PipActivity.plugging;
     if (!plugging && activity != PipActivity.unplugging) return const [];
     final near = _stationRight ? x + width + 2 : x - 4;
@@ -1296,6 +1317,96 @@ class PipBrain {
     return (from + (to - from) * p, 4 + skyRows * 0.25 * p, p);
   }
 
+  // Round 53: his medicine reminder.
+
+  /// A medicine due and not marked (the room says, from the red dot).
+  bool medicineDue = false;
+
+  /// Seconds before he reminds of it: soon after it's due (or he's
+  /// seen), then every [remindEvery] while it's still due.
+  static const remindFirst = 3.0;
+  static const remindEvery = 45.0;
+  double _remindIn = remindFirst;
+
+  void _stepMedicine(double dt) {
+    if (!medicineDue) {
+      _remindIn = remindFirst;
+      return;
+    }
+    if (activity != PipActivity.standing && activity != PipActivity.walking) {
+      return;
+    }
+    _remindIn -= dt;
+    if (_remindIn > 0) return;
+    _remindIn = remindEvery;
+    _startShowing(PipScreen.pill);
+  }
+
+  // Round 53: eating, after a recipe was looked at a while.
+
+  /// How long he eats; when each bite is (seconds in).
+  static const eatTime = 6.5;
+  static const plateIn = 0.4;
+  static const bites = [1.4, 2.6, 3.8];
+  static const biteTime = 0.35;
+  static const eatenAt = 4.6;
+  static const plateWidth = 10;
+
+  /// The plate's height held (below his mouth; up to it for a bite).
+  static const plateRest = 3.0;
+
+  /// How long after a recipe was read he eats, when seen.
+  static const eatsWithin = Duration(hours: 1);
+
+  /// The recipe reading he last ate for (the room: once for each).
+  DateTime? ateFor;
+
+  /// Eating, if he's up and about: true if he started.
+  bool eat() {
+    if (activity != PipActivity.standing && activity != PipActivity.walking) {
+      return false;
+    }
+    _start(PipActivity.eating);
+    return true;
+  }
+
+  /// The plate: (its left, height above the ground, bites taken 0–3,
+  /// size 0–1 popping in and away); null when he isn't eating. Held up
+  /// to his face for each bite.
+  (double, double, int, double)? get plate {
+    if (activity != PipActivity.eating) return null;
+    final taken = bites.where((b) => _t >= b + biteTime / 2).length;
+    final double size = _t < plateIn
+        ? _t / plateIn
+        : _t > eatTime - plateIn
+            ? ((eatTime - _t) / plateIn).clamp(0.0, 1.0)
+            : 1;
+    var up = 0.0;
+    for (final b in bites) {
+      if (_t >= b && _t < b + biteTime) {
+        up = 3 * math.sin(math.pi * (_t - b) / biteTime);
+      }
+    }
+    final left = x + (width - plateWidth) / 2;
+    return (left, plateRest + up, taken, size);
+  }
+
+  /// Crumbs falling from the plate after each bite: (x, height).
+  List<(double, double)> get crumbs {
+    if (activity != PipActivity.eating) return const [];
+    final out = <(double, double)>[];
+    for (final (i, b) in bites.indexed) {
+      final since = _t - b - biteTime / 2;
+      if (since < 0 || since >= 0.6) continue;
+      final fall = 0.5 * 40 * since * since;
+      for (final dx in const [-2.0, 3.0]) {
+        final h = plateRest + 2 - fall;
+        if (h > 0) out.add((x + width / 2 + dx + i, h));
+      }
+    }
+    return out;
+  }
+
   /// A little dance: its length and beat, in seconds.
   static const danceTime = 4.0;
   static const beatTime = 0.5;
@@ -1321,7 +1432,7 @@ class PipBrain {
 
   void _startShowing(PipScreen screen) {
     _screenShow = screen;
-    _showFor = screen.notification ? 4.0 : 3.2;
+    _showFor = screen.hops ? 4.0 : 3.2;
     _start(PipActivity.showing);
   }
 
@@ -1330,6 +1441,10 @@ class PipBrain {
   (PipScreen, double)? get screenShow => switch (activity) {
         PipActivity.showing => (_screenShow, _t),
         PipActivity.dancing => (PipScreen.music, _t),
+        PipActivity.eating when _t >= eatenAt => (
+            PipScreen.happy,
+            _t - eatenAt
+          ),
         PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
         PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
         _ => null,
@@ -1735,6 +1850,10 @@ class PipBrain {
             2 => PipFrame.step1,
             _ => PipFrame.idle,
           },
+        // Round 53: his mouth open for each bite.
+        PipActivity.eating => bites.any((b) => _t >= b && _t < b + biteTime)
+            ? PipFrame.oh
+            : PipFrame.idle,
       };
 
   /// Hurrying, his steps come quicker too (Round 44).
@@ -1777,10 +1896,15 @@ class PipBrain {
       // A hop on every beat.
       return 3 * math.sin(math.pi * ((_t / beatTime) % 1)).abs();
     }
-    if (activity == PipActivity.showing &&
-        _screenShow.notification &&
-        _t < 0.4) {
+    if (activity == PipActivity.showing && _screenShow.hops && _t < 0.4) {
       return 3 * math.sin(math.pi * _t / 0.4); // a hop: something came
+    }
+    // Round 53: the pill twice (a second hop).
+    if (activity == PipActivity.showing &&
+        _screenShow == PipScreen.pill &&
+        _t >= 0.5 &&
+        _t < 0.9) {
+      return 3 * math.sin(math.pi * (_t - 0.5) / 0.4);
     }
     if (activity == PipActivity.hatching && _t >= popEnd && _t < jumpEnd) {
       final p = (_t - popEnd) / (jumpEnd - popEnd);

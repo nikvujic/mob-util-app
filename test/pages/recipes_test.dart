@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/screen.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/providers/recipe_read_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
@@ -169,6 +170,30 @@ void main() {
 
       await pressBack(tester);
       expect(screenOn, isFalse, reason: 'off on leaving');
+    });
+
+    testWidgets(
+        'open 5 minutes, it counts as read (Round 53: Pip eats after), '
+        'marked again each minute it stays open', (tester) async {
+      var now = DateTime(2026, 10, 15, 18);
+      container = await pumpApp(tester, clock: () => now);
+      container.read(recipesProvider.notifier).replaceAll([pancakes()]);
+      await openTab(tester, 'Hub');
+      await tester.tap(find.byTooltip('Recipes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pancakes'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(minutes: 4, seconds: 30));
+      expect(container.read(recipeReadProvider), isNull, reason: 'not yet');
+      await tester.pump(const Duration(seconds: 30));
+      expect(container.read(recipeReadProvider), now);
+      now = now.add(const Duration(minutes: 1));
+      await tester.pump(const Duration(minutes: 1));
+      expect(container.read(recipeReadProvider), now);
+      await pressBack(tester);
+      final left = container.read(recipeReadProvider);
+      await tester.pump(const Duration(minutes: 3));
+      expect(container.read(recipeReadProvider), left, reason: 'closed');
     });
 
     testWidgets('To Shop puts them on the to-buy list, with Undo',

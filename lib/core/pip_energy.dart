@@ -184,4 +184,12 @@ abstract class PipLink {
   /// Whether a notification came after [from], up to [to] (Round 52: his
   /// screen shows one).
   bool notifiedBetween(DateTime from, DateTime to);
+
+  /// A medicine dose due and not marked (Round 53: the red dot): he
+  /// reminds of it.
+  bool get medicineDue;
+
+  /// When a recipe was last read a while (Round 53): he eats, seen within
+  /// the hour after.
+  DateTime? get recipeReadAt;
 }

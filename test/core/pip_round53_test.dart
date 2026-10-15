@@ -210,4 +210,122 @@ void main() {
       expect(turned.length, frame.length);
     }
   });
+
+  group('1.16.0: his medicine reminder', () {
+    test('a medicine due: soon a pill on his screen, with two hops', () {
+      final p = up()..medicineDue = true;
+      var t = 0.0;
+      for (; t < 10 && p.screenShow?.$1 != PipScreen.pill; t += 1 / 60) {
+        p.step(1 / 60);
+      }
+      expect(t, closeTo(PipBrain.remindFirst, 0.1));
+      expect(p.activity, PipActivity.showing);
+      var hops = 0;
+      var wasUp = false;
+      for (var i = 0; i < 60 && p.activity == PipActivity.showing; i++) {
+        p.step(1 / 60);
+        if (p.lift > 0 && !wasUp) hops++;
+        wasUp = p.lift > 0;
+      }
+      expect(hops, 2);
+    });
+
+    test('again every so often while due; never when not', () {
+      final due = up()..medicineDue = true;
+      var shows = 0;
+      var was = false;
+      for (var i = 0; i < 60 * 100; i++) {
+        due.step(1 / 60);
+        final pill = due.screenShow?.$1 == PipScreen.pill;
+        if (pill && !was) shows++;
+        was = pill;
+      }
+      // At 3 s, then 45 s on (walks and events between can delay it).
+      expect(shows, inInclusiveRange(2, 3));
+      final not = up();
+      for (var i = 0; i < 60 * 100; i++) {
+        not.step(1 / 60);
+        expect(not.screenShow?.$1, isNot(PipScreen.pill));
+      }
+    });
+
+    test('not asleep: he reminds only up and about', () {
+      final p = asleep()..medicineDue = true;
+      run(p, 10);
+      expect(p.activity, PipActivity.asleep);
+      expect(p.screenShow, isNull);
+    });
+
+    test("from Pip Home's list too", () {
+      final p = up();
+      expect(p.play(PipAnimation.medicine), isTrue);
+      expect(p.screenShow?.$1, PipScreen.pill);
+    });
+  });
+
+  group('1.16.0: eating', () {
+    test(
+        'a plate in both hands, three bites (up to his mouth, mouth open, '
+        'crumbs after), happy, then done', () {
+      final p = up();
+      expect(p.eat(), isTrue);
+      expect(p.activity, PipActivity.eating);
+      run(p, PipBrain.plateIn + 0.05);
+      final (left, rest, taken0, size) = p.plate!;
+      expect(size, 1);
+      expect(taken0, 0);
+      expect(rest, PipBrain.plateRest);
+      final hands = p.mitts;
+      expect(hands, hasLength(2));
+      expect(hands.first.$1, lessThan(left));
+      expect(hands.last.$1, greaterThan(left + PipBrain.plateWidth - 3));
+      var biteUp = 0;
+      var crumbs = false;
+      var open = false;
+      final taken = <int>{};
+      var wasUp = false;
+      while (p.activity == PipActivity.eating && p.zsClock < PipBrain.eatenAt) {
+        p.step(1 / 60);
+        final plate = p.plate!;
+        taken.add(plate.$3);
+        final up = plate.$2 > rest;
+        if (up && !wasUp) biteUp++;
+        wasUp = up;
+        open |= up && p.frame == PipFrame.oh;
+        crumbs |= p.crumbs.isNotEmpty;
+      }
+      expect(biteUp, 3);
+      expect(taken, {0, 1, 2, 3});
+      expect(open, isTrue);
+      expect(crumbs, isTrue);
+      p.step(0.1);
+      expect(p.screenShow?.$1, PipScreen.happy);
+      run(p, PipBrain.eatTime);
+      expect(p.activity, isNot(PipActivity.eating));
+      expect(p.plate, isNull);
+      expect(p.mitts, isEmpty);
+    });
+
+    test('not while asleep or busy', () {
+      expect(asleep().eat(), isFalse);
+      final busy = up()..play(PipAnimation.dance);
+      expect(busy.eat(), isFalse);
+      expect(up().play(PipAnimation.eat), isTrue);
+    });
+
+    test('his meal gets smaller each bite, nothing left after three', () {
+      final sizes = [
+        for (var left = 3; left >= 0; left--)
+          PipSprites.meal(left).join().replaceAll('.', '').length,
+      ];
+      expect(sizes[0], greaterThan(sizes[1]));
+      expect(sizes[1], greaterThan(sizes[2]));
+      expect(sizes[2], greaterThan(0));
+      expect(sizes[3], 0);
+      for (var left = 0; left <= 3; left++) {
+        expect(PipSprites.meal(left),
+            everyElement(hasLength(PipBrain.plateWidth)));
+      }
+    });
+  });
 }

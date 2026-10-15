@@ -416,6 +416,13 @@ Round 53: the brain queues `PipBuzz`es where something hits;
 (and drops them when it runs an event to its end unseen).
 `PipSprites.screenTurned` turns a screen picture so it reads right when
 he's drawn mirrored.
+Round 53 (1.16.0): `PipLink.medicineDue` (the red dot's rule, read
+fresh) sets `PipBrain.medicineDue`, and the brain shows the pill on its
+own clock (`remindFirst`, `remindEvery`). `recipeReadProvider` holds
+when a recipe was last open 5 minutes (the recipe page's minute timer);
+`PipLink.recipeReadAt` hands it to the room, which starts `eat()` within
+`PipBrain.eatsWithin` and keeps `ateFor` so it's once a reading. The
+brain gives `plate` and `crumbs`; the plate's hands come from `mitts`.
 
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,

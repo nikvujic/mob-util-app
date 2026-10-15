@@ -183,8 +183,23 @@ void main() {
         'ball',
         'shootingStar',
         'dance',
+        // Round 53.
+        'medicine',
+        'eat',
       ]);
     });
+
+    /// Steps until he's up and about (an event, now and then, runs its
+    /// course first: the random isn't seeded).
+    void upAndAbout(PipBrain pip) {
+      for (var i = 0;
+          i < 60 * 60 &&
+              pip.activity != PipActivity.standing &&
+              pip.activity != PipActivity.walking;
+          i++) {
+        pip.step(1 / 60);
+      }
+    }
 
     test('play starts it, or says no', () {
       final egg = PipBrain(roomWidth: 120, hatched: false);
@@ -196,11 +211,13 @@ void main() {
       for (var i = 0; i < 300; i++) {
         pip.step(1 / 60);
       }
+      upAndAbout(pip);
       expect(pip.play(PipAnimation.spawn), isTrue);
       expect(pip.activity, PipActivity.spawning);
       for (var i = 0; i < 300; i++) {
         pip.step(1 / 60);
       }
+      upAndAbout(pip);
       final facing = pip.facingRight;
       expect(pip.play(PipAnimation.turn), isTrue);
       expect(pip.facingRight, !facing);

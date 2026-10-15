@@ -4,6 +4,17 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Pip reminds you of your medicine**: while a dose is due (the red
+  dot on Medicine), he shows a pill on his screen with two hops, soon
+  after you see him and then every so often until it's marked.
+- **Pip eats**: after a recipe has been open 5 minutes or more, the next
+  time you see him within the hour he has a meal: a plate in his hands,
+  three bites (crumbs falling), then a happy face. Once for each recipe
+  read. Both are in Pip Home's Animations.
+
 ## [1.15.1] - 2026-10-15
 
 ### Changed

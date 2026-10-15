@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/markdown.dart';
 import 'package:the_app/core/screen.dart';
 import 'package:the_app/core/theme.dart';
@@ -10,6 +11,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/pages/hub/ingredients.dart';
 import 'package:the_app/pages/hub/page_gate.dart';
+import 'package:the_app/providers/recipe_read_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
@@ -112,11 +114,20 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     _lifecycle = AppLifecycleListener(onHide: _saveNow);
     // Cooking with the phone set aside: the screen stays on (Round 40).
     KeepScreenOn.hold();
+    // Round 53: open a while, it's been read (Pip eats, seen soon after);
+    // marked again each minute it stays open.
+    _reading = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (timer.tick < recipeReadAfter.inMinutes) return;
+      ref.read(recipeReadProvider.notifier).state = ref.read(clockProvider)();
+    });
   }
+
+  late final Timer _reading;
 
   @override
   void dispose() {
     _saveNow();
+    _reading.cancel();
     KeepScreenOn.release();
     _lifecycle.dispose();
     _name.dispose();

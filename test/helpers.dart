@@ -330,6 +330,14 @@ class FakePipLink implements PipLink {
   @override
   bool notifiedBetween(DateTime from, DateTime to) =>
       notifications.any((n) => n.isAfter(from) && !n.isAfter(to));
+
+  /// A medicine due (Round 53).
+  @override
+  bool medicineDue = false;
+
+  /// When a recipe was read a while (Round 53).
+  @override
+  DateTime? recipeReadAt;
 }
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]

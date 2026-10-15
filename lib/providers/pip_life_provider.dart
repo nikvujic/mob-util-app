@@ -3,12 +3,16 @@ import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/format.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/power.dart';
 import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/providers/medicine_alerts_provider.dart';
+import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notification_log_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/recipe_read_provider.dart';
 
 /// Pip, the pet (Round 34): an egg until hatched, then his birthday and
 /// name; his energy and batteries (Round 37). Saved to `pip.json`.
@@ -209,6 +213,16 @@ class _Link implements PipLink {
 
   @override
   DateTime get now => _now;
+
+  @override
+  bool get medicineDue {
+    final now = _now;
+    return !_ref.read(preferencesProvider).medicinePausedOn(dayOf(now)) &&
+        doseDue(_ref.read(medicineProvider), now);
+  }
+
+  @override
+  DateTime? get recipeReadAt => _ref.read(recipeReadProvider);
 
   @override
   bool notifiedBetween(DateTime from, DateTime to) => _ref

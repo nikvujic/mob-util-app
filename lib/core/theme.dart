@@ -543,6 +543,11 @@ abstract final class PipColours {
   static const cross = Color(0xFFE0503E); // his cross words (#!)
   static const heart = Color(0xFFE0503E);
   static const puff = Color(0xFFF2F4F8);
+  // Round 53: his plate and meal.
+  static const plate = Color(0xFFF5F2EA);
+  static const plateShade = Color(0xFFB9B4AA);
+  static const meal = Color(0xFFD98A3A);
+  static const mealDark = Color(0xFFA8642A);
 
   // Pip Home's card (Round 35): a game's panel, whatever the theme.
   static const panel = Color(0xFF231F1D);
