@@ -337,6 +337,19 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 49 — Nikola's questions on the food tracker (2026-10-15, patch 1.14.2)
+
+- [ ] Statistics: a row's verdict ("Not enough data yet" and the rest)
+  centred on its food's lines, not at their top.
+- [ ] Statistics: a food without a verdict says what's missing (rated
+  meals with it, or without it), so "5 rated meals" and "not enough
+  data" don't look like a contradiction.
+- [ ] Foods: a food deleted and later added again by the same name gets
+  its meals back (it takes the old id), instead of showing twice in the
+  statistics.
+- Questions answered (tags, rename and delete, foods vs ingredients,
+  partial restore for Food: a proposal, not built).
+
 ### Round 48 — symptoms, the Hub's order, recipes in the food index (2026-10-14, patch 1.14.1)
 
 - [x] Statistics **by symptom**: for each symptom logged, the foods it
