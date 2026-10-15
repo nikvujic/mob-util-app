@@ -4,6 +4,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -77,18 +78,36 @@ class _FoodsPageState extends ConsumerState<FoodsPage> {
     if (!mounted) return;
     switch (choice) {
       case 'rename':
+        String? taken;
         await showTextInputSheet(
           context,
           hint: 'Food',
           initialValue: food.name,
           onSubmit: (name) {
-            if (!_notifier.renameFood(food.id, name) &&
-                name.trim().isNotEmpty &&
-                name.trim() != food.name) {
-              _toast('There is a food called that already');
-            }
+            if (!_notifier.renameFood(food.id, name)) taken = name;
           },
         );
+        // Another food's name (Round 50): merge them, asked first.
+        final other =
+            taken == null ? null : ref.read(foodProvider).foodNamed(taken!);
+        if (other == null || other.id == food.id || !mounted) return;
+        final meals = ref
+            .read(foodProvider)
+            .meals
+            .where((m) => m.foods.any((f) => f.foodId == food.id))
+            .length;
+        final merge = await showConfirmDialog(
+          context,
+          title: 'Merge into ${other.name}?',
+          message: '${other.name} is already a food. ${food.name} and its '
+              '$meals ${meals == 1 ? 'meal' : 'meals'} become '
+              "${other.name}'s; their tags are joined.",
+          confirmLabel: 'Merge',
+        );
+        if (!merge || !mounted) return;
+        final before = _notifier.mergeFood(food.id, other.id);
+        _toast('${food.name} merged into ${other.name}',
+            undo: () => _notifier.replaceAll(before));
       case 'tags':
         await showModalBottomSheet<void>(
           context: context,
@@ -113,6 +132,19 @@ class _FoodsPageState extends ConsumerState<FoodsPage> {
           : PullDownList(
               bottomSpace: BottomActions.contentClearance,
               slivers: [
+                // While some have no tags (Round 50): what tags are for.
+                if (foods.any((f) => f.tags.isEmpty))
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      key: const Key('tagsHint'),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Text(
+                        'Tags (dairy, gluten, spicy…) group foods for the '
+                        'statistics by kind. Tap a food to tag it.',
+                        style: TextStyle(color: colors.textMuted),
+                      ),
+                    ),
+                  ),
                 SliverPadding(
                   padding: const EdgeInsets.only(top: 4),
                   sliver: SliverList.list(

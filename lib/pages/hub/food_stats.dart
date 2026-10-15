@@ -27,6 +27,7 @@ class FoodStatsPage extends ConsumerWidget {
     final foods = FoodStats.foods(book);
     final tags = FoodStats.tags(book);
     final bySymptom = FoodStats.bySymptom(book);
+    final unrated = book.meals.where((m) => m.rating == null).length;
 
     Widget heading(String text) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
@@ -58,7 +59,9 @@ class FoodStatsPage extends ConsumerWidget {
                     '$bad bad or awful '
                     '(usually ${_share(bad, rated)}). A food needs '
                     '${FoodStats.enoughMeals} rated meals before it gets a '
-                    'verdict.',
+                    'verdict.'
+                    // Round 50: unrated ones don't count; say so.
+                    '${unrated == 0 ? '' : ' $unrated ${unrated == 1 ? 'meal isn\'t' : 'meals aren\'t'} rated yet.'}',
                     style: TextStyle(color: colors.textSecondary),
                   ),
                 ),

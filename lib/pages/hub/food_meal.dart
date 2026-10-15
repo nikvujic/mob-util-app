@@ -121,6 +121,23 @@ class _MealPageState extends ConsumerState<MealPage> {
     _food.clear();
   }
 
+  /// Another day, the same time; days to come aren't offered.
+  Future<void> _pickDay() async {
+    final local = _meal.at.toLocal();
+    final today = dayOf(ref.read(clockProvider)());
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: dayOf(local).isAfter(today) ? today : dayOf(local),
+      firstDate: DateTime(2000),
+      lastDate: today,
+    );
+    if (picked == null || !mounted) return;
+    _change(_meal.copyWith(
+      at: DateTime(
+          picked.year, picked.month, picked.day, local.hour, local.minute),
+    ));
+  }
+
   Future<void> _pickTime() async {
     final local = _meal.at.toLocal();
     final picked = await showTimePicker(
@@ -230,13 +247,19 @@ class _MealPageState extends ConsumerState<MealPage> {
                     selected: meal.kind == kind,
                     onSelected: (_) => _change(meal.copyWith(kind: kind)),
                   ),
+                // The day can change too (Round 50), not only the time.
+                ActionChip(
+                  key: const Key('mealDay'),
+                  avatar: const Icon(Icons.calendar_today, size: 18),
+                  label: Text(
+                    formatDay(local, today: ref.read(clockProvider)()),
+                  ),
+                  onPressed: _pickDay,
+                ),
                 ActionChip(
                   key: const Key('mealTime'),
                   avatar: const Icon(Icons.schedule, size: 18),
-                  label: Text(
-                    '${formatDay(local, today: ref.read(clockProvider)())}  '
-                    '${formatMinutes(local.hour * 60 + local.minute)}',
-                  ),
+                  label: Text(formatMinutes(local.hour * 60 + local.minute)),
                   onPressed: _pickTime,
                 ),
               ],

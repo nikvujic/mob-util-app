@@ -4,6 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.14.3] - 2026-10-15
+
+### Added
+- Food: renaming a food to another food's name **merges** them (asked
+  first, with Undo): its meals become the other's and their tags are
+  joined, so "Egg" and "Eggs" count as one.
+- Food: a meal's **day** can be changed, not only its time.
+
+### Changed
+- Food: the Foods list says what tags are for while some foods have
+  none; Statistics says how many meals aren't rated yet (they don't
+  count).
+
 ## [1.14.2] - 2026-10-15
 
 ### Changed

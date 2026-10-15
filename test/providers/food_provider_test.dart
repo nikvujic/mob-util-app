@@ -79,6 +79,30 @@ void main() {
     expect(food.foodNamed('Tea')!.id, isNot(milk.id));
   });
 
+  test(
+      'merged (Round 50): its meals take the other (once per meal), tags '
+      'joined, it leaves the list; Undo puts it back', () {
+    final egg = food.foodNamed('Egg')!;
+    final eggs = food.foodNamed('Eggs')!;
+    final toast = food.foodNamed('Toast')!;
+    food
+      ..setTags(egg.id, {FoodTag.meat})
+      ..setTags(eggs.id, {FoodTag.dairy})
+      ..saveMeal(mealOf('m1', [egg, toast]))
+      ..saveMeal(mealOf('m2', [egg, eggs]))
+      ..saveMeal(mealOf('m3', [toast]));
+    final before = food.mergeFood(egg.id, eggs.id);
+    expect(food.state.foods.map((f) => f.name), ['Eggs', 'Toast']);
+    expect(food.state.foodById(eggs.id)!.tags, {FoodTag.meat, FoodTag.dairy});
+    List<String> namesOf(String id) =>
+        food.state.mealById(id)!.foods.map((f) => f.name).toList();
+    expect(namesOf('m1'), ['Eggs', 'Toast']);
+    expect(namesOf('m2'), ['Eggs'], reason: 'once per meal');
+    expect(namesOf('m3'), ['Toast']);
+    food.replaceAll(before);
+    expect(food.state.foods, hasLength(3));
+  });
+
   test('saved to food.json and loaded back', () async {
     final dir = Directory.systemTemp.createTempSync('food');
     addTearDown(() => dir.deleteSync(recursive: true));

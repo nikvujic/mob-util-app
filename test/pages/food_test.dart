@@ -311,6 +311,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(book().meals.single.foods.single.name, 'Oat milk');
 
+    expect(find.byKey(const Key('tagsHint')), findsOneWidget,
+        reason: 'some have no tags');
     await tester.tap(find.text('Tea'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tags'));
@@ -330,6 +332,60 @@ void main() {
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
     expect(book().foods, hasLength(2));
+  });
+
+  testWidgets(
+      'Foods: renamed to another food\'s name, they merge (Round 50), asked '
+      'first, with Undo; all tagged, no hint', (tester) async {
+    await openFood(tester,
+        start: FoodBook(foods: [
+          Food(id: 'Egg', name: 'Egg', tags: {FoodTag.meat}),
+          Food(id: 'Eggs', name: 'Eggs', tags: {FoodTag.dairy}),
+        ], meals: [
+          meal('a', DateTime(2026, 10, 14, 8), ['Egg']),
+          meal('b', DateTime(2026, 10, 13, 8), ['Eggs']),
+        ]));
+    await tapTooltip(tester, 'Foods');
+    expect(find.byKey(const Key('tagsHint')), findsNothing);
+    await tester.tap(find.text('Egg'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rename'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'eggs');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.text('Merge into Eggs?'), findsOneWidget);
+    expect(find.textContaining('Egg and its 1 meal become'), findsOneWidget);
+    await tester.tap(find.text('Merge'));
+    await tester.pumpAndSettle();
+    expect(book().foods.map((f) => f.name), ['Eggs']);
+    expect(book().mealById('a')!.foods.single.foodId, 'Eggs');
+    expect(find.text('Egg merged into Eggs'), findsOneWidget);
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(book().foods, hasLength(2));
+  });
+
+  testWidgets("a meal's day changed (Round 50), its time kept", (tester) async {
+    await openFood(tester,
+        start: FoodBook(foods: const [], meals: [
+          meal('a', DateTime(2026, 10, 14, 8, 30), ['Oats']),
+          meal('b', DateTime(2026, 10, 14, 13), ['Rice'],
+              rating: MealRating.good),
+        ]));
+    await tester.tap(find.text('Oats'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('mealDay')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('12'));
+    await tester.tap(find.widgetWithText(TextButton, 'OK'));
+    await tester.pumpAndSettle();
+    expect(book().mealById('a')!.at, DateTime(2026, 10, 12, 8, 30));
+
+    // Statistics say unrated meals don't count yet (Round 50).
+    await pressBack(tester);
+    await tapTooltip(tester, 'Statistics');
+    expect(find.textContaining("1 meal isn't rated yet"), findsOneWidget);
   });
 
   testWidgets('Statistics: nothing rated says so; then verdicts with numbers',
@@ -362,6 +418,9 @@ void main() {
         ));
     await tapTooltip(tester, 'Statistics');
     expect(find.byKey(const Key('foodUsual')), findsOneWidget);
+    expect(
+        find.textContaining('12 rated meals, 5 bad or awful'), findsOneWidget);
+    expect(find.textContaining("aren't rated yet"), findsNothing);
     expect(tester.widget<Text>(find.byKey(const Key('verdict-Onion'))).data,
         'Likely trouble');
     expect(tester.widget<Text>(find.byKey(const Key('verdict-Rice'))).data,

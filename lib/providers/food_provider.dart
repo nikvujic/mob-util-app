@@ -90,6 +90,51 @@ class FoodNotifier extends StateNotifier<FoodBook> {
     return true;
   }
 
+  /// Merges food [fromId] into [intoId] (Round 50: "Egg" and "Eggs"
+  /// typed apart): its meals take the other (once per meal), their tags
+  /// are joined, and it leaves the list. Returns the book before, for
+  /// Undo.
+  FoodBook mergeFood(String fromId, String intoId) {
+    final before = state;
+    final from = state.foodById(fromId);
+    final into = state.foodById(intoId);
+    if (from == null || into == null || fromId == intoId) return before;
+    state = FoodBook(
+      foods: [
+        for (final f in state.foods)
+          if (f.id == intoId)
+            f.copyWith(tags: {...f.tags, ...from.tags})
+          else if (f.id != fromId)
+            f,
+      ],
+      meals: [
+        for (final m in state.meals)
+          m.foods.any((f) => f.foodId == fromId)
+              ? m.copyWith(foods: _mergedFoods(m.foods, fromId, into))
+              : m,
+      ],
+    );
+    return before;
+  }
+
+  /// A meal's foods with [fromId] as [into], once.
+  static List<MealFood> _mergedFoods(
+    List<MealFood> foods,
+    String fromId,
+    Food into,
+  ) {
+    final merged = <MealFood>[];
+    for (final f in foods) {
+      final food =
+          f.foodId == fromId ? MealFood(foodId: into.id, name: into.name) : f;
+      if (food.foodId == into.id && merged.any((o) => o.foodId == into.id)) {
+        continue;
+      }
+      merged.add(food);
+    }
+    return merged;
+  }
+
   void setTags(String id, Set<FoodTag> tags) {
     state = FoodBook(foods: [
       for (final f in state.foods)
