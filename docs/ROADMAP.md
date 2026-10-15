@@ -337,6 +337,26 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 59 — Nikola's notes on 1.19.0 (2026-10-15)
+
+- [x] Dates: a **Holiday** (and an **Event**) has a **length**: pick how
+  many days it lasts.
+- [x] Dates: the **+** button is on the left; it belongs on the right.
+- [x] Pip keeps **charging once full**: he should stop.
+- [x] 18:27, practically night outside, and Pip's sky shows the **sun**:
+  it should be evening for him.
+- [x] Food: **Delete meal** asks first.
+
+Done (1.20.0). Lasting: `DateEntry.days` (holiday and event only,
+`span`; 1–31), dates.json v2, backup v24; on each day, from its first
+(`startCovering`; into the new year too), upcoming while it's on, its
+reminders before its first day. The + was on the hand's side, taken
+from the Hub tile's tap: pinned right, as Medicine's. Charging: full,
+he unplugs (the station stays while plugged in). The sky: `sunTimesOn`
+(NOAA's approximations at 45°N on the time zone's meridian, an hour
+later in summer time); dawn 45 min before sunrise to 20 after, dusk
+20 before sunset to 35 after.
+
 ### Round 58 — Nikola's notes on 1.18.0 (2026-10-15)
 
 - [x] Pip's **hats** sit on one side of his head: centre them, as hats

@@ -39,6 +39,10 @@ Opened from a card or **+**; saved as you go, like a meal or a recipe
   (more can be added later).
 - **Date**: day and month, and the **year** if known (a birthday
   without a year still works; it just doesn't say the age).
+- **Lasts** (Round 59, a Holiday or an Event): how many days, − / +
+  (1 to 31). It shows on each of them in the calendar and on its card as
+  its days ("Sat, 1 Aug – Mon, 10 Aug"), "on now" while it's on;
+  reminders come before its first day.
 - **Every year** (a switch): on by default for Birthday, Anniversary
   and Holiday; off for Event and Other (a one-off on that year's date,
   so its year is needed then).

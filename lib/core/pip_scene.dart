@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show Color;
 
 import 'package:the_app/core/theme.dart';
@@ -9,15 +10,72 @@ enum PipPlace { room, home }
 /// The part of the day his sky follows.
 enum DayPart { night, dawn, day, dusk }
 
-/// [now]'s part of the day: dawn 5:30–7, day to 18:30, dusk to 20:00,
-/// night otherwise. (Later: with the seasons.)
+/// [now]'s part of the day (Round 59: with the seasons): dawn from 45
+/// minutes before sunrise to 20 after, day to 20 minutes before sunset,
+/// dusk to 35 after, night otherwise. October evenings get dark before
+/// seven, June ones only after nine.
 DayPart dayPartAt(DateTime now) {
   final m = now.hour * 60 + now.minute;
-  if (m < 5 * 60 + 30) return DayPart.night;
-  if (m < 7 * 60) return DayPart.dawn;
-  if (m < 18 * 60 + 30) return DayPart.day;
-  if (m < 20 * 60) return DayPart.dusk;
+  final (rise, set) = sunTimesOn(now);
+  if (m < rise - 45) return DayPart.night;
+  if (m < rise + 20) return DayPart.dawn;
+  if (m < set - 20) return DayPart.day;
+  if (m < set + 35) return DayPart.dusk;
   return DayPart.night;
+}
+
+/// The latitude his sun follows: the middle of Europe (the app has no
+/// location; 45° is within a few minutes of anywhere from Rome to Prague
+/// along the same time zone).
+const sunLatitude = 45.0;
+
+/// Sunrise and sunset on [day] (Round 59), in minutes into its day, by
+/// the phone's clock: worked out for [sunLatitude] on the middle meridian
+/// of the phone's time zone (15° an hour), an hour later in summer time.
+/// [zone] and [standardZone] (its offset that day, and outside summer
+/// time) are the phone's unless given (tests: another time zone).
+(double, double) sunTimesOn(
+  DateTime day, {
+  Duration? zone,
+  Duration? standardZone,
+}) {
+  final local = day.toLocal();
+  final dayOfYear = DateTime.utc(local.year, local.month, local.day)
+          .difference(DateTime.utc(local.year))
+          .inDays +
+      1;
+  // Summer time: the zone's offset now beyond its smaller one of the year.
+  final january = DateTime(local.year).timeZoneOffset;
+  final july = DateTime(local.year, 7).timeZoneOffset;
+  final standard = standardZone ?? (january < july ? january : july);
+  final summer = (zone ?? local.timeZoneOffset) - standard;
+  final longitude = standard.inMinutes / 4; // 15° an hour
+
+  // NOAA's approximations, at noon.
+  final g = 2 * math.pi / 365 * (dayOfYear - 1);
+  final eqTime = 229.18 *
+      (0.000075 +
+          0.001868 * math.cos(g) -
+          0.032077 * math.sin(g) -
+          0.014615 * math.cos(2 * g) -
+          0.040849 * math.sin(2 * g));
+  final decl = 0.006918 -
+      0.399912 * math.cos(g) +
+      0.070257 * math.sin(g) -
+      0.006758 * math.cos(2 * g) +
+      0.000907 * math.sin(2 * g) -
+      0.002697 * math.cos(3 * g) +
+      0.00148 * math.sin(3 * g);
+  final lat = sunLatitude * math.pi / 180;
+  final cosHa =
+      math.cos(90.833 * math.pi / 180) / (math.cos(lat) * math.cos(decl)) -
+          math.tan(lat) * math.tan(decl);
+  final ha = math.acos(cosHa.clamp(-1.0, 1.0)) * 180 / math.pi;
+  // Minutes after midnight UTC, then the phone's clock.
+  final shift = standard.inMinutes + summer.inMinutes;
+  final rise = 720 - 4 * (longitude + ha) - eqTime + shift;
+  final set = 720 - 4 * (longitude - ha) - eqTime + shift;
+  return (rise, set);
 }
 
 /// The moon's phase (Round 38), as his sky shows it: none (new moon),

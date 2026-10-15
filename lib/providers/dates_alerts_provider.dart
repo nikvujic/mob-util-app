@@ -15,6 +15,28 @@ String howSoon(DateTime on, DateTime today) => switch (daysBetween(today, on)) {
       final n => 'in $n days',
     };
 
+/// When [date] is, starting [on] (Round 59): its day, or its days
+/// ("Sat, 24 Oct – Mon, 26 Oct") if it lasts; how soon ("in 9 days"), or
+/// "on now" / "last day today" while it's on, or how long ago ("2 days
+/// ago", a day picked in the past); "turns 31" / "10 years".
+String whenLabel(DateEntry date, DateTime on, DateTime today) {
+  final end = date.endFrom(on);
+  final years = yearsLabel(date, on);
+  final ago = daysBetween(end, today);
+  return [
+    date.span > 1
+        ? '${formatDay(on, today: today)} – ${formatDay(end, today: today)}'
+        : formatDay(on, today: today),
+    if (ago > 0)
+      ago == 1 ? 'yesterday' : '$ago days ago'
+    else if (on.isBefore(today))
+      ago == 0 ? 'last day today' : 'on now'
+    else
+      howSoon(on, today),
+    if (years != null) years,
+  ].join('  ·  ');
+}
+
 /// What a date is on [on]: "turns 31" (a birthday), "10 years" (an
 /// anniversary), or nothing.
 String? yearsLabel(DateEntry date, DateTime on) {

@@ -225,4 +225,57 @@ void main() {
     expect(book().dates, hasLength(1));
     expect(find.text('Ana'), findsOneWidget);
   });
+
+  testWidgets('+ on the right (Round 59), even opened from a tile on the left',
+      (tester) async {
+    container = await pumpApp(tester, clock: () => now);
+    await openTab(tester, 'Hub');
+    // A touch on the left first: the hand can't be told from it here.
+    await tester.tapAt(const Offset(20, 300));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Dates'));
+    await tester.pumpAndSettle();
+    final width = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(tester.getCenter(find.byTooltip('Add a date')).dx,
+        greaterThan(width / 2));
+  });
+
+  testWidgets(
+      'a holiday lasts (Round 59): days picked; on each of them in the '
+      'calendar; its days on its card', (tester) async {
+    await openDates(tester);
+    await tester.tap(find.byKey(const Key('datesDay-2026-10-24')));
+    await tester.pumpAndSettle();
+    await tap(tester, find.byTooltip('Add a date'));
+    await tester.enterText(find.byKey(const Key('dateTitle')), 'Odmor');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('dateLasts')), findsNothing,
+        reason: 'a birthday is a day');
+    await tap(tester, find.byKey(const Key('dateType-holiday')));
+    expect(find.text('1 day'), findsOneWidget);
+    expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('dateDaysLess')))
+            .onPressed,
+        isNull);
+    await tap(tester, find.byKey(const Key('dateDaysMore')));
+    await tap(tester, find.byKey(const Key('dateDaysMore')));
+    expect(find.text('3 days'), findsOneWidget);
+    expect(book().dates.single.days, 3);
+    await tap(tester, find.byKey(const Key('dateDaysLess')));
+    expect(book().dates.single.days, 2);
+    await tap(tester, find.byKey(const Key('dateType-event')));
+    expect(find.text('2 days'), findsOneWidget, reason: 'an event lasts too');
+    await pressBack(tester);
+    final id = book().dates.single.id;
+    Iterable<Widget> dots(String day) =>
+        tester.widget<Row>(find.byKey(Key('datesDots-$day'))).children;
+    expect(dots('2026-10-24'), hasLength(1));
+    expect(dots('2026-10-25'), hasLength(1));
+    expect(dots('2026-10-26'), isEmpty);
+    // Picked on its second day: shown from its first.
+    await tester.tap(find.byKey(const Key('datesDay-2026-10-25')));
+    await tester.pumpAndSettle();
+    expect(whenOf(tester, id), 'Sat, 24 Oct – Sun, 25 Oct  ·  in 9 days');
+  });
 }

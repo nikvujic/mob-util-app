@@ -141,7 +141,6 @@ class _DatePageState extends ConsumerState<DatePage> {
     final colors = context.colors;
     final today = _today;
     final next = date.nextFrom(today);
-    final years = next == null ? null : yearsLabel(date, next);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.dateId == null && !saved ? 'New date' : 'Date'),
@@ -197,16 +196,47 @@ class _DatePageState extends ConsumerState<DatePage> {
               ),
             ),
           ),
+          // Round 59: a holiday or an event can last several days.
+          if (date.type.lasts)
+            ListTile(
+              key: const Key('dateLasts'),
+              title: const Text('Lasts'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    key: const Key('dateDaysLess'),
+                    tooltip: 'A day less',
+                    icon: const Icon(Icons.remove),
+                    onPressed: date.days > 1
+                        ? () => _change(date.copyWith(days: date.days - 1))
+                        : null,
+                  ),
+                  SizedBox(
+                    width: 64,
+                    child: Text(
+                      key: const Key('dateDays'),
+                      countOf(date.days, 'day', 'days'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('dateDaysMore'),
+                    tooltip: 'A day more',
+                    icon: const Icon(Icons.add),
+                    onPressed: date.days < DateEntry.mostDays
+                        ? () => _change(date.copyWith(days: date.days + 1))
+                        : null,
+                  ),
+                ],
+              ),
+            ),
           if (next != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
               child: Text(
                 key: const Key('dateNext'),
-                [
-                  formatDay(next, today: today),
-                  howSoon(next, today),
-                  if (years != null) years,
-                ].join('  ·  '),
+                whenLabel(date, next, today),
                 style: TextStyle(color: colors.textMuted, fontSize: 12),
               ),
             ),

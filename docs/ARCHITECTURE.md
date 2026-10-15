@@ -391,7 +391,9 @@ drawn by `widgets/pixel_text.dart` on the room's pixel grid.
 
 One system for his world (Round 35), so nothing shows or plays where it
 doesn't belong. `core/pip_scene.dart`: a `PipPlace` (the menu's `room`,
-Pip Home's `home`), the `DayPart` from the clock (`dayPartAt`), a
+Pip Home's `home`), the `DayPart` from the clock (`dayPartAt`; Round 59:
+by `sunTimesOn`, sunrise and sunset for the date at `sunLatitude` on
+the time zone's meridian, an hour later in summer time), a
 `PipBackground` (each gives its sky per part of the day), and `PipProp`s
 (stars, moon, sun, clouds; later snow, hats...), each declaring the
 places, parts of the day and backgrounds it shows in. `PipScene.at` is

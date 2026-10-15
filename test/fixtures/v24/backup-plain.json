@@ -1,0 +1,80 @@
+{
+  "format": "the-app-backup",
+  "version": 24,
+  "createdAt": "2026-10-15T19:00:00.000Z",
+  "appVersion": "1.20.0 (63)",
+  "data": {
+    "notes": [],
+    "shopItems": [],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [],
+    "recipes": [],
+    "ingredients": {
+      "sections": []
+    },
+    "food": {
+      "foods": [],
+      "meals": []
+    },
+    "dates": [
+      {
+        "id": "d1",
+        "title": "Ljetovanje 🏖",
+        "type": "holiday",
+        "day": 1,
+        "month": 8,
+        "yearly": true,
+        "note": "Ponesi kremu",
+        "reminders": [
+          {
+            "daysBefore": 7,
+            "minutes": 1080
+          }
+        ],
+        "days": 10
+      },
+      {
+        "id": "d2",
+        "title": "Sajam",
+        "type": "event",
+        "day": 30,
+        "month": 12,
+        "year": 2026,
+        "yearly": false,
+        "note": "Hala 1",
+        "reminders": [],
+        "days": 4
+      },
+      {
+        "id": "d3",
+        "title": "Ana 🎂",
+        "type": "birthday",
+        "day": 24,
+        "month": 10,
+        "year": 1995,
+        "yearly": true,
+        "note": "",
+        "reminders": [
+          {
+            "daysBefore": 1,
+            "minutes": 540
+          }
+        ]
+      }
+    ]
+  }
+}

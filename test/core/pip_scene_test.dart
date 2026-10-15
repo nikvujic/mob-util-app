@@ -7,17 +7,60 @@ import 'package:the_app/core/theme.dart';
 void main() {
   DateTime at(int h, int m) => DateTime(2026, 10, 13, h, m);
 
-  test('the parts of the day', () {
+  test('the parts of the day (Round 59: by the sun, with the seasons)', () {
+    final (rise, set) = sunTimesOn(at(12, 0));
+    DayPart partAt(double minutes) =>
+        dayPartAt(at(minutes ~/ 60, (minutes % 60).floor()));
     expect(dayPartAt(at(0, 0)), DayPart.night);
-    expect(dayPartAt(at(5, 29)), DayPart.night);
-    expect(dayPartAt(at(5, 30)), DayPart.dawn);
-    expect(dayPartAt(at(6, 59)), DayPart.dawn);
-    expect(dayPartAt(at(7, 0)), DayPart.day);
-    expect(dayPartAt(at(18, 29)), DayPart.day);
-    expect(dayPartAt(at(18, 30)), DayPart.dusk);
-    expect(dayPartAt(at(19, 59)), DayPart.dusk);
-    expect(dayPartAt(at(20, 0)), DayPart.night);
+    expect(partAt(rise - 46), DayPart.night);
+    expect(partAt(rise - 44), DayPart.dawn);
+    expect(partAt(rise + 19), DayPart.dawn);
+    expect(partAt(rise + 21), DayPart.day);
+    expect(partAt(set - 21), DayPart.day);
+    expect(partAt(set - 19), DayPart.dusk);
+    expect(partAt(set + 34), DayPart.dusk);
+    expect(partAt(set + 36), DayPart.night);
     expect(dayPartAt(at(23, 59)), DayPart.night);
+  });
+
+  test('the sun: its times by the season, as at 45° on the zone\'s meridian',
+      () {
+    // The phone's clock: an hour later in summer time.
+    double summer(DateTime t) {
+      final jan = DateTime(t.year).timeZoneOffset;
+      final jul = DateTime(t.year, 7).timeZoneOffset;
+      return (t.timeZoneOffset - (jan < jul ? jan : jul)).inMinutes.toDouble();
+    }
+
+    void near((double, double) times, int rise, int set, DateTime day) {
+      expect(times.$1 - summer(day), closeTo(rise, 4), reason: '$day rise');
+      expect(times.$2 - summer(day), closeTo(set, 4), reason: '$day set');
+    }
+
+    final june = DateTime(2026, 6, 21, 12);
+    final december = DateTime(2026, 12, 21, 12);
+    final october = DateTime(2026, 10, 15, 12);
+    near(sunTimesOn(june), 4 * 60 + 13, 19 * 60 + 51, june);
+    near(sunTimesOn(december), 7 * 60 + 37, 16 * 60 + 22, december);
+    near(sunTimesOn(october), 6 * 60 + 14, 17 * 60 + 17, october);
+    // A phone in Central European time (+1, +2 in summer): the same
+    // clock times as on its meridian, summer time an hour later.
+    const cet = Duration(hours: 1), cest = Duration(hours: 2);
+    final (r, st) = sunTimesOn(october, zone: cest, standardZone: cet);
+    expect(r, closeTo(7 * 60 + 14, 4));
+    expect(st, closeTo(18 * 60 + 17, 4),
+        reason: "Nikola's 18:27 in October: dusk, not day");
+    final (wr, ws) = sunTimesOn(december, zone: cet, standardZone: cet);
+    expect(wr, closeTo(7 * 60 + 37, 4));
+    expect(ws, closeTo(16 * 60 + 22, 4));
+    // Nikola's evening: 10 minutes past sunset in October is no longer
+    // day (it was, by the fixed hours, till 18:30).
+    final (_, set) = sunTimesOn(october);
+    final evening = set + 10;
+    expect(
+        dayPartAt(
+            DateTime(2026, 10, 15, evening ~/ 60, (evening % 60).floor())),
+        DayPart.dusk);
   });
 
   test('each part has its own sky', () {
@@ -38,7 +81,10 @@ void main() {
         {PipProp.sun, PipProp.clouds});
     expect(PipScene.at(PipPlace.room, at(23, 0)).props,
         {PipProp.stars, PipProp.moon});
-    expect(PipScene.at(PipPlace.home, at(19, 0)).props,
+    final (_, set) = sunTimesOn(at(12, 0));
+    final dusk = set + 10;
+    expect(
+        PipScene.at(PipPlace.home, at(dusk ~/ 60, (dusk % 60).floor())).props,
         {PipProp.moon, PipProp.clouds});
   });
 

@@ -113,4 +113,64 @@ void main() {
         ]),
         isEmpty);
   });
+
+  test('when (Round 59): its days if it lasts; on now; the last day; gone', () {
+    final today = DateTime(2026, 8, 6);
+    const holiday = DateEntry(
+      id: 'h',
+      title: 'Ljetovanje',
+      type: DateType.holiday,
+      day: 1,
+      month: 8,
+      days: 10,
+    );
+    expect(whenLabel(holiday, DateTime(2026, 8, 1), today),
+        'Sat, 1 Aug – Mon, 10 Aug  ·  on now');
+    expect(whenLabel(holiday, DateTime(2026, 8, 1), DateTime(2026, 8, 10)),
+        'Sat, 1 Aug – Mon, 10 Aug  ·  last day today');
+    expect(whenLabel(holiday, DateTime(2026, 8, 1), DateTime(2026, 7, 29)),
+        'Sat, 1 Aug – Mon, 10 Aug  ·  in 3 days');
+    expect(whenLabel(holiday, DateTime(2026, 8, 1), DateTime(2026, 8, 11)),
+        'Sat, 1 Aug – Mon, 10 Aug  ·  yesterday');
+    const ana = DateEntry(
+      id: 'a',
+      title: 'Ana',
+      type: DateType.birthday,
+      day: 3,
+      month: 8,
+      year: 1995,
+    );
+    expect(whenLabel(ana, DateTime(2026, 8, 3), today),
+        'Mon, 3 Aug  ·  3 days ago  ·  turns 31');
+    expect(whenLabel(ana, DateTime(2026, 8, 3), DateTime(2026, 8, 3)),
+        'Mon, 3 Aug  ·  today  ·  turns 31');
+  });
+
+  test('a holiday that lasts: reminded before its first day only', () {
+    const holiday = DateEntry(
+      id: 'h',
+      title: 'Ljetovanje',
+      type: DateType.holiday,
+      day: 10,
+      month: 8,
+      days: 5,
+      reminders: [DateReminder(daysBefore: 1, minutes: 540)],
+    );
+    final planned = planDateReminders(
+      now: DateTime(2026, 8, 1, 12),
+      book: const DateBook([holiday]),
+      preferences: const Preferences(),
+      days: 14,
+    );
+    expect(planned.map((r) => r.at), [DateTime(2026, 8, 9, 9)]);
+    // On now: nothing more this time.
+    expect(
+        planDateReminders(
+          now: DateTime(2026, 8, 11, 12),
+          book: const DateBook([holiday]),
+          preferences: const Preferences(),
+          days: 14,
+        ),
+        isEmpty);
+  });
 }

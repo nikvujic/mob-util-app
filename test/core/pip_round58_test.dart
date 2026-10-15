@@ -196,4 +196,31 @@ void main() {
           reason: 'what he had then');
     });
   });
+
+  test(
+      'Round 59: full while charging, he unplugs and goes about; the '
+      'station stays; a segment down, he goes back', () {
+    final p = up()..segments = 2;
+    p.setPlugged(true, animate: false);
+    expect(p.activity, PipActivity.charging);
+    run(p, 1);
+    expect(p.activity, PipActivity.charging, reason: 'not full yet');
+    p.segments = 3;
+    run(p, 1 / 60);
+    expect(p.activity, PipActivity.unplugging);
+    run(p, PipBrain.unplugEnd + 0.5);
+    expect(p.activity, isNot(PipActivity.unplugging));
+    expect(p.station, isNotNull, reason: 'the phone is still plugged in');
+    run(p, 10);
+    expect({
+      PipActivity.toStation,
+      PipActivity.plugging,
+      PipActivity.charging
+    }, isNot(contains(p.activity)), reason: 'full: he leaves it be');
+    p.segments = 2;
+    for (var i = 0; i < 60 * 30 && p.activity != PipActivity.charging; i++) {
+      p.step(1 / 60);
+    }
+    expect(p.activity, PipActivity.charging);
+  });
 }

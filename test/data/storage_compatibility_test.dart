@@ -831,6 +831,81 @@ void main() {
       );
       expect(storage.initialDates.dates, isEmpty);
     });
+
+    test('a date from version 1 lasts a day', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v23/storage'),
+      );
+      expect(storage.initialDates.dates.map((d) => d.days), [1, 1, 1]);
+    });
+  });
+
+  group('dates.json v2 / v24 backup (lasting days, Round 59)', () {
+    void expectSample(DateBook book) {
+      expect(
+          book.dates.map((d) => (
+                d.id,
+                d.title,
+                d.type,
+                d.day,
+                d.month,
+                d.year,
+                d.yearly,
+                d.days,
+                d.span,
+                d.note
+              )),
+          [
+            (
+              'd1',
+              'Ljetovanje 🏖',
+              DateType.holiday,
+              1,
+              8,
+              null,
+              true,
+              10,
+              10,
+              'Ponesi kremu'
+            ),
+            (
+              'd2',
+              'Sajam',
+              DateType.event,
+              30,
+              12,
+              2026,
+              false,
+              4,
+              4,
+              'Hala 1'
+            ),
+            ('d3', 'Ana 🎂', DateType.birthday, 24, 10, 1995, true, 1, 1, ''),
+          ]);
+      expect(book.dates[0].reminders,
+          const [DateReminder(daysBefore: 7, minutes: 1080)]);
+      expect(book.dates[1].reminders, isEmpty);
+      expect(book.dates[2].reminders, const [DateReminder.standard]);
+      // Into the new year.
+      expect(book.on(DateTime(2027, 1, 2)).single.id, 'd2');
+      expect(book.on(DateTime(2027, 1, 3)), isEmpty);
+    }
+
+    test('dates.json version 2 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v24/storage'),
+      );
+      expectSample(storage.initialDates);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v24 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v24/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.dates.dates, hasLength(3));
+      expectSample(file.backup.dates);
+    });
   });
 
   test('notifications.json version 1 (Round 31) loads', () async {
@@ -1172,6 +1247,10 @@ void main() {
           '263b76a17f5dd3f9d24a9f8bc4c2d6ece5954983034f39ffc56a48385e2dc057',
       'test/fixtures/v23/backup-plain.json':
           'b7fe1f4ea2a469b4bb1950691900d53afa7eb581af11f13ddae3f6cc66c561ce',
+      'test/fixtures/v24/storage/dates.json':
+          '6038dd679d774288fdc6ff82d66282c3394bdd23ab734c5b04e63686560a1a76',
+      'test/fixtures/v24/backup-plain.json':
+          '0176927ff8cb861b80f27cc94b7e1cb6f520a10ab6aee2f049b88704198d91ea',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

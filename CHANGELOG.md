@@ -4,6 +4,23 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Dates**: a holiday or an event can **last several days** (Lasts,
+  − / +, up to 31): it shows on each of them in the calendar, its card
+  says its days ("Sat, 1 Aug – Mon, 10 Aug") and "on now" while it's on;
+  reminders come before its first day.
+
+### Changed
+- Pip's **sky follows the seasons**: dawn, day, dusk and night by the
+  sun's real times for the date (an October evening is dusk soon after
+  six, a June one after nine), not fixed hours.
+- Pip **stops charging when he's full**: he unplugs and goes about, and
+  goes back once he's used a segment.
+- **Food**: Delete meal asks first.
+- **Dates**: the **+** button is always on the right.
+
 ## [1.19.0] - 2026-10-15
 
 ### Added

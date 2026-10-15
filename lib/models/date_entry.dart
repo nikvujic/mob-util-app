@@ -4,16 +4,19 @@
 enum DateType {
   birthday('Birthday', yearly: true),
   anniversary('Anniversary', yearly: true),
-  holiday('Holiday', yearly: true),
-  event('Event'),
+  holiday('Holiday', yearly: true, lasts: true),
+  event('Event', lasts: true),
   other('Other');
 
-  const DateType(this.label, {this.yearly = false});
+  const DateType(this.label, {this.yearly = false, this.lasts = false});
 
   final String label;
 
   /// Whether a new date of this type is every year.
   final bool yearly;
+
+  /// Whether it can last several days (Round 59: a holiday, an event).
+  final bool lasts;
 
   /// The type stored as [id]; unknown (e.g. from a newer app): other.
   static DateType fromId(String? id) =>
@@ -77,6 +80,14 @@ class DateEntry {
   final String note;
   final List<DateReminder> reminders;
 
+  /// How many days it lasts (Round 59), from its day on; only a type that
+  /// [DateType.lasts] (else it's kept, unused, for if the type comes
+  /// back). See [span].
+  final int days;
+
+  /// The longest it can last.
+  static const mostDays = 31;
+
   const DateEntry({
     required this.id,
     required this.title,
@@ -87,7 +98,15 @@ class DateEntry {
     this.yearly = true,
     this.note = '',
     this.reminders = const [DateReminder.standard],
+    this.days = 1,
   });
+
+  /// How many days it lasts, as its type has it: 1 unless it [DateType.lasts].
+  int get span => type.lasts ? days : 1;
+
+  /// Its last day, for one starting on [start].
+  DateTime endFrom(DateTime start) =>
+      DateTime(start.year, start.month, start.day + span - 1);
 
   DateEntry copyWith({
     String? title,
@@ -98,6 +117,7 @@ class DateEntry {
     bool? yearly,
     String? note,
     List<DateReminder>? reminders,
+    int? days,
   }) =>
       DateEntry(
         id: id,
@@ -109,6 +129,7 @@ class DateEntry {
         yearly: yearly ?? this.yearly,
         note: note ?? this.note,
         reminders: reminders ?? this.reminders,
+        days: (days ?? this.days).clamp(1, mostDays),
       );
 
   /// When it falls in [inYear] (29 February on the 28th in a year without
@@ -119,19 +140,31 @@ class DateEntry {
     return DateTime(inYear, month, day > last ? last : day);
   }
 
-  /// Whether it falls on [date] (a day, local).
-  bool on(DateTime date) {
-    final at = inYear(date.year);
-    return at != null && at.month == date.month && at.day == date.day;
+  /// When the time it covers [date] began (its first day), or null if
+  /// it doesn't fall on [date] (a day, local). Round 59: lasting several
+  /// days, every one of them (also into the new year).
+  DateTime? startCovering(DateTime date) {
+    final day = DateTime(date.year, date.month, date.day);
+    for (final y in [date.year, date.year - 1]) {
+      final at = inYear(y);
+      if (at != null && !at.isAfter(day) && !endFrom(at).isBefore(day)) {
+        return at;
+      }
+    }
+    return null;
   }
 
-  /// The next time it falls, on [from] or after (a day); null if never
-  /// again (a one-off gone by).
+  /// Whether it falls on [date] (a day, local).
+  bool on(DateTime date) => startCovering(date) != null;
+
+  /// The next time it falls, on [from] or after (a day): its first day,
+  /// which is before [from] while it's on (Round 59); null if never again
+  /// (a one-off gone by).
   DateTime? nextFrom(DateTime from) {
     final start = DateTime(from.year, from.month, from.day);
-    for (final y in [from.year, from.year + 1]) {
+    for (final y in [from.year - 1, from.year, from.year + 1]) {
       final at = inYear(y);
-      if (at != null && !at.isBefore(start)) return at;
+      if (at != null && !endFrom(at).isBefore(start)) return at;
     }
     return null;
   }
@@ -154,6 +187,7 @@ class DateEntry {
         'yearly': yearly,
         'note': note,
         'reminders': [for (final r in reminders) r.toJson()],
+        if (days != 1) 'days': days,
       };
 
   factory DateEntry.fromJson(Map<String, dynamic> json) => DateEntry(
@@ -169,6 +203,7 @@ class DateEntry {
           for (final r in (json['reminders'] as List? ?? const []))
             DateReminder.fromJson(r as Map<String, dynamic>),
         ],
+        days: ((json['days'] as num?)?.toInt() ?? 1).clamp(1, mostDays),
       );
 }
 

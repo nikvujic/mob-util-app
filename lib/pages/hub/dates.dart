@@ -75,7 +75,11 @@ class _DatesPageState extends ConsumerState<DatesPage> {
     final picked = _picked;
     final shown = picked == null
         ? book.upcoming(today)
-        : [for (final d in book.on(picked)) (date: d, on: picked)];
+        // Round 59: each from its first day (it may last several).
+        : [
+            for (final d in book.on(picked))
+              (date: d, on: d.startCovering(picked) ?? picked),
+          ];
     return Scaffold(
       appBar: AppBar(title: Text(HubTool.dates.label)),
       body: PullDownList(
@@ -143,7 +147,10 @@ class _DatesPageState extends ConsumerState<DatesPage> {
           ),
         ],
       ),
+      // Round 59: always on the right (as Medicine): opened from the Hub,
+      // the tile's side isn't the hand's.
       floatingActionButton: BottomActions(
+        side: HandSide.right,
         actions: [
           BottomAction(
             icon: Icons.add,
@@ -177,7 +184,6 @@ class DateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final years = yearsLabel(date, on);
     return SelectableCard(
       selected: false,
       onTap: onTap,
@@ -212,11 +218,7 @@ class DateCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     key: Key('dateWhen-${date.id}'),
-                    [
-                      formatDay(on, today: today),
-                      howSoon(on, today),
-                      if (years != null) years,
-                    ].join('  ·  '),
+                    whenLabel(date, on, today),
                     style: TextStyle(color: colors.textSecondary, fontSize: 12),
                   ),
                 ],

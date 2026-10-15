@@ -121,4 +121,79 @@ void main() {
             .type,
         DateType.other);
   });
+
+  group('lasting days (Round 59)', () {
+    const holiday = DateEntry(
+      id: 'h',
+      title: 'Ljetovanje',
+      type: DateType.holiday,
+      day: 1,
+      month: 8,
+      days: 10,
+    );
+
+    test('a holiday or an event can last; other types are a day', () {
+      expect(DateType.values.where((t) => t.lasts),
+          {DateType.holiday, DateType.event});
+      expect(holiday.span, 10);
+      final asBirthday = holiday.copyWith(type: DateType.birthday);
+      expect(asBirthday.span, 1);
+      expect(asBirthday.days, 10, reason: 'kept, for if it comes back');
+      expect(asBirthday.on(DateTime(2026, 8, 2)), isFalse);
+    });
+
+    test('on every one of its days, from its first', () {
+      expect(holiday.on(DateTime(2026, 7, 31)), isFalse);
+      expect(holiday.on(DateTime(2026, 8, 1)), isTrue);
+      expect(holiday.on(DateTime(2026, 8, 10)), isTrue);
+      expect(holiday.on(DateTime(2026, 8, 11)), isFalse);
+      expect(holiday.startCovering(DateTime(2026, 8, 6)), DateTime(2026, 8, 1));
+      expect(holiday.endFrom(DateTime(2026, 8, 1)), DateTime(2026, 8, 10));
+    });
+
+    test('next from a day it is on: its first day, before it', () {
+      expect(holiday.nextFrom(DateTime(2026, 8, 6)), DateTime(2026, 8, 1));
+      expect(holiday.nextFrom(DateTime(2026, 8, 11)), DateTime(2027, 8, 1));
+      final book = DateBook([holiday]);
+      expect(
+          book.upcoming(DateTime(2026, 8, 6)).single.on, DateTime(2026, 8, 1));
+    });
+
+    test('into the new year, every year or once', () {
+      const fair = DateEntry(
+        id: 'f',
+        title: 'Sajam',
+        type: DateType.event,
+        day: 30,
+        month: 12,
+        year: 2026,
+        yearly: false,
+        days: 4,
+      );
+      expect(fair.on(DateTime(2027, 1, 2)), isTrue);
+      expect(fair.on(DateTime(2027, 1, 3)), isFalse);
+      expect(fair.startCovering(DateTime(2027, 1, 1)), DateTime(2026, 12, 30));
+      expect(fair.nextFrom(DateTime(2027, 1, 2)), DateTime(2026, 12, 30));
+      expect(fair.nextFrom(DateTime(2027, 1, 3)), isNull);
+      final yearly = fair.copyWith(yearly: true, type: DateType.holiday);
+      expect(yearly.on(DateTime(2028, 1, 1)), isTrue);
+    });
+
+    test('kept between 1 and 31 days; written only when not 1', () {
+      expect(holiday.copyWith(days: 0).days, 1);
+      expect(holiday.copyWith(days: 40).days, DateEntry.mostDays);
+      expect(holiday.toJson()['days'], 10);
+      expect(holiday.copyWith(days: 1).toJson().containsKey('days'), isFalse);
+      expect(DateEntry.fromJson(holiday.toJson()).days, 10);
+      expect(
+          DateEntry.fromJson({
+            'id': 'a',
+            'type': 'event',
+            'day': 1,
+            'month': 2,
+            'days': 99
+          }).days,
+          DateEntry.mostDays);
+    });
+  });
 }

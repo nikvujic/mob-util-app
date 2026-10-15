@@ -978,6 +978,11 @@ class PipBrain {
             // phone's plugged in, else it sinks).
             if (!phonePlugged || segments >= 3) _startUnplugging();
           }
+        } else if (segments >= 3) {
+          // Round 59: full, he's done: he unplugs and goes about (the
+          // station stays while the phone's plugged in; he's back once a
+          // segment's gone).
+          _startUnplugging();
         }
       case PipActivity.unplugging:
         if (_t >= unplugEnd) {

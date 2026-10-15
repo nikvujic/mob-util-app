@@ -83,8 +83,9 @@ class Backup {
   /// ingredients list (`recipes`, `ingredients`, as in their files,
   /// Round 42); 21 = to-do things may be waiting (Round 45); 22 = the
   /// food tracker (`food`, as in `food.json`, Round 46); 23 = birthdays &
-  /// dates (`dates`, as in `dates.json`, Round 57).
-  static const version = 23;
+  /// dates (`dates`, as in `dates.json`, Round 57); 24 = a holiday or an
+  /// event may last several days (`days`, Round 59).
+  static const version = 24;
 
   final DateTime createdAt;
   final String appVersion;

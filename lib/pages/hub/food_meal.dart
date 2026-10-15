@@ -12,6 +12,7 @@ import 'package:the_app/pages/hub/food_index.dart';
 import 'package:the_app/pages/hub/food_recipe_sheet.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// A meal (Round 46): what kind and when, its foods, and how it went.
@@ -196,7 +197,15 @@ class _MealPageState extends ConsumerState<MealPage> {
     ));
   }
 
-  void _delete() {
+  /// Asked first (Round 59), then gone, with Undo.
+  Future<void> _delete() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Delete this ${_meal.kind.label.toLowerCase()}?',
+      confirmLabel: 'Delete',
+      destructive: true,
+    );
+    if (!confirmed || !mounted) return;
     final meal = _meal;
     // Kept: Undo comes after this page has closed.
     final notifier = _notifier;

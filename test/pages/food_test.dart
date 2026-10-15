@@ -5,6 +5,7 @@ import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
+import 'package:the_app/widgets/app_dialog.dart';
 
 import '../helpers.dart';
 
@@ -433,6 +434,15 @@ void main() {
     await tester.scrollUntilVisible(find.byKey(const Key('deleteMeal')), 200,
         scrollable: find.byType(Scrollable).first);
     await tester.tap(find.byKey(const Key('deleteMeal')));
+    await tester.pumpAndSettle();
+    // Round 59: asked first.
+    expect(find.text('Delete this breakfast?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(book().meals, hasLength(1), reason: 'not confirmed');
+    await tester.tap(find.byKey(const Key('deleteMeal')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(DialogButton, 'Delete'));
     await tester.pumpAndSettle();
     expect(book().meals, isEmpty);
     expect(find.text('Breakfast deleted'), findsOneWidget);
