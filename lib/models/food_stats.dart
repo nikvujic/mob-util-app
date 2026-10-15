@@ -45,6 +45,14 @@ class FoodFinding {
     this.symptomCount = 0,
   });
 
+  /// Rated meals still needed with it, and without it, for a verdict
+  /// (Round 49: so "5 rated meals" and "not enough data" don't clash).
+  int get missingWith =>
+      meals >= FoodStats.enoughMeals ? 0 : FoodStats.enoughMeals - meals;
+  int get missingWithout => mealsWithout >= FoodStats.enoughMeals
+      ? 0
+      : FoodStats.enoughMeals - mealsWithout;
+
   double get badShare => meals == 0 ? 0 : bad / meals;
   double get badShareWithout =>
       mealsWithout == 0 ? 0 : badWithout / mealsWithout;

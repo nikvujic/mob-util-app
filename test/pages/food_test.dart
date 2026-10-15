@@ -368,6 +368,15 @@ void main() {
         'Seems fine');
     expect(tester.widget<Text>(find.byKey(const Key('verdict-Tofu'))).data,
         'Not enough data yet');
+    // Round 49: what it needs, and the verdict centred on its lines.
+    expect(tester.widget<Text>(find.byKey(const Key('needs-Tofu'))).data,
+        'Needs 4 more rated with it');
+    expect(
+        tester.getCenter(find.byKey(const Key('verdict-Tofu'))).dy,
+        moreOrLessEquals(
+            tester.getCenter(find.byKey(const Key('finding-Tofu'))).dy,
+            epsilon: 1));
+    expect(find.byKey(const Key('needs-Onion')), findsNothing);
     expect(
         find.descendant(
             of: find.byKey(const Key('finding-Onion')),

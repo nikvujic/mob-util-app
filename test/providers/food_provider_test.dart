@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/food.dart';
+import 'package:the_app/models/food_stats.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/backup_provider.dart';
 import 'package:the_app/providers/food_provider.dart';
@@ -62,6 +63,20 @@ void main() {
     food.deleteFood(milk.id);
     expect(food.state.foods, isEmpty);
     expect(food.state.meals.single.foods.single.name, 'Milk');
+  });
+
+  test(
+      'deleted, then added again by the same name: its meals are its own '
+      'again (Round 49), not a second food', () {
+    final milk = food.foodNamed('Milk')!;
+    food.saveMeal(mealOf('m1', [milk]));
+    food.deleteFood(milk.id);
+    final again = food.foodNamed('milk')!;
+    expect(again.id, milk.id);
+    expect(again.name, 'milk', reason: 'as typed now');
+    expect(FoodStats.foods(food.state), hasLength(1));
+    // A new name gets a new id.
+    expect(food.foodNamed('Tea')!.id, isNot(milk.id));
   });
 
   test('saved to food.json and loaded back', () async {

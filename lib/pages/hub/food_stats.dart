@@ -162,6 +162,15 @@ class _SymptomBlock extends StatelessWidget {
   }
 }
 
+/// What a food without a verdict still needs (Round 49).
+String _needs(FoodFinding f) {
+  final parts = [
+    if (f.missingWith > 0) '${f.missingWith} more rated with it',
+    if (f.missingWithout > 0) '${f.missingWithout} more rated without it',
+  ];
+  return 'Needs ${parts.join(', ')}';
+}
+
 /// "1 in 5" (rounded), or "none".
 String _share(int part, int whole) {
   if (whole == 0 || part == 0) return 'none';
@@ -191,8 +200,8 @@ class _FindingRow extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+          // The verdict centred on the food's lines (Round 49).
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -209,6 +218,12 @@ class _FindingRow extends StatelessWidget {
                     if (f.symptom case final symptom?)
                       Text(
                         '${symptom.label} after ${f.symptomCount}',
+                        style: TextStyle(color: colors.textMuted, fontSize: 12),
+                      ),
+                    if (f.verdict == FoodVerdict.unknown)
+                      Text(
+                        key: Key('needs-${f.label}'),
+                        _needs(f),
                         style: TextStyle(color: colors.textMuted, fontSize: 12),
                       ),
                   ],

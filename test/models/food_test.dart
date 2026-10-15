@@ -165,6 +165,8 @@ void main() {
       expect(onion.symptomCount, 4);
       expect(of(foods, 'RICE').verdict, FoodVerdict.unknown,
           reason: 'in all but 2 meals: nothing to compare it with');
+      expect((of(foods, 'RICE').missingWith, of(foods, 'RICE').missingWithout),
+          (0, 3));
       expect(foods.first.label, 'ONION', reason: 'trouble first');
       expect(FoodStats.usual(book), (16, 5));
     });

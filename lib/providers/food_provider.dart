@@ -16,7 +16,18 @@ class FoodNotifier extends StateNotifier<FoodBook> {
     if (trimmed.isEmpty) return null;
     final existing = state.foodNamed(trimmed);
     if (existing != null) return existing;
-    final food = Food(id: generateId(), name: trimmed);
+    // Deleted before and back by the same name (Round 49): it takes its
+    // old id, so its meals (which kept it) are its own again.
+    final wanted = trimmed.toLowerCase();
+    final orphan = [
+      for (final m in state.meals.reversed)
+        for (final f in m.foods)
+          if (f.foodId != null &&
+              f.name.toLowerCase() == wanted &&
+              state.foodById(f.foodId!) == null)
+            f.foodId!,
+    ].firstOrNull;
+    final food = Food(id: orphan ?? generateId(), name: trimmed);
     state = FoodBook(foods: [...state.foods, food], meals: state.meals);
     return food;
   }

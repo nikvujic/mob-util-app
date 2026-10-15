@@ -4,6 +4,17 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.14.2] - 2026-10-15
+
+### Changed
+- Food statistics: each verdict sits centred beside its food; a food
+  without one says what it still needs (more rated meals with it, or
+  without it).
+
+### Fixed
+- Food: a food deleted and later added again by the same name gets its
+  meals back, instead of showing twice in the statistics.
+
 ## [1.14.1] - 2026-10-15
 
 ### Added
