@@ -219,6 +219,46 @@ void main() {
   });
 
   testWidgets(
+      'at its end, a flick on the index flings the page on (Round 56); '
+      "the index doesn't stretch", (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.reset);
+    await openFood(tester,
+        start: FoodBook(foods: [
+          for (var i = 0; i < 30; i++) Food(id: 'f$i', name: 'Food $i'),
+        ], meals: const []));
+    await tapTooltip(tester, 'Log a meal');
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('foodIndex')),
+            matching: find.byWidgetPredicate((w) =>
+                w is StretchingOverscrollIndicator ||
+                w is GlowingOverscrollIndicator)),
+        findsNothing);
+    final inner = find.descendant(
+        of: find.byKey(const Key('foodIndexScroll')),
+        matching: find.byType(Scrollable));
+    final page = find
+        .ancestor(
+            of: find.byKey(const Key('foodIndex')),
+            matching: find.byType(Scrollable))
+        .first;
+    ScrollPosition at(Finder f) => tester.state<ScrollableState>(f).position;
+    at(inner).jumpTo(at(inner).maxScrollExtent);
+    await tester.pumpAndSettle();
+    final start = at(page).pixels;
+    // A new gesture, at its end: a quick flick of 60 pixels.
+    await tester.fling(
+        find.byKey(const Key('foodIndex')), const Offset(0, -60), 1500);
+    await tester.pumpAndSettle();
+    expect(at(page).pixels, greaterThan(start + 100),
+        reason: 'flung on, past the finger');
+  });
+
+  testWidgets(
       'a recipe picked with the keyboard down: closed, the keyboard stays '
       'down (the index still there); a tap on the field brings it '
       '(Round 54)', (tester) async {

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/recipe.dart';
@@ -29,16 +30,6 @@ class FoodIndex extends StatelessWidget {
 
   /// The tallest it gets (Round 53).
   static const maxHeight = 300.0;
-
-  /// A drag past the index's end goes on to the page around it.
-  static bool _passOn(BuildContext context, OverscrollNotification n) {
-    final page = Scrollable.maybeOf(context)?.position;
-    if (page == null || n.dragDetails == null) return false;
-    final to = (page.pixels + n.overscroll)
-        .clamp(page.minScrollExtent, page.maxScrollExtent);
-    if (to != page.pixels) page.jumpTo(to);
-    return true;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +63,7 @@ class FoodIndex extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: maxHeight),
-          child: NotificationListener<OverscrollNotification>(
-            onNotification: (n) => _passOn(context, n),
+          child: _HandOn(
             child: SingleChildScrollView(
               key: const Key('foodIndexScroll'),
               physics: const ClampingScrollPhysics(),
@@ -112,4 +102,68 @@ class FoodIndex extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A drag past the end of the scrolling [child] goes on to the page
+/// around it (Round 54), as a drag of the page itself, so letting go
+/// flings the page on (Round 56: before, only the finger's moves went
+/// on, and the index stretched at its end as if still scrolling: it no
+/// longer stretches).
+class _HandOn extends StatefulWidget {
+  final Widget child;
+
+  const _HandOn({required this.child});
+
+  @override
+  State<_HandOn> createState() => _HandOnState();
+}
+
+class _HandOnState extends State<_HandOn> {
+  /// The page's drag while the index is past its end, or null.
+  Drag? _page;
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth != 0) return false;
+    if (n is OverscrollNotification) {
+      final details = n.dragDetails;
+      if (details == null) return false; // its own fling: let it stop
+      final page = Scrollable.maybeOf(context)?.position;
+      if (page == null) return false;
+      _page ??= page.drag(
+        DragStartDetails(
+          globalPosition: details.globalPosition,
+          localPosition: details.localPosition,
+        ),
+        () => _page = null,
+      );
+      _page!.update(DragUpdateDetails(
+        globalPosition: details.globalPosition,
+        localPosition: details.localPosition,
+        delta: Offset(0, -n.overscroll),
+        primaryDelta: -n.overscroll,
+      ));
+      return true;
+    }
+    if (n is ScrollEndNotification && _page != null) {
+      _page!.end(n.dragDetails ?? DragEndDetails(primaryVelocity: 0));
+      _page = null;
+    }
+    return false;
+  }
+
+  @override
+  void dispose() {
+    _page?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+          child: widget.child,
+        ),
+      );
 }

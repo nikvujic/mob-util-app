@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 56 — Nikola: the index's scroll on (2026-10-15; patch 1.17.2)
+
+- [x] Food, the index under the field: scrolled to its end, a drag kept
+  trying to scroll it (it stretched) instead of the page. Now the drag
+  goes on as the page's own (a flick flings the page on), and the index
+  doesn't stretch.
+
 ### Round 55 — Nikola's notes on 1.17.0 (2026-10-15; patch 1.17.1)
 
 - [x] Pip's **medicine reminder stays** as long as the red dot is on:
