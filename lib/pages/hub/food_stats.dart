@@ -313,8 +313,6 @@ class FoodFindingPage extends ConsumerWidget {
             ),
           ),
         );
-    String percent(int part, int whole) =>
-        whole == 0 ? '–' : '${(100 * part / whole).round()}%';
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -345,15 +343,31 @@ class FoodFindingPage extends ConsumerWidget {
             withIt: FoodStats.ratings(withIt),
             without: FoodStats.ratings(without),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Text(
-              'Bad or awful: ${percent(finding.bad, finding.meals)} with it, '
-              '${percent(finding.badWithout, finding.mealsWithout)} without.'
-              '${withIt.length > finding.meals ? ' ${withIt.length - finding.meals} not rated.' : ''}',
-              style: TextStyle(color: colors.textMuted, fontSize: 12),
-            ),
+          // Round 51: a statistic, shown as one (two bars), not a line.
+          heading('BAD OR AWFUL'),
+          _ShareBar(
+            key: const Key('badShare-with'),
+            label: 'With it',
+            part: finding.bad,
+            whole: finding.meals,
+            colour: MealRating.awful.colour,
           ),
+          _ShareBar(
+            key: const Key('badShare-without'),
+            label: 'Without',
+            part: finding.badWithout,
+            whole: finding.mealsWithout,
+            colour: colors.textHint,
+          ),
+          if (withIt.length > finding.meals)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                '${withIt.length - finding.meals} with it not rated '
+                "(they don't count)",
+                style: TextStyle(color: colors.textMuted, fontSize: 12),
+              ),
+            ),
           if (symptoms.isNotEmpty) ...[
             heading('AFTER IT'),
             for (final (symptom, n) in symptoms)
@@ -406,6 +420,72 @@ class FoodFindingPage extends ConsumerWidget {
   }
 }
 
+/// A share as a labelled bar and its percentage (Round 51).
+class _ShareBar extends StatelessWidget {
+  final String label;
+  final int part;
+  final int whole;
+  final Color colour;
+
+  const _ShareBar({
+    super.key,
+    required this.label,
+    required this.part,
+    required this.whole,
+    required this.colour,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final share = whole == 0 ? 0.0 : part / whole;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 64,
+            child: Text(label, style: TextStyle(color: colors.textSecondary)),
+          ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) => Stack(
+                children: [
+                  Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: colors.divider,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  Container(
+                    width: box.maxWidth * share,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: colour,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 96,
+            child: Text(
+              whole == 0
+                  ? 'no meals'
+                  : '${(100 * share).round()}%  ($part of $whole)',
+              textAlign: TextAlign.end,
+              style: TextStyle(color: colors.textPrimary, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A label and a value on one line.
 class _Line extends StatelessWidget {
   final String label;
@@ -441,6 +521,7 @@ class _Comparison extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final legend = TextStyle(color: colors.textMuted, fontSize: 12);
     final totalWith = withIt.values.fold(0, (a, b) => a + b);
     final totalWithout = without.values.fold(0, (a, b) => a + b);
     Widget bar(double share, Color colour) => LayoutBuilder(
@@ -492,11 +573,27 @@ class _Comparison extends StatelessWidget {
               ],
             ),
           ),
+        // The legend (Round 51): what the bars and the counts are.
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-          child: Text(
-            'Coloured: with it  ·  grey: without  ·  counts: with · without',
-            style: TextStyle(color: colors.textMuted, fontSize: 12),
+          key: const Key('barsLegend'),
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+          child: Row(
+            children: [
+              Row(
+                children: [
+                  for (final rating in MealRating.values.reversed)
+                    Container(width: 5, height: 8, color: rating.colour),
+                ],
+              ),
+              const SizedBox(width: 6),
+              Text('With it', style: legend),
+              const SizedBox(width: 14),
+              Container(width: 25, height: 8, color: colors.textHint),
+              const SizedBox(width: 6),
+              Text('Without', style: legend),
+              const Spacer(),
+              Text('with · without', style: legend),
+            ],
           ),
         ),
       ],

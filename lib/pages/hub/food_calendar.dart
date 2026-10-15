@@ -24,11 +24,13 @@ class FoodCalendar extends StatefulWidget {
     required this.onDay,
   });
 
-  static const cell = 42.0;
-  static const gap = 4.0;
+  /// A day's circle (Round 51: as small as the week line's were) and its
+  /// row, which takes the taps between the circles too.
+  static const cell = 32.0;
+  static const row = 38.0;
 
   /// Six weeks fit any month.
-  static const height = 24 + 6 * (cell + gap);
+  static const height = 24 + 6 * row;
 
   @override
   State<FoodCalendar> createState() => _FoodCalendarState();
@@ -163,8 +165,8 @@ class _Month extends StatelessWidget {
           ),
         ),
         for (var w = 0; w < weeks; w++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: FoodCalendar.gap),
+          SizedBox(
+            height: FoodCalendar.row,
             child: Row(
               children: [
                 for (var d = 0; d < 7; d++)
@@ -205,7 +207,7 @@ class _Day extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!inMonth) return const SizedBox(height: FoodCalendar.cell);
+    if (!inMonth) return const SizedBox(height: FoodCalendar.row);
     final colors = context.colors;
     final future = day.isAfter(today);
     final worst = book.worstOn(day);

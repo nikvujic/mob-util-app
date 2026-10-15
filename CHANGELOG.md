@@ -4,6 +4,15 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [1.14.4] - 2026-10-15
+
+### Changed
+- Food: the calendar's days are small circles again (the month stays).
+- Food, a food's page: the bars have a proper legend (a coloured mini
+  bar for meals with it, a grey one for without, and what the counts
+  are), and **bad or awful** is shown as two bars, with it and without,
+  with their percentages.
+
 ## [1.14.3] - 2026-10-15
 
 ### Added

@@ -370,11 +370,11 @@ it a bigger change". Decisions Claude's.
 
 ### Round 51 — the food tracker's calendar and legend (2026-10-15, patch 1.14.4)
 
-- [ ] The calendar's days as small as the week line's were (the month
+- [x] The calendar's days as small as the week line's were (the month
   grid stays).
-- [ ] The legend under the bars: a mini coloured bar "With it", a grey
+- [x] The legend under the bars: a mini coloured bar "With it", a grey
   one "Without", a divider, then "with · without" for the counts.
-- [ ] "Bad or awful: x% with it, y% without" as a statistic: two
+- [x] "Bad or awful: x% with it, y% without" as a statistic: two
   labelled bars, not a line of text.
 
 ### Round 50 — a sweep of the food tracker (2026-10-15, patch 1.14.3)

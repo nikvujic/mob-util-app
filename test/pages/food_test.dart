@@ -237,9 +237,9 @@ void main() {
     expect(dot('foodDay-2026-10-12').color, const Color(0xFFEF5350),
         reason: 'awful wins');
     expect(dot('foodDay-2026-10-13').color, isNull);
-    expect(tester.getSize(find.byKey(const Key('foodDay-2026-10-12'))).width,
-        greaterThanOrEqualTo(40),
-        reason: 'bigger than a line of dots');
+    // Round 51: circles as small as the week line's were.
+    expect(
+        tester.getSize(find.byKey(const Key('foodDay-2026-10-12'))).width, 32);
     await tester.tap(find.byKey(const Key('foodDay-2026-10-12')));
     await tester.pumpAndSettle();
     expect(find.text('MON, 12 OCT'), findsOneWidget);
@@ -471,6 +471,25 @@ void main() {
             of: find.byKey(const Key('ratingBar-awful')),
             matching: find.text('5 · 0')),
         findsOneWidget);
+    // Round 51: bad or awful as two bars; the legend says what's what.
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('badShare-with')),
+            matching: find.text('100%  (5 of 5)')),
+        findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('badShare-without')),
+            matching: find.text('0%  (0 of 7)')),
+        findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('barsLegend')),
+            matching: find.text('with · without')),
+        findsOneWidget);
+    await tester.scrollUntilVisible(
+        find.byKey(const Key('symptomAfter-bloating')), 200,
+        scrollable: find.byType(Scrollable).last);
     expect(
         find.descendant(
             of: find.byKey(const Key('symptomAfter-bloating')),
