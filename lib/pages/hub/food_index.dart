@@ -5,7 +5,8 @@ import 'package:the_app/models/recipe.dart';
 /// The index under the food field (Round 47): a new name to add, the
 /// foods already used, and the recipes' ingredients that aren't foods
 /// yet, each in its section. Round 53: at most [maxHeight] tall,
-/// scrolling inside when longer.
+/// scrolling inside when longer. Round 54: scrolled to its end, a drag
+/// on scrolls the page.
 class FoodIndex extends StatelessWidget {
   final String typed;
   final bool isNew;
@@ -28,6 +29,16 @@ class FoodIndex extends StatelessWidget {
 
   /// The tallest it gets (Round 53).
   static const maxHeight = 300.0;
+
+  /// A drag past the index's end goes on to the page around it.
+  static bool _passOn(BuildContext context, OverscrollNotification n) {
+    final page = Scrollable.maybeOf(context)?.position;
+    if (page == null || n.dragDetails == null) return false;
+    final to = (page.pixels + n.overscroll)
+        .clamp(page.minScrollExtent, page.maxScrollExtent);
+    if (to != page.pixels) page.jumpTo(to);
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,35 +72,40 @@ class FoodIndex extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: maxHeight),
-          child: SingleChildScrollView(
-            key: const Key('foodIndexScroll'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isNew) row(typed, 'indexNew', icon: Icons.add),
-                if (foods.isNotEmpty) ...[
-                  heading('FOODS'),
-                  for (final name in foods) row(name, 'indexFood'),
+          child: NotificationListener<OverscrollNotification>(
+            onNotification: (n) => _passOn(context, n),
+            child: SingleChildScrollView(
+              key: const Key('foodIndexScroll'),
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isNew) row(typed, 'indexNew', icon: Icons.add),
+                  if (foods.isNotEmpty) ...[
+                    heading('FOODS'),
+                    for (final name in foods) row(name, 'indexFood'),
+                  ],
+                  if (recipes.isNotEmpty) ...[
+                    heading('RECIPES'),
+                    for (final recipe in recipes)
+                      ListTile(
+                        key: Key('indexRecipe-${recipe.name}'),
+                        dense: true,
+                        minTileHeight: kMinInteractiveDimension,
+                        leading: const Icon(Icons.menu_book_outlined, size: 20),
+                        title: Text(recipe.name),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => onRecipe(recipe),
+                      ),
+                  ],
+                  if (ingredients.isNotEmpty) ...[
+                    heading('INGREDIENTS'),
+                    for (final name in ingredients)
+                      row(name, 'indexIngredient'),
+                  ],
+                  const SizedBox(height: 4),
                 ],
-                if (recipes.isNotEmpty) ...[
-                  heading('RECIPES'),
-                  for (final recipe in recipes)
-                    ListTile(
-                      key: Key('indexRecipe-${recipe.name}'),
-                      dense: true,
-                      minTileHeight: kMinInteractiveDimension,
-                      leading: const Icon(Icons.menu_book_outlined, size: 20),
-                      title: Text(recipe.name),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => onRecipe(recipe),
-                    ),
-                ],
-                if (ingredients.isNotEmpty) ...[
-                  heading('INGREDIENTS'),
-                  for (final name in ingredients) row(name, 'indexIngredient'),
-                ],
-                const SizedBox(height: 4),
-              ],
+              ),
             ),
           ),
         ),

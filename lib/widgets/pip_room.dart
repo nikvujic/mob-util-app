@@ -698,6 +698,14 @@ class _RoomPainter extends CustomPainter {
     if (brain.battery case (final left, final up)) {
       sprite(PipSprites.battery, left, groundTop - up);
     }
+    // Round 54: his old one, pulled out of his side (behind his casing
+    // till it's out) and thrown away, end over end, fading.
+    if (brain.oldBattery
+        case (final left, final up, final faded, final turned)) {
+      sprite(PipSprites.batteryEmpty, left.floorToDouble(),
+          (groundTop - up).floorToDouble(),
+          alpha: 1 - faded, flip: turned);
+    }
 
     // Round 52: what's in his field, behind him. A flower coming up
     // (only its grown part shows), or still in the ground.
@@ -760,6 +768,17 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
+    // Round 54: the slot in his side, open while his battery's changed.
+    // Scaled with him, as he crouches.
+    if (brain.batterySlot case final column?) {
+      final (sx, sy) = brain.stretch;
+      dot(
+          centre + (column - centre) * sx,
+          bottom - (PipBrain.slotUp + PipBrain.slotRows) * sy,
+          PipColours.cable,
+          sx,
+          PipBrain.slotRows * sy);
+    }
     // Round 53: his plate, its meal, crumbs falling (his hands on it
     // next).
     if (brain.plate case (final px, final py, final taken, final size)

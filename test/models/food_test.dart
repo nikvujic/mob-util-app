@@ -106,7 +106,7 @@ void main() {
       expect(book.worstOn(DateTime(2026, 10, 13)), isNull);
     });
 
-    test('foods most eaten first; the last different meals to repeat', () {
+    test('foods most eaten first', () {
       final book = FoodBook(foods: [
         Food(id: 'a', name: 'Apple'),
         Food(id: 'b', name: 'Bread'),
@@ -118,8 +118,6 @@ void main() {
         meal('4', ['c'], at: DateTime(2026, 10, 4)),
       ]);
       expect(book.foodsByUse.map((f) => f.name), ['Bread', 'Cheese', 'Apple']);
-      expect(book.recentMeals().map((m) => m.id), ['4', '3', '1'],
-          reason: '2 has the same foods as 3');
     });
 
     test('a food found by name in any case', () {

@@ -196,6 +196,18 @@ abstract final class PipSprites {
     'gggg',
   ];
 
+  /// His old battery (Round 54), thrown away: dark inside, a red bit
+  /// left at the bottom.
+  static const batteryEmpty = [
+    '.hh.',
+    'gXXg',
+    'gXXg',
+    'gXXg',
+    'gXXg',
+    'gRRg',
+    'gggg',
+  ];
+
   // Round 44: his charging station, his hands, his charging screens.
 
   /// The power station (Round 44: drafts v2), 14 x 27, its socket and

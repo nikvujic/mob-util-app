@@ -172,6 +172,7 @@ void main() {
         'turn',
         'fallAsleep',
         'powerOff',
+        'fetch', // Round 54
         'charge',
         // Round 52.
         'fromSky',

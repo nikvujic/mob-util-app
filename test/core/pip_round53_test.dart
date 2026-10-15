@@ -89,7 +89,12 @@ void main() {
         if (size < 0.5) continue;
         final away = p.facingRight ? angle > 0 : angle < 0;
         expect(away, isTrue, reason: 'leaning away, angle $angle');
-        expect(p.facingRight ? hx > p.x + PipBrain.width : hx < p.x, isTrue,
+        // Round 54: by his casing, not over it.
+        expect(
+            p.facingRight
+                ? hx - 1 > p.x + PipBrain.width - PipBrain.bodyInset
+                : hx < p.x + PipBrain.bodyInset - 1,
+            isTrue,
             reason: 'beside him, not over him');
         angles++;
       }

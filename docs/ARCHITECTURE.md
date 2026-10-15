@@ -423,6 +423,12 @@ when a recipe was last open 5 minutes (the recipe page's minute timer);
 `PipLink.recipeReadAt` hands it to the room, which starts `eat()` within
 `PipBrain.eatsWithin` and keeps `ateFor` so it's once a reading. The
 brain gives `plate` and `crumbs`; the plate's hands come from `mitts`.
+Round 54: hands go by his casing, not his box: `PipBrain.bodyInset` and
+`handBeside`. Changing his battery is a timeline in `fetching` (`handIn`
+… `pickEnd`): `battery` (the new one, carried and pushed in), `oldBattery`
+(pulled out, thrown), `batterySlot` and the hand in `mitts`. The old
+and new ones are drawn before him, so in the slot they're behind his
+casing.
 
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,

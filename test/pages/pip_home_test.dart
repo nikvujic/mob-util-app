@@ -223,6 +223,31 @@ void main() {
     expect(words(), isNot(contains("HE'S BUSY, A MOMENT")));
   });
 
+  testWidgets(
+      'Changing his battery (Round 54) plays as a preview: no battery used',
+      (tester) async {
+    final link = FakePipLink(batteries: 1);
+    await open(tester, link: link);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAnimations')));
+    await tester.pumpAndSettle();
+    final brain = room(tester).brain;
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('pipPlay-fetch')),
+      100,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('pipAnimationList')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipPlay-fetch')));
+    await tester.pump();
+    expect(brain.activity, PipActivity.fetching);
+    expect(brain.battery, isNotNull, reason: 'one dropped near him');
+    expect(link.batteries, 1, reason: 'yours not used');
+  });
+
   testWidgets("at his station, Charging says so (Round 45)", (tester) async {
     await open(tester, link: FakePipLink(segments: 2)..plugged = true);
     final brain = room(tester).brain;

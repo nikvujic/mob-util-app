@@ -53,7 +53,7 @@ void main() {
     expect(p.plug, isNotNull);
     final onHook = p.plug!;
     run(p, PipBrain.mittsInEnd + 0.01);
-    expect(p.mitts, hasLength(2));
+    expect(p.mitts, hasLength(1), reason: 'Round 54: only the hand he uses');
     expect(p.mitts.every((m) => m.$3 == 1), isTrue);
     run(p, PipBrain.carryEnd - PipBrain.mittsInEnd);
     expect(p.plug, isNot(onHook), reason: 'in his side now');
@@ -114,7 +114,7 @@ void main() {
     p.setPlugged(false);
     expect(p.activity, PipActivity.unplugging);
     run(p, PipBrain.mittsInEnd + 0.01);
-    expect(p.mitts, hasLength(2), reason: 'hands pop in');
+    expect(p.mitts, hasLength(1), reason: 'a hand pops in (Round 54: one)');
     until(p, PipActivity.unplugging);
     expect(p.activity, PipActivity.standing);
     expect(p.station!.$2, lessThanOrEqualTo(1));

@@ -288,19 +288,6 @@ class FoodBook {
       });
   }
 
-  /// The last meals with different foods, latest first, to repeat.
-  List<Meal> recentMeals({int count = 3}) {
-    final seen = <String>{};
-    final recent = <Meal>[];
-    for (final m in meals.reversed) {
-      if (m.foods.isEmpty) continue;
-      final key = (m.foods.map((f) => f.key).toList()..sort()).join('|');
-      if (seen.add(key)) recent.add(m);
-      if (recent.length == count) break;
-    }
-    return recent;
-  }
-
   Map<String, dynamic> toJson() => {
         'foods': [for (final f in foods) f.toJson()],
         'meals': [for (final m in meals) m.toJson()],

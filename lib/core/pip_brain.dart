@@ -168,7 +168,8 @@ enum PipAnimation {
   powerOff('Running out'),
   wakeUp('Waking up', listed: false),
   powerOn('Back on', listed: false),
-  fetch('Picking up a battery', listed: false),
+  // Round 54: in the list too, as a preview (no battery used).
+  fetch('Changing his battery'),
   // Round 44: the station rises, he plugs in, charges a while, unplugs.
   charge('Charging'),
   // Round 52: more entrances, and things that happen now and then.
@@ -278,6 +279,14 @@ class PipBrain {
   static const width = 20;
   static const height = 19;
 
+  /// His casing's sides, in from his box's (Round 54: hands go by these).
+  static const bodyInset = 2;
+
+  /// A hand's middle beside him, a pixel off his casing: on his right or
+  /// his left. Its two pixels are [handX] - 1 and [handX].
+  double handBeside({required bool right}) =>
+      right ? x + width - bodyInset + 2 : x + bodyInset - 2;
+
   /// Walking speed, in pixels a second.
   static const speed = 14.0;
 
@@ -374,7 +383,8 @@ class PipBrain {
         // No battery given (a demo): straight to the screen coming on.
         if (_battery == null) _t = flyEnd;
       case PipAnimation.fetch:
-        return false; // only with a battery: [takeBattery]
+        // Round 54: a preview (no battery used): one dropped near him.
+        return takeBattery(_batterySpot);
       case PipAnimation.charge:
         // Only where there's room for the station. The phone plugged in
         // and him not at it (full, say): it plays all the same (Round 45).
@@ -469,10 +479,33 @@ class PipBrain {
     }
     _start(PipActivity.fetching);
     _picking = null;
-    // To stand over it, facing it.
-    _target = (left + batteryWidth / 2 - width / 2).clamp(0, _maxX).toDouble();
+    // Round 54: to stand beside it (it by the hand he'll use), on the
+    // side he comes from if there's room there.
+    final rightOf = left + batteryWidth / 2 >= x + width / 2;
+    final besideLeft = left - (width - bodyInset + 1); // it on his right
+    final besideRight = left + batteryWidth + 1 - bodyInset; // his left
+    bool fits(double at) => at >= 0 && at <= _maxX;
+    final take = rightOf
+        ? (fits(besideLeft) || !fits(besideRight))
+        : !fits(besideRight) && fits(besideLeft);
+    _batteryOnRight = take;
+    _target = (take ? besideLeft : besideRight).clamp(0, _maxX).toDouble();
     facingRight = _target >= x;
     return true;
+  }
+
+  /// Which side of him the dropped battery is (Round 54).
+  bool _batteryOnRight = true;
+
+  /// A spot a few steps off for a battery to drop at (Round 54: the
+  /// preview), on whichever side has room.
+  double get _batterySpot {
+    final right = x + width - bodyInset + 1 + 20;
+    if (right + batteryWidth <= roomWidth) return right;
+    final left = x + bodyInset - 1 - batteryWidth - 20;
+    return left >= 0
+        ? left
+        : right.clamp(0, roomWidth - batteryWidth).toDouble();
   }
 
   /// The battery's size, how high it's dropped from, how fast it falls.
@@ -495,6 +528,18 @@ class PipBrain {
         _batteryFrom + (to - batteryWidth / 2 - _batteryFrom) * p,
         _batteryHeight * (1 - p) + 18 * math.sin(math.pi * p),
       );
+    }
+    // Round 54: taken by the hand, carried to his slot, pushed in.
+    final p = _picking;
+    if (activity == PipActivity.fetching && p != null && p >= grabbed) {
+      final out = _slotLeft(out: true);
+      if (p < atSlotAgain) {
+        final q = _ease((p - grabbed) / (atSlotAgain - grabbed));
+        return _lerp((b, 0), (out, slotUp), q);
+      }
+      final q =
+          _ease(((p - atSlotAgain) / (pushedIn - atSlotAgain)).clamp(0.0, 1.0));
+      return _lerp((out, slotUp), (_slotLeft(out: false), slotUp), q);
     }
     return (b, _batteryHeight);
   }
@@ -577,9 +622,115 @@ class PipBrain {
   static const riseUpEnd = 1.6;
   static const onEnd = 1.9;
 
-  /// Picking the battery up: bent over it, then a hop of joy.
-  static const pickAt = 0.35;
-  static const pickEnd = 0.8;
+  /// Changing his battery (Round 54), seconds once he's beside it: a
+  /// hand pops in, goes to the slot in his side and pulls the old one
+  /// out, lifts it and throws it away; he crouches, the hand takes the
+  /// new one, carries it to the slot and pushes it in, pops away; a hop
+  /// of joy.
+  static const handIn = 0.25;
+  static const atSlot = 0.5;
+  static const pulledOut = 0.85;
+  static const throwAt = 1.1;
+  static const throwFlight = 0.9;
+  static const atBattery = 1.5;
+  static const grabbed = 1.65;
+  static const atSlotAgain = 2.05;
+  static const pushedIn = 2.4;
+  static const handOut = 2.6;
+  static const pickEnd = 3.0;
+
+  /// The slot's bottom (height above the ground) and its height.
+  static const slotUp = 6.0;
+  static const slotRows = 7;
+
+  /// A battery's left edge by his slot: all in (behind his casing) or
+  /// out (a pixel off it).
+  double _slotLeft({required bool out}) => _batteryOnRight
+      ? (out ? x + width - bodyInset + 1 : x + width - bodyInset - batteryWidth)
+      : (out ? x + bodyInset - 1 - batteryWidth : x + bodyInset.toDouble());
+
+  /// Where the hand is holding a battery at [left], [up]: at its outer
+  /// side ((x, height) of the hand's middle).
+  (double, double) _holding(double left, double up) => (
+        _batteryOnRight ? left + batteryWidth + 1 : left - 1,
+        up + batteryHeight / 2,
+      );
+
+  /// The old battery, out of his side: its left edge, height above the
+  /// ground, how faded (0–1) and turned (flying, end over end); null
+  /// while it's in him, and gone.
+  (double, double, double, bool)? get oldBattery {
+    final p = _picking;
+    if (activity != PipActivity.fetching || p == null || p < atSlot) {
+      return null;
+    }
+    final inside = _slotLeft(out: false);
+    final out = _slotLeft(out: true);
+    if (p < pulledOut) {
+      final q = _ease((p - atSlot) / (pulledOut - atSlot));
+      return (inside + (out - inside) * q, slotUp, 0, false);
+    }
+    if (p < throwAt) {
+      // Lifted, ready to throw.
+      final q = _ease((p - pulledOut) / (throwAt - pulledOut));
+      return (out, slotUp + 4 * q, 0, false);
+    }
+    final q = (p - throwAt) / throwFlight;
+    if (q >= 1) return null;
+    final away = _batteryOnRight ? 1.0 : -1.0;
+    return (
+      out + away * 50 * q,
+      slotUp + 4 + 16 * math.sin(math.pi * q * 0.9),
+      q < 0.6 ? 0 : (q - 0.6) / 0.4,
+      (q * 8).floor().isOdd,
+    );
+  }
+
+  /// The slot in his side, open while the batteries go in and out: the
+  /// column of his casing it's in, or null.
+  double? get batterySlot {
+    final p = _picking;
+    if (activity != PipActivity.fetching || p == null) return null;
+    if (p < handIn || p >= pushedIn + 0.1) return null;
+    return _batteryOnRight ? x + width - bodyInset - 1 : x + bodyInset;
+  }
+
+  /// The hand changing his battery: (x, height of its middle, size).
+  (double, double, double)? get _batteryHand {
+    final p = _picking;
+    if (activity != PipActivity.fetching || p == null || p >= handOut) {
+      return null;
+    }
+    final rest = (handBeside(right: _batteryOnRight), 9.0);
+    final atOld = _holding(_slotLeft(out: false), slotUp);
+    final b = _battery;
+    final onGround = b == null ? rest : _holding(b, 0);
+    if (p < handIn) return (rest.$1, rest.$2, p / handIn);
+    if (p < atSlot) {
+      final (hx, hy) =
+          _lerp(rest, atOld, _ease((p - handIn) / (atSlot - handIn)));
+      return (hx, hy, 1);
+    }
+    if (p < throwAt) {
+      final (left, up, _, _) = oldBattery!;
+      final (hx, hy) = _holding(left, up);
+      return (hx, hy, 1);
+    }
+    if (p < atBattery) {
+      final from = _holding(_slotLeft(out: true), slotUp + 4);
+      final (hx, hy) =
+          _lerp(from, onGround, _ease((p - throwAt) / (atBattery - throwAt)));
+      return (hx, hy, 1);
+    }
+    if (p < pushedIn) {
+      final (left, up) = battery!;
+      final (hx, hy) = _holding(left, up);
+      return (hx, hy, 1);
+    }
+    final size = 1 - (p - pushedIn) / (handOut - pushedIn);
+    final (hx, hy) = _holding(_slotLeft(out: false), slotUp);
+    return (hx, hy, size.clamp(0.0, 1.0));
+  }
 
   /// How far over he is (0 standing, 1 lying on his side).
   double get tilt {
@@ -749,13 +900,16 @@ class PipBrain {
           final distance = hurry * dt;
           if ((_target - x).abs() <= distance) {
             x = _target;
-            if (_batteryHeight == 0) _picking = 0;
+            if (_batteryHeight == 0) {
+              _picking = 0;
+              facingRight = _batteryOnRight;
+            }
           } else {
             x += _target > x ? distance : -distance;
           }
         } else {
           _picking = picking + dt;
-          if (_picking! >= pickAt) _battery = null;
+          if (_picking! >= pushedIn) _battery = null;
           if (_picking! >= pickEnd) _stand();
         }
       case PipActivity.toStation:
@@ -1060,18 +1214,22 @@ class PipBrain {
   static const hookUp = 5.0;
   static const socketUp = 8.0;
 
-  /// Where his floating hands are (Round 44: they pop in when he needs
-  /// them, and away after): each (x, height above the ground, size 0–1),
-  /// the near one (towards the station) first; none when not needed.
+  /// His floating hand (Round 44: it pops in when he needs it, and away
+  /// after): each (x, height above the ground, size 0–1); Round 54: only
+  /// the one he uses (two holding his plate); none when not needed.
   List<(double, double, double)> get mitts {
+    // Round 54: changing his battery.
+    if (_batteryHand case (final hx, final hy, final size)) {
+      return [(hx - 1, hy - 1.5, size)];
+    }
     // Round 53: holding his plate, one each side.
     if (plate case (final px, final py, _, final size)) {
       return [(px - 1, py - 0.5, size), (px + plateWidth - 1, py - 0.5, size)];
     }
     final plugging = activity == PipActivity.plugging;
     if (!plugging && activity != PipActivity.unplugging) return const [];
-    final near = _stationRight ? x + width + 2 : x - 4;
-    final far = _stationRight ? x - 4 : x + width + 2;
+    // Round 54: close by his side (a pixel off it), only the one he uses.
+    final near = handBeside(right: _stationRight) - 1;
     const rest = 8.0;
     final double size;
     if (_t < mittsInEnd) {
@@ -1097,7 +1255,7 @@ class PipBrain {
       _ when _plugPoint != null => (hand.$1, hand.$2 - 2),
       _ => (near, rest),
     };
-    return [(hx, hy, size), (far, rest, size)];
+    return [(hx, hy, size)];
   }
 
   /// Where the plug is (x, height above the ground) while a hand carries
@@ -1261,7 +1419,8 @@ class PipBrain {
   (double, double)? get fist {
     if (!angry) return null;
     final shake = (_t * 8).floor().isEven ? -1.0 : 1.0;
-    final side = facingRight ? x + width + 1 : x - 3;
+    // Round 54: by his side (drawn from its left pixel).
+    final side = handBeside(right: facingRight) - 1;
     return (side + shake, height + 1.0);
   }
 
@@ -1566,7 +1725,8 @@ class PipBrain {
   (double, double, double, double)? get sword {
     if (activity != PipActivity.bugHunt) return null;
     // Round 53: held out in front, pointing up and away from him.
-    final hand = facingRight ? x + width + 3 : x - 3;
+    // Round 54: a little closer to him.
+    final hand = handBeside(right: facingRight);
     final double size = switch (_bugPhase) {
       0 => (_phaseT / swordIn).clamp(0.0, 1.0),
       4 => (1 - (_phaseT - 1.0) / 0.4).clamp(0.0, 1.0),
@@ -1648,7 +1808,7 @@ class PipBrain {
       1 || 2 => (_flowerX, 0, 1, 0),
       _ => (
           // Round 53: its stem down in his hand.
-          facingRight ? x + width : x - 3,
+          handBeside(right: facingRight) - 2,
           4,
           1,
           _flowerPhase == 4 ? (_t / flowerFade).clamp(0.0, 1.0) : 0,
@@ -1659,7 +1819,7 @@ class PipBrain {
   /// The hand holding the flower: (x, height), or null.
   (double, double)? get flowerHand {
     if (activity != PipActivity.flower || _flowerPhase < 3) return null;
-    return (facingRight ? x + width : x - 2, 5);
+    return (handBeside(right: facingRight) - 1, 5);
   }
 
   // A butterfly.
@@ -1935,8 +2095,8 @@ class PipBrain {
         return hop(riseUpEnd, onEnd, 3);
       case PipActivity.fetching when _picking != null:
         final p = _picking!;
-        if (p < pickAt || p >= pickEnd) return 0;
-        return 3 * math.sin(math.pi * (p - pickAt) / (pickEnd - pickAt));
+        if (p < handOut || p >= pickEnd) return 0;
+        return 3 * math.sin(math.pi * (p - handOut) / (pickEnd - handOut));
       default:
     }
     if (frame == PipFrame.step1 || frame == PipFrame.step3) return 1;
@@ -1956,8 +2116,12 @@ class PipBrain {
     }
     final crouch = switch (activity) {
       PipActivity.flower when _flowerPhase == 2 => _t / flowerPick,
-      PipActivity.fetching when _picking != null && _picking! < pickAt =>
-        _picking! / pickAt,
+      // Round 54: down for the new battery, and up again with it.
+      PipActivity.fetching
+          when _picking != null &&
+              _picking! >= throwAt &&
+              _picking! < atSlotAgain =>
+        (_picking! - throwAt) / (atSlotAgain - throwAt),
       _ => null,
     };
     if (crouch != null) {

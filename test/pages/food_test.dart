@@ -109,7 +109,7 @@ void main() {
 
   testWidgets(
       'the index under the field (Round 47): foods most eaten first, '
-      'narrowed as you type; the last meal repeated', (tester) async {
+      'narrowed as you type', (tester) async {
     await openFood(tester,
         start: FoodBook(foods: [
           Food(id: 'Eggs', name: 'Eggs'),
@@ -139,14 +139,11 @@ void main() {
     expect(find.byKey(const Key('indexFood-Kiwi')), findsNothing,
         reason: 'in the meal now');
 
-    // Another: Same as yesterday's breakfast.
+    // Round 54: no Same as (repeating a recent meal).
     await pressBack(tester);
     await tapTooltip(tester, 'Log a meal');
-    await tester.ensureVisible(find.byKey(const Key('repeatMeal-m1')));
-    await tester.tap(find.byKey(const Key('repeatMeal-m1')));
-    await tester.pumpAndSettle();
-    expect(book().mealsOn(DateTime(2026, 10, 14)).last.foods.map((f) => f.name),
-        ['Eggs', 'Toast']);
+    expect(find.text('SAME AS'), findsNothing);
+    expect(find.byIcon(Icons.replay), findsNothing);
   });
 
   testWidgets(
@@ -185,6 +182,78 @@ void main() {
             .controller!
             .text,
         isEmpty);
+  });
+
+  testWidgets(
+      'the index scrolled to its end: a drag on scrolls the page '
+      '(Round 54)', (tester) async {
+    await openFood(tester,
+        start: FoodBook(foods: [
+          for (var i = 0; i < 30; i++) Food(id: 'f$i', name: 'Food $i'),
+        ], meals: const []));
+    await tapTooltip(tester, 'Log a meal');
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    final inner = find.descendant(
+        of: find.byKey(const Key('foodIndexScroll')),
+        matching: find.byType(Scrollable));
+    final page = find
+        .ancestor(
+            of: find.byKey(const Key('foodIndex')),
+            matching: find.byType(Scrollable))
+        .first;
+    ScrollPosition at(Finder f) => tester.state<ScrollableState>(f).position;
+    final start = at(page).pixels;
+    // Inside the index: only it scrolls.
+    await tester.dragFrom(tester.getCenter(find.byKey(const Key('foodIndex'))),
+        const Offset(0, -80));
+    await tester.pumpAndSettle();
+    expect(at(inner).pixels, greaterThan(0));
+    expect(at(page).pixels, start);
+    // Past its end: the page goes on.
+    await tester.dragFrom(tester.getCenter(find.byKey(const Key('foodIndex'))),
+        const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    expect(at(inner).pixels, at(inner).maxScrollExtent);
+    expect(at(page).pixels, greaterThan(start + 50));
+  });
+
+  testWidgets(
+      'a recipe picked with the keyboard down: closed, the keyboard stays '
+      'down (the index still there); a tap on the field brings it '
+      '(Round 54)', (tester) async {
+    await openFood(tester,
+        start:
+            FoodBook(foods: [Food(id: 'f1', name: 'Milk')], meals: const []));
+    container.read(recipesProvider.notifier).replaceAll([
+      Recipe(
+        id: 'r1',
+        name: 'Pancakes',
+        ingredients: const [RecipeIngredient(name: 'Flour')],
+        createdAt: DateTime(2026, 10, 1),
+      ),
+    ]);
+    await tapTooltip(tester, 'Log a meal');
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    expect(tester.testTextInput.isVisible, isTrue);
+    // The keyboard put away (the field still focused); a recipe opened.
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('indexRecipe-Pancakes')));
+    await tester.pumpAndSettle();
+    await pressBack(tester);
+    expect(tester.testTextInput.isVisible, isFalse, reason: 'stays down');
+    expect(find.byKey(const Key('foodIndex')), findsOneWidget);
+    // The X closes it then too.
+    await tester.tap(find.byKey(const Key('closeFoodIndex')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('foodIndex')), findsNothing);
+    // A tap on the field: the keyboard, and the index again.
+    await tester.tap(find.byKey(const Key('mealFoodField')));
+    await tester.pumpAndSettle();
+    expect(tester.testTextInput.isVisible, isTrue);
+    expect(find.byKey(const Key('foodIndex')), findsOneWidget);
   });
 
   testWidgets(

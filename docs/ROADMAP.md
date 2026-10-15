@@ -337,6 +337,20 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 54 — Nikola's notes on 1.16.0 (2026-10-15; 1.17.0)
+
+- [x] Pip's **battery**, done by hand: he walks up beside it, a hand
+  pulls his old battery out of his side and throws it away, picks the
+  new one up and pushes it in. In Pip Home's Animations too, as a
+  preview only (no battery used, no energy).
+- [x] His **hands** a bit closer to his body (charging, the sword, and
+  any other); only the hand he uses shows (charging had both).
+- [x] Food, the index under the field: picking a recipe and closing it
+  with the keyboard down no longer brings the keyboard up (only a tap
+  on the field does).
+- [x] The index scrolled to its end, scrolling on scrolls the page.
+- [x] The meal page's **Same as** section goes.
+
 ### Round 53 — Nikola's notes on 1.15.0 (2026-10-15; patch 1.15.1, then 1.16.0)
 
 **Patch (1.15.1)**

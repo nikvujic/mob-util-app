@@ -4,6 +4,22 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- **Pip changes his battery by hand**: he walks up beside it, a hand
+  pulls his old battery out of his side and throws it away, then picks
+  up the new one and pushes it in. It's in Pip Home's Animations too, as
+  a preview (none of your batteries used).
+- His **hands** are closer to him (charging, the sword and the others),
+  and only the one he uses shows.
+- **Food**: with the keyboard down, picking a recipe from the index no
+  longer brings it back up (a tap on the field does); scrolled to the
+  index's end, a drag goes on to scroll the page.
+
+### Removed
+- The meal page's **Same as** section.
+
 ## [1.16.0] - 2026-10-15
 
 ### Added

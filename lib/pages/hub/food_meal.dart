@@ -53,6 +53,11 @@ class _MealPageState extends ConsumerState<MealPage> {
   String? _flashing;
   int _flashes = 0;
 
+  /// The index kept open with the field let go (Round 54): a recipe
+  /// picked with the keyboard down, so closing it doesn't bring the
+  /// keyboard back. A tap on the field (or the X) ends it.
+  bool _keepIndex = false;
+
   FoodNotifier get _notifier => ref.read(foodProvider.notifier);
 
   /// The meal as saved, or the draft.
@@ -62,7 +67,9 @@ class _MealPageState extends ConsumerState<MealPage> {
   void initState() {
     super.initState();
     _food.addListener(() => setState(() {}));
-    _foodFocus.addListener(() => setState(() {}));
+    _foodFocus.addListener(() => setState(() {
+          if (_foodFocus.hasFocus) _keepIndex = false;
+        }));
   }
 
   @override
@@ -110,6 +117,12 @@ class _MealPageState extends ConsumerState<MealPage> {
   /// A recipe's ingredients, all ticked, to choose which to add (Round
   /// 48); each becomes a food (the same name reused).
   Future<void> _fromRecipe(Recipe recipe) async {
+    // Keyboard down (Round 54): the field let go, the index kept, so
+    // the sheet closing doesn't focus it (and bring the keyboard up).
+    if (MediaQuery.viewInsetsOf(context).bottom == 0) {
+      setState(() => _keepIndex = true);
+      _foodFocus.unfocus();
+    }
     final picked = await showModalBottomSheet<List<String>>(
       context: context,
       isScrollControlled: true,
@@ -221,12 +234,11 @@ class _MealPageState extends ConsumerState<MealPage> {
     final isNew = typed.isNotEmpty &&
         book.foodNamed(typed) == null &&
         !indexIngredients.any((n) => n.toLowerCase() == typed);
-    final showIndex = _foodFocus.hasFocus &&
+    final showIndex = (_foodFocus.hasFocus || _keepIndex) &&
         (isNew ||
             indexFoods.isNotEmpty ||
             indexRecipes.isNotEmpty ||
             indexIngredients.isNotEmpty);
-    final recent = meal.foods.isEmpty ? book.recentMeals() : const <Meal>[];
 
     return Scaffold(
       appBar: AppBar(
@@ -315,17 +327,19 @@ class _MealPageState extends ConsumerState<MealPage> {
               decoration: InputDecoration(
                 hintText: 'Add a food',
                 // Round 53: an X closes the index (and clears the field).
-                suffixIcon: _foodFocus.hasFocus || _food.text.isNotEmpty
-                    ? IconButton(
-                        key: const Key('closeFoodIndex'),
-                        tooltip: 'Close',
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          _food.clear();
-                          _foodFocus.unfocus();
-                        },
-                      )
-                    : null,
+                suffixIcon:
+                    _foodFocus.hasFocus || _keepIndex || _food.text.isNotEmpty
+                        ? IconButton(
+                            key: const Key('closeFoodIndex'),
+                            tooltip: 'Close',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              _food.clear();
+                              _foodFocus.unfocus();
+                              setState(() => _keepIndex = false);
+                            },
+                          )
+                        : null,
               ),
               onSubmitted: _typed,
             ),
@@ -343,25 +357,6 @@ class _MealPageState extends ConsumerState<MealPage> {
                 _food.clear();
               },
             ),
-          if (recent.isNotEmpty) ...[
-            _heading('SAME AS'),
-            for (final r in recent)
-              ListTile(
-                key: Key('repeatMeal-${r.id}'),
-                dense: true,
-                leading: const Icon(Icons.replay),
-                title: Text(
-                  r.foods.map((f) => f.name).join(', '),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  '${r.kind.label} · ${formatDay(r.at.toLocal(), today: ref.read(clockProvider)())}',
-                  style: TextStyle(color: colors.textMuted),
-                ),
-                onTap: () => _change(meal.copyWith(foods: r.foods)),
-              ),
-          ],
           _heading('HOW IT WENT'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
