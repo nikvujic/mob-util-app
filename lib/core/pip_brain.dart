@@ -58,6 +58,58 @@ enum PipActivity {
 
   /// Unplugging: the same as plugging in, backwards.
   unplugging,
+
+  // Round 52: more ways in, and things happening in his field.
+
+  /// Dropping in from the sky: he falls, lands with a squash and dust.
+  falling,
+
+  /// Thrown in from the side (the menu's swing): tumbling through the
+  /// air, landing with a thump.
+  thrown,
+
+  /// After being thrown in: a scowl, a fist shaken, cross words.
+  angry,
+
+  /// Bugs crawl in; he pops out a sword and fights them off.
+  bugHunt,
+
+  /// Something on his screen for a while (a notification, or for fun).
+  showing,
+
+  /// A flower comes up; he walks over, picks it, holds it a while.
+  flower,
+
+  /// A butterfly flutters by; he watches it.
+  butterfly,
+
+  /// A ball rolls in; he walks up and kicks it away.
+  ball,
+}
+
+/// How he comes into his field (Round 52): out of the ground, from the
+/// sky, or thrown in from the side (only in the menu, by its swing).
+enum PipEntrance { ground, sky, side }
+
+/// What his screen can show for a while (Round 52): notifications (when
+/// one comes), and things for fun now and then.
+enum PipScreen {
+  envelope(notification: true),
+  bell(notification: true),
+  alert(notification: true),
+  heart,
+  music,
+  question,
+  loading,
+  wink,
+  starEyes,
+  hi,
+  happy;
+
+  /// Shown when a notification comes (the others now and then for fun).
+  final bool notification;
+
+  const PipScreen({this.notification = false});
 }
 
 /// What his screen shows while he charges (Round 44), now and then
@@ -74,7 +126,16 @@ enum ChargeScreen {
 }
 
 /// How his face looks (Round 37): by his energy, asleep, or off.
-enum PipFace { normal, tired, veryTired, asleep, off }
+enum PipFace {
+  normal,
+  tired,
+  veryTired,
+  asleep,
+  off,
+
+  /// Round 52: thrown in, and cross about it.
+  angry,
+}
 
 /// His animations that can be played on request (Round 35: Pip Home's
 /// Animations): each one he has, by name.
@@ -92,7 +153,16 @@ enum PipAnimation {
   powerOn('Back on', listed: false),
   fetch('Picking up a battery', listed: false),
   // Round 44: the station rises, he plugs in, charges a while, unplugs.
-  charge('Charging');
+  charge('Charging'),
+  // Round 52: more entrances, and things that happen now and then.
+  fromSky('Falling from the sky'),
+  fromSide('Thrown in from the side'),
+  bugs('Fighting bugs'),
+  screen('Something on his screen'),
+  notified('A notification'),
+  flower('Picking a flower'),
+  butterfly('Watching a butterfly'),
+  ball('Kicking a ball');
 
   final String label;
 
@@ -115,6 +185,10 @@ enum PipAnimation {
 ///
 /// Round 44: hurrying to his station, plugging in or out, or charging,
 /// nothing starts (asleep at night, he first unplugs: [PipBrain.show]).
+///
+/// Round 52: an entrance (from the sky, thrown in, angry after) or an
+/// event (bugs, his screen, a flower, a butterfly, a ball) runs its
+/// course; they start only while he's up and about.
 bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.egg ||
       PipActivity.hatching ||
@@ -127,7 +201,16 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.toStation ||
       PipActivity.plugging ||
       PipActivity.charging ||
-      PipActivity.unplugging =>
+      PipActivity.unplugging ||
+      // Round 52: an entrance, or an event, runs its course.
+      PipActivity.falling ||
+      PipActivity.thrown ||
+      PipActivity.angry ||
+      PipActivity.bugHunt ||
+      PipActivity.showing ||
+      PipActivity.flower ||
+      PipActivity.butterfly ||
+      PipActivity.ball =>
         false,
       PipActivity.asleep =>
         next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
@@ -274,6 +357,25 @@ class PipBrain {
         if (!_stationFits) return false;
         _demoCharge = 0;
         _setStation(true, animate: true);
+      case PipAnimation.fromSky:
+        enter(PipEntrance.sky);
+      case PipAnimation.fromSide:
+        enter(PipEntrance.side);
+      case PipAnimation.bugs:
+        if (!_eventRoom) return false;
+        _startBugs();
+      case PipAnimation.screen:
+        _startShowing(_funScreens[random.nextInt(_funScreens.length)]);
+      case PipAnimation.notified:
+        _startShowing(_notifyScreens[random.nextInt(_notifyScreens.length)]);
+      case PipAnimation.flower:
+        if (!_eventRoom) return false;
+        _startFlower();
+      case PipAnimation.butterfly:
+        _startButterfly();
+      case PipAnimation.ball:
+        if (!_eventRoom) return false;
+        _startBall();
     }
     return true;
   }
@@ -477,6 +579,8 @@ class PipBrain {
     switch (activity) {
       case PipActivity.asleep:
         return PipFace.asleep;
+      case PipActivity.angry:
+        return PipFace.angry;
       case PipActivity.fallingAsleep:
         return _t < eyesCloseAt ? PipFace.tired : PipFace.asleep;
       case PipActivity.wakingUp:
@@ -572,7 +676,7 @@ class PipBrain {
           facingRight = !facingRight;
           _turnAt = null;
         }
-        if (_t >= _standFor) _walk();
+        if (_t >= _standFor && !_maybeEvent()) _walk();
       case PipActivity.walking:
         final distance = pace * dt;
         if ((_target - x).abs() <= distance) {
@@ -656,9 +760,28 @@ class PipBrain {
           // The phone unplugged: the station goes too.
           if (!_wantsStation) _sinkStation();
         }
+      case PipActivity.falling:
+        if (_t >= _fallTime + landHold) _stand();
+      case PipActivity.thrown:
+        final p = (_t / throwTime).clamp(0.0, 1.0);
+        x = _throwFrom + (_target - _throwFrom) * p;
+        if (_t >= throwTime + landHold) _start(PipActivity.angry);
+      case PipActivity.angry:
+        if (_t >= angryTime) _stand();
+      case PipActivity.bugHunt:
+        _stepBugs(dt);
+      case PipActivity.showing:
+        if (_t >= _showFor) _stand();
+      case PipActivity.flower:
+        _stepFlower(dt);
+      case PipActivity.butterfly:
+        _stepButterfly(dt);
+      case PipActivity.ball:
+        _stepBall(dt);
     }
     if (activity == PipActivity.standing) _maybeCharge();
-    x = x.clamp(0, _maxX);
+    // Thrown in, he's still coming in from beyond the edge.
+    if (activity != PipActivity.thrown) x = x.clamp(0, _maxX);
   }
 
   // Round 44: his charging station.
@@ -986,6 +1109,475 @@ class PipBrain {
     return c * c * (3 - 2 * c);
   }
 
+  // Round 52: entrances.
+
+  /// How many rows of sky he has above the ground (the room says), to
+  /// drop in from above it.
+  int skyRows = 40;
+
+  /// Falling: how fast (pixels a second squared); how long it takes from
+  /// above the room ([_fallTime], from [skyRows]); after landing, how
+  /// long the squash and the dust last.
+  static const gravity = 160.0;
+  double _fallTime = 0.6;
+  static const landHold = 0.45;
+
+  /// Thrown in: how long in the air, how high the arc, where from.
+  static const throwTime = 0.95;
+  double _throwHigh = 14;
+  double _throwFrom = 0;
+
+  /// Angry after a throw, in seconds.
+  static const angryTime = 2.6;
+
+  /// Comes into his field by [entrance] now (from wherever he is).
+  void enter(PipEntrance entrance) {
+    switch (entrance) {
+      case PipEntrance.ground:
+        _start(PipActivity.spawning);
+      case PipEntrance.sky:
+        _fallTime = math.sqrt(2 * (skyRows + height) / gravity);
+        _start(PipActivity.falling);
+      case PipEntrance.side:
+        // From beyond the left edge (the menu swings in from the left),
+        // landing a third of the way in.
+        _throwFrom = -width - 4.0;
+        _target = (roomWidth * 0.3).clamp(0, _maxX).toDouble();
+        _throwHigh = math.min(18, math.max(4, skyRows - height - 6)).toDouble();
+        x = _throwFrom;
+        facingRight = true;
+        _start(PipActivity.thrown);
+    }
+  }
+
+  /// Seconds the app was away before he comes in again (Round 52: back
+  /// after a while, by one of his entrances).
+  static const awayFor = Duration(minutes: 10);
+
+  /// When his room was last left (the menu closed), for [awayFor].
+  DateTime? leftAt;
+
+  /// Just made, about to come out of the ground (nothing seen yet).
+  /// (The ground only cracks after a moment: a first frame or two may
+  /// have gone by.)
+  bool get freshSpawn => activity == PipActivity.spawning && _t < crackEnd / 2;
+
+  /// Turned round mid-air, thrown in: radians (one whole tumble).
+  double get spin => activity == PipActivity.thrown && _t < throwTime
+      ? 2 * math.pi * _ease(_t / throwTime)
+      : 0;
+
+  /// Dust puffing up where he landed (from the sky or a throw): 0 → 1,
+  /// or null.
+  double? get landingDust {
+    final landed = switch (activity) {
+      PipActivity.falling => _t - _fallTime,
+      PipActivity.thrown => _t - throwTime,
+      _ => -1.0,
+    };
+    if (landed < 0 || landed >= landHold) return null;
+    return landed / landHold;
+  }
+
+  /// Angry (after a throw): his face says so, a fist shakes over his
+  /// head, cross words (#!) above it.
+  bool get angry => activity == PipActivity.angry;
+
+  /// Seconds into what he's doing (for things that flicker with it).
+  double get zsClock => _t;
+
+  /// The shaking fist: (x, height above the ground), or null.
+  (double, double)? get fist {
+    if (!angry) return null;
+    final shake = (_t * 8).floor().isEven ? -1.0 : 1.0;
+    final side = facingRight ? x + width + 1 : x - 3;
+    return (side + shake, height + 1.0);
+  }
+
+  // Round 52: events, now and then while he stands about.
+
+  /// The chance, each time he'd walk off, that something happens instead.
+  static const eventChance = 0.09;
+
+  /// Room enough for an event (something coming in, him going to it).
+  bool get _eventRoom => roomWidth >= 3 * width + 10;
+
+  /// Something happens instead of a walk, sometimes: not with the
+  /// station up, and not at bedtime. True if it did.
+  bool _maybeEvent() {
+    if (!_eventRoom || _wantsStation || _bedtime) return false;
+    if (random.nextDouble() >= eventChance) return false;
+    final pick = random.nextInt(10);
+    switch (pick) {
+      case 0 || 1:
+        _startBugs();
+      case 2 || 3 || 4:
+        _startShowing(_funScreens[random.nextInt(_funScreens.length)]);
+      case 5 || 6:
+        _startFlower();
+      case 7 || 8:
+        _startButterfly();
+      default:
+        _startBall();
+    }
+    return true;
+  }
+
+  /// A notification came (his room heard): his screen shows one, with a
+  /// hop, if he's up and about; else nothing (asleep, busy, charging).
+  bool notify() {
+    if (activity != PipActivity.standing && activity != PipActivity.walking) {
+      return false;
+    }
+    _startShowing(_notifyScreens[random.nextInt(_notifyScreens.length)]);
+    return true;
+  }
+
+  static final _funScreens = [
+    for (final s in PipScreen.values)
+      if (!s.notification) s,
+  ];
+  static final _notifyScreens = [
+    for (final s in PipScreen.values)
+      if (s.notification) s,
+  ];
+
+  // His screen showing something.
+  PipScreen _screenShow = PipScreen.happy;
+  double _showFor = 3;
+
+  void _startShowing(PipScreen screen) {
+    _screenShow = screen;
+    _showFor = screen.notification ? 4.0 : 3.2;
+    _start(PipActivity.showing);
+  }
+
+  /// What his screen shows and how far into it: while [PipActivity.
+  /// showing], and after a bug fight (proud) or holding a flower (happy).
+  (PipScreen, double)? get screenShow => switch (activity) {
+        PipActivity.showing => (_screenShow, _t),
+        PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
+        PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
+        _ => null,
+      };
+
+  /// Shows [screen] now (for tests and pictures).
+  @visibleForTesting
+  void debugShow(PipScreen screen) => _startShowing(screen);
+
+  // Bugs.
+
+  int _bugsLeft = 0;
+  double? _bugX;
+  bool _bugFromRight = true;
+
+  /// 0 the sword pops in, 1 the bug crawls (he goes for it), 2 the
+  /// swing, 3 the poof; [_phaseT] seconds into it.
+  int _bugPhase = 0;
+  double _phaseT = 0;
+
+  static const bugWidth = 5;
+  static const bugSpeed = 9.0;
+  static const swordIn = 0.35;
+  static const swingTime = 0.3;
+  static const poofTime = 0.35;
+
+  /// How far his sword reaches past his side.
+  static const reach = 7.0;
+
+  void _startBugs() {
+    _bugsLeft = 1 + random.nextInt(3);
+    _start(PipActivity.bugHunt);
+    _nextBug();
+    _bugPhase = 0;
+  }
+
+  void _nextBug() {
+    _bugFromRight = random.nextBool();
+    _bugX = _bugFromRight ? roomWidth.toDouble() : -bugWidth.toDouble();
+    _bugPhase = 1;
+    _phaseT = 0;
+  }
+
+  /// Where he swings from: his side facing the bug.
+  double get _swordSide => facingRight ? x + width : x;
+
+  bool get _bugWalking => _bugPhase == 1 && !_bugInReach && _bugX != null;
+
+  bool get _bugInReach {
+    final b = _bugX;
+    if (b == null) return false;
+    final near = facingRight ? b : b + bugWidth;
+    return (near - _swordSide).abs() <= reach && (facingRight == (b > x));
+  }
+
+  void _stepBugs(double dt) {
+    _phaseT += dt;
+    final b = _bugX;
+    switch (_bugPhase) {
+      case 0: // the sword pops in
+        if (_phaseT >= swordIn) {
+          _bugPhase = 1;
+          _phaseT = 0;
+        }
+      case 1: // the bug crawls in; he hurries at it
+        if (b == null) return;
+        final towards = b + bugWidth / 2 > x + width / 2 ? 1 : -1;
+        _bugX = b - towards * bugSpeed * dt;
+        facingRight = towards > 0;
+        if (_bugInReach) {
+          _bugPhase = 2;
+          _phaseT = 0;
+        } else if ((b - x).abs() > width) {
+          // Up to it, but not off his field.
+          x = (x + towards * hurry * dt).clamp(0, _maxX).toDouble();
+        }
+      case 2: // the swing
+        if (_phaseT >= swingTime) {
+          _bugPhase = 3;
+          _phaseT = 0;
+        }
+      case 3: // the poof
+        if (_phaseT >= poofTime) {
+          _bugsLeft--;
+          if (_bugsLeft > 0) {
+            _nextBug();
+          } else {
+            _bugX = null;
+            _bugPhase = 4;
+            _phaseT = 0;
+          }
+        }
+      default: // all gone: proud a moment, the sword away
+        if (_phaseT >= 1.6) _stand();
+    }
+  }
+
+  /// The bug: its left edge and whether its legs are up (they step);
+  /// null when there's none (or it's gone in a poof).
+  (double, bool)? get bug {
+    final b = _bugX;
+    if (activity != PipActivity.bugHunt || b == null || _bugPhase == 3) {
+      return null;
+    }
+    return (b, (_t * 8).floor().isEven);
+  }
+
+  /// The poof where a bug was struck: its middle and 0 → 1.
+  (double, double)? get poof {
+    if (activity != PipActivity.bugHunt || _bugPhase != 3) return null;
+    return ((_bugX ?? x) + bugWidth / 2, _phaseT / poofTime);
+  }
+
+  /// His sword (Round 52, for the adventures later): held in a floating
+  /// hand at (x, height above the ground), its angle (0 up, pointing
+  /// forward as it grows) and size (popping in and away); null when put
+  /// away.
+  (double, double, double, double)? get sword {
+    if (activity != PipActivity.bugHunt) return null;
+    final hand = facingRight ? x + width + 2 : x - 2;
+    final double size = switch (_bugPhase) {
+      0 => (_phaseT / swordIn).clamp(0.0, 1.0),
+      4 => (1 - (_phaseT - 1.0) / 0.4).clamp(0.0, 1.0),
+      _ => 1,
+    };
+    final forward = facingRight ? 1.0 : -1.0;
+    final double angle = switch (_bugPhase) {
+      2 => forward * (-0.5 + 2.2 * _ease(_phaseT / swingTime)),
+      3 => forward * 1.7,
+      _ => forward * -0.5, // raised, ready
+    };
+    return (hand, 7, angle, size);
+  }
+
+  // A flower.
+
+  double _flowerX = 0;
+
+  /// 0 it comes up, 1 he walks over, 2 he picks it, 3 he holds it, 4 it
+  /// fades.
+  int _flowerPhase = 0;
+  static const sproutTime = 1.2;
+  static const flowerPick = 0.45;
+  static const flowerHold = 3.0;
+  static const flowerFade = 0.6;
+
+  void _startFlower() {
+    // Somewhere a few steps away, inside his field.
+    final max = _maxX;
+    var at = x;
+    for (var i = 0; i < 12 && (at - x).abs() < 12; i++) {
+      at = random.nextDouble() * max;
+    }
+    if ((at - x).abs() < 12) at = x < max / 2 ? max : 0;
+    _flowerX = at + width / 2 - 1;
+    _target = at;
+    _flowerPhase = 0;
+    _start(PipActivity.flower);
+  }
+
+  void _stepFlower(double dt) {
+    switch (_flowerPhase) {
+      case 0:
+        if (_t >= sproutTime) {
+          _flowerPhase = 1;
+          facingRight = _target > x;
+          _t = 0;
+        }
+      case 1:
+        final distance = pace * dt;
+        if ((_target - x).abs() <= distance) {
+          x = _target;
+          _flowerPhase = 2;
+          _t = 0;
+        } else {
+          x += _target > x ? distance : -distance;
+        }
+      case 2:
+        if (_t >= flowerPick) {
+          _flowerPhase = 3;
+          _t = 0;
+        }
+      case 3:
+        if (_t >= flowerHold) {
+          _flowerPhase = 4;
+          _t = 0;
+        }
+      default:
+        if (_t >= flowerFade) _stand();
+    }
+  }
+
+  /// The flower: (x, height above the ground of its stem's foot, grown
+  /// 0–1, faded 0–1); in the ground until picked, then in his hand.
+  (double, double, double, double)? get flower {
+    if (activity != PipActivity.flower) return null;
+    return switch (_flowerPhase) {
+      0 => (_flowerX, 0, (_t / sproutTime).clamp(0.0, 1.0), 0),
+      1 || 2 => (_flowerX, 0, 1, 0),
+      _ => (
+          facingRight ? x + width : x - 3,
+          6,
+          1,
+          _flowerPhase == 4 ? (_t / flowerFade).clamp(0.0, 1.0) : 0,
+        ),
+    };
+  }
+
+  /// The hand holding the flower: (x, height), or null.
+  (double, double)? get flowerHand {
+    if (activity != PipActivity.flower || _flowerPhase < 3) return null;
+    return (facingRight ? x + width : x - 2, 5);
+  }
+
+  // A butterfly.
+
+  double _flyX = 0;
+  double _flyFrom = 0;
+  bool _flyRight = true;
+  static const butterflySpeed = 11.0;
+
+  void _startButterfly() {
+    _flyRight = random.nextBool();
+    _flyFrom = _flyRight ? -6.0 : roomWidth + 1.0;
+    _flyX = _flyFrom;
+    _start(PipActivity.butterfly);
+  }
+
+  void _stepButterfly(double dt) {
+    _flyX += (_flyRight ? 1 : -1) * butterflySpeed * dt;
+    // He watches it: turned towards it.
+    facingRight = _flyX + 2 > x + width / 2;
+    if (_flyRight ? _flyX > roomWidth + 2 : _flyX < -8) _stand();
+  }
+
+  bool get _butterflyClose =>
+      activity == PipActivity.butterfly &&
+      (_flyX + 2 - (x + width / 2)).abs() < width;
+
+  /// The butterfly: (x, height above the ground, wings up); null when
+  /// there's none. It bobs as it goes.
+  (double, double, bool)? get butterfly {
+    if (activity != PipActivity.butterfly) return null;
+    final up = 24 + 4 * math.sin(_t * 3) + 2 * math.sin(_t * 7.3);
+    return (_flyX, up, (_t * 6).floor().isEven);
+  }
+
+  // A ball.
+
+  double _ballX = 0;
+  double _ballUp = 0;
+  double _ballSpeed = 0;
+  double _ballVy = 0;
+
+  /// 0 it rolls in, 1 he walks up to it, 2 the kick, 3 it flies off.
+  int _ballPhase = 0;
+  static const ballSize = 4;
+  static const kickTime = 0.25;
+
+  void _startBall() {
+    final fromRight = random.nextBool();
+    _ballX = fromRight ? roomWidth.toDouble() : -ballSize.toDouble();
+    _ballSpeed = fromRight ? -26 : 26;
+    _ballUp = 0;
+    _ballVy = 0;
+    _ballPhase = 0;
+    _start(PipActivity.ball);
+  }
+
+  void _stepBall(double dt) {
+    switch (_ballPhase) {
+      case 0:
+        // Slowing as it rolls; it stops on its own.
+        _ballX += _ballSpeed * dt;
+        _ballSpeed *= math.pow(0.45, dt).toDouble();
+        if (_ballSpeed.abs() < 3) {
+          _ballSpeed = 0;
+          _ballPhase = 1;
+          // Beside it, the side it came from... facing it.
+          final behind = _ballX + ballSize / 2 > x + width / 2;
+          _target = (behind ? _ballX - width + 1 : _ballX + ballSize - 1)
+              .clamp(0, _maxX)
+              .toDouble();
+          facingRight = _target < _ballX;
+          if ((_target - x).abs() > 0.5) facingRight = _target > x;
+        }
+      case 1:
+        final distance = pace * dt;
+        if ((_target - x).abs() <= distance) {
+          x = _target;
+          facingRight = _ballX + ballSize / 2 > x + width / 2;
+          _ballPhase = 2;
+          _t = 0;
+        } else {
+          x += _target > x ? distance : -distance;
+        }
+      case 2:
+        if (_t >= kickTime) {
+          _ballPhase = 3;
+          _ballSpeed = facingRight ? 55 : -55;
+          _ballVy = 45;
+          _t = 0;
+        }
+      default:
+        _ballX += _ballSpeed * dt;
+        _ballVy -= gravity * dt;
+        _ballUp += _ballVy * dt;
+        if (_ballUp < 0) {
+          _ballUp = 0;
+          _ballVy = -_ballVy * 0.5; // a bounce
+        }
+        if (_ballX > roomWidth + 2 || _ballX < -ballSize - 2) _stand();
+    }
+  }
+
+  /// The ball: (left edge, height above the ground, which way it's
+  /// turned 0–3); null when there's none.
+  (double, double, int)? get ball {
+    if (activity != PipActivity.ball) return null;
+    return (_ballX, _ballUp, (_ballX / 2).floor() % 4);
+  }
+
   void _stand() {
     activity = PipActivity.standing;
     _t = 0;
@@ -1051,6 +1643,22 @@ class PipBrain {
         PipActivity.charging ||
         PipActivity.unplugging =>
           PipFrame.idle,
+        // Round 52.
+        PipActivity.falling => _t < _fallTime ? PipFrame.oh : PipFrame.tuck,
+        PipActivity.thrown => _t < throwTime ? PipFrame.oh : PipFrame.tuck,
+        PipActivity.angry || PipActivity.showing => PipFrame.idle,
+        PipActivity.bugHunt => _bugWalking ? _stepFrame : PipFrame.idle,
+        PipActivity.flower => _flowerPhase == 1
+            ? _stepFrame
+            : _flowerPhase == 2
+                ? PipFrame.tuck
+                : PipFrame.idle,
+        PipActivity.butterfly => _butterflyClose ? PipFrame.oh : PipFrame.idle,
+        PipActivity.ball => switch (_ballPhase) {
+            1 => _stepFrame,
+            2 => PipFrame.step1,
+            _ => PipFrame.idle,
+          },
       };
 
   /// Hurrying, his steps come quicker too (Round 44).
@@ -1062,7 +1670,9 @@ class PipBrain {
       ][(_t / (_hurrying ? stepTime * speed / hurry : stepTime)).floor() % 4];
 
   bool get _hurrying =>
-      activity == PipActivity.toStation || activity == PipActivity.fetching;
+      activity == PipActivity.toStation ||
+      activity == PipActivity.fetching ||
+      activity == PipActivity.bugHunt;
 
   bool get _atTarget => (_target - x).abs() < 0.01;
 
@@ -1079,6 +1689,19 @@ class PipBrain {
 
   /// How high above the ground (a hop, or a step's bob), in pixels.
   double get lift {
+    // Round 52: dropping from the sky, or thrown in on an arc.
+    if (activity == PipActivity.falling && _t < _fallTime) {
+      final left = _fallTime - _t;
+      return 0.5 * gravity * left * left;
+    }
+    if (activity == PipActivity.thrown && _t < throwTime) {
+      return _throwHigh * math.sin(math.pi * _t / throwTime);
+    }
+    if (activity == PipActivity.showing &&
+        _screenShow.notification &&
+        _t < 0.4) {
+      return 3 * math.sin(math.pi * _t / 0.4); // a hop: something came
+    }
     if (activity == PipActivity.hatching && _t >= popEnd && _t < jumpEnd) {
       final p = (_t - popEnd) / (jumpEnd - popEnd);
       // A little higher than the spawn's hop, still in the room.
@@ -1118,6 +1741,23 @@ class PipBrain {
 
   /// Squash and stretch: (width, height) scale.
   (double, double) get stretch {
+    // Round 52: landing from the sky or a throw, squashed and springing
+    // back.
+    final landed = switch (activity) {
+      PipActivity.falling => _t - _fallTime,
+      PipActivity.thrown => _t - throwTime,
+      _ => null,
+    };
+    if (landed != null) {
+      if (landed < 0) {
+        return activity == PipActivity.falling ? (0.9, 1.15) : (1, 1);
+      }
+      if (landed < landHold) {
+        final s = 0.28 * math.sin(math.pi * landed / landHold);
+        return (1 + s / 2, 1 - s);
+      }
+      return (1, 1);
+    }
     if (activity == PipActivity.hatching) {
       if (_t >= popEnd && _t < jumpEnd) {
         final p = (_t - popEnd) / (jumpEnd - popEnd);

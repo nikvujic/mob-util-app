@@ -431,15 +431,59 @@ abstract final class PipColours {
   static const light = Color(0xFFF2C07A); // the antenna's light
   static const eggShade = Color(0xFFD8D0C2); // his egg's shade (Round 34)
 
-  // His sky (Round 35), top and bottom of each part of the day.
-  static const nightTop = Color(0xFF0F162C);
-  static const nightBottom = Color(0xFF2B3C63);
-  static const dawnTop = Color(0xFF3B4A7A);
-  static const dawnBottom = Color(0xFFE8A27A);
-  static const dayTop = Color(0xFF4F86C6);
-  static const dayBottom = Color(0xFFA9D2EE);
-  static const duskTop = Color(0xFF2E2A5C);
-  static const duskBottom = Color(0xFFD9775A);
+  // His sky (Round 35), top and bottom of each part of the day; Round 52:
+  // more hues between them (the stops, top to bottom).
+  static const nightTop = Color(0xFF0B1022);
+  static const nightBottom = Color(0xFF3A3F72);
+  static const nightStops = [
+    nightTop,
+    Color(0xFF131C3C),
+    Color(0xFF1E2A55),
+    Color(0xFF2C3566),
+    nightBottom,
+  ];
+  static const dawnTop = Color(0xFF2E3A6B);
+  static const dawnBottom = Color(0xFFF7D49A);
+  static const dawnStops = [
+    dawnTop,
+    Color(0xFF5A5490),
+    Color(0xFF9C6DA0),
+    Color(0xFFD9849A),
+    Color(0xFFF2A880),
+    dawnBottom,
+  ];
+  static const dayTop = Color(0xFF3F78C0);
+  static const dayBottom = Color(0xFFDDEFF5);
+  static const dayStops = [
+    dayTop,
+    Color(0xFF5590D0),
+    Color(0xFF79AEDF),
+    Color(0xFFA2CBEC),
+    Color(0xFFC6E2F2),
+    dayBottom,
+  ];
+  static const duskTop = Color(0xFF221D4C);
+  static const duskBottom = Color(0xFFF7C46C);
+  static const duskStops = [
+    duskTop,
+    Color(0xFF412C6E),
+    Color(0xFF6E3878),
+    Color(0xFFA6447A),
+    Color(0xFFD65A66),
+    Color(0xFFEE8452),
+    duskBottom,
+  ];
+  // Round 52: clouds with light and shade (tinted at dawn and dusk), the
+  // sun's glow and highlight, the moon's halo and craters, coloured stars.
+  static const cloudLight = Color(0xFFFFFFFF);
+  static const cloudShade = Color(0xFFC9D7E8);
+  static const cloudWarm = Color(0xFFFBE3E3);
+  static const cloudWarmShade = Color(0xFFD99AA8);
+  static const sunCore = Color(0xFFFFF0B8);
+  static const sunLow = Color(0xFFFFA65A); // at dawn
+  static const moonDark = Color(0xFF9C9D96);
+  static const starWarm = Color(0xFFFFE2A8);
+  static const starCool = Color(0xFFA8C8FF);
   static const star = Color(0xFFF5F0E8);
   static const starDim = Color(0xFF7D88AA); // most stars (Round 38)
   static const moon = Color(0xFFE4E4DC); // pale grey, not the sun's yellow
@@ -478,6 +522,25 @@ abstract final class PipColours {
   static const cable = Color(0xFF2E2C2A);
   static const staticLight = Color(0xFFC8C4BC);
   static const staticDark = Color(0xFF9A958C);
+
+  // Round 52: things in his field, and his sword.
+  static const bug = Color(0xFF6CC24A); // a computer bug: green
+  static const bugEye = Color(0xFFE0503E);
+  static const blade = Color(0xFFDDE3EA);
+  static const bladeEdge = Color(0xFF9AA4B0);
+  static const guard = Color(0xFFE0B040);
+  static const hilt = Color(0xFF7A4A2A);
+  static const petal = Color(0xFFF07AA8);
+  static const petalDark = Color(0xFFC9537F);
+  static const flowerHeart = Color(0xFFFFD36E);
+  static const stem = Color(0xFF4F8A34);
+  static const wing = Color(0xFFF5A23A);
+  static const wingDark = Color(0xFF8A4A16);
+  static const ball = Color(0xFFE0503E);
+  static const ballStripe = Color(0xFFF5F0E8);
+  static const cross = Color(0xFFE0503E); // his cross words (#!)
+  static const heart = Color(0xFFE0503E);
+  static const puff = Color(0xFFF2F4F8);
 
   // Pip Home's card (Round 35): a game's panel, whatever the theme.
   static const panel = Color(0xFF231F1D);

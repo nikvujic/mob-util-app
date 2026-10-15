@@ -47,7 +47,14 @@ class PipRoom extends StatefulWidget {
     this.scene,
     this.height = rows,
     this.pixel = smallPixel,
+    this.entrances = const {PipEntrance.ground},
   });
+
+  /// How he may come in (Round 52): the menu has all three (thrown in by
+  /// its swing only there), Pip Home the ground and the sky. One at
+  /// random, the first time he's seen and back after a while
+  /// ([PipBrain.awayFor]); not without animations (he's simply there).
+  final Set<PipEntrance> entrances;
 
   /// About how big one of Pip's pixels is: [smallPixel] in the menu,
   /// bigger in Pip Home.
@@ -84,6 +91,17 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
 
   double _sinceCheck = 0;
 
+  /// Whether his way in was picked (once a room's time).
+  bool _entered = false;
+
+  /// When his life was last looked at (notifications since then).
+  DateTime? _lastLook;
+
+  PipEntrance _pickEntrance() {
+    final ways = widget.entrances.toList();
+    return ways[widget.brain.random.nextInt(ways.length)];
+  }
+
   /// What was last made so from his life; null: nothing yet.
   PipShow? _shown;
 
@@ -101,6 +119,21 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     final (show, segments) = link.look();
     brain.segments = segments;
+    final now = link.now;
+    // Round 52: his way in, the first time or back after a while.
+    if (_moving && show == PipShow.awake && !_entered) {
+      _entered = true;
+      final left = brain.leftAt;
+      final back = left != null &&
+          now.difference(left) >= PipBrain.awayFor &&
+          (brain.activity == PipActivity.standing ||
+              brain.activity == PipActivity.walking);
+      if (brain.freshSpawn || back) brain.enter(_pickEntrance());
+    }
+    // A notification came since the last look: his screen shows it.
+    final since = _lastLook;
+    if (since != null && link.notifiedBetween(since, now)) brain.notify();
+    _lastLook = now;
     // Round 44: plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
     brain.setPlugged(link.plugged, animate: _shown != null && _moving);
@@ -165,10 +198,19 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
         case PipActivity.fetching ||
               PipActivity.toStation ||
               PipActivity.plugging ||
-              PipActivity.unplugging:
+              PipActivity.unplugging ||
+              // Round 52: an entrance or an event, run to its end.
+              PipActivity.falling ||
+              PipActivity.thrown ||
+              PipActivity.angry ||
+              PipActivity.bugHunt ||
+              PipActivity.showing ||
+              PipActivity.flower ||
+              PipActivity.butterfly ||
+              PipActivity.ball:
           // Walking over, then picking it up (or plugging in or out).
           final doing = brain.activity;
-          for (var s = 0; s < 400 && brain.activity == doing; s++) {
+          for (var s = 0; s < 1200 && brain.activity == doing; s++) {
             brain.step(0.05);
           }
         default:
@@ -216,6 +258,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    // Round 52: when he was left, for coming back in after a while.
+    final link = widget.link;
+    if (link != null) widget.brain.leftAt = link.now;
     _ticker.dispose();
     super.dispose();
   }
@@ -250,6 +295,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
         child: LayoutBuilder(
           builder: (context, box) {
             widget.brain.roomWidth = (box.maxWidth / pixel).floor();
+            widget.brain.skyRows = widget.height - PipRoom.ground;
             return SizedBox(
               width: box.maxWidth,
               height: widget.height * pixel,
@@ -303,9 +349,25 @@ class _RoomPainter extends CustomPainter {
 
     /// The moon in [phase] (Round 38): pale grey with darker seas, only
     /// its lit part drawn: a thin sliver, half, or all of it; growing,
-    /// lit on the right.
+    /// lit on the right. Round 52: seas in two greys and a few craters,
+    /// placed by its size.
     void moon(int cx, int cy, int r, MoonPhase phase) {
-      final seas = {(-2, -1), (-1, -1), (-2, 0), (1, 2), (2, 1), (2, 2)};
+      final seas = <(int, int)>{};
+      final craters = <(int, int)>{};
+      for (final (sx, sy, dark) in const [
+        (-0.45, -0.25, false),
+        (-0.25, -0.25, false),
+        (-0.45, 0.0, false),
+        (-0.2, 0.05, true),
+        (0.25, 0.45, false),
+        (0.45, 0.25, false),
+        (0.45, 0.45, true),
+        (0.1, -0.55, true),
+        (-0.1, 0.55, false),
+      ]) {
+        final at = ((sx * r).round(), (sy * r).round());
+        (dark ? craters : seas).add(at);
+      }
       for (var y = -r; y <= r; y++) {
         for (var x = -r; x <= r; x++) {
           if (x * x + y * y > r * r + r) continue;
@@ -321,43 +383,98 @@ class _RoomPainter extends CustomPainter {
               (side + r * 0.55) * (side + r * 0.55) + y * y > r * r + r,
           };
           if (!lit) continue;
-          dot((cx + x).toDouble(), (cy + y).toDouble(),
-              seas.contains((x, y)) ? PipColours.moonShade : PipColours.moon);
+          dot(
+              (cx + x).toDouble(),
+              (cy + y).toDouble(),
+              craters.contains((x, y))
+                  ? PipColours.moonDark
+                  : seas.contains((x, y))
+                      ? PipColours.moonShade
+                      : PipColours.moon);
         }
       }
     }
 
-    /// A small pixel cloud, its top left at [x], [y].
-    void cloud(double x, double y) {
-      dot(x + 2, y, PipColours.cloud, 4, 1);
-      dot(x + 1, y + 1, PipColours.cloud, 7, 1);
-      dot(x, y + 2, PipColours.cloud, 10, 2);
+    /// A pixel cloud (Round 52: three shapes, lit on top and shaded
+    /// underneath; warm at dawn and dusk), its top left at [x], [y].
+    void cloud(double x, double y, int shape, DayPart part) {
+      const shapes = [
+        [
+          '...lll.....',
+          '..lcccll...',
+          '.lcccccclll',
+          'cccccccccccc',
+          '.ssssssssss.'
+        ],
+        [
+          '......ll.......',
+          '....llcccl.ll..',
+          '..llcccccccccl.',
+          '.cccccccccccccc',
+          'ccccccccccccccc',
+          '.sssssssssssss.',
+        ],
+        ['..ll...', '.lccll.', 'cccccc.', '.ssss..'],
+      ];
+      final warm = part == DayPart.dawn || part == DayPart.dusk;
+      final colours = {
+        'l': PipColours.cloudLight,
+        'c': warm ? PipColours.cloudWarm : PipColours.cloud,
+        's': warm ? PipColours.cloudWarmShade : PipColours.cloudShade,
+      };
+      final rows = shapes[shape % shapes.length];
+      for (var j = 0; j < rows.length; j++) {
+        for (var i = 0; i < rows[j].length; i++) {
+          final colour = colours[rows[j][i]];
+          if (colour != null) dot(x + i, y + j, colour);
+        }
+      }
     }
 
     final groundTop = (height - PipRoom.ground).toDouble();
 
     // His sky (Round 35): bands of colour from top to bottom (stepped,
-    // pixel style), then what's in it now.
-    if (scene case final scene? when scene.sky != null) {
-      final (top, bottom) = scene.sky!;
-      const bands = 8;
-      final band = (groundTop / bands).ceilToDouble();
+    // pixel style), then what's in it now. Round 52: through more hues
+    // (the scene's stops), more and thinner bands, each edge dithered.
+    if (scene case final scene? when scene.skyStops != null) {
+      final stops = scene.skyStops!;
+      Color colourAt(double p) {
+        final f = p.clamp(0.0, 1.0) * (stops.length - 1);
+        final i = f.floor().clamp(0, stops.length - 2);
+        return Color.lerp(stops[i], stops[i + 1], f - i)!;
+      }
+
+      final bands = (groundTop / 4).round().clamp(8, 28);
+      final band = groundTop / bands;
       for (var i = 0; i < bands; i++) {
-        dot(0, i * band, Color.lerp(top, bottom, i / (bands - 1))!,
-            columns.toDouble(), band);
+        final top = (i * band).floorToDouble();
+        final bottom = ((i + 1) * band).floorToDouble();
+        final colour = colourAt(i / (bands - 1));
+        dot(0, top, colour, columns.toDouble(), bottom - top);
+        // The edge above: every other pixel of this band's colour.
+        if (i > 0) {
+          for (var x = i % 2; x < columns; x += 2) {
+            dot(x.toDouble(), top - 1, colour);
+          }
+        }
       }
       // A tall sky gets the bigger sun and moon.
       final home = groundTop > 40;
-      // The sun's or moon's place: high on the right.
+      // The sun's or moon's place: high on the right (Round 52: the sun
+      // low and orange at dawn).
       final bodyX = columns - (home ? 16 : 10);
-      final bodyY = home ? 11 : 6;
+      final dawn = scene.part == DayPart.dawn;
+      final bodyY = (home ? 11 : 6) + (dawn ? (home ? 8 : 4) : 0);
       final bodyR = home ? 6 : 4;
+      // The sky behind the sun or moon, for their glow (blended, so it
+      // isn't grey over a coloured sky).
+      final behind = colourAt(bodyY / groundTop);
       for (final prop in scene.props) {
         switch (prop) {
           case PipProp.stars:
             // The same stars every time (Round 38: fewer, most of them
-            // dim, a few bright with a twinkle), in the upper sky and
-            // clear of the moon.
+            // dim, a few bright with a twinkle; Round 52: some warm,
+            // some cool), in the upper sky and clear of the moon.
             final top = (groundTop * 0.7).floor();
             for (var i = 0; i < columns * top ~/ 130; i++) {
               final h = _hash(i);
@@ -366,8 +483,14 @@ class _RoomPainter extends CustomPainter {
               final dx = x - bodyX, dy = y - bodyY;
               if (dx * dx + dy * dy < (bodyR + 5) * (bodyR + 5)) continue;
               final bright = i % 6 == 0;
-              dot(x.toDouble(), y.toDouble(),
-                  bright ? PipColours.star : PipColours.starDim);
+              final colour = bright
+                  ? PipColours.star
+                  : i % 7 == 0
+                      ? PipColours.starWarm
+                      : i % 11 == 0
+                          ? PipColours.starCool
+                          : PipColours.starDim;
+              dot(x.toDouble(), y.toDouble(), colour);
               if (bright && i % 12 == 0) {
                 for (final (ox, oy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]) {
                   dot((x + ox).toDouble(), (y + oy).toDouble(),
@@ -376,26 +499,49 @@ class _RoomPainter extends CustomPainter {
               }
             }
           case PipProp.moon:
+            // A faint halo at night, then the moon.
+            if (scene.part == DayPart.night && scene.moon != MoonPhase.none) {
+              disc(bodyX, bodyY, bodyR + 3,
+                  Color.lerp(behind, PipColours.moon, 0.12)!);
+            }
             moon(bodyX, bodyY, bodyR, scene.moon);
           case PipProp.sun:
-            // A round sun with short rays (Round 38: unlike the moon).
-            disc(bodyX, bodyY, bodyR - 1, PipColours.sun);
+            // A round sun with rays (Round 38: unlike the moon); Round 52:
+            // a glow round it, long and short rays, a bright core.
+            final face = dawn ? PipColours.sunLow : PipColours.sun;
+            disc(bodyX, bodyY, bodyR + 2, Color.lerp(behind, face, 0.35)!);
+            disc(bodyX, bodyY, bodyR - 1, face);
             final ray = bodyR + 1;
             for (final (ox, oy) in [(0, 1), (0, -1), (1, 0), (-1, 0)]) {
-              dot((bodyX + ox * ray).toDouble(), (bodyY + oy * ray).toDouble(),
-                  PipColours.sun);
-              dot((bodyX + ox * (ray + 1)).toDouble(),
-                  (bodyY + oy * (ray + 1)).toDouble(), PipColours.sun);
+              for (var k = 0; k < (home ? 3 : 2); k++) {
+                dot((bodyX + ox * (ray + k)).toDouble(),
+                    (bodyY + oy * (ray + k)).toDouble(), face);
+              }
             }
             final diagonal = (ray * 0.75).round();
             for (final (ox, oy) in [(1, 1), (1, -1), (-1, 1), (-1, -1)]) {
               dot((bodyX + ox * diagonal).toDouble(),
-                  (bodyY + oy * diagonal).toDouble(), PipColours.sun);
+                  (bodyY + oy * diagonal).toDouble(), face);
+              if (home) {
+                dot((bodyX + ox * (diagonal + 1)).toDouble(),
+                    (bodyY + oy * (diagonal + 1)).toDouble(), face);
+              }
             }
+            final core = (bodyR / 3).ceil();
+            disc(bodyX - 1, bodyY - 1, core, PipColours.sunCore);
           case PipProp.clouds:
-            for (final (cx, cy) in [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)]) {
+            final spots = home
+                ? const [
+                    (0.08, 0.18),
+                    (0.36, 0.08),
+                    (0.55, 0.3),
+                    (0.78, 0.45),
+                    (0.2, 0.5),
+                  ]
+                : const [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)];
+            for (final (i, (cx, cy)) in spots.indexed) {
               cloud((columns * cx).floorToDouble(),
-                  (groundTop * cy).floorToDouble());
+                  (groundTop * cy).floorToDouble(), i, scene.part);
             }
         }
       }
@@ -490,10 +636,14 @@ class _RoomPainter extends CustomPainter {
     }
 
     final charge = brain.chargeScreen;
-    final sprite0 = charge == null
-        ? PipSprites.frameOf(brain.frame, brain.face)
-        : PipSprites.chargingFrame(charge.$1, charge.$2,
-            lamp: brain.stationLamp);
+    final shown = brain.screenShow;
+    final sprite0 = charge != null
+        ? PipSprites.chargingFrame(charge.$1, charge.$2,
+            lamp: brain.stationLamp)
+        : shown != null
+            // Round 52: something on his screen.
+            ? PipSprites.screenFrame(shown.$1, shown.$2)
+            : PipSprites.frameOf(brain.frame, brain.face);
     final rows = sprite0.length;
     final (sx, sy) = brain.stretch;
     final centre = brain.x + PipBrain.width / 2;
@@ -516,6 +666,27 @@ class _RoomPainter extends CustomPainter {
       sprite(PipSprites.battery, left, groundTop - up);
     }
 
+    // Round 52: what's in his field, behind him. A flower coming up
+    // (only its grown part shows), or still in the ground.
+    if (brain.flower case (final fx, final up, final grown, final fade)
+        when up == 0) {
+      final rows = PipSprites.flower;
+      final shown = (rows.length * grown).ceil();
+      sprite(rows.sublist(rows.length - shown), fx - 2, groundTop,
+          colours: PipSprites.fieldColours, alpha: 1 - fade);
+    }
+    // A bug crawling in, its legs stepping; mirrored going right.
+    if (brain.bug case (final bx, final legsUp)) {
+      final toRight = bx + PipBrain.bugWidth / 2 < centre;
+      sprite(legsUp ? PipSprites.bugUp : PipSprites.bugDown, bx, groundTop,
+          colours: PipSprites.fieldColours, mirror: toRight);
+    }
+    // A ball, rolling (its stripe turning) or bouncing off.
+    if (brain.ball case (final bx, final up, final turn)) {
+      sprite(PipSprites.ballFrames[turn], bx, groundTop - up,
+          colours: PipSprites.fieldColours);
+    }
+
     // Pip, clipped at the ground while he comes up.
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, groundTop * pixel));
@@ -530,6 +701,13 @@ class _RoomPainter extends CustomPainter {
       canvas.translate(pivot.dx, pivot.dy);
       canvas.rotate((right ? 1 : -1) * brain.tilt * math.pi / 2);
       canvas.translate(-pivot.dx, -pivot.dy);
+    }
+    // Thrown in (Round 52): tumbling about his middle.
+    if (brain.spin != 0) {
+      final mid = Offset(centre * pixel, (bottom - rows / 2) * pixel);
+      canvas.translate(mid.dx, mid.dy);
+      canvas.rotate(brain.spin);
+      canvas.translate(-mid.dx, -mid.dy);
     }
     final w = sx * pixel;
     final h = sy * pixel;
@@ -568,6 +746,78 @@ class _RoomPainter extends CustomPainter {
               (cy + oy * (out + 0.5)).floorToDouble(), PipColours.stationBolt);
         }
       }
+    }
+    // Round 52: in front of him.
+    // Dust puffing up either side where he landed.
+    if (brain.landingDust case final t?) {
+      for (var i = 0; i < 4; i++) {
+        final side = i.isEven ? 1 : -1;
+        final out = PipBrain.width / 2 + 1 + (2 + i) * t * 3;
+        final up = 4 * math.sin(math.pi * t) * (1 - i * 0.15);
+        dot((centre + side * out).floorToDouble(),
+            (groundTop - 1 - up).floorToDouble(), PipColours.puff);
+      }
+    }
+    // A bug struck: a poof.
+    if (brain.poof case (final px, final t)) {
+      final out = 1 + 4 * t;
+      for (final (ox, oy) in const [
+        (-1, -1),
+        (1, -1),
+        (-1, 1),
+        (1, 1),
+        (0, -1),
+        (-1, 0),
+        (1, 0),
+      ]) {
+        dot((px + ox * out).floorToDouble(),
+            (groundTop - 2 + oy * out * 0.7).floorToDouble(), PipColours.puff);
+      }
+    }
+    // His sword, in a floating hand: raised, swung, popping in and away.
+    if (brain.sword case (final hx, final hy, final angle, final size)
+        when size > 0.05) {
+      final hand = Offset(hx * pixel, (groundTop - hy) * pixel);
+      canvas.save();
+      canvas.translate(hand.dx, hand.dy);
+      canvas.rotate(angle);
+      canvas.scale(size);
+      final blade = PipSprites.sword;
+      for (var y = 0; y < blade.length; y++) {
+        for (var x = 0; x < blade[y].length; x++) {
+          final colour = PipSprites.fieldColours[blade[y][x]];
+          if (colour == null) continue;
+          // The grip (two rows up from the bottom) in the hand.
+          canvas.drawRect(
+            Rect.fromLTWH((x - 1.5) * pixel, (y - blade.length + 2) * pixel,
+                pixel, pixel),
+            paint..color = colour,
+          );
+        }
+      }
+      canvas.restore();
+      sprite(PipSprites.mitt, hx - 1, groundTop - hy + 2);
+    }
+    // A flower in his hand, then fading.
+    if (brain.flower case (final fx, final up, _, final fade) when up > 0) {
+      sprite(PipSprites.flower, fx - 1, groundTop - up,
+          colours: PipSprites.fieldColours, alpha: 1 - fade);
+    }
+    if (brain.flowerHand case (final hx, final hy)) {
+      sprite(PipSprites.mitt, hx, groundTop - hy + 3);
+    }
+    // Angry: a fist shaking over his head, cross words above.
+    if (brain.fist case (final fx, final fy)) {
+      sprite(PipSprites.mitt, fx, groundTop - fy);
+      final words = PipSprites.crossWords[(brain.zsClock * 4).floor() % 2];
+      sprite(words, centre - 3, groundTop - PipBrain.height - 6,
+          colours: PipSprites.fieldColours);
+    }
+    // A butterfly fluttering by.
+    if (brain.butterfly case (final bx, final up, final wingsUp)) {
+      sprite(wingsUp ? PipSprites.butterflyUp : PipSprites.butterflyDown, bx,
+          groundTop - up,
+          colours: PipSprites.fieldColours);
     }
     for (final (x, up) in brain.sparks) {
       dot(x.floorToDouble(), (groundTop - up - 1).floorToDouble(),

@@ -177,4 +177,11 @@ abstract class PipLink {
 
   /// The phone is plugged in now (Round 44): his charging station.
   bool get plugged;
+
+  /// The time now (Round 52: how long his room was left).
+  DateTime get now;
+
+  /// Whether a notification came after [from], up to [to] (Round 52: his
+  /// screen shows one).
+  bool notifiedBetween(DateTime from, DateTime to);
 }

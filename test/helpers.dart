@@ -319,6 +319,17 @@ class FakePipLink implements PipLink {
   /// The phone plugged in (Round 44).
   @override
   bool plugged = false;
+
+  /// The time (Round 52); the real one unless a test sets it.
+  DateTime? at;
+  @override
+  DateTime get now => at ?? DateTime.now();
+
+  /// When notifications came (Round 52).
+  final List<DateTime> notifications = [];
+  @override
+  bool notifiedBetween(DateTime from, DateTime to) =>
+      notifications.any((n) => n.isAfter(from) && !n.isAfter(to));
 }
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]

@@ -173,6 +173,15 @@ void main() {
         'fallAsleep',
         'powerOff',
         'charge',
+        // Round 52.
+        'fromSky',
+        'fromSide',
+        'bugs',
+        'screen',
+        'notified',
+        'flower',
+        'butterfly',
+        'ball',
       ]);
     });
 

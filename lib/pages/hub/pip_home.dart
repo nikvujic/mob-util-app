@@ -79,6 +79,9 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                 scene: scene,
                 height: rows,
                 pixel: _pixel,
+                // Round 52: out of the ground or from the sky (thrown in
+                // only by the menu's swing).
+                entrances: const {PipEntrance.ground, PipEntrance.sky},
               ),
               Expanded(
                 child: Padding(

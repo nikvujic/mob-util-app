@@ -80,6 +80,14 @@ abstract final class PipSprites {
         };
       case 'off':
         return const {};
+      case 'angry':
+        // Round 52: brows down to the middle, a frown.
+        return {
+          (eyes[0] - 1, 1), (eyes[0], 1), (eyes[0] + 1, 2), //
+          (eyes[1] + 2, 1), (eyes[1] + 1, 1), (eyes[1], 2),
+          for (final e in eyes) ...[(e, 3), (e + 1, 3)],
+          (mouth + 1, 6), (mouth + 2, 5), (mouth + 3, 5), (mouth + 4, 6),
+        };
     }
     return {
       for (final e in eyes)
@@ -158,6 +166,7 @@ abstract final class PipSprites {
 
   static List<String> _withFace(PipFrame frame, PipFace face) {
     final kind = switch (face) {
+      PipFace.angry => 'angry',
       PipFace.asleep => 'asleep',
       PipFace.off => 'off',
       _ when frame == PipFrame.blink => 'blink',
@@ -336,6 +345,241 @@ abstract final class PipSprites {
     return [for (final r in rows) r.join()];
   }
 
+  // Round 52: his screen showing things, and what's in his field.
+
+  /// His standing frame with [screen] on his screen, [t] seconds in.
+  static List<String> screenFrame(PipScreen screen, double t) {
+    final rows = [for (final r in frames[PipFrame.idle]!) r.split('')];
+    for (var y = 0; y < screenRows; y++) {
+      for (var x = 0; x < screenWidth; x++) {
+        rows[_screenY + y][_screenX + x] = 'W';
+      }
+    }
+    void k(int x, int y, [String c = 'K']) {
+      if (x >= 0 && x < screenWidth && y >= 0 && y < screenRows) {
+        rows[_screenY + y][_screenX + x] = c;
+      }
+    }
+
+    /// A small picture, '#' its pixels (in [c]), its top left at [x], [y].
+    void draw(List<String> art, int x, int y, [String c = 'K']) {
+      for (var j = 0; j < art.length; j++) {
+        for (var i = 0; i < art[j].length; i++) {
+          if (art[j][i] == '#') k(x + i, y + j, c);
+        }
+      }
+    }
+
+    final blink = (t * 3).floor().isEven;
+    switch (screen) {
+      case PipScreen.envelope:
+        // An envelope, its flap a V; it nudges up and down.
+        final up = (t * 4).floor() % 2;
+        draw(const [
+          '##########',
+          '##......##',
+          '#.#....#.#',
+          '#..#..#..#',
+          '#...##...#',
+          '##########',
+        ], 2, 1 + up);
+      case PipScreen.bell:
+        // A bell, swinging.
+        final swing = const [0, 1, 0, -1][(t * 6).floor() % 4];
+        draw(const [
+          '...##...',
+          '..####..',
+          '.######.',
+          '.######.',
+          '########',
+          '...##...',
+        ], 3 + swing, 1, 'Y');
+        if (swing != 0) {
+          k(swing > 0 ? 1 : 12, 2, 'K');
+          k(swing > 0 ? 1 : 12, 4, 'K');
+        }
+      case PipScreen.alert:
+        // A red "!", blinking.
+        if (blink) {
+          draw(const ['##', '##', '##', '##', '..', '##'], 6, 1, 'R');
+        }
+      case PipScreen.heart:
+        // A heart, beating.
+        final big = (t * 2.5).floor().isEven;
+        draw(
+            big
+                ? const [
+                    '.##.##.',
+                    '#######',
+                    '#######',
+                    '.#####.',
+                    '..###..',
+                    '...#...',
+                  ]
+                : const [
+                    '.#.#.',
+                    '#####',
+                    '.###.',
+                    '..#..',
+                  ],
+            big ? 3 : 4,
+            big ? 1 : 2,
+            'R');
+      case PipScreen.music:
+        // Two notes, bobbing in turn.
+        final a = (t * 3).floor().isEven ? 0 : 1;
+        draw(const ['.##', '.#.', '.#.', '##.', '##.'], 3, 1 + a);
+        draw(const ['.##', '.#.', '.#.', '##.', '##.'], 8, 2 - a);
+      case PipScreen.question:
+        draw(
+            const ['.###.', '#...#', '...#.', '..#..', '.....', '..#..'], 4, 1);
+      case PipScreen.loading:
+        // A bar filling up, then again.
+        draw(const ['##########', '#........#', '##########'], 2, 3);
+        final filled = ((t / 0.35).floor() % 9);
+        for (var i = 0; i < filled; i++) {
+          k(3 + i, 4, 'B');
+        }
+      case PipScreen.wink:
+        // One eye open, one shut, a smile.
+        for (final (x, y) in const [(3, 2), (4, 2), (3, 3), (4, 3)]) {
+          k(x, y);
+        }
+        k(10, 3);
+        k(11, 3);
+        for (final (x, y) in const [
+          (4, 5),
+          (9, 5),
+          (5, 6),
+          (6, 6),
+          (7, 6),
+          (8, 6),
+        ]) {
+          k(x, y);
+        }
+      case PipScreen.starEyes:
+        for (final e in const [3, 10]) {
+          draw(const ['.#.', '###', '.#.'], e, 1, blink ? 'Y' : 'R');
+        }
+        for (final (x, y) in const [
+          (4, 5),
+          (9, 5),
+          (5, 6),
+          (6, 6),
+          (7, 6),
+          (8, 6),
+        ]) {
+          k(x, y);
+        }
+      case PipScreen.hi:
+        // "HI", big.
+        draw(const [
+          '#..#.###',
+          '#..#..#.',
+          '####..#.',
+          '#..#..#.',
+          '#..#.###',
+        ], 3, 2);
+      case PipScreen.happy:
+        // ^ ^ and a big smile: proud, or glad.
+        for (final e in const [3, 10]) {
+          k(e, 3);
+          k(e + 1, 2);
+          k(e + 2, 3);
+        }
+        for (final (x, y) in const [
+          (4, 5),
+          (9, 5),
+          (5, 6),
+          (6, 6),
+          (7, 6),
+          (8, 6),
+        ]) {
+          k(x, y);
+        }
+    }
+    return [for (final r in rows) r.join()];
+  }
+
+  /// A computer bug (Round 52), 5 x 4, its legs up or down: green, a red
+  /// eye at the front (its left: it's mirrored going right).
+  static const bugUp = ['.K.K.', 'rbbbb', 'bbbbb', 'K.K.K'];
+  static const bugDown = ['.K.K.', 'rbbbb', 'bbbbb', '.K.K.'];
+
+  /// His sword, 3 x 11, pointing up: blade, guard, hilt.
+  static const sword = [
+    '.s.',
+    'sse',
+    'sse',
+    'sse',
+    'sse',
+    'sse',
+    'sse',
+    'ggg',
+    '.t.',
+    '.t.',
+    '.g.',
+  ];
+
+  /// A flower, 5 x 7: petals, its heart, a stem with a leaf.
+  static const flower = [
+    '.pp..',
+    'pfpP.',
+    '.pP..',
+    '..v..',
+    '.vv..',
+    '..v..',
+    '..v..',
+  ];
+
+  /// A butterfly, 7 x 4, its wings up or down.
+  static const butterflyUp = [
+    'ww...ww',
+    'wWw.wWw',
+    '.wwkww.',
+    '...k...',
+  ];
+  static const butterflyDown = [
+    '.......',
+    '...k...',
+    'wwwkwww',
+    '.wW.Ww.',
+  ];
+
+  /// A ball, 4 x 4, its stripe turned four ways as it rolls.
+  static const ballFrames = [
+    ['.oo.', 'oiio', 'oooo', '.oo.'],
+    ['.oo.', 'oioo', 'oioo', '.oo.'],
+    ['.oo.', 'oooo', 'oiio', '.oo.'],
+    ['.oo.', 'ooio', 'ooio', '.oo.'],
+  ];
+
+  /// His cross words over his head (#!), two ways, 7 x 5.
+  static const crossWords = [
+    ['.#.#..#', '#####.#', '.#.#..#', '#####..', '.#.#..#'],
+    ['#.#...#', '#####.#', '#.#...#', '#####..', '#.#...#'],
+  ];
+
+  static const fieldColours = {
+    'K': PipColours.face,
+    'b': PipColours.bug,
+    'r': PipColours.bugEye,
+    's': PipColours.blade,
+    'e': PipColours.bladeEdge,
+    'g': PipColours.guard,
+    't': PipColours.hilt,
+    'p': PipColours.petal,
+    'P': PipColours.petalDark,
+    'f': PipColours.flowerHeart,
+    'w': PipColours.wing,
+    'W': PipColours.wingDark,
+    'k': PipColours.face,
+    'o': PipColours.ball,
+    'i': PipColours.ballStripe,
+    '#': PipColours.cross,
+    'v': PipColours.stem,
+  };
+
   /// A little z rising while he sleeps, 3 x 4.
   static const z = ['zzz', '..z', '.z.', 'zzz'];
 
@@ -412,6 +656,8 @@ abstract final class PipSprites {
     'Y': PipColours.stationBolt,
     'n': PipColours.staticLight,
     'd': PipColours.staticDark,
+    // Round 52: his screen's pictures.
+    'R': PipColours.heart,
   };
 
   /// How many rows a frame has.

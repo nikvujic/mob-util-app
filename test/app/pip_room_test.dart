@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
@@ -82,12 +84,20 @@ void main() {
       expect(pip().activity, PipActivity.spawning, reason: 'not yet seen');
 
       await openMenuMoving(tester);
-      expect(pip().activity, PipActivity.spawning);
+      // Round 52: out of the ground, from the sky, or thrown in.
+      const entrances = {
+        PipActivity.spawning,
+        PipActivity.falling,
+        PipActivity.thrown,
+      };
+      expect(entrances, contains(pip().activity));
       expect(pip().roomWidth, greaterThan(PipBrain.width));
-      for (var i = 0; i < 120; i++) {
+      for (var i = 0; i < 330; i++) {
         await tester.pump(const Duration(milliseconds: 16));
       }
-      expect(pip().spawned, isTrue, reason: 'out, after about 2 s');
+      expect(pip().spawned, isTrue);
+      expect({...entrances, PipActivity.angry}, isNot(contains(pip().activity)),
+          reason: 'in, after a few seconds');
 
       await closeMenu(tester);
       expect(room, findsNothing);
@@ -96,8 +106,67 @@ void main() {
       expect(pip().x, x);
 
       await openMenuMoving(tester);
-      expect(pip().activity, isNot(PipActivity.spawning),
-          reason: 'only the first time');
+      expect(entrances, isNot(contains(pip().activity)),
+          reason: 'only the first time (or back after a while)');
+    });
+
+    testWidgets(
+        'his ways in (Round 52): all three in the menu, a random one; back '
+        'after a while he comes in again, not after a short while',
+        (tester) async {
+      final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(1))),
+      ]);
+      await openMenuMoving(tester);
+      expect(tester.widget<PipRoom>(find.byType(PipRoom)).entrances,
+          PipEntrance.values.toSet());
+      const entrances = {
+        PipActivity.spawning,
+        PipActivity.falling,
+        PipActivity.thrown,
+      };
+      expect(entrances, contains(pip().activity));
+      for (var i = 0; i < 330; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await closeMenu(tester);
+      expect(pip().leftAt, link.at, reason: 'when he was left');
+
+      // Five minutes away: just there.
+      link.at = link.at!.add(const Duration(minutes: 5));
+      await openMenuMoving(tester);
+      expect(entrances, isNot(contains(pip().activity)));
+      for (var i = 0; i < 330; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await closeMenu(tester);
+
+      // Away longer than [PipBrain.awayFor]: in again.
+      link.at = link.at!.add(PipBrain.awayFor);
+      await openMenuMoving(tester);
+      expect(entrances, contains(pip().activity));
+    });
+
+    testWidgets('a notification comes: his screen shows one (Round 52)',
+        (tester) async {
+      final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(2))),
+      ]);
+      await openMenuMoving(tester);
+      for (var i = 0; i < 330; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().screenShow, isNull);
+      link.notifications.add(link.at!.add(const Duration(seconds: 1)));
+      link.at = link.at!.add(const Duration(seconds: 2));
+      for (var i = 0; i < 70; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().screenShow?.$1.notification, isTrue);
     });
 
     testWidgets('the phone set to remove animations: he just stands',

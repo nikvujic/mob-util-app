@@ -7,6 +7,7 @@ import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/power.dart';
 import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/providers/notification_log_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 
 /// Pip, the pet (Round 34): an egg until hatched, then his birthday and
@@ -205,6 +206,15 @@ class _Link implements PipLink {
 
   @override
   bool get plugged => _ref.read(pipPowerProvider);
+
+  @override
+  DateTime get now => _now;
+
+  @override
+  bool notifiedBetween(DateTime from, DateTime to) => _ref
+      .read(notificationLogProvider)
+      .scheduled
+      .any((n) => n.at.isAfter(from) && !n.at.isAfter(to));
 }
 
 /// Whether the phone is plugged in (Round 44: Pip's charging station):

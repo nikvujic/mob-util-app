@@ -77,6 +77,15 @@ enum PipBackground {
         DayPart.day => (PipColours.dayTop, PipColours.dayBottom),
         DayPart.dusk => (PipColours.duskTop, PipColours.duskBottom),
       };
+
+  /// The sky's colours at [part], top to bottom (Round 52: more hues than
+  /// its top and bottom, e.g. dusk's indigo to purple, pink, orange, gold).
+  List<Color> stopsAt(DayPart part) => switch (part) {
+        DayPart.night => PipColours.nightStops,
+        DayPart.dawn => PipColours.dawnStops,
+        DayPart.day => PipColours.dayStops,
+        DayPart.dusk => PipColours.duskStops,
+      };
 }
 
 /// Things drawn in his sky (Round 35). Each says where it may show: in
@@ -162,4 +171,7 @@ class PipScene {
 
   /// The sky's top and bottom colours, or null without a background.
   (Color, Color)? get sky => background?.skyAt(part);
+
+  /// Its colours top to bottom (Round 52), or null without a background.
+  List<Color>? get skyStops => background?.stopsAt(part);
 }

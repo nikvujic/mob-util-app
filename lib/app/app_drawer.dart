@@ -11,6 +11,7 @@ import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
@@ -175,6 +176,12 @@ class AppDrawer extends ConsumerWidget {
               link: ref.watch(pipLinkProvider),
               // His sky follows the time of day (Round 35).
               scene: PipScene.at(PipPlace.room, ref.watch(clockProvider)()),
+              // Round 52: in the menu he may be thrown in by its swing.
+              entrances: const {
+                PipEntrance.ground,
+                PipEntrance.sky,
+                PipEntrance.side,
+              },
               // Out of his egg: that's his birthday (Round 34).
               onHatched: () => ref
                   .read(pipLifeProvider.notifier)

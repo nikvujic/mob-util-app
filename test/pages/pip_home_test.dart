@@ -206,13 +206,14 @@ void main() {
     await tester.tap(find.byKey(const Key('pipAnimations')));
     await tester.pumpAndSettle();
     final brain = room(tester).brain;
-    // The last in the list: scrolled all the way down to it.
-    await tester.drag(
-      find.descendant(
+    // Round 52: more animations after it; scrolled to it.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('pipPlay-charge')),
+      100,
+      scrollable: find.descendant(
         of: find.byKey(const Key('pipAnimationList')),
         matching: find.byType(Scrollable),
       ),
-      const Offset(0, -600),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('pipPlay-charge')));
@@ -229,12 +230,14 @@ void main() {
     await toSettings(tester);
     await tester.tap(find.byKey(const Key('pipAnimations')));
     await tester.pumpAndSettle();
-    await tester.drag(
-      find.descendant(
+    // Round 52: more animations after it; scrolled to it.
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('pipPlay-charge')),
+      100,
+      scrollable: find.descendant(
         of: find.byKey(const Key('pipAnimationList')),
         matching: find.byType(Scrollable),
       ),
-      const Offset(0, -600),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('pipPlay-charge')));
