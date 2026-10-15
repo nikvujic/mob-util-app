@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 57 — Nikola: the next pages (2026-10-15)
+
+Bills not now. The order: **Birthdays & dates**, **Packing lists**,
+**Days since / until**, **Life percentage**, **Coin flip**, then the
+**planner notification that stays**.
+
+- [ ] **Birthdays & dates** (spec `docs/DATES_SPEC.md`): a calendar of
+  important dates; a date has a title, a note, a type, and up to 3
+  reminders (days before, time); the usual patterns (Notifications page
+  settings, lock, backup, Clear data). Pip wears a **party hat** on a
+  birthday. Waiting on Nikola's go and the spec's questions.
+
 ### Round 56 — Nikola: the index's scroll on (2026-10-15; patch 1.17.2)
 
 - [x] Food, the index under the field: scrolled to its end, a drag kept
