@@ -337,6 +337,26 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 50 — a sweep of the food tracker (2026-10-15, patch 1.14.3)
+
+Nikola: the page was someone's request; sweep it so it holds up for
+whoever needs it, decisions Claude's. His question: ingredients have no
+tags. (They needn't: an ingredient added to a meal becomes a food, in
+Foods, and is tagged there.)
+
+- [ ] Foods: renaming one to another food's name **merges** them (asked
+  first): its meals become the other's, tags joined. So "Egg" and "Eggs"
+  typed apart can become one, and the statistics count them together.
+- [ ] Foods: a line saying tags give the statistics by kind, while some
+  foods have none.
+- [ ] A meal's **day** can be changed too, not only its time.
+- [ ] Statistics: how many meals aren't rated yet (they don't count).
+
+**Later, much later** (Nikola): partial restore for Food. Proposal in
+Round 49's answer: pick the backup's days; each meal brings the foods
+the list is missing, existing ones untouched, meals already there
+skipped. Nikola mentioned notes as what he needs partial restore for.
+
 ### Round 49 — Nikola's questions on the food tracker (2026-10-15, patch 1.14.2)
 
 - [x] Statistics: a row's verdict ("Not enough data yet" and the rest)
