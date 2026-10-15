@@ -13,13 +13,51 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
 
   /// Adds an item at the end of "To buy" (S5), so the list keeps the order
   /// things were added in, and returns its id. Blank names are ignored
-  /// (null).
-  String? addItem(String name) {
+  /// (null). One already there by that name (Round 58, any case) isn't
+  /// added twice: it's moved there instead, as if new. [copy]: a new one
+  /// all the same (a recipe's To Shop, for another quantity).
+  String? addItem(String name, {bool copy = false}) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
+    final existing = copy ? null : named(trimmed);
+    if (existing != null) {
+      final others = state.where((i) => i.id != existing.id);
+      state = [...others, existing.copyWith(toBuy: true)];
+      return existing.id;
+    }
     final item = ShopItem(id: generateId(), name: trimmed);
     state = [...state, item];
     return item.id;
+  }
+
+  /// The item called [name] (any case), if there is one.
+  ShopItem? named(String name) {
+    final key = name.trim().toLowerCase();
+    return state.where((i) => i.name.toLowerCase() == key).firstOrNull;
+  }
+
+  /// The items not on the list that [typed] is part of (any case), the
+  /// ones it starts first (Round 58: offered while adding).
+  List<String> suggest(String typed) {
+    final key = typed.trim().toLowerCase();
+    if (key.isEmpty) return const [];
+    final found = [
+      for (final item in state)
+        if (!item.toBuy && item.name.toLowerCase().contains(key)) item.name,
+    ];
+    bool starts(String n) => n.toLowerCase().startsWith(key);
+    return [...found.where(starts), ...found.where((n) => !starts(n))];
+  }
+
+  /// Renames an item (Round 58). False if [name] is blank or another
+  /// item has it already; its own name in another case is fine.
+  bool rename(String id, String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return false;
+    final other = named(trimmed);
+    if (other != null && other.id != id) return false;
+    _update(id, (item) => item.copyWith(name: trimmed));
+    return true;
   }
 
   /// Moves the item to the other section: back to "To buy" at its end

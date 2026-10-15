@@ -38,6 +38,7 @@ class ShopItem {
   });
 
   ShopItem copyWith({
+    String? name,
     bool? toBuy,
     Quantity? Function()? quantity,
     int? count,
@@ -45,7 +46,7 @@ class ShopItem {
   }) {
     return ShopItem(
       id: id,
-      name: name,
+      name: name ?? this.name,
       toBuy: toBuy ?? this.toBuy,
       quantity: quantity == null ? this.quantity : quantity(),
       count: count ?? this.count,

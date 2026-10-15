@@ -368,9 +368,15 @@ registered only while listened to). `PipPowerNotifier`
 keeps the answer in `Preferences.pipPlugged` (this phone only), and
 tells `PipLifeNotifier.setCharging`, which takes his energy as it is
 then: while charging `PipEnergy.chargingLevelAt` lets it drain as ever
-but never below `chargingFloor` (Round 45), and `segmentsAt` shows the
-segments he had when plugged in until he's unplugged (the menu, Pip
-Home and the full check all read it). His room reads `PipLink.plugged` every second and calls
+but never below `chargingFloor` (Round 45); `segmentsAt` shows what he
+has (Round 58: it used to keep the segments he was plugged in with,
+which, with `pipPlugged` restored after a restart, could look full for
+days). Round 58: `PipLink.chargeTick` (`PipLifeNotifier.chargeTick`: a
+segment, up to full, on again if off) is called by the room every
+`PipBrain.chargeEvery` (30 s) of its ticker while he's `charging`, and
+once when `PipBrain.takeDroneCharge` says the station's drone charged
+him (the drone is the brain's: `droneDue`, `DronePhase`, `drone` for the
+painter; not moving, `sendDrone(animate: false)` simply does it). His room reads `PipLink.plugged` every second and calls
 `PipBrain.setPlugged` (animated only once he's been looked at). The
 brain owns the station (where, how far up), the plug and his floating
 hands as positions; `pip_room.dart` only draws them.
@@ -437,7 +443,8 @@ body and face, or a screen picture (charging or shown), turned
 mirrored. Hats: `PipBrain.hat` (the party hat while `birthday`, which
 the room sets from `PipLink.partyHat`; or one `tryOn`'d, Pip Home's
 Hats), drawn by the painter right after his body inside the same moves
-(mirror, stretch, tilt, spin), from `PipSprites.hatLeft`/`hatBottom`;
+(mirror, stretch, tilt, spin), from `PipSprites.hatLeftOf` (Round 58:
+centred on `hatCentre`, over his antenna) and `hatBottom`;
 `hatBeside` (asleep) puts it on the ground beside him.
 
 Dates (Round 57): `models/date_entry.dart` (`DateEntry`, `DateBook`:

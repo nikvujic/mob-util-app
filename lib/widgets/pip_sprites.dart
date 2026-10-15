@@ -269,6 +269,25 @@ abstract final class PipSprites {
     'c': PipColours.cable,
   };
 
+  /// The station's drone (Round 58), 10 x 5, its rotors two ways (they
+  /// spin), in [stationColours].
+  static const drone = [
+    [
+      'GGGG..GGGG',
+      '....HH....',
+      '.HHggggHH.',
+      '..HggggH..',
+      '...HqqH...',
+    ],
+    [
+      '.GG....GG.',
+      '....HH....',
+      '.HHggggHH.',
+      '..HggggH..',
+      '...HqqH...',
+    ],
+  ];
+
   /// [station] with its lamp off (it blinks).
   static final stationLampOff = [
     for (final row in station) row.replaceAll('q', 'e'),
@@ -569,57 +588,69 @@ abstract final class PipSprites {
         _ => const <String>[],
       };
 
-  /// His hats (Round 57), each at most 8 wide, drawn on his head right
-  /// of his antenna (facing right; mirrored with him), from [hatLeft]
-  /// on his frame, its bottom row just above his casing ([hatBottom]).
+  /// His hats (Round 57), drawn on his head (mirrored with him), their
+  /// bottom row just above his casing ([hatBottom]). Round 58: centred
+  /// on his head, over his antenna (it's under the hat), each an even
+  /// width so it sits in the middle ([hatLeftOf]); the party hat bigger,
+  /// striped, with a pompom.
   static const hats = {
     PipHat.party: [
-      '...o...',
-      '...p...',
-      '..pyp..',
-      '..ypy..',
-      '.pypyp.',
-      'yyyyyyy',
+      '....oo....',
+      '...oooo...',
+      '....yp....',
+      '...yppy...',
+      '...ppyy...',
+      '..ppyypp..',
+      '..pyyppy..',
+      '.pyyppyyp.',
+      'oooooooooo',
     ],
     PipHat.crown: [
-      'g..g..g',
-      'gg.g.gg',
-      'ggggggg',
-      'grgbgrg',
+      'g..gg..g',
+      'gg.gg.gg',
+      'gggggggg',
+      'grgbbgrg',
     ],
     PipHat.topHat: [
-      '.kkkkk.',
-      '.kkkkk.',
-      '.kkkkk.',
-      '.rrrrr.',
-      'kkkkkkk',
+      '..kkkkkk..',
+      '..kkkkkk..',
+      '..kkkkkk..',
+      '..kkkkkk..',
+      '..rrrrrr..',
+      'kkkkkkkkkk',
     ],
     PipHat.wizard: [
-      '....u..',
-      '...uu..',
-      '..uuu..',
-      '..uyu..',
-      '.uuuuu.',
-      '.uyuuu.',
-      'uuuuuuu',
+      '......u...',
+      '.....uu...',
+      '....uuu...',
+      '....uyu...',
+      '...uuuuu..',
+      '...uuuyu..',
+      '..uyuuuuu.',
+      'uuuuuuuuuu',
     ],
     PipHat.cap: [
-      '..ccc...',
-      '.ccccc..',
-      'cccccccc',
+      '...cccc...',
+      '..cccccc..',
+      '..cccccccc',
     ],
     PipHat.beanie: [
-      '...w...',
-      '.bbbbb.',
-      'bbbbbbb',
-      'wbwbwbw',
+      '....ww....',
+      '..bbbbbb..',
+      '.bbbbbbbb.',
+      '.bbbbbbbb.',
+      'wbwbwbwbwb',
     ],
   };
 
-  /// Where a hat sits on his frame: its left column, and the row its
-  /// bottom is on.
-  static const hatLeft = 10;
+  /// The middle of his head on his frame: between columns 9 and 10.
+  static const hatCentre = 10;
+
+  /// The row a hat's bottom is on.
   static const hatBottom = 1;
+
+  /// Where [art] (a hat) starts on his frame, so it's centred.
+  static int hatLeftOf(List<String> art) => hatCentre - art.first.length ~/ 2;
 
   static const hatColours = {
     'o': PipColours.hatWhite,

@@ -44,7 +44,30 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       submitLabel: 'Add',
       keepOpen: true,
       onSubmit: _add,
+      suggestions: _notifier.suggest,
     );
+  }
+
+  /// Renames the one selected item (Round 58); a name another item has
+  /// is refused, with a word why.
+  Future<void> _renameSelected() async {
+    final id = _selection.selected.single;
+    final item = ref.read(shopProvider).where((i) => i.id == id).firstOrNull;
+    if (item == null) return;
+    final name = await showTextInputSheet(
+      context,
+      hint: 'Name',
+      initialValue: item.name,
+    );
+    if (name == null || !mounted) return;
+    if (!_notifier.rename(id, name)) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+            SnackBar(content: Text('${name.trim()} is already there')));
+      return;
+    }
+    _selection.clear();
   }
 
   /// Adds an item and scrolls to it, so it's seen landing in the list.
@@ -209,6 +232,14 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
                   select: _selectStep(toBuy, stock),
+                  nearDelete: [
+                    if (_selection.count == 1)
+                      SelectionAction(
+                        icon: Icons.edit_outlined,
+                        tooltip: 'Rename',
+                        onPressed: _renameSelected,
+                      ),
+                  ],
                 )
               : FloatingActionButton(
                   // Tabs are kept alive side by side; a shared default hero

@@ -7,6 +7,7 @@ import 'package:the_app/widgets/pixel_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/providers/pip_provider.dart';
@@ -289,6 +290,73 @@ void main() {
       expect(buzzes.where((b) => b.contains('light')), hasLength(6));
       expect(buzzes.where((b) => b.contains('heavy')), hasLength(1),
           reason: 'a longer one for the pop');
+    });
+  });
+
+  group('his station charges him, watched (Round 58)', () {
+    late ProviderContainer container;
+    PipBrain pip() => container.read(pipBrainProvider);
+
+    Future<void> frames(WidgetTester tester, double seconds) async {
+      for (var t = 0.0; t < seconds; t += 0.1) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    Future<void> open(WidgetTester tester, FakePipLink link) async {
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(3))),
+      ]);
+      await tester.tap(find.byTooltip('Menu').first);
+      await frames(tester, 1);
+    }
+
+    testWidgets('at it: a segment every 30 seconds, up to full',
+        (tester) async {
+      final link = FakePipLink(segments: 1)
+        ..at = DateTime(2026, 10, 15, 12)
+        ..plugged = true;
+      await open(tester, link);
+      for (var i = 0; i < 200 && pip().activity != PipActivity.charging; i++) {
+        await frames(tester, 0.1);
+      }
+      expect(pip().activity, PipActivity.charging);
+      await frames(tester, PipBrain.chargeEvery - 1.5);
+      expect(link.charges, 0, reason: 'not yet');
+      await frames(tester, 2);
+      expect(link.charges, 1);
+      expect(pip().segments, 2, reason: 'his icon at once');
+      await frames(tester, PipBrain.chargeEvery);
+      expect(link.charges, 2);
+      expect(pip().segments, 3);
+      await frames(tester, PipBrain.chargeEvery);
+      expect(link.charges, 2, reason: 'full');
+    });
+
+    testWidgets('not at it (unplugged): nothing', (tester) async {
+      final link = FakePipLink(segments: 1)..at = DateTime(2026, 10, 15, 12);
+      await open(tester, link);
+      await frames(tester, PipBrain.chargeEvery + 2);
+      expect(link.charges, 0);
+    });
+
+    testWidgets('off: the drone charges him, then he goes to plug in',
+        (tester) async {
+      final link = FakePipLink(show: PipShow.off, segments: 0)
+        ..at = DateTime(2026, 10, 15, 12)
+        ..plugged = true;
+      await open(tester, link);
+      expect(link.charges, 0);
+      for (var i = 0; i < 100 && link.charges == 0; i++) {
+        await frames(tester, 0.1);
+      }
+      expect(link.charges, 1);
+      expect(pip().segments, 1);
+      await frames(tester, 6);
+      expect(
+          {PipActivity.toStation, PipActivity.plugging, PipActivity.charging},
+          contains(pip().activity));
     });
   });
 }

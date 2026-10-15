@@ -82,12 +82,9 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// his energy as it was.
   void resumeCharging(bool charging) => _charging = charging;
 
-  /// His battery icon's segments at [now]: plugged in, it doesn't drop
-  /// (Round 45: the drop shows once he's unplugged).
-  int segmentsAt(DateTime now) => _charging
-      ? math.max(
-          PipEnergy.segments(levelAt(now)), PipEnergy.segments(state.energy))
-      : PipEnergy.segments(levelAt(now));
+  /// His battery icon's segments at [now]: what he has (Round 58: also
+  /// plugged in; it used to keep what he was plugged in with).
+  int segmentsAt(DateTime now) => PipEnergy.segments(levelAt(now));
 
   /// His energy at [now].
   double levelAt(DateTime now) =>
@@ -169,6 +166,20 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     return true;
   }
 
+  /// A segment from his station at [now] (Round 58): a segment more, up
+  /// to full, and on again if he was off. False if he's full (or an egg).
+  bool chargeTick(DateTime now) {
+    if (!state.hatched) return false;
+    final level = levelAt(now);
+    if (level >= PipLife.fullEnergy) return false;
+    state = state.copyWith(
+      energy: math.min(PipLife.fullEnergy, level + 1),
+      energyAt: () => now,
+      offSeen: false,
+    );
+    return true;
+  }
+
   /// Replaces him (restoring a backup): one from before Round 37 starts
   /// full from now.
   void replace(PipLife pip) => state = _started(pip);
@@ -208,6 +219,9 @@ class _Link implements PipLink {
 
   @override
   bool giveBattery() => _pip.giveBattery(_now);
+
+  @override
+  bool chargeTick() => _pip.chargeTick(_now);
 
   @override
   bool get plugged => _ref.read(pipPowerProvider);

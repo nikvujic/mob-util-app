@@ -199,7 +199,7 @@ void main() {
 
     test('he uses it as ever', () {
       expect(
-          PipEnergy.chargingLevelAt(2.5, at, at.add(const Duration(hours: 4))),
+          PipEnergy.chargingLevelAt(2.5, at, at.add(const Duration(hours: 2))),
           closeTo(2.0, 1e-9));
     });
 
@@ -210,7 +210,9 @@ void main() {
       expect(PipEnergy.segments(PipEnergy.chargingFloor), 1);
     });
 
-    test("out already, he stays out (the station doesn't fill him)", () {
+    // Round 58: watched at the station, it does (a segment every 30
+    // seconds), and off, its drone: [PipLink.chargeTick].
+    test("out already, he stays out (the clock alone doesn't fill him)", () {
       expect(PipEnergy.chargingLevelAt(0, at, at.add(const Duration(hours: 4))),
           0);
     });

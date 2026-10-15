@@ -105,6 +105,10 @@ class SelectionActions extends StatelessWidget {
 
   final List<SelectionAction> extra;
 
+  /// Actions between Select all and Delete (Round 58: Shop's Rename,
+  /// with one item selected).
+  final List<SelectionAction> nearDelete;
+
   /// Replaces the Select all / Deselect all button (e.g. Shop's
   /// section-first cycle).
   final SelectionAction? select;
@@ -116,6 +120,7 @@ class SelectionActions extends StatelessWidget {
     required this.onDeselectAll,
     required this.onDelete,
     this.extra = const [],
+    this.nearDelete = const [],
     this.select,
   });
 
@@ -137,6 +142,12 @@ class SelectionActions extends StatelessWidget {
           onPressed:
               select?.onPressed ?? (allSelected ? onDeselectAll : onSelectAll),
         ),
+        for (final action in nearDelete)
+          BottomAction(
+            icon: action.icon,
+            tooltip: action.tooltip,
+            onPressed: action.onPressed,
+          ),
         BottomAction(
           icon: Icons.delete_outline,
           tooltip: 'Delete',

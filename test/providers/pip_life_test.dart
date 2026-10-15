@@ -162,8 +162,8 @@ void main() {
       );
       expect(pip.refusalAt(now), PipRefusal.full);
       expect(pip.giveBattery(now), isFalse);
-      // Eight hours on (Round 45): two segments left.
-      final later = DateTime(2026, 10, 14, 17);
+      // Four hours on (Round 58): two segments left.
+      final later = DateTime(2026, 10, 14, 13);
       expect(PipEnergy.segments(pip.levelAt(later)), 2);
       expect(pip.giveBattery(later), isTrue);
       expect(pip.state.batteries, 0);
@@ -200,7 +200,7 @@ void main() {
     });
 
     test('what was shown is remembered', () {
-      final pip = start()..hatch(now);
+      final pip = start()..hatch(DateTime(2026, 10, 14, 20));
       pip.shown(PipShow.fallAsleep, DateTime(2026, 10, 14, 23, 10));
       expect(pip.state.sleepSeen, '2026-10-14');
       expect(pip.showAt(DateTime(2026, 10, 14, 23, 30)), PipShow.asleep);
@@ -234,10 +234,11 @@ void main() {
       ]);
       addTearDown(container.dispose);
       final link = container.read(pipLinkProvider);
-      expect(link.look(), (PipShow.awake, 2));
+      // Round 58: three hours at a segment every four.
+      expect(link.look(), (PipShow.awake, 1));
       expect(container.read(pipLifeProvider).batteries, 1, reason: 'due');
       expect(link.giveBattery(), isTrue);
-      expect(link.look().$2, 3);
+      expect(link.look().$2, 2);
     });
 
     test('restored: carries on from where the backup left him', () {
@@ -250,7 +251,7 @@ void main() {
         nextBatteryAt: DateTime(2026, 10, 14, 12),
       ));
       // Two hours since the backup: one asleep (to 8:00), one awake.
-      expect(pip.levelAt(now), closeTo(2 - 1 / 36 - 1 / 8, 1e-9));
+      expect(pip.levelAt(now), closeTo(2 - 1 / 18 - 1 / 4, 1e-9));
       expect(pip.state.batteries, 2);
     });
   });

@@ -16,25 +16,31 @@ void main() {
   });
 
   group('energy used', () {
-    test('awake: a segment every 8 hours (Round 45)', () {
-      expect(PipEnergy.usedBetween(at(14, 9), at(14, 17)), closeTo(1, 1e-9));
+    test('awake: a segment every 4 hours (Round 58)', () {
+      expect(PipEnergy.usedBetween(at(14, 9), at(14, 13)), closeTo(1, 1e-9));
     });
 
-    test('asleep: much slower, a segment every 36 hours', () {
+    test('asleep: much slower, a segment every 18 hours (Round 58)', () {
       expect(
-          PipEnergy.usedBetween(at(14, 23), at(15, 8)), closeTo(9 / 36, 1e-9));
+          PipEnergy.usedBetween(at(14, 23), at(15, 8)), closeTo(9 / 18, 1e-9));
     });
 
     test('across the night: each part at its own rate', () {
       // 20:00 → 9:00: 3 h awake, 9 h asleep, 1 h awake.
       expect(PipEnergy.usedBetween(at(14, 20), at(15, 9)),
-          closeTo(4 / 8 + 9 / 36, 1e-9));
+          closeTo(4 / 4 + 9 / 18, 1e-9));
     });
 
-    test('a day: about two segments (Round 45)', () {
+    test(
+        'a day (Round 58): about 4.25 segments, a little less than the '
+        'batteries bring', () {
       final day = PipEnergy.usedBetween(at(14, 9), at(15, 9));
-      expect(day, closeTo(15 / 8 + 9 / 36, 1e-9));
-      expect(day, inInclusiveRange(2, 2.2));
+      expect(day, closeTo(15 / 4 + 9 / 18, 1e-9));
+      expect(day, inInclusiveRange(4, 4.5));
+      final batteries =
+          const Duration(days: 1).inMinutes / PipEnergy.batteryEvery.inMinutes;
+      expect(day, lessThan(batteries));
+      expect(day, greaterThan(batteries * 0.8), reason: 'just a little');
     });
 
     test('the clock gone back: nothing used', () {
@@ -47,9 +53,9 @@ void main() {
     });
 
     test('when it runs out', () {
-      expect(PipEnergy.emptyAt(1, at(14, 9)), at(14, 17));
-      // 2 at 20:00: 0.375 by 23:00, 0.25 overnight, 1.375 more from 8:00.
-      expect(PipEnergy.emptyAt(2, at(14, 20)), at(15, 19));
+      expect(PipEnergy.emptyAt(1, at(14, 9)), at(14, 13));
+      // 2 at 20:00: 0.75 by 23:00, 0.5 overnight, 0.75 more from 8:00.
+      expect(PipEnergy.emptyAt(2, at(14, 20)), at(15, 11));
       expect(PipEnergy.emptyAt(0, at(14, 9)), isNull);
       final empty = PipEnergy.emptyAt(3, at(14, 9))!;
       expect(PipEnergy.levelAt(3, at(14, 9), empty), closeTo(0, 0.01));

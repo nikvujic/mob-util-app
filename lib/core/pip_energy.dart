@@ -8,11 +8,13 @@ abstract final class PipEnergy {
   /// Full: three segments of his battery.
   static const full = 3.0;
 
-  /// Energy used an hour awake (Round 45: a segment every 8 hours, so a
-  /// day shows it), and asleep (much less, so he rarely runs out in the
-  /// night).
-  static const awakePerHour = 1 / 8;
-  static const asleepPerHour = 1 / 36;
+  /// Energy used an hour awake, and asleep (much less, so he rarely runs
+  /// out in the night). Round 58: twice as fast as before (a segment
+  /// every 4 hours awake): about 4.25 a day, a little less than the
+  /// batteries bring when each is given as it comes (4.8 a day). His
+  /// charging station makes up for it ([PipLink.chargeTick]).
+  static const awakePerHour = 1 / 4;
+  static const asleepPerHour = 1 / 18;
 
   /// A battery comes every [batteryEvery] (Round 45: on the clock, they
   /// pile up while away, up to [maxBatteries]).
@@ -55,10 +57,11 @@ abstract final class PipEnergy {
   static double levelAt(double level, DateTime since, DateTime now) =>
       math.max(0, level - usedBetween(since, now));
 
-  /// Charging (Round 45): for fun more than use. He uses energy as ever,
-  /// but can't run out: plugged in, he stops at [chargingFloor] (unless
-  /// he was out already). His battery icon doesn't show a drop meanwhile
-  /// (the provider keeps the segments he was plugged in with).
+  /// Charging (Round 45): plugged in, he uses energy as ever, but can't
+  /// run out: he stops at [chargingFloor] (unless he was out already).
+  /// Round 58: his battery icon shows what he has (it used to keep the
+  /// segments he was plugged in with, and could look full for days); at
+  /// his station, watched, he charges fast ([PipLink.chargeTick]).
   static const chargingFloor = 0.05;
   static double chargingLevelAt(double level, DateTime since, DateTime now) =>
       level <= 0
@@ -195,4 +198,9 @@ abstract class PipLink {
 
   /// Someone's birthday today, or his own (Round 57): the party hat.
   bool get partyHat;
+
+  /// A segment from his station (Round 58): every [PipBrain.chargeEvery]
+  /// he's at it, watched, and the drone's charge when he's off. True if
+  /// he took it (not when full).
+  bool chargeTick();
 }

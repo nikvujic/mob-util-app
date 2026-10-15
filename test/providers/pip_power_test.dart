@@ -37,8 +37,8 @@ void main() {
   setUp(() => now = DateTime(2026, 10, 14, 10));
 
   test(
-      'plugged in (Round 45): he uses energy as ever, but his icon doesn\'t '
-      'drop till unplugged, and he can\'t run out', () async {
+      'plugged in (Round 45): he uses energy as ever, and can\'t run out; '
+      'his icon shows what he has (Round 58)', () async {
     final power = FakePower(isPlugged: true);
     final container = start(power);
     final link = container.read(pipLinkProvider);
@@ -48,9 +48,10 @@ void main() {
     expect(container.read(preferencesProvider).pipPlugged, isTrue,
         reason: 'kept for after a restart');
     final pip = container.read(pipLifeProvider.notifier);
-    now = now.add(const Duration(hours: 6));
-    expect(pip.levelAt(now), closeTo(0.75, 0.001), reason: 'used as ever');
-    expect(pip.segmentsAt(now), 2, reason: 'shown as when plugged in');
+    now = now.add(const Duration(hours: 2));
+    expect(pip.levelAt(now), closeTo(1.0, 0.001), reason: 'used as ever');
+    expect(pip.segmentsAt(now), 1,
+        reason: 'Round 58: not kept as when plugged in');
     now = now.add(const Duration(hours: 20));
     expect(pip.levelAt(now), PipEnergy.chargingFloor, reason: 'never out');
     expect(pip.showAt(now), isNot(PipShow.powerOff));
@@ -59,7 +60,7 @@ void main() {
     await pumpEventQueue();
     expect(link.plugged, isFalse);
     expect(container.read(preferencesProvider).pipPlugged, isFalse);
-    expect(pip.segmentsAt(now), 1, reason: 'the drop shows now');
+    expect(pip.segmentsAt(now), 1);
   });
 
   test('asked again while he\'s looked at, every few seconds at most',
@@ -88,9 +89,11 @@ void main() {
     container.read(pipLinkProvider).look();
     final pip = container.read(pipLifeProvider.notifier);
     expect(pip.charging, isTrue, reason: 'straight away');
-    now = now.add(const Duration(hours: 4));
+    now = now.add(const Duration(hours: 2));
     await pumpEventQueue();
-    expect(pip.segmentsAt(now), 2, reason: 'still shown as when plugged in');
+    // Round 58: what he has, however long ago he was plugged in (it used
+    // to keep what he had then: full for days).
+    expect(pip.segmentsAt(now), 1);
     expect(pip.levelAt(now), closeTo(1.0, 0.001));
   });
 

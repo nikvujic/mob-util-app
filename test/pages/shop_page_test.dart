@@ -271,4 +271,83 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byTooltip('Select all items'), findsOneWidget);
   });
+
+  group('Round 58', () {
+    testWidgets(
+        'the add sheet offers bought items as you type; a tap puts one '
+        'back, not a copy', (tester) async {
+      await pumpShop(tester);
+      final shop = container.read(shopProvider.notifier);
+      final milk = shop.addItem('Milk')!;
+      shop
+        ..addItem('Bread')
+        ..toggle(milk);
+      await tester.pump();
+      await tester.tap(find.byTooltip('Add item'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('textSuggestions')), findsNothing);
+      await tester.enterText(find.byType(TextField), 'mi');
+      await tester.pump();
+      expect(find.byKey(const Key('suggestion-Milk')), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'br');
+      await tester.pump();
+      expect(find.byKey(const Key('textSuggestions')), findsNothing,
+          reason: 'Bread is on the list');
+      await tester.enterText(find.byType(TextField), 'mi');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('suggestion-Milk')));
+      await tester.pump();
+      expect(container.read(shopProvider).map((i) => (i.name, i.toBuy)),
+          [('Bread', true), ('Milk', true)]);
+      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
+          isEmpty);
+      expect(find.byKey(const Key('textSuggestions')), findsNothing);
+    });
+
+    testWidgets(
+        'one selected: Rename between Select all and Delete; a name '
+        'taken is refused', (tester) async {
+      await pumpShop(tester);
+      container.read(shopProvider.notifier)
+        ..addItem('Milk')
+        ..addItem('Bread');
+      await tester.pump();
+      await tester.longPress(find.text('Milk'));
+      await tester.pump();
+      final select = tester.getCenter(find.byTooltip('Select all to buy'));
+      final rename = tester.getCenter(find.byTooltip('Rename'));
+      final delete = tester.getCenter(find.byTooltip('Delete'));
+      // In a row, Delete outermost (on either side).
+      expect((select.dx - rename.dx).sign, (rename.dx - delete.dx).sign);
+      expect(rename.dx, isNot(select.dx));
+      expect(rename.dy, moreOrLessEquals(delete.dy, epsilon: 1));
+      // Two selected: no Rename.
+      await tester.tap(find.text('Bread'));
+      await tester.pump();
+      expect(find.byTooltip('Rename'), findsNothing);
+      await tester.tap(find.text('Bread'));
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Rename'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'bread');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('bread is already there'), findsOneWidget);
+      expect(find.text('1 selected'), findsOneWidget);
+      tester
+          .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+          .hideCurrentSnackBar();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Rename'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Oat milk');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(container.read(shopProvider).map((i) => i.name),
+          ['Oat milk', 'Bread']);
+      expect(find.text('1 selected'), findsNothing);
+    });
+  });
 }

@@ -21,6 +21,14 @@ class TextInputSheet extends StatefulWidget {
   /// E.g. numbers for an amount; text by default.
   final TextInputType? keyboardType;
 
+  /// What's already there that matches the typed text (Round 58: Shop's
+  /// items not on the list), offered above the field as you type; a tap
+  /// submits it. Asked again on each change, so it's always current.
+  final List<String> Function(String typed)? suggestions;
+
+  /// How many suggestions show at most.
+  static const mostSuggestions = 6;
+
   const TextInputSheet({
     super.key,
     required this.hint,
@@ -30,6 +38,7 @@ class TextInputSheet extends StatefulWidget {
     this.onSubmit,
     this.controller,
     this.keyboardType,
+    this.suggestions,
   });
 
   @override
@@ -75,13 +84,13 @@ class _TextInputSheetState extends State<TextInputSheet> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit([String? picked]) {
     // Edited live: nothing to hand back.
     if (widget.controller != null) {
       Navigator.of(context).pop();
       return;
     }
-    final text = _controller.text.trim();
+    final text = (picked ?? _controller.text).trim();
     if (text.isEmpty) {
       if (!widget.keepOpen) Navigator.of(context).pop();
       return;
@@ -95,8 +104,43 @@ class _TextInputSheetState extends State<TextInputSheet> {
     }
   }
 
+  /// The suggestions for what's typed, as chips in a row that scrolls
+  /// sideways; nothing while nothing's typed or nothing matches.
+  Widget _suggestions(BuildContext context) => ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final typed = _controller.text.trim();
+          final found = typed.isEmpty
+              ? const <String>[]
+              : widget.suggestions!(typed)
+                  .take(TextInputSheet.mostSuggestions)
+                  .toList();
+          if (found.isEmpty) return const SizedBox.shrink();
+          return SingleChildScrollView(
+            key: const Key('textSuggestions'),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
+              children: [
+                for (final name in found)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      key: Key('suggestion-$name'),
+                      avatar: const Icon(Icons.history, size: 18),
+                      label: Text(name),
+                      onPressed: () => _submit(name),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      );
+
   @override
   Widget build(BuildContext context) {
+    final field = _field(context);
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -104,37 +148,47 @@ class _TextInputSheetState extends State<TextInputSheet> {
         top: 8,
         bottom: MediaQuery.viewInsetsOf(context).bottom + 8,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              autofocus: true,
-              keyboardType: widget.keyboardType,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction:
-                  widget.keepOpen ? TextInputAction.send : TextInputAction.done,
-              style: TextStyle(color: context.colors.textPrimary),
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                hintStyle: TextStyle(color: context.colors.textHint),
-                border: InputBorder.none,
-              ),
-              // Keep the keyboard up between entries in keepOpen mode.
-              onEditingComplete: widget.keepOpen ? () {} : null,
-              onSubmitted: (_) => _submit(),
+      child: widget.suggestions == null
+          ? field
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [_suggestions(context), field],
             ),
-          ),
-          TextButton(
-            onPressed: _submit,
-            child: Text(
-              widget.submitLabel,
-              style: TextStyle(color: context.colors.accent),
+    );
+  }
+
+  Widget _field(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            autofocus: true,
+            keyboardType: widget.keyboardType,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction:
+                widget.keepOpen ? TextInputAction.send : TextInputAction.done,
+            style: TextStyle(color: context.colors.textPrimary),
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              hintStyle: TextStyle(color: context.colors.textHint),
+              border: InputBorder.none,
             ),
+            // Keep the keyboard up between entries in keepOpen mode.
+            onEditingComplete: widget.keepOpen ? () {} : null,
+            onSubmitted: (_) => _submit(),
           ),
-        ],
-      ),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: Text(
+            widget.submitLabel,
+            style: TextStyle(color: context.colors.accent),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -150,6 +204,7 @@ Future<String?> showTextInputSheet(
   ValueChanged<String>? onSubmit,
   TextEditingController? controller,
   TextInputType? keyboardType,
+  List<String> Function(String typed)? suggestions,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -162,6 +217,7 @@ Future<String?> showTextInputSheet(
       onSubmit: onSubmit,
       controller: controller,
       keyboardType: keyboardType,
+      suggestions: suggestions,
     ),
   );
 }

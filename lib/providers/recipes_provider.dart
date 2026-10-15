@@ -345,7 +345,8 @@ ToShop sendToShop(
       }
       continue;
     }
-    final id = shop.addItem(name);
+    // Another quantity: a copy beside it (Round 58: not moved).
+    final id = shop.addItem(name, copy: true);
     if (id == null) continue;
     added++;
     switch (wanted.quantity) {

@@ -342,6 +342,18 @@ class FakePipLink implements PipLink {
   /// A birthday today (Round 57).
   @override
   bool partyHat = false;
+
+  /// Segments from his station (Round 58): one more each (not full); off,
+  /// he's on again.
+  int charges = 0;
+  @override
+  bool chargeTick() {
+    if (segments >= 3) return false;
+    charges++;
+    segments++;
+    if (show == PipShow.off || show == PipShow.powerOff) show = PipShow.awake;
+    return true;
+  }
 }
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]

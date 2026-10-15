@@ -217,6 +217,11 @@ void main() {
     await openMenu(tester);
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
+    // Round 58: under Introduction after updates.
+    expect(
+        tester.getTopLeft(find.byKey(const Key('todoNote'))).dy,
+        greaterThan(
+            tester.getTopLeft(find.byKey(const Key('introOnUpdates'))).dy));
     await tester.tap(find.byKey(const Key('todoNote')));
     await tester.pumpAndSettle();
     await tester.pageBack();

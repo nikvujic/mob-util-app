@@ -4,6 +4,36 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- Pip's **charging station charges him**: while you watch him (the menu
+  or Pip Home) at the station with the phone charging, a segment every
+  30 seconds. **Off** with the phone plugged in, the station sends out
+  a **drone** that beams a segment into him; then he's up and walks
+  over to plug in.
+- **Shop**: with one item selected, **Rename** (between Select all and
+  Delete); typing in the add field offers your **bought items** that
+  match, a tap puts one back on the list.
+
+### Changed
+- Pip uses **energy twice as fast** (a segment every 4 hours awake),
+  a little faster than the batteries alone keep up with.
+- Pip's **hats** sit in the middle of his head (over his antenna); the
+  **party hat** is bigger, striped, with a pompom.
+- **Shop**: adding an item that's there already moves it to the list
+  instead of adding a copy.
+- **Food**: putting the keyboard away closes the index; Back first
+  closes it, a second Back leaves.
+- **Dates**: Delete asks first.
+- **Settings**: Introduction after updates comes before the To-do note.
+
+### Fixed
+- Pip's battery could look **full for days** while the phone was
+  charging (it kept what he had when plugged in); it now shows what he
+  has.
+- Opened while off with the phone plugged in, Pip was shown charging.
+
 ## [1.18.0] - 2026-10-15
 
 ### Added

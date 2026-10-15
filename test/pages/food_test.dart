@@ -139,7 +139,9 @@ void main() {
     expect(find.byKey(const Key('indexFood-Kiwi')), findsNothing,
         reason: 'in the meal now');
 
-    // Round 54: no Same as (repeating a recent meal).
+    // Round 54: no Same as (repeating a recent meal). Round 58: the
+    // first Back closes the index.
+    await pressBack(tester);
     await pressBack(tester);
     await tapTooltip(tester, 'Log a meal');
     expect(find.text('SAME AS'), findsNothing);
@@ -652,5 +654,48 @@ void main() {
     await tester.tap(find.textContaining('Mon, 5 Oct  ·  Lunch'));
     await tester.pumpAndSettle();
     expect(appBarTitle('Meal'), findsOneWidget);
+  });
+
+  group('Round 58: the index closes', () {
+    Future<void> openIndex(WidgetTester tester) async {
+      await openFood(tester,
+          start:
+              FoodBook(foods: [Food(id: 'f1', name: 'Milk')], meals: const []));
+      addTearDown(tester.view.resetViewInsets);
+      await tapTooltip(tester, 'Log a meal');
+      await tester.tap(find.byKey(const Key('mealFoodField')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('foodIndex')), findsOneWidget);
+    }
+
+    bool focused(WidgetTester tester) => tester
+        .widget<TextField>(find.byKey(const Key('mealFoodField')))
+        .focusNode!
+        .hasFocus;
+
+    testWidgets('with the keyboard put away: the field let go', (tester) async {
+      await openIndex(tester);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('foodIndex')), findsOneWidget);
+      tester.view.viewInsets = FakeViewPadding.zero;
+      await tester.pumpAndSettle();
+      expect(focused(tester), isFalse);
+      expect(find.byKey(const Key('foodIndex')), findsNothing);
+      expect(find.text('New meal'), findsOneWidget);
+    });
+
+    testWidgets('Back closes it first; Back again leaves', (tester) async {
+      await openIndex(tester);
+      await tester.enterText(find.byKey(const Key('mealFoodField')), 'Mi');
+      await tester.pumpAndSettle();
+      await pressBack(tester);
+      expect(find.text('New meal'), findsOneWidget);
+      expect(focused(tester), isFalse);
+      expect(find.byKey(const Key('foodIndex')), findsNothing);
+      await pressBack(tester);
+      expect(find.text('New meal'), findsNothing);
+      expect(find.text('No meals logged'), findsOneWidget);
+    });
   });
 }

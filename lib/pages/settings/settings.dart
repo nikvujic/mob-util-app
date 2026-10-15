@@ -39,18 +39,7 @@ class SettingsPage extends ConsumerWidget {
             onChanged:
                 ref.read(preferencesProvider.notifier).setCounterFeedback,
           ),
-          SwitchListTile(
-            key: const Key('todoNote'),
-            secondary: const Icon(Icons.checklist),
-            title: const Text('To-do note'),
-            subtitle: Text(
-              'A plain to-do list at the top of Notes. Turned off, its list '
-              'and options are kept for when it comes back.',
-              style: TextStyle(color: context.colors.textSecondary),
-            ),
-            value: preferences.todoNote,
-            onChanged: ref.read(preferencesProvider.notifier).setTodoNote,
-          ),
+          // The Introduction first, then the To-do note (Round 58).
           SwitchListTile(
             key: const Key('introOnUpdates'),
             secondary: const Icon(Icons.auto_stories_outlined),
@@ -85,6 +74,18 @@ class SettingsPage extends ConsumerWidget {
                   );
               },
             ),
+          SwitchListTile(
+            key: const Key('todoNote'),
+            secondary: const Icon(Icons.checklist),
+            title: const Text('To-do note'),
+            subtitle: Text(
+              'A plain to-do list at the top of Notes. Turned off, its list '
+              'and options are kept for when it comes back.',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.todoNote,
+            onChanged: ref.read(preferencesProvider.notifier).setTodoNote,
+          ),
           const Divider(),
           ListTile(
             leading:

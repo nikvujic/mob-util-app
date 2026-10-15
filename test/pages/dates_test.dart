@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/providers/dates_provider.dart';
+import 'package:the_app/widgets/app_dialog.dart';
 
 import '../helpers.dart';
 
@@ -201,13 +202,22 @@ void main() {
     expect(book().dates.single.year, 2026);
   });
 
-  testWidgets('opened, changed, deleted with Undo', (tester) async {
+  testWidgets('opened; deleted once confirmed (Round 58), with Undo',
+      (tester) async {
     await openDates(tester, start: [date('Ana', 24, 10, year: 1995)]);
     await tap(tester, find.text('Ana'));
     expect(appBarTitle('Date'), findsOneWidget);
     expect(find.byKey(const Key('dateNext')), findsOneWidget);
     expect(find.text('Sat, 24 Oct  ·  in 9 days  ·  turns 31'), findsOneWidget);
     await tap(tester, find.byKey(const Key('deleteDate')));
+    expect(find.text('Delete Ana?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(book().dates, hasLength(1), reason: 'not confirmed');
+    expect(appBarTitle('Date'), findsOneWidget);
+    await tap(tester, find.byKey(const Key('deleteDate')));
+    await tester.tap(find.widgetWithText(DialogButton, 'Delete'));
+    await tester.pumpAndSettle();
     expect(book().dates, isEmpty);
     expect(find.text('Ana deleted'), findsOneWidget);
     await tester.tap(find.text('Undo'));

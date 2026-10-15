@@ -87,6 +87,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     // A long pause (e.g. the app away) doesn't jump him across the room.
     setState(() => widget.brain.step(dt.clamp(0, 0.1)));
+    _charge(dt.clamp(0, 0.1));
     // Round 53: a buzz where something hits (a landing, a strike, a kick).
     for (final buzz in widget.brain.takeBuzzes()) {
       switch (buzz) {
@@ -101,6 +102,30 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   }
 
   double _sinceCheck = 0;
+
+  /// Seconds at his station, watched, since the last segment it gave.
+  double _charging = 0;
+
+  /// Round 58: his station's charge reaches his life: a segment every
+  /// [PipBrain.chargeEvery] he's at it while watched, and the drone's
+  /// when he was off. His icon shows it at once.
+  void _charge(double dt) {
+    final link = widget.link;
+    final brain = widget.brain;
+    if (link == null) return;
+    var charged = false;
+    if (brain.activity == PipActivity.charging) {
+      _charging += dt;
+      if (_charging >= PipBrain.chargeEvery) {
+        _charging = 0;
+        charged = link.chargeTick();
+      }
+    } else {
+      _charging = 0;
+    }
+    if (brain.takeDroneCharge()) charged = link.chargeTick() || charged;
+    if (charged) brain.segments = link.look().$2;
+  }
 
   /// Whether his way in was picked (once a room's time).
   bool _entered = false;
@@ -166,7 +191,12 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
       _shown = show;
       link.shown(show);
     }
-    if (!_moving) _finish();
+    if (!_moving) {
+      _finish();
+      // Off, plugged in, not moving: the drone's charge simply done.
+      if (brain.sendDrone(animate: false)) _finish();
+      _charge(0);
+    }
   }
 
   void _checkSoon() => WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -768,7 +798,9 @@ class _RoomPainter extends CustomPainter {
       for (var y = 0; y < art.length; y++) {
         for (var x = 0; x < art[y].length; x++) {
           final colour = PipSprites.hatColours[art[y][x]];
-          if (colour != null) own(PipSprites.hatLeft + x, top + y, colour);
+          if (colour != null) {
+            own(PipSprites.hatLeftOf(art) + x, top + y, colour);
+          }
         }
       }
     }
@@ -785,6 +817,23 @@ class _RoomPainter extends CustomPainter {
         groundTop,
         colours: PipSprites.hatColours,
       );
+    }
+    // Round 58: the station's drone, flying to him while he's off, its
+    // beam on him as it charges him.
+    if (brain.drone case (final dx, final dy, final beaming)) {
+      if (beaming) {
+        final middle = dx + PipBrain.droneWidth / 2;
+        final top = groundTop - dy;
+        final reach = dy - PipBrain.beamTo;
+        for (var i = 0.0; i < reach; i++) {
+          // Flickering, fading down towards him.
+          final a = (brain.droneSpin ? 0.95 : 0.7) * (1 - i / (reach + 4));
+          dot(middle - 1, top + i, PipColours.stationBolt.withValues(alpha: a),
+              2, 1);
+        }
+      }
+      sprite(PipSprites.drone[brain.droneSpin ? 0 : 1], dx, groundTop - dy,
+          colours: PipSprites.stationColours);
     }
     // Round 54: the slot in his side, open while his battery's changed.
     // Scaled with him, as he crouches.
@@ -895,10 +944,8 @@ class _RoomPainter extends CustomPainter {
     if (brain.fist case (final fx, final fy)) {
       sprite(PipSprites.mitt, fx, groundTop - fy);
       final words = PipSprites.crossWords[(brain.zsClock * 4).floor() % 2];
-      // Round 53: lower, just over his head beside his antenna, away
-      // from the fist.
-      sprite(words, brain.facingRight ? centre - 10 : centre + 3,
-          groundTop - PipBrain.height + 1,
+      sprite(
+          words, crossWordsLeft(brain, centre), groundTop - PipBrain.height + 1,
           colours: PipSprites.fieldColours);
     }
     // A shooting star: its head and a fading tail.
@@ -976,4 +1023,13 @@ List<String> pipFrameOf(PipBrain brain) {
           : null;
   if (picture == null) return PipSprites.frameOf(brain.frame, brain.face);
   return brain.facingRight ? picture : PipSprites.screenTurned(picture);
+}
+
+/// Where his cross words start (their left column) with his frame's
+/// middle at [centre]. Round 53: low, just over his head beside his
+/// antenna, away from the fist. Round 58: in a hat (centred, over his
+/// antenna), further out, clear of it.
+double crossWordsLeft(PipBrain brain, double centre) {
+  final out = brain.hat != null && !brain.hatBeside ? 2 : 0;
+  return brain.facingRight ? centre - 10 - out : centre + 3 + out;
 }

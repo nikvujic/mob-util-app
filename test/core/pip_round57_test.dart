@@ -64,15 +64,27 @@ void main() {
       expect(p.hat, PipHat.party);
     });
 
-    test('each hat: on his head right of the antenna, above his casing', () {
+    test(
+        'each hat (Round 58): centred on his head, over his antenna, '
+        'above his casing', () {
       final frame = PipSprites.frameOf(PipFrame.idle, PipFace.normal);
       final antenna = frame.first.indexOf('A');
+      final casing = frame[PipSprites.hatBottom + 1];
+      final headMiddle =
+          (casing.indexOf('L') + casing.lastIndexOf('L') + 1) / 2;
       for (final MapEntry(key: hat, value: art) in PipSprites.hats.entries) {
-        expect(art.map((r) => r.length).reduce(math.max), lessThanOrEqualTo(8),
-            reason: hat.name);
-        expect(PipSprites.hatLeft, greaterThan(antenna));
+        final width = art.first.length;
+        expect(art.every((r) => r.length == width), isTrue, reason: hat.name);
+        expect(width.isEven, isTrue, reason: '${hat.name}: one middle');
+        expect(width, lessThanOrEqualTo(10), reason: hat.name);
+        final left = PipSprites.hatLeftOf(art);
+        expect(left + width / 2, headMiddle, reason: '${hat.name}: centred');
+        // His antenna (two rows) under it.
+        for (final row in art.reversed.take(2)) {
+          expect(row[antenna - left], isNot('.'), reason: hat.name);
+        }
         // Its bottom row on the row above his casing's top.
-        expect(frame[PipSprites.hatBottom + 1].contains('L'), isTrue);
+        expect(casing.contains('L'), isTrue);
         for (final row in art) {
           for (final c in row.split('')) {
             if (c != '.') {
@@ -82,8 +94,34 @@ void main() {
           }
         }
       }
+      // The party hat, bigger (Round 58).
+      expect(PipSprites.hats[PipHat.party]!.length, greaterThanOrEqualTo(8));
+      expect(PipSprites.hats[PipHat.party]!.first.length, 10);
       expect(PipSprites.hats.keys.toSet(), PipHat.values.toSet());
     });
+  });
+
+  test("his cross words (Round 58): clear of any hat he's in, either way", () {
+    for (final right in [true, false]) {
+      for (final hat in PipHat.values) {
+        final p = up()
+          ..x = 60
+          ..facingRight = right
+          ..tryOn(hat);
+        final centre = p.x + PipBrain.width / 2;
+        final art = PipSprites.hats[hat]!;
+        // The hat's columns in the room (mirrored facing left).
+        final from = PipSprites.hatLeftOf(art);
+        final to = from + art.first.length - 1;
+        final hatL = right ? p.x + from : p.x + PipBrain.width - 1 - to;
+        final hatR = hatL + art.first.length;
+        final wordsL = crossWordsLeft(p, centre);
+        final wordsR = wordsL + PipSprites.crossWords.first.first.length;
+        expect(wordsR <= hatL || wordsL >= hatR, isTrue,
+            reason: '${hat.name} right: $right ($wordsL-$wordsR, '
+                '$hatL-$hatR)');
+      }
+    }
   });
 
   test('his birthday: the day he hatched each year after, not that day', () {

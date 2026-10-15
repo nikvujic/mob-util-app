@@ -266,6 +266,9 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
         next != PipAnimation.wakeUp && next != PipAnimation.powerOn,
     };
 
+/// The station's drone's trip (Round 58).
+enum DronePhase { rising, out, beaming, back, sinking }
+
 /// Pip's frames, by name; drawn by `widgets/pip_room.dart`.
 enum PipFrame { idle, blink, step1, step2, step3, step4, oh, tuck }
 
@@ -870,6 +873,7 @@ class PipBrain {
   void step(double dt) {
     _t += dt;
     _stepStation(dt);
+    _stepDrone(dt);
     switch (activity) {
       case PipActivity.egg:
         break;
@@ -1180,6 +1184,168 @@ class PipBrain {
     }
   }
 
+  /// Round 58: at his station, watched, a segment this often.
+  static const chargeEvery = 30.0;
+
+  // Round 58: off with the phone plugged in, the station's drone flies
+  // over and charges him a segment; then he's up and walks over to plug
+  // in as ever.
+
+  /// The drone's size, in pixels.
+  static const droneWidth = 10;
+  static const droneHeight = 5;
+
+  /// Its trip's parts, in seconds: up out of the station's top, over to
+  /// him, beaming down on him, back over the station, down into it.
+  static const droneRise = 0.5;
+  static const droneOut = 1.2;
+  static const droneBeam = 1.6;
+  static const droneBack = 1.2;
+  static const droneSink = 0.5;
+
+  /// How high above the ground it hovers over him lying there (its
+  /// bottom), and where its beam ends (his side).
+  static const droneHover = 30.0;
+  static const beamTo = 17.0;
+
+  DronePhase? _dronePhase;
+  double _droneT = 0;
+
+  /// Where its leg of the trip began (its left, its bottom's height).
+  (double, double) _droneFrom = (0, 0);
+
+  /// It charged him: taken once by the room, which tells his life.
+  bool _droneCharged = false;
+
+  /// Where it starts and ends: in the station's top.
+  (double, double) get _droneHome => (
+        _stationX! + (stationWidth - droneWidth) / 2,
+        stationHeight - droneHeight.toDouble(),
+      );
+
+  /// Over the station, before going down into it (or after coming up).
+  (double, double) get _droneAbove => (_droneHome.$1, stationHeight + 4.0);
+
+  /// Over his middle, lying there.
+  (double, double) get _droneOver {
+    final middle = _fallRight ? x + width + height / 2 : x - height / 2;
+    return (
+      (middle - droneWidth / 2)
+          .clamp(0, math.max(0, roomWidth - droneWidth))
+          .toDouble(),
+      droneHover,
+    );
+  }
+
+  /// Whether it would set off now: he's off (for real, not a demo), the
+  /// phone plugged in, the station up and still (at night too: off, his
+  /// life says off whatever the hour; charged, he then goes to sleep).
+  bool get droneDue =>
+      _dronePhase == null &&
+      activity == PipActivity.off &&
+      !_demo &&
+      // Up only while the phone's plugged in (or a demo, never while
+      // he's off).
+      _stationX != null &&
+      _stationDir == 0;
+
+  /// The drone to draw: its left, its bottom's height, and whether it
+  /// beams down on him; null when it's in the station.
+  (double, double, bool)? get drone {
+    final phase = _dronePhase;
+    if (phase == null || _stationX == null) return null;
+    final (from, to, length) = switch (phase) {
+      DronePhase.rising => (_droneHome, _droneAbove, droneRise),
+      DronePhase.out => (_droneFrom, _droneOver, droneOut),
+      DronePhase.beaming => (_droneOver, _droneOver, droneBeam),
+      DronePhase.back => (_droneFrom, _droneAbove, droneBack),
+      DronePhase.sinking => (_droneAbove, _droneHome, droneSink),
+    };
+    final p = _ease((_droneT / length).clamp(0.0, 1.0));
+    // An arc on the long legs; a little bob while beaming.
+    final arc = phase == DronePhase.out || phase == DronePhase.back
+        ? 8 * math.sin(math.pi * p)
+        : phase == DronePhase.beaming
+            ? math.sin(_droneT * 9)
+            : 0.0;
+    return (
+      from.$1 + (to.$1 - from.$1) * p,
+      from.$2 + (to.$2 - from.$2) * p + arc,
+      phase == DronePhase.beaming,
+    );
+  }
+
+  /// Its rotors' turn: two ways, quickly in turn.
+  bool get droneSpin => (_droneT * 12).floor().isEven;
+
+  /// The drone's charge, once: true if it charged him since last asked.
+  bool takeDroneCharge() {
+    final charged = _droneCharged;
+    _droneCharged = false;
+    return charged;
+  }
+
+  /// Sets it off at once, if it's due (also with his room not moving:
+  /// then simply done, him back on).
+  bool sendDrone({bool animate = true}) {
+    if (!droneDue) return false;
+    if (!animate) {
+      _droneCharge();
+      return true;
+    }
+    _dronePhase = DronePhase.rising;
+    _droneT = 0;
+    return true;
+  }
+
+  /// It charged him a segment: he comes back on (no battery to fly in).
+  void _droneCharge() {
+    _droneCharged = true;
+    _start(PipActivity.poweringOn);
+    _t = flyEnd;
+  }
+
+  void _droneLeg(DronePhase next) {
+    final at = drone;
+    _droneFrom = at == null ? _droneAbove : (at.$1, at.$2);
+    _dronePhase = next;
+    _droneT = 0;
+  }
+
+  void _stepDrone(double dt) {
+    if (_dronePhase == null && droneDue) sendDrone();
+    final phase = _dronePhase;
+    if (phase == null) return;
+    // The station gone (unplugged): so is the drone.
+    if (_stationX == null || _stationDir < 0) {
+      _dronePhase = null;
+      return;
+    }
+    _droneT += dt;
+    // On by other means meanwhile (a battery): it goes home.
+    final waiting = phase == DronePhase.rising ||
+        phase == DronePhase.out ||
+        phase == DronePhase.beaming;
+    if (waiting && activity != PipActivity.off) {
+      _droneLeg(DronePhase.back);
+      return;
+    }
+    switch (phase) {
+      case DronePhase.rising when _droneT >= droneRise:
+        _droneLeg(DronePhase.out);
+      case DronePhase.out when _droneT >= droneOut:
+        _droneLeg(DronePhase.beaming);
+      case DronePhase.beaming when _droneT >= droneBeam:
+        _droneCharge();
+        _droneLeg(DronePhase.back);
+      case DronePhase.back when _droneT >= droneBack:
+        _droneLeg(DronePhase.sinking);
+      case DronePhase.sinking when _droneT >= droneSink:
+        _dronePhase = null;
+      default:
+    }
+  }
+
   /// Bedtime (his life says asleep): he doesn't go and plug in.
   bool _bedtime = false;
 
@@ -1189,6 +1355,8 @@ class PipBrain {
       _stationX != null &&
       _wantsStation &&
       !_bedtime &&
+      // Round 58: empty, he's off: the drone sees to him first.
+      segments > 0 &&
       (segments < 3 || _demoCharge != null) &&
       (activity == PipActivity.standing ||
           activity == PipActivity.walking ||

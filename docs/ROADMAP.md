@@ -337,6 +337,38 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 58 — Nikola's notes on 1.18.0 (2026-10-15)
+
+- [x] Pip's **hats** sit on one side of his head: centre them, as hats
+  are (they were kept right of his antenna; the angry #! moves aside
+  instead). The **party hat** better, a bit bigger.
+- [x] Settings: the **To-do** and **Introduction** switches swap places.
+- [x] Shop: adding an item that's there already **moves** it (no
+  copy); with one item selected, **Rename** (between Delete and Select
+  all); the add field offers **existing items** as you type.
+- [x] Food, the index: the field **let go** (keyboard down) closes it;
+  **back** first closes it (the field let go), a second back leaves.
+- [x] Dates: **Delete** asks first.
+- [x] Pip's **energy** goes far too slowly (17:00 the next day, one
+  battery given, still full): a bug, or too slow. He drains a lot
+  faster, a little slower than batteries can keep up with. Offset by the
+  **station**: while he's looked at (the menu or Pip Home) with the
+  phone charging, he gains a segment every 30 s. **Off** when the
+  phone's plugged in: the station sends out a **drone** that charges
+  him one segment; then he walks to the station as usual.
+
+Done (1.19.0). The hats weren't kept aside for the angry animation:
+they were put right of his antenna so as not to cover it; now they
+cover it, centred (even widths, about his head's middle), and his
+cross words move out past the hat. The "still full" was a bug: plugged
+in, his icon kept the segments he had when the app saw the plug go in,
+and after a restart that came from the saved "plugged" setting, so with
+the phone charging when looked at he could look full for days. His icon
+now shows what he has. Energy: 1/4 a segment an hour awake, 1/18 asleep
+(about 4.25 a day against the batteries' 4.8). Also found: opened while
+off and plugged in, he went straight to charging (empty, he now
+doesn't; the drone comes).
+
 ### Round 57 — Nikola: the next pages (2026-10-15)
 
 Bills not now. The order: **Birthdays & dates**, **Packing lists**,

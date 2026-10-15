@@ -72,6 +72,33 @@ class _MealPageState extends ConsumerState<MealPage> {
         }));
   }
 
+  /// Whether the keyboard has been up since the field took focus.
+  bool _keyboardShown = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The keyboard put away (Round 58): the field let go, so the index
+    // closes with it. Only while this page is on top: a sheet over it
+    // takes the focus (and the keyboard) for itself.
+    if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+      _keyboardShown = true;
+    } else if (_keyboardShown) {
+      _keyboardShown = false;
+      if (_foodFocus.hasFocus && (ModalRoute.of(context)?.isCurrent ?? true)) {
+        _foodFocus.unfocus();
+      }
+    }
+  }
+
+  /// Whether the index is open: Back closes it first (Round 58).
+  bool get _indexOpen => _foodFocus.hasFocus || _keepIndex;
+
+  void _closeIndex() {
+    _foodFocus.unfocus();
+    setState(() => _keepIndex = false);
+  }
+
   @override
   void dispose() {
     _note.dispose();
@@ -240,190 +267,196 @@ class _MealPageState extends ConsumerState<MealPage> {
             indexRecipes.isNotEmpty ||
             indexIngredients.isNotEmpty);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.mealId == null && !saved ? 'New meal' : 'Meal'),
-      ),
-      body: PullDownList.children(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                for (final kind in MealKind.values)
-                  ChoiceChip(
-                    key: Key('mealKind-${kind.name}'),
-                    label: Text(kind.label),
-                    selected: meal.kind == kind,
-                    onSelected: (_) => _change(meal.copyWith(kind: kind)),
-                  ),
-                // The day can change too (Round 50), not only the time.
-                ActionChip(
-                  key: const Key('mealDay'),
-                  avatar: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(
-                    formatDay(local, today: ref.read(clockProvider)()),
-                  ),
-                  onPressed: _pickDay,
-                ),
-                ActionChip(
-                  key: const Key('mealTime'),
-                  avatar: const Icon(Icons.schedule, size: 18),
-                  label: Text(formatMinutes(local.hour * 60 + local.minute)),
-                  onPressed: _pickTime,
-                ),
-              ],
-            ),
-          ),
-          _heading('FOODS'),
-          if (meal.foods.isNotEmpty)
+    return PopScope(
+      canPop: !_indexOpen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _closeIndex();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.mealId == null && !saved ? 'New meal' : 'Meal'),
+        ),
+        body: PullDownList.children(
+          children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  for (final f in meal.foods)
-                    _Flash(
-                      key: f.foodId != null && f.foodId == _flashing
-                          ? ValueKey('flash-${f.name}-$_flashes')
-                          : ValueKey('chip-${f.name}'),
-                      on: f.foodId != null && f.foodId == _flashing,
-                      // A tap takes it out (Round 46: a chip's own small
-                      // delete button is too small a target).
-                      child: InputChip(
-                        key: Key('mealFood-${f.name}'),
-                        tooltip: 'Remove ${f.name}',
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(f.name),
-                            const SizedBox(width: 6),
-                            const Icon(Icons.close, size: 16),
-                          ],
+                  for (final kind in MealKind.values)
+                    ChoiceChip(
+                      key: Key('mealKind-${kind.name}'),
+                      label: Text(kind.label),
+                      selected: meal.kind == kind,
+                      onSelected: (_) => _change(meal.copyWith(kind: kind)),
+                    ),
+                  // The day can change too (Round 50), not only the time.
+                  ActionChip(
+                    key: const Key('mealDay'),
+                    avatar: const Icon(Icons.calendar_today, size: 18),
+                    label: Text(
+                      formatDay(local, today: ref.read(clockProvider)()),
+                    ),
+                    onPressed: _pickDay,
+                  ),
+                  ActionChip(
+                    key: const Key('mealTime'),
+                    avatar: const Icon(Icons.schedule, size: 18),
+                    label: Text(formatMinutes(local.hour * 60 + local.minute)),
+                    onPressed: _pickTime,
+                  ),
+                ],
+              ),
+            ),
+            _heading('FOODS'),
+            if (meal.foods.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final f in meal.foods)
+                      _Flash(
+                        key: f.foodId != null && f.foodId == _flashing
+                            ? ValueKey('flash-${f.name}-$_flashes')
+                            : ValueKey('chip-${f.name}'),
+                        on: f.foodId != null && f.foodId == _flashing,
+                        // A tap takes it out (Round 46: a chip's own small
+                        // delete button is too small a target).
+                        child: InputChip(
+                          key: Key('mealFood-${f.name}'),
+                          tooltip: 'Remove ${f.name}',
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(f.name),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.close, size: 16),
+                            ],
+                          ),
+                          selected: true,
+                          showCheckmark: false,
+                          onPressed: () => _change(meal.copyWith(foods: [
+                            for (final other in meal.foods)
+                              if (other != f) other,
+                          ])),
                         ),
-                        selected: true,
-                        showCheckmark: false,
-                        onPressed: () => _change(meal.copyWith(foods: [
-                          for (final other in meal.foods)
-                            if (other != f) other,
-                        ])),
                       ),
+                  ],
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: TextField(
+                key: const Key('mealFoodField'),
+                controller: _food,
+                focusNode: _foodFocus,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  hintText: 'Add a food',
+                  // Round 53: an X closes the index (and clears the field).
+                  suffixIcon:
+                      _foodFocus.hasFocus || _keepIndex || _food.text.isNotEmpty
+                          ? IconButton(
+                              key: const Key('closeFoodIndex'),
+                              tooltip: 'Close',
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                _food.clear();
+                                _foodFocus.unfocus();
+                                setState(() => _keepIndex = false);
+                              },
+                            )
+                          : null,
+                ),
+                onSubmitted: _typed,
+              ),
+            ),
+            if (showIndex)
+              FoodIndex(
+                typed: _food.text.trim(),
+                isNew: isNew,
+                foods: [for (final f in indexFoods) f.name],
+                recipes: indexRecipes,
+                onRecipe: _fromRecipe,
+                ingredients: indexIngredients,
+                onPick: (name) {
+                  _addFood(name);
+                  _food.clear();
+                },
+              ),
+            _heading('HOW IT WENT'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // From bad to good (Round 47).
+                  for (final rating in MealRating.values.reversed)
+                    _RatingButton(
+                      rating: rating,
+                      selected: meal.rating == rating,
+                      // Tapped again: not rated.
+                      onTap: () => _change(meal.copyWith(
+                        rating: () => meal.rating == rating ? null : rating,
+                      )),
                     ),
                 ],
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: TextField(
-              key: const Key('mealFoodField'),
-              controller: _food,
-              focusNode: _foodFocus,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.done,
-              decoration: InputDecoration(
-                hintText: 'Add a food',
-                // Round 53: an X closes the index (and clears the field).
-                suffixIcon:
-                    _foodFocus.hasFocus || _keepIndex || _food.text.isNotEmpty
-                        ? IconButton(
-                            key: const Key('closeFoodIndex'),
-                            tooltip: 'Close',
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              _food.clear();
-                              _foodFocus.unfocus();
-                              setState(() => _keepIndex = false);
-                            },
-                          )
-                        : null,
-              ),
-              onSubmitted: _typed,
-            ),
-          ),
-          if (showIndex)
-            FoodIndex(
-              typed: _food.text.trim(),
-              isNew: isNew,
-              foods: [for (final f in indexFoods) f.name],
-              recipes: indexRecipes,
-              onRecipe: _fromRecipe,
-              ingredients: indexIngredients,
-              onPick: (name) {
-                _addFood(name);
-                _food.clear();
-              },
-            ),
-          _heading('HOW IT WENT'),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // From bad to good (Round 47).
-                for (final rating in MealRating.values.reversed)
-                  _RatingButton(
-                    rating: rating,
-                    selected: meal.rating == rating,
-                    // Tapped again: not rated.
-                    onTap: () => _change(meal.copyWith(
-                      rating: () => meal.rating == rating ? null : rating,
-                    )),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final symptom in Symptom.values)
-                  FilterChip(
-                    key: Key('symptom-${symptom.name}'),
-                    label: Text(symptom.label),
-                    selected: meal.symptoms.contains(symptom),
-                    onSelected: (on) => _change(meal.copyWith(
-                      symptoms: on
-                          ? {...meal.symptoms, symptom}
-                          : ({...meal.symptoms}..remove(symptom)),
-                    )),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: TextField(
-              key: const Key('mealNote'),
-              controller: _note,
-              minLines: 1,
-              maxLines: 4,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Note'),
-              onChanged: (text) => _change(_meal.copyWith(note: text)),
-            ),
-          ),
-          // At the end of the page, not up top nor round (Round 47).
-          if (saved)
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  key: const Key('deleteMeal'),
-                  style: TextButton.styleFrom(foregroundColor: colors.danger),
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete meal'),
-                  onPressed: _delete,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final symptom in Symptom.values)
+                    FilterChip(
+                      key: Key('symptom-${symptom.name}'),
+                      label: Text(symptom.label),
+                      selected: meal.symptoms.contains(symptom),
+                      onSelected: (on) => _change(meal.copyWith(
+                        symptoms: on
+                            ? {...meal.symptoms, symptom}
+                            : ({...meal.symptoms}..remove(symptom)),
+                      )),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              child: TextField(
+                key: const Key('mealNote'),
+                controller: _note,
+                minLines: 1,
+                maxLines: 4,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(labelText: 'Note'),
+                onChanged: (text) => _change(_meal.copyWith(note: text)),
+              ),
+            ),
+            // At the end of the page, not up top nor round (Round 47).
+            if (saved)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('deleteMeal'),
+                    style: TextButton.styleFrom(foregroundColor: colors.danger),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Delete meal'),
+                    onPressed: _delete,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

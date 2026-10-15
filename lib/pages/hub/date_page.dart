@@ -9,12 +9,13 @@ import 'package:the_app/pages/hub/date_reminder_sheet.dart';
 import 'package:the_app/pages/hub/dates.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// A date (Round 57): its title, type, day (and year), every year or
 /// once, a note and up to three reminders. Saved as it's changed, once
 /// it has a title; a new one left without one is dropped. Delete is at
-/// the end, with Undo.
+/// the end, asked first, with Undo.
 class DatePage extends ConsumerStatefulWidget {
   /// The date to open, or null for a new one on [on].
   final String? dateId;
@@ -94,7 +95,15 @@ class _DatePageState extends ConsumerState<DatePage> {
     _change(_draft.copyWith(reminders: reminders));
   }
 
-  void _delete() {
+  /// Asked first (Round 58), then gone, with Undo.
+  Future<void> _delete() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Delete ${_draft.title.trim()}?',
+      confirmLabel: 'Delete',
+      destructive: true,
+    );
+    if (!confirmed || !mounted) return;
     final date = _draft;
     final notifier = _notifier;
     final before = notifier.delete(date.id);

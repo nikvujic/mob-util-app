@@ -181,4 +181,66 @@ void main() {
       );
     });
   });
+
+  group('Round 58', () {
+    test('an item added again is moved, not doubled (any case)', () {
+      notifier
+        ..addItem('Milk')
+        ..addItem('Eggs')
+        ..addItem('Bread');
+      notifier.toggle(idOf('Milk')); // bought
+      final milk = idOf('Milk');
+      expect(notifier.addItem(' milk '), milk);
+      expect(toBuy(), ['Eggs', 'Bread', 'Milk']);
+      expect(stock(), isEmpty);
+      // Already to buy: to the end, as if new.
+      expect(notifier.addItem('EGGS'), idOf('Eggs'));
+      expect(toBuy(), ['Bread', 'Milk', 'Eggs']);
+      expect(notifier.state, hasLength(3));
+    });
+
+    test('a moved item keeps its amount', () {
+      final id = notifier.addItem('Flour')!;
+      notifier
+        ..setQuantity(id, Quantity.weight)
+        ..setGrams(id, 500)
+        ..toggle(id)
+        ..addItem('flour');
+      final flour = notifier.state.single;
+      expect(flour.toBuy, isTrue);
+      expect(flour.grams, 500);
+      expect(flour.name, 'Flour', reason: 'its name as it was');
+    });
+
+    test('rename: trimmed; not blank, not another item\'s name', () {
+      notifier
+        ..addItem('Milk')
+        ..addItem('Bread');
+      final milk = idOf('Milk');
+      expect(notifier.rename(milk, '  Oat milk '), isTrue);
+      expect(notifier.state.first.name, 'Oat milk');
+      expect(notifier.rename(milk, '   '), isFalse);
+      expect(notifier.rename(milk, 'bread'), isFalse);
+      expect(notifier.state.first.name, 'Oat milk');
+      // Its own name in another case is fine.
+      expect(notifier.rename(milk, 'OAT MILK'), isTrue);
+      expect(notifier.state.first.name, 'OAT MILK');
+      expect(notifier.state.first.id, milk);
+    });
+
+    test('suggest: items not on the list containing it, starts first', () {
+      notifier
+        ..addItem('Oat milk')
+        ..addItem('Milk')
+        ..addItem('Milk chocolate')
+        ..addItem('Bread');
+      for (final name in ['Oat milk', 'Milk', 'Bread']) {
+        notifier.toggle(idOf(name));
+      }
+      expect(notifier.suggest('MIL'), ['Milk', 'Oat milk'],
+          reason: 'Milk chocolate is on the list already');
+      expect(notifier.suggest('  '), isEmpty);
+      expect(notifier.suggest('x'), isEmpty);
+    });
+  });
 }
