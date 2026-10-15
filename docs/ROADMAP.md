@@ -337,6 +337,32 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 53 — Nikola's notes on 1.15.0 (2026-10-15; patch 1.15.1, then 1.16.0)
+
+**Patch (1.15.1)**
+- [ ] Food, the index under the field: an **X** in the field closes it;
+  the index at most so tall, scrolling inside when longer.
+- [ ] Pip's **waking up** after sleep a bit longer.
+- [ ] His **sword** better looking, held pointing up and away from him
+  (not angled into his body); **bugs** bigger and better.
+- [ ] No more pictures on his screen for fun (the ?, HI, star eyes with
+  their flashing red, the heart, loading, the wink): that kind of event
+  goes. His screen still shows notifications.
+- [ ] Words on his screen never mirrored (they were, facing left).
+- [ ] The **#!** when angry a bit lower.
+- [ ] Holding the flower: its stem in his hand, not floating above it.
+- [ ] Picking something up (a flower, a battery) and landing: he
+  crouches, feet on the ground (the legs floated for a frame).
+- [ ] **Buzzes** at moments: the ball kicked, a bug struck, landing from
+  the sky or a throw.
+
+**New (1.16.0)**
+- [ ] **Medicine reminder**: while the medicine red dot is on, he
+  reminds now and then (a pill on his screen, a hop).
+- [ ] **Eating**: after a recipe was open 5 minutes or more, the next
+  time he's seen within the hour he's eating (a plate in his hands,
+  bites, crumbs).
+
 ### Round 52 — Pip: entrances, random events, richer skies (2026-10-15, 1.15.0)
 
 Nikola, going to sleep: "start pip work without waiting for me … make
