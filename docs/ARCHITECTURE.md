@@ -417,8 +417,10 @@ Round 53: the brain queues `PipBuzz`es where something hits;
 `PipSprites.screenTurned` turns a screen picture so it reads right when
 he's drawn mirrored.
 Round 53 (1.16.0): `PipLink.medicineDue` (the red dot's rule, read
-fresh) sets `PipBrain.medicineDue`, and the brain shows the pill on its
-own clock (`remindFirst`, `remindEvery`). `recipeReadProvider` holds
+fresh) sets `PipBrain.medicineDue`; Round 55: while it's set, the
+brain's step starts the pill (`reminding`) whenever he's standing or
+walking, before `_maybeCharge`, so it stays until marked; `showing`
+gives way only to falling asleep or running out (`mayStart`). `recipeReadProvider` holds
 when a recipe was last open 5 minutes (the recipe page's minute timer);
 `PipLink.recipeReadAt` hands it to the room, which starts `eat()` within
 `PipBrain.eatsWithin` and keeps `ateFor` so it's once a reading. The

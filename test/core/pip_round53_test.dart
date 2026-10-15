@@ -216,55 +216,130 @@ void main() {
     }
   });
 
-  group('1.16.0: his medicine reminder', () {
-    test('a medicine due: soon a pill on his screen, with two hops', () {
+  group('his medicine reminder (Round 55: it stays)', () {
+    test(
+        'due: the pill at once, kept on (a hop now and then), him not '
+        'walking off', () {
       final p = up()..medicineDue = true;
-      var t = 0.0;
-      for (; t < 10 && p.screenShow?.$1 != PipScreen.pill; t += 1 / 60) {
-        p.step(1 / 60);
-      }
-      expect(t, closeTo(PipBrain.remindFirst, 0.1));
-      expect(p.activity, PipActivity.showing);
+      p.step(1 / 60);
+      expect(p.screenShow?.$1, PipScreen.pill);
+      expect(p.reminding, isTrue);
+      final x = p.x;
       var hops = 0;
       var wasUp = false;
-      for (var i = 0; i < 60 && p.activity == PipActivity.showing; i++) {
+      for (var i = 0; i < 60 * 60; i++) {
         p.step(1 / 60);
+        expect(p.screenShow?.$1, PipScreen.pill, reason: 'still due');
         if (p.lift > 0 && !wasUp) hops++;
         wasUp = p.lift > 0;
       }
-      expect(hops, 2);
+      expect(p.x, x);
+      expect(hops, greaterThan(10));
     });
 
-    test('again every so often while due; never when not', () {
-      final due = up()..medicineDue = true;
-      var shows = 0;
-      var was = false;
-      for (var i = 0; i < 60 * 100; i++) {
-        due.step(1 / 60);
-        final pill = due.screenShow?.$1 == PipScreen.pill;
-        if (pill && !was) shows++;
-        was = pill;
-      }
-      // At 3 s, then 45 s on (walks and events between can delay it).
-      expect(shows, inInclusiveRange(2, 3));
-      final not = up();
-      for (var i = 0; i < 60 * 100; i++) {
-        not.step(1 / 60);
-        expect(not.screenShow?.$1, isNot(PipScreen.pill));
-      }
-    });
-
-    test('not asleep: he reminds only up and about', () {
-      final p = asleep()..medicineDue = true;
-      run(p, 10);
-      expect(p.activity, PipActivity.asleep);
+    test('marked: it stops at once; not due, never', () {
+      final p = up()..medicineDue = true;
+      run(p, 5);
+      p.medicineDue = false;
+      p.step(1 / 60);
       expect(p.screenShow, isNull);
+      expect(p.activity, PipActivity.standing);
+      for (var i = 0; i < 60 * 100; i++) {
+        p.step(1 / 60);
+        expect(p.screenShow?.$1, isNot(PipScreen.pill));
+      }
     });
 
-    test("from Pip Home's list too", () {
+    test('before charging: he goes plug in only once it is marked', () {
+      final p = up()
+        ..segments = 2
+        ..medicineDue = true;
+      p.setPlugged(true, animate: true);
+      final seen = <PipActivity>{};
+      for (var i = 0; i < 60 * 20; i++) {
+        p.step(1 / 60);
+        seen.add(p.activity);
+      }
+      expect(seen, isNot(contains(PipActivity.toStation)));
+      expect(seen, isNot(contains(PipActivity.plugging)));
+      expect(p.reminding, isTrue);
+      p.medicineDue = false;
+      for (var i = 0; i < 60 * 20; i++) {
+        p.step(1 / 60);
+        seen.add(p.activity);
+      }
+      expect(seen.intersection({PipActivity.toStation, PipActivity.plugging}),
+          isNotEmpty);
+    });
+
+    test('busy when the station came up: done, his medicine before it', () {
+      final p = up()..segments = 2;
+      expect(p.play(PipAnimation.dance), isTrue);
+      p.setPlugged(true, animate: true);
+      p.medicineDue = true;
+      final seen = <PipActivity>{};
+      for (var i = 0; i < 60 * 15; i++) {
+        p.step(1 / 60);
+        seen.add(p.activity);
+      }
+      expect(seen, contains(PipActivity.dancing));
+      expect(seen, isNot(contains(PipActivity.toStation)));
+      expect(p.reminding, isTrue);
+    });
+
+    test('opened plugged in, a medicine due: not simply charging, it first',
+        () {
+      final p = up()
+        ..segments = 2
+        ..medicineDue = true;
+      p.setPlugged(true, animate: false);
+      expect(p.activity, isNot(PipActivity.charging));
+      p.step(1 / 60);
+      expect(p.reminding, isTrue);
+      final plain = up()..segments = 2;
+      plain.setPlugged(true, animate: false);
+      expect(plain.activity, PipActivity.charging);
+    });
+
+    test('before a battery: none taken while he reminds', () {
+      final p = up()..medicineDue = true;
+      p.step(1 / 60);
+      expect(p.canTakeBattery, isFalse);
+      expect(p.takeBattery(80), isFalse);
+      p.medicineDue = false;
+      p.step(1 / 60);
+      expect(p.takeBattery(80), isTrue);
+    });
+
+    test('bedtime, or running out, still come first', () {
+      final p = up()..medicineDue = true;
+      run(p, 2);
+      expect(p.show(PipShow.fallAsleep), isTrue);
+      run(p, 3);
+      expect(p.activity, PipActivity.asleep);
+      run(p, 10);
+      expect(p.activity, PipActivity.asleep, reason: 'not while asleep');
+      expect(p.screenShow, isNull);
+      // Woken: the reminder first.
+      p.show(PipShow.wakeUp);
+      run(p, 3);
+      expect(p.reminding, isTrue);
+      expect(p.show(PipShow.powerOff), isTrue);
+      expect(p.activity, PipActivity.poweringOff);
+      final q = up()..medicineDue = true;
+      run(q, 1);
+      expect(q.show(PipShow.off), isTrue);
+      expect(q.activity, PipActivity.off);
+    });
+
+    test("from Pip Home's list, not due: once, then he's done", () {
       final p = up();
       expect(p.play(PipAnimation.medicine), isTrue);
       expect(p.screenShow?.$1, PipScreen.pill);
+      run(p, 1);
+      expect(p.screenShow?.$1, PipScreen.pill, reason: 'a preview a while');
+      run(p, 4);
+      expect(p.reminding, isFalse);
     });
   });
 

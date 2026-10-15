@@ -54,11 +54,15 @@ void main() {
 
   group('settings (O12)', () {
     testWidgets(
-        'a bell in the top bar opens the Notifications page (Round 31); '
-        'each is kept', (tester) async {
+        'no bell on the page (Round 55): on the Notifications page, from '
+        'the menu; each is kept', (tester) async {
       await start(tester);
       await openMedicine(tester);
-      await tester.tap(find.byTooltip('Notifications'));
+      expect(find.byTooltip('Notifications'), findsNothing);
+      expect(find.byIcon(Icons.notifications_outlined), findsNothing);
+      await pressBack(tester);
+      await openMenu(tester);
+      await tester.tap(find.text('Notifications'));
       await tester.pumpAndSettle();
       expect(appBarTitle('Notifications'), findsOneWidget);
 
@@ -76,8 +80,8 @@ void main() {
 
     testWidgets('pause for a day or more, and resume', (tester) async {
       await start(tester);
-      await openMedicine(tester);
-      await tester.tap(find.byTooltip('Notifications'));
+      await openMenu(tester);
+      await tester.tap(find.text('Notifications'));
       await tester.pumpAndSettle();
 
       final pause = find.byKey(const Key('notifyPause-medicine'));

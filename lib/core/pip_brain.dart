@@ -229,7 +229,6 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.thrown ||
       PipActivity.angry ||
       PipActivity.bugHunt ||
-      PipActivity.showing ||
       PipActivity.flower ||
       PipActivity.butterfly ||
       PipActivity.ball ||
@@ -237,6 +236,10 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.dancing ||
       PipActivity.eating =>
         false,
+      // Round 55: something on his screen (his medicine reminder, which
+      // keeps on) gives way to bedtime, or running out.
+      PipActivity.showing =>
+        next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
       PipActivity.asleep =>
         next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
       PipActivity.off => next == PipAnimation.powerOn,
@@ -415,6 +418,7 @@ class PipBrain {
         _start(PipActivity.dancing);
       case PipAnimation.medicine:
         _startShowing(PipScreen.pill);
+        _previewing = !medicineDue;
       case PipAnimation.eat:
         _start(PipActivity.eating);
     }
@@ -597,7 +601,13 @@ class PipBrain {
   bool get _busy =>
       !mayStart(activity, PipAnimation.walk) &&
       activity != PipActivity.asleep &&
-      activity != PipActivity.off;
+      activity != PipActivity.off &&
+      !reminding;
+
+  /// Reminding of his medicine (Round 55): he keeps at it, but it's no
+  /// reason to put off what his life says (asleep, off).
+  bool get reminding =>
+      activity == PipActivity.showing && _screenShow == PipScreen.pill;
 
   /// Falling asleep's parts: eyes closing, then settling down.
   static const eyesCloseAt = 0.8;
@@ -966,7 +976,12 @@ class PipBrain {
       case PipActivity.bugHunt:
         _stepBugs(dt);
       case PipActivity.showing:
-        if (_t >= _showFor) _stand();
+        // Round 55: his medicine reminder, marked, stops at once; still
+        // due, it starts over ([_stepMedicine]), a hop each time.
+        if ((_screenShow == PipScreen.pill && !medicineDue && !_previewing) ||
+            _t >= _showFor) {
+          _stand();
+        }
       case PipActivity.flower:
         _stepFlower(dt);
       case PipActivity.butterfly:
@@ -987,7 +1002,8 @@ class PipBrain {
       case PipActivity.eating:
         if (_t >= eatTime) _stand();
     }
-    _stepMedicine(dt);
+    // Round 55: his medicine before charging (or anything else).
+    _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
     if (activity != PipActivity.thrown) x = x.clamp(0, _maxX);
@@ -1089,7 +1105,8 @@ class PipBrain {
       } else if (_stationDir < 0) {
         _stationDir = 1; // sinking: back up
       }
-      if (!animate && _goesCharging) {
+      // Round 55: a medicine due, he reminds first (and goes after).
+      if (!animate && _goesCharging && !medicineDue) {
         // Simply there, charging.
         x = _plugX;
         facingRight = _stationRight;
@@ -1481,23 +1498,17 @@ class PipBrain {
   /// A medicine due and not marked (the room says, from the red dot).
   bool medicineDue = false;
 
-  /// Seconds before he reminds of it: soon after it's due (or he's
-  /// seen), then every [remindEvery] while it's still due.
-  static const remindFirst = 3.0;
-  static const remindEvery = 45.0;
-  double _remindIn = remindFirst;
+  /// The reminder played from Pip Home's list, not for real: once.
+  bool _previewing = false;
 
-  void _stepMedicine(double dt) {
-    if (!medicineDue) {
-      _remindIn = remindFirst;
-      return;
-    }
+  /// Round 55: due, the first thing he does whenever he's up and about
+  /// (before going to charge, or a battery), and he keeps at it.
+  void _stepMedicine() {
+    if (!medicineDue) return;
     if (activity != PipActivity.standing && activity != PipActivity.walking) {
       return;
     }
-    _remindIn -= dt;
-    if (_remindIn > 0) return;
-    _remindIn = remindEvery;
+    _previewing = false;
     _startShowing(PipScreen.pill);
   }
 

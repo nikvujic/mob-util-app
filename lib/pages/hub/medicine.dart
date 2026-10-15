@@ -7,7 +7,6 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/pages/hub/hold_to_take.dart';
 import 'package:the_app/pages/hub/medicine_history.dart';
-import 'package:the_app/core/routes.dart';
 import 'package:the_app/pages/hub/medicine_sheet.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -201,20 +200,9 @@ class MedicinePage extends ConsumerWidget {
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Medicine'),
-        // Its settings were all about notifications: they're on the
-        // Notifications page now (Round 31), a tap away from here.
-        actions: [
-          IconButton(
-            key: const Key('medicineSettings'),
-            icon: const Icon(Icons.notifications_outlined),
-            tooltip: 'Notifications',
-            onPressed: () =>
-                Navigator.of(context).pushNamed(AppRoutes.notifications),
-          ),
-        ],
-      ),
+      // Round 55: no notifications button (they're on the Notifications
+      // page, from the menu).
+      appBar: AppBar(title: const Text('Medicine')),
       body: book.medicines.isEmpty
           ? const EmptyState(
               icon: Icons.medication_outlined,

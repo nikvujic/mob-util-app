@@ -4,6 +4,18 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- **Pip's medicine reminder stays** while the red dot is on: whenever
+  he's up and about it's the first thing he does (before going to
+  charge or picking up a battery), the pill on his screen with a hop now
+  and then, until the dose is marked. Not while he's asleep.
+
+### Removed
+- The **notifications button** in the Medicine page's top corner (its
+  settings are on the Notifications page, in the menu).
+
 ## [1.17.0] - 2026-10-15
 
 ### Changed

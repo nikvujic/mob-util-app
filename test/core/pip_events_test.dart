@@ -152,8 +152,8 @@ void main() {
     });
 
     test('his screen: a picture a while, then his face again', () {
-      final pip = up()..debugShow(PipScreen.pill);
-      expect(pip.screenShow?.$1, PipScreen.pill);
+      final pip = up()..debugShow(PipScreen.envelope);
+      expect(pip.screenShow?.$1, PipScreen.envelope);
       until(pip, PipActivity.showing);
       expect(pip.screenShow, isNull);
     });

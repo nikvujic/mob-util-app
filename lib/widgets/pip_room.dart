@@ -205,6 +205,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   void _finish() {
     final brain = widget.brain;
     for (var i = 0; i < 6; i++) {
+      // Round 55: his medicine reminder has no end: the pill just shows.
+      if (brain.reminding) return;
       switch (brain.activity) {
         case PipActivity.spawning:
           brain.step(PipBrain.landEnd);

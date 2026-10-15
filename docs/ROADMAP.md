@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 55 — Nikola's notes on 1.17.0 (2026-10-15; patch 1.17.1)
+
+- [x] Pip's **medicine reminder stays** as long as the red dot is on:
+  whenever he's up and about it's the first thing he does, before
+  going to charge or picking up a battery, and he keeps at it (the pill
+  on his screen, a hop now and then) until the dose is marked. Not
+  asleep (and later, not on an adventure).
+- [x] The Medicine page's **notifications button** (top corner) goes.
+
 ### Round 54 — Nikola's notes on 1.16.0 (2026-10-15; 1.17.0)
 
 - [x] Pip's **battery**, done by hand: he walks up beside it, a hand
