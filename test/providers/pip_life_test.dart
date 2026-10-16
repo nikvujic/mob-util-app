@@ -107,11 +107,16 @@ void main() {
       );
     }
 
-    test('hatched: full, no batteries, the first on its way', () {
+    test(
+        'hatched (Round 61): two segments, a battery in hand, the next on '
+        'its way', () {
       final pip = start()..hatch(DateTime(2026, 10, 14, 9));
-      expect(pip.state.energy, 3);
+      expect(pip.state.energy, 2);
+      expect(pip.segmentsAt(DateTime(2026, 10, 14, 9)), 2);
       expect(pip.state.energyAt, DateTime(2026, 10, 14, 9));
-      expect(pip.state.batteries, 0);
+      expect(pip.state.batteries, 1);
+      expect(pip.refusalAt(DateTime(2026, 10, 14, 9)), isNull,
+          reason: 'one to give him straight away');
       final gap = pip.state.nextBatteryAt!.difference(pip.state.energyAt!);
       expect(gap, PipEnergy.batteryEvery);
     });
@@ -129,15 +134,16 @@ void main() {
       final pip = start()..hatch(now);
       final due = pip.state.nextBatteryAt!;
       pip.collect(due.subtract(const Duration(minutes: 1)));
-      expect(pip.state.batteries, 0, reason: 'not yet');
-      // Away a little over 5 hours past it: two came.
+      expect(pip.state.batteries, 1, reason: 'not yet: only his first');
+      // Away a little over 5 hours past it: two came (Round 61: three
+      // held with the one he hatched with).
       final later = due.add(const Duration(hours: 5, minutes: 10));
       pip.collect(later);
-      expect(pip.state.batteries, 2);
+      expect(pip.state.batteries, 3);
       expect(pip.state.nextBatteryAt, due.add(const Duration(hours: 10)),
           reason: 'on the clock, not from now');
       pip.collect(later);
-      expect(pip.state.batteries, 2, reason: 'no more for looking again');
+      expect(pip.state.batteries, 3, reason: 'no more for looking again');
       // Away three days: three, no more.
       pip.collect(later.add(const Duration(days: 3)));
       expect(pip.state.batteries, PipEnergy.maxBatteries);

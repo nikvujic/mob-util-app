@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/providers/reminders_provider.dart';
+import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
@@ -36,6 +38,18 @@ typedef _Opened = ({RestorableBackup? backup, String? error});
 
 class _BackupPageState extends ConsumerState<BackupPage> {
   bool _exporting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Round 61: opened, the backup reminder leaves the tray.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(clearShownProvider)(NotifyPage.backup);
+      }
+    });
+  }
+
   bool _importing = false;
 
   bool get _busy => _exporting || _importing;

@@ -69,8 +69,13 @@ abstract class ReminderScheduler {
   /// Whether the phone lets the app show notifications at all.
   Future<bool> areAllowed();
 
-  /// Replaces every scheduled reminder with [reminders].
+  /// Replaces every scheduled reminder with [reminders]. Round 61: ones
+  /// already shown stay in the phone's tray.
   Future<void> replaceAll(List<Reminder> reminders);
+
+  /// Takes the shown notifications of [kind] out of the tray (Round 61:
+  /// once their page is opened, not when the app is).
+  Future<void> clearShown(ReminderKind kind);
 
   /// The [Reminder.target] of each notification tapped while the app runs.
   Stream<String> get opened;
@@ -104,6 +109,16 @@ class NotificationReminderScheduler implements ReminderScheduler {
       'backup-reminders',
       'Backup reminders',
       channelDescription: 'When a week has gone by without a backup',
+      category: AndroidNotificationCategory.reminder,
+    ),
+    // Round 61: Dates' own (it was missing: a date's reminder couldn't be
+    // scheduled, nor any after it).
+    ReminderKind.dates: AndroidNotificationDetails(
+      'dates-reminders',
+      'Dates reminders',
+      channelDescription: 'Birthdays and dates coming up',
+      importance: Importance.high,
+      priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
     ),
     ReminderKind.notice: AndroidNotificationDetails(
@@ -214,16 +229,42 @@ class NotificationReminderScheduler implements ReminderScheduler {
     }
   }
 
+  /// Each reminder's notification id (Round 61): from what it is, so a
+  /// plan made again gives it the same one (and a shown one keeps its
+  /// own); unique within [reminders].
+  @visibleForTesting
+  static List<int> idsFor(List<Reminder> reminders) {
+    final taken = <int>{};
+    return [
+      for (final r in reminders)
+        () {
+          var id = Object.hash(r.kind, r.at.millisecondsSinceEpoch, r.title,
+                  r.body, r.target) &
+              0x7fffffff;
+          while (!taken.add(id)) {
+            id = (id + 1) & 0x7fffffff;
+          }
+          return id;
+        }(),
+    ];
+  }
+
   @override
   Future<void> replaceAll(List<Reminder> reminders) async {
     if (!await _init()) return;
     try {
-      await _plugin.cancelAll();
+      // Round 61: only what's planned and no longer wanted is cancelled
+      // (`cancelAll` also took shown ones out of the tray).
+      final ids = idsFor(reminders);
+      final keep = ids.toSet();
+      for (final pending in await _plugin.pendingNotificationRequests()) {
+        if (!keep.contains(pending.id)) await _plugin.cancel(pending.id);
+      }
       // Exact if Android allows it, else as close as it does.
       final exact = await _android?.canScheduleExactNotifications() ?? false;
-      for (final (id, reminder) in reminders.indexed) {
+      for (final (i, reminder) in reminders.indexed) {
         await _plugin.zonedSchedule(
-          id,
+          ids[i],
           reminder.title,
           reminder.body,
           // An absolute moment: planned again on every app start, so a
@@ -238,6 +279,24 @@ class NotificationReminderScheduler implements ReminderScheduler {
       }
     } on PlatformException {
       // Not allowed (e.g. notifications off): nothing to show anyway.
+    }
+  }
+
+  @override
+  Future<void> clearShown(ReminderKind kind) async {
+    if (!await _init()) return;
+    try {
+      final channel = _channels[kind]!.channelId;
+      final shown = await _android?.getActiveNotifications() ?? const [];
+      for (final n in shown) {
+        final id = n.id;
+        // Its kind's channel, or one of its sounds' (`…-coin`).
+        if (id != null && (n.channelId ?? '').startsWith(channel)) {
+          await _plugin.cancel(id);
+        }
+      }
+    } on PlatformException {
+      // Nothing to clear.
     }
   }
 }

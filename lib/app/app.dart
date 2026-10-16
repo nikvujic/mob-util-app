@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/providers/auto_backup_provider.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
@@ -157,6 +158,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tellUnreadable();
       _collectBattery();
+      // "Open the app to keep reminders": it's open.
+      ref.read(clearShownProvider)(null);
       ref.read(autoBackupProvider).run();
     });
   }
@@ -253,6 +256,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() => _selectedIndex = index);
     if (left != index) _sectionShown[left].fire();
     _sectionShown[index].fire();
+    // Round 61: the Planner opened, its shown notifications go.
+    if (section == AppSection.planner) {
+      ref.read(clearShownProvider)(NotifyPage.planner);
+    }
   }
 
   /// Closes everything open on top of the home screen, except pages from

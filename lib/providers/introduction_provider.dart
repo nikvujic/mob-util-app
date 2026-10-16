@@ -19,16 +19,21 @@ final introductionShownProvider = Provider<bool>(
 );
 
 /// The Introduction's text (N16): the guide to the app
-/// (`assets/introduction.md`), then what's new in this version, from the
-/// CHANGELOG.
+/// (`assets/introduction.md`), then what's new in this version (Round 61:
+/// in every version since the What's new last read), from the CHANGELOG.
 final introductionTextProvider = FutureProvider<String>((ref) async {
   final version = versionNumber(ref.watch(appVersionProvider));
   final load = ref.watch(bundledTextProvider);
   final guide = await load('assets/introduction.md');
   final changelog = await load('CHANGELOG.md');
-  final changes = changesFor(changelog, version);
+  // Round 61: every version since the What's new last read.
+  final from = ref.watch(preferencesProvider.select((p) => p.introFrom));
+  final changes = changesSince(changelog, version, from);
+  final title = changes != null && changes.startsWith('## ') && from != null
+      ? "# What's new since $from"
+      : "# What's new in $version";
   return [
     guide.trim(),
-    if (changes != null) "# What's new in $version\n\n$changes",
+    if (changes != null) '$title\n\n$changes',
   ].join('\n\n');
 });

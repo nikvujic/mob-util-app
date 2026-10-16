@@ -120,8 +120,8 @@ void main() {
     await openTile(tester, 'Medicine');
     expect(find.text('Medicine is locked'), findsOneWidget);
     expect(find.byTooltip('Add medicine'), findsNothing, reason: 'not built');
-    await tester.tap(find.text('Unlock'));
-    await tester.pumpAndSettle();
+    // Round 61: it asks at once, no Unlock to press first.
+    expect(find.byType(TextField), findsOneWidget);
     await enterPassword(tester, password);
     expect(find.text('Medicine is locked'), findsNothing);
     expect(find.byTooltip('Add medicine'), findsOneWidget);
@@ -136,6 +136,9 @@ void main() {
     await tester.pump();
     expect(find.text('Push-ups'), findsNothing);
     expect(find.text('Counters is locked'), findsOneWidget);
+    // Round 61: locked while open, it doesn't ask by itself.
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets(

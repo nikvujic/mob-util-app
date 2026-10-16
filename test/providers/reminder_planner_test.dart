@@ -31,6 +31,9 @@ class _SlowScheduler implements ReminderScheduler {
   Future<String?> takeLaunch() async => null;
 
   @override
+  Future<void> clearShown(ReminderKind kind) async {}
+
+  @override
   Future<void> replaceAll(List<Reminder> reminders) async {
     running++;
     if (running > mostAtOnce) mostAtOnce = running;

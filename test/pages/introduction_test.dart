@@ -222,6 +222,56 @@ void main() {
     expect(find.text('1 selected'), findsOneWidget);
   });
 
+  group('changes since the What\'s new last read (Round 61)', () {
+    const changelog = '''
+## [1.23.0] - x
+
+### Added
+- Three
+
+## [1.22.1] - x
+
+### Fixed
+- Two
+
+## [1.22.0] - x
+
+### Added
+- One
+
+## [1.21.0] - x
+
+### Added
+- Old
+''';
+
+    test('every version after it, newest first, each headed', () {
+      expect(
+          changesSince(changelog, '1.23.0', '1.21.0'),
+          '## 1.23.0\n\n### Added\n- Three\n\n'
+          '## 1.22.1\n\n### Fixed\n- Two\n\n'
+          '## 1.22.0\n\n### Added\n- One');
+      expect(changesSince(changelog, '1.22.1', '1.22.0'),
+          changesFor(changelog, '1.22.1'),
+          reason: 'only one after it: as before');
+      expect(changesSince(changelog, '1.23.0', null),
+          changesFor(changelog, '1.23.0'));
+    });
+
+    test('kept while unread; the read one from then on', () {
+      // 1.21.0 read; two updates before it's opened.
+      var p = const Preferences(introVersion: '1.21.0');
+      p = p.startedVersion('1.22.0');
+      expect(p.introFrom, '1.21.0');
+      expect(p.introUnread, isTrue);
+      p = p.startedVersion('1.23.0');
+      expect(p.introFrom, '1.21.0', reason: 'still unread: they pile up');
+      p = p.copyWith(introUnread: false).startedVersion('1.24.0');
+      expect(p.introFrom, '1.23.0');
+      expect(Preferences.fromJson(p.toJson()).introFrom, '1.23.0');
+    });
+  });
+
   group('changes for a version', () {
     const changelog = '''
 # Changelog

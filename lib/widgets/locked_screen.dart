@@ -3,20 +3,46 @@ import 'package:the_app/core/theme.dart';
 
 /// What a closed section (L5) or Hub page (O7) shows instead of itself:
 /// "[title] is locked" and an Unlock button.
-class LockedScreen extends StatelessWidget {
+class LockedScreen extends StatefulWidget {
   final String title;
   final PreferredSizeWidget appBar;
   final VoidCallback onUnlock;
+
+  /// Asks at once, as it's shown (Round 61: the To-do and Hub pages,
+  /// opened locked, go straight to the fingerprint as a locked note does;
+  /// not when one locks while open); the button is there to ask again.
+  final bool askAtOnce;
 
   const LockedScreen({
     super.key,
     required this.title,
     required this.appBar,
     required this.onUnlock,
+    this.askAtOnce = false,
   });
 
   @override
+  State<LockedScreen> createState() => _LockedScreenState();
+}
+
+class _LockedScreenState extends State<LockedScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.askAtOnce) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Locked while open, its page is closed: no prompt over what's
+      // under it.
+      if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
+      widget.onUnlock();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final title = widget.title;
+    final appBar = widget.appBar;
+    final onUnlock = widget.onUnlock;
     return Scaffold(
       appBar: appBar,
       body: Center(

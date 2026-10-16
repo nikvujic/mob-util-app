@@ -385,6 +385,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Secret'), findsNothing);
         expect(appBarTitle('To-do'), findsNothing, reason: 'closed, back home');
+        expect(find.byKey(const Key('promptPassword')), findsNothing,
+            reason: 'Round 61: no prompt left over the notes');
         expect(tester.widget<Text>(find.byKey(const Key('todoSummary'))).data,
             'Locked');
         expect(find.byKey(const Key('todoCount')), findsNothing);
@@ -392,8 +394,8 @@ void main() {
         await open(tester);
         expect(find.text('To-do is locked'), findsOneWidget);
         expect(find.text('Secret'), findsNothing);
-        await tester.tap(find.text('Unlock'));
-        await tester.pumpAndSettle();
+        // Round 61: it asks at once (the fingerprint first, if set).
+        expect(find.byKey(const Key('promptPassword')), findsOneWidget);
         await tester.enterText(
             find.byKey(const Key('promptPassword')), password);
         await tester.tap(find.text('Unlock').last);

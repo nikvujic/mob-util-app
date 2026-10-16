@@ -1,3 +1,5 @@
+import 'package:the_app/models/notify_settings.dart';
+import 'package:the_app/pages/hub/clears_shown.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/pages/hub/counters.dart';
@@ -25,10 +27,13 @@ extension HubToolPage on HubTool {
   Widget page() => switch (this) {
         HubTool.counters => const CountersPage(),
         HubTool.placard => const PlacardPage(),
-        HubTool.medicine => const MedicinePage(),
+        // Round 61: opened, their shown notifications go.
+        HubTool.medicine =>
+          const ClearsShown(page: NotifyPage.medicine, child: MedicinePage()),
         HubTool.recipes => const RecipesPage(),
         HubTool.food => const FoodPage(),
-        HubTool.dates => const DatesPage(),
+        HubTool.dates =>
+          const ClearsShown(page: NotifyPage.dates, child: DatesPage()),
         HubTool.pip => const PipHomePage(),
       };
 }

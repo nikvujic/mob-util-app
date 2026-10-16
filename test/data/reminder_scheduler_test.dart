@@ -85,4 +85,33 @@ void main() {
       expect(activity, contains('R.raw.$resource'), reason: resource);
     }
   });
+
+  test('every kind has its channel (Round 61: Dates had none)', () {
+    final ids = {
+      for (final kind in ReminderKind.values)
+        NotificationReminderScheduler.detailsFor(reminder(kind)).channelId,
+    };
+    expect(ids, hasLength(ReminderKind.values.length));
+    expect(
+        NotificationReminderScheduler.detailsFor(reminder(ReminderKind.dates))
+            .channelId,
+        'dates-reminders');
+  });
+
+  test(
+      'ids from what each reminder is (Round 61): the same plan, the same '
+      'ids; unique within a plan', () {
+    Reminder r(String title, int hour) =>
+        Reminder(at: DateTime(2026, 10, 13, hour), title: title, body: 'B');
+    final plan = [r('A', 9), r('B', 10), r('A', 11)];
+    final ids = NotificationReminderScheduler.idsFor(plan);
+    expect(ids.toSet(), hasLength(3));
+    expect(
+        NotificationReminderScheduler.idsFor([r('X', 8), ...plan]).skip(1), ids,
+        reason: 'one more in front: the others keep theirs');
+    expect(ids.every((id) => id >= 0 && id <= 0x7fffffff), isTrue);
+    // The very same twice still gets two ids.
+    final twice = NotificationReminderScheduler.idsFor([r('A', 9), r('A', 9)]);
+    expect(twice.toSet(), hasLength(2));
+  });
 }

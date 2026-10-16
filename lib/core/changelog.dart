@@ -31,6 +31,48 @@ String? changesFor(String changelog, String version) {
   ].join('\n\n');
 }
 
+/// The changes from every version after [from] up to [version] (Round
+/// 61: updates not read yet pile up), each under its own `## X.Y.Z`,
+/// newest first; [changesFor] when [from] is null or there's only the
+/// one (or none) after it.
+String? changesSince(String changelog, String version, String? from) {
+  final heading = RegExp(r'^## \[([^\]]+)\].*$', multiLine: true);
+  final sections = heading.allMatches(changelog).toList();
+  final after = from == null ? null : _numbers(from);
+  final upTo = _numbers(version);
+  if (after == null || upTo == null) return changesFor(changelog, version);
+  final picked = [
+    for (final (i, m) in sections.indexed)
+      if (_numbers(m.group(1)!) case final v?
+          when _compare(v, after) > 0 && _compare(v, upTo) <= 0)
+        i,
+  ];
+  if (picked.length <= 1) return changesFor(changelog, version);
+  String body(int at) {
+    final start = sections[at].end;
+    final end =
+        at + 1 < sections.length ? sections[at + 1].start : changelog.length;
+    return changelog.substring(start, end).trim();
+  }
+
+  return [
+    for (final i in picked) '## ${sections[i].group(1)}\n\n${body(i)}',
+  ].join('\n\n');
+}
+
+List<int>? _numbers(String version) {
+  final parts = version.split('.').map(int.tryParse).toList();
+  if (parts.length != 3 || parts.contains(null)) return null;
+  return parts.cast<int>();
+}
+
+int _compare(List<int> a, List<int> b) {
+  for (var i = 0; i < 3; i++) {
+    if (a[i] != b[i]) return a[i].compareTo(b[i]);
+  }
+  return 0;
+}
+
 /// "1.14" of "1.14.1"; null if it isn't three numbers.
 String? _minorOf(String version) {
   final parts = version.split('.');

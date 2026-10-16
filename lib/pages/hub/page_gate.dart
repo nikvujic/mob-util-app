@@ -21,6 +21,7 @@ class PageGate extends ConsumerWidget {
     if (!ref.watch(pageClosedProvider(page))) return child;
     return LockedScreen(
       title: page.label,
+      askAtOnce: true,
       appBar: AppBar(title: Text(page.label)),
       onUnlock: () => showPasswordPrompt<UnlockedKeys>(
         context,

@@ -34,6 +34,13 @@ class DateReminder {
   /// A new date's (Round 57, Nikola): the day before, at 09:00.
   static const standard = DateReminder(daysBefore: 1, minutes: 9 * 60);
 
+  /// A new date's reminders (Round 61, Nikola): the day before and a
+  /// week before, at 09:00.
+  static const defaults = [
+    standard,
+    DateReminder(daysBefore: 7, minutes: 9 * 60),
+  ];
+
   /// The choices for [daysBefore].
   static const daysChoices = [0, 1, 2, 3, 5, 7, 14, 30];
 

@@ -562,11 +562,7 @@ class _RoomPainter extends CustomPainter {
               }
             }
           case PipProp.moon:
-            // A faint halo at night, then the moon.
-            if (scene.part == DayPart.night && scene.moon != MoonPhase.none) {
-              disc(bodyX, bodyY, bodyR + 3,
-                  Color.lerp(behind, PipColours.moon, 0.12)!);
-            }
+            // Round 61: no halo (it read as a dark ring round it).
             moon(bodyX, bodyY, bodyR, scene.moon);
           case PipProp.sun:
             // A round sun with rays (Round 38: unlike the moon); Round 52:

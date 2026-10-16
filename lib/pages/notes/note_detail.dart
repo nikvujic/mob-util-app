@@ -15,6 +15,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/format_bar.dart';
+import 'package:the_app/widgets/gentle_reveal.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/line_numbers.dart';
 import 'package:the_app/widgets/markdown_text.dart';
@@ -78,7 +79,35 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleFocusNode.unfocus();
   }
 
-  final _contentScroll = ScrollController();
+  /// Round 61: a selection's handle dragged past the top or bottom
+  /// scrolls the text gently (it raced, and jumped about).
+  late final _contentScroll = GentleRevealController(
+    gentle: () => !_contentController.selection.isCollapsed,
+  );
+
+  /// Round 61: a handle held past the text's top or bottom scrolls on.
+  late final _edgeScroll = HandleEdgeScroll(
+    scroll: _contentScroll,
+    text: _contentController,
+    view: _scrollKey,
+    editable: _editable,
+  );
+
+  /// The note's text's render object.
+  RenderEditable? _editable() {
+    RenderEditable? editable;
+    void visit(RenderObject child) {
+      if (editable != null) return;
+      if (child is RenderEditable) {
+        editable = child;
+      } else {
+        child.visitChildren(visit);
+      }
+    }
+
+    _contentFieldKey.currentContext?.findRenderObject()?.visitChildren(visit);
+    return editable;
+  }
 
   /// Room below the text, so its end can scroll clear of the buttons (and
   /// of the format bar, while it's open).
@@ -108,18 +137,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   Set<TextSelectionHandleType> _handlesOffScreen() {
     final selection = _contentController.selection;
     final view = _scrollKey.currentContext?.findRenderObject();
-    RenderEditable? editable;
-    void visit(RenderObject child) {
-      if (editable != null) return;
-      if (child is RenderEditable) {
-        editable = child;
-      } else {
-        child.visitChildren(visit);
-      }
-    }
-
-    _contentFieldKey.currentContext?.findRenderObject()?.visitChildren(visit);
-    final field = editable;
+    final field = _editable();
     if (!selection.isValid ||
         field == null ||
         !field.hasSize ||
@@ -196,6 +214,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _contentController.addListener(_scheduleAutosave);
     _contentController.addListener(_checkHandles);
     _contentScroll.addListener(_checkHandles);
+    _edgeScroll.start();
     _lifecycleListener = AppLifecycleListener(onHide: _autosave);
   }
 
@@ -209,6 +228,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _formatShown.dispose();
     _offScreen.dispose();
     _titleFocusNode.dispose();
+    _edgeScroll.dispose();
     _contentScroll.dispose();
     _history.dispose();
     super.dispose();

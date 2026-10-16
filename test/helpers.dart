@@ -250,6 +250,12 @@ class FakeReminderScheduler implements ReminderScheduler {
     scheduled = List.of(reminders);
   }
 
+  /// The kinds whose shown notifications were cleared (Round 61).
+  final cleared = <ReminderKind>[];
+
+  @override
+  Future<void> clearShown(ReminderKind kind) async => cleared.add(kind);
+
   /// Taps on notifications: add a [Reminder.target] to tap one.
   final taps = StreamController<String>.broadcast();
 

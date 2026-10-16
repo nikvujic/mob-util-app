@@ -56,6 +56,18 @@ abstract final class PipSprites {
   static Set<(int, int)> _face(String kind, int look) {
     final eyes = [3 + look, 10 + look];
     final mouth = 4 + look;
+    // Round 61: a blink shuts the eyes of the face he has (tired, very
+    // tired), keeping its mouth: before, every blink was the smiling one.
+    if (kind.startsWith('blink-')) {
+      final face = _face(kind.substring(6), look);
+      bool eye((int, int) p) =>
+          p.$2 <= 4 && eyes.any((e) => p.$1 == e || p.$1 == e + 1);
+      final shut = face.where(eye).map((p) => p.$2).fold(3, math.max);
+      return {
+        ...face.where((p) => !eye(p)),
+        for (final e in eyes) ...[(e, shut), (e + 1, shut)],
+      };
+    }
     // Round 37: tired, eyes half shut and a flat mouth; very tired, eyes
     // low and a wobbly mouth; asleep, eyes shut and a small mouth.
     switch (kind) {
@@ -180,6 +192,8 @@ abstract final class PipSprites {
       PipFace.asleep => 'asleep',
       PipFace.off => 'off',
       PipFace.yawn => 'yawn',
+      PipFace.tired when frame == PipFrame.blink => 'blink-tired',
+      PipFace.veryTired when frame == PipFrame.blink => 'blink-very',
       _ when frame == PipFrame.blink => 'blink',
       _ when frame == PipFrame.oh || frame == PipFrame.tuck => 'oh',
       PipFace.tired => 'tired',

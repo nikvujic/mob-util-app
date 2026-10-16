@@ -40,14 +40,18 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     );
   }
 
-  /// He's out, at [now]: that's his birthday. Once only. Full of energy,
-  /// his first battery on its way.
+  /// He's out, at [now]: that's his birthday. Once only. Round 61: two
+  /// segments and a battery in hand (so there's one to give him), the
+  /// next on its way.
+  static const hatchEnergy = 2.0;
+  static const hatchBatteries = 1;
   void hatch(DateTime now) {
     if (state.hatched) return;
     state = state.copyWith(
       born: now,
-      energy: PipLife.fullEnergy,
+      energy: hatchEnergy,
       energyAt: () => now,
+      batteries: hatchBatteries,
       nextBatteryAt: () => PipEnergy.nextBattery(now),
     );
   }

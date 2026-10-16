@@ -4,6 +4,33 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Fixed
+- **Dates reminders never came**: they had no notification channel, so
+  scheduling stopped at the first one (and reminders after it, of any
+  page, were lost too).
+- **Notifications vanished from the tray** when the app opened: they now
+  stay until you open their page (Planner, Medicine, Dates, Backup) or
+  swipe them away.
+- **Notes**: dragging a selection's handle past the top (or bottom) of a
+  long note raced a screen at a time and jumped about; now, held there,
+  the note scrolls on steadily (faster the further out) and the
+  selection follows, up to the first line.
+- **Pip** flashed a smile at each blink when tired: a blink now keeps his
+  mouth.
+- The **moon**'s dark ring at night is gone.
+
+### Changed
+- **Pip hatches** with two segments and a battery to give him (was:
+  full, none).
+- **Dates**: a new date reminds **a day and a week before** (09:00).
+- A **locked Hub page** or the **to-do note** asks for the fingerprint
+  (or password) as soon as you open it.
+- **What's new** (here, in the Introduction) lists every version since
+  the one you last read about, not just the latest.
+- The Introduction is brought up to date.
+
 ## [1.21.0] - 2026-10-15
 
 ### Changed

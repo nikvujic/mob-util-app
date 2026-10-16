@@ -51,6 +51,11 @@ class Preferences {
   /// before the first start (or before N16).
   final String? introVersion;
 
+  /// The version whose What's new was last read (Round 61): the
+  /// Introduction's What's new lists every version after it. Updates
+  /// while it's still unread keep it, so they pile up until read.
+  final String? introFrom;
+
   /// It's new to the user (a fresh install or an update), until opened.
   final bool introUnread;
 
@@ -113,6 +118,7 @@ class Preferences {
     this.introDeleted = false,
     this.introOnUpdates = true,
     this.introVersion,
+    this.introFrom,
     this.introUnread = false,
     this.introScroll = 0,
     this.resetBlockedUntil,
@@ -164,6 +170,7 @@ class Preferences {
     final bringUp = introVersion == null || introOnUpdates;
     return copyWith(
       introVersion: () => version,
+      introFrom: () => introUnread ? introFrom : introVersion,
       introDeleted: bringUp ? false : introDeleted,
       introUnread: bringUp || introUnread,
       introScroll: bringUp ? 0 : introScroll,
@@ -202,6 +209,7 @@ class Preferences {
     bool? introDeleted,
     bool? introOnUpdates,
     String? Function()? introVersion,
+    String? Function()? introFrom,
     bool? introUnread,
     double? introScroll,
     DateTime? Function()? resetBlockedUntil,
@@ -239,6 +247,7 @@ class Preferences {
         introDeleted: introDeleted ?? this.introDeleted,
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
         introVersion: introVersion == null ? this.introVersion : introVersion(),
+        introFrom: introFrom == null ? this.introFrom : introFrom(),
         introUnread: introUnread ?? this.introUnread,
         introScroll: introScroll ?? this.introScroll,
         resetBlockedUntil: resetBlockedUntil == null
@@ -287,6 +296,7 @@ class Preferences {
         'introDeleted': introDeleted,
         'introOnUpdates': introOnUpdates,
         if (introVersion != null) 'introVersion': introVersion,
+        if (introFrom != null) 'introFrom': introFrom,
         'introUnread': introUnread,
         if (introScroll > 0) 'introScroll': introScroll,
         if (resetBlockedUntil != null)
@@ -339,6 +349,7 @@ class Preferences {
         introDeleted: json['introDeleted'] as bool? ?? false,
         introOnUpdates: json['introOnUpdates'] as bool? ?? true,
         introVersion: json['introVersion'] as String?,
+        introFrom: json['introFrom'] as String?,
         introUnread: json['introUnread'] as bool? ?? false,
         introScroll: (json['introScroll'] as num?)?.toDouble() ?? 0,
         resetBlockedUntil: json['resetBlockedUntil'] == null

@@ -347,12 +347,12 @@ Pip:
   Oct, a bunny-ears or flower crown at Easter (moves each year), a
   party hat at New Year's Eve, a heart on 14 Feb). Birthdays stay the
   party hat. An event hat wins over a random one.
-- [ ] The **moon**'s dark circle round it looks like an error: drop
+- [x] The **moon**'s dark circle round it looks like an error: drop
   (or rework) the night halo. (It's a disc a little lighter than the
   sky, which reads as a dark ring next to the bright moon.)
-- [ ] **Hatched**: he starts with **2 segments** and **a battery** in
+- [x] **Hatched**: he starts with **2 segments** and **a battery** in
   hand (now: full, none).
-- [ ] At 2 segments he **flashes smiles** while idling. Found: a blink
+- [x] At 2 segments he **flashes smiles** while idling. Found: a blink
   draws the eyes shut with the *normal* smile, whatever his face, so a
   tired Pip smiles for each blink. A blink should keep his mouth.
 
@@ -361,7 +361,7 @@ Dates:
   is on a **snowy mountain** (snowing all the time), dressed as a skier
   in his usual events, with ski events of his own (the coming
   *adventures* could be him skiing).
-- [ ] **Default reminders** for every date: **1 day before and 7 days
+- [x] **Default reminders** for every date: **1 day before and 7 days
   before**.
 - [ ] Cards show **everything**: the date it's on (not "the year of the
   next one" for a birthday with a year, and nothing for one without:
@@ -378,24 +378,36 @@ Dates:
   and a month before), set only if the reminders weren't touched.
 
 App:
-- [ ] **Notifications** vanish from the tray when the app opens.
+- [x] **Notifications** vanish from the tray when the app opens.
   Found: every replan (each app start, any change) calls the plugin's
   `cancelAll`, which also clears notifications already shown. Should
   cancel only what's planned (ids apart from shown ones), so a shown
   one goes only when its page is opened (or swiped away).
-- [ ] **To-do** (locked) doesn't ask for the **fingerprint** at once
+- [x] **To-do** (locked) doesn't ask for the **fingerprint** at once
   when opened (the password prompt comes first; the fingerprint is
   its alternative), unlike locked pages.
-- [ ] **Notes**: in a long note, selecting from the end and dragging
+- [x] **Notes**: in a long note, selecting from the end and dragging
   the start handle up to the first line: it can't reach it, it jumps
   about (the text doesn't scroll along smoothly).
-- [ ] Check the **introduction** is still up to date and relevant.
+- [x] Check the **introduction** is still up to date and relevant.
 - [x] Question: is the app safe for **passwords in locked notes**?
   Answered in chat: Argon2id (OWASP setting) + AES-256-GCM, the
   password never stored, the fingerprint key in Android's keystore,
   auto-lock after 5 min away, backups encrypted the same way; as safe
   as the master password is strong; not audited; not a password
   manager (no autofill, no breach checks).
+
+Batch 1 done (1.22.0). Also found and fixed: Dates had no notification
+channel, so its reminders (and every reminder after the first one) were
+never scheduled. Tray: reminders get ids from what they are, a replan
+cancels only planned ones no longer wanted, and each page clears its
+kind's shown ones when opened (`ClearsShown`, the Planner tab, Backup;
+"open the app" notices on start). Selection: `GentleRevealController`
+(reveal jumps at most 12 px while a range is selected) and
+`HandleEdgeScroll` (a finger held past the edge scrolls on, the
+selection's end following). Locked pages: `LockedScreen(askAtOnce)`,
+not when locked while open (its page closes). What's new:
+`Preferences.introFrom`, `changesSince`.
 
 ### Round 60 — Nikola (2026-10-15)
 

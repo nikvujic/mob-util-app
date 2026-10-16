@@ -187,6 +187,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
     if (ref.watch(todoClosedProvider)) {
       return LockedScreen(
         title: 'To-do',
+        askAtOnce: true,
         appBar: AppBar(title: const Text('To-do')),
         onUnlock: () => showPasswordPrompt<UnlockedKeys>(
           context,

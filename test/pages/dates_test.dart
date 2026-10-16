@@ -134,8 +134,8 @@ void main() {
 
   testWidgets(
       '+ on a picked day: a new date there, saved once titled; year '
-      'not known; reminders: the day before at 09:00, another added, '
-      'one removed', (tester) async {
+      'not known; reminders (Round 61): a day and a week before at 09:00, '
+      'another added, one removed', (tester) async {
     await openDates(tester);
     await tester.tap(find.byKey(const Key('datesDay-2026-10-24')));
     await tester.pumpAndSettle();
@@ -147,10 +147,13 @@ void main() {
     await tester.enterText(find.byKey(const Key('dateTitle')), 'Ana');
     await tester.pumpAndSettle();
     expect(book().dates.single.title, 'Ana');
+    expect(book().dates.single.reminders, DateReminder.defaults);
+    expect(DateReminder.defaults.map((r) => (r.daysBefore, r.minutes)),
+        [(1, 540), (7, 540)]);
     await tap(tester, find.byKey(const Key('dateYearKnown')));
     expect(find.text('24 October'), findsOneWidget);
     await tap(tester, find.byKey(const Key('dateAddReminder')));
-    await tap(tester, find.byKey(const Key('reminderDays-7')));
+    await tap(tester, find.byKey(const Key('reminderDays-14')));
     await tap(tester, find.byKey(const Key('reminderDone')));
     await tap(tester, find.byKey(const Key('dateReminderRemove-0')));
     await tester.enterText(find.byKey(const Key('dateNote')), 'a book');
@@ -160,10 +163,11 @@ void main() {
     expect(saved.yearly, isTrue);
     expect(saved.type, DateType.birthday);
     expect(saved.note, 'a book');
-    expect(saved.reminders, const [DateReminder(daysBefore: 7, minutes: 540)]);
+    expect(saved.reminders, const [
+      DateReminder(daysBefore: 7, minutes: 540),
+      DateReminder(daysBefore: 14, minutes: 540),
+    ]);
     // Only three.
-    await tap(tester, find.byKey(const Key('dateAddReminder')));
-    await tap(tester, find.byKey(const Key('reminderDone')));
     await tap(tester, find.byKey(const Key('dateAddReminder')));
     await tap(tester, find.byKey(const Key('reminderDone')));
     expect(book().dates.single.reminders, hasLength(3));

@@ -36,6 +36,7 @@ class _DatePageState extends ConsumerState<DatePage> {
         day: (widget.on ?? DateTime.now()).day,
         month: (widget.on ?? DateTime.now()).month,
         year: (widget.on ?? DateTime.now()).year,
+        reminders: DateReminder.defaults,
       );
 
   late final _title = TextEditingController(text: _draft.title);

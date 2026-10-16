@@ -256,6 +256,20 @@ class ReminderPlanner {
   }
 }
 
+/// Takes [page]'s shown notifications out of the phone's tray (Round 61:
+/// once it's opened, not when the app is); null: the app's own notices.
+final clearShownProvider = Provider<Future<void> Function(NotifyPage?)>(
+  (ref) => (page) => ref.read(reminderSchedulerProvider).clearShown(
+        switch (page) {
+          null => ReminderKind.notice,
+          NotifyPage.planner => ReminderKind.planner,
+          NotifyPage.medicine => ReminderKind.medicine,
+          NotifyPage.backup => ReminderKind.backup,
+          NotifyPage.dates => ReminderKind.dates,
+        },
+      ),
+);
+
 /// The page a kind of reminder comes from (none for the app's own).
 NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
       ReminderKind.planner => NotifyPage.planner,
