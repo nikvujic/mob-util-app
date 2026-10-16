@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/pip_hats.dart';
+import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/pip_energy.dart';
@@ -245,6 +247,27 @@ void main() {
       expect(container.read(pipLifeProvider).batteries, 1, reason: 'due');
       expect(link.giveBattery(), isTrue);
       expect(link.look().$2, 2);
+    });
+
+    test("the link: today's hat (Round 61), Santa's at Christmas", () {
+      DateTime now = DateTime(2026, 12, 26, 12);
+      final container = ProviderContainer(overrides: [
+        appStorageProvider.overrideWithValue(AppStorage.inMemory(
+          initialPip: PipLife(
+              born: DateTime(2026, 10, 1), energyAt: DateTime(2026, 12, 26)),
+        )),
+        clockProvider.overrideWithValue(() => now),
+        powerSourceProvider.overrideWithValue(FakePower()),
+      ]);
+      addTearDown(container.dispose);
+      final link = container.read(pipLinkProvider);
+      expect(link.hatToday, PipHat.santa);
+      now = DateTime(2027, 1, 3, 12);
+      expect(link.hatToday, isNot(PipHat.santa));
+      expect(
+          link.hatToday,
+          pipHatOn(DateTime(2027, 1, 3),
+              seed: DateTime(2026, 10, 1).millisecondsSinceEpoch ~/ 1000));
     });
 
     test('restored: carries on from where the backup left him', () {

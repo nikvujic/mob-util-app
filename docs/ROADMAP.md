@@ -340,7 +340,7 @@ fixtures for every stored format.
 ### Round 61 — Nikola's notes on 1.21.0 (2026-10-16)
 
 Pip:
-- [ ] **Hats**: everyday hats at random: some days he wears one, a
+- [x] **Hats**: everyday hats at random: some days he wears one, a
   random one, all day, about **6–7 hat days a month**; mostly none.
   **Event hats**: a **Santa hat** from a week before New Year to 2
   January; more of that kind (ideas: a pumpkin/witch hat around 31
@@ -416,6 +416,14 @@ reminders (`DateKind.reminders`: a wedding a week and a month before)
 replacing the usual only if untouched; cards: `whenLabel` without the
 year for every-year dates, `dateDetails` (kind, days, born/since,
 reminders). Holiday kinds are in; Pip skiing on a ski holiday is batch 4.
+
+Batch 3 done (1.24.0): `core/pip_hats.dart`: `pipHatOn(day, seed)` (a
+day of the year's from `seasonalHatOn`: Santa 25 Dec–2 Jan, witch 31
+Oct, bunny ears Orthodox Easter Sun–Mon (`orthodoxEaster`), heart 14
+Feb; else a steady per-day hash, chance 6.5/30.44, an everyday hat),
+seeded with his birthday so each Pip has his own days. `PipLink.hatToday`
+→ `PipBrain.dayHat`; the party hat (birthday) wins, a tried-on one over
+both. New sprites: santa, witch, bunny, heart (centred, antenna covered).
 
 ### Round 60 — Nikola (2026-10-15)
 

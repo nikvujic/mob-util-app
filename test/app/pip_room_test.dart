@@ -359,4 +359,14 @@ void main() {
           contains(pip().activity));
     });
   });
+
+  testWidgets("today's hat from his life (Round 61)", (tester) async {
+    final link = FakePipLink()
+      ..at = DateTime(2026, 10, 31, 12)
+      ..hatToday = PipHat.witch;
+    final container = await pumpApp(tester, pipLink: link);
+    await openMenu(tester);
+    await tester.pumpAndSettle();
+    expect(container.read(pipBrainProvider).hat, PipHat.witch);
+  });
 }

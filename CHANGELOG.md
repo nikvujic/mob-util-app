@@ -4,6 +4,17 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Pip's hats by the day**: now and then (about 6–7 days a month) he
+  wears a random hat all day (a crown, a top hat, a wizard hat, a cap, a
+  beanie), and some days have their own: a **Santa hat** from 25
+  December to 2 January, a **witch hat** on 31 October, **bunny ears**
+  at Easter (Orthodox; Sunday and Monday), a **heart band** on 14
+  February. A birthday's party hat comes first. The new hats are on Pip
+  Home's Hats list too.
+
 ## [1.23.0] - 2026-10-16
 
 ### Added

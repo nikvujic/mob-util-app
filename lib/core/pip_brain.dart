@@ -104,11 +104,20 @@ enum PipHat {
   topHat('Top hat'),
   wizard('Wizard hat'),
   cap('Cap'),
-  beanie('Beanie');
+  beanie('Beanie'),
+
+  /// Round 61: for days of the year (see `pip_hats.dart`).
+  santa('Santa hat', everyday: false),
+  witch('Witch hat', everyday: false),
+  bunny('Bunny ears', everyday: false),
+  heart('Heart band', everyday: false);
 
   final String label;
 
-  const PipHat(this.label);
+  /// Worn on a random day (Round 61); the others are for their days.
+  final bool everyday;
+
+  const PipHat(this.label, {this.everyday = true});
 }
 
 /// A buzz of the phone, how strong (Round 53).
@@ -1695,6 +1704,10 @@ class PipBrain {
   /// Someone's birthday today, or his own (the room says): the party hat.
   bool birthday = false;
 
+  /// Today's hat otherwise (Round 61, the room says): a day of the year's
+  /// (a Santa hat at New Year...) or a random day's; null: none.
+  PipHat? dayHat;
+
   /// A hat tried on (Pip Home's Hats; null: none, even on a birthday),
   /// while [_tryingOn].
   PipHat? _triedOn;
@@ -1718,7 +1731,8 @@ class PipBrain {
     if (activity == PipActivity.egg || activity == PipActivity.hatching) {
       return null;
     }
-    return _tryingOn ? _triedOn : (birthday ? PipHat.party : null);
+    if (_tryingOn) return _triedOn;
+    return birthday ? PipHat.party : dayHat;
   }
 
   /// Asleep (settled, legs tucked): his hat on the ground beside him.

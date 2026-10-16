@@ -655,6 +655,40 @@ abstract final class PipSprites {
       '.bbbbbbbb.',
       'wbwbwbwbwb',
     ],
+    // Round 61: a day of the year's.
+    PipHat.santa: [
+      '.......oo.',
+      '......rroo',
+      '.....rrr..',
+      '....rrrrr.',
+      '...rrrrrr.',
+      '.rrrrrrrr.',
+      'oooooooooo',
+    ],
+    PipHat.witch: [
+      '.......k..',
+      '......kk..',
+      '.....kkk..',
+      '....kkkk..',
+      '....kkkkk.',
+      '...uuuuuu.',
+      'kkkkkkkkkk',
+    ],
+    PipHat.bunny: [
+      '.ww..ww.',
+      '.wp..pw.',
+      '.wp..pw.',
+      '.wwwwww.',
+      'wwwwwwww',
+    ],
+    PipHat.heart: [
+      '.rr..rr.',
+      'rrrrrrrr',
+      '.rrrrrr.',
+      '..rrrr..',
+      '...rr...',
+      'pppppppp',
+    ],
   };
 
   /// The middle of his head on his frame: between columns 9 and 10.

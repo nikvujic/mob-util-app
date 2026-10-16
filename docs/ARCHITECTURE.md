@@ -447,7 +447,7 @@ the room sets from `PipLink.partyHat`; or one `tryOn`'d, Pip Home's
 Hats), drawn by the painter right after his body inside the same moves
 (mirror, stretch, tilt, spin), from `PipSprites.hatLeftOf` (Round 58:
 centred on `hatCentre`, over his antenna) and `hatBottom`;
-`hatBeside` (asleep) puts it on the ground beside him.
+`hatBeside` (asleep) puts it on the ground beside him. Round 61: `PipBrain.dayHat` from `PipLink.hatToday` (`core/pip_hats.dart`: `pipHatOn`, days of the year and steady random days) when there's no party hat.
 
 Dates (Round 57): `models/date_entry.dart` (`DateEntry`, `DateBook`:
 `on`, `nextFrom`, `upcoming`, `birthdayOn`), `datesProvider`

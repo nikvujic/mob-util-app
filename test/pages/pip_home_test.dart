@@ -102,9 +102,19 @@ void main() {
     await tester.tap(find.byKey(const Key('pipHats')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('pipHat-none')), findsOneWidget);
+    // Round 61: more than fit; each there further down.
+    final list = find
+        .descendant(
+            of: find.byKey(const Key('pipHatList')),
+            matching: find.byType(Scrollable))
+        .first;
+    final position = tester.state<ScrollableState>(list).position;
     for (final hat in PipHat.values) {
-      expect(find.byKey(Key('pipHat-${hat.name}')), findsOneWidget);
+      await tester.scrollUntilVisible(find.byKey(Key('pipHat-${hat.name}')), 60,
+          scrollable: list);
     }
+    position.jumpTo(0);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('pipHat-crown')));
     await tester.pump();
     expect(brain.hat, PipHat.crown);

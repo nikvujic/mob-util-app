@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -348,6 +349,10 @@ class FakePipLink implements PipLink {
   /// A birthday today (Round 57).
   @override
   bool partyHat = false;
+
+  /// Today's hat otherwise (Round 61).
+  @override
+  PipHat? hatToday;
 
   /// Segments from his station (Round 58): one more each (not full); off,
   /// he's on again.

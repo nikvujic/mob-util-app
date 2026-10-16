@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:the_app/core/pip_brain.dart';
+
 /// Pip's energy and sleep (Round 37): plain rules, worked out from the
 /// clock, so nothing runs in the background. His energy is kept as a
 /// level (0 to [full]) at a moment; at any later moment it's that level
@@ -198,6 +200,10 @@ abstract class PipLink {
 
   /// Someone's birthday today, or his own (Round 57): the party hat.
   bool get partyHat;
+
+  /// Today's hat otherwise (Round 61): a day of the year's or a random
+  /// day's ([pipHatOn]); null: none.
+  PipHat? get hatToday;
 
   /// A segment from his station (Round 58): every [PipBrain.chargeEvery]
   /// he's at it, watched, and the drone's charge when he's off. True if

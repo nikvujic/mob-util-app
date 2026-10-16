@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_hats.dart';
+import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/power.dart';
 import 'package:the_app/models/pip_life.dart';
@@ -242,6 +244,13 @@ class _Link implements PipLink {
 
   @override
   DateTime? get recipeReadAt => _ref.read(recipeReadProvider);
+
+  @override
+  PipHat? get hatToday {
+    final born = _ref.read(pipLifeProvider).born;
+    return pipHatOn(dayOf(_now),
+        seed: born == null ? 0 : born.millisecondsSinceEpoch ~/ 1000);
+  }
 
   @override
   bool get partyHat {

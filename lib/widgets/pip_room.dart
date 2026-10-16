@@ -175,6 +175,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     brain.medicineDue = link.medicineDue;
     // Round 57: a birthday, the party hat.
     brain.birthday = link.partyHat;
+    // Round 61: otherwise today's (a day of the year's, or a random one).
+    brain.dayHat = link.hatToday;
     final read = link.recipeReadAt;
     if (_moving &&
         read != null &&
