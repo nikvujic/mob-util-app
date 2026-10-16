@@ -337,6 +337,66 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 61 — Nikola's notes on 1.21.0 (2026-10-16)
+
+Pip:
+- [ ] **Hats**: everyday hats at random: some days he wears one, a
+  random one, all day, about **6–7 hat days a month**; mostly none.
+  **Event hats**: a **Santa hat** from a week before New Year to 2
+  January; more of that kind (ideas: a pumpkin/witch hat around 31
+  Oct, a bunny-ears or flower crown at Easter (moves each year), a
+  party hat at New Year's Eve, a heart on 14 Feb). Birthdays stay the
+  party hat. An event hat wins over a random one.
+- [ ] The **moon**'s dark circle round it looks like an error: drop
+  (or rework) the night halo. (It's a disc a little lighter than the
+  sky, which reads as a dark ring next to the bright moon.)
+- [ ] **Hatched**: he starts with **2 segments** and **a battery** in
+  hand (now: full, none).
+- [ ] At 2 segments he **flashes smiles** while idling. Found: a blink
+  draws the eyes shut with the *normal* smile, whatever his face, so a
+  tired Pip smiles for each blink. A blink should keep his mouth.
+
+Dates:
+- [ ] **Holiday kinds**, starting with **Skiing**: during its days Pip
+  is on a **snowy mountain** (snowing all the time), dressed as a skier
+  in his usual events, with ski events of his own (the coming
+  *adventures* could be him skiing).
+- [ ] **Default reminders** for every date: **1 day before and 7 days
+  before**.
+- [ ] Cards show **everything**: the date it's on (not "the year of the
+  next one" for a birthday with a year, and nothing for one without:
+  just its day), how soon, the age / which anniversary / how many
+  years, how long it lasts, its kind (skiing...), the birth year if
+  known, and its **reminders** when set. Not "every year" or "year
+  known" as such.
+- [ ] **Each type its own form and defaults**: Birthday and
+  Anniversary: every year, year known on (Birthday: "Year known — for
+  the age"; Anniversary: "— for which anniversary"). Holiday and Event:
+  no Every year / Year known (a date with a year; Holiday has its kind
+  and length). Notes and wording per type.
+- [ ] Event kinds, e.g. **Wedding**: its own default reminders (a week
+  and a month before), set only if the reminders weren't touched.
+
+App:
+- [ ] **Notifications** vanish from the tray when the app opens.
+  Found: every replan (each app start, any change) calls the plugin's
+  `cancelAll`, which also clears notifications already shown. Should
+  cancel only what's planned (ids apart from shown ones), so a shown
+  one goes only when its page is opened (or swiped away).
+- [ ] **To-do** (locked) doesn't ask for the **fingerprint** at once
+  when opened (the password prompt comes first; the fingerprint is
+  its alternative), unlike locked pages.
+- [ ] **Notes**: in a long note, selecting from the end and dragging
+  the start handle up to the first line: it can't reach it, it jumps
+  about (the text doesn't scroll along smoothly).
+- [ ] Check the **introduction** is still up to date and relevant.
+- [x] Question: is the app safe for **passwords in locked notes**?
+  Answered in chat: Argon2id (OWASP setting) + AES-256-GCM, the
+  password never stored, the fingerprint key in Android's keystore,
+  auto-lock after 5 min away, backups encrypted the same way; as safe
+  as the master password is strong; not audited; not a password
+  manager (no autofill, no breach checks).
+
 ### Round 60 — Nikola (2026-10-15)
 
 - [x] Dates: a day's dates shown **around the date** (its circle in
