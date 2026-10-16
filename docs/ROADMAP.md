@@ -492,7 +492,7 @@ doesn't; the drone comes).
 Bills not now. The order: **Birthdays & dates**, **Packing lists**,
 **Days since / until**, **Life percentage**, **Coin flip**, then the
 **planner notification that stays**. (2026-10-16, Nikola: **Life
-percentage** and **Coin flip** are scrapped.)
+percentage**, **Coin flip** and **Days since / until** are scrapped.)
 
 - [x] **Birthdays & dates** (spec `docs/DATES_SPEC.md`): a calendar of
   important dates; a date has a title, a note, a type, and up to 3
