@@ -189,28 +189,97 @@ void main() {
   });
 
   testWidgets(
-      'an event is once (its year needed: no Year known); back to a '
-      'birthday, every year again', (tester) async {
+      'each type its form (Round 61): a birthday every year, Year known '
+      'for the age; an event once, with kinds; Other chooses', (tester) async {
     await openDates(tester);
     await tap(tester, find.byTooltip('Add a date'));
     await tester.enterText(find.byKey(const Key('dateTitle')), 'Exam');
     await tester.pumpAndSettle();
-    // Its year not known first: once, it's this year's.
+    DateEntry saved() => book().dates.single;
+    // A birthday: no Every year; Year known, for the age.
+    expect(find.byKey(const Key('dateYearly')), findsNothing);
+    expect(find.text('For the age'), findsOneWidget);
+    expect(find.byKey(const Key('dateKind-none')), findsNothing);
     await tap(tester, find.byKey(const Key('dateYearKnown')));
-    expect(book().dates.single.year, isNull);
+    expect(saved().year, isNull);
+    expect(saved().yearly, isTrue);
+    // An anniversary: for which one.
+    await tap(tester, find.byKey(const Key('dateType-anniversary')));
+    expect(find.text('For which anniversary'), findsOneWidget);
+    // An event: once, this year; neither switch; its kinds.
     await tap(tester, find.byKey(const Key('dateType-event')));
-    expect(book().dates.single.yearly, isFalse);
-    expect(book().dates.single.year, 2026);
+    expect(saved().yearly, isFalse);
+    expect(saved().year, 2026);
     expect(find.byKey(const Key('dateYearKnown')), findsNothing);
-    await tap(tester, find.byKey(const Key('dateType-birthday')));
-    expect(book().dates.single.yearly, isTrue);
-    expect(find.byKey(const Key('dateYearKnown')), findsOneWidget);
-    // Every year off again, its year not known: this year's too.
-    await tap(tester, find.byKey(const Key('dateYearKnown')));
-    expect(book().dates.single.year, isNull);
+    expect(find.byKey(const Key('dateYearly')), findsNothing);
+    expect(find.byKey(const Key('dateKind-wedding')), findsOneWidget);
+    // A wedding: its own reminders, a week and a month before (they
+    // were the usual); just an event again, the usual back.
+    await tap(tester, find.byKey(const Key('dateKind-wedding')));
+    expect(saved().kind, DateKind.wedding);
+    expect(saved().reminders, DateReminder.weddingDefaults);
+    await tap(tester, find.byKey(const Key('dateKind-none')));
+    expect(saved().kind, isNull);
+    expect(saved().reminders, DateReminder.defaults);
+    // A wedding turned into a holiday: the usual reminders back.
+    await tap(tester, find.byKey(const Key('dateKind-wedding')));
+    await tap(tester, find.byKey(const Key('dateType-holiday')));
+    expect(saved().reminders, DateReminder.defaults);
+    await tap(tester, find.byKey(const Key('dateType-event')));
+    await tap(tester, find.byKey(const Key('dateKind-none')));
+    // Reminders changed by hand stay as they are.
+    await tap(tester, find.byKey(const Key('dateReminderRemove-0')));
+    await tap(tester, find.byKey(const Key('dateKind-wedding')));
+    expect(saved().reminders, [DateReminder.defaults.last]);
+    // A holiday's kinds.
+    await tap(tester, find.byKey(const Key('dateType-holiday')));
+    expect(saved().kindNow, isNull, reason: 'a wedding is no holiday');
+    await tap(tester, find.byKey(const Key('dateKind-skiing')));
+    expect(saved().kind, DateKind.skiing);
+    // Other: it chooses.
+    await tap(tester, find.byKey(const Key('dateType-other')));
+    expect(find.byKey(const Key('dateYearly')), findsOneWidget);
     await tap(tester, find.byKey(const Key('dateYearly')));
-    expect(book().dates.single.yearly, isFalse);
-    expect(book().dates.single.year, 2026);
+    expect(saved().yearly, isTrue);
+    expect(find.text('For how many years'), findsOneWidget);
+  });
+
+  testWidgets(
+      'a card says it all (Round 61): its day (no year for one every '
+      'year), how soon, the age; its kind, days, year, reminders',
+      (tester) async {
+    await openDates(tester, start: [
+      const DateEntry(
+        id: 'ana',
+        title: 'Ana',
+        type: DateType.birthday,
+        day: 10,
+        month: 10,
+        year: 1995,
+      ),
+      const DateEntry(
+        id: 'ski',
+        title: 'Jahorina',
+        type: DateType.holiday,
+        kind: DateKind.skiing,
+        day: 20,
+        month: 1,
+        year: 2027,
+        yearly: false,
+        days: 5,
+        reminders: [],
+      ),
+    ]);
+    // Ana's next is in 2027: no year for it (it read as her birth year).
+    expect(whenOf(tester, 'ana'), 'Sun, 10 Oct  ·  in 360 days  ·  turns 32');
+    String details(String id) =>
+        tester.widget<Text>(find.byKey(Key('dateDetails-$id'))).data!;
+    expect(details('ana'), 'born 1995  ·  1 day before');
+    expect(whenOf(tester, 'ski'),
+        'Wed, 20 Jan 2027 – Sun, 24 Jan 2027  ·  in 97 days');
+    expect(details('ski'), 'Skiing  ·  5 days');
+    // Its kind's icon: skis.
+    expect(find.byIcon(Icons.downhill_skiing), findsOneWidget);
   });
 
   testWidgets('opened; deleted once confirmed (Round 58), with Undo',

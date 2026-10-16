@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
@@ -96,6 +97,16 @@ class _DatePageState extends ConsumerState<DatePage> {
     _change(_draft.copyWith(reminders: reminders));
   }
 
+  /// The reminders after its kind goes from [from] to [to] (Round 61): a
+  /// kind's own (a wedding's) if they were still the old kind's, so
+  /// reminders set by hand stay.
+  List<DateReminder> _remindersFor(
+      DateEntry date, DateKind? from, DateKind? to) {
+    final was = from?.reminders ?? DateReminder.defaults;
+    if (!listEquals(date.reminders, was)) return date.reminders;
+    return to?.reminders ?? DateReminder.defaults;
+  }
+
   /// Asked first (Round 58), then gone, with Undo.
   Future<void> _delete() async {
     final confirmed = await showConfirmDialog(
@@ -172,18 +183,44 @@ class _DatePageState extends ConsumerState<DatePage> {
                     avatar: Icon(type.icon, size: 18, color: type.colour),
                     label: Text(type.label),
                     selected: date.type == type,
-                    // A type sets every year or once (it can be changed
-                    // after); once needs a year.
+                    // A type sets every year or once (Round 61: only
+                    // Other can change it after); once needs a year.
                     onSelected: (_) => _change(date.copyWith(
                       type: type,
                       yearly: type.yearly,
                       year: () =>
                           date.year ?? (type.yearly ? null : today.year),
+                      reminders: _remindersFor(date, date.kindNow,
+                          type == date.kind?.type ? date.kind : null),
                     )),
                   ),
               ],
             ),
           ),
+          // Round 61: a holiday's or an event's kind.
+          if (date.type.kinds.isNotEmpty) ...[
+            _heading('KIND'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final kind in [null, ...date.type.kinds])
+                    ChoiceChip(
+                      key: Key('dateKind-${kind?.name ?? 'none'}'),
+                      avatar: Icon(kind?.icon ?? date.type.icon, size: 18),
+                      label: Text(kind?.label ?? date.type.label),
+                      selected: date.kindNow == kind,
+                      onSelected: (_) => _change(date.copyWith(
+                        kind: () => kind,
+                        reminders: _remindersFor(date, date.kindNow, kind),
+                      )),
+                    ),
+                ],
+              ),
+            ),
+          ],
           _heading('WHEN'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -241,20 +278,27 @@ class _DatePageState extends ConsumerState<DatePage> {
                 style: TextStyle(color: colors.textMuted, fontSize: 12),
               ),
             ),
-          SwitchListTile(
-            key: const Key('dateYearly'),
-            title: const Text('Every year'),
-            value: date.yearly,
-            onChanged: (on) => _change(date.copyWith(
-              yearly: on,
-              year: () => on ? date.year : (date.year ?? today.year),
-            )),
-          ),
-          if (date.yearly)
+          // Round 61: only Other chooses; a birthday or an anniversary is
+          // every year, a holiday or an event once.
+          if (date.type.choosesYearly)
+            SwitchListTile(
+              key: const Key('dateYearly'),
+              title: const Text('Every year'),
+              value: date.yearly,
+              onChanged: (on) => _change(date.copyWith(
+                yearly: on,
+                year: () => on ? date.year : (date.year ?? today.year),
+              )),
+            ),
+          if (date.yearly && (date.type.choosesYearly || date.type.yearly))
             SwitchListTile(
               key: const Key('dateYearKnown'),
               title: const Text('Year known'),
-              subtitle: const Text('For the age, or how many years'),
+              subtitle: Text(switch (date.type) {
+                DateType.birthday => 'For the age',
+                DateType.anniversary => 'For which anniversary',
+                _ => 'For how many years',
+              }),
               value: date.year != null,
               onChanged: (on) =>
                   _change(date.copyWith(year: () => on ? today.year : null)),
@@ -297,7 +341,17 @@ class _DatePageState extends ConsumerState<DatePage> {
               minLines: 1,
               maxLines: 6,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Note'),
+              decoration: InputDecoration(
+                labelText: 'Note',
+                // Round 61: a hint for each type.
+                hintText: switch (date.type) {
+                  DateType.birthday => 'Gift ideas…',
+                  DateType.anniversary => 'Plans, gift ideas…',
+                  DateType.holiday => 'Bookings, what to pack…',
+                  DateType.event => 'Where, what to bring…',
+                  DateType.other => null,
+                },
+              ),
               onChanged: (text) => _change(_draft.copyWith(note: text)),
             ),
           ),

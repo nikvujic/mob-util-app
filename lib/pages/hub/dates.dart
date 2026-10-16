@@ -34,6 +34,16 @@ extension DateTypeLook on DateType {
       };
 }
 
+/// How a holiday's or an event's kind looks (Round 61).
+extension DateKindLook on DateKind {
+  IconData get icon => switch (this) {
+        DateKind.skiing => Icons.downhill_skiing,
+        DateKind.beach => Icons.beach_access,
+        DateKind.trip => Icons.luggage,
+        DateKind.wedding => Icons.favorite,
+      };
+}
+
 /// Opens one of the Dates page's own pages, behind its lock.
 void openDatesPage(BuildContext context, Widget page) {
   Navigator.of(context).push(
@@ -199,11 +209,12 @@ class DateCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: date.type.colour,
               ),
+              // Round 61: its kind's icon (skis, a heart...), if it has one.
               child: Icon(
-                date.type.icon,
+                date.kindNow?.icon ?? date.type.icon,
                 size: 20,
                 color: DateColours.ink,
-                semanticLabel: date.type.label,
+                semanticLabel: date.kindNow?.label ?? date.type.label,
               ),
             ),
             const SizedBox(width: 12),
@@ -221,6 +232,14 @@ class DateCard extends StatelessWidget {
                     whenLabel(date, on, today),
                     style: TextStyle(color: colors.textSecondary, fontSize: 12),
                   ),
+                  // Round 61: all there is to know about it.
+                  if (dateDetails(date) case final details
+                      when details.isNotEmpty)
+                    Text(
+                      key: Key('dateDetails-${date.id}'),
+                      details.join('  ·  '),
+                      style: TextStyle(color: colors.textMuted, fontSize: 12),
+                    ),
                 ],
               ),
             ),

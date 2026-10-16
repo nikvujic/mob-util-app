@@ -45,7 +45,7 @@ void main() {
     DatesNotifier(storage).save(ana());
     await storage.flush();
     expect(File('${dir.path}/dates.json').readAsStringSync(),
-        contains('"version":2'));
+        contains('"version":3'));
     final again = await AppStorage.open(directory: dir);
     expect(again.initialDates.dates.single.toJson(), ana().toJson());
   });

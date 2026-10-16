@@ -4,6 +4,27 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Dates: kinds.** A holiday can be **Skiing**, **Beach** or a **Trip**;
+  an event can be a **Wedding** (its card shows the kind's icon). Pip's
+  ski trips come later.
+- A **wedding** reminds **a week and a month before** (if its reminders
+  weren't changed by hand).
+
+### Changed
+- **Dates: each type its own form.** A birthday and an anniversary are
+  every year (no switch); *Year known* says what it's for ("for the
+  age", "for which anniversary"). A holiday and an event are on a date
+  with its year, once (no *Every year* or *Year known*), and can last
+  several days. *Other* still chooses. The note has a hint per type.
+- **Dates cards say it all**: the day (no year for one every year; it
+  showed the next one's year, which read as a birth year), how soon,
+  the age or which anniversary, and a second line with its kind, how many
+  days, *born 1995* / *since 2016*, and its reminders ("1 day, 1 week
+  before").
+
 ## [1.22.0] - 2026-10-16
 
 ### Fixed

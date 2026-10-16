@@ -363,18 +363,18 @@ Dates:
   *adventures* could be him skiing).
 - [x] **Default reminders** for every date: **1 day before and 7 days
   before**.
-- [ ] Cards show **everything**: the date it's on (not "the year of the
+- [x] Cards show **everything**: the date it's on (not "the year of the
   next one" for a birthday with a year, and nothing for one without:
   just its day), how soon, the age / which anniversary / how many
   years, how long it lasts, its kind (skiing...), the birth year if
   known, and its **reminders** when set. Not "every year" or "year
   known" as such.
-- [ ] **Each type its own form and defaults**: Birthday and
+- [x] **Each type its own form and defaults**: Birthday and
   Anniversary: every year, year known on (Birthday: "Year known — for
   the age"; Anniversary: "— for which anniversary"). Holiday and Event:
   no Every year / Year known (a date with a year; Holiday has its kind
   and length). Notes and wording per type.
-- [ ] Event kinds, e.g. **Wedding**: its own default reminders (a week
+- [x] Event kinds, e.g. **Wedding**: its own default reminders (a week
   and a month before), set only if the reminders weren't touched.
 
 App:
@@ -408,6 +408,14 @@ kind's shown ones when opened (`ClearsShown`, the Planner tab, Backup;
 selection's end following). Locked pages: `LockedScreen(askAtOnce)`,
 not when locked while open (its page closes). What's new:
 `Preferences.introFrom`, `changesSince`.
+
+Batch 2 done (1.23.0): `DateKind` (skiing, beach, trip; wedding) in
+dates.json v3 / backup v25 (fixtures v25); `DateType.choosesYearly`
+(Other only); per-type *Year known* wording and note hints; a kind's own
+reminders (`DateKind.reminders`: a wedding a week and a month before)
+replacing the usual only if untouched; cards: `whenLabel` without the
+year for every-year dates, `dateDetails` (kind, days, born/since,
+reminders). Holiday kinds are in; Pip skiing on a ski holiday is batch 4.
 
 ### Round 60 — Nikola (2026-10-15)
 

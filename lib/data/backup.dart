@@ -84,8 +84,9 @@ class Backup {
   /// Round 42); 21 = to-do things may be waiting (Round 45); 22 = the
   /// food tracker (`food`, as in `food.json`, Round 46); 23 = birthdays &
   /// dates (`dates`, as in `dates.json`, Round 57); 24 = a holiday or an
-  /// event may last several days (`days`, Round 59).
-  static const version = 24;
+  /// event may last several days (`days`, Round 59); 25 = and be of a
+  /// kind (`kind`, Round 61).
+  static const version = 25;
 
   final DateTime createdAt;
   final String appVersion;

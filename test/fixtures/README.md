@@ -138,6 +138,13 @@ app still reads every version, so an update can never lose existing data.
   "Hala 1", no reminders; "Ana 🎂", a birthday 24 Oct 1995 (a day: no
   `days`), the standard reminder.
 - `v24/backup-plain.json` — backup (version 24) with them.
+- `v25/storage/dates.json` — dates of a kind (Round 61, dates.json
+  version 3, `kind`): "Jahorina ⛷", a holiday, **skiing**, from 20 Jan
+  2027, once, 5 days, note "Ski pass", a reminder 7 days before at
+  09:00; "Venčanje Ane i Marka", an event, **wedding**, 12 Jun 2027, its
+  reminders a week and a month before; "Ana 🎂", a birthday 24 Oct 1995,
+  the usual reminders (a day and a week before).
+- `v25/backup-plain.json` — backup (version 25) with them.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

@@ -146,3 +146,19 @@ and be caught.
 4. Pip's hats: the party hat on birthdays (and his own), beside him
    asleep; the Hats list on Pip Home.
 5. Introduction, docs, full suite, release.
+
+## 7. Round 61: per type, kinds, cards (1.23.0)
+
+- **Birthday**, **Anniversary**: every year, no switch; *Year known*
+  ("for the age" / "for which anniversary"). **Holiday**, **Event**: a
+  date with its year, once; no *Every year* or *Year known*; *Lasts*.
+  **Other**: as before (both switches).
+- **Kinds**: a Holiday can be Skiing, Beach or Trip (Skiing: Pip goes
+  skiing on its days, later); an Event can be a Wedding, which reminds a
+  week and a month before (taking the place of the usual ones only if
+  they weren't changed). The card shows the kind's icon.
+- New dates remind a day and a week before (09:00).
+- **Cards**: title; the day (no year for every-year dates), how soon,
+  turns N / N years; then the kind, how many days, born / since year,
+  the reminders ("1 day, 1 week before").
+

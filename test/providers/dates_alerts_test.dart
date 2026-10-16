@@ -173,4 +173,54 @@ void main() {
         ),
         isEmpty);
   });
+
+  test('details (Round 61): kind, days, year, reminders, shortly', () {
+    expect(beforeLabel(0), 'on the day');
+    expect(beforeLabel(1), '1 day');
+    expect(beforeLabel(3), '3 days');
+    expect(beforeLabel(7), '1 week');
+    expect(beforeLabel(14), '2 weeks');
+    expect(beforeLabel(30), '1 month');
+    const wed = DateEntry(
+      id: 'w',
+      title: 'Wedding',
+      type: DateType.anniversary,
+      day: 1,
+      month: 6,
+      year: 2016,
+      reminders: [
+        DateReminder(daysBefore: 30, minutes: 540),
+        DateReminder(daysBefore: 0, minutes: 540),
+      ],
+    );
+    expect(dateDetails(wed), ['since 2016', 'on the day, 1 month before']);
+    expect(dateDetails(wed.copyWith(type: DateType.birthday, reminders: [])),
+        ['born 2016']);
+    expect(
+        dateDetails(wed.copyWith(
+            type: DateType.other, reminders: [], year: () => null)),
+        isEmpty);
+    expect(
+        dateDetails(const DateEntry(
+          id: 'b',
+          title: 'Beach',
+          type: DateType.holiday,
+          kind: DateKind.beach,
+          day: 1,
+          month: 8,
+          year: 2027,
+          yearly: false,
+          days: 7,
+          reminders: [],
+        )),
+        ['Beach', '7 days'],
+        reason: 'a one-off: its year is in its date');
+    // A one-off in another year: its year in its date; every year: none.
+    expect(
+        whenLabel(wed.copyWith(yearly: false, year: () => 2027),
+            DateTime(2027, 6, 1), DateTime(2026, 10, 16)),
+        startsWith('Tue, 1 Jun 2027'));
+    expect(whenLabel(wed, DateTime(2027, 6, 1), DateTime(2026, 10, 16)),
+        startsWith('Tue, 1 Jun  ·'));
+  });
 }

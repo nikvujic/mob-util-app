@@ -45,7 +45,7 @@ import 'package:the_app/models/todo_item.dart';
 ///         {"version": 1, "sections": [...]}
 ///     <app documents>/data/food.json
 ///         {"version": 1, "foods": [...], "meals": [...]}
-///     <app documents>/data/dates.json {"version": 2, "dates": [...]}
+///     <app documents>/data/dates.json {"version": 3, "dates": [...]}
 ///     <app documents>/data/notifications.json
 ///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
@@ -126,8 +126,9 @@ class AppStorage {
 
   /// Version of `dates.json` (Round 57), birthdays & dates. History: 1 =
   /// first format; 2 = a holiday or an event may last several days
-  /// (`days`, Round 59).
-  static const datesFormatVersion = 2;
+  /// (`days`, Round 59); 3 = a holiday or an event may be of a kind
+  /// (`kind`: skiing, beach, trip, wedding; Round 61).
+  static const datesFormatVersion = 3;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;

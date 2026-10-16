@@ -196,4 +196,48 @@ void main() {
           DateEntry.mostDays);
     });
   });
+
+  group('kinds (Round 61)', () {
+    test('a holiday or an event has kinds; others none', () {
+      expect(DateType.holiday.kinds,
+          [DateKind.skiing, DateKind.beach, DateKind.trip]);
+      expect(DateType.event.kinds, [DateKind.wedding]);
+      expect(DateType.birthday.kinds, isEmpty);
+      expect(DateType.values.where((t) => t.choosesYearly), [DateType.other]);
+    });
+
+    test('kept with another type, unused; written by name', () {
+      const ski = DateEntry(
+          id: 's',
+          title: 'Ski',
+          type: DateType.holiday,
+          day: 1,
+          month: 2,
+          kind: DateKind.skiing);
+      expect(ski.kindNow, DateKind.skiing);
+      final asEvent = ski.copyWith(type: DateType.event);
+      expect(asEvent.kind, DateKind.skiing);
+      expect(asEvent.kindNow, isNull);
+      expect(ski.toJson()['kind'], 'skiing');
+      expect(
+          ski.copyWith(kind: () => null).toJson().containsKey('kind'), isFalse);
+      expect(DateEntry.fromJson(ski.toJson()).kind, DateKind.skiing);
+      expect(
+          DateEntry.fromJson({
+            'id': 'a',
+            'type': 'holiday',
+            'day': 1,
+            'month': 2,
+            'kind': 'sailing'
+          }).kind,
+          isNull,
+          reason: 'from a newer app: none');
+    });
+
+    test('a wedding reminds a week and a month before', () {
+      expect(DateKind.wedding.reminders, DateReminder.weddingDefaults);
+      expect(DateReminder.weddingDefaults.map((r) => r.daysBefore), [7, 30]);
+      expect(DateKind.skiing.reminders, isNull);
+    });
+  });
 }

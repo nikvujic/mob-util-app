@@ -908,6 +908,72 @@ void main() {
     });
   });
 
+  group('dates.json v3 / v25 backup (kinds, Round 61)', () {
+    void expectSample(DateBook book) {
+      expect(
+          book.dates.map((d) => (
+                d.id,
+                d.title,
+                d.type,
+                d.kind,
+                d.kindNow,
+                d.year,
+                d.yearly,
+                d.days,
+                d.note
+              )),
+          [
+            (
+              'd1',
+              'Jahorina ⛷',
+              DateType.holiday,
+              DateKind.skiing,
+              DateKind.skiing,
+              2027,
+              false,
+              5,
+              'Ski pass'
+            ),
+            (
+              'd2',
+              'Venčanje Ane i Marka',
+              DateType.event,
+              DateKind.wedding,
+              DateKind.wedding,
+              2027,
+              false,
+              1,
+              ''
+            ),
+            ('d3', 'Ana 🎂', DateType.birthday, null, null, 1995, true, 1, ''),
+          ]);
+      expect(book.dates[1].reminders, DateReminder.weddingDefaults);
+      expect(book.dates[2].reminders, DateReminder.defaults);
+    }
+
+    test('dates.json version 3 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v25/storage'),
+      );
+      expectSample(storage.initialDates);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v25 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v25/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.dates);
+    });
+
+    test('older dates have no kind', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v24/storage'),
+      );
+      expect(storage.initialDates.dates.map((d) => d.kind), [null, null, null]);
+    });
+  });
+
   test('notifications.json version 1 (Round 31) loads', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v16/storage'),
@@ -1251,6 +1317,10 @@ void main() {
           '6038dd679d774288fdc6ff82d66282c3394bdd23ab734c5b04e63686560a1a76',
       'test/fixtures/v24/backup-plain.json':
           '0176927ff8cb861b80f27cc94b7e1cb6f520a10ab6aee2f049b88704198d91ea',
+      'test/fixtures/v25/storage/dates.json':
+          'bce63f7175c4c910ce679ee54f8850d33ea6a02edbe24e4fc4c4f01fadd88027',
+      'test/fixtures/v25/backup-plain.json':
+          '8ca336780769eb072937a3932302f794598d8d77b8a3651f4150a450bba084da',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

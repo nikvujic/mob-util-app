@@ -23,10 +23,13 @@ String whenLabel(DateEntry date, DateTime on, DateTime today) {
   final end = date.endFrom(on);
   final years = yearsLabel(date, on);
   final ago = daysBetween(end, today);
+  // Round 61: the day it's on, without a year for one every year (the
+  // year shown was the next one's, which read as a birth year); a
+  // one-off in another year has its year.
+  final shownYear = date.yearly ? on : today;
+  String day(DateTime d) => formatDay(d, today: shownYear);
   return [
-    date.span > 1
-        ? '${formatDay(on, today: today)} – ${formatDay(end, today: today)}'
-        : formatDay(on, today: today),
+    date.span > 1 ? '${day(on)} – ${day(end)}' : day(on),
     if (ago > 0)
       ago == 1 ? 'yesterday' : '$ago days ago'
     else if (on.isBefore(today))
@@ -36,6 +39,36 @@ String whenLabel(DateEntry date, DateTime on, DateTime today) {
     if (years != null) years,
   ].join('  ·  ');
 }
+
+/// What else there is to say about [date] (Round 61, its card's second
+/// line): its kind ("Skiing"), how long it lasts ("4 days"), its year
+/// ("born 1995", "since 2016") and its reminders ("1 day, 1 week before").
+List<String> dateDetails(DateEntry date) => [
+      if (date.kindNow case final kind?) kind.label,
+      if (date.span > 1) countOf(date.span, 'day', 'days'),
+      if (date.year case final year? when date.yearly)
+        switch (date.type) {
+          DateType.birthday => 'born $year',
+          DateType.anniversary => 'since $year',
+          _ => 'from $year',
+        },
+      if (date.reminders.isNotEmpty)
+        '${[
+          for (final r in [
+            ...date.reminders
+          ]..sort((a, b) => a.daysBefore.compareTo(b.daysBefore)))
+            beforeLabel(r.daysBefore),
+        ].join(', ')} before',
+    ];
+
+/// How long before, shortly: "on the day", "1 day", "1 week", "1 month".
+String beforeLabel(int days) => switch (days) {
+      0 => 'on the day',
+      7 => '1 week',
+      14 => '2 weeks',
+      30 => '1 month',
+      _ => countOf(days, 'day', 'days'),
+    };
 
 /// What a date is on [on]: "turns 31" (a birthday), "10 years" (an
 /// anniversary), or nothing.

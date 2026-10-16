@@ -18,9 +18,49 @@ enum DateType {
   /// Whether it can last several days (Round 59: a holiday, an event).
   final bool lasts;
 
+  /// Whether its form offers *Every year* and *Year known* (Round 61:
+  /// only Other; a birthday or anniversary is every year, a holiday or an
+  /// event is once, on a date with its year).
+  bool get choosesYearly => this == other;
+
+  /// Its kinds (Round 61), besides the plain one.
+  List<DateKind> get kinds => [
+        for (final k in DateKind.values)
+          if (k.type == this) k
+      ];
+
   /// The type stored as [id]; unknown (e.g. from a newer app): other.
   static DateType fromId(String? id) =>
       values.where((t) => t.name == id).firstOrNull ?? other;
+}
+
+/// A kind of holiday or event (Round 61): a holiday can be a ski trip
+/// (Pip goes skiing then, later), a beach or a trip; an event a wedding
+/// (its own reminders). None: just a holiday or an event. The [name] is
+/// stored.
+enum DateKind {
+  skiing('Skiing', DateType.holiday),
+  beach('Beach', DateType.holiday),
+  trip('Trip', DateType.holiday),
+  wedding('Wedding', DateType.event);
+
+  const DateKind(this.label, this.type);
+
+  final String label;
+
+  /// The type it's a kind of.
+  final DateType type;
+
+  /// The kind stored as [id], or none (also for one from a newer app).
+  static DateKind? fromId(String? id) =>
+      values.where((k) => k.name == id).firstOrNull;
+
+  /// Its own reminders for a new date of its kind (Round 61: a wedding,
+  /// a week and a month before), or null: the usual.
+  List<DateReminder>? get reminders => switch (this) {
+        wedding => DateReminder.weddingDefaults,
+        _ => null,
+      };
 }
 
 /// A date's reminder (Round 57): [daysBefore] it (0: on the day), at
@@ -39,6 +79,12 @@ class DateReminder {
   static const defaults = [
     standard,
     DateReminder(daysBefore: 7, minutes: 9 * 60),
+  ];
+
+  /// A wedding's (Round 61, Nikola): a week and a month before.
+  static const weddingDefaults = [
+    DateReminder(daysBefore: 7, minutes: 9 * 60),
+    DateReminder(daysBefore: 30, minutes: 9 * 60),
   ];
 
   /// The choices for [daysBefore].
@@ -95,6 +141,13 @@ class DateEntry {
   /// The longest it can last.
   static const mostDays = 31;
 
+  /// Its kind (Round 61), if one of its type's; see [kindNow].
+  final DateKind? kind;
+
+  /// Its kind as its type has it: none if the kind is another type's
+  /// (kept, unused, for if the type comes back).
+  DateKind? get kindNow => kind?.type == type ? kind : null;
+
   const DateEntry({
     required this.id,
     required this.title,
@@ -106,6 +159,7 @@ class DateEntry {
     this.note = '',
     this.reminders = const [DateReminder.standard],
     this.days = 1,
+    this.kind,
   });
 
   /// How many days it lasts, as its type has it: 1 unless it [DateType.lasts].
@@ -125,6 +179,7 @@ class DateEntry {
     String? note,
     List<DateReminder>? reminders,
     int? days,
+    DateKind? Function()? kind,
   }) =>
       DateEntry(
         id: id,
@@ -137,6 +192,7 @@ class DateEntry {
         note: note ?? this.note,
         reminders: reminders ?? this.reminders,
         days: (days ?? this.days).clamp(1, mostDays),
+        kind: kind == null ? this.kind : kind(),
       );
 
   /// When it falls in [inYear] (29 February on the 28th in a year without
@@ -195,6 +251,7 @@ class DateEntry {
         'note': note,
         'reminders': [for (final r in reminders) r.toJson()],
         if (days != 1) 'days': days,
+        if (kind != null) 'kind': kind!.name,
       };
 
   factory DateEntry.fromJson(Map<String, dynamic> json) => DateEntry(
@@ -211,6 +268,7 @@ class DateEntry {
             DateReminder.fromJson(r as Map<String, dynamic>),
         ],
         days: ((json['days'] as num?)?.toInt() ?? 1).clamp(1, mostDays),
+        kind: DateKind.fromId(json['kind'] as String?),
       );
 }
 
