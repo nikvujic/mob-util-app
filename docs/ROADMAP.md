@@ -343,8 +343,14 @@ fixtures for every stored format.
   Adventures button and card, register 13:00–15:00 with a sword-up
   fanfare, adventuring **12:00–18:00** as a daily activity, running and
   fighting bugs, XP from time, ~90 at a year, 160, 230, 280, then 50 a
-  year; titles every 10 levels to 80; skiing later). Waiting on his
-  answers to its section 10, then build.
+  year; titles every 10 levels to 80; skiing later).
+- [ ] His answers are in the spec: register 13:00–17:00; XP bar; a hat
+  box beside weapon and off-hand; no XP while powered off; he can't
+  power down mid-adventure (does it after 18:00); level-up flash and
+  jingle; no notifications; sounds follow the media volume, the rest is
+  vibration; taps and random events off while out; he keeps his hat;
+  bugs sometimes knock him back; skiing: snow and sliding down, falling
+  now and then. **Build when Nikola says go.**
 
 ### Round 62 — Nikola's notes after 1.24.0 (2026-10-17)
 
