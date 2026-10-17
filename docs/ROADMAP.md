@@ -337,6 +337,41 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 62 — Nikola's notes after 1.24.0 (2026-10-17)
+
+Noted only; not started (out of tokens).
+
+Medicine:
+- [ ] **Bug**: changing a medicine's take time also changes the times
+  already in its history. History must keep the time it was taken at.
+
+Pip:
+- [ ] **Night wake-up**: tapping Pip three times at night wakes him for
+  **15 minutes**, once per night (so he can be charged). Special wake-up
+  animation: he looks with one eye open first. During the 15 minutes he
+  looks tired, like at 1 battery tick, then goes back to sleep.
+- [ ] **Early wake-up**: from 08:00 on, waking him before his usual time
+  is allowed.
+- [ ] **Angry animation**: his hand goes too far from his body; keep it
+  closer.
+- [ ] **Backgrounds** (answered below, waiting on Nikola's call): trees,
+  seasons, event backgrounds (Halloween, New Year…), weather (rain,
+  snow, clouds); moving parts (trees swaying, leaves falling, snoring
+  Zs, clouds drifting). No location permission.
+  Answer given: real weather needs a network weather API plus a
+  location; without location permission the only options are a city
+  the user types once (geocoded, then a free no-key API such as
+  Open-Meteo, needs INTERNET permission) or no real weather at all.
+  Seasons, events, day/night and all the animation need nothing.
+
+Dates:
+- [ ] **No "Year known"** for Holiday and Event (they already carry
+  their year).
+- [ ] **Sections**: **Today** (dates happening now, including a
+  multi-day one in progress) above **Upcoming**, and **Past** at the
+  end for one-off dates (anything but Birthday and Anniversary), kept
+  so the date isn't lost.
+- [ ] **Cards**: a small bell icon next to the reminders text.
 ### Round 61 — Nikola's notes on 1.21.0 (2026-10-16)
 
 Pip:
