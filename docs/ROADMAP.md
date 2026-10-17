@@ -364,6 +364,22 @@ Pip:
   Open-Meteo, needs INTERNET permission) or no real weather at all.
   Seasons, events, day/night and all the animation need nothing.
 
+Internet Access (a page in the menu, second to last):
+- [ ] Says plainly the app uses **no internet** unless a section below
+  is turned on. The release APK has no INTERNET permission today and no
+  analytics or network packages; adding the permission comes with this
+  page (check the merged manifest of the built APK).
+- [ ] One **section per service**, each with a toggle, what it is, and
+  what it's used for. Turning one on opens the section.
+- [ ] **Weather** (Open-Meteo, no key): add a city by search, pick from
+  the matches (name, region, country), saved with coordinates; several
+  cities, to switch fast; "No place found" saves nothing. Fetched by
+  coordinates every hour or two while the app is open; off → seasonal
+  sky only. No IP location (wrong on mobile data).
+- [ ] Later: **my backup server** section (API key field, Test
+  connection; on success the server backup appears in Settings).
+- Order: **adventures first**, then this and the backgrounds.
+
 Dates:
 - [ ] **No "Year known"** for Holiday and Event (they already carry
   their year).
