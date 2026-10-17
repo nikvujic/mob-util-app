@@ -347,10 +347,11 @@ fixtures for every stored format.
 - [ ] His answers are in the spec: register 13:00–17:00; XP bar; a hat
   box beside weapon and off-hand; no XP while powered off; he can't
   power down mid-adventure (does it after 18:00); level-up flash and
-  jingle; no notifications; sounds follow the media volume, the rest is
-  vibration; taps and random events off while out; he keeps his hat;
-  bugs sometimes knock him back; skiing: snow and sliding down, falling
-  now and then. **Build when Nikola says go.**
+  vibration, no sound; no notifications; the register fanfare is the
+  only sound (media volume), the rest is vibration; taps and random
+  events off while out; he keeps his hat; bugs sometimes knock him back
+  and his sword flies off, so he fetches it; skiing: snow and sliding
+  down, falling now and then and fetching a lost ski. **Build when Nikola says go.**
 
 ### Round 62 — Nikola's notes after 1.24.0 (2026-10-17)
 

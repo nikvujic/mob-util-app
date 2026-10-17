@@ -41,8 +41,9 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   **adventure view**: Pip **in the centre**, running, while the
   **ground moves** under him (and things on it scroll past). Bugs come
   in from the right; he swings and they pop, with a short vibration.
-  Now and then one **hits him**: he flies back a little, lands, gets up
-  and runs on (only an animation: no health, nothing lost), with a
+  Now and then one **hits him**: he flies back a little and his
+  **sword flies out of his hand**; he gets up, runs to pick it up and
+  runs on (only an animation: no health, nothing lost), with a
   vibration. The sky is the usual one
   for the time of day (and later the backgrounds).
 - The menu's name line shows his **level** instead of his age while he
@@ -99,8 +100,7 @@ The table counts days he actually adventured; a day he was powered off
 gives no XP (decided).
 
 **Level up** (decided): when it happens while someone is watching, a
-short **LEVEL UP** flash over him with an 8-bit **jingle** and a
-vibration; a new title shows on the card.
+short **LEVEL UP** flash over him and a vibration, **no sound**; a new title shows on the card.
 
 **Titles**: a new title every 10 levels, up to level 80 (decided,
 these names):
@@ -129,18 +129,19 @@ these names):
 
 ## 7. Sound (decided)
 
-- The register **fanfare** and the **level-up jingle** are Pip's only
-  sounds; everything else (bug hits, getting hit, falls) is vibration.
+- The register **fanfare** is Pip's **only sound**; everything else
+  (level up, bug hits, getting hit, falls) is vibration.
   They play through the app's own player (the SoundPool already in
   MainActivity) on the **media volume**, so they follow the phone's
-  volume (muted → silent). Short 8-bit clips bundled with the app.
+  volume (muted → silent). A short 8-bit clip bundled with the app.
 
 ## 8. Skiing (decided; after the normal adventure)
 
 - On days with a **Skiing** date in Dates, the background is **always
   snowy**, and his adventure is **skiing down a hill** instead of
   running right: he puts on skis at the start, slides down (the slope
-  moving under him), and now and then **falls**, gets up and carries on
+  moving under him), and now and then **falls**: a ski comes off and
+  slides away; he gets up, fetches it, puts it back on and carries on
   (with a vibration). XP the same as a normal adventure.
 
 ## 9. Data and backup
