@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 63 — Pip's adventures, the spec (2026-10-17)
+
+- [ ] Spec written: `docs/ADVENTURES_SPEC.md` (Nikola's notes: the
+  Adventures button and card, register 13:00–15:00 with a sword-up
+  fanfare, adventuring **12:00–18:00** as a daily activity, running and
+  fighting bugs, XP from time, ~90 at a year, 160, 230, 280, then 50 a
+  year; titles every 10 levels to 80; skiing later). Waiting on his
+  answers to its section 10, then build.
+
 ### Round 62 — Nikola's notes after 1.24.0 (2026-10-17)
 
 Noted only; not started (out of tokens).
