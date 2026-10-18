@@ -143,6 +143,7 @@ void main() {
     pip.register(at(18, 13));
     pip.breakIfDue(at(18, 13, 50));
     expect(pip.state.breakAt, isNull, reason: 'before 14:00');
+    pip.lookedAt(at(18, 14, 10)); // back after a while
     pip.breakIfDue(at(18, 14, 10));
     expect(pip.state.breakAt, at(18, 14, 10));
     expect(pip.onBreakAt(at(18, 14, 30)), isTrue);
@@ -161,6 +162,7 @@ void main() {
   test('saved and read back (pip.json v3)', () {
     final pip = hatched();
     pip.register(at(18, 13));
+    pip.lookedAt(at(18, 14, 10)); // back after a while
     pip.breakIfDue(at(18, 14, 10));
     final json = pip.state.toJson();
     expect(PipLife.fromJson(json), pip.state);
@@ -258,5 +260,42 @@ void main() {
     // Not counted twice.
     pip.collect(at(21, 10));
     expect(pip.state.xp, 120 + 360);
+  });
+
+  test(
+      'watched since before 14:00, not having seen him set off: his '
+      'break starts all the same (Round 66)', () {
+    final pip = hatched();
+    pip.register(at(18, 16)); // the day before
+    pip.replace(
+        pip.state.copyWith(energy: PipEnergy.full, energyAt: () => at(19, 11)));
+    for (var m = 0; m <= 20; m++) {
+      final t = at(19, 13, 50).add(Duration(minutes: m));
+      pip.lookedAt(t);
+      pip.collect(t);
+      pip.breakIfDue(t);
+    }
+    expect(pip.state.breakAt, at(19, 14));
+  });
+
+  test(
+      'back on with a battery in front of you at 14:20: no break till '
+      'you\'ve been away (Round 66)', () {
+    final pip = hatched(energy: 0, energyAt: at(19, 9));
+    pip.replace(pip.state.copyWith(
+      registeredAt: () => at(18, 14),
+      outDay: () => '2026-10-18',
+      offSeen: true,
+    ));
+    pip.lookedAt(at(19, 14, 19));
+    pip.lookedAt(at(19, 14, 20));
+    pip.giveBattery(at(19, 14, 20));
+    expect(pip.outAt(at(19, 14, 20)), isTrue);
+    pip.lookedAt(at(19, 14, 21));
+    pip.breakIfDue(at(19, 14, 21));
+    expect(pip.state.breakAt, isNull);
+    pip.lookedAt(at(19, 14, 30));
+    pip.breakIfDue(at(19, 14, 30));
+    expect(pip.state.breakAt, at(19, 14, 30));
   });
 }

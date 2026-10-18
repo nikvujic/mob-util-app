@@ -17,9 +17,9 @@ abstract final class PipAdventure {
   static const lastStartHour = 17;
 
   /// His break (Round 64): half an hour, starting when he's looked at
-  /// between 14:00 and 16:00. Round 66: only on a fresh look, after he
-  /// went unseen at least [unseenFor] (so not as he sets off in front of
-  /// you, or comes back on with a battery).
+  /// between 14:00 and 16:00. Round 66: if he was seen setting off (just
+  /// registered, or back on with a battery), not till he's gone unseen at
+  /// least [unseenFor] (so he doesn't set off and stop at once).
   static const breakFromHour = 14;
   static const breakUntilHour = 16;
   static const breakLength = Duration(minutes: 30);
@@ -43,12 +43,13 @@ abstract final class PipAdventure {
       to.isAfter(from) ? to.difference(from).inMinutes : 0;
 
   /// Whether a break may start at [now] for an adventure out since
-  /// [from] (none had yet), looked at after being unseen for [unseen]
-  /// (null: not seen before, this run).
-  static bool breakDueAt(DateTime now, DateTime from, {Duration? unseen}) =>
+  /// [from] (none had yet); not while his setting off was [startSeen]
+  /// (and he hasn't gone unseen since).
+  static bool breakDueAt(DateTime now, DateTime from,
+          {bool startSeen = false}) =>
       now.hour >= breakFromHour &&
       now.hour < breakUntilHour &&
-      (unseen == null || unseen >= unseenFor) &&
+      !startSeen &&
       !now.isBefore(from) &&
       now.isBefore(endOf(from));
 

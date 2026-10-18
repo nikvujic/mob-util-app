@@ -75,11 +75,12 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
 
 - Once per adventure, **half an hour off**, only for looks: XP goes on
   as if he were running.
-- **When**: he's looked at between **14:00 and 16:00**, none had today,
-  and (Round 66) it's a **fresh look**: he'd gone unseen at least **five
-  minutes** before (or the app has just opened). Watched as he sets
-  off or comes back on with a battery, no break then; looked in on
-  later, it starts. Nobody looks in that way: no break that day.
+- **When**: he's looked at between **14:00 and 16:00**, none had today.
+  Round 66 (corrected in Round 68): if you **saw him set off** (just
+  registered, or back on with a battery), not till you've been away at
+  least **five minutes**; otherwise at once, watching or not. Opened as
+  it starts, you see him run up and sit; later in it, he's simply at
+  the table. Nobody looks in between 14:00 and 16:00: no break that day.
 - **Normal adventure**: the ground slows and a **tavern** slides in (he
   stays centred; the background moves), he puts the sword away, walks
   to a table and sits; a **plate of food** pops out of the window onto

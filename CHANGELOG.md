@@ -4,6 +4,15 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- Pip's **break**: the five minutes away count only when you **saw him
+  set off** (registering, or back on with a battery); otherwise it
+  starts the first time you look in between 14:00 and 16:00, even if
+  you've been watching. Opening the app as it starts, you see him run
+  up to the tavern (or hut) and sit down.
+
 ## [1.26.0] - 2026-10-18
 
 ### Added

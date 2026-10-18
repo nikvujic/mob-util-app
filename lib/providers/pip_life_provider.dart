@@ -166,6 +166,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       outFrom: () => now,
       breakAt: () => null,
     );
+    _startSeen = true;
     return true;
   }
 
@@ -206,19 +207,24 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       outFrom: () => out,
       breakAt: () => null,
     );
+    // Setting off now: seen (Round 66: his break waits).
+    if (now.difference(out) < const Duration(minutes: 1)) _startSeen = true;
     // Not seen till after 18:00: the whole day out at once.
     if (!now.isBefore(PipAdventure.endOf(out))) _settle(now);
   }
 
-  /// When he was last looked at, and how long he'd gone unseen before
-  /// that (Round 66; in memory: the app's first look is a fresh one).
+  /// When he was last looked at, and whether he was seen setting off
+  /// today and not left unseen since (Round 66; in memory: the app's
+  /// first look is a fresh one). Then his break waits.
   DateTime? _seenAt;
-  Duration? _unseen;
+  bool _startSeen = false;
 
   /// He's looked at [now] (his room, every second while it's shown).
   void lookedAt(DateTime now) {
     final last = _seenAt;
-    _unseen = last == null ? null : now.difference(last);
+    if (last == null || now.difference(last) >= PipAdventure.unseenFor) {
+      _startSeen = false;
+    }
     _seenAt = now;
   }
 
@@ -250,14 +256,14 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   }
 
   /// His break starts at [now] if it's due (Round 64: looked at between
-  /// 14:00 and 16:00, none had today; Round 66: a fresh look, after five
-  /// minutes unseen).
+  /// 14:00 and 16:00, none had today; Round 66: if he was seen setting
+  /// off, only once he's gone unseen five minutes).
   void breakIfDue(DateTime now) {
     final from = state.outFrom;
     if (from == null ||
         state.breakAt != null ||
         !outAt(now) ||
-        !PipAdventure.breakDueAt(now, from, unseen: _unseen)) {
+        !PipAdventure.breakDueAt(now, from, startSeen: _startSeen)) {
       return;
     }
     state = state.copyWith(breakAt: () => now);

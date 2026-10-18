@@ -2384,7 +2384,9 @@ class PipBrain {
     if (activity != PipActivity.adventuring) {
       if (!_canGoOut) return;
       _setOut();
-      if (out.onBreak && !animate) {
+      // Round 66: opened as his break starts: seen starting (he runs up
+      // to the tavern); later in it, simply at the table.
+      if (out.onBreak && !animate && out.breakDone >= breakJustStarted) {
         _run!.seated();
       } else {
         _run!.start(animate: animate);
@@ -2392,6 +2394,10 @@ class PipBrain {
     }
     _run!.want(onBreak: out.onBreak, done: out.breakDone);
   }
+
+  /// How far into his break counts as just starting (about a minute and
+  /// a half of the half hour).
+  static const breakJustStarted = 0.05;
 
   /// Just registered as an adventurer (Pip Home): his sword held up high,
   /// then off he goes. True if he could (up and about).

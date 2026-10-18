@@ -132,6 +132,16 @@ void main() {
     expect(b.sword, isNotNull);
   });
 
+  test(
+      'opened just as his break starts: he runs up to the tavern '
+      '(Round 66)', () {
+    final b = standing();
+    b.adventure((onBreak: true, breakDone: 0.0), animate: false);
+    expect(b.run!.phase, isNot(RunPhase.sitting));
+    steps(b, 0.1);
+    expect(b.run!.phase, RunPhase.arriving);
+  });
+
   test('opened during his break: at the table, eating', () {
     final b = standing();
     b.adventure((onBreak: true, breakDone: 0.3), animate: false);
