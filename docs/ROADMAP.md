@@ -370,8 +370,9 @@ fixtures for every stored format.
 
 Noted; adventures first (go given), the rest after.
 
-- [ ] **Medicine history** (Round 62, not done yet): changing a take
+- [x] **Medicine history** (Round 62, not done yet): changing a take
   time rewrites the history's times.
+  Not a bug (Round 68, Nikola): the time shown is the dose's daily slot.
 - [x] **Adventure break** (`docs/ADVENTURES_SPEC.md`): half an hour off
   during the adventure, only for looks (XP goes on). If the app is
   opened between 14:00 and 16:00 and he hasn't had it, it starts then,
@@ -421,8 +422,9 @@ Noted; adventures first (go given), the rest after.
 Noted only; not started (out of tokens).
 
 Medicine:
-- [ ] **Bug**: changing a medicine's take time also changes the times
+- [x] **Bug**: changing a medicine's take time also changes the times
   already in its history. History must keep the time it was taken at.
+  Not a bug (Round 68, Nikola): the time shown is the dose's daily slot.
 
 Pip:
 - [ ] **Night wake-up**: tapping Pip three times at night wakes him for
