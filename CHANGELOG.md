@@ -10,6 +10,15 @@ Release with the installable APK.
 - **Pip's adventures**: a **tap gives him a battery** while he's out
   too: it flies to him and he catches it as he runs. Plugged in, he
   isn't refused one for charging while he's out.
+- His **break** starts only when you look in after **five minutes or
+  more away** (between 14:00 and 16:00), never while you're watching:
+  so not as he sets off in front of you or comes back on with a
+  battery.
+
+### Fixed
+- Pip Home's adventure card: "Not an adventurer yet" and "Come back
+  between 13:00 and 17:00" ran off the card's edge on a narrow phone;
+  they wrap now.
 
 ## [1.25.0] - 2026-10-18
 

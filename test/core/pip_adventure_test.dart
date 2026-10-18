@@ -67,14 +67,24 @@ void main() {
     expect(PipAdventure.canRegisterAt(DateTime(2026, 10, 18, 17)), isFalse);
   });
 
-  test('a break between 14:00 and 16:00, out half an hour first', () {
+  test(
+      'a break between 14:00 and 16:00, on a fresh look (Round 66: '
+      'five minutes unseen first)', () {
     final noon = DateTime(2026, 10, 18, 12);
     expect(
         PipAdventure.breakDueAt(DateTime(2026, 10, 18, 13, 59), noon), isFalse);
     expect(PipAdventure.breakDueAt(DateTime(2026, 10, 18, 14), noon), isTrue);
     expect(PipAdventure.breakDueAt(DateTime(2026, 10, 18, 16), noon), isFalse);
-    final late = DateTime(2026, 10, 18, 15, 40);
+    final at = DateTime(2026, 10, 18, 14, 30);
     expect(
-        PipAdventure.breakDueAt(DateTime(2026, 10, 18, 15, 50), late), isFalse);
+        PipAdventure.breakDueAt(at, noon, unseen: const Duration(seconds: 1)),
+        isFalse,
+        reason: 'watched all along');
+    expect(
+        PipAdventure.breakDueAt(at, noon, unseen: const Duration(minutes: 4)),
+        isFalse);
+    expect(
+        PipAdventure.breakDueAt(at, noon, unseen: const Duration(minutes: 5)),
+        isTrue);
   });
 }

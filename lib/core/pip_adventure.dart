@@ -17,11 +17,13 @@ abstract final class PipAdventure {
   static const lastStartHour = 17;
 
   /// His break (Round 64): half an hour, starting when he's looked at
-  /// between 14:00 and 16:00, if he's been out at least [breakAfter].
+  /// between 14:00 and 16:00. Round 66: only on a fresh look, after he
+  /// went unseen at least [unseenFor] (so not as he sets off in front of
+  /// you, or comes back on with a battery).
   static const breakFromHour = 14;
   static const breakUntilHour = 16;
   static const breakLength = Duration(minutes: 30);
-  static const breakAfter = Duration(minutes: 30);
+  static const unseenFor = Duration(minutes: 5);
 
   /// An XP a minute out: a full day is 360.
   static const xpPerDay = (endHour - startHour) * 60;
@@ -41,11 +43,13 @@ abstract final class PipAdventure {
       to.isAfter(from) ? to.difference(from).inMinutes : 0;
 
   /// Whether a break may start at [now] for an adventure out since
-  /// [from] (none had yet).
-  static bool breakDueAt(DateTime now, DateTime from) =>
+  /// [from] (none had yet), looked at after being unseen for [unseen]
+  /// (null: not seen before, this run).
+  static bool breakDueAt(DateTime now, DateTime from, {Duration? unseen}) =>
       now.hour >= breakFromHour &&
       now.hour < breakUntilHour &&
-      !now.isBefore(from.add(breakAfter)) &&
+      (unseen == null || unseen >= unseenFor) &&
+      !now.isBefore(from) &&
       now.isBefore(endOf(from));
 
   /// The days out (of 360 XP) [level] takes. The yearly targets: about

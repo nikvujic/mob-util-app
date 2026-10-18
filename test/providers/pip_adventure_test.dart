@@ -1,9 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/data/power.dart';
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
+
+import '../helpers.dart';
 
 /// Pip's adventures (Round 63): registering, his days out, XP, energy.
 void main() {
@@ -188,5 +193,55 @@ void main() {
     expect(pip.giveBattery(at(19, 13)), isTrue);
     // Back from it, plugged in, he's at his station again: not now.
     expect(pip.refusalAt(at(19, 19)), PipRefusal.charging);
+  });
+
+  test(
+      'no break while he\'s watched: registered at 14:00 in front of you, '
+      'then only after five minutes away (Round 66)', () {
+    final pip = hatched();
+    pip.lookedAt(at(
+      18,
+      13,
+      59,
+    ));
+    pip.register(at(18, 14));
+    for (var m = 0; m <= 3; m++) {
+      pip.lookedAt(at(18, 14, m));
+      pip.breakIfDue(at(18, 14, m));
+    }
+    expect(pip.state.breakAt, isNull, reason: 'watched');
+    // Away four minutes: still not.
+    pip.lookedAt(at(18, 14, 7));
+    pip.breakIfDue(at(18, 14, 7));
+    expect(pip.state.breakAt, isNull);
+    // Away five: his break.
+    pip.lookedAt(at(18, 14, 12));
+    pip.breakIfDue(at(18, 14, 12));
+    expect(pip.state.breakAt, at(18, 14, 12));
+  });
+
+  test(
+      'through his room\'s link: watched each second, no break; back '
+      'after five minutes, his break (Round 66)', () {
+    var now = at(18, 13, 59);
+    final container = ProviderContainer(overrides: [
+      appStorageProvider.overrideWithValue(AppStorage.inMemory(
+          initialPip: PipLife(
+              born: at(10, 9), energyAt: at(18, 9), nextBatteryAt: at(30, 9)))),
+      clockProvider.overrideWithValue(() => now),
+      powerSourceProvider.overrideWithValue(FakePower()),
+    ]);
+    addTearDown(container.dispose);
+    final link = container.read(pipLinkProvider);
+    link.look();
+    container.read(pipLifeProvider.notifier).register(at(18, 14));
+    for (var s = 0; s < 120; s++) {
+      now = at(18, 14).add(Duration(seconds: s));
+      link.look();
+      expect(link.outing()!.onBreak, isFalse, reason: 'watched, at $s s');
+    }
+    now = at(18, 14, 8);
+    link.look();
+    expect(link.outing()!.onBreak, isTrue);
   });
 }

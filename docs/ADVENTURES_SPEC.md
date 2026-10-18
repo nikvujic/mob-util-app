@@ -75,10 +75,11 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
 
 - Once per adventure, **half an hour off**, only for looks: XP goes on
   as if he were running.
-- **When**: if the app is open (or opened) between **14:00 and 16:00**
-  and he hasn't had today's break, it starts then, so it's seen. If
-  nobody looks, it's at 15:00–15:30. An adventure started after 15:30
-  (a late battery) has no break.
+- **When**: he's looked at between **14:00 and 16:00**, none had today,
+  and (Round 66) it's a **fresh look**: he'd gone unseen at least **five
+  minutes** before (or the app has just opened). Watched as he sets
+  off or comes back on with a battery, no break then; looked in on
+  later, it starts. Nobody looks in that way: no break that day.
 - **Normal adventure**: the ground slows and a **tavern** slides in (he
   stays centred; the background moves), he puts the sword away, walks
   to a table and sits; a **plate of food** pops out of the window onto
@@ -154,88 +155,105 @@ these names):
   MainActivity) on the **media volume**, so they follow the phone's
   volume (muted → silent). A short 8-bit clip bundled with the app.
 
-## 8. Skiing (Round 65: the spec; waiting on Nikola's go)
+## 8. Skiing (Round 65–66: the spec; waiting on Nikola's go)
 
-Decided so far: on days with a **Skiing** date in Dates, the background
-is **always snowy**, and his adventure is **skiing down a hill** instead
-of running right; now and then he **falls**: a ski comes off and slides
-away; he gets up, fetches it, puts it back on and carries on (with a
-vibration); his break is a **hot chocolate**. XP the same as a normal
-adventure. The rest are suggestions (questions in 8.7).
+Skiing is **a different look for his adventure**, not a separate thing:
+the same days out (12:00–18:00), the same XP, break and rules; only
+what's drawn changes. **Decided** marks Nikola's answers.
 
-### 8.1 When
+### 8.1 Ski days
 
 - A **ski day**: any day a Dates holiday of kind **Skiing** is on
-  (including each day of one that lasts several days). Worked out from
-  Dates, nothing new stored: no backup or format change.
-- Registered or not, the **whole day** is snowy (8.2). If he's an
-  adventurer, his day out (12:00–18:00, same rules, same XP) is skiing.
+  (each day of one that lasts several days), outside its travel (8.6).
+- **Snowing all day** on ski days, day and night (decided).
+- Not registered: the snow and his gear (8.2) only; he never skis on
+  his own (decided: skiing replaces his adventure, it isn't an event).
 
-### 8.2 The snowy day (menu and Pip Home)
+### 8.2 The snowy day
 
 - **Ground**: snow instead of grass, white with pale blue-grey shading
-  and a few specks; a darker band of packed snow under it.
-- **Snowing**, all day and night: flakes (1–2 pixels, white, some
-  dimmer) drifting down and a little sideways; while he skis, they also
-  stream back past him with the slope.
-- **Sky**: the usual one for the hour, a little greyer by day (thin
-  cloud), stars and moon at night as ever.
-- **Pine trees** dusted with snow, a few in the background.
-- Pip's usual day (walking, events, sleep) goes on as ever in it.
+  and a few specks.
+- **Snowflakes** drifting down and a little sideways, all day; while
+  he skis they also stream back past him.
+- A few **snowy pine trees**; the sky as ever for the hour (a little
+  greyer by day).
+- **His ski gear** in his field (decided): skis and poles stuck in a
+  snowbank on one side. On his day out he walks over and **picks them
+  up** first (the skis on his feet, the poles in his hands), then goes;
+  seen at 18:00, he puts them back.
+- A **ski beanie** all ski day (decided); a birthday's party hat still
+  wins.
+- His usual day (walking, events, sleep) goes on in it.
 
-### 8.3 The slope
+### 8.3 The slope (to pick: `docs/pip_ski_slope_drafts.png`)
 
-- His adventure view tilts: the ground is a **gentle slope** going down
-  to the right (about one pixel down for every four across), Pip in
-  the middle on it. The slope, trees, flags and bumps slide **up and
-  to the left** past him, so he looks like he's going **down**.
-- **Slalom flags** (red and blue poles) and pine trees go by; now and
-  then a **bump** sends him up in a little hop (a light buzz on
-  landing).
-- **No bugs** while skiing; the sword stays away (his weapon box still
-  shows it). He holds **ski poles** instead.
+Three ways to draw going downhill, him always in the middle:
 
-### 8.4 Starting and ending
+- **A, tilted slope**: the ground slopes down to the right; trees,
+  flags and bumps slide up and to the left past him. Reads most like
+  "down a hill".
+- **B, raised snowfield** (Nikola's idea): the snow fills more of the
+  room; he stays put and the trees and flags **rise past him**, so he
+  seems to go down.
+- **C, flat glide**: like running, the snow moving left.
 
-- Seen setting off: he walks to the middle, **skis pop in** under his
-  feet and poles into his hands (a sparkle, like his hands), the
-  ground tilts into the slope and off he goes. Otherwise he's simply
-  skiing.
-- Seen at 18:00: he turns side-on in a little spray of snow and stops,
-  the skis and poles pop away, the ground goes flat (snowy). Otherwise
-  he's simply back.
-- Registering on a ski day: the sword up high with the fanfare as ever,
-  then the skis.
+Suggested: **A**. Either way: **slalom flags** (red and blue) and
+**bumps**, both at random (decided): a bump sends him up in a little
+hop (a light buzz on landing). **No bugs**; the sword stays away (the
+weapon box still shows it).
 
-### 8.5 Falling
+### 8.4 Falling (decided)
 
-- Now and then (every 20–60 seconds, at random) he **falls**: he
-  tumbles forward with a puff of snow, **one ski comes off** and slides
-  on down the slope ahead of him; he gets up (a medium buzz on the
-  fall), walks down to it, steps back into it, and the slope moves
-  again.
+- Every **40–90 seconds** at random: he tumbles forward in a puff of
+  snow (a medium buzz), **one ski comes off** and slides on ahead; he
+  gets up, walks to it, steps back in, and carries on.
 
-### 8.6 The break
+### 8.5 The break
 
-- The same as the tavern (looked at 14:00–16:00, half an hour, once a
-  day), but a **mountain hut**: a log hut with snow on its roof, a lit
-  window; the slope flattens as it comes; he takes his skis off and
-  leans them on the wall, sits at the table outside, and a **mug of hot
-  chocolate** (steam rising) pops out of the window to him; he sips it
-  as the break goes, the mug emptying. Then skis back on, and down.
+- As the tavern (a fresh look between 14:00 and 16:00, half an hour,
+  once a day), but a **mountain hut**: snow on its roof, a lit window;
+  he leans his skis on its wall, sits at the table outside, and a
+  **mug of hot chocolate** (steam rising) pops out of the window; he
+  sips it as the break goes. Then skis back on, and down.
 
-### 8.7 Questions
+### 8.6 The trip: a bus there and back (Round 66, decided)
 
-1. **The slope**: tilted as in 8.3, or the ground kept **flat** with
-   him gliding (simpler to read in the small menu strip)?
-2. **Snow all day** on ski days, or only during his day out?
-3. **Hat**: keep his hat of the day, or a **ski beanie** on ski days
-   (unless it's a birthday)?
-4. **Bumps and flags**: both, one, or neither?
-5. **Falls**: every 20–60 s, or rarer (bugs knocked him back about one
-   in five)?
-6. **Not registered**: on a ski day, should Pip ski a little at times
-   anyway (a short run as one of his events), or only snow?
+- A Skiing holiday in Dates gets a **travel time**: the trip there and
+  the trip back (questions 8.8).
+- While travelling, Pip is **in a bus**, all the time: the bus in the
+  middle of his room, him in a window, the **road** (dashes) and
+  roadside things (poles, trees, hills) moving past. **Nothing else
+  applies**: no events, no taps or batteries, no station, no energy
+  used, **no hat**. He **sleeps** in his seat at night (eyes shut,
+  little z's). If he's an adventurer he still **gains XP** for
+  12:00–18:00 as on any day, but no adventure is shown.
+- **Snow**: on the way there, the snowy look comes in once **80%** of
+  the trip is done; on the way back it goes once **20%** is done.
+- **Leaving** (seen, or in Animations): the bus drives in and stops,
+  its door opens, Pip walks in, the door shuts, and it drives off (the
+  road starts moving). **Arriving**: the bus slows and stops, Pip steps
+  out, the bus drives off. Not seen: he's simply in the bus, or back.
+
+### 8.7 Pip Home's Animations
+
+- **Skiing**, **Falling on skis**, **Off on a trip** (the bus leaving)
+  and **Back from a trip** (arriving), as previews.
+
+### 8.8 Questions
+
+1. **The slope**: A, B or C (the picture)?
+2. **Travel time in Dates**: how should it be entered? Suggested: on a
+   Skiing holiday, **Travel** with **hours each way** (e.g. 6) and
+   **leaves at** for each trip: there on the first day (default 06:00)
+   and back on the last day (default 16:00). Or would you rather give
+   the departure and arrival times outright?
+3. **Ski days during travel**: on the first and last days, he skis only
+   in what's left of 12:00–18:00 outside the bus (arrived at 12:00, he
+   skis 12:00–18:00; on the bus till 14:00, skis 14:00–18:00). Right?
+4. **Energy on the trip**: kept as it was (not used, not gained), and
+   batteries still pile up on the clock meanwhile?
+5. **Gear when not registered**: still shown in the snowbank as part of
+   the scene, or only for an adventurer?
 
 ## 9. Data and backup
 

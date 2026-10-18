@@ -392,7 +392,9 @@ class _StatusState extends ConsumerState<_Status> {
                       _words(PipAdventure.titleFor(level).toUpperCase(),
                           colour: PipColours.light),
                     ] else
-                      _words('NOT AN ADVENTURER YET', colour: PipColours.dim),
+                      // Round 66: wrapped, clear of the card's edge.
+                      const PixelParagraph('NOT AN ADVENTURER YET',
+                          colour: PipColours.dim, pixel: 3),
                   ],
                 ),
               ),
@@ -434,7 +436,7 @@ class _StatusState extends ConsumerState<_Status> {
             ),
           if (message != null) ...[
             const SizedBox(height: 12),
-            _words(message, colour: PipColours.light),
+            PixelParagraph(message, colour: PipColours.light, pixel: 3),
           ],
           const SizedBox(height: 12),
           _CardRow(

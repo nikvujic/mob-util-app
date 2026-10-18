@@ -35,6 +35,71 @@ class PixelText extends StatelessWidget {
   }
 }
 
+/// Words in the pixel letters (Round 66), wrapped onto as many lines as
+/// the width needs (a word longer than a line goes on its own).
+class PixelParagraph extends StatelessWidget {
+  final String text;
+  final Color colour;
+  final double pixel;
+
+  /// Between lines, in dots.
+  static const lineGap = 3;
+
+  const PixelParagraph(this.text,
+      {super.key, required this.colour, this.pixel = 2.5});
+
+  /// [text] in lines of at most [columns] letters, broken between words.
+  static List<String> linesOf(String text, int columns) {
+    final lines = <String>[];
+    var line = '';
+    for (final word in text.split(' ').where((w) => w.isNotEmpty)) {
+      if (line.isEmpty) {
+        line = word;
+      } else if (line.length + 1 + word.length <= columns) {
+        line = '$line $word';
+      } else {
+        lines.add(line);
+        line = word;
+      }
+    }
+    if (line.isNotEmpty) lines.add(line);
+    return lines;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ratio = MediaQuery.devicePixelRatioOf(context);
+    final dot = math.max(1.0, (pixel * ratio).floorToDouble()) / ratio;
+    return Semantics(
+      label: text,
+      child: ExcludeSemantics(
+        child: LayoutBuilder(builder: (context, box) {
+          final step = (PixelFont.width + PixelFont.gap) * dot;
+          final columns = box.maxWidth.isFinite
+              ? math.max(
+                  1, ((box.maxWidth + PixelFont.gap * dot) / step).floor())
+              : text.length;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final (i, line) in linesOf(text, columns).indexed) ...[
+                if (i > 0) SizedBox(height: lineGap * dot),
+                SizedBox(
+                  width: PixelFont.widthOf(line) * dot,
+                  height: PixelFont.height * dot,
+                  child: CustomPaint(
+                      painter: _PixelTextPainter([(line, colour)], dot)),
+                ),
+              ],
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
 class _PixelTextPainter extends CustomPainter {
   final List<(String, Color)> parts;
   final double dot;

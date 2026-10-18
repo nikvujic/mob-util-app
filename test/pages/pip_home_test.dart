@@ -30,10 +30,16 @@ void main() {
   }
 
   /// The words drawn in pixel letters, as screen readers hear them.
-  Iterable<String> words() => find
-      .byType(PixelText)
-      .evaluate()
-      .map((e) => (e.widget as PixelText).label);
+  Iterable<String> words() => [
+        ...find
+            .byType(PixelText)
+            .evaluate()
+            .map((e) => (e.widget as PixelText).label),
+        ...find
+            .byType(PixelParagraph)
+            .evaluate()
+            .map((e) => (e.widget as PixelParagraph).text),
+      ];
 
   PipRoom room(WidgetTester tester) => tester.widget(find.byType(PipRoom));
 
@@ -375,6 +381,36 @@ void main() {
       expect(find.bySemanticsLabel('OFF-HAND: empty'), findsOneWidget);
       expect(find.bySemanticsLabel('HAT: empty'), findsOneWidget);
       expect(find.byKey(const Key('pipRegister')), findsNothing);
+    });
+
+    testWidgets(
+        'a narrow phone (360 wide): his long words wrap inside the card '
+        '(Round 66)', (tester) async {
+      tester.view.physicalSize = const Size(360 * 3, 780 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      container =
+          await pumpApp(tester, clock: () => DateTime(2026, 10, 13, 12));
+      await openTab(tester, 'Hub');
+      await tester.tap(find.byTooltip('Pip'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('pipAdventures')));
+      await tester.tap(find.byKey(const Key('pipAdventures')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('pipRegister')));
+      await tester.pumpAndSettle();
+      final card = tester.getRect(find.byKey(const Key('pipAdventure')));
+      for (final e in find.byType(PixelParagraph).evaluate()) {
+        final lines = find.descendant(
+            of: find.byWidget(e.widget), matching: find.byType(CustomPaint));
+        for (final line in lines.evaluate()) {
+          final r = tester.getRect(find.byWidget(line.widget));
+          expect(r.right, lessThanOrEqualTo(card.right - 16 + 0.01),
+              reason: (e.widget as PixelParagraph).text);
+        }
+      }
+      expect(find.byType(PixelParagraph).evaluate().length,
+          greaterThanOrEqualTo(2));
     });
   });
 }

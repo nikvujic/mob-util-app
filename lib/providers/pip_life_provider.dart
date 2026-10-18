@@ -191,14 +191,27 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     if (!now.isBefore(PipAdventure.endOf(out))) _settle(now);
   }
 
+  /// When he was last looked at, and how long he'd gone unseen before
+  /// that (Round 66; in memory: the app's first look is a fresh one).
+  DateTime? _seenAt;
+  Duration? _unseen;
+
+  /// He's looked at [now] (his room, every second while it's shown).
+  void lookedAt(DateTime now) {
+    final last = _seenAt;
+    _unseen = last == null ? null : now.difference(last);
+    _seenAt = now;
+  }
+
   /// His break starts at [now] if it's due (Round 64: looked at between
-  /// 14:00 and 16:00, out at least half an hour, none had today).
+  /// 14:00 and 16:00, none had today; Round 66: a fresh look, after five
+  /// minutes unseen).
   void breakIfDue(DateTime now) {
     final from = state.outFrom;
     if (from == null ||
         state.breakAt != null ||
         !outAt(now) ||
-        !PipAdventure.breakDueAt(now, from)) {
+        !PipAdventure.breakDueAt(now, from, unseen: _unseen)) {
       return;
     }
     state = state.copyWith(breakAt: () => now);
@@ -330,6 +343,7 @@ class _Link implements PipLink {
     // Plugged in or not first (Round 44): it decides his energy.
     _ref.read(pipPowerProvider.notifier).refresh();
     final now = _now;
+    _pip.lookedAt(now);
     _pip.collect(now);
     return (_pip.showAt(now), _pip.segmentsAt(now));
   }
