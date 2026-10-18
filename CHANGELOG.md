@@ -35,7 +35,7 @@ Release with the installable APK.
   sends him out. Charging at 12:00, he unplugs and goes. Taps and his
   usual events wait till he's back.
 
-
+## [1.24.0] - 2026-10-16
 
 ### Added
 - **Pip's hats by the day**: now and then (about 6–7 days a month) he
