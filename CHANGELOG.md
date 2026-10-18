@@ -4,7 +4,7 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [Unreleased]
+## [1.26.0] - 2026-10-18
 
 ### Added
 - **Pip's ski trips.** A Skiing holiday in Dates makes his days there
