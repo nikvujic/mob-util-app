@@ -13,6 +13,15 @@ Release with the installable APK.
   you've been watching. Opening the app as it starts, you see him run
   up to the tavern (or hut) and sit down.
 
+### Fixed
+- **Recipes**: typing a recipe's name made the page bounce at every key.
+- **Selection handles** (notes, recipes): a handle's touch area reached
+  up into the line it marks, so a tap on the text there grabbed it; it
+  now starts at the handle and reaches down.
+- **Pip**: opening the app unplugged, after it was plugged in last time,
+  his charging station flashed up and sank again; it now waits for the
+  phone to say.
+
 ## [1.26.0] - 2026-10-18
 
 ### Added

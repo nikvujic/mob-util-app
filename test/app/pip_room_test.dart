@@ -10,6 +10,7 @@ import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/models/preferences.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/widgets/pip_room.dart';
@@ -414,6 +415,32 @@ void main() {
     await openMenu(tester);
     await tester.pumpAndSettle();
     expect(container.read(pipBrainProvider).hat, PipHat.witch);
+  });
+
+  testWidgets(
+      'plugged in last time, not now: opened, his station never shows '
+      '(Round 64: it flashed up and sank)', (tester) async {
+    final container = await pumpApp(tester,
+        pipMoves: true,
+        realPipLink: true,
+        clock: () => DateTime(2026, 10, 14, 10),
+        pip: PipLife(
+          born: DateTime(2026, 10, 1),
+          energy: 1.5,
+          energyAt: DateTime(2026, 10, 14, 10),
+          nextBatteryAt: DateTime(2026, 10, 14, 15),
+        ),
+        preferences: const Preferences(pipPlugged: true),
+        power: FakePower(),
+        overrides: [
+          pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(1))),
+        ]);
+    await tester.tap(find.byTooltip('Menu').first);
+    final pip = container.read(pipBrainProvider);
+    for (var i = 0; i < 150; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(pip.station, isNull, reason: 'frame $i');
+    }
   });
 
   testWidgets(

@@ -380,7 +380,7 @@ Noted; adventures first (go given), the rest after.
   stays centred), sits at a table, a **plate of food** pops out of the
   window onto it and he eats. Skiing: a **hot chocolate**. More break
   events later.
-- [ ] **Note selection handles**: the left one's grab area reaches too
+- [x] **Note selection handles**: the left one's grab area reaches too
   high and catches touches by accident; lower it.
 - [ ] **Subscriptions**: a new Hub page (to spec).
 - [ ] **Shop search**: a search button opens a field above the keyboard;
@@ -390,14 +390,14 @@ Noted; adventures first (go given), the rest after.
 - [ ] **Shop sort**: a toggle on the bought list: alphabetical, drag
   handles hidden; again for the normal order. Items added while sorted
   still go on top of the normal order.
-- [ ] **Recipes**: typing the title makes the page bounce at every key.
+- [x] **Recipes**: typing the title makes the page bounce at every key.
 - [ ] **Recipes**: the markdown format bar for its text; and a free
   **text quantity** ("1-2") beside the pickers, which Shop takes too
   (ingredients go to Shop).
 - [ ] **Planner reminders button**: a list of all scheduled reminders,
   next first with their times, with checkboxes to delete several.
 - [ ] **Hub pages ideas** (to talk through).
-- [ ] **Pip**: the charging station seemed to flash when the app opened
+- [x] **Pip**: the charging station seemed to flash when the app opened
   with no charger in.
 
 ### Round 63 — Pip's adventures, the spec (2026-10-17)

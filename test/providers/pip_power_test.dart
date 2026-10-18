@@ -42,7 +42,7 @@ void main() {
     final power = FakePower(isPlugged: true);
     final container = start(power);
     final link = container.read(pipLinkProvider);
-    expect(link.plugged, isFalse, reason: 'not asked yet');
+    expect(link.plugged, isNull, reason: 'not asked yet (Round 64)');
     await pumpEventQueue();
     expect(link.plugged, isTrue);
     expect(container.read(preferencesProvider).pipPlugged, isTrue,

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:the_app/core/theme.dart';
@@ -19,6 +21,15 @@ class FormatBarSelectionControls extends MaterialTextSelectionControls
     ValueListenable<Set<TextSelectionHandleType>>? offScreen,
   }) : offScreen = offScreen ?? ValueNotifier(const {});
 
+  /// Round 64: each handle as tall as a finger's touch area, drawn at its
+  /// top: its touch area then starts at the handle and reaches down,
+  /// not up into the line it marks (where a tap on the text grabbed it).
+  @override
+  Size getHandleSize(double textLineHeight) {
+    final size = super.getHandleSize(textLineHeight);
+    return Size(size.width, math.max(size.height, kMinInteractiveDimension));
+  }
+
   @override
   Widget buildHandle(
     BuildContext context,
@@ -26,7 +37,13 @@ class FormatBarSelectionControls extends MaterialTextSelectionControls
     double textHeight, [
     VoidCallback? onTap,
   ]) {
-    final handle = super.buildHandle(context, type, textHeight, onTap);
+    final handle = SizedBox(
+      height: getHandleSize(textHeight).height,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: super.buildHandle(context, type, textHeight, onTap),
+      ),
+    );
     final shown = ValueListenableBuilder(
       valueListenable: offScreen,
       builder: (_, off, child) => off.contains(type)

@@ -146,6 +146,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// His adventure level when last looked at (Round 63).
   int? _level;
 
+  /// Whether the phone's plugged in was known at an earlier look.
+  bool _pluggedKnown = false;
+
   /// Asks his life what to show and makes it so (once a change, not over
   /// and over, so a demo from Pip Home's list isn't undone); also his
   /// energy for his face and pace. Never during a build: it may collect
@@ -203,8 +206,12 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // looked at (opened while charging, he's simply there, charging).
     final seen = _shown != null && _moving;
     // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
-    brain.setPlugged(link.plugged && out == null && trip.leg == null,
-        animate: seen);
+    // Round 64: not till Android has said (the first time, simply so).
+    if (link.plugged case final plugged?) {
+      brain.setPlugged(plugged && out == null && trip.leg == null,
+          animate: seen && _pluggedKnown);
+      _pluggedKnown = true;
+    }
     // Round 67: on his ski trip's bus.
     brain.ride(trip, animate: seen);
     brain.adventure(out, animate: seen);

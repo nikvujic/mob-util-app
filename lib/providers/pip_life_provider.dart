@@ -435,7 +435,9 @@ class _Link implements PipLink {
   int get level => PipAdventure.levelFor(_pip.xpAt(_now));
 
   @override
-  bool get plugged => _ref.read(pipPowerProvider);
+  bool? get plugged => _ref.read(pipPowerProvider.notifier).known
+      ? _ref.read(pipPowerProvider)
+      : null;
 
   @override
   DateTime get now => _now;
@@ -504,7 +506,12 @@ class PipPowerNotifier extends StateNotifier<bool> {
     if (mounted) _set(plugged);
   }
 
+  /// Android has said, this run (Round 64).
+  bool get known => _known;
+  bool _known = false;
+
   void _set(bool plugged) {
+    _known = true;
     final now = _ref.read(clockProvider)();
     _ref.read(pipLifeProvider.notifier).setCharging(plugged, now);
     _ref.read(preferencesProvider.notifier).setPipPlugged(plugged);

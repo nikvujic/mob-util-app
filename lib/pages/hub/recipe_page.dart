@@ -787,6 +787,10 @@ class _RecipePageState extends ConsumerState<RecipePage> {
               key: const Key('recipeName'),
               controller: _name,
               focusNode: _nameFocus,
+              // Round 64: no room asked for above it (at the list's top,
+              // that pulled into the reach space at every key, which then
+              // snapped back: the page bounced).
+              scrollPadding: EdgeInsets.fromLTRB(20, 0, 20, clearance + 20),
               autofocus: widget.isNew,
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.done,

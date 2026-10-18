@@ -202,8 +202,10 @@ abstract class PipLink {
   /// if it was (he then gets its energy).
   bool giveBattery();
 
-  /// The phone is plugged in now (Round 44): his charging station.
-  bool get plugged;
+  /// The phone is plugged in now (Round 44): his charging station. Round
+  /// 64: null till Android has said (the app just opened: what was known
+  /// last time made his station flash up and sink again).
+  bool? get plugged;
 
   /// The time now (Round 52: how long his room was left).
   DateTime get now;

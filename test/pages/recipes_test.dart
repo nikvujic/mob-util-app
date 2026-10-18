@@ -114,6 +114,33 @@ void main() {
       expect(recipes(), isEmpty);
     });
 
+    testWidgets(
+        'typing its name, the page stays still (Round 64: it bounced at '
+        'every key)', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.625;
+      addTearDown(tester.view.reset);
+      await openRecipes(tester);
+      await tapTooltip(tester, 'New recipe');
+      // The keyboard up.
+      tester.view.viewInsets = const FakeViewPadding(bottom: 800);
+      await tester.pumpAndSettle();
+      final name = find.byKey(const Key('recipeName'));
+      final at = tester.getTopLeft(name).dy;
+      var text = '';
+      for (final c in 'Pancakes'.split('')) {
+        text += c;
+        tester.testTextInput.updateEditingValue(TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length)));
+        for (var i = 0; i < 12; i++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          expect(tester.getTopLeft(name).dy, at, reason: '"$text", frame $i');
+        }
+      }
+      expect(find.text('Pancakes'), findsOneWidget);
+    });
+
     testWidgets('a new one named, Done: view mode, and in the list',
         (tester) async {
       await openRecipes(tester);
