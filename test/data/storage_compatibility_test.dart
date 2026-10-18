@@ -1056,6 +1056,42 @@ void main() {
     });
   });
 
+  group('pip.json v3 / v26 backup (his adventures, Round 63)', () {
+    void expectSample(PipLife? pip) {
+      expect(pip!.name, 'Bip 4');
+      expect(pip.energy, 2.5);
+      expect(pip.adventurer, isTrue);
+      expect(pip.registeredAt!.toUtc(), DateTime.utc(2026, 10, 17, 11, 30));
+      expect(pip.xp, 390);
+      expect(pip.outDay, '2026-10-18');
+      expect(pip.outFrom!.toUtc(), DateTime.utc(2026, 10, 18, 10));
+      expect(pip.breakAt!.toUtc(), DateTime.utc(2026, 10, 18, 12, 10));
+    }
+
+    test('pip.json version 3 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v26/storage'),
+      );
+      expectSample(storage.initialPip);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v26 backup restores him, out where he was', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v26/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.pip);
+    });
+
+    test('older Pips aren\'t adventurers', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v18/storage'),
+      );
+      expect(storage.initialPip.adventurer, isFalse);
+      expect(storage.initialPip.xp, 0);
+    });
+  });
+
   group('medicine.json v5 / v19 backup (weekdays, Round 40)', () {
     void expectSample(MedicineBook book) {
       final vitamin = book.medicines.firstWhere((m) => m.id == 'm1');
@@ -1321,6 +1357,10 @@ void main() {
           'bce63f7175c4c910ce679ee54f8850d33ea6a02edbe24e4fc4c4f01fadd88027',
       'test/fixtures/v25/backup-plain.json':
           '8ca336780769eb072937a3932302f794598d8d77b8a3651f4150a450bba084da',
+      'test/fixtures/v26/storage/pip.json':
+          '285adbfa6ba47b66a9377730db5374679e41e75c2e4dd3374e12bd14ea3258a0',
+      'test/fixtures/v26/backup-plain.json':
+          '8c52d2d96e13a29b6879ecb15c89b8cf9e0cd352d1ddbaa1eba16c7cb6c1d7fa',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

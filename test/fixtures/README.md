@@ -145,6 +145,10 @@ app still reads every version, so an update can never lose existing data.
   reminders a week and a month before; "Ana 🎂", a birthday 24 Oct 1995,
   the usual reminders (a day and a week before).
 - `v25/backup-plain.json` — backup (version 25) with them.
+- `v26/storage/pip.json` — Pip as an adventurer (Round 63, pip.json
+  version 3, `adventure`): "Bip 4", registered 17 Oct 11:30 UTC, 390 XP
+  banked, out since 18 Oct 10:00 UTC, his break from 12:10 UTC.
+- `v26/backup-plain.json` — backup (version 26) with him.
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

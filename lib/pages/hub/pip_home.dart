@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/pip_adventure.dart';
+import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
@@ -15,6 +17,7 @@ import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/widgets/pip_energy_bar.dart';
 import 'package:the_app/widgets/pip_portrait.dart';
 import 'package:the_app/widgets/pip_room.dart';
+import 'package:the_app/widgets/pip_sprites.dart';
 import 'package:the_app/widgets/pixel_text.dart';
 
 /// Pip Home (Round 35): his field, big, on top, following the time of
@@ -108,7 +111,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                               if (page == 0) _endPreviews();
                             }),
                             children: [
-                              const _Status(),
+                              _Status(cheer: () => setState(_brain.cheer)),
                               switch (_settings) {
                                 _Settings.menu => _SettingsMenu(
                                     background: background,
@@ -205,7 +208,10 @@ Widget _words(String text, {Color colour = PipColours.screen, double? pixel}) =>
 
 /// His status: how he looks, his name, age and birthday.
 class _Status extends ConsumerStatefulWidget {
-  const _Status();
+  /// Just registered as an adventurer (Round 63): his sword up high.
+  final VoidCallback cheer;
+
+  const _Status({required this.cheer});
 
   @override
   ConsumerState<_Status> createState() => _StatusState();
@@ -240,6 +246,33 @@ class _StatusState extends ConsumerState<_Status> {
     return h == 0 ? '${m}M' : (m == 0 ? '${h}H' : '${h}H ${m}M');
   }
 
+  /// Round 63: his adventure card instead of his info card, and what it
+  /// says after a tap on Register outside its hours.
+  bool _adventure = false;
+  String? _message;
+
+  void _toggle() => setState(() {
+        _adventure = !_adventure;
+        _message = null;
+      });
+
+  /// Registers him (Round 63): from 13:00 to 17:00; else come back then.
+  void _register() {
+    final now = ref.read(clockProvider)();
+    if (!PipAdventure.canRegisterAt(now)) {
+      HapticFeedback.selectionClick();
+      setState(() => _message = 'COME BACK BETWEEN '
+          '${PipAdventure.registerFrom}:00 AND '
+          '${PipAdventure.registerUntil}:00');
+      return;
+    }
+    if (!ref.read(pipLifeProvider.notifier).register(now)) return;
+    setState(() => _message = null);
+    HapticFeedback.heavyImpact();
+    AppSound.fanfare();
+    widget.cheer();
+  }
+
   @override
   Widget build(BuildContext context) {
     final pip = ref.watch(pipLifeProvider);
@@ -257,6 +290,7 @@ class _StatusState extends ConsumerState<_Status> {
           _ => PipFace.veryTired,
         },
     };
+    if (_adventure) return _adventureCard(pip, life, now, face);
     final next = pip.nextBatteryAt;
     // What a tap on his field would do (Round 37).
     final hint = switch (life.refusalAt(now)) {
@@ -313,6 +347,102 @@ class _StatusState extends ConsumerState<_Status> {
             const SizedBox(height: 16),
             _words(hint, colour: PipColours.light),
           ],
+          // Round 63: his adventures, always here.
+          const SizedBox(height: 12),
+          _CardRow(
+            key: const Key('pipAdventures'),
+            label: 'ADVENTURES',
+            value: '>',
+            onTap: _toggle,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// His adventure card (Round 63): his level and title, the XP to the
+  /// next, his weapon, off-hand and hat; not registered yet, a button to.
+  Widget _adventureCard(
+      PipLife pip, PipLifeNotifier life, DateTime now, PipFace face) {
+    final xp = life.xpAt(now);
+    final level = PipAdventure.levelFor(xp);
+    final from = PipAdventure.xpFor(level);
+    final to = PipAdventure.xpFor(level + 1);
+    final message = _message;
+    return SingleChildScrollView(
+      key: const Key('pipAdventure'),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PipPortrait(face: face),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _words(pip.name, colour: PipColours.light, pixel: 5),
+                    const SizedBox(height: 16),
+                    if (pip.adventurer) ...[
+                      _line('LEVEL', '$level'),
+                      const SizedBox(height: 10),
+                      _words(PipAdventure.titleFor(level).toUpperCase(),
+                          colour: PipColours.light),
+                    ] else
+                      _words('NOT AN ADVENTURER YET', colour: PipColours.dim),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (pip.adventurer) ...[
+            Row(
+              children: [
+                _words('XP  ', colour: PipColours.dim),
+                Expanded(
+                  child: _XpBar(
+                    key: const Key('pipXp'),
+                    progress: PipAdventure.progressFor(xp),
+                  ),
+                ),
+                _words('  ${xp - from}/${to - from}', colour: PipColours.dim),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Row(
+              children: [
+                _ItemBox(
+                  key: Key('pipWeapon'),
+                  label: 'WEAPON',
+                  item: PipSprites.sword,
+                ),
+                SizedBox(width: 12),
+                _ItemBox(key: Key('pipOffHand'), label: 'OFF-HAND'),
+                SizedBox(width: 12),
+                _ItemBox(key: Key('pipHatBox'), label: 'HAT'),
+              ],
+            ),
+          ] else
+            _CardRow(
+              key: const Key('pipRegister'),
+              label: 'REGISTER AS ADVENTURER',
+              onTap: _register,
+            ),
+          if (message != null) ...[
+            const SizedBox(height: 12),
+            _words(message, colour: PipColours.light),
+          ],
+          const SizedBox(height: 12),
+          _CardRow(
+            key: const Key('pipInfo'),
+            label: 'INFO',
+            value: '<',
+            onTap: _toggle,
+          ),
         ],
       ),
     );
@@ -753,4 +883,92 @@ class _Key extends StatelessWidget {
       ),
     );
   }
+}
+
+/// How far into his level he is (Round 63): a bar filling up.
+class _XpBar extends StatelessWidget {
+  final double progress;
+
+  const _XpBar({super.key, required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'XP ${(progress * 100).round()}% to the next level',
+      child: Container(
+        height: 12,
+        decoration: BoxDecoration(
+          border: Border.all(color: PipColours.panelEdge, width: 3),
+        ),
+        alignment: Alignment.centerLeft,
+        child: FractionallySizedBox(
+          widthFactor: progress.clamp(0.0, 1.0),
+          heightFactor: 1,
+          child: const ColoredBox(color: PipColours.light),
+        ),
+      ),
+    );
+  }
+}
+
+/// A box for what he carries (Round 63): his weapon (the sword), his
+/// off-hand and his hat (empty for now; later from his inventory).
+class _ItemBox extends StatelessWidget {
+  final String label;
+  final List<String>? item;
+
+  const _ItemBox({super.key, required this.label, this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final art = item;
+    return Semantics(
+      label: art == null ? '$label: empty' : '$label: a sword',
+      child: ExcludeSemantics(
+        child: Column(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                border: Border.all(color: PipColours.panelEdge, width: 3),
+              ),
+              alignment: Alignment.center,
+              child: art == null
+                  ? null
+                  : CustomPaint(
+                      size: Size(art.first.length * 2.5, art.length * 2.5),
+                      painter: _ItemPainter(art),
+                    ),
+            ),
+            const SizedBox(height: 6),
+            _words(label, colour: PipColours.dim, pixel: 2),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ItemPainter extends CustomPainter {
+  final List<String> art;
+
+  _ItemPainter(this.art);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final pixel = size.height / art.length;
+    final paint = Paint()..isAntiAlias = false;
+    for (var y = 0; y < art.length; y++) {
+      for (var x = 0; x < art[y].length; x++) {
+        final colour = PipSprites.fieldColours[art[y][x]];
+        if (colour == null) continue;
+        canvas.drawRect(Rect.fromLTWH(x * pixel, y * pixel, pixel, pixel),
+            paint..color = colour);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ItemPainter old) => old.art != art;
 }

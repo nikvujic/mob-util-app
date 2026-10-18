@@ -110,8 +110,9 @@ class AppStorage {
   static const notificationsFormatVersion = 1;
 
   /// Version of `pip.json` (Round 34): Pip, the pet. History: 1 = first
-  /// format; 2 = his energy, batteries and what was shown (Round 37).
-  static const pipFormatVersion = 2;
+  /// format; 2 = his energy, batteries and what was shown (Round 37);
+  /// 3 = his adventures (`adventure`, Round 63).
+  static const pipFormatVersion = 3;
 
   /// Version of `recipes.json` (Round 42). History: 1 = first format.
   static const recipesFormatVersion = 1;

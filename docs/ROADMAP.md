@@ -343,7 +343,7 @@ Noted; adventures first (go given), the rest after.
 
 - [ ] **Medicine history** (Round 62, not done yet): changing a take
   time rewrites the history's times.
-- [ ] **Adventure break** (`docs/ADVENTURES_SPEC.md`): half an hour off
+- [x] **Adventure break** (`docs/ADVENTURES_SPEC.md`): half an hour off
   during the adventure, only for looks (XP goes on). If the app is
   opened between 14:00 and 16:00 and he hasn't had it, it starts then,
   so it's seen. He comes to a **tavern** (the background shifts, he
@@ -372,19 +372,20 @@ Noted; adventures first (go given), the rest after.
 
 ### Round 63 — Pip's adventures, the spec (2026-10-17)
 
-- [ ] Spec written: `docs/ADVENTURES_SPEC.md` (Nikola's notes: the
+- [x] Spec written: `docs/ADVENTURES_SPEC.md` (Nikola's notes: the
   Adventures button and card, register 13:00–15:00 with a sword-up
   fanfare, adventuring **12:00–18:00** as a daily activity, running and
   fighting bugs, XP from time, ~90 at a year, 160, 230, 280, then 50 a
   year; titles every 10 levels to 80; skiing later).
-- [ ] His answers are in the spec: register 13:00–17:00; XP bar; a hat
+- [x] His answers are in the spec: register 13:00–17:00; XP bar; a hat
   box beside weapon and off-hand; no XP while powered off; he can't
   power down mid-adventure (does it after 18:00); level-up flash and
   vibration, no sound; no notifications; the register fanfare is the
   only sound (media volume), the rest is vibration; taps and random
   events off while out; he keeps his hat; bugs sometimes knock him back
   and his sword flies off, so he fetches it; skiing: snow and sliding
-  down, falling now and then and fetching a lost ski. **Build when Nikola says go.**
+  down, falling now and then and fetching a lost ski.
+- [x] Built (v1.25.0), with the break (Round 64). Skiing next.
 
 ### Round 62 — Nikola's notes after 1.24.0 (2026-10-17)
 

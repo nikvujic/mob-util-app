@@ -504,6 +504,22 @@ abstract final class PipColours {
   static const cloud = Color(0xFFF2F4F8);
 
   // His room (Round 26): grass on dirt.
+  // Round 64: the tavern on his day out.
+  static const roof = Color(0xFFA2463A);
+  static const roofDark = Color(0xFF7A3129);
+  static const wood = Color(0xFFB07A4A);
+  static const woodDark = Color(0xFF85552F);
+  static const door = Color(0xFF6B4423);
+  static const doorDark = Color(0xFF4E301A);
+  static const windowGlow = Color(0xFFFFD98A);
+  static const windowFrame = Color(0xFF5A3A20);
+  static const chimney = Color(0xFF8C8C88);
+  static const chimneyTop = Color(0xFF5A5A58);
+  static const sign = Color(0xFFE8C48A);
+  static const mug = Color(0xFFE8963A);
+  // Round 63: LEVEL UP, over him.
+  static const levelUp = Color(0xFFFFD36E);
+  static const levelUpShade = Color(0xFFB0702A);
   static const grass = Color(0xFF5E8C3A);
   static const grassLight = Color(0xFF86B85A);
   static const dirt = Color(0xFF6B4423);

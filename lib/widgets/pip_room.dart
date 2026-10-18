@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
@@ -141,6 +142,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// What was last made so from his life; null: nothing yet.
   PipShow? _shown;
 
+  /// His adventure level when last looked at (Round 63).
+  int? _level;
+
   /// Asks his life what to show and makes it so (once a change, not over
   /// and over, so a demo from Pip Home's list isn't undone); also his
   /// energy for his face and pace. Never during a build: it may collect
@@ -156,7 +160,11 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     final (show, segments) = link.look();
     brain.segments = segments;
     final now = link.now;
-    // Round 52: his way in, the first time or back after a while.
+    // Round 63: out on his adventure (looked at: his break may start).
+    final out = link.outing();
+    // Round 52: his way in, the first time or back after a while (not
+    // while he's out: he's simply there, running).
+    if (out != null) _entered = true;
     if (_moving && show == PipShow.awake && !_entered) {
       _entered = true;
       final left = brain.leftAt;
@@ -188,7 +196,17 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     // Round 44: plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
-    brain.setPlugged(link.plugged, animate: _shown != null && _moving);
+    final seen = _shown != null && _moving;
+    // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
+    brain.setPlugged(link.plugged && out == null, animate: seen);
+    brain.adventure(out, animate: seen);
+    // A level up seen while he's out: a flash over him.
+    final level = link.level;
+    final before = _level;
+    if (before != null && level > before && brain.run != null && _moving) {
+      brain.levelUp();
+    }
+    _level = level;
     if (show != _shown && brain.show(show)) {
       _shown = show;
       link.shown(show);
@@ -254,6 +272,20 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
           brain.step(PipBrain.offEnd);
         case PipActivity.poweringOn:
           brain.step(PipBrain.onEnd);
+        case PipActivity.adventuring:
+          // Round 63: out, whatever he's in the middle of done: simply
+          // running (or at the table).
+          final run = brain.run!;
+          for (var s = 0;
+              s < 400 &&
+                  run.phase != RunPhase.running &&
+                  run.phase != RunPhase.sitting &&
+                  brain.run != null;
+              s++) {
+            brain.step(0.05);
+          }
+          brain.takeBuzzes();
+          return;
         case PipActivity.fetching ||
               PipActivity.toStation ||
               PipActivity.plugging ||
@@ -291,6 +323,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     final link = widget.link;
     final brain = widget.brain;
     if (link == null) return;
+    // Round 63: out on his adventure, he takes none ([PipBrain.canTakeBattery]).
     if (brain.canTakeBattery && link.giveBattery()) {
       brain.takeBattery(atPixel - PipBrain.batteryWidth / 2);
       HapticFeedback.mediumImpact();
@@ -600,21 +633,33 @@ class _RoomPainter extends CustomPainter {
                     (0.2, 0.5),
                   ]
                 : const [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)];
+            // Round 63: out, they drift slowly back as he runs.
+            final drift = (brain.run?.shift ?? 0) * 0.12;
             for (final (i, (cx, cy)) in spots.indexed) {
-              cloud((columns * cx).floorToDouble(),
-                  (groundTop * cy).floorToDouble(), i, scene.part);
+              final wide = columns + 24;
+              final at = ((columns * cx - drift) % wide + wide) % wide - 12;
+              cloud(at.floorToDouble(), (groundTop * cy).floorToDouble(), i,
+                  scene.part);
             }
         }
       }
     }
 
     // The ground: a row of grass with lighter tufts, dirt with specks.
+    // Round 63: out on his adventure, it moves under him (and a pebble
+    // now and then shows it).
+    final run = brain.run;
+    final shift = run?.shift.floor() ?? 0;
     for (var x = 0; x < columns; x++) {
-      final h = (x * 7919) % 13; // the same tufts every time
+      final gx = x + shift;
+      final h = (gx * 7919) % 13; // the same tufts every time
       dot(x.toDouble(), groundTop, PipColours.grass);
       if (h < 3) dot(x.toDouble(), groundTop - 1, PipColours.grassLight);
+      if (run != null && gx % 47 == 0) {
+        dot(x.toDouble(), groundTop - 1, PipColours.batteryCase, 2, 1);
+      }
       for (var y = 1; y < PipRoom.ground; y++) {
-        final speck = (x * 31 + y * 17) % 11 == 0;
+        final speck = (gx * 31 + y * 17) % 11 == 0;
         dot(x.toDouble(), groundTop + y,
             speck ? PipColours.dirtDark : PipColours.dirt);
       }
@@ -637,6 +682,29 @@ class _RoomPainter extends CustomPainter {
               colour.withValues(alpha: colour.a * alpha));
         }
       }
+    }
+
+    /// His sword, its grip's middle at [hand] (screen), turned by [angle]
+    /// (0: pointing up) and scaled by [size].
+    void blade(Offset hand, double angle, double size) {
+      canvas.save();
+      canvas.translate(hand.dx, hand.dy);
+      canvas.rotate(angle);
+      canvas.scale(size);
+      final art = PipSprites.sword;
+      for (var y = 0; y < art.length; y++) {
+        for (var x = 0; x < art[y].length; x++) {
+          final colour = PipSprites.fieldColours[art[y][x]];
+          if (colour == null) continue;
+          // The middle of the grip in the hand.
+          canvas.drawRect(
+            Rect.fromLTWH((x - art[y].length / 2) * pixel,
+                (y - PipSprites.swordGrip - 0.5) * pixel, pixel, pixel),
+            paint..color = colour,
+          );
+        }
+      }
+      canvas.restore();
     }
 
     final eggLeft =
@@ -736,9 +804,25 @@ class _RoomPainter extends CustomPainter {
       sprite(rows.sublist(rows.length - shown), fx - 2, groundTop,
           colours: PipSprites.fieldColours, alpha: 1 - fade);
     }
+    // Round 64: his day out's tavern, its table and his stool.
+    if (run != null) {
+      if (run.tavern case final tx?) {
+        sprite(PipSprites.tavern, tx.floorToDouble(), groundTop,
+            colours: PipSprites.tavernColours);
+        sprite(PipSprites.table, (tx + PipRun.tableLeft).floorToDouble(),
+            groundTop,
+            colours: PipSprites.tavernColours);
+        sprite(PipSprites.stool, (tx + PipRun.seatOffset + 6).floorToDouble(),
+            groundTop,
+            colours: PipSprites.tavernColours);
+      }
+      // His sword, knocked out of his hand: flying, then lying there.
+      if (run.lyingSword case (final sx, final up, final angle)) {
+        blade(Offset(sx * pixel, (groundTop - up) * pixel), angle, 1);
+      }
+    }
     // A bug crawling in, its legs stepping; mirrored going right.
-    if (brain.bug case (final bx, final legsUp)) {
-      final toRight = bx + PipBrain.bugWidth / 2 < centre;
+    if (brain.bug case (final bx, final legsUp, final toRight)) {
       sprite(legsUp ? PipSprites.bugUp : PipSprites.bugDown, bx, groundTop,
           colours: PipSprites.fieldColours, mirror: toRight);
     }
@@ -909,26 +993,33 @@ class _RoomPainter extends CustomPainter {
     // His sword, in a floating hand: raised, swung, popping in and away.
     if (brain.sword case (final hx, final hy, final angle, final size)
         when size > 0.05) {
-      final hand = Offset(hx * pixel, (groundTop - hy) * pixel);
-      canvas.save();
-      canvas.translate(hand.dx, hand.dy);
-      canvas.rotate(angle);
-      canvas.scale(size);
-      final blade = PipSprites.sword;
-      for (var y = 0; y < blade.length; y++) {
-        for (var x = 0; x < blade[y].length; x++) {
-          final colour = PipSprites.fieldColours[blade[y][x]];
-          if (colour == null) continue;
-          // The middle of the grip in the hand.
-          canvas.drawRect(
-            Rect.fromLTWH((x - blade[y].length / 2) * pixel,
-                (y - PipSprites.swordGrip - 0.5) * pixel, pixel, pixel),
-            paint..color = colour,
-          );
-        }
-      }
-      canvas.restore();
+      blade(Offset(hx * pixel, (groundTop - hy) * pixel), angle, size);
       sprite(PipSprites.mitt, hx - 1, groundTop - hy + 2);
+    }
+    // Round 64: his plate, flown out of the tavern's window to the table,
+    // its meal going as his break does.
+    if (run?.plateAt case (final px, final py, final left)) {
+      final plateLeft = (px - PipBrain.plateWidth / 2).floorToDouble();
+      final bottom = (groundTop - py).floorToDouble();
+      sprite(PipSprites.plate, plateLeft, bottom,
+          colours: PipSprites.fieldColours);
+      sprite(PipSprites.meal((left * 3).ceil()), plateLeft,
+          bottom - PipSprites.plate.length,
+          colours: PipSprites.fieldColours);
+    }
+    // Round 63: LEVEL UP over him, rising and fading.
+    if (brain.levelFlash case final f?) {
+      final art = PipSprites.levelUp;
+      final left = (centre - art.first.length / 2).floorToDouble();
+      final top = groundTop - PipBrain.height - 8 - (6 * f).floorToDouble();
+      final fade = f < 0.7 ? 1.0 : (1 - (f - 0.7) / 0.3);
+      final on = (f * 12).floor().isEven || f > 0.3;
+      if (on) {
+        sprite(art, left + 1, top + 1,
+            alpha: fade, colours: const {'x': PipColours.levelUpShade});
+        sprite(art, left, top,
+            alpha: fade, colours: const {'x': PipColours.levelUp});
+      }
     }
     // A flower in his hand, then fading.
     if (brain.flower case (final fx, final up, _, final fade) when up > 0) {

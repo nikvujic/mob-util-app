@@ -11,6 +11,7 @@ import 'package:the_app/pages/settings/themes.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
@@ -146,17 +147,27 @@ class AppDrawer extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    PixelText(
-                      [
-                        (pip.name, PipColours.light),
-                        (
-                          '  ${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!)}',
-                          context.colors.textSecondary,
-                        ),
-                      ],
-                      label: '${pip.name}, '
-                          '${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!).toLowerCase()} old',
-                    ),
+                    // Round 63: out on his adventure, his level instead.
+                    if (_adventureLevel(ref) case final level?)
+                      PixelText(
+                        [
+                          (pip.name, PipColours.light),
+                          ('  LV $level', context.colors.textSecondary),
+                        ],
+                        label: '${pip.name}, adventuring, level $level',
+                      )
+                    else
+                      PixelText(
+                        [
+                          (pip.name, PipColours.light),
+                          (
+                            '  ${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!)}',
+                            context.colors.textSecondary,
+                          ),
+                        ],
+                        label: '${pip.name}, '
+                            '${PipLife.ageText(pip.ageOn(ref.watch(clockProvider)())!).toLowerCase()} old',
+                      ),
                     const Spacer(),
                     PipEnergyBar(
                       key: const Key('pipEnergy'),
@@ -202,4 +213,12 @@ class AppDrawer extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// His level while he's out on his adventure (Round 63), or null.
+int? _adventureLevel(WidgetRef ref) {
+  final life = ref.read(pipLifeProvider.notifier);
+  final now = ref.watch(clockProvider)();
+  if (!life.outAt(now)) return null;
+  return PipAdventure.levelFor(life.xpAt(now));
 }

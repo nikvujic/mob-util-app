@@ -7,6 +7,8 @@ import 'package:the_app/widgets/pixel_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_run.dart';
+import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/widgets/pip_room.dart';
@@ -252,6 +254,45 @@ void main() {
       await openMenu(tester); // settles: nothing animates
       expect(pip().spawned, isTrue);
     });
+
+    testWidgets(
+        'out on his adventure (Round 63): opened, simply running; no '
+        'station, taps do nothing; a level up seen flashes; at 18:00 he '
+        'stops', (tester) async {
+      final link = FakePipLink(batteries: 3)
+        ..at = DateTime(2026, 10, 15, 13)
+        ..out = (onBreak: false, breakDone: 0.0)
+        ..plugged = true;
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(1))),
+      ]);
+      await openMenuMoving(tester);
+      for (var i = 0; i < 70; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().activity, PipActivity.adventuring);
+      expect(pip().run!.phase, RunPhase.running, reason: 'no setting off');
+      expect(pip().station, isNull, reason: 'out, he doesn\'t charge');
+      await tester.tap(find.byKey(const Key('pipRoom')));
+      expect(link.batteries, 3, reason: 'taps do nothing');
+
+      link.level = 2;
+      for (var i = 0; i < 70; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().levelFlash, isNotNull);
+
+      link.out = null;
+      for (var i = 0; i < 70; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().run?.phase, RunPhase.ending, reason: 'seen: he slows');
+      for (var i = 0; i < 120; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().activity, isNot(PipActivity.adventuring));
+    });
   });
 
   group('his egg (Round 34)', () {
@@ -368,5 +409,40 @@ void main() {
     await openMenu(tester);
     await tester.pumpAndSettle();
     expect(container.read(pipBrainProvider).hat, PipHat.witch);
+  });
+
+  Iterable<String> labels() => find
+      .byType(PixelText)
+      .evaluate()
+      .map((e) => (e.widget as PixelText).label);
+
+  testWidgets(
+      'out on his adventure, the menu shows his level, not his age '
+      '(Round 63)', (tester) async {
+    final out = PipLife(
+      born: DateTime(2026, 10, 1),
+      energyAt: DateTime(2026, 10, 15, 11),
+      registeredAt: DateTime(2026, 10, 14, 14),
+      xp: 720,
+      outDay: '2026-10-15',
+      outFrom: DateTime(2026, 10, 15, 12),
+    );
+    await pumpApp(tester, clock: () => DateTime(2026, 10, 15, 13), pip: out);
+    await openMenu(tester);
+    expect(labels(), contains('Pip, adventuring, level 2'));
+  });
+
+  testWidgets('back from it, his age again', (tester) async {
+    final back = PipLife(
+      born: DateTime(2026, 10, 1),
+      energyAt: DateTime(2026, 10, 15, 11),
+      registeredAt: DateTime(2026, 10, 14, 14),
+      xp: 720,
+      outDay: '2026-10-15',
+      outFrom: DateTime(2026, 10, 15, 12),
+    );
+    await pumpApp(tester, clock: () => DateTime(2026, 10, 15, 19), pip: back);
+    await openMenu(tester);
+    expect(labels(), contains('Pip, 15 days old'));
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Pip, the pet (Round 34): whether he's hatched, when (his birthday),
 /// and his name. In backups; his age isn't stored, it comes from his
 /// birthday, so restored he's as old as he really is.
@@ -32,6 +34,17 @@ class PipLife {
   final String? sleepSeen;
   final String? wakeSeen;
 
+  /// His adventures (Round 63): when he registered as an adventurer
+  /// (null: not yet), the XP banked from his days out before, and his
+  /// latest day out: the day ([dayKey]-like, "2026-10-18"), from when
+  /// (null: he hasn't gone out that day, or it's banked) and when his
+  /// break started (Round 64; null: not had).
+  final DateTime? registeredAt;
+  final int xp;
+  final String? outDay;
+  final DateTime? outFrom;
+  final DateTime? breakAt;
+
   const PipLife({
     this.born,
     this.name = defaultName,
@@ -42,6 +55,11 @@ class PipLife {
     this.offSeen = false,
     this.sleepSeen,
     this.wakeSeen,
+    this.registeredAt,
+    this.xp = 0,
+    this.outDay,
+    this.outFrom,
+    this.breakAt,
   });
 
   static const defaultName = 'Pip';
@@ -51,6 +69,9 @@ class PipLife {
   static const egg = PipLife();
 
   bool get hatched => born != null;
+
+  /// Registered as an adventurer.
+  bool get adventurer => registeredAt != null;
 
   /// How many days old he is at [now], the day he hatched being day 1;
   /// null while he's an egg.
@@ -91,6 +112,11 @@ class PipLife {
     bool? offSeen,
     String? Function()? sleepSeen,
     String? Function()? wakeSeen,
+    DateTime? Function()? registeredAt,
+    int? xp,
+    String? Function()? outDay,
+    DateTime? Function()? outFrom,
+    DateTime? Function()? breakAt,
   }) =>
       PipLife(
         born: born ?? this.born,
@@ -103,6 +129,11 @@ class PipLife {
         offSeen: offSeen ?? this.offSeen,
         sleepSeen: sleepSeen == null ? this.sleepSeen : sleepSeen(),
         wakeSeen: wakeSeen == null ? this.wakeSeen : wakeSeen(),
+        registeredAt: registeredAt == null ? this.registeredAt : registeredAt(),
+        xp: xp ?? this.xp,
+        outDay: outDay == null ? this.outDay : outDay(),
+        outFrom: outFrom == null ? this.outFrom : outFrom(),
+        breakAt: breakAt == null ? this.breakAt : breakAt(),
       );
 
   static String _time(DateTime t) => t.toUtc().toIso8601String();
@@ -119,21 +150,38 @@ class PipLife {
         'offSeen': offSeen,
         if (sleepSeen != null) 'sleepSeen': sleepSeen,
         if (wakeSeen != null) 'wakeSeen': wakeSeen,
+        if (adventurer)
+          'adventure': {
+            'registeredAt': _time(registeredAt!),
+            'xp': xp,
+            if (outDay != null) 'outDay': outDay,
+            if (outFrom != null) 'outFrom': _time(outFrom!),
+            if (breakAt != null) 'breakAt': _time(breakAt!),
+          },
       };
 
-  /// Also reads version 1 (no energy yet: full, no batteries).
-  factory PipLife.fromJson(Map<String, dynamic> json) => PipLife(
-        born: _parse(json['born']),
-        name: json['name'] as String? ?? defaultName,
-        energy: (json['energy'] as num?)?.toDouble().clamp(0, fullEnergy) ??
-            fullEnergy,
-        energyAt: _parse(json['energyAt']),
-        batteries: ((json['batteries'] as num?)?.toInt() ?? 0).clamp(0, 3),
-        nextBatteryAt: _parse(json['nextBatteryAt']),
-        offSeen: json['offSeen'] as bool? ?? false,
-        sleepSeen: json['sleepSeen'] as String?,
-        wakeSeen: json['wakeSeen'] as String?,
-      );
+  /// Also reads version 1 (no energy yet: full, no batteries) and 2 (not
+  /// an adventurer).
+  factory PipLife.fromJson(Map<String, dynamic> json) {
+    final out = json['adventure'] as Map<String, dynamic>?;
+    return PipLife(
+      born: _parse(json['born']),
+      name: json['name'] as String? ?? defaultName,
+      energy: (json['energy'] as num?)?.toDouble().clamp(0, fullEnergy) ??
+          fullEnergy,
+      energyAt: _parse(json['energyAt']),
+      batteries: ((json['batteries'] as num?)?.toInt() ?? 0).clamp(0, 3),
+      nextBatteryAt: _parse(json['nextBatteryAt']),
+      offSeen: json['offSeen'] as bool? ?? false,
+      sleepSeen: json['sleepSeen'] as String?,
+      wakeSeen: json['wakeSeen'] as String?,
+      registeredAt: _parse(out?['registeredAt']),
+      xp: math.max(0, (out?['xp'] as num?)?.toInt() ?? 0),
+      outDay: out?['outDay'] as String?,
+      outFrom: _parse(out?['outFrom']),
+      breakAt: _parse(out?['breakAt']),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -146,9 +194,27 @@ class PipLife {
       other.nextBatteryAt == nextBatteryAt &&
       other.offSeen == offSeen &&
       other.sleepSeen == sleepSeen &&
-      other.wakeSeen == wakeSeen;
+      other.wakeSeen == wakeSeen &&
+      other.registeredAt == registeredAt &&
+      other.xp == xp &&
+      other.outDay == outDay &&
+      other.outFrom == outFrom &&
+      other.breakAt == breakAt;
 
   @override
-  int get hashCode => Object.hash(born, name, energy, energyAt, batteries,
-      nextBatteryAt, offSeen, sleepSeen, wakeSeen);
+  int get hashCode => Object.hash(
+      born,
+      name,
+      energy,
+      energyAt,
+      batteries,
+      nextBatteryAt,
+      offSeen,
+      sleepSeen,
+      wakeSeen,
+      registeredAt,
+      xp,
+      outDay,
+      outFrom,
+      breakAt);
 }

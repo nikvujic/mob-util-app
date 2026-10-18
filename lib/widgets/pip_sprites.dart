@@ -740,6 +740,75 @@ abstract final class PipSprites {
     'v': PipColours.stem,
   };
 
+  /// Round 64: the tavern on his day out, 33 x 26: a roof and chimney,
+  /// wooden walls, a door, a sign with a mug, and a lit window with a
+  /// counter (the plate flies out of it).
+  static const tavern = [
+    '........................CCC......',
+    '........................ccc......',
+    '.............rRRrRRr....ccc......',
+    '...........RrRRrRRrRRr..ccc......',
+    '.........RRrRRrRRrRRrRRr.........',
+    '.......rRRrRRrRRrRRrRRrRRr.......',
+    '.....RrRRrRRrRRrRRrRRrRRrRRr.....',
+    '...RRrRRrRRrRRrRRrRRrRRrRRrRRr...',
+    '.rRRrRRrRRrRRrRRrRRrRRrRRrRRrRRr.',
+    'rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',
+    '..wWWWWWWWWWWWWWWWWWWWWWWWWWWWw..',
+    '..wWssssssssWWWWWWWWWWWWWWWWWWw..',
+    '..wWsSSyySSsWWWWWllllllllllllWw..',
+    '..wwsssssssswwwwwlLLLLLLLLLLlww..',
+    '..wWWWWWWWWWWWWWWlLLLLLLLLLLlWw..',
+    '..wWWddddddWWWWWWlLLLLLLLLLLlWw..',
+    '..wWWdDDDDdWWWWWWlLLLLLLLLLLlWw..',
+    '..wwwdDDDDdwwwwwwlLLLLLLLLLLlww..',
+    '..wWWdDDDDdWWWWWWlLLLLLLLLLLlWw..',
+    '..wWWdDDDDdWWWWWWllllllllllllWw..',
+    '..wWWdDDDkdWWWWWllllllllllllllw..',
+    '..wwwdDDDDdwwwwwwwwwwwwwwwwwwww..',
+    '..wWWdDDDDdWWWWWWWWWWWWWWWWWWWw..',
+    '..wWWdDDDDdWWWWWWWWWWWWWWWWWWWw..',
+    '..wWWdDDDDdWWWWWWWWWWWWWWWWWWWw..',
+    '..wwwdDDDDdwwwwwwwwwwwwwwwwwwww..',
+  ];
+
+  /// Its table (10 wide, 6 tall) and his stool (8 x 3), outside.
+  static const table = [
+    'wwwwwwwwww',
+    '.wWWWWWWw.',
+    '..w....w..',
+    '..w....w..',
+    '..w....w..',
+    '..w....w..',
+  ];
+  static const stool = ['wwwwwwww', '.w....w.', '.w....w.'];
+
+  static const tavernColours = {
+    'R': PipColours.roof,
+    'r': PipColours.roofDark,
+    'W': PipColours.wood,
+    'w': PipColours.woodDark,
+    'D': PipColours.door,
+    'd': PipColours.doorDark,
+    'k': PipColours.windowGlow,
+    'L': PipColours.windowGlow,
+    'l': PipColours.windowFrame,
+    'c': PipColours.chimney,
+    'C': PipColours.chimneyTop,
+    's': PipColours.windowFrame,
+    'S': PipColours.sign,
+    'y': PipColours.mug,
+  };
+
+  /// Round 63: LEVEL UP, in little 3 x 5 letters, 31 x 5.
+  static const levelUp = [
+    'x...xxx.x.x.xxx.x.......x.x.xx.',
+    'x...x...x.x.x...x.......x.x.x.x',
+    'x...xx..x.x.xx..x.......x.x.xx.',
+    'x...x...x.x.x...x.......x.x.x..',
+    'xxx.xxx..x..xxx.xxx.....xxx.x..',
+  ];
+
   /// A little z rising while he sleeps, 3 x 4.
   static const z = ['zzz', '..z', '.z.', 'zzz'];
 

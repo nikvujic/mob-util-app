@@ -26,6 +26,7 @@ class MainActivity: FlutterFragmentActivity() {
     private var inflate = 0
     private var pop = 0
     private var fill = 0
+    private var fanfare = 0
 
     /// The notification sounds (Round 31), heard when picking one.
     private val notifySounds = mutableMapOf<String, Int>()
@@ -160,6 +161,9 @@ class MainActivity: FlutterFragmentActivity() {
         pop = pool.load(this, R.raw.pop, 1)
         // An important medicine's hold-to-take (Round 24): a glass filling.
         fill = pool.load(this, R.raw.fill, 1)
+        // Pip registered as an adventurer (Round 63): his fanfare, his
+        // only sound; on the media volume, like the rest.
+        fanfare = pool.load(this, R.raw.fanfare, 1)
         // The notification sounds to pick from (Round 31); notifications
         // play them themselves, this is for hearing one when picking.
         // Round 39: 8-bit ones.
@@ -201,6 +205,7 @@ class MainActivity: FlutterFragmentActivity() {
                         if (filling != 0) pool?.stop(filling)
                         filling = 0
                     }
+                    "fanfare" -> pool?.play(fanfare, 1f, 1f, 2, 0, 1f)
                     // Round 41: at the volume picked (0 to 1).
                     "notify" -> {
                         val args = call.arguments as? Map<*, *>

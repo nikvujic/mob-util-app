@@ -365,6 +365,15 @@ class FakePipLink implements PipLink {
     if (show == PipShow.off || show == PipShow.powerOff) show = PipShow.awake;
     return true;
   }
+
+  /// Out on his adventure (Round 63): what [outing] says.
+  PipOut? out;
+
+  @override
+  PipOut? outing() => out;
+
+  @override
+  int level = 1;
 }
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]

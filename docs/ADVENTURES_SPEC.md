@@ -1,6 +1,6 @@
 # Pip's adventures — spec (Round 63)
 
-Not built yet; waiting on Nikola's go. From Nikola's notes (ROADMAP,
+Built in Rounds 63–64 (v1.25.0); skiing (section 8) and the inventory still to come. From Nikola's notes (ROADMAP,
 Rounds 41 and 63); his answers are in, and **Decided** marks them.
 
 ## 1. What it is
@@ -139,8 +139,8 @@ these names):
 - He **can't power down** during an adventure: if his energy would run
   out, he keeps going and powers down **after it ends** at 18:00 (or at
   once then, if he's out of energy).
-- Batteries still fly to him while he runs (he catches them without
-  stopping).
+- No batteries while he's out (taps do nothing); before 12:00 or
+  after 18:00 as ever.
 - No notifications for adventures (decided).
 
 ## 7. Sound (decided)

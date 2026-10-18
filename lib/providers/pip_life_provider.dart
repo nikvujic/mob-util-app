@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
+import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_hats.dart';
 import 'package:the_app/core/pip_brain.dart';
@@ -78,6 +79,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// (not).
   void setCharging(bool charging, DateTime now) {
     if (charging == _charging) return;
+    _settle(now);
     if (state.hatched) {
       state = state.copyWith(energy: levelAt(now), energyAt: () => now);
     }
@@ -92,18 +94,121 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// plugged in; it used to keep what he was plugged in with).
   int segmentsAt(DateTime now) => PipEnergy.segments(levelAt(now));
 
-  /// His energy at [now].
-  double levelAt(DateTime now) =>
-      (_charging ? PipEnergy.chargingLevelAt : PipEnergy.levelAt)(
-        state.energy,
-        state.energyAt ?? now,
-        now,
+  /// His energy at [now]. Round 63: out on an adventure he can't power
+  /// down; he does once it's over, if he's run out by then.
+  double levelAt(DateTime now) {
+    final level = (_charging ? PipEnergy.chargingLevelAt : PipEnergy.levelAt)(
+      state.energy,
+      state.energyAt ?? now,
+      now,
+    );
+    return outAt(now) ? math.max(level, adventureFloor) : level;
+  }
+
+  /// What he keeps, out, however long it's been (a few minutes' worth).
+  static const adventureFloor = 0.01;
+
+  /// Out on his adventure at [now] (Round 63).
+  bool outAt(DateTime now) {
+    final from = state.outFrom;
+    return from != null &&
+        !now.isBefore(from) &&
+        now.isBefore(PipAdventure.endOf(from));
+  }
+
+  /// On his break at [now] (Round 64).
+  bool onBreakAt(DateTime now) {
+    final at = state.breakAt;
+    return outAt(now) &&
+        at != null &&
+        !now.isBefore(at) &&
+        now.isBefore(at.add(PipAdventure.breakLength));
+  }
+
+  /// His XP at [now]: what's banked and this day out so far.
+  int xpAt(DateTime now) {
+    final from = state.outFrom;
+    if (from == null) return state.xp;
+    final end = PipAdventure.endOf(from);
+    return state.xp +
+        PipAdventure.minutesBetween(from, now.isBefore(end) ? now : end);
+  }
+
+  /// Registers him as an adventurer at [now] (Round 63): only between
+  /// 13:00 and 17:00, once. His energy is filled and he goes out at once.
+  /// True if he was.
+  bool register(DateTime now) {
+    if (!state.hatched ||
+        state.adventurer ||
+        !PipAdventure.canRegisterAt(now)) {
+      return false;
+    }
+    state = state.copyWith(
+      registeredAt: () => now,
+      energy: PipLife.fullEnergy,
+      energyAt: () => now,
+      offSeen: false,
+      outDay: () => dayKey(now),
+      outFrom: () => now,
+      breakAt: () => null,
+    );
+    return true;
+  }
+
+  /// His days out, made right for [now] (Round 63): a finished one's XP
+  /// banked; today's started if it's time and he could go: at 12:00 if he
+  /// had energy then (charging or not), or else when he's back on before
+  /// 17:00 (a battery). Run before anything that changes his energy, so
+  /// his energy at 12:00 is still known.
+  void _settle(DateTime now) {
+    if (!state.adventurer) return;
+    final from = state.outFrom;
+    if (from != null && !now.isBefore(PipAdventure.endOf(from))) {
+      state = state.copyWith(
+        xp: xpAt(now),
+        outFrom: () => null,
+        breakAt: () => null,
       );
+    }
+    final today = dayKey(now);
+    if (state.outDay == today) return;
+    final start = PipAdventure.startOf(now);
+    if (now.isBefore(start)) return;
+    DateTime? out;
+    final since = state.energyAt ?? now;
+    if (!since.isAfter(start) && levelAt(start) > 0) {
+      out = start;
+    } else if (now.hour < PipAdventure.lastStartHour && levelAt(now) > 0) {
+      out = now;
+    }
+    if (out == null) return;
+    state = state.copyWith(
+      outDay: () => today,
+      outFrom: () => out,
+      breakAt: () => null,
+    );
+    // Not seen till after 18:00: the whole day out at once.
+    if (!now.isBefore(PipAdventure.endOf(out))) _settle(now);
+  }
+
+  /// His break starts at [now] if it's due (Round 64: looked at between
+  /// 14:00 and 16:00, out at least half an hour, none had today).
+  void breakIfDue(DateTime now) {
+    final from = state.outFrom;
+    if (from == null ||
+        state.breakAt != null ||
+        !outAt(now) ||
+        !PipAdventure.breakDueAt(now, from)) {
+      return;
+    }
+    state = state.copyWith(breakAt: () => now);
+  }
 
   /// The batteries due by [now] (Round 45: every few hours on the clock,
   /// piling up while away, up to 3 held).
   void collect(DateTime now) {
     if (!state.hatched) return;
+    _settle(now);
     final next = state.nextBatteryAt;
     if (next == null) {
       state = state.copyWith(nextBatteryAt: () => PipEnergy.nextBattery(now));
@@ -126,6 +231,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
 
   /// [show] was shown at [now]: remembered, so it isn't played again.
   void shown(PipShow show, DateTime now) {
+    _settle(now);
     switch (show) {
       case PipShow.powerOff || PipShow.off:
         if (!state.offSeen) {
@@ -162,6 +268,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// Gives him a battery at [now], if he can have one: a segment more
   /// (up to full), and on again if he was off. True if given.
   bool giveBattery(DateTime now) {
+    _settle(now);
     if (refusalAt(now) != null) return false;
     state = state.copyWith(
       batteries: state.batteries - 1,
@@ -169,6 +276,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       energyAt: () => now,
       offSeen: false,
     );
+    // Round 63: back on before 17:00, he goes out.
+    _settle(now);
     return true;
   }
 
@@ -176,6 +285,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// to full, and on again if he was off. False if he's full (or an egg).
   bool chargeTick(DateTime now) {
     if (!state.hatched) return false;
+    _settle(now);
     final level = levelAt(now);
     if (level >= PipLife.fullEnergy) return false;
     state = state.copyWith(
@@ -183,6 +293,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       energyAt: () => now,
       offSeen: false,
     );
+    _settle(now);
     return true;
   }
 
@@ -228,6 +339,23 @@ class _Link implements PipLink {
 
   @override
   bool chargeTick() => _pip.chargeTick(_now);
+
+  @override
+  PipOut? outing() {
+    final now = _now;
+    if (!_pip.outAt(now)) return null;
+    _pip.breakIfDue(now);
+    final at = _ref.read(pipLifeProvider).breakAt;
+    if (at == null || !_pip.onBreakAt(now)) {
+      return (onBreak: false, breakDone: 0);
+    }
+    final done =
+        now.difference(at).inSeconds / PipAdventure.breakLength.inSeconds;
+    return (onBreak: true, breakDone: done.clamp(0.0, 1.0));
+  }
+
+  @override
+  int get level => PipAdventure.levelFor(_pip.xpAt(_now));
 
   @override
   bool get plugged => _ref.read(pipPowerProvider);

@@ -4,7 +4,38 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
-## [1.24.0] - 2026-10-16
+## [Unreleased]
+
+### Added
+- **Pip's adventures.** Pip Home's card has an **Adventures** button:
+  his adventure card. Between **13:00 and 17:00** he can **register as
+  an adventurer**: he holds his sword up high to an 8-bit **fanfare**
+  (his only sound, on the media volume) and goes out at once.
+- From then on he goes out **every day from 12:00 to 18:00** by
+  himself: in the middle of his field, **running** while the ground
+  moves under him, striking the **bugs** that come at him (a buzz for
+  each). Now and then one **gets him**: he's knocked back, his **sword
+  flies off**, and he goes back for it.
+- Between **14:00 and 16:00**, the first time you look, he takes a
+  half-hour **break**: a **tavern** comes up, he sits at its table and a
+  plate of food flies out of the window to him; he eats it as the break
+  goes. Only for the look: he keeps gaining.
+- **XP**: one a minute out (360 a full day), and **levels**, one at a
+  time, each a little longer than the last: about level 90 after a year
+  out, 160 after two, 230 after three, 280 after four, then 50 a year,
+  no cap. A **title** every 10 levels up to 80 (Rookie, Bug Squasher,
+  Squire, Debugger, Knight, Veteran, Champion, Hero, Legend). A level up
+  you see: **LEVEL UP** over him and a buzz.
+- His **adventure card**: his level and title, an **XP bar**, and boxes
+  for his **weapon** (the sword), **off-hand** and **hat** (empty for
+  now). In the menu, while he's out, his **level** shows instead of his
+  age.
+- Out, he **can't run out**: if his energy is gone, he powers down
+  after 18:00. Off at 12:00, he stays home, but a battery before 17:00
+  sends him out. Charging at 12:00, he unplugs and goes. Taps and his
+  usual events wait till he's back.
+
+
 
 ### Added
 - **Pip's hats by the day**: now and then (about 6–7 days a month) he

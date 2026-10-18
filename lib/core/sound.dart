@@ -39,6 +39,10 @@ abstract final class AppSound {
   static Future<void> fill() => _play('fill');
   static Future<void> stopFill() => _play('stopFill');
 
+  /// Pip's fanfare (Round 63): he's registered as an adventurer. On the
+  /// media volume (muted: silent).
+  static Future<void> fanfare() => _play('fanfare');
+
   /// A notification sound (Round 31), heard when picking one: its raw
   /// resource's name, e.g. `notify_coin`, at [volume] (Round 41: 0 to 1).
   static Future<void> notify(String resource, {double volume = 1}) =>

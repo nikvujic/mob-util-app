@@ -457,6 +457,19 @@ via `hubToolNewsProvider`/`hubNewsProvider`, red winning) in
 notification. Preferences keep `datesReminders`, `datesPausedUntil` and
 `datesSeenOn`.
 
+His adventures (Round 63): `core/pip_adventure.dart` has the rules
+(the 12:00–18:00 day out, registering 13:00–17:00, the break window,
+`levelFor`/`xpFor`/`progressFor`, `titleFor`). `PipLifeNotifier` keeps
+his days out right with `_settle` (run before anything that changes his
+energy, so his energy at 12:00 is still known): a finished day's XP
+banked, today's started at 12:00 or when he's back on before 17:00;
+`levelAt` floors his energy while he's out. `PipLink.outing()` tells
+his room (starting the break when it's due) and `PipLink.level` its
+flashes. In the brain he's `PipActivity.adventuring` (a row of `false`
+in `mayStart`), driven by `core/pip_run.dart`'s `PipRun` (phases,
+the ground's shift, bugs, the knocked-off sword, the tavern and plate),
+which the painter draws in screen terms (world x − shift).
+
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,
 `emptyAt`, `segments`, `nextBattery`, `batteriesAt`: one every 5 h on

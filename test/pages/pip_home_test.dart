@@ -15,13 +15,15 @@ void main() {
   late ProviderContainer container;
 
   Future<void> open(WidgetTester tester,
-      {int hour = 12, FakePipLink? link}) async {
+      {int hour = 12, FakePipLink? link, bool real = false}) async {
     // A phone's size (Nikola's): half of it is his field.
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
     container = await pumpApp(tester,
-        clock: () => DateTime(2026, 10, 13, hour), pipLink: link);
+        clock: () => DateTime(2026, 10, 13, hour),
+        pipLink: link,
+        realPipLink: real);
     await openTab(tester, 'Hub');
     await tester.tap(find.byTooltip('Pip'));
     await tester.pumpAndSettle();
@@ -330,5 +332,49 @@ void main() {
     await tester.tap(find.byKey(const Key('pipPlay-charge')));
     await tester.pump();
     expect(words(), contains("HE'S CHARGING"));
+  });
+
+  group('adventures (Round 63)', () {
+    testWidgets(
+        'the Adventures button turns his card; not registered: a button, '
+        'only from 13:00 to 17:00', (tester) async {
+      await open(tester, hour: 12);
+      await tester.ensureVisible(find.byKey(const Key('pipAdventures')));
+      await tester.tap(find.byKey(const Key('pipAdventures')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipAdventure')), findsOneWidget);
+      expect(words(), contains('NOT AN ADVENTURER YET'));
+      await tester.tap(find.byKey(const Key('pipRegister')));
+      await tester.pumpAndSettle();
+      expect(words(), contains('COME BACK BETWEEN 13:00 AND 17:00'));
+      expect(container.read(pipLifeProvider).adventurer, isFalse);
+      // Back to his info card.
+      await tester.ensureVisible(find.byKey(const Key('pipInfo')));
+      await tester.tap(find.byKey(const Key('pipInfo')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipStatus')), findsOneWidget);
+    });
+
+    testWidgets(
+        'registered: his sword up high in his field, then his level, title, '
+        'XP and boxes', (tester) async {
+      await open(tester, hour: 14, real: true);
+      await tester.ensureVisible(find.byKey(const Key('pipAdventures')));
+      await tester.tap(find.byKey(const Key('pipAdventures')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('pipRegister')));
+      await tester.pumpAndSettle();
+      final pip = container.read(pipLifeProvider);
+      expect(pip.adventurer, isTrue);
+      expect(pip.registeredAt, DateTime(2026, 10, 13, 14));
+      expect(tester.widget<PipRoom>(find.byType(PipRoom)).brain.activity,
+          PipActivity.adventuring);
+      expect(words(), containsAll(['LEVEL 1', 'ROOKIE']));
+      expect(find.byKey(const Key('pipXp')), findsOneWidget);
+      expect(find.bySemanticsLabel('WEAPON: a sword'), findsOneWidget);
+      expect(find.bySemanticsLabel('OFF-HAND: empty'), findsOneWidget);
+      expect(find.bySemanticsLabel('HAT: empty'), findsOneWidget);
+      expect(find.byKey(const Key('pipRegister')), findsNothing);
+    });
   });
 }

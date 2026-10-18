@@ -209,4 +209,15 @@ abstract class PipLink {
   /// he's at it, watched, and the drone's charge when he's off. True if
   /// he took it (not when full).
   bool chargeTick();
+
+  /// His day out now (Round 63), or null: he isn't out. Looked at, so his
+  /// break starts if it's due (Round 64); on it, how far through (0–1).
+  PipOut? outing();
+
+  /// His adventure level now (Round 63: a level up seen, a flash).
+  int get level;
 }
+
+/// Out on his adventure (Round 63): on his break or not, and how far
+/// through it (0 to 1).
+typedef PipOut = ({bool onBreak, double breakDone});

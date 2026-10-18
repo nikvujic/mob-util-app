@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_run.dart';
 
 /// What Pip is doing (Round 26).
 enum PipActivity {
@@ -94,6 +95,10 @@ enum PipActivity {
 
   /// Round 53: eating from a plate in his hands, a few bites, crumbs.
   eating,
+
+  /// Round 63: out on his adventure (12:00 to 18:00): running, the
+  /// ground moving under him, striking bugs ([PipRun]).
+  adventuring,
 }
 
 /// A hat on his head (Round 57): the party hat on a birthday, or one
@@ -261,7 +266,9 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.ball ||
       PipActivity.stargazing ||
       PipActivity.dancing ||
-      PipActivity.eating =>
+      PipActivity.eating ||
+      // Round 63: out, nothing else happens till he's back.
+      PipActivity.adventuring =>
         false,
       // Round 55: something on his screen (his medicine reminder, which
       // keeps on) gives way to bedtime, or running out.
@@ -593,6 +600,7 @@ class PipBrain {
     if (fresh && show != PipShow.awake) _stand();
     switch (show) {
       case PipShow.awake:
+        if (activity == PipActivity.adventuring) return true;
         return switch (activity) {
           PipActivity.asleep => play(PipAnimation.wakeUp),
           PipActivity.off => play(PipAnimation.powerOn),
@@ -1043,7 +1051,10 @@ class PipBrain {
         if (_t >= danceTime) _stand();
       case PipActivity.eating:
         if (_t >= eatTime) _stand();
+      case PipActivity.adventuring:
+        _stepRun(dt);
     }
+    _stepLevelFlash(dt);
     // Round 55: his medicine before charging (or anything else).
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
@@ -1617,7 +1628,9 @@ class PipBrain {
   /// Turned round mid-air, thrown in: radians (one whole tumble).
   double get spin => activity == PipActivity.thrown && _t < throwTime
       ? 2 * math.pi * _ease(_t / throwTime)
-      : 0;
+      : activity == PipActivity.adventuring
+          ? _run?.spin ?? 0
+          : 0;
 
   /// Dust puffing up where he landed (from the sky or a throw): 0 → 1,
   /// or null.
@@ -1965,16 +1978,19 @@ class PipBrain {
 
   /// The bug: its left edge and whether its legs are up (they step);
   /// null when there's none (or it's gone in a poof).
-  (double, bool)? get bug {
+  (double, bool, bool)? get bug {
+    if (activity == PipActivity.adventuring) return _run?.bug;
     final b = _bugX;
     if (activity != PipActivity.bugHunt || b == null || _bugPhase == 3) {
       return null;
     }
-    return (b, (_t * 8).floor().isEven);
+    // Mirrored going right (it comes from his left).
+    return (b, (_t * 8).floor().isEven, b + bugWidth / 2 < x + width / 2);
   }
 
   /// The poof where a bug was struck: its middle and 0 → 1.
   (double, double)? get poof {
+    if (activity == PipActivity.adventuring) return _run?.poof;
     if (activity != PipActivity.bugHunt || _bugPhase != 3) return null;
     return ((_bugX ?? x) + bugWidth / 2, _phaseT / poofTime);
   }
@@ -1984,6 +2000,7 @@ class PipBrain {
   /// forward as it grows) and size (popping in and away); null when put
   /// away.
   (double, double, double, double)? get sword {
+    if (activity == PipActivity.adventuring) return _run?.sword;
     if (activity != PipActivity.bugHunt) return null;
     // Round 53: held out in front, pointing up and away from him.
     // Round 54: a little closer to him.
@@ -2192,6 +2209,132 @@ class PipBrain {
     return (_ballX, _ballUp, (_ballX / 2).floor() % 4);
   }
 
+  // Round 63: his adventures.
+
+  PipRun? _run;
+
+  /// His day out, as it's drawn (the room's painter); null: not out.
+  PipRun? get run => activity == PipActivity.adventuring ? _run : null;
+
+  /// Whether he can set off now: up and about, or just made (opened
+  /// while he's out: he's simply there, out).
+  bool get _canGoOut =>
+      activity == PipActivity.standing ||
+      activity == PipActivity.walking ||
+      activity == PipActivity.showing ||
+      freshSpawn;
+
+  /// Out on his adventure, or not, as his life says ([out]; his room
+  /// checks every second): he sets off, takes his break, comes back.
+  /// [animate]: seen happening (he walks to the middle and draws his
+  /// sword; at 18:00 he slows to a stop); else he's simply out or back.
+  void adventure(PipOut? out, {required bool animate}) {
+    final run = _run;
+    if (out == null) {
+      if (run == null || activity != PipActivity.adventuring) return;
+      if (animate) {
+        run.want(onBreak: false, end: true);
+      } else {
+        _endRun();
+      }
+      return;
+    }
+    if (activity != PipActivity.adventuring) {
+      if (!_canGoOut) return;
+      _setOut();
+      if (out.onBreak && !animate) {
+        _run!.seated();
+      } else {
+        _run!.start(animate: animate);
+      }
+    }
+    _run!.want(onBreak: out.onBreak, done: out.breakDone);
+  }
+
+  /// Just registered as an adventurer (Pip Home): his sword held up high,
+  /// then off he goes. True if he could (up and about).
+  bool cheer() {
+    if (!_canGoOut || !spawned && !freshSpawn) return false;
+    _setOut();
+    _run!.start(cheer: true, animate: true);
+    return true;
+  }
+
+  /// Cheering just now (his fanfare plays with it).
+  bool get cheering => run?.phase == RunPhase.cheer;
+
+  void _setOut() {
+    _run = PipRun(random, x: x, roomWidth: roomWidth);
+    _start(PipActivity.adventuring);
+  }
+
+  void _stepRun(double dt) {
+    final run = _run;
+    if (run == null) {
+      _stand();
+      return;
+    }
+    run.roomWidth = roomWidth;
+    run.step(dt);
+    x = run.x;
+    facingRight = run.facingRight;
+    _buzzes.addAll(run.buzzes);
+    run.buzzes.clear();
+    if (run.phase == RunPhase.done) _endRun();
+  }
+
+  void _endRun() {
+    final run = _run;
+    _run = null;
+    if (run != null) x = run.x;
+    _stand();
+  }
+
+  /// Steps while out: quicker running.
+  PipFrame get _runFrame {
+    final run = _run;
+    if (run == null) return PipFrame.idle;
+    if (run.stepping) {
+      return const [
+        PipFrame.step1,
+        PipFrame.step2,
+        PipFrame.step3,
+        PipFrame.step4,
+      ][(run.clock / (stepTime / run.stepRate)).floor() % 4];
+    }
+    return switch (run.phase) {
+      RunPhase.knocked => PipFrame.oh,
+      RunPhase.down => PipFrame.tuck,
+      RunPhase.sitting => run.biting ? PipFrame.oh : PipFrame.tuck,
+      _ => PipFrame.idle,
+    };
+  }
+
+  /// A level up seen (Round 63): a flash over him for [levelFlashTime],
+  /// with a buzz (no sound).
+  double? _levelFlash;
+  static const levelFlashTime = 1.8;
+
+  void levelUp() {
+    _levelFlash = 0;
+    _buzzes.add(PipBuzz.medium);
+  }
+
+  /// The level-up flash, 0 → 1; null: none.
+  double? get levelFlash {
+    final f = _levelFlash;
+    return f == null ? null : f / levelFlashTime;
+  }
+
+  void _stepLevelFlash(double dt) {
+    final f = _levelFlash;
+    if (f == null) return;
+    final next = f + dt;
+    // A second buzz a moment after the first.
+    if (f < 0.25 && next >= 0.25) _buzzes.add(PipBuzz.light);
+    _levelFlash = next >= levelFlashTime ? null : next;
+  }
+
   void _stand() {
     activity = PipActivity.standing;
     _t = 0;
@@ -2280,6 +2423,7 @@ class PipBrain {
         PipActivity.eating => bites.any((b) => _t >= b && _t < b + biteTime)
             ? PipFrame.oh
             : PipFrame.idle,
+        PipActivity.adventuring => _runFrame,
       };
 
   /// Hurrying, his steps come quicker too (Round 44).
@@ -2310,6 +2454,14 @@ class PipBrain {
 
   /// How high above the ground (a hop, or a step's bob), in pixels.
   double get lift {
+    // Round 63: out, as his run says (a knock, his seat), and a bob.
+    if (_run case final run? when activity == PipActivity.adventuring) {
+      final bob =
+          run.stepping && (frame == PipFrame.step1 || frame == PipFrame.step3)
+              ? 1.0
+              : 0.0;
+      return run.lift + bob - (frame == PipFrame.tuck ? 2 : 0);
+    }
     // Round 52: dropping from the sky, or thrown in on an arc.
     if (activity == PipActivity.falling && _t < _fallTime) {
       final left = _fallTime - _t;
@@ -2378,6 +2530,7 @@ class PipBrain {
       return (1 - s / 2, 1 + s);
     }
     final crouch = switch (activity) {
+      PipActivity.adventuring => _run?.crouch,
       PipActivity.flower when _flowerPhase == 2 => _t / flowerPick,
       // Round 54: down for the new battery, and up again with it.
       PipActivity.fetching
