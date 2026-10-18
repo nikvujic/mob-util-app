@@ -173,4 +173,20 @@ void main() {
     expect(PipAdventure.levelFor(0), 1);
     expect(PipAdventure.titleFor(PipAdventure.levelFor(0)), 'Rookie');
   });
+
+  test('plugged in, out on his adventure: he can have a battery (Round 65)',
+      () {
+    final pip = hatched(energy: 1, energyAt: at(19, 11, 59));
+    pip.replace(pip.state.copyWith(
+      registeredAt: () => at(18, 14),
+      outDay: () => '2026-10-18',
+    ));
+    pip.setCharging(true, at(19, 11, 59));
+    pip.collect(at(19, 13));
+    expect(pip.outAt(at(19, 13)), isTrue);
+    expect(pip.refusalAt(at(19, 13)), isNull);
+    expect(pip.giveBattery(at(19, 13)), isTrue);
+    // Back from it, plugged in, he's at his station again: not now.
+    expect(pip.refusalAt(at(19, 19)), PipRefusal.charging);
+  });
 }

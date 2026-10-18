@@ -257,7 +257,8 @@ void main() {
 
     testWidgets(
         'out on his adventure (Round 63): opened, simply running; no '
-        'station, taps do nothing; a level up seen flashes; at 18:00 he '
+        'station; a tap gives a battery he catches running; a level up seen '
+        'flashes; at 18:00 he '
         'stops', (tester) async {
       final link = FakePipLink(batteries: 3)
         ..at = DateTime(2026, 10, 15, 13)
@@ -275,7 +276,10 @@ void main() {
       expect(pip().run!.phase, RunPhase.running, reason: 'no setting off');
       expect(pip().station, isNull, reason: 'out, he doesn\'t charge');
       await tester.tap(find.byKey(const Key('pipRoom')));
-      expect(link.batteries, 3, reason: 'taps do nothing');
+      // Round 65: a battery, flying to him; he runs on.
+      expect(link.batteries, 2);
+      expect(pip().battery, isNotNull);
+      expect(pip().run!.phase, RunPhase.running);
 
       link.level = 2;
       for (var i = 0; i < 70; i++) {

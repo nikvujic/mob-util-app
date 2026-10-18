@@ -261,7 +261,10 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     final show = showAt(now);
     if (show == PipShow.asleep) return PipRefusal.asleep;
     // Round 44: plugged in (at his station), not now.
-    if (_charging && show != PipShow.off) return PipRefusal.charging;
+    // Round 65: not while he's out (he isn't at his station then).
+    if (_charging && show != PipShow.off && !outAt(now)) {
+      return PipRefusal.charging;
+    }
     return null;
   }
 

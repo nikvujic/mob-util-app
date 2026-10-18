@@ -187,10 +187,44 @@ class PipRun {
     _fleeing = false;
   }
 
+  /// Round 65: a battery given while he's out, flying from where it was
+  /// dropped to him (he catches it without stopping); seconds into it.
+  double? _batteryFrom;
+  double _batteryT = 0;
+  static const batteryFlight = 0.7;
+
+  /// He can catch one now (one at a time).
+  bool get canCatch => _batteryFrom == null;
+
+  /// A battery dropped at [left] (on the screen) flies to him.
+  void catchBattery(double left) {
+    _batteryFrom = left;
+    _batteryT = 0;
+  }
+
+  /// The flying battery: its left edge and height on the screen, or null.
+  (double, double)? get battery {
+    final from = _batteryFrom;
+    if (from == null) return null;
+    final p = (_batteryT / batteryFlight).clamp(0.0, 1.0);
+    final to = x + PipBrain.width / 2 - PipBrain.batteryWidth / 2;
+    return (
+      from + (to - from) * p,
+      PipBrain.dropHeight * (1 - p) + 8 * p + 14 * math.sin(math.pi * p),
+    );
+  }
+
   /// Moves on by [dt] seconds.
   void step(double dt) {
     t += dt;
     clock += dt;
+    if (_batteryFrom != null) {
+      _batteryT += dt;
+      if (_batteryT >= batteryFlight) {
+        _batteryFrom = null;
+        buzzes.add(PipBuzz.light);
+      }
+    }
     shift += speed * dt;
     _stepBug(dt);
     final tavern = tavernAt;

@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 65 — Nikola on 1.25.0 (2026-10-18)
+
+- [x] **Batteries while he's out**: a tap gives one; it flies to him and
+  he catches it running. Registering fills his energy (as built).
+- [ ] **Skiing**: spec in `docs/ADVENTURES_SPEC.md` section 8, waiting
+  on Nikola's answers (8.7) and go.
+
 ### Round 64 — Nikola's notes from using the app (2026-10-18)
 
 Noted; adventures first (go given), the rest after.

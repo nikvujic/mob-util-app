@@ -139,8 +139,11 @@ these names):
 - He **can't power down** during an adventure: if his energy would run
   out, he keeps going and powers down **after it ends** at 18:00 (or at
   once then, if he's out of energy).
-- No batteries while he's out (taps do nothing); before 12:00 or
-  after 18:00 as ever.
+- Round 65: a **tap gives him a battery** while he's out too (decided):
+  it flies from where you tapped to him and he catches it without
+  stopping (a light buzz), one at a time. Plugged in, out, he isn't at
+  his station, so it isn't refused for that. Registering fills his
+  **energy** (his battery icon), not the batteries you hold (decided).
 - No notifications for adventures (decided).
 
 ## 7. Sound (decided)
@@ -151,14 +154,88 @@ these names):
   MainActivity) on the **media volume**, so they follow the phone's
   volume (muted → silent). A short 8-bit clip bundled with the app.
 
-## 8. Skiing (decided; after the normal adventure)
+## 8. Skiing (Round 65: the spec; waiting on Nikola's go)
 
-- On days with a **Skiing** date in Dates, the background is **always
-  snowy**, and his adventure is **skiing down a hill** instead of
-  running right: he puts on skis at the start, slides down (the slope
-  moving under him), and now and then **falls**: a ski comes off and
-  slides away; he gets up, fetches it, puts it back on and carries on
-  (with a vibration). XP the same as a normal adventure.
+Decided so far: on days with a **Skiing** date in Dates, the background
+is **always snowy**, and his adventure is **skiing down a hill** instead
+of running right; now and then he **falls**: a ski comes off and slides
+away; he gets up, fetches it, puts it back on and carries on (with a
+vibration); his break is a **hot chocolate**. XP the same as a normal
+adventure. The rest are suggestions (questions in 8.7).
+
+### 8.1 When
+
+- A **ski day**: any day a Dates holiday of kind **Skiing** is on
+  (including each day of one that lasts several days). Worked out from
+  Dates, nothing new stored: no backup or format change.
+- Registered or not, the **whole day** is snowy (8.2). If he's an
+  adventurer, his day out (12:00–18:00, same rules, same XP) is skiing.
+
+### 8.2 The snowy day (menu and Pip Home)
+
+- **Ground**: snow instead of grass, white with pale blue-grey shading
+  and a few specks; a darker band of packed snow under it.
+- **Snowing**, all day and night: flakes (1–2 pixels, white, some
+  dimmer) drifting down and a little sideways; while he skis, they also
+  stream back past him with the slope.
+- **Sky**: the usual one for the hour, a little greyer by day (thin
+  cloud), stars and moon at night as ever.
+- **Pine trees** dusted with snow, a few in the background.
+- Pip's usual day (walking, events, sleep) goes on as ever in it.
+
+### 8.3 The slope
+
+- His adventure view tilts: the ground is a **gentle slope** going down
+  to the right (about one pixel down for every four across), Pip in
+  the middle on it. The slope, trees, flags and bumps slide **up and
+  to the left** past him, so he looks like he's going **down**.
+- **Slalom flags** (red and blue poles) and pine trees go by; now and
+  then a **bump** sends him up in a little hop (a light buzz on
+  landing).
+- **No bugs** while skiing; the sword stays away (his weapon box still
+  shows it). He holds **ski poles** instead.
+
+### 8.4 Starting and ending
+
+- Seen setting off: he walks to the middle, **skis pop in** under his
+  feet and poles into his hands (a sparkle, like his hands), the
+  ground tilts into the slope and off he goes. Otherwise he's simply
+  skiing.
+- Seen at 18:00: he turns side-on in a little spray of snow and stops,
+  the skis and poles pop away, the ground goes flat (snowy). Otherwise
+  he's simply back.
+- Registering on a ski day: the sword up high with the fanfare as ever,
+  then the skis.
+
+### 8.5 Falling
+
+- Now and then (every 20–60 seconds, at random) he **falls**: he
+  tumbles forward with a puff of snow, **one ski comes off** and slides
+  on down the slope ahead of him; he gets up (a medium buzz on the
+  fall), walks down to it, steps back into it, and the slope moves
+  again.
+
+### 8.6 The break
+
+- The same as the tavern (looked at 14:00–16:00, half an hour, once a
+  day), but a **mountain hut**: a log hut with snow on its roof, a lit
+  window; the slope flattens as it comes; he takes his skis off and
+  leans them on the wall, sits at the table outside, and a **mug of hot
+  chocolate** (steam rising) pops out of the window to him; he sips it
+  as the break goes, the mug emptying. Then skis back on, and down.
+
+### 8.7 Questions
+
+1. **The slope**: tilted as in 8.3, or the ground kept **flat** with
+   him gliding (simpler to read in the small menu strip)?
+2. **Snow all day** on ski days, or only during his day out?
+3. **Hat**: keep his hat of the day, or a **ski beanie** on ski days
+   (unless it's a birthday)?
+4. **Bumps and flags**: both, one, or neither?
+5. **Falls**: every 20–60 s, or rarer (bugs knocked him back about one
+   in five)?
+6. **Not registered**: on a ski day, should Pip ski a little at times
+   anyway (a short run as one of his events), or only snow?
 
 ## 9. Data and backup
 

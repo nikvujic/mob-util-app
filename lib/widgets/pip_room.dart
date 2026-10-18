@@ -323,7 +323,6 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     final link = widget.link;
     final brain = widget.brain;
     if (link == null) return;
-    // Round 63: out on his adventure, he takes none ([PipBrain.canTakeBattery]).
     if (brain.canTakeBattery && link.giveBattery()) {
       brain.takeBattery(atPixel - PipBrain.batteryWidth / 2);
       HapticFeedback.mediumImpact();

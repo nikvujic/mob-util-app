@@ -504,13 +504,19 @@ class PipBrain {
   /// off: it flies to him).
   bool get canTakeBattery =>
       mayStart(activity, PipAnimation.fetch) ||
-      mayStart(activity, PipAnimation.powerOn);
+      mayStart(activity, PipAnimation.powerOn) ||
+      // Round 65: out on his adventure, it flies to him as he runs.
+      (activity == PipActivity.adventuring && _run?.canCatch == true);
 
   /// A battery dropped at [at] (room pixels from the left): he walks over
   /// and picks it up, or, off, it flies to him and he comes back on.
   bool takeBattery(double at) {
     if (!canTakeBattery) return false;
     final left = at.clamp(0, math.max(0, roomWidth - batteryWidth)).toDouble();
+    if (activity == PipActivity.adventuring) {
+      _run!.catchBattery(left);
+      return true;
+    }
     _battery = left;
     _batteryFrom = left;
     _batteryHeight = dropHeight;
@@ -558,6 +564,7 @@ class PipBrain {
   /// The battery to draw: its left edge and how high above the ground
   /// (flying to him while he's off), or null.
   (double, double)? get battery {
+    if (activity == PipActivity.adventuring) return _run?.battery;
     final b = _battery;
     if (b == null) return null;
     if (activity == PipActivity.poweringOn) {

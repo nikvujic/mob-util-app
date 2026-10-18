@@ -4,6 +4,13 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Changed
+- **Pip's adventures**: a **tap gives him a battery** while he's out
+  too: it flies to him and he catches it as he runs. Plugged in, he
+  isn't refused one for charging while he's out.
+
 ## [1.25.0] - 2026-10-18
 
 ### Added

@@ -170,14 +170,13 @@ void main() {
   });
 
   test(
-      'out, nothing else starts; he takes no battery; his life\'s "awake" '
+      'out, nothing else starts; his life\'s "awake" '
       'is him out', () {
     final b = standing();
     b.adventure(out, animate: false);
     for (final a in PipAnimation.values) {
       expect(mayStart(PipActivity.adventuring, a), isFalse);
     }
-    expect(b.canTakeBattery, isFalse);
     expect(b.eat(), isFalse);
     expect(b.notify(), isFalse);
     expect(b.show(PipShow.awake), isTrue);
@@ -193,5 +192,26 @@ void main() {
     expect(b.takeBuzzes(), [PipBuzz.medium, PipBuzz.light]);
     steps(b, PipBrain.levelFlashTime);
     expect(b.levelFlash, isNull);
+  });
+
+  test(
+      'a battery given while he\'s out (Round 65): it flies to him, he '
+      'catches it running; one at a time', () {
+    final b = standing();
+    b.adventure(out, animate: false);
+    b.takeBuzzes();
+    expect(b.canTakeBattery, isTrue);
+    expect(b.takeBattery(10), isTrue);
+    expect(b.canTakeBattery, isFalse, reason: 'one in the air');
+    final (from, high) = b.battery!;
+    expect(from, 10);
+    expect(high, PipBrain.dropHeight);
+    steps(b, PipRun.batteryFlight / 2);
+    expect(b.battery!.$1, greaterThan(10));
+    expect(b.run!.phase, RunPhase.running);
+    steps(b, PipRun.batteryFlight);
+    expect(b.battery, isNull);
+    expect(b.takeBuzzes(), contains(PipBuzz.light));
+    expect(b.canTakeBattery, isTrue);
   });
 }
