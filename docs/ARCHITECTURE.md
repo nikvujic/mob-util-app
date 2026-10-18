@@ -470,6 +470,18 @@ in `mayStart`), driven by `core/pip_run.dart`'s `PipRun` (phases,
 the ground's shift, bugs, the knocked-off sword, the tavern and plate),
 which the painter draws in screen terms (world x − shift).
 
+His ski trips (Round 67): `providers/pip_trip.dart` works out from
+Dates the bus rides (`ridesNear`), ski days, bus days and the snowy
+look (`PipTrip.at`, a `PipTripNow` from `core/pip_adventure.dart`);
+`PipLifeNotifier` gets the dates as a function, pauses his energy over
+the rides (`PipEnergy.levelPausing`) and counts bus days' XP;
+`PipLink.trip()` tells his room. The brain's `PipActivity.riding` is
+driven by `core/pip_bus.dart` (`PipBus`); skiing is `PipRun` with
+`skiing` (slope things, bumps, falls, gear); `PipBrain.snowing` (a ski
+day or a ski preview) decides the snow, the beanie and his gear's
+snowbank. Previews (`previewAdventure`, `previewBus`) run their course
+whatever his life says and stop with `stopPreviews`.
+
 His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,
 `emptyAt`, `segments`, `nextBattery`, `batteriesAt`: one every 5 h on

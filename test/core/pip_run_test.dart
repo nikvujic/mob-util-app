@@ -64,7 +64,7 @@ void main() {
     final b = standing();
     b.adventure(out, animate: false);
     b.takeBuzzes();
-    b.run!.debugBug(hits: false);
+    b.run!.bugAhead(hits: false);
     var poofed = false;
     for (var i = 0; i < 120; i++) {
       b.step(1 / 60);
@@ -81,7 +81,7 @@ void main() {
       'and runs on', () {
     final b = standing();
     b.adventure(out, animate: false);
-    b.run!.debugBug(hits: true);
+    b.run!.bugAhead(hits: true);
     steps(b, 0.75);
     expect(b.run!.phase, RunPhase.knocked);
     expect(b.sword, isNull);
@@ -143,7 +143,7 @@ void main() {
   test('18:00 seen: he slows to a stop and is back; unseen: back at once', () {
     final b = standing();
     b.adventure(out, animate: false);
-    b.run!.debugBug(hits: false);
+    b.run!.bugAhead(hits: false);
     b.adventure(null, animate: true);
     steps(b, 0.1);
     expect(b.run!.phase, RunPhase.ending);

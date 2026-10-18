@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_adventure.dart';
+import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_run.dart';
 
 /// What Pip is doing (Round 26).
@@ -99,6 +101,9 @@ enum PipActivity {
   /// Round 63: out on his adventure (12:00 to 18:00): running, the
   /// ground moving under him, striking bugs ([PipRun]).
   adventuring,
+
+  /// Round 67: on his ski trip's bus ([PipBus]).
+  riding,
 }
 
 /// A hat on his head (Round 57): the party hat on a birthday, or one
@@ -115,7 +120,10 @@ enum PipHat {
   santa('Santa hat', everyday: false),
   witch('Witch hat', everyday: false),
   bunny('Bunny ears', everyday: false),
-  heart('Heart band', everyday: false);
+  heart('Heart band', everyday: false),
+
+  /// Round 67: all his ski days.
+  skiBeanie('Ski beanie', everyday: false);
 
   final String label;
 
@@ -267,8 +275,10 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.stargazing ||
       PipActivity.dancing ||
       PipActivity.eating ||
-      // Round 63: out, nothing else happens till he's back.
-      PipActivity.adventuring =>
+      // Round 63: out, nothing else happens till he's back; Round 67: on
+      // the bus, nor then.
+      PipActivity.adventuring ||
+      PipActivity.riding =>
         false,
       // Round 55: something on his screen (his medicine reminder, which
       // keeps on) gives way to bedtime, or running out.
@@ -596,6 +606,11 @@ class PipBrain {
   /// he's just appeared (instead of coming out of the ground), or with
   /// its animation. False if he's busy now (try again later).
   bool show(PipShow show) {
+    // Round 67: on the bus, he dozes in his seat at night; nothing else.
+    if (activity == PipActivity.riding) {
+      _busAsleep = show == PipShow.asleep || show == PipShow.fallAsleep;
+      return true;
+    }
     // Round 44: plugged in at bedtime, he unplugs first (then sleeps;
     // the station stays, unused, while the phone's plugged in).
     _bedtime = show == PipShow.asleep || show == PipShow.fallAsleep;
@@ -822,6 +837,8 @@ class PipBrain {
     switch (activity) {
       case PipActivity.asleep:
         return PipFace.asleep;
+      case PipActivity.riding when _busAsleep:
+        return PipFace.asleep;
       case PipActivity.angry:
         return PipFace.angry;
       case PipActivity.fallingAsleep:
@@ -849,7 +866,10 @@ class PipBrain {
   /// The little z's rising while he sleeps: each (x from his middle, y
   /// above his head, how faded 0–1), in room pixels.
   List<(double, double, double)> get zs {
-    if (activity != PipActivity.asleep) return const [];
+    if (activity != PipActivity.asleep &&
+        !(activity == PipActivity.riding && _busAsleep && _bus!.inside)) {
+      return const [];
+    }
     return [
       for (var i = 0; i < 3; i++)
         if (((_t / 2.4 + i / 3) % 1) case final p)
@@ -1060,8 +1080,11 @@ class PipBrain {
         if (_t >= eatTime) _stand();
       case PipActivity.adventuring:
         _stepRun(dt);
+      case PipActivity.riding:
+        _stepBus(dt);
     }
     _stepLevelFlash(dt);
+    if (snowing) snowClock += dt;
     // Round 55: his medicine before charging (or anything else).
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
@@ -1752,7 +1775,11 @@ class PipBrain {
       return null;
     }
     if (_tryingOn) return _triedOn;
-    return birthday ? PipHat.party : dayHat;
+    // Round 67: no hat on the bus.
+    if (activity == PipActivity.riding) return null;
+    if (birthday) return PipHat.party;
+    // Round 67: a ski beanie all his ski days.
+    return snowing ? PipHat.skiBeanie : dayHat;
   }
 
   /// Asleep (settled, legs tucked): his hat on the ground beside him.
@@ -2216,6 +2243,112 @@ class PipBrain {
     return (_ballX, _ballUp, (_ballX / 2).floor() % 4);
   }
 
+  // Round 67: his ski trip's bus.
+
+  PipBus? _bus;
+  bool _busAsleep = false;
+
+  /// The bus ride, as it's drawn; null: not on it.
+  PipBus? get bus => activity == PipActivity.riding ? _bus : null;
+
+  /// On the bus or not, as his life says ([trip]; his room checks every
+  /// second). [animate]: seen happening (it pulls in and he boards; it
+  /// stops and he steps out), else he's simply on it, or off.
+  void ride(PipTripNow trip, {required bool animate}) {
+    final bus = _bus;
+    if (_busPreview != null) return;
+    if (trip.leg == null) {
+      if (bus == null || activity != PipActivity.riding) return;
+      if (animate) {
+        bus.arrive();
+      } else {
+        _endBus();
+      }
+      return;
+    }
+    if (activity == PipActivity.riding) return;
+    if (activity == PipActivity.adventuring) _endRun();
+    if (!_canBoard) return;
+    _bus = PipBus(roomWidth: roomWidth, pipX: x)..start(animate: animate);
+    x = _bus!.pipX;
+    _start(PipActivity.riding);
+  }
+
+  /// Whether he can get on now: up and about (or just made, or asleep or
+  /// off: he's simply on it).
+  bool get _canBoard =>
+      _canGoOut ||
+      activity == PipActivity.asleep ||
+      activity == PipActivity.off;
+
+  void _stepBus(double dt) {
+    final bus = _bus;
+    if (bus == null) {
+      _stand();
+      return;
+    }
+    final preview = _busPreview;
+    if (preview != null && bus.phase == BusPhase.riding) {
+      _busPreview = preview + dt;
+      if (_busPreview! >= busPreviewRide) bus.arrive();
+    }
+    bus.roomWidth = roomWidth;
+    bus.step(dt);
+    x = bus.pipX;
+    facingRight = bus.inside || bus.facingRight;
+    if (bus.phase == BusPhase.done) _endBus();
+  }
+
+  void _endBus() {
+    final bus = _bus;
+    _bus = null;
+    _busPreview = null;
+    if (bus != null) x = bus.pipX.clamp(0, _maxX).toDouble();
+    _stand();
+  }
+
+  /// Played from Pip Home's Adventures (Round 67): a short day out, or a
+  /// ski run ([ski]: snowing, his gear, a fall), with no XP; it ends by
+  /// itself, or with [stopPreviews]. True if he could (up and about).
+  bool previewAdventure({bool ski = false}) {
+    if (!_canGoOut) return false;
+    _run = PipRun(random, x: x, roomWidth: roomWidth, skiing: ski);
+    _start(PipActivity.adventuring);
+    _run!.start(animate: true);
+    _runPreview = 0;
+    _previewSki = ski;
+    return true;
+  }
+
+  double? _runPreview;
+  bool _previewSki = false;
+  static const previewEventAt = 6.0;
+  static const previewLength = 14.0;
+
+  /// Snowing: a ski day, or a ski preview.
+  bool get snowing => snowy || _previewSki;
+
+  /// Back on his info card (or leaving): a preview going on stops.
+  void stopPreviews() {
+    if (_runPreview != null && activity == PipActivity.adventuring) {
+      _endRun();
+    }
+    if (_busPreview != null && activity == PipActivity.riding) _endBus();
+  }
+
+  /// Played from Pip Home's Adventures (Round 67): the bus pulls in, he
+  /// boards, it drives a while, stops and he steps out. True if it could.
+  bool previewBus() {
+    if (!_canGoOut) return false;
+    _bus = PipBus(roomWidth: roomWidth, pipX: x)..start(animate: true);
+    _start(PipActivity.riding);
+    _busPreview = 0;
+    return true;
+  }
+
+  double? _busPreview;
+  static const busPreviewRide = 4.0;
+
   // Round 63: his adventures.
 
   PipRun? _run;
@@ -2237,6 +2370,8 @@ class PipBrain {
   /// sword; at 18:00 he slows to a stop); else he's simply out or back.
   void adventure(PipOut? out, {required bool animate}) {
     final run = _run;
+    // A preview (Pip Home's Adventures) runs its course.
+    if (_runPreview != null) return;
     if (out == null) {
       if (run == null || activity != PipActivity.adventuring) return;
       if (animate) {
@@ -2270,8 +2405,20 @@ class PipBrain {
   /// Cheering just now (his fanfare plays with it).
   bool get cheering => run?.phase == RunPhase.cheer;
 
+  /// Round 67: a ski day (his room says): his day out is skiing, it
+  /// snows, his gear stands in a snowbank, a ski beanie.
+  bool skiing = false;
+  bool snowy = false;
+
+  /// His gear in the snowbank (not on him, not on a bus).
+  bool get gearInBank =>
+      snowing &&
+      !(run?.geared ?? false) &&
+      activity != PipActivity.egg &&
+      activity != PipActivity.riding;
+
   void _setOut() {
-    _run = PipRun(random, x: x, roomWidth: roomWidth);
+    _run = PipRun(random, x: x, roomWidth: roomWidth, skiing: skiing);
     _start(PipActivity.adventuring);
   }
 
@@ -2280,6 +2427,20 @@ class PipBrain {
     if (run == null) {
       _stand();
       return;
+    }
+    // Round 67: a preview's moments, then home.
+    final preview = _runPreview;
+    if (preview != null) {
+      final next = preview + dt;
+      _runPreview = next;
+      bool at(double s) => preview < s && next >= s;
+      if (run.skiing) {
+        if (at(previewEventAt)) run.fallNow();
+      } else {
+        if (at(previewEventAt - 2.5)) run.bugAhead(hits: false);
+        if (at(previewEventAt + 2)) run.bugAhead(hits: true);
+      }
+      if (at(previewLength)) run.want(onBreak: false, end: true);
     }
     run.roomWidth = roomWidth;
     run.step(dt);
@@ -2293,6 +2454,8 @@ class PipBrain {
   void _endRun() {
     final run = _run;
     _run = null;
+    _runPreview = null;
+    _previewSki = false;
     if (run != null) x = run.x;
     _stand();
   }
@@ -2332,6 +2495,9 @@ class PipBrain {
     final f = _levelFlash;
     return f == null ? null : f / levelFlashTime;
   }
+
+  /// Seconds his snow has been falling (Round 67), for the flakes.
+  double snowClock = 0;
 
   void _stepLevelFlash(double dt) {
     final f = _levelFlash;
@@ -2431,6 +2597,14 @@ class PipBrain {
             ? PipFrame.oh
             : PipFrame.idle,
         PipActivity.adventuring => _runFrame,
+        PipActivity.riding => _bus?.walking == true
+            ? const [
+                PipFrame.step1,
+                PipFrame.step2,
+                PipFrame.step3,
+                PipFrame.step4,
+              ][(_t / stepTime).floor() % 4]
+            : PipFrame.idle,
       };
 
   /// Hurrying, his steps come quicker too (Round 44).
@@ -2461,6 +2635,10 @@ class PipBrain {
 
   /// How high above the ground (a hop, or a step's bob), in pixels.
   double get lift {
+    // Round 67: in his seat on the bus, his feet hidden.
+    if (_bus case final bus? when activity == PipActivity.riding) {
+      return bus.inside ? PipBus.seatLift : 0;
+    }
     // Round 63: out, as his run says (a knock, his seat), and a bob.
     if (_run case final run? when activity == PipActivity.adventuring) {
       final bob =

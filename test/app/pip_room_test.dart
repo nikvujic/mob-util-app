@@ -6,6 +6,7 @@ import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/widgets/pixel_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/models/pip_life.dart';
@@ -413,6 +414,32 @@ void main() {
     await openMenu(tester);
     await tester.pumpAndSettle();
     expect(container.read(pipBrainProvider).hat, PipHat.witch);
+  });
+
+  testWidgets(
+      'his ski trip (Round 67): on the bus, no station; a ski day snowy, '
+      'skiing out', (tester) async {
+    final link = FakePipLink()
+      ..at = DateTime(2027, 1, 20, 9)
+      ..plugged = true
+      ..ride = (leg: TripLeg.there, progress: 0.5, snowy: false, skiing: false);
+    final container = await pumpApp(tester, pipLink: link, overrides: [
+      pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(1))),
+    ]);
+    await openMenu(tester);
+    final pip = container.read(pipBrainProvider);
+    expect(pip.activity, PipActivity.riding);
+    expect(pip.station, isNull);
+    await tester.tapAt(const Offset(780, 300)); // beside the menu
+    await tester.pumpAndSettle();
+    link
+      ..ride = (leg: null, progress: 0.0, snowy: true, skiing: true)
+      ..out = (onBreak: false, breakDone: 0.0)
+      ..plugged = false;
+    await openMenu(tester);
+    expect(pip.snowy, isTrue);
+    expect(pip.activity, PipActivity.adventuring);
+    expect(pip.run!.skiing, isTrue);
   });
 
   Iterable<String> labels() => find

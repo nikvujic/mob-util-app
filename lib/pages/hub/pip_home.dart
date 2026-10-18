@@ -32,7 +32,7 @@ class PipHomePage extends ConsumerStatefulWidget {
 }
 
 /// What the settings side of the card shows.
-enum _Settings { menu, rename, animations, backgrounds, hats }
+enum _Settings { menu, rename, animations, adventures, backgrounds, hats }
 
 class _PipHomePageState extends ConsumerState<PipHomePage> {
   /// His own, here: the menu's Pip stays where he was.
@@ -48,6 +48,8 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   void _endPreviews() {
     _background = PipBackground.field;
     _brain.stopTryingOn();
+    // Round 67: an adventure preview stops too.
+    _brain.stopPreviews();
   }
 
   /// The scene's pixel: Pip as big as in the menu (Round 38), in a
@@ -121,6 +123,10 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                     back: () => _show(_Settings.menu),
                                   ),
                                 _Settings.animations => _Animations(
+                                    brain: _brain,
+                                    back: () => _show(_Settings.menu),
+                                  ),
+                                _Settings.adventures => _Adventures(
                                     brain: _brain,
                                     back: () => _show(_Settings.menu),
                                   ),
@@ -526,6 +532,13 @@ class _SettingsMenu extends StatelessWidget {
           value: '>',
           onTap: () => open(_Settings.animations),
         ),
+        // Round 67: his adventures, as previews (no XP).
+        _CardRow(
+          key: const Key('pipAdventurePreviews'),
+          label: 'ADVENTURES',
+          value: '>',
+          onTap: () => open(_Settings.adventures),
+        ),
         // Picked from a list (Round 36); the one in use beside it. Round
         // 57: a preview, like a hat.
         _CardRow(
@@ -692,6 +705,89 @@ class _AnimationsState extends State<_Animations> {
                     value: '>',
                     onTap: () => _play(a),
                   ),
+            ],
+          ),
+        ),
+        if (_why case final why?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: _words(why, colour: PipColours.light),
+          ),
+        _back(widget.back),
+      ],
+    );
+  }
+}
+
+/// His adventures as previews (Round 67): a day out, a ski run, a bus
+/// trip, played in his field; no XP, nothing kept, stopped back on his
+/// info card.
+class _Adventures extends StatefulWidget {
+  final PipBrain brain;
+  final VoidCallback back;
+
+  const _Adventures({required this.brain, required this.back});
+
+  @override
+  State<_Adventures> createState() => _AdventuresState();
+}
+
+class _AdventuresState extends State<_Adventures> {
+  Timer? _hide;
+  String? _why;
+
+  @override
+  void dispose() {
+    _hide?.cancel();
+    super.dispose();
+  }
+
+  void _play(bool Function() play) {
+    if (play()) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    _hide?.cancel();
+    setState(() => _why = switch (widget.brain.activity) {
+          PipActivity.asleep => "HE'S ASLEEP",
+          PipActivity.off => "HE'S OFF",
+          PipActivity.adventuring => "HE'S OUT",
+          PipActivity.riding => "HE'S ON HIS TRIP",
+          _ => "HE'S BUSY, A MOMENT",
+        });
+    _hide = Timer(const Duration(milliseconds: 1200), () {
+      if (mounted) setState(() => _why = null);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final brain = widget.brain;
+    return Column(
+      key: const Key('pipAdventureList'),
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              _CardRow(
+                key: const Key('pipPreview-adventure'),
+                label: 'ADVENTURE',
+                value: '>',
+                onTap: () => _play(brain.previewAdventure),
+              ),
+              _CardRow(
+                key: const Key('pipPreview-skiing'),
+                label: 'SKIING',
+                value: '>',
+                onTap: () => _play(() => brain.previewAdventure(ski: true)),
+              ),
+              _CardRow(
+                key: const Key('pipPreview-bus'),
+                label: 'BUS TRIP',
+                value: '>',
+                onTap: () => _play(brain.previewBus),
+              ),
             ],
           ),
         ),

@@ -517,6 +517,26 @@ abstract final class PipColours {
   static const chimneyTop = Color(0xFF5A5A58);
   static const sign = Color(0xFFE8C48A);
   static const mug = Color(0xFFE8963A);
+  // Round 67: his ski days.
+  static const snow = Color(0xFFF2F5FA);
+  static const snowShade = Color(0xFFCBD6E6);
+  static const snowDark = Color(0xFFA9B8CF);
+  static const flake = Color(0xFFFFFFFF);
+  static const pine = Color(0xFF2E6040);
+  static const pineDark = Color(0xFF1F4430);
+  static const flagRed = Color(0xFFDC3C32);
+  static const flagBlue = Color(0xFF3C64DC);
+  static const pole = Color(0xFF5A5A58);
+  static const ski = Color(0xFFE8963A);
+  static const hotMug = Color(0xFFC0392B);
+  static const cocoa = Color(0xFF6B3E26);
+  static const steam = Color(0xFFE8E8E8);
+  static const busYellow = Color(0xFFF2B632);
+  static const busShade = Color(0xFFC88A1E);
+  static const busGlass = Color(0xFF9CC7E0);
+  static const road = Color(0xFF5A5A5E);
+  static const roadDark = Color(0xFF45454A);
+  static const roadLine = Color(0xFFF5F0E8);
   // Round 63: LEVEL UP, over him.
   static const levelUp = Color(0xFFFFD36E);
   static const levelUpShade = Color(0xFFB0702A);

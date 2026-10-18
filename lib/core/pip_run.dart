@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import 'package:the_app/core/pip_brain.dart';
+
+/// What stands on his ski slope (Round 67).
+enum SlopeThing { tree, redFlag, blueFlag }
 
 /// Where he is in his day out (Round 63).
 enum RunPhase {
@@ -48,6 +49,24 @@ enum RunPhase {
   /// 18:00: slowing to a stop, the sword away.
   ending,
 
+  // Round 67: skiing (a ski day's look for his day out).
+
+  /// Walking to his gear in the snowbank...
+  toGear,
+
+  /// ...taking it (skis on, poles in hand); at the end, putting it back.
+  takeGear,
+  putGear,
+
+  /// A fall: tumbling forward, a ski coming off and sliding away...
+  skiFall,
+
+  /// ...walking to it...
+  toSki,
+
+  /// ...and stepping back in.
+  skiOn,
+
   /// Over: he's back to his usual self.
   done,
 }
@@ -59,7 +78,19 @@ enum RunPhase {
 class PipRun {
   final math.Random random;
 
-  PipRun(this.random, {required this.x, required this.roomWidth});
+  PipRun(this.random,
+      {required this.x, required this.roomWidth, this.skiing = false});
+
+  /// Round 67: a ski day: he skis down instead of running right; no bugs,
+  /// no sword; poles and skis from his gear in the snowbank ([gearX]).
+  final bool skiing;
+
+  /// Where his gear stands in the snowbank (its left edge).
+  static const gearX = 3.0;
+
+  /// His gear on him (skis on his feet, poles in his hands).
+  bool get geared => skiing && _geared;
+  bool _geared = false;
 
   int roomWidth;
   RunPhase phase = RunPhase.running;
@@ -123,16 +154,62 @@ class PipRun {
     if (cheer) {
       _to(RunPhase.cheer);
     } else if (animate) {
-      _to(RunPhase.toCentre);
+      _to(skiing ? RunPhase.toGear : RunPhase.toCentre);
     } else {
       x = centre;
-      speed = runSpeed;
+      _geared = true;
+      _go();
       _to(RunPhase.running);
     }
   }
 
+  /// Off he goes: running right, or (skiing) down the slope.
+  void _go() {
+    if (skiing) {
+      // The slope moves past him; the ground doesn't (the hut, after his
+      // break, slides away).
+      speed = tavernAt == null ? 0 : runSpeed;
+      _dropSpeed = skiSpeed;
+    } else {
+      speed = runSpeed;
+    }
+  }
+
+  // Round 67: skiing down (slope B: the snowfield raised, things on it
+  // rising past him, so he seems to go down).
+
+  /// How far down the slope he's gone, and how fast now.
+  double drop = 0;
+  double _dropSpeed = 0;
+  static const skiSpeed = 8.0;
+
+  /// The raised snowfield's height above the ground.
+  static const snowfield = 24;
+
+  /// Trees and flags on the slope: their x on the screen, where on the
+  /// slope (they're drawn [drop] − at above the ground) and which.
+  final slope = <({double x, double at, SlopeThing kind})>[];
+  double _nextThing = 0.5;
+
+  /// A bump coming up under him (where on the slope), and his hop over it.
+  double? _bumpAt;
+  double _nextBump = 6;
+  double _hop = -1;
+  static const hopTime = 0.45;
+
+  /// The next fall (seconds), and the ski that came off (on the screen).
+  double _nextFall = fallFrom;
+  static const fallFrom = 40.0;
+  static const fallSpread = 50.0;
+  static const fallTime = 0.8;
+  static const skiOnTime = 0.4;
+  static const gearTime = 0.5;
+  double? skiAt;
+  double _skiFrom = 0;
+
   /// Seen first while on his break: at the table, eating.
   void seated() {
+    _geared = true;
     tavernAt = shift + _seatX(centre) - seatOffset;
     x = _seatX(centre);
     facingRight = false;
@@ -179,9 +256,9 @@ class PipRun {
 
   double _seatX(double near) => near + 8;
 
-  /// A bug just ahead now (tests and pictures): [hits] him or not.
-  @visibleForTesting
-  void debugBug({required bool hits}) {
+  /// A bug just ahead now (a preview's, tests and pictures): [hits] him
+  /// or not.
+  void bugAhead({required bool hits}) {
     bugAt = shift + x + PipBrain.width + 14;
     _hitter = hits;
     _fleeing = false;
@@ -226,6 +303,8 @@ class PipRun {
       }
     }
     shift += speed * dt;
+    drop += _dropSpeed * dt;
+    if (skiing) _stepSlope(dt);
     _stepBug(dt);
     final tavern = tavernAt;
     if (tavern != null && tavern + tavernWidth - shift < -2) tavernAt = null;
@@ -233,14 +312,44 @@ class PipRun {
       case RunPhase.cheer:
         if (t >= cheerTime) _to(RunPhase.toCentre);
       case RunPhase.toCentre:
-        if (_walkTo(centre, dt)) _to(RunPhase.drawing);
+        if (_walkTo(centre, dt)) {
+          if (skiing) {
+            facingRight = true;
+            _go();
+            _to(RunPhase.running);
+          } else {
+            _to(RunPhase.drawing);
+          }
+        }
       case RunPhase.drawing:
         facingRight = true;
         if (t >= drawTime) {
           _sheathed = false;
-          speed = runSpeed;
+          _go();
           _to(RunPhase.running);
         }
+      case RunPhase.toGear:
+        if (_walkTo(gearX + 6, dt)) {
+          facingRight = false;
+          _to(_geared ? RunPhase.putGear : RunPhase.takeGear);
+        }
+      case RunPhase.takeGear:
+        if (t >= gearTime / 2) _geared = true;
+        if (t >= gearTime) _to(RunPhase.toCentre);
+      case RunPhase.putGear:
+        if (t >= gearTime / 2) _geared = false;
+        if (t >= gearTime) _to(RunPhase.done);
+      case RunPhase.skiFall:
+        final p = (t / fallTime).clamp(0.0, 1.0);
+        skiAt = _skiFrom + 18 * _ease(p);
+        if (t >= fallTime) _to(RunPhase.toSki);
+      case RunPhase.toSki:
+        if (_walkTo(skiAt! - PipBrain.width / 2, dt, fast: true)) {
+          _to(RunPhase.skiOn);
+        }
+      case RunPhase.skiOn:
+        if (t >= skiOnTime / 2) skiAt = null;
+        if (t >= skiOnTime) _to(RunPhase.back);
       case RunPhase.running:
         _run(dt);
       case RunPhase.knocked:
@@ -264,10 +373,10 @@ class PipRun {
       case RunPhase.back:
         if (_walkTo(centre, dt, fast: true)) {
           facingRight = true;
-          if (_sheathed) {
+          if (_sheathed && !skiing) {
             _to(RunPhase.drawing);
           } else {
-            speed = runSpeed;
+            _go();
             _to(RunPhase.running);
           }
         }
@@ -294,10 +403,12 @@ class PipRun {
         }
       case RunPhase.ending:
         speed = math.max(0, speed - runSpeed * dt / endTime);
+        _dropSpeed = math.max(0, _dropSpeed - skiSpeed * dt / endTime);
         if (t >= endTime) {
           speed = 0;
+          _dropSpeed = 0;
           _sheathed = true;
-          _to(RunPhase.done);
+          _to(skiing && _geared ? RunPhase.toGear : RunPhase.done);
         }
       case RunPhase.done:
         break;
@@ -307,6 +418,10 @@ class PipRun {
   double _knockFrom = 0;
 
   void _run(double dt) {
+    if (skiing) {
+      _ski(dt);
+      return;
+    }
     speed = runSpeed;
     facingRight = true;
     x = centre;
@@ -358,6 +473,82 @@ class PipRun {
     }
   }
 
+  /// Skiing down: the slope rising past him, bumps, a fall now and then;
+  /// his break and the end as when running.
+  void _ski(double dt) {
+    facingRight = true;
+    x = centre;
+    _dropSpeed = skiSpeed;
+    speed = tavernAt == null ? 0 : runSpeed;
+    if (_wantEnd) {
+      _to(RunPhase.ending);
+      return;
+    }
+    if (_wantBreak && tavernAt == null) {
+      // The hut slides in from the side, the slope still.
+      _dropSpeed = 0;
+      speed = runSpeed;
+      tavernAt = shift + roomWidth + 2;
+      _to(RunPhase.arriving);
+      return;
+    }
+    _nextFall -= dt;
+    if (_nextFall <= 0 && _hop < 0) {
+      _nextFall = fallFrom + random.nextDouble() * fallSpread;
+      _dropSpeed = 0;
+      _skiFrom = x + PipBrain.width;
+      skiAt = _skiFrom;
+      buzzes.add(PipBuzz.medium);
+      _to(RunPhase.skiFall);
+    }
+  }
+
+  void _stepSlope(double dt) {
+    if (_hop >= 0) {
+      _hop += dt;
+      if (_hop >= hopTime) {
+        _hop = -1;
+        buzzes.add(PipBuzz.light);
+      }
+    }
+    if (_dropSpeed <= 0) return;
+    // Trees and flags, now and then, on either side of him.
+    _nextThing -= dt;
+    if (_nextThing <= 0) {
+      _nextThing = 0.35 + random.nextDouble() * 0.6;
+      final room = roomWidth - 10.0;
+      for (var i = 0; i < 6; i++) {
+        final tx = 2 + random.nextDouble() * room;
+        if (tx > x - 8 && tx < x + PipBrain.width + 4) continue;
+        final kind = random.nextDouble() < 0.6
+            ? SlopeThing.tree
+            : (random.nextBool() ? SlopeThing.redFlag : SlopeThing.blueFlag);
+        slope.add((x: tx, at: drop + 6, kind: kind));
+        break;
+      }
+    }
+    slope.removeWhere((s) => drop - s.at > snowfield + 2);
+    // A bump under him now and then: a hop as it passes his feet.
+    _nextBump -= dt;
+    if (_nextBump <= 0 && _bumpAt == null && phase == RunPhase.running) {
+      _nextBump = 6 + random.nextDouble() * 8;
+      _bumpAt = drop + 6;
+    }
+    final bump = _bumpAt;
+    if (bump != null) {
+      final up = drop - bump;
+      if (up >= 0 && _hop < 0 && phase == RunPhase.running) _hop = 0;
+      if (up > snowfield) _bumpAt = null;
+    }
+  }
+
+  /// The bump: how high above the ground on the screen (it rises past
+  /// him), or null.
+  double? get bump {
+    final b = _bumpAt;
+    return b == null ? null : drop - b;
+  }
+
   void _stepBug(double dt) {
     if (_poofAt != null) {
       _poofT += dt;
@@ -387,7 +578,9 @@ class PipRun {
 
   /// Walking or running (his legs step).
   bool get stepping => switch (phase) {
-        RunPhase.running || RunPhase.arriving => true,
+        // Round 67: on skis he glides.
+        RunPhase.running || RunPhase.arriving => !skiing,
+        RunPhase.toGear || RunPhase.toSki => true,
         RunPhase.ending => speed > 2,
         RunPhase.toCentre ||
         RunPhase.toSword ||
@@ -408,6 +601,8 @@ class PipRun {
 
   /// How high off the ground (a knock's arc, or his seat).
   double get lift => switch (phase) {
+        RunPhase.running when _hop >= 0 =>
+          4 * math.sin(math.pi * (_hop / hopTime).clamp(0, 1)),
         RunPhase.knocked => 7 * math.sin(math.pi * (t / knockTime).clamp(0, 1)),
         RunPhase.sitting => seatHeight,
         RunPhase.standUp => seatHeight * (1 - t / standUpTime) +
@@ -418,16 +613,41 @@ class PipRun {
   static const seatHeight = 3.0;
 
   /// Crouched picking up the sword: 0 to 1.
-  double? get crouch => phase == RunPhase.pickUp ? t / pickTime : null;
+  double? get crouch => switch (phase) {
+        RunPhase.pickUp => t / pickTime,
+        RunPhase.skiOn => t / skiOnTime,
+        RunPhase.takeGear || RunPhase.putGear => t / gearTime,
+        _ => null,
+      };
 
   /// Tumbling back (radians) as he's knocked.
-  double get spin => phase == RunPhase.knocked
-      ? -2 * math.pi * (t / knockTime).clamp(0.0, 1.0)
-      : 0;
+  double get spin => switch (phase) {
+        RunPhase.knocked => -2 * math.pi * (t / knockTime).clamp(0.0, 1.0),
+        // Round 67: a fall on skis, head over heels forward.
+        RunPhase.skiFall =>
+          2 * math.pi * _ease((t / (fallTime * 0.6)).clamp(0.0, 1.0)),
+        _ => 0,
+      };
+
+  /// A puff of snow where he fell: 0 → 1, or null.
+  double? get snowPuff => phase == RunPhase.skiFall && t >= fallTime * 0.5
+      ? ((t - fallTime * 0.5) / (fallTime * 0.5)).clamp(0.0, 1.0)
+      : null;
+
+  /// His skis on his feet (both, or one while the other's off) and his
+  /// poles in hand.
+  bool get skisOn =>
+      geared &&
+      phase != RunPhase.skiFall &&
+      // At the hut, they lean on its wall.
+      phase != RunPhase.sitting &&
+      phase != RunPhase.standUp;
+  bool get oneSki => skiAt != null;
 
   /// The sword in his hand: (hand x, height, angle, size) on the screen,
   /// as `PipBrain.sword`; null: not in his hand.
   (double, double, double, double)? get sword {
+    if (skiing && phase != RunPhase.cheer) return null;
     final hand = facingRight
         ? x + PipBrain.width - PipBrain.bodyInset + 2
         : x + PipBrain.bodyInset - 2;
@@ -504,6 +724,9 @@ class PipRun {
     final py = fromY + (toY - fromY) * p + 5 * math.sin(math.pi * p);
     return (px, py, phase == RunPhase.sitting ? 1 - breakDone : 0);
   }
+
+  /// A fall now (a preview's, tests and pictures).
+  void fallNow() => _nextFall = 0;
 
   /// A bite now (his mouth open), sitting with his meal.
   bool get biting =>

@@ -340,6 +340,35 @@ void main() {
     expect(words(), contains("HE'S CHARGING"));
   });
 
+  testWidgets(
+      'Adventures previews (Round 67): an adventure, skiing, a bus trip; '
+      'stopped back on his card', (tester) async {
+    await open(tester);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAdventurePreviews')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('pipAdventureList')), findsOneWidget);
+    final brain = room(tester).brain;
+    await tester.tap(find.byKey(const Key('pipPreview-skiing')));
+    await tester.pump();
+    expect(brain.activity, PipActivity.adventuring);
+    expect(brain.run!.skiing, isTrue);
+    // Busy: another waits.
+    await tester.tap(find.byKey(const Key('pipPreview-bus')));
+    await tester.pump();
+    expect(words(), contains("HE'S OUT"));
+    await tester.pump(const Duration(seconds: 2));
+    // Back to his info card: it stops.
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    expect(brain.activity, PipActivity.adventuring, reason: 'still going');
+    await tester.fling(
+        find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(brain.activity, isNot(PipActivity.adventuring));
+    expect(container.read(pipLifeProvider).xp, 0, reason: 'no XP');
+  });
+
   group('adventures (Round 63)', () {
     testWidgets(
         'the Adventures button turns his card; not registered: a button, '

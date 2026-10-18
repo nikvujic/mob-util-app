@@ -155,7 +155,7 @@ these names):
   MainActivity) on the **media volume**, so they follow the phone's
   volume (muted → silent). A short 8-bit clip bundled with the app.
 
-## 8. Skiing (Round 65–67; building)
+## 8. Skiing (Round 65–67; built in v1.26.0)
 
 Skiing is **a different look for his adventure**, not a separate thing:
 the same days out (12:00–18:00), the same XP, break and rules; only

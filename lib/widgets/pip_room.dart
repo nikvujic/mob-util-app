@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
@@ -185,6 +186,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     brain.birthday = link.partyHat;
     // Round 61: otherwise today's (a day of the year's, or a random one).
     brain.dayHat = link.hatToday;
+    // Round 67: his ski trip: snow, skiing for his day out.
+    final trip = link.trip();
+    brain.snowy = trip.snowy;
+    brain.skiing = trip.skiing;
     final read = link.recipeReadAt;
     if (_moving &&
         read != null &&
@@ -198,7 +203,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // looked at (opened while charging, he's simply there, charging).
     final seen = _shown != null && _moving;
     // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
-    brain.setPlugged(link.plugged && out == null, animate: seen);
+    brain.setPlugged(link.plugged && out == null && trip.leg == null,
+        animate: seen);
+    // Round 67: on his ski trip's bus.
+    brain.ride(trip, animate: seen);
     brain.adventure(out, animate: seen);
     // A level up seen while he's out: a flash over him.
     final level = link.level;
@@ -644,26 +652,6 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    // The ground: a row of grass with lighter tufts, dirt with specks.
-    // Round 63: out on his adventure, it moves under him (and a pebble
-    // now and then shows it).
-    final run = brain.run;
-    final shift = run?.shift.floor() ?? 0;
-    for (var x = 0; x < columns; x++) {
-      final gx = x + shift;
-      final h = (gx * 7919) % 13; // the same tufts every time
-      dot(x.toDouble(), groundTop, PipColours.grass);
-      if (h < 3) dot(x.toDouble(), groundTop - 1, PipColours.grassLight);
-      if (run != null && gx % 47 == 0) {
-        dot(x.toDouble(), groundTop - 1, PipColours.batteryCase, 2, 1);
-      }
-      for (var y = 1; y < PipRoom.ground; y++) {
-        final speck = (gx * 31 + y * 17) % 11 == 0;
-        dot(x.toDouble(), groundTop + y,
-            speck ? PipColours.dirtDark : PipColours.dirt);
-      }
-    }
-
     /// A sprite's pixels, its bottom left at [left], [bottom] (in room
     /// pixels); faded by [alpha]; upside down with [flip]; mirrored with
     /// [mirror]; in [colours] (his own by default).
@@ -680,6 +668,100 @@ class _RoomPainter extends CustomPainter {
           dot(left + x, bottom - rows.length + y,
               colour.withValues(alpha: colour.a * alpha));
         }
+      }
+    }
+
+    // The ground: a row of grass with lighter tufts, dirt with specks.
+    // Round 63: out on his adventure, it moves under him (and a pebble
+    // now and then shows it).
+    final run = brain.run;
+    final shift = run?.shift.floor() ?? 0;
+    // Round 67: a ski day's snow instead of grass.
+    final snowy = brain.snowing;
+    // Pines along the back on a ski day.
+    if (snowy) {
+      for (final at in const [0.12, 0.42, 0.7, 0.9]) {
+        final px = ((columns * at - shift * 0.5) % (columns + 12)) - 6;
+        sprite(PipSprites.pine, px.floorToDouble(),
+            groundTop - (run?.skiing == true ? PipRun.snowfield : 0),
+            colours: PipSprites.snowColours);
+      }
+    }
+    // Skiing: the snowfield raised, the slope's things rising past him.
+    if (run != null && run.skiing) {
+      final top = groundTop - PipRun.snowfield;
+      dot(0, top, PipColours.snowShade, columns.toDouble(), 1);
+      dot(0, top + 1, PipColours.snow, columns.toDouble(),
+          PipRun.snowfield.toDouble());
+      // His trail, up the slope behind him.
+      final mid = (run.x + PipBrain.width / 2).floorToDouble();
+      for (var k = 2; k < PipRun.snowfield; k += 2) {
+        final wiggle = ((run.drop + k) / 3).floor().isEven ? 0.0 : 1.0;
+        dot(mid - 4 + wiggle, groundTop - k, PipColours.snowShade);
+        dot(mid + 3 + wiggle, groundTop - k, PipColours.snowShade);
+      }
+      canvas.save();
+      canvas.clipRect(
+          Rect.fromLTWH(0, (top + 1) * pixel, size.width, size.height));
+      for (final s in run.slope) {
+        final up = run.drop - s.at;
+        final art = switch (s.kind) {
+          SlopeThing.tree => PipSprites.pine,
+          SlopeThing.redFlag => PipSprites.flagRed,
+          SlopeThing.blueFlag => PipSprites.flagBlue,
+        };
+        sprite(art, s.x.floorToDouble(), (groundTop - up).floorToDouble(),
+            colours: PipSprites.snowColours);
+      }
+      if (run.bump case final up?) {
+        final bx = (run.x + 2).floorToDouble();
+        final by = (groundTop - up).floorToDouble();
+        dot(bx + 2, by - 2, PipColours.snowShade, PipBrain.width - 8.0, 1);
+        dot(bx, by - 1, PipColours.snowShade, PipBrain.width - 4.0, 1);
+      }
+      canvas.restore();
+    }
+    // Round 67: on the bus, a road moving under it, posts going by.
+    final bus = brain.bus;
+    final road = bus?.road.floor() ?? 0;
+    if (bus != null) {
+      for (var k = 0; k < columns ~/ 40 + 2; k++) {
+        final px =
+            ((k * 40 - road) % (columns + 40) + columns + 40) % (columns + 40) -
+                20;
+        dot(px.toDouble(), groundTop - 9, PipColours.pole, 1, 9);
+        dot(px - 1.0, groundTop - 9, PipColours.flagRed, 3, 1);
+      }
+    }
+    for (var x = 0; x < columns; x++) {
+      if (bus != null) {
+        dot(x.toDouble(), groundTop, PipColours.road, 1,
+            PipRoom.ground.toDouble());
+        if ((x + road) % 12 < 6) {
+          dot(x.toDouble(), groundTop + 2, PipColours.roadLine);
+        }
+        dot(x.toDouble(), groundTop - 1,
+            snowy ? PipColours.snow : PipColours.grass);
+        continue;
+      }
+      final gx = x + shift;
+      final h = (gx * 7919) % 13; // the same tufts every time
+      dot(x.toDouble(), groundTop, snowy ? PipColours.snow : PipColours.grass);
+      if (h < 3) {
+        dot(x.toDouble(), groundTop - 1,
+            snowy ? PipColours.snow : PipColours.grassLight);
+      }
+      if (run != null && !snowy && gx % 47 == 0) {
+        dot(x.toDouble(), groundTop - 1, PipColours.batteryCase, 2, 1);
+      }
+      for (var y = 1; y < PipRoom.ground; y++) {
+        final speck = (gx * 31 + y * 17) % 11 == 0;
+        dot(
+            x.toDouble(),
+            groundTop + y,
+            snowy
+                ? (speck ? PipColours.snowDark : PipColours.snowShade)
+                : (speck ? PipColours.dirtDark : PipColours.dirt));
       }
     }
 
@@ -704,6 +786,16 @@ class _RoomPainter extends CustomPainter {
         }
       }
       canvas.restore();
+    }
+
+    /// His ski trip's bus, its door open as he gets on or off.
+    void drawBus(PipBus bus) {
+      final left = bus.busX.floorToDouble();
+      sprite(PipSprites.bus, left, groundTop, colours: PipSprites.busColours);
+      if (bus.doorOpen) {
+        dot(left + PipBus.doorX + 1, groundTop - PipBus.height + 4,
+            PipColours.screenOff, PipBus.doorWidth - 2.0, 13);
+      }
     }
 
     final eggLeft =
@@ -803,17 +895,29 @@ class _RoomPainter extends CustomPainter {
       sprite(rows.sublist(rows.length - shown), fx - 2, groundTop,
           colours: PipSprites.fieldColours, alpha: 1 - fade);
     }
-    // Round 64: his day out's tavern, its table and his stool.
+    // Round 67: his ski gear in its snowbank.
+    if (brain.gearInBank) {
+      sprite(PipSprites.gearBank, PipRun.gearX - 2, groundTop,
+          colours: PipSprites.snowColours);
+    }
+    // Round 64: his day out's tavern, its table and his stool (Round 67:
+    // a ski day's, a hut with snow on its roof).
     if (run != null) {
       if (run.tavern case final tx?) {
         sprite(PipSprites.tavern, tx.floorToDouble(), groundTop,
-            colours: PipSprites.tavernColours);
+            colours:
+                run.skiing ? PipSprites.hutColours : PipSprites.tavernColours);
         sprite(PipSprites.table, (tx + PipRun.tableLeft).floorToDouble(),
             groundTop,
             colours: PipSprites.tavernColours);
         sprite(PipSprites.stool, (tx + PipRun.seatOffset + 6).floorToDouble(),
             groundTop,
             colours: PipSprites.tavernColours);
+      }
+      // A ski come off in a fall, sliding away, then lying there.
+      if (run.skiAt case final sx?) {
+        dot(sx.floorToDouble(), groundTop - 1, PipColours.ski, 12, 1);
+        dot(sx.floorToDouble() + 11, groundTop - 2, PipColours.ski);
       }
       // His sword, knocked out of his hand: flying, then lying there.
       if (run.lyingSword case (final sx, final up, final angle)) {
@@ -830,6 +934,9 @@ class _RoomPainter extends CustomPainter {
       sprite(PipSprites.ballFrames[turn], bx, groundTop - up,
           colours: PipSprites.fieldColours);
     }
+
+    // Round 67: the bus, behind him while he's outside it.
+    if (bus != null && bus.busShown && !bus.inside) drawBus(bus);
 
     // Pip, clipped at the ground while he comes up.
     canvas.save();
@@ -886,6 +993,8 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
+    // Round 67: in his seat: the bus over him, him in its window.
+    if (bus != null && bus.busShown && bus.inside) drawBus(bus);
     // Asleep, it's on the ground beside him (on the side with room).
     if (brain.hat case final hat? when brain.hatBeside) {
       final art = PipSprites.hats[hat]!;
@@ -995,9 +1104,51 @@ class _RoomPainter extends CustomPainter {
       blade(Offset(hx * pixel, (groundTop - hy) * pixel), angle, size);
       sprite(PipSprites.mitt, hx - 1, groundTop - hy + 2);
     }
-    // Round 64: his plate, flown out of the tavern's window to the table,
-    // its meal going as his break does.
-    if (run?.plateAt case (final px, final py, final left)) {
+    // Round 67: his skis under his feet, his poles in his hands.
+    if (run != null && run.skisOn) {
+      final feet = bottom.floorToDouble();
+      final long = run.oneSki ? 12.0 : PipBrain.width + 6.0;
+      dot(brain.x - 3, feet, PipColours.ski, long, 1);
+      if (!run.oneSki) {
+        dot(brain.x + PipBrain.width + 3, feet - 1, PipColours.ski);
+      }
+      for (final side in const [-1.0, 1.0]) {
+        final hx = side < 0 ? brain.x - 1 : brain.x + PipBrain.width;
+        _line(dot, hx, feet - 8, hx - side * -2, feet, PipColours.pole);
+        dot(hx, feet - 8, PipColours.screen);
+      }
+    }
+    // A puff of snow where he fell.
+    if (run?.snowPuff case final t?) {
+      for (var i = 0; i < 6; i++) {
+        final side = i.isEven ? 1 : -1;
+        final out = 4 + (2 + i) * t * 3;
+        final up = 5 * math.sin(math.pi * t) * (1 - i * 0.12);
+        dot((centre + side * out).floorToDouble(),
+            (groundTop - 1 - up).floorToDouble(), PipColours.flake);
+      }
+    }
+    // Round 67: on a ski break, a mug of hot chocolate instead of a plate.
+    if (run != null && run.skiing) {
+      if (run.plateAt case (final px, final py, final left)) {
+        final mx = (px - 3).floorToDouble();
+        final my = (groundTop - py).floorToDouble();
+        sprite(PipSprites.mug, mx, my, colours: PipSprites.snowColours);
+        final level = (3 * left).ceil();
+        if (level > 0) {
+          dot(mx + 1, my - 1 - level, PipColours.cocoa, 3, level.toDouble());
+        }
+        if (left > 0) {
+          for (var i = 0; i < 2; i++) {
+            final rise = ((run.clock * 3 + i * 0.5) % 1);
+            dot(
+                mx + 1 + i * 2 + (rise * 2).floorToDouble() % 2,
+                my - 6 - (rise * 4).floorToDouble(),
+                PipColours.steam.withValues(alpha: 1 - rise));
+          }
+        }
+      }
+    } else if (run?.plateAt case (final px, final py, final left)) {
       final plateLeft = (px - PipBrain.plateWidth / 2).floorToDouble();
       final bottom = (groundTop - py).floorToDouble();
       sprite(PipSprites.plate, plateLeft, bottom,
@@ -1066,6 +1217,20 @@ class _RoomPainter extends CustomPainter {
     // Asleep: little z's rising above his head, fading.
     for (final (dx, up, fade) in brain.zs) {
       sprite(PipSprites.z, centre + dx, groundTop - 18 - up, alpha: 1 - fade);
+    }
+    // Round 67: snowing on a ski day, drifting down (rising past him as
+    // he skis down).
+    if (brain.snowing) {
+      final t = brain.snowClock;
+      final rise = run?.skiing == true ? run!.drop * 0.9 : 0.0;
+      final rows = height.toDouble();
+      for (var i = 0; i < columns ~/ 3; i++) {
+        final speedY = 5.0 + (i % 3) * 2;
+        final fx = (i * 37 + 3 * math.sin(t * 0.8 + i)) % columns;
+        final fy = ((i * 53 + t * speedY - rise) % rows + rows) % rows;
+        dot(fx.floorToDouble(), fy.floorToDouble(),
+            i % 4 == 0 ? PipColours.snowShade : PipColours.flake);
+      }
     }
     // The egg's bottom half in front of him, as he jumps out of it.
     if (hatching) {

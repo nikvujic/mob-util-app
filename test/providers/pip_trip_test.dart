@@ -1,4 +1,7 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/data/power.dart';
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/data/app_storage.dart';
@@ -6,6 +9,8 @@ import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/pip_trip.dart';
+
+import '../helpers.dart';
 
 /// Pip's ski trips (Round 67): ski days, the bus there and back, snow.
 void main() {
@@ -118,5 +123,35 @@ void main() {
       p.collect(at(26, 9));
       expect(p.state.xp, PipAdventure.xpPerDay);
     });
+  });
+
+  test(
+      'his room\'s link: on the bus, the trip; a bus day, no adventure '
+      'shown', () {
+    var now = at(25, 12);
+    final container = ProviderContainer(overrides: [
+      appStorageProvider.overrideWithValue(AppStorage.inMemory(
+        initialDates: book,
+        initialPip: PipLife(
+          born: DateTime(2026, 10, 1),
+          energyAt: at(25, 8),
+          nextBatteryAt: at(25, 13),
+          registeredAt: DateTime(2026, 12, 1, 14),
+          outDay: '2027-01-24',
+        ),
+      )),
+      clockProvider.overrideWithValue(() => now),
+      powerSourceProvider.overrideWithValue(FakePower()),
+    ]);
+    addTearDown(container.dispose);
+    final link = container.read(pipLinkProvider);
+    link.look();
+    expect(link.trip().leg, TripLeg.back);
+    expect(link.outing(), isNull, reason: 'on the bus');
+    now = at(25, 17, 30);
+    link.look();
+    expect(link.trip(), noTrip);
+    expect(link.outing(), isNull, reason: 'a bus day: no adventure shown');
+    expect(container.read(pipLifeProvider.notifier).xpAt(now), 330);
   });
 }

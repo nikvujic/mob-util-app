@@ -655,6 +655,15 @@ abstract final class PipSprites {
       '.bbbbbbbb.',
       'wbwbwbwbwb',
     ],
+    // Round 67: his ski days': a pompom, a white band.
+    PipHat.skiBeanie: [
+      '....ww....',
+      '...wwww...',
+      '..rrrrrr..',
+      '.rwwwwwwr.',
+      '.rrrrrrrr.',
+      'rrrrrrrrrr',
+    ],
     // Round 61: a day of the year's.
     PipHat.santa: [
       '.......oo.',
@@ -798,6 +807,130 @@ abstract final class PipSprites {
     's': PipColours.windowFrame,
     'S': PipColours.sign,
     'y': PipColours.mug,
+  };
+
+  /// Round 67: his ski days. A snowy pine, 7 x 9.
+  static const pine = [
+    '...w...',
+    '..wGw..',
+    '..GGG..',
+    '.wGGGw.',
+    '.GGgGG.',
+    'wGGGGGw',
+    'GGgGGgG',
+    '...t...',
+    '...t...',
+  ];
+
+  /// Slalom flags, 4 x 8.
+  static const flagRed = [
+    'pRRR',
+    'pRRR',
+    'pRR.',
+    'p...',
+    'p...',
+    'p...',
+    'p...',
+    'p...',
+  ];
+  static const flagBlue = [
+    'pBBB',
+    'pBBB',
+    'pBB.',
+    'p...',
+    'p...',
+    'p...',
+    'p...',
+    'p...',
+  ];
+
+  /// His gear in its snowbank, 12 x 14: two skis upright, two poles.
+  static const gearBank = [
+    '.o..........',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo.....p.p.',
+    '.oo....kpkpk',
+    '.oo.....p.p.',
+    '..wwww..wwww',
+    '.wwwwwwwwwww',
+    'wwssswwwwssw',
+  ];
+
+  /// A mug of hot chocolate, 6 x 4 (its cocoa drawn inside).
+  static const mug = [
+    'M...M.',
+    'M...MM',
+    'M...M.',
+    'MMMMM.',
+  ];
+
+  static const snowColours = {
+    'G': PipColours.pine,
+    'g': PipColours.pineDark,
+    'w': PipColours.snow,
+    's': PipColours.snowShade,
+    't': PipColours.woodDark,
+    'p': PipColours.pole,
+    'k': PipColours.screenOff,
+    'o': PipColours.ski,
+    'R': PipColours.flagRed,
+    'B': PipColours.flagBlue,
+    'M': PipColours.hotMug,
+  };
+
+  /// The tavern as a mountain hut: snow on its roof.
+  static final hutColours = {
+    ...tavernColours,
+    'R': PipColours.snow,
+    'r': PipColours.snowShade,
+  };
+
+  /// Round 67: his ski trip's bus, 56 x 24: yellow, a red stripe, a door
+  /// at the front (left), windows; his own window clear (he shows
+  /// through it).
+  static const bus = [
+    '..YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY..',
+    '.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.',
+    'YYYYYYYYYYYYYYyyyyyyyyyyyyYYyyyyyyyyyyyyyyyyyyYyyyyyyyyY',
+    'YYYYYddddddddYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
+    'YYYYYddddddddYyyyyyyyyyyyyYYyyyyyyyyyyyyyyyyyyYyyyyyyyyY',
+    'YYYYYdYYYYYYdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY',
+    'YYYYYdYYYYYYdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYl',
+    'rrrrrdrrrrrrdrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrl',
+    'rrrrrdrrrrrrdrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',
+    'RYYYYdYYYYYYdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY',
+    'YYYYYdYYYkkkkkkYYYYYYYYYYYYYYYYYYYYYYYYYYkkkkkkYYYYYYYYY',
+    'yyyyyyyykkkkkkkkyyyyyyyyyyyyyyyyyyyyyyyykkkkkkkkyyyyyyyy',
+    '........kkhhhhkk........................kkhhhhkk........',
+    '........kkhhhhkk........................kkhhhhkk........',
+    '........kkhhhhkk........................kkhhhhkk........',
+    '........kkkkkkkk........................kkkkkkkk........',
+    '.........kkkkkk..........................kkkkkk.........',
+  ];
+
+  static const busColours = {
+    'Y': PipColours.busYellow,
+    'y': PipColours.busShade,
+    'g': PipColours.busGlass,
+    'd': PipColours.busShade,
+    'r': PipColours.flagRed,
+    'l': PipColours.windowGlow,
+    'R': PipColours.flagRed,
+    'k': PipColours.face,
+    'h': PipColours.batteryCase,
   };
 
   /// Round 63: LEVEL UP, in little 3 x 5 letters, 31 x 5.

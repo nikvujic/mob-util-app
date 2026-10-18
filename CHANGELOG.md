@@ -6,6 +6,31 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Pip's ski trips.** A Skiing holiday in Dates makes his days there
+  **snowy**: snow on the ground, flakes falling all day, snowy pines, a
+  **ski beanie** (a birthday's party hat still wins) and his **skis and
+  poles** in a snowbank.
+- On a ski day his adventure is **skiing**: he picks up his gear and
+  goes down a **raised snowfield**, trees, slalom flags and bumps rising
+  past him (a hop over each bump); every 40–90 seconds he **falls**, a
+  ski slides off, and he fetches it. His break is at a **mountain hut**
+  with a **hot chocolate**. At 18:00 he puts his gear back.
+- **Travel** for a Skiing holiday: hours each way, leaving at 06:00 on
+  its first day and coming back at 11:00 the day after its last
+  (changeable). On the way Pip rides a **bus**: the road moving, him in
+  a window, asleep at night, nothing else going on (no energy used,
+  batteries still pile up). Seen, the bus pulls in and he gets on, or
+  it stops and he gets off. The snow comes 80% of the way there and goes
+  20% of the way back. A day the bus is on the road between 12:00 and
+  18:00 he doesn't ski, but still gains the day's XP.
+- Pip Home: **Adventures** previews (an adventure, skiing, a bus trip),
+  played in his field; no XP; they stop when you go back to his card.
+
+### Fixed
+- Pip's adventures: a day you didn't open the app gave no XP; now it
+  counts if he had energy at 12:00.
+
 ### Changed
 - **Pip's adventures**: a **tap gives him a battery** while he's out
   too: it flies to him and he catches it as he runs. Plugged in, he

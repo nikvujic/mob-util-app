@@ -341,17 +341,17 @@ fixtures for every stored format.
 
 - [x] **Batteries while he's out**: a tap gives one; it flies to him and
   he catches it running. Registering fills his energy (as built).
-- [ ] **Skiing**: spec in `docs/ADVENTURES_SPEC.md` section 8, waiting
-  on Nikola's answers (8.8) and go.
+- [x] **Skiing**: spec in `docs/ADVENTURES_SPEC.md` section 8; built
+  in Round 67.
 
 ### Round 67 — Nikola's answers on skiing (2026-10-18)
 
-- [ ] Skiing as in `docs/ADVENTURES_SPEC.md` section 8: slope B; travel
+- [x] Skiing as in `docs/ADVENTURES_SPEC.md` section 8: slope B; travel
   hours and leaving times in Dates (there 06:00 on the first day, back
   11:00 the day after the last); no skiing on a day the bus is on the
   road in 12:00–18:00 (XP still); batteries pile up on the trip; his
   gear always shown on ski days.
-- [ ] Pip Home: an **ADVENTURES** previews list (Adventure, Skiing, Bus
+- [x] Pip Home: an **ADVENTURES** previews list (Adventure, Skiing, Bus
   trip), no XP, stops when swiped back.
 
 ### Round 66 — Nikola on the skiing spec (2026-10-18)
@@ -360,7 +360,7 @@ fixtures for every stored format.
   off, or back on with a battery); after five minutes unseen.
 - [x] Pip Home: "Not an adventurer yet" and "Come back between..." ran
   off the card on a narrow phone: they wrap.
-- [ ] Skiing answers in the spec: snow all ski day, ski beanie
+- [x] Skiing answers in the spec: snow all ski day, ski beanie
   (birthdays win), flags and bumps at random, falls every 40–90 s, no
   skiing unless registered; his **gear** in the field, picked up first;
   a **bus trip** there and back (travel time in Dates), the slope to
