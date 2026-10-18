@@ -128,8 +128,9 @@ class AppStorage {
   /// Version of `dates.json` (Round 57), birthdays & dates. History: 1 =
   /// first format; 2 = a holiday or an event may last several days
   /// (`days`, Round 59); 3 = a holiday or an event may be of a kind
-  /// (`kind`: skiing, beach, trip, wedding; Round 61).
-  static const datesFormatVersion = 3;
+  /// (`kind`: skiing, beach, trip, wedding; Round 61); 4 = a ski trip's
+  /// travel (`travel`: hours, leave, back; Round 67).
+  static const datesFormatVersion = 4;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;

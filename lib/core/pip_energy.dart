@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
 
 /// Pip's energy and sleep (Round 37): plain rules, worked out from the
@@ -70,6 +71,27 @@ abstract final class PipEnergy {
           ? 0
           : math.max(
               levelAt(level, since, now), math.min(level, chargingFloor));
+
+  /// [level] at [since] at [now], worked out by [rule] ([levelAt], or
+  /// [chargingLevelAt]) except over the [paused] spans (Round 67: on his
+  /// ski trip's bus he uses none).
+  static double levelPausing(
+    double level,
+    DateTime since,
+    DateTime now,
+    List<(DateTime, DateTime)> paused, {
+    double Function(double, DateTime, DateTime) rule = levelAt,
+  }) {
+    final spans = [...paused]..sort((a, b) => a.$1.compareTo(b.$1));
+    var at = since;
+    var left = level;
+    for (final (from, to) in spans) {
+      if (!to.isAfter(at) || !from.isBefore(now)) continue;
+      if (from.isAfter(at)) left = rule(left, at, from);
+      at = to.isBefore(now) ? to : now;
+    }
+    return now.isAfter(at) ? rule(left, at, now) : left;
+  }
 
   /// When [level] at [since] runs out (a minute's precision), or null
   /// if it's already empty.
@@ -216,6 +238,9 @@ abstract class PipLink {
 
   /// His adventure level now (Round 63: a level up seen, a flash).
   int get level;
+
+  /// His ski trip now (Round 67): on its bus, snowy, skiing today.
+  PipTripNow trip();
 }
 
 /// Out on his adventure (Round 63): on his break or not, and how far

@@ -240,4 +240,44 @@ void main() {
       expect(DateKind.skiing.reminders, isNull);
     });
   });
+
+  group('a ski trip\'s travel (Round 67)', () {
+    const ski = DateEntry(
+      id: 'ski',
+      title: 'Jahorina',
+      type: DateType.holiday,
+      day: 20,
+      month: 1,
+      year: 2027,
+      yearly: false,
+      days: 5,
+      kind: DateKind.skiing,
+      travelHours: 6,
+    );
+
+    test(
+        'there on the first day at 06:00; back the day after the last, at '
+        '11:00', () {
+      final trips = ski.tripsFrom(DateTime(2027, 1, 20))!;
+      expect(trips.there, DateTime(2027, 1, 20, 6));
+      expect(trips.back, DateTime(2027, 1, 25, 11));
+      expect(trips.length, const Duration(hours: 6));
+    });
+
+    test('only for Skiing, with hours set', () {
+      expect(ski.copyWith(travelHours: 0).hasTravel, isFalse);
+      expect(ski.copyWith(kind: () => DateKind.beach).hasTravel, isFalse);
+      expect(
+          ski.copyWith(travelHours: 99).travelHours, DateEntry.mostTravelHours);
+    });
+
+    test('kept in its JSON; none without travel', () {
+      final json = ski.copyWith(leaveAt: 7 * 60, backAt: 10 * 60).toJson();
+      expect(json['travel'], {'hours': 6, 'leave': 420, 'back': 600});
+      final back = DateEntry.fromJson(json);
+      expect((back.travelHours, back.leaveAt, back.backAt), (6, 420, 600));
+      expect(
+          ski.copyWith(travelHours: 0).toJson().containsKey('travel'), isFalse);
+    });
+  });
 }

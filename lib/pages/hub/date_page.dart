@@ -132,6 +132,22 @@ class _DatePageState extends ConsumerState<DatePage> {
       ));
   }
 
+  /// A travel time picked (Round 67): from [minutes], made into the date
+  /// by [apply].
+  Future<void> _pickTravelTime(
+      int minutes, DateEntry Function(int) apply) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+    if (picked == null || !mounted) return;
+    _change(apply(picked.hour * 60 + picked.minute));
+  }
+
   Widget _heading(String text) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         child: Text(
@@ -269,6 +285,65 @@ class _DatePageState extends ConsumerState<DatePage> {
                 ],
               ),
             ),
+          // Round 67: a ski trip's bus there and back (Pip rides it).
+          if (date.kindNow == DateKind.skiing) ...[
+            ListTile(
+              key: const Key('dateTravel'),
+              title: const Text('Travel'),
+              subtitle: const Text('Hours each way'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    key: const Key('dateTravelLess'),
+                    tooltip: 'An hour less',
+                    icon: const Icon(Icons.remove),
+                    onPressed: date.travelHours > 0
+                        ? () => _change(
+                            date.copyWith(travelHours: date.travelHours - 1))
+                        : null,
+                  ),
+                  SizedBox(
+                    width: 64,
+                    child: Text(
+                      key: const Key('dateTravelHours'),
+                      date.travelHours == 0
+                          ? 'None'
+                          : countOf(date.travelHours, 'hour', 'hours'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('dateTravelMore'),
+                    tooltip: 'An hour more',
+                    icon: const Icon(Icons.add),
+                    onPressed: date.travelHours < DateEntry.mostTravelHours
+                        ? () => _change(
+                            date.copyWith(travelHours: date.travelHours + 1))
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+            if (date.travelHours > 0) ...[
+              ListTile(
+                key: const Key('dateLeaves'),
+                title: const Text('Leaves'),
+                subtitle: const Text('On the first day'),
+                trailing: Text(formatMinutes(date.leaveAt)),
+                onTap: () => _pickTravelTime(
+                    date.leaveAt, (m) => _draft.copyWith(leaveAt: m)),
+              ),
+              ListTile(
+                key: const Key('dateComesBack'),
+                title: const Text('Comes back'),
+                subtitle: const Text('The day after the last day'),
+                trailing: Text(formatMinutes(date.backAt)),
+                onTap: () => _pickTravelTime(
+                    date.backAt, (m) => _draft.copyWith(backAt: m)),
+              ),
+            ],
+          ],
           if (next != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),

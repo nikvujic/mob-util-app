@@ -86,8 +86,8 @@ class Backup {
   /// dates (`dates`, as in `dates.json`, Round 57); 24 = a holiday or an
   /// event may last several days (`days`, Round 59); 25 = and be of a
   /// kind (`kind`, Round 61); 26 = Pip's adventures (in `pip`, Round
-  /// 63).
-  static const version = 26;
+  /// 63); 27 = a ski trip's travel (in `dates`, Round 67).
+  static const version = 27;
 
   final DateTime createdAt;
   final String appVersion;

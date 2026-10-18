@@ -974,6 +974,42 @@ void main() {
     });
   });
 
+  group('dates.json v4 / v27 backup (ski travel, Round 67)', () {
+    void expectSample(DateBook book) {
+      final ski = book.dates.first;
+      expect(ski.title, 'Jahorina ⛷');
+      expect(ski.kindNow, DateKind.skiing);
+      expect(ski.travelHours, 5);
+      expect(ski.leaveAt, 7 * 60);
+      expect(ski.backAt, 10 * 60);
+      expect(ski.hasTravel, isTrue);
+      expect(book.dates[1].travelHours, 0);
+      expect(book.dates[1].leaveAt, DateEntry.leaveDefault);
+    }
+
+    test('dates.json version 4 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v27/storage'),
+      );
+      expectSample(storage.initialDates);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v27 backup restores it', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v27/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.dates);
+    });
+
+    test('older ski holidays have no travel', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v25/storage'),
+      );
+      expect(storage.initialDates.dates.first.hasTravel, isFalse);
+    });
+  });
+
   test('notifications.json version 1 (Round 31) loads', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v16/storage'),
@@ -1361,6 +1397,10 @@ void main() {
           '285adbfa6ba47b66a9377730db5374679e41e75c2e4dd3374e12bd14ea3258a0',
       'test/fixtures/v26/backup-plain.json':
           '8c52d2d96e13a29b6879ecb15c89b8cf9e0cd352d1ddbaa1eba16c7cb6c1d7fa',
+      'test/fixtures/v27/storage/dates.json':
+          '295073184b7b5ea52bcc6820d4839ce81910a0937032f22443f8b7b1490eda14',
+      'test/fixtures/v27/backup-plain.json':
+          '0744095d21a1f853bf48d572002bc9d8b668794e58674bc363f5f260f8348188',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

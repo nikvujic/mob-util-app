@@ -245,6 +245,35 @@ void main() {
   });
 
   testWidgets(
+      'a ski trip\'s travel (Round 67): only on Skiing; hours each way, '
+      'leaving at 06:00 the first day, back at 11:00 the day after',
+      (tester) async {
+    await openDates(tester);
+    await tap(tester, find.byTooltip('Add a date'));
+    await tester.enterText(find.byKey(const Key('dateTitle')), 'Jahorina');
+    await tester.pumpAndSettle();
+    DateEntry saved() => book().dates.single;
+    await tap(tester, find.byKey(const Key('dateType-holiday')));
+    expect(find.byKey(const Key('dateTravel')), findsNothing);
+    await tap(tester, find.byKey(const Key('dateKind-skiing')));
+    expect(find.byKey(const Key('dateTravel')), findsOneWidget);
+    expect(find.text('None'), findsOneWidget);
+    expect(find.byKey(const Key('dateLeaves')), findsNothing);
+    await tap(tester, find.byKey(const Key('dateTravelMore')));
+    await tap(tester, find.byKey(const Key('dateTravelMore')));
+    expect(saved().travelHours, 2);
+    expect(find.text('2 hours'), findsOneWidget);
+    expect(find.text('06:00'), findsOneWidget);
+    expect(find.text('11:00'), findsOneWidget);
+    await tap(tester, find.byKey(const Key('dateTravelLess')));
+    expect(saved().travelHours, 1);
+    // Another kind: no travel.
+    await tap(tester, find.byKey(const Key('dateKind-beach')));
+    expect(find.byKey(const Key('dateTravel')), findsNothing);
+    expect(saved().hasTravel, isFalse);
+  });
+
+  testWidgets(
       'a card says it all (Round 61): its day (no year for one every '
       'year), how soon, the age; its kind, days, year, reminders',
       (tester) async {

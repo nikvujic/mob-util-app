@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
@@ -371,6 +372,12 @@ class FakePipLink implements PipLink {
 
   @override
   PipOut? outing() => out;
+
+  /// His ski trip (Round 67): what [trip] says.
+  PipTripNow ride = noTrip;
+
+  @override
+  PipTripNow trip() => ride;
 
   @override
   int level = 1;

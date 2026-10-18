@@ -114,3 +114,19 @@ abstract final class PipAdventure {
   static String titleFor(int level) =>
       titles[math.min(titles.length - 1, math.max(0, level) ~/ 10)];
 }
+
+/// Which way his ski trip's bus is going (Round 67).
+enum TripLeg { there, back }
+
+/// His ski trip at a moment (Round 67; worked out from Dates in
+/// `providers/pip_trip.dart`): on the bus (which way, how far, 0 to 1)
+/// or not; the snowy look; and whether today his adventure is skiing.
+typedef PipTripNow = ({
+  TripLeg? leg,
+  double progress,
+  bool snowy,
+  bool skiing,
+});
+
+/// No trip: the usual day.
+const PipTripNow noTrip = (leg: null, progress: 0, snowy: false, skiing: false);

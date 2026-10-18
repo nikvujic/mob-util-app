@@ -148,6 +148,35 @@ class DateEntry {
   /// (kept, unused, for if the type comes back).
   DateKind? get kindNow => kind?.type == type ? kind : null;
 
+  /// A ski trip's travel (Round 67): hours each way (0: none), when the
+  /// bus leaves on the first day ([leaveAt]) and on the day after the
+  /// last ([backAt]), as minutes into the day. Only for a Skiing holiday
+  /// ([hasTravel]); kept otherwise, unused.
+  final int travelHours;
+  final int leaveAt;
+  final int backAt;
+
+  static const mostTravelHours = 24;
+  static const leaveDefault = 6 * 60;
+  static const backDefault = 11 * 60;
+
+  /// A Skiing holiday with travel set.
+  bool get hasTravel => kindNow == DateKind.skiing && travelHours > 0;
+
+  /// The bus trips for the holiday starting on [start]: there (leaving
+  /// on its first day) and back (leaving the day after its last); null
+  /// without travel.
+  ({DateTime there, DateTime back, Duration length})? tripsFrom(
+      DateTime start) {
+    if (!hasTravel) return null;
+    final end = endFrom(start);
+    return (
+      there: DateTime(start.year, start.month, start.day, 0, leaveAt),
+      back: DateTime(end.year, end.month, end.day + 1, 0, backAt),
+      length: Duration(hours: travelHours),
+    );
+  }
+
   const DateEntry({
     required this.id,
     required this.title,
@@ -160,6 +189,9 @@ class DateEntry {
     this.reminders = const [DateReminder.standard],
     this.days = 1,
     this.kind,
+    this.travelHours = 0,
+    this.leaveAt = leaveDefault,
+    this.backAt = backDefault,
   });
 
   /// How many days it lasts, as its type has it: 1 unless it [DateType.lasts].
@@ -180,6 +212,9 @@ class DateEntry {
     List<DateReminder>? reminders,
     int? days,
     DateKind? Function()? kind,
+    int? travelHours,
+    int? leaveAt,
+    int? backAt,
   }) =>
       DateEntry(
         id: id,
@@ -193,6 +228,10 @@ class DateEntry {
         reminders: reminders ?? this.reminders,
         days: (days ?? this.days).clamp(1, mostDays),
         kind: kind == null ? this.kind : kind(),
+        travelHours:
+            (travelHours ?? this.travelHours).clamp(0, mostTravelHours),
+        leaveAt: leaveAt ?? this.leaveAt,
+        backAt: backAt ?? this.backAt,
       );
 
   /// When it falls in [inYear] (29 February on the 28th in a year without
@@ -252,24 +291,35 @@ class DateEntry {
         'reminders': [for (final r in reminders) r.toJson()],
         if (days != 1) 'days': days,
         if (kind != null) 'kind': kind!.name,
+        if (travelHours > 0)
+          'travel': {'hours': travelHours, 'leave': leaveAt, 'back': backAt},
       };
 
-  factory DateEntry.fromJson(Map<String, dynamic> json) => DateEntry(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? '',
-        type: DateType.fromId(json['type'] as String?),
-        day: (json['day'] as num).toInt(),
-        month: (json['month'] as num).toInt(),
-        year: (json['year'] as num?)?.toInt(),
-        yearly: json['yearly'] as bool? ?? true,
-        note: json['note'] as String? ?? '',
-        reminders: [
-          for (final r in (json['reminders'] as List? ?? const []))
-            DateReminder.fromJson(r as Map<String, dynamic>),
-        ],
-        days: ((json['days'] as num?)?.toInt() ?? 1).clamp(1, mostDays),
-        kind: DateKind.fromId(json['kind'] as String?),
-      );
+  factory DateEntry.fromJson(Map<String, dynamic> json) {
+    final travel = json['travel'] as Map<String, dynamic>?;
+    int minutes(Object? m, int fallback) =>
+        ((m as num?)?.toInt() ?? fallback).clamp(0, 24 * 60 - 1);
+    return DateEntry(
+      id: json['id'] as String,
+      title: json['title'] as String? ?? '',
+      type: DateType.fromId(json['type'] as String?),
+      day: (json['day'] as num).toInt(),
+      month: (json['month'] as num).toInt(),
+      year: (json['year'] as num?)?.toInt(),
+      yearly: json['yearly'] as bool? ?? true,
+      note: json['note'] as String? ?? '',
+      reminders: [
+        for (final r in (json['reminders'] as List? ?? const []))
+          DateReminder.fromJson(r as Map<String, dynamic>),
+      ],
+      days: ((json['days'] as num?)?.toInt() ?? 1).clamp(1, mostDays),
+      kind: DateKind.fromId(json['kind'] as String?),
+      travelHours:
+          ((travel?['hours'] as num?)?.toInt() ?? 0).clamp(0, mostTravelHours),
+      leaveAt: minutes(travel?['leave'], leaveDefault),
+      backAt: minutes(travel?['back'], backDefault),
+    );
+  }
 }
 
 /// A date on the day it next falls (for the upcoming list).

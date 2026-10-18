@@ -10,11 +10,13 @@ import 'package:the_app/core/pip_hats.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/power.dart';
+import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notification_log_provider.dart';
+import 'package:the_app/providers/pip_trip.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/recipe_read_provider.dart';
 
@@ -23,10 +25,15 @@ import 'package:the_app/providers/recipe_read_provider.dart';
 class PipLifeNotifier extends StateNotifier<PipLife> {
   final DateTime Function() _clock;
 
+  /// The dates (Round 67: his ski trips' buses, his days out on them).
+  final DateBook Function() _dates;
+
   PipLifeNotifier(
     AppStorage storage, {
     DateTime Function()? clock,
+    DateBook Function()? dates,
   })  : _clock = clock ?? DateTime.now,
+        _dates = dates ?? (() => DateBook.empty),
         super(storage.initialPip) {
     state = _started(state);
     addListener(storage.savePip, fireImmediately: false);
@@ -97,10 +104,17 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// His energy at [now]. Round 63: out on an adventure he can't power
   /// down; he does once it's over, if he's run out by then.
   double levelAt(DateTime now) {
-    final level = (_charging ? PipEnergy.chargingLevelAt : PipEnergy.levelAt)(
+    final since = state.energyAt ?? now;
+    // Round 67: on his ski trip's bus, he uses none.
+    final level = PipEnergy.levelPausing(
       state.energy,
-      state.energyAt ?? now,
+      since,
       now,
+      [
+        for (final r in PipTrip.ridesNear(_dates(), now))
+          if (r.to.isAfter(since) && r.from.isBefore(now)) (r.from, r.to),
+      ],
+      rule: _charging ? PipEnergy.chargingLevelAt : PipEnergy.levelAt,
     );
     return outAt(now) ? math.max(level, adventureFloor) : level;
   }
@@ -172,11 +186,16 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     }
     final today = dayKey(now);
     if (state.outDay == today) return;
+    _settleMissed(now);
     final start = PipAdventure.startOf(now);
     if (now.isBefore(start)) return;
     DateTime? out;
     final since = state.energyAt ?? now;
-    if (!since.isAfter(start) && levelAt(start) > 0) {
+    if (PipTrip.busDay(_dates(), now)) {
+      // Round 67: on the bus that day: no adventure shown, its XP all
+      // the same.
+      out = start;
+    } else if (!since.isAfter(start) && levelAt(start) > 0) {
       out = start;
     } else if (now.hour < PipAdventure.lastStartHour && levelAt(now) > 0) {
       out = now;
@@ -201,6 +220,33 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     final last = _seenAt;
     _unseen = last == null ? null : now.difference(last);
     _seenAt = now;
+  }
+
+  /// The days between his last day out and [now]'s that nobody looked in
+  /// on (Round 67): each a whole day out if he could go at 12:00 (energy
+  /// then, by what's known; he can't power down once out) or was on his
+  /// ski trip's bus; else none. Each such day is then done with.
+  void _settleMissed(DateTime now) {
+    final last = state.outDay;
+    if (last == null) return;
+    final parts = last.split('-').map(int.parse).toList();
+    var day = DateTime(parts[0], parts[1], parts[2] + 1);
+    final today = DateTime(now.year, now.month, now.day);
+    var xp = state.xp;
+    String? done;
+    for (var i = 0; i < 400 && day.isBefore(today); i++) {
+      final start = PipAdventure.startOf(day);
+      final since = state.energyAt ?? start;
+      if (PipTrip.busDay(_dates(), day) ||
+          (!since.isAfter(start) && levelAt(start) > 0)) {
+        xp += PipAdventure.xpPerDay;
+      }
+      done = dayKey(day);
+      day = DateTime(day.year, day.month, day.day + 1);
+    }
+    if (done != null) {
+      state = state.copyWith(xp: xp, outDay: () => done);
+    }
   }
 
   /// His break starts at [now] if it's due (Round 64: looked at between
@@ -273,6 +319,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     if (segmentsAt(now) >= 3) return PipRefusal.full;
     final show = showAt(now);
     if (show == PipShow.asleep) return PipRefusal.asleep;
+    // Round 67: on his ski trip's bus, nothing.
+    if (PipTrip.at(_dates(), now).leg != null) return PipRefusal.travelling;
     // Round 44: plugged in (at his station), not now.
     // Round 65: not while he's out (he isn't at his station then).
     if (_charging && show != PipShow.off && !outAt(now)) {
@@ -319,12 +367,13 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
 }
 
 /// Why he can't have a battery now.
-enum PipRefusal { egg, noBatteries, full, asleep, charging }
+enum PipRefusal { egg, noBatteries, full, asleep, charging, travelling }
 
 final pipLifeProvider = StateNotifierProvider<PipLifeNotifier, PipLife>(
   (ref) => PipLifeNotifier(
     ref.watch(appStorageProvider),
     clock: ref.watch(clockProvider),
+    dates: () => ref.read(datesProvider),
   ),
 );
 
@@ -358,9 +407,14 @@ class _Link implements PipLink {
   bool chargeTick() => _pip.chargeTick(_now);
 
   @override
+  PipTripNow trip() => PipTrip.at(_ref.read(datesProvider), _now);
+
+  @override
   PipOut? outing() {
     final now = _now;
     if (!_pip.outAt(now)) return null;
+    // Round 67: a day on the ski trip's bus: its XP, no adventure shown.
+    if (PipTrip.busDay(_ref.read(datesProvider), now)) return null;
     _pip.breakIfDue(now);
     final at = _ref.read(pipLifeProvider).breakAt;
     if (at == null || !_pip.onBreakAt(now)) {

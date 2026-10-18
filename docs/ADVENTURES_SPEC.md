@@ -155,7 +155,7 @@ these names):
   MainActivity) on the **media volume**, so they follow the phone's
   volume (muted → silent). A short 8-bit clip bundled with the app.
 
-## 8. Skiing (Round 65–66: the spec; waiting on Nikola's go)
+## 8. Skiing (Round 65–67; building)
 
 Skiing is **a different look for his adventure**, not a separate thing:
 the same days out (12:00–18:00), the same XP, break and rules; only
@@ -229,31 +229,38 @@ weapon box still shows it).
   12:00–18:00 as on any day, but no adventure is shown.
 - **Snow**: on the way there, the snowy look comes in once **80%** of
   the trip is done; on the way back it goes once **20%** is done.
-- **Leaving** (seen, or in Animations): the bus drives in and stops,
+- **Leaving** (seen, or in the Adventures previews): the bus drives in and stops,
   its door opens, Pip walks in, the door shuts, and it drives off (the
   road starts moving). **Arriving**: the bus slows and stops, Pip steps
   out, the bus drives off. Not seen: he's simply in the bus, or back.
 
-### 8.7 Pip Home's Animations
+### 8.7 Pip Home's previews
 
-- **Skiing**, **Falling on skis**, **Off on a trip** (the bus leaving)
-  and **Back from a trip** (arriving), as previews.
+- In the **Adventures** list (8.9).
 
-### 8.8 Questions
+### 8.8 Nikola's answers (Round 67)
 
-1. **The slope**: A, B or C (the picture)?
-2. **Travel time in Dates**: how should it be entered? Suggested: on a
-   Skiing holiday, **Travel** with **hours each way** (e.g. 6) and
-   **leaves at** for each trip: there on the first day (default 06:00)
-   and back on the last day (default 16:00). Or would you rather give
-   the departure and arrival times outright?
-3. **Ski days during travel**: on the first and last days, he skis only
-   in what's left of 12:00–18:00 outside the bus (arrived at 12:00, he
-   skis 12:00–18:00; on the bus till 14:00, skis 14:00–18:00). Right?
-4. **Energy on the trip**: kept as it was (not used, not gained), and
-   batteries still pile up on the clock meanwhile?
-5. **Gear when not registered**: still shown in the snowbank as part of
-   the scene, or only for an adventurer?
+1. **Slope: B**, the raised snowfield: trees, flags and bumps rise past
+   him.
+2. **Travel in Dates**: on a Skiing holiday, **travel hours** (total,
+   each way) and a **leaving time** for each trip: there on the first
+   day (default **06:00**), back on the **day after the last day**
+   (default **11:00**).
+3. A day the bus is on the road any time between 12:00 and 18:00, he
+   **doesn't ski** that day (still gains XP).
+4. On the trip his energy stays as it was; **batteries pile up** as
+   ever.
+5. His **gear shows** in the snowbank on ski days whether he's an
+   adventurer or not.
+
+### 8.9 Previews: Pip Home's Adventures (Round 67, decided)
+
+- Pip Home's settings get an **ADVENTURES** list (beside Animations,
+  Background and Hats): **Adventure**, **Skiing** and **Bus trip**. Each
+  plays a short showcase in his field (setting off, a bug or a fall, a
+  bit of running or skiing, back; the bus leaving and arriving); no XP,
+  nothing kept, and it stops when the card is swiped back to his info
+  (like the other previews).
 
 ## 9. Data and backup
 

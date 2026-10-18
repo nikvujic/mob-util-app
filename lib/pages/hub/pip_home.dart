@@ -298,6 +298,7 @@ class _StatusState extends ConsumerState<_Status> {
       PipRefusal.full => "HE'S FULL",
       PipRefusal.asleep => "HE'S ASLEEP",
       PipRefusal.charging => "HE'S CHARGING",
+      PipRefusal.travelling => "HE'S ON HIS TRIP",
       PipRefusal.noBatteries || PipRefusal.egg => null,
     };
     return SingleChildScrollView(

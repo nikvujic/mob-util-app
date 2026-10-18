@@ -244,4 +244,19 @@ void main() {
     link.look();
     expect(link.outing()!.onBreak, isTrue);
   });
+
+  test('days nobody looked in on (Round 67): out if he had energy at 12:00',
+      () {
+    final pip = hatched();
+    pip.register(at(18, 16)); // 120 XP that day
+    // Full at 11:00 on the 19th (batteries); empty by 23:00.
+    pip.replace(
+        pip.state.copyWith(energy: PipEnergy.full, energyAt: () => at(19, 11)));
+    pip.collect(at(21, 9));
+    expect(pip.state.xp, 120 + 360, reason: 'the 19th; not the 20th');
+    expect(pip.state.outDay, '2026-10-20');
+    // Not counted twice.
+    pip.collect(at(21, 10));
+    expect(pip.state.xp, 120 + 360);
+  });
 }

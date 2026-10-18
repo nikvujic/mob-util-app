@@ -344,6 +344,16 @@ fixtures for every stored format.
 - [ ] **Skiing**: spec in `docs/ADVENTURES_SPEC.md` section 8, waiting
   on Nikola's answers (8.8) and go.
 
+### Round 67 — Nikola's answers on skiing (2026-10-18)
+
+- [ ] Skiing as in `docs/ADVENTURES_SPEC.md` section 8: slope B; travel
+  hours and leaving times in Dates (there 06:00 on the first day, back
+  11:00 the day after the last); no skiing on a day the bus is on the
+  road in 12:00–18:00 (XP still); batteries pile up on the trip; his
+  gear always shown on ski days.
+- [ ] Pip Home: an **ADVENTURES** previews list (Adventure, Skiing, Bus
+  trip), no XP, stops when swiped back.
+
 ### Round 66 — Nikola on the skiing spec (2026-10-18)
 
 - [x] **Break only on a fresh look**: not while he's watched (setting

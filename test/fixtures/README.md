@@ -149,6 +149,11 @@ app still reads every version, so an update can never lose existing data.
   version 3, `adventure`): "Bip 4", registered 17 Oct 11:30 UTC, 390 XP
   banked, out since 18 Oct 10:00 UTC, his break from 12:10 UTC.
 - `v26/backup-plain.json` — backup (version 26) with him.
+- `v27/storage/dates.json` — a ski trip's travel (Round 67, dates.json
+  version 4, `travel`): v25's dates, "Jahorina ⛷" with 5 hours each way,
+  leaving at 07:00 on its first day and 10:00 the day after its last.
+- `v27/backup-plain.json` — backup (version 27) with them (and v26's
+  Pip).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
