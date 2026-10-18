@@ -337,6 +337,39 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 64 — Nikola's notes from using the app (2026-10-18)
+
+Noted; adventures first (go given), the rest after.
+
+- [ ] **Medicine history** (Round 62, not done yet): changing a take
+  time rewrites the history's times.
+- [ ] **Adventure break** (`docs/ADVENTURES_SPEC.md`): half an hour off
+  during the adventure, only for looks (XP goes on). If the app is
+  opened between 14:00 and 16:00 and he hasn't had it, it starts then,
+  so it's seen. He comes to a **tavern** (the background shifts, he
+  stays centred), sits at a table, a **plate of food** pops out of the
+  window onto it and he eats. Skiing: a **hot chocolate**. More break
+  events later.
+- [ ] **Note selection handles**: the left one's grab area reaches too
+  high and catches touches by accident; lower it.
+- [ ] **Subscriptions**: a new Hub page (to spec).
+- [ ] **Shop search**: a search button opens a field above the keyboard;
+  typing filters the bought items; the list still scrolls with the
+  keyboard open; closing the keyboard keeps the field (and filter), with
+  a cancel button beside it.
+- [ ] **Shop sort**: a toggle on the bought list: alphabetical, drag
+  handles hidden; again for the normal order. Items added while sorted
+  still go on top of the normal order.
+- [ ] **Recipes**: typing the title makes the page bounce at every key.
+- [ ] **Recipes**: the markdown format bar for its text; and a free
+  **text quantity** ("1-2") beside the pickers, which Shop takes too
+  (ingredients go to Shop).
+- [ ] **Planner reminders button**: a list of all scheduled reminders,
+  next first with their times, with checkboxes to delete several.
+- [ ] **Hub pages ideas** (to talk through).
+- [ ] **Pip**: the charging station seemed to flash when the app opened
+  with no charger in.
+
 ### Round 63 — Pip's adventures, the spec (2026-10-17)
 
 - [ ] Spec written: `docs/ADVENTURES_SPEC.md` (Nikola's notes: the

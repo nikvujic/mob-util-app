@@ -71,6 +71,22 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   minute he was out. He can't power down once out (section 6), so an
   adventure is always **start → 18:00** or **powered on → 18:00**.
 
+## 4b. The break (Round 64, decided)
+
+- Once per adventure, **half an hour off**, only for looks: XP goes on
+  as if he were running.
+- **When**: if the app is open (or opened) between **14:00 and 16:00**
+  and he hasn't had today's break, it starts then, so it's seen. If
+  nobody looks, it's at 15:00–15:30. An adventure started after 15:30
+  (a late battery) has no break.
+- **Normal adventure**: the ground slows and a **tavern** slides in (he
+  stays centred; the background moves), he puts the sword away, walks
+  to a table and sits; a **plate of food** pops out of the window onto
+  the table and he eats. At the end he gets up, draws the sword and the
+  ground moves again.
+- **Skiing**: the same at a mountain hut, with a **hot chocolate**.
+- Later: more break events.
+
 ## 5. Levels and titles
 
 **XP = one per minute adventuring** (a full day is 360 XP). The level
