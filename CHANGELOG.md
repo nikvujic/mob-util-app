@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.30.0] - 2026-10-19
+
 ### Added
 - **Planner: a notification while a block is on.** From a block's (or
   routine's) start, a quiet notification stays in the tray, counting
