@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.36.0] - 2026-10-19
+
 ### Added
 - **Subscriptions**, a new Hub page: what you pay for, as cards two to a
   row coloured by their state: **active** (green), **to cancel** (orange:
