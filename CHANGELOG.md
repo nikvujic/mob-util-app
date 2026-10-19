@@ -12,6 +12,9 @@ Release with the installable APK.
 - **Notes** (and everywhere text is edited): since v1.27.0, tapping in
   the text showed the cursor's handle far off to the right of the
   cursor, every time.
+- **What's new** always shows the whole version with its patches (1.28.1
+  shows 1.28.1 and 1.28.0), even after reading an earlier patch's, and
+  is then headed with the version, not "since" the one read.
 
 ## [1.28.0] - 2026-10-19
 

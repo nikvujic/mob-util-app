@@ -258,6 +258,31 @@ void main() {
           changesFor(changelog, '1.23.0'));
     });
 
+    test(
+        'always the whole minor version, even its patches read already '
+        '(Round 70)', () {
+      const patched = '## [1.22.2] - x\n\n### Fixed\n- Four\n\n$changelog';
+      expect(
+          changesSince(patched, '1.22.2', '1.22.0'),
+          '## 1.22.2\n\n### Fixed\n- Four\n\n'
+          '## 1.22.1\n\n### Fixed\n- Two\n\n'
+          '## 1.22.0\n\n### Added\n- One');
+      expect(changesSince(changelog, '1.23.0', '1.22.1'),
+          changesFor(changelog, '1.23.0'),
+          reason: 'a new minor version: from it on');
+    });
+
+    test('headed "in" the version when only its minor version shows', () {
+      final same = changesSince(changelog, '1.22.1', '1.22.0')!;
+      expect(whatsNewTitle(same, '1.22.1', '1.22.0'), "# What's new in 1.22.1");
+      final more = changesSince(changelog, '1.23.0', '1.21.0')!;
+      expect(
+          whatsNewTitle(more, '1.23.0', '1.21.0'), "# What's new since 1.21.0");
+      expect(whatsNewTitle('### Added\n- Three', '1.23.0', '1.22.1'),
+          "# What's new in 1.23.0");
+      expect(whatsNewTitle(more, '1.23.0', null), "# What's new in 1.23.0");
+    });
+
     test('kept while unread; the read one from then on', () {
       // 1.21.0 read; two updates before it's opened.
       var p = const Preferences(introVersion: '1.21.0');

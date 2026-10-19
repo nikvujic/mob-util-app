@@ -34,7 +34,8 @@ String? changesFor(String changelog, String version) {
 /// The changes from every version after [from] up to [version] (Round
 /// 61: updates not read yet pile up), each under its own `## X.Y.Z`,
 /// newest first; [changesFor] when [from] is null or there's only the
-/// one (or none) after it.
+/// one (or none) after it. Round 70: always the whole of [version]'s
+/// minor version too (1.28.0 with 1.28.2, even if it was read).
 String? changesSince(String changelog, String version, String? from) {
   final heading = RegExp(r'^## \[([^\]]+)\].*$', multiLine: true);
   final sections = heading.allMatches(changelog).toList();
@@ -44,7 +45,8 @@ String? changesSince(String changelog, String version, String? from) {
   final picked = [
     for (final (i, m) in sections.indexed)
       if (_numbers(m.group(1)!) case final v?
-          when _compare(v, after) > 0 && _compare(v, upTo) <= 0)
+          when _compare(v, upTo) <= 0 &&
+              (_compare(v, after) > 0 || (v[0] == upTo[0] && v[1] == upTo[1])))
         i,
   ];
   if (picked.length <= 1) return changesFor(changelog, version);
@@ -71,6 +73,18 @@ int _compare(List<int> a, List<int> b) {
     if (a[i] != b[i]) return a[i].compareTo(b[i]);
   }
   return 0;
+}
+
+/// The What's new heading for [changes] (from [changesSince]): "in"
+/// [version] when they're only its minor version's, else "since" [from].
+String whatsNewTitle(String changes, String version, String? from) {
+  final minor = _minorOf(version);
+  final shown = RegExp(r'^## (\S+)', multiLine: true)
+      .allMatches(changes)
+      .map((m) => _minorOf(m[1]!));
+  return from != null && shown.any((m) => m != minor)
+      ? "# What's new since $from"
+      : "# What's new in $version";
 }
 
 /// "1.14" of "1.14.1"; null if it isn't three numbers.

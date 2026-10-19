@@ -29,11 +29,8 @@ final introductionTextProvider = FutureProvider<String>((ref) async {
   // Round 61: every version since the What's new last read.
   final from = ref.watch(preferencesProvider.select((p) => p.introFrom));
   final changes = changesSince(changelog, version, from);
-  final title = changes != null && changes.startsWith('## ') && from != null
-      ? "# What's new since $from"
-      : "# What's new in $version";
   return [
     guide.trim(),
-    if (changes != null) '$title\n\n$changes',
+    if (changes != null) '${whatsNewTitle(changes, version, from)}\n\n$changes',
   ].join('\n\n');
 });
