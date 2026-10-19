@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.29.1] - 2026-10-19
+
 ### Fixed
 - **Shop's search** is a button beside **+** at the bottom, not in the
   top bar (buttons belong at the bottom, under your thumb), and it
