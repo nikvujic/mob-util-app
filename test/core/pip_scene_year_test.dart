@@ -27,8 +27,8 @@ void main() {
   });
 
   test(
-      'its days: Halloween, Christmas (to the Orthodox one), New Year\'s '
-      'Eve, Easter', () {
+      'its days: Halloween, New Year\'s Eve, Christmas (Round 72: the '
+      'Orthodox one alone), Easter', () {
     PipOccasion? on(int y, int m, int d, [int h = 12]) =>
         PipOccasion.at(DateTime(y, m, d, h));
     expect(on(2026, 10, 23), isNull);
@@ -36,12 +36,16 @@ void main() {
     expect(on(2026, 10, 31), PipOccasion.halloween);
     expect(on(2026, 11, 1), isNull);
     expect(on(2026, 12, 19), isNull);
-    expect(on(2026, 12, 20), PipOccasion.christmas);
-    expect(on(2026, 12, 31, 19), PipOccasion.christmas);
-    expect(on(2026, 12, 31, 20), PipOccasion.newYear);
+    expect(on(2026, 12, 20), isNull, reason: 'no Christmas weeks');
+    expect(on(2026, 12, 25), isNull);
+    expect(on(2026, 12, 30, 23), isNull);
+    expect(on(2026, 12, 31, 0), PipOccasion.newYear, reason: 'all day');
+    expect(on(2026, 12, 31, 12), PipOccasion.newYear);
     expect(on(2027, 1, 1, 1), PipOccasion.newYear);
-    expect(on(2027, 1, 1, 2), PipOccasion.christmas);
-    expect(on(2027, 1, 7), PipOccasion.christmas);
+    expect(on(2027, 1, 1, 2), isNull);
+    expect(on(2027, 1, 6, 23), isNull);
+    expect(on(2027, 1, 7, 0), PipOccasion.christmas);
+    expect(on(2027, 1, 7, 23), PipOccasion.christmas);
     expect(on(2027, 1, 8), isNull);
     // Orthodox Easter 2027: 2 May; Sunday and Monday.
     expect(on(2027, 5, 1), isNull);
@@ -75,13 +79,24 @@ void main() {
     expect(propsAt(DateTime(2026, 10, 30, 12)), contains(PipProp.pumpkins));
     expect(propsAt(DateTime(2026, 10, 30, 12)), isNot(contains(PipProp.bats)),
         reason: 'bats after dark');
-    final christmas = propsAt(DateTime(2026, 12, 24, 12));
-    expect(christmas, contains(PipProp.festiveTree));
+    expect(propsAt(DateTime(2026, 12, 24, 12)),
+        isNot(contains(PipProp.festiveTree)),
+        reason: 'Round 72: no Christmas weeks');
+    final christmas = propsAt(DateTime(2027, 1, 7, 12));
+    expect(christmas, contains(PipProp.badnjak));
     expect(christmas, isNot(contains(PipProp.trees)),
-        reason: 'its pine instead');
+        reason: 'its badnjak instead');
+    expect(christmas.intersection({PipProp.festiveTree, PipProp.fireworks}),
+        isEmpty,
+        reason: 'its own look, not New Year\'s');
     final eve = propsAt(DateTime(2026, 12, 31, 23));
     expect(eve, containsAll({PipProp.festiveTree, PipProp.fireworks}));
-    expect(eve, isNot(contains(PipProp.trees)));
+    expect(eve, isNot(contains(PipProp.trees)), reason: 'its pine instead');
+    expect(eve, isNot(contains(PipProp.badnjak)));
+    final eveDay = propsAt(DateTime(2026, 12, 31, 12));
+    expect(eveDay, contains(PipProp.festiveTree));
+    expect(eveDay, isNot(contains(PipProp.fireworks)),
+        reason: 'fireworks after dark');
     expect(propsAt(DateTime(2027, 5, 2, 12)), contains(PipProp.eggs));
     final plain = propsAt(DateTime(2026, 7, 10, 23));
     expect(
@@ -89,6 +104,7 @@ void main() {
           PipProp.pumpkins,
           PipProp.bats,
           PipProp.festiveTree,
+          PipProp.badnjak,
           PipProp.fireworks,
           PipProp.eggs,
         }),
@@ -163,7 +179,7 @@ void main() {
       PipOccasion.christmas,
       DayPart.night
     ));
-    expect(scene.props, containsAll({PipProp.festiveTree, PipProp.snowfall}));
+    expect(scene.props, containsAll({PipProp.badnjak, PipProp.snowfall}));
     look = look.toggled(WeatherKind.rain).toggled(Season.winter);
     expect((look.weather, look.season), (WeatherKind.rain, null),
         reason: 'another replaces it; the same again takes it off');
@@ -173,7 +189,7 @@ void main() {
         reason: 'over the real weather');
     // Something tried: the real day's things don't come along.
     expect(
-        PipScene.at(PipPlace.home, DateTime(2026, 12, 24, 12),
+        PipScene.at(PipPlace.home, DateTime(2027, 1, 7, 12),
                 look: const PipLook(weather: WeatherKind.fog))
             .occasion,
         isNull);

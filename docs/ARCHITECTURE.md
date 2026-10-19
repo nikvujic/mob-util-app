@@ -401,11 +401,11 @@ the one place that works out what's showing (Round 38: with the real
 moon's phase, `moonPhaseAt`, counted from a known new moon; no moon
 drawn at a new moon); `PipRoom` only draws it. Round 70: it also takes
 the `Season` (by the month), the day's `PipOccasion` (Halloween,
-Christmas to 7 January, New Year's Eve, Orthodox Easter) and the weather
+New Year's Eve, Orthodox Christmas on 7 January, Orthodox Easter) and the weather
 (an Open-Meteo WMO code, read by `core/weather.dart` into a
 `WeatherKind`), and a `PipLook` (what Pip Home tries on, over all of
 it); the field's props (trees, leaves, petals, pumpkins, bats, the
-festive pine, fireworks, eggs, rain, snowfall, lightning, fog) are
+festive pine, the badnjak, fireworks, eggs, rain, snowfall, lightning, fog) are
 decided there, a grey sky hiding the sun, moon and stars.
 
 The weather (Round 70): `data/weather_api.dart` (the only network code,

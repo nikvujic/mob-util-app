@@ -36,29 +36,29 @@ enum Season {
 ///
 /// - **Halloween**, 24–31 October: jack-o'-lanterns (lit after dark),
 ///   bats at night.
-/// - **Christmas**, 20 December to 7 January (the Orthodox Christmas, as
-///   kept where the app's made): a decorated pine, its lights blinking.
-/// - **New Year's Eve**, 31 December from 20:00 to 1 January 02:00:
-///   fireworks too.
+/// - **New Year's Eve**, all 31 December and on to 1 January 02:00
+///   (Round 72: no Christmas weeks before it): a decorated pine, its
+///   lights blinking; fireworks after dark.
+/// - **Christmas** (Round 72), the Orthodox one on 7 January, as kept
+///   where the app's made: a badnjak (an oak branch, its dry leaves on,
+///   tied with a red ribbon), straw on the ground, a lit candle.
 /// - **Easter**, Orthodox Easter Sunday and Monday: painted eggs in the
 ///   grass.
 enum PipOccasion {
   halloween('Halloween'),
-  christmas('Christmas'),
   newYear("New Year's Eve"),
+  christmas('Christmas'),
   easter('Easter');
 
   final String label;
 
   const PipOccasion(this.label);
 
-  /// [now]'s occasion, if any (New Year's Eve over Christmas).
+  /// [now]'s occasion, if any.
   static PipOccasion? at(DateTime now) {
     final (m, d, h) = (now.month, now.day, now.hour);
-    if ((m == 12 && d == 31 && h >= 20) || (m == 1 && d == 1 && h < 2)) {
-      return newYear;
-    }
-    if ((m == 12 && d >= 20) || (m == 1 && d <= 7)) return christmas;
+    if ((m == 12 && d == 31) || (m == 1 && d == 1 && h < 2)) return newYear;
+    if (m == 1 && d == 7) return christmas;
     if (m == 10 && d >= 24) return halloween;
     final sunday = orthodoxEaster(now.year);
     final day = DateTime(now.year, m, d);
@@ -232,10 +232,13 @@ enum PipProp {
   pumpkins,
   bats(parts: {DayPart.night, DayPart.dusk}),
 
-  /// Christmas's decorated pine, its lights blinking.
+  /// New Year's Eve's decorated pine, its lights blinking.
   festiveTree,
 
-  /// New Year's Eve's fireworks (it's night then).
+  /// Christmas's badnjak, straw and candle (Round 72).
+  badnjak,
+
+  /// New Year's Eve's fireworks, after dark.
   fireworks(parts: {DayPart.night, DayPart.dusk}),
 
   /// Easter's painted eggs in the grass.
@@ -369,13 +372,14 @@ class PipScene {
           PipProp.stars || PipProp.sun => !grey,
           PipProp.moon => !grey && moon != MoonPhase.none,
           PipProp.clouds => true,
-          PipProp.trees => occasion != PipOccasion.christmas &&
-              occasion != PipOccasion.newYear,
+          // The day's own tree instead.
+          PipProp.trees => occasion != PipOccasion.newYear &&
+              occasion != PipOccasion.christmas,
           PipProp.leaves => season == Season.autumn,
           PipProp.petals => season == Season.spring && !grey,
           PipProp.pumpkins || PipProp.bats => occasion == PipOccasion.halloween,
-          PipProp.festiveTree => occasion == PipOccasion.christmas ||
-              occasion == PipOccasion.newYear,
+          PipProp.festiveTree => occasion == PipOccasion.newYear,
+          PipProp.badnjak => occasion == PipOccasion.christmas,
           PipProp.fireworks => occasion == PipOccasion.newYear,
           PipProp.eggs => occasion == PipOccasion.easter,
           PipProp.rain => weather?.wet ?? false,

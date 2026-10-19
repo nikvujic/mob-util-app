@@ -655,14 +655,20 @@ abstract final class PipSprites {
       '.bbbbbbbb.',
       'wbwbwbwbwb',
     ],
-    // Round 67: his ski days': a pompom, a white band.
+    // Round 67: his ski days'. Round 72 (Nikola: better): pulled down
+    // over his head ([hatDrop]), a ribbed cuff, a Nordic pattern, a
+    // shaded pompom.
     PipHat.skiBeanie: [
-      '....ww....',
-      '...wwww...',
-      '..rrrrrr..',
-      '.rwwwwwwr.',
-      '.rrrrrrrr.',
-      'rrrrrrrrrr',
+      '.......ww.......',
+      '......wwwW......',
+      '.......WW.......',
+      '....rrrrrrrr....',
+      '..rrrrrrrrrrrr..',
+      '.rrwrrrwwrrrwrr.',
+      '.rwwwrwrrwrwwwr.',
+      'rrrrrrrrrrrrrrrr',
+      'RwRwRwRwRwRwRwRw',
+      'RRRRRRRRRRRRRRRR',
     ],
     // Round 61: a day of the year's.
     PipHat.santa: [
@@ -706,10 +712,16 @@ abstract final class PipSprites {
   /// The row a hat's bottom is on.
   static const hatBottom = 1;
 
+  /// Round 72: rows a hat comes down over his head (its cuff on his
+  /// casing's top), below [hatBottom].
+  static const hatDrop = {PipHat.skiBeanie: 2};
+
   /// Where [art] (a hat) starts on his frame, so it's centred.
   static int hatLeftOf(List<String> art) => hatCentre - art.first.length ~/ 2;
 
   static const hatColours = {
+    'R': PipColours.hatRubyDark,
+    'W': PipColours.hatWhiteShade,
     'o': PipColours.hatWhite,
     'p': PipColours.hatPink,
     'y': PipColours.hatYellow,
@@ -891,44 +903,62 @@ abstract final class PipSprites {
     'r': PipColours.snowShade,
   };
 
-  /// Round 67: his ski trip's bus, 56 x 24: yellow, a red stripe, a door
-  /// at the front (left), windows; his own window clear (he shows
-  /// through it).
+  /// Round 72: his ski trip's bus, 92 x 36, bigger (Nikola): yellow, a
+  /// red stripe, the windscreen and door at the front (left), three
+  /// passenger windows; his own ('.') clear, him in it behind the glass,
+  /// seats in the others.
   static const bus = [
-    '..YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY..',
-    '.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.',
-    'YYYYYYYYYYYYYYyyyyyyyyyyyyYYyyyyyyyyyyyyyyyyyyYyyyyyyyyY',
-    'YYYYYddddddddYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYdggggggdYyggggggggggyYYy................yYyggggggyY',
-    'YYYYYddddddddYyyyyyyyyyyyyYYyyyyyyyyyyyyyyyyyyYyyyyyyyyY',
-    'YYYYYdYYYYYYdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY',
-    'YYYYYdYYYYYYdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYl',
-    'rrrrrdrrrrrrdrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrl',
-    'rrrrrdrrrrrrdrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',
-    'RYYYYdYYYYYYdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY',
-    'YYYYYdYYYkkkkkkYYYYYYYYYYYYYYYYYYYYYYYYYYkkkkkkYYYYYYYYY',
-    'yyyyyyyykkkkkkkkyyyyyyyyyyyyyyyyyyyyyyyykkkkkkkkyyyyyyyy',
-    '........kkhhhhkk........................kkhhhhkk........',
-    '........kkhhhhkk........................kkhhhhkk........',
-    '........kkhhhhkk........................kkhhhhkk........',
-    '........kkkkkkkk........................kkkkkkkk........',
-    '.........kkkkkk..........................kkkkkk.........',
+    '..YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY..',
+    '.YyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyY.',
+    'YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY',
+    'YyyyyyyyyYYddddddddddddYYyyyyyyyyyyyyyyyyyyyyyyyyyyYyyyyyyyyyyyyyyyyyyyyyyyyyyYyyyyyyyyyyyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggggggggggggggggggggggggyYy........................yYygggggggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggGgggggggggggggggggggggyYy........................yYyggGggggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggGggggggggggggggggggggyYy........................yYygggGgggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggggGgggggggggggggggggggyYy........................yYyggggGggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggggGggggggggggggggggggyYy........................yYygggggGgggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggggggggggggggggggggggggyYy........................yYygggggggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggggggggggggggggggggggggyYy........................yYygggggggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggggggggggggggggggggggggyYy........................yYygggggggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYyggggggggggggggggggggggggyYy........................yYygggggggggyYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YwwwwwwwwYYddddddddddddYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YwwwwwwwwYYdwwwwddwwwwdYYygggsssssssgggsssssssggggyYy........................yYygggsssssssYY',
+    'YYYYYYYYYYYdwwwwddwwwwdYYyyyyyyyyyyyyyyyyyyyyyyyyyyYyyyyyyyyyyyyyyyyyyyyyyyyyyYyyyyyyyyyyyYY',
+    'YYYYYYYYYYYdwwwwddwwwwdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY',
+    'rrrrrrrrrrrdwwwwddwwwwdrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',
+    'rrrrrrrrrrrdwwwwddwwwwdrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',
+    'RRRRRRRRRRRdwwwwddwwwwdRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR',
+    'llYYYYYYYYYdwwwwddwwwwdYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYtt',
+    'llYYYYYYYYYdwwwwddwwwwdYYYYaaaakkkkkkkaaaaYYYYYYYYYYYYYYYYYYYYYYYYYaaaakkkkkkkaaaaYYYYYYYYtt',
+    'YYYYYYYYYYYdwwwwddwwwwdYYYYaaakkkkkkkkkaaaYYYYYYYYYYYYYYYYYYYYYYYYYaaakkkkkkkkkaaaYYYYYYYYYY',
+    'YYYYYYYYYYYdwwwwddwwwwdYYYYaakkkkkhkkkkkaaYYYYYYYYYYYYYYYYYYYYYYYYYaakkkkkhkkkkkaaYYYYYYYYYY',
+    'kkkkYYYYYYYdwwwwddwwwwdYYYYaakkkhhhhhkkkaaYYYYYYYYYYYYYYYYYYYYYYYYYaakkkhhhhhkkkaaYYYYYYkkkk',
+    'yyyyyyyyyyydwwwwddwwwwdyyyyaakkkhhkhhkkkaayyyyyyyyyyyyyyyyyyyyyyyyyaakkkhhkhhkkkaayyyyyyyyyy',
+    'yyyyyyyyyyyddddddddddddyyyyaakkkhhkhhkkkaayyyyyyyyyyyyyyyyyyyyyyyyyaakkkhhkhhkkkaayyyyyyyyyy',
+    '.............................kkkhhhhhkkk.............................kkkhhhhhkkk............',
+    '.............................kkkkkhkkkkk.............................kkkkkhkkkkk............',
+    '..............................kkkkkkkkk...............................kkkkkkkkk.............',
+    '...............................kkkkkkk.................................kkkkkkk..............',
   ];
 
   static const busColours = {
     'Y': PipColours.busYellow,
     'y': PipColours.busShade,
     'g': PipColours.busGlass,
-    'd': PipColours.busShade,
+    'G': PipColours.cloudLight,
+    'w': PipColours.busGlass,
+    's': PipColours.busSeat,
+    'd': PipColours.busTrim,
+    'a': PipColours.busTrim,
     'r': PipColours.flagRed,
+    'R': PipColours.busStripeShade,
     'l': PipColours.windowGlow,
-    'R': PipColours.flagRed,
+    't': PipColours.lightRed,
     'k': PipColours.face,
     'h': PipColours.batteryCase,
   };
@@ -1024,51 +1054,88 @@ abstract final class PipSprites {
 
   // Round 70: his field through the year.
 
-  /// A tree, 15 x 18: its crown in [treeColours] for the season ('L'
-  /// leaves, 'D' darker, 'B' blossom or a lighter leaf), 'T' and 'U' its
-  /// trunk. The crown is its first [treeCrown] rows (they sway).
+  /// A tree, 30 x 36 (Round 72: bigger and more detailed, Nikola): its
+  /// crown in [treeColours] for the season ('L' leaves, 'H' lit, 'D' in
+  /// shade, 'B' blossom or a bright leaf), 'T' and 'U' its trunk, lit and
+  /// shaded. The crown is its first [treeCrown] rows (they sway).
   static const tree = [
-    '.....LLLLL.....',
-    '...LLLLBLLLL...',
-    '..LLBLLLLLLLL..',
-    '.LLLLLLLLLBLLL.',
-    '.LLLLLDLLLLLLL.',
-    'LLLBLLLLLLLLBLL',
-    'LLLLLLLLLDLLLLL',
-    'LLDLLLLBLLLLLDL',
-    '.LLLLLLLLLLLLL.',
-    '.LLBLLLLDLLBLL.',
-    '..DLLLLLLLLLD..',
-    '...DDLLLLLDD...',
-    '.....DTTUD.....',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '.....TTTUU.....',
+    '...........H.......B..........',
+    '........HHHHHHHHHHHHHHL.......',
+    '.......HHHHBLHLHHHHHLBLH......',
+    '......HHHHHLBLLHHHHLLLHLB.....',
+    '......HBHLLHBLLHHLLLLBLLL.....',
+    '......HHLLHLLLLHLLLLHLLLL.....',
+    '.....HLLLHLLLLHLLLLHLLBLDD....',
+    '......LLHLLLLDBLLLDLLLLDD.....',
+    '....HHHBLLLLDLLLLHLLLLDDHLL...',
+    '...HHHHHHLLHLLLLHLLLDDHLLLHL..',
+    '...HHHHLLLHLLLLHLLBLHLLLLHLL..',
+    '..HHHHLLBHLLLLDBLLLDLLLBHLLLL.',
+    '..BHLLLLHLLLLDLLLLDLLLLHLLLLD.',
+    '..HLLLLHLLLLDLLLLDBBBLHLLLLDD.',
+    '..BLBLHLLBLDLLLBHLLLLDLLLLDDD.',
+    '.HHBHHLLLBDDLLLHLLLLDLLLLHLLLL',
+    '.HHLHLLLLDDLLLHLLLLDLLLLHLBLLD',
+    '.LLHLLLLDDDLLHLLLLDLLLDBLLLLDL',
+    '.LHLLLLDDDBLDLLLLDLDDDHLBLLDDD',
+    '.HLLLLDDDDLDLLLLDDDDDDLLLLDDDD',
+    '..LLLDDDD.DLLLLDDDDDD.LLLDDDD.',
+    '...DDDDD...LLLDDDDDD...DDDDD..',
+    '............DDDDDDD...........',
+    '.............TTDU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '............TTTTUU............',
+    '............TTTTUU............',
+    '...........TTTTTUUUU..........',
   ];
-  static const treeCrown = 12;
+  static const treeCrown = 23;
 
-  /// The same tree in winter, bare (its branches sway as a crown).
+  /// The same tree in winter, bare: its branches (they sway as a crown).
   static const bareTree = [
-    '..U.....T....U.',
-    '...T..U..T..T..',
-    '....T.T..T.T...',
-    '.T...TT.TU...T.',
-    '..T...TTU...T..',
-    '...TU..T..UT...',
-    '.....T.T.U.....',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '......TTU......',
-    '.....TTTUU.....',
+    '........T.T..T.T.T.TUU........',
+    '.......T.TT..UU.TT.U..........',
+    '.....TTT...TU....T.U....T.....',
+    '......T....TU.....U.....TUU...',
+    '...T...T...T......T.....U.....',
+    '....TTTT...T......T....U....U.',
+    '...T...TT..T......T....UUUUU..',
+    '.........T.T......T..UU....U..',
+    '..........TTT.....TUU......U..',
+    '............T.....U...........',
+    '.......T....T.....U...T.......',
+    '......T.T...TT...UU...T.U.....',
+    '.......TT....T...U....UU......',
+    '........T.....T.U.....U.......',
+    '.........T....T.U....U........',
+    '....TT...T.....U.....U...UU...',
+    '.....TTTTTTT...T...UUUUUUU....',
+    '....T.......T..T..U.......U...',
+    '.............TTTUU............',
+    '...............T..............',
+    '...............T..............',
+    '...............T..............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '.............TTTU.............',
+    '............TTTTUU............',
+    '............TTTTUU............',
+    '...........TTTTTUUU...........',
   ];
 
   /// The tree's colours in each season (by its index: spring, summer,
@@ -1076,6 +1143,7 @@ abstract final class PipSprites {
   static const treeColours = [
     {
       'L': PipColours.leafSpring,
+      'H': PipColours.leafSpringLight,
       'D': PipColours.leafSpringDark,
       'B': PipColours.blossom,
       'T': PipColours.bark,
@@ -1083,15 +1151,17 @@ abstract final class PipSprites {
     },
     {
       'L': PipColours.leafSummer,
+      'H': PipColours.leafSpring,
       'D': PipColours.leafSummerDark,
-      'B': PipColours.leafSpring,
+      'B': PipColours.leafSummerDark,
       'T': PipColours.bark,
       'U': PipColours.barkDark,
     },
     {
       'L': PipColours.leafAutumn,
+      'H': PipColours.leafAutumnLight,
       'D': PipColours.leafAutumnDark,
-      'B': PipColours.leafAutumnLight,
+      'B': PipColours.lightRed,
       'T': PipColours.bark,
       'U': PipColours.barkDark,
     },
@@ -1131,6 +1201,55 @@ abstract final class PipSprites {
     PipColours.lightBlue,
     PipColours.lightGreen,
   ];
+
+  /// Round 72: Christmas's badnjak, 16 x 18: oak branches, their dry
+  /// leaves on ('o', 'O'), tied with a red ribbon ('r'), standing in
+  /// straw ('s', 'S').
+  static const badnjak = [
+    '......oO.oo.....',
+    '....oOoo.oOo.o..',
+    '...oOo.b.oOooO..',
+    '..oo.oob.bo.Oo..',
+    '...O.ob.bBoo....',
+    '.....ob.b.Bo....',
+    '......bBb.B.....',
+    '......bBbB......',
+    '......rrrr......',
+    '.....rrbBrr.....',
+    '......bBbB......',
+    '.......bBb......',
+    '.......bBb......',
+    '.......bBb......',
+    '.......bBb......',
+    '.....s.bBb.s....',
+    '..sSsssbBbsSss..',
+    '.sSsSsSsSsSsSsS.',
+  ];
+  static const badnjakColours = {
+    'o': PipColours.oakLeaf,
+    'O': PipColours.oakLeafDark,
+    'b': PipColours.bark,
+    'B': PipColours.barkDark,
+    'r': PipColours.lightRed,
+    's': PipColours.straw,
+    'S': PipColours.strawDark,
+  };
+
+  /// Round 72: Christmas's candle, 3 x 8: its flame ('f', 'F'), which
+  /// flickers, its wick ('k'), the wax ('w', 'W').
+  static const candle = [
+    '.f.',
+    'fFf',
+    '.k.',
+    'www',
+    'wWw',
+    'www',
+    'www',
+    'wWw',
+  ];
+
+  /// Straw on the ground around it, 7 x 1.
+  static const straw = ['sSs.sSs'];
 
   /// Halloween's jack-o'-lantern, 7 x 6; its face 'y' lit after dark.
   static const pumpkin = [

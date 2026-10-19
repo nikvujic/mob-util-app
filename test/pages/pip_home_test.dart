@@ -141,7 +141,7 @@ void main() {
       PipOccasion.christmas,
       DayPart.night
     ));
-    expect(scene.props, containsAll({PipProp.festiveTree, PipProp.snowfall}));
+    expect(scene.props, containsAll({PipProp.badnjak, PipProp.snowfall}));
     expect(words(), contains('ON'));
     await tryOn('rain', up: true);
     await tryOn('winter', up: true);

@@ -60,15 +60,25 @@ void main() {
     expect(b.sword!.$4, 1);
   });
 
-  test('a bug ahead: struck, a poof and a buzz; he runs on', () {
+  test(
+      'a bug coming: in from the edge, crawling closer (Round 72: never '
+      'popping up beside him); struck, a poof and a buzz; he runs on', () {
     final b = standing();
     b.adventure(out, animate: false);
     b.takeBuzzes();
-    b.run!.bugAhead(hits: false);
+    expect(b.run!.bugComing(hits: false), isTrue);
+    expect(b.run!.bugComing(hits: true), isFalse, reason: 'one at a time');
+    var last = b.bug!.$1;
+    expect(last, greaterThanOrEqualTo(200 - PipBrain.bugWidth),
+        reason: 'at the edge');
     var poofed = false;
-    for (var i = 0; i < 120; i++) {
+    for (var i = 0; i < 60 * 6; i++) {
       b.step(1 / 60);
       poofed = poofed || b.poof != null;
+      if (b.bug case (final x, _, _)) {
+        expect(last - x, lessThan(2), reason: 'no jumps');
+        last = x;
+      }
     }
     expect(poofed, isTrue);
     expect(b.bug, isNull);
@@ -81,8 +91,11 @@ void main() {
       'and runs on', () {
     final b = standing();
     b.adventure(out, animate: false);
-    b.run!.bugAhead(hits: true);
-    steps(b, 0.75);
+    b.run!.bugComing(hits: true);
+    for (var i = 0; i < 60 * 8 && b.run!.phase != RunPhase.knocked; i++) {
+      b.step(1 / 60);
+    }
+    steps(b, 0.1);
     expect(b.run!.phase, RunPhase.knocked);
     expect(b.sword, isNull);
     expect(b.run!.lyingSword, isNotNull);
@@ -153,7 +166,7 @@ void main() {
   test('18:00 seen: he slows to a stop and is back; unseen: back at once', () {
     final b = standing();
     b.adventure(out, animate: false);
-    b.run!.bugAhead(hits: false);
+    b.run!.bugComing(hits: false);
     b.adventure(null, animate: true);
     steps(b, 0.1);
     expect(b.run!.phase, RunPhase.ending);

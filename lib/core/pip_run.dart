@@ -166,6 +166,12 @@ class PipRun {
   /// Off he goes: running right, or (skiing) down the slope.
   void _go() {
     if (skiing) {
+      // Round 72: the slope already dotted with what he's passed.
+      if (slope.isEmpty && tavernAt == null) {
+        for (var behind = 0.0; behind < farthest; behind += 18) {
+          _placeThing(drop - behind - random.nextDouble() * 12);
+        }
+      }
       // The slope moves past him; the ground doesn't (the hut, after his
       // break, slides away).
       speed = tavernAt == null ? 0 : runSpeed;
@@ -175,19 +181,47 @@ class PipRun {
     }
   }
 
-  // Round 67: skiing down (slope B: the snowfield raised, things on it
-  // rising past him, so he seems to go down).
+  // Round 67: skiing down. Round 72 (Nikola: he should go *down*): the
+  // room becomes the slope, seen from below; what he passes comes up
+  // from the bottom of the screen and shrinks away to the horizon.
 
   /// How far down the slope he's gone, and how fast now.
   double drop = 0;
   double _dropSpeed = 0;
-  static const skiSpeed = 8.0;
+  static const skiSpeed = 30.0;
 
-  /// The raised snowfield's height above the ground.
-  static const snowfield = 24;
+  /// Downhill: the slope view (not at the hut, nor walking to his gear).
+  bool get downhill =>
+      skiing &&
+      tavernAt == null &&
+      const {
+        RunPhase.running,
+        RunPhase.skiFall,
+        RunPhase.toSki,
+        RunPhase.skiOn,
+        RunPhase.back,
+        RunPhase.ending,
+      }.contains(phase);
 
-  /// Trees and flags on the slope: their x on the screen, where on the
-  /// slope (they're drawn [drop] − at above the ground) and which.
+  /// The slope's depth: a thing [behind] him (in [drop]'s units; below
+  /// him, nearer, less than 0) is drawn at this share of its size and
+  /// distance from the middle; 1 at his feet, shrinking to the horizon.
+  static const depth = 24.0;
+  static double nearness(double behind) =>
+      behind <= -depth + 1 ? depth : depth / (depth + behind);
+
+  /// Gone into the horizon past this far behind him.
+  static const farthest = 180.0;
+
+  /// Where the slope meets the sky, as a share of the sky's height.
+  static const horizon = 0.42;
+
+  /// His slalom: how far to the side of the middle he is at [at] along
+  /// the slope.
+  static double swayAt(double at) => 5 * math.sin(at / 16);
+
+  /// Trees and flags on the slope: their x on the screen at his feet's
+  /// depth, where on the slope ([drop] − at behind him) and which.
   final slope = <({double x, double at, SlopeThing kind})>[];
   double _nextThing = 0.5;
 
@@ -256,12 +290,15 @@ class PipRun {
 
   double _seatX(double near) => near + 8;
 
-  /// A bug just ahead now (a preview's, tests and pictures): [hits] him
-  /// or not.
-  void bugAhead({required bool hits}) {
-    bugAt = shift + x + PipBrain.width + 14;
+  /// A bug coming now (a preview's, tests): [hits] him or not. Round 72:
+  /// it crawls in from the room's edge, as any does (it was put just
+  /// ahead of him, and seemed to teleport); not while one is coming.
+  bool bugComing({required bool hits}) {
+    if (bugAt != null) return false;
+    bugAt = shift + roomWidth;
     _hitter = hits;
     _fleeing = false;
+    return true;
   }
 
   /// Round 65: a battery given while he's out, flying from where it was
@@ -335,21 +372,31 @@ class PipRun {
         }
       case RunPhase.takeGear:
         if (t >= gearTime / 2) _geared = true;
-        if (t >= gearTime) _to(RunPhase.toCentre);
+        // Round 72: skis on, straight down the slope (not walked over).
+        if (t >= gearTime) {
+          facingRight = true;
+          _go();
+          _to(RunPhase.running);
+        }
       case RunPhase.putGear:
         if (t >= gearTime / 2) _geared = false;
         if (t >= gearTime) _to(RunPhase.done);
       case RunPhase.skiFall:
         final p = (t / fallTime).clamp(0.0, 1.0);
-        skiAt = _skiFrom + 18 * _ease(p);
-        if (t >= fallTime) _to(RunPhase.toSki);
+        // Round 72: the ski lands beside him; he clicks back in where
+        // he is (no walking over).
+        skiAt = _skiFrom + 4 * _ease(p);
+        if (t >= fallTime) _to(RunPhase.skiOn);
       case RunPhase.toSki:
         if (_walkTo(skiAt! - PipBrain.width / 2, dt, fast: true)) {
           _to(RunPhase.skiOn);
         }
       case RunPhase.skiOn:
         if (t >= skiOnTime / 2) skiAt = null;
-        if (t >= skiOnTime) _to(RunPhase.back);
+        if (t >= skiOnTime) {
+          _go();
+          _to(RunPhase.running);
+        }
       case RunPhase.running:
         _run(dt);
       case RunPhase.knocked:
@@ -477,7 +524,9 @@ class PipRun {
   /// his break and the end as when running.
   void _ski(double dt) {
     facingRight = true;
-    x = centre;
+    // Round 72: a gentle slalom, eased into from where he set off.
+    final lane = centre + swayAt(drop);
+    x += (lane - x) * math.min(1, dt * 3);
     _dropSpeed = skiSpeed;
     speed = tavernAt == null ? 0 : runSpeed;
     if (_wantEnd) {
@@ -515,30 +564,37 @@ class PipRun {
     // Trees and flags, now and then, on either side of him.
     _nextThing -= dt;
     if (_nextThing <= 0) {
-      _nextThing = 0.35 + random.nextDouble() * 0.6;
-      final room = roomWidth - 10.0;
-      for (var i = 0; i < 6; i++) {
-        final tx = 2 + random.nextDouble() * room;
-        if (tx > x - 8 && tx < x + PipBrain.width + 4) continue;
-        final kind = random.nextDouble() < 0.6
-            ? SlopeThing.tree
-            : (random.nextBool() ? SlopeThing.redFlag : SlopeThing.blueFlag);
-        slope.add((x: tx, at: drop + 6, kind: kind));
-        break;
-      }
+      _nextThing = 0.25 + random.nextDouble() * 0.45;
+      _placeThing(drop + 10);
     }
-    slope.removeWhere((s) => drop - s.at > snowfield + 2);
+    slope.removeWhere((s) => drop - s.at > farthest);
     // A bump under him now and then: a hop as it passes his feet.
     _nextBump -= dt;
     if (_nextBump <= 0 && _bumpAt == null && phase == RunPhase.running) {
       _nextBump = 6 + random.nextDouble() * 8;
-      _bumpAt = drop + 6;
+      _bumpAt = drop + 10;
     }
     final bump = _bumpAt;
     if (bump != null) {
       final up = drop - bump;
       if (up >= 0 && _hop < 0 && phase == RunPhase.running) _hop = 0;
-      if (up > snowfield) _bumpAt = null;
+      if (up > farthest) _bumpAt = null;
+    }
+  }
+
+  /// A tree or a flag at [at] on the slope, either side of his lane, some
+  /// beyond the screen's edges (they come in toward the middle as they
+  /// go).
+  void _placeThing(double at) {
+    final room = roomWidth * 1.6;
+    for (var i = 0; i < 6; i++) {
+      final tx = -roomWidth * 0.3 + random.nextDouble() * room;
+      if (tx > centre - 14 && tx < centre + PipBrain.width + 10) continue;
+      final kind = random.nextDouble() < 0.6
+          ? SlopeThing.tree
+          : (random.nextBool() ? SlopeThing.redFlag : SlopeThing.blueFlag);
+      slope.add((x: tx, at: at, kind: kind));
+      return;
     }
   }
 

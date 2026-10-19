@@ -47,8 +47,9 @@ class PipBus {
   double busX = 0;
   double _pipX;
 
-  static const width = 56;
-  static const height = 24;
+  // Round 72: bigger (Nikola), him a passenger behind a window.
+  static const width = 92;
+  static const height = 36;
   static const roadSpeed = 30.0;
   static const pullTime = 2.0;
   static const doorTime = 0.4;
@@ -56,12 +57,16 @@ class PipBus {
 
   /// Where his window is, from the bus's left edge (his left edge there),
   /// and how high he sits (his feet hidden by the bus).
-  static const seatX = 27.0;
-  static const seatLift = 6.0;
+  static const seatX = 55.0;
+  static const seatLift = 11.0;
+
+  /// His window, from the bus's left edge and its top: left, right, top,
+  /// bottom (inclusive).
+  static const window = (left: 53, right: 76, top: 4, bottom: 19);
 
   /// Where the door is, from the bus's left edge, and how wide.
-  static const doorX = 5.0;
-  static const doorWidth = 8;
+  static const doorX = 11.0;
+  static const doorWidth = 12;
 
   /// The bus parked in the middle.
   double get middle => (roomWidth - width) / 2;

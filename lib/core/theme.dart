@@ -534,6 +534,11 @@ abstract final class PipColours {
   static const busYellow = Color(0xFFF2B632);
   static const busShade = Color(0xFFC88A1E);
   static const busGlass = Color(0xFF9CC7E0);
+  // Round 72: the bigger bus's seats, trim and inside.
+  static const busSeat = Color(0xFF4F6E8C);
+  static const busTrim = Color(0xFF3A3632);
+  static const busStripeShade = Color(0xFFA8382F);
+  static const busInside = Color(0xFF5C6B78);
   static const road = Color(0xFF5A5A5E);
   static const roadDark = Color(0xFF45454A);
   static const roadLine = Color(0xFFF5F0E8);
@@ -596,6 +601,8 @@ abstract final class PipColours {
   static const hatYellow = Color(0xFFFFD36E);
   static const hatGold = Color(0xFFE8B23A);
   static const hatRuby = Color(0xFFE0503E);
+  static const hatRubyDark = Color(0xFFA8382F);
+  static const hatWhiteShade = Color(0xFFCFC8BA);
   static const hatSapphire = Color(0xFF4F8FE0);
   static const hatBlack = Color(0xFF2B2826);
   static const hatPurple = Color(0xFF6A4FB5);
@@ -613,9 +620,14 @@ abstract final class PipColours {
   static const key = Color(0xFF36302C);
   static const dim = Color(0xFF9A8F86); // quieter words on the panel
 
+  // Round 72: the mountains at the ski slope's horizon.
+  static const mountain = Color(0xFF8FA4C2);
+  static const mountainShade = Color(0xFF7489AA);
+
   // Round 70: the seasons, occasions and weather in his field.
   static const leafSpring = Color(0xFF8CC65A);
   static const leafSpringDark = Color(0xFF5E9A3C);
+  static const leafSpringLight = Color(0xFFB6E07E);
   static const blossom = Color(0xFFF7B8CC);
   static const blossomLight = Color(0xFFFCE0EA);
   static const leafSummer = Color(0xFF4F8E35);
@@ -639,6 +651,14 @@ abstract final class PipColours {
   static const lightBlue = Color(0xFF5AB4F0);
   static const lightGreen = Color(0xFF7FE07A);
   static const starGold = Color(0xFFFFE07A);
+
+  // Round 72: Christmas's badnjak (dry oak leaves), straw and candle.
+  static const oakLeaf = Color(0xFFA8642A);
+  static const oakLeafDark = Color(0xFF7A4520);
+  static const straw = Color(0xFFE8C468);
+  static const strawDark = Color(0xFFBF9A40);
+  static const candle = Color(0xFFF2E2B0);
+  static const candleShade = Color(0xFFD4BE80);
   static const eggPink = Color(0xFFF2A0C0);
   static const eggBlue = Color(0xFF8FC4F0);
   static const eggYellow = Color(0xFFF6DA6A);

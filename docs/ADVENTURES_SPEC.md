@@ -242,7 +242,11 @@ weapon box still shows it).
 ### 8.8 Nikola's answers (Round 67)
 
 1. **Slope: B**, the raised snowfield: trees, flags and bumps rise past
-   him.
+   him. Round 72 (Nikola: he looked like he walked on a layer of
+   ground): **downhill**, seen from behind: the slope goes up to
+   mountains on the horizon, he sways gently side to side in the
+   middle, and what he passes comes up from below him and shrinks away
+   to the horizon (`PipRun.nearness`).
 2. **Travel in Dates**: on a Skiing holiday, **travel hours** (total,
    each way) and a **leaving time** for each trip: there on the first
    day (default **06:00**), back on the **day after the last day**

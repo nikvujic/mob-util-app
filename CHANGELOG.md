@@ -6,6 +6,29 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Pip's skiing**: he now skis **down** the slope, swaying gently side
+  to side, seen from behind: trees and flags come up from below him and
+  shrink away to the mountains on the horizon. After a fall he clicks
+  his ski back on where he is, with no walking about.
+- **Pip's bus** is much bigger: he sits behind a window with glass,
+  seats and room around him, not his face filling it. The roadside
+  trees stand beside the road, not on it.
+- **Trees** in his field are a lot bigger and more detailed, and stand
+  in new places each time the app opens.
+- **Rain** falls slanted, in two layers, with splashes on the ground.
+- A new **ski beanie**: striped, with a cuff and a pompom, pulled down
+  over his head.
+- **Christmas** is no longer 20 December to 7 January: **New Year's
+  Eve** (all of the 31st, into the small hours) keeps the pine with
+  lights, fireworks after dark; **Christmas** is now the Orthodox one,
+  **7 January**, with its own look: a badnjak (an oak branch tied with
+  a red ribbon) in straw, and a lit candle.
+
+### Fixed
+- In the **Adventure** preview, the bugs seemed to teleport in front of
+  him; they now crawl in from the edge like any other.
+
 ## [1.30.0] - 2026-10-19
 
 ### Added

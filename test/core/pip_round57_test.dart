@@ -76,7 +76,8 @@ void main() {
         final width = art.first.length;
         expect(art.every((r) => r.length == width), isTrue, reason: hat.name);
         expect(width.isEven, isTrue, reason: '${hat.name}: one middle');
-        expect(width, lessThanOrEqualTo(10), reason: hat.name);
+        // Round 72: the ski beanie as wide as his head; the rest 10.
+        expect(width, lessThanOrEqualTo(16), reason: hat.name);
         final left = PipSprites.hatLeftOf(art);
         expect(left + width / 2, headMiddle, reason: '${hat.name}: centred');
         // His antenna (two rows) under it.

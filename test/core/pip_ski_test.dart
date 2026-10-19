@@ -52,10 +52,45 @@ void main() {
       expect(run.shift, 0, reason: 'the ground doesn\'t move');
       expect(run.slope, isNotEmpty);
       expect(b.bug, isNull);
-      expect(b.x, run.centre);
+      // Round 72: down the slope, a gentle slalom about the middle.
+      expect(run.downhill, isTrue);
+      expect((b.x - run.centre).abs(), lessThanOrEqualTo(5.01));
+      // ...side to side, not straight down.
+      final xs = <double>{};
+      for (var i = 0; i < 80; i++) {
+        steps(b, 0.1);
+        xs.add(b.x.roundToDouble());
+      }
+      expect(xs.length, greaterThanOrEqualTo(5));
     });
 
-    test('seen setting off: to his gear, takes it, to the middle, down', () {
+    test(
+        'the slope (Round 72): what he passes comes up from below him and '
+        'shrinks away to the horizon; there from the start', () {
+      final b = standing(ski: true);
+      b.adventure(out, animate: false);
+      final run = b.run!;
+      expect(run.slope.length, greaterThan(5), reason: 'already dotted');
+      steps(b, 3);
+      final fresh = run.slope.where((s) => run.drop - s.at < 0);
+      expect(fresh, isNotEmpty, reason: 'new ones still below him');
+      expect(
+          run.slope.every((s) => run.drop - s.at <= PipRun.farthest), isTrue);
+      // Nearer, bigger and further out; far off, small, near the middle.
+      expect(PipRun.nearness(-10), greaterThan(1));
+      expect(PipRun.nearness(0), 1);
+      expect(PipRun.nearness(PipRun.farthest), lessThan(0.15));
+      // Clear of his lane at his feet.
+      for (final s in run.slope) {
+        expect(
+            s.x <= run.centre - 14 || s.x >= run.centre + PipBrain.width + 10,
+            isTrue);
+      }
+    });
+
+    test(
+        'seen setting off: to his gear, takes it, and down the slope '
+        '(Round 72: not walked to the middle on skis)', () {
       final b = standing(ski: true);
       b.x = 120;
       b.adventure(out, animate: true);
@@ -68,9 +103,12 @@ void main() {
       expect(took, isTrue);
       expect(b.run!.geared, isTrue);
       expect(b.run!.phase, RunPhase.running);
+      expect(b.run!.downhill, isTrue);
     });
 
-    test('a fall: tumbling, a ski off and away; he fetches it and goes on', () {
+    test(
+        'a fall: tumbling, a ski off beside him; he clicks back in where he '
+        'is (Round 72: no walking over) and goes on', () {
       final b = standing(ski: true);
       b.adventure(out, animate: false);
       b.takeBuzzes();
@@ -82,9 +120,12 @@ void main() {
       steps(b, PipRun.fallTime);
       expect(b.run!.skiAt, greaterThan(b.x + PipBrain.width));
       var on = false;
+      final where = b.x;
       for (var i = 0; i < 60 * 10 && b.run!.phase != RunPhase.running; i++) {
         b.step(1 / 60);
         on = on || b.run!.phase == RunPhase.skiOn;
+        expect(b.run!.phase, isNot(RunPhase.toSki));
+        expect(b.x, where);
       }
       expect(on, isTrue);
       expect(b.run!.skiAt, isNull);

@@ -340,20 +340,23 @@ fixtures for every stored format.
 ### Round 72 — Nikola on 1.28.1 (2026-10-19)
 
 Now: the planner's notification that stays (done), small fixes (Dates'
-sections and bell). For the next run, Pip:
-- [ ] **Bus**: the window isn't his whole face; a **bigger bus**, him
+sections and bell). Pip (done in 1.31.0):
+- [x] **Bus**: the window isn't his whole face; a **bigger bus**, him
   seen in a window; the roadside trees not on the road.
-- [ ] **Skiing** (seen in Pip Home's previews): he should ski **down**,
+- [x] **Skiing** (seen in Pip Home's previews): he should ski **down**,
   not walk left and right on a layer of ground; the trees should come
   up from the bottom of the screen and go up till they vanish at the
   horizon.
-- [ ] **Adventure** (previews): the bugs seem to **teleport**.
-- [ ] A better **ski beanie**.
-- [ ] **Trees**: a lot bigger, more detailed, in a random spot each time
+- [x] **Adventure** (previews): the bugs seem to **teleport**.
+- [x] A better **ski beanie**.
+- [x] **Trees**: a lot bigger, more detailed, in a random spot each time
   the app opens (not always one in view and one peeking in).
-- [ ] **Rain**: a better effect.
-- [ ] **Christmas**: not 20 Dec–7 Jan; just **New Year's Eve**, and the
-  **Orthodox Christmas (7 January)** with its own look.
+- [x] **Rain**: a better effect (slanted streaks in two layers,
+  splashes).
+- [x] **Christmas**: not 20 Dec–7 Jan; just **New Year's Eve** (all
+  31 December, to 02:00), and the **Orthodox Christmas (7 January)**
+  with its own look: a badnjak in straw, a lit candle. (The Santa hat,
+  25 Dec–2 Jan, is a hat of the year's, not the background's: kept.)
 - His question: the longer wake-up (yawn and stretch) was done in
   1.18.0; still open: **Night wake-up** (three taps at night wake
   him for 15 minutes) and **Early wake-up** (from 08:00).

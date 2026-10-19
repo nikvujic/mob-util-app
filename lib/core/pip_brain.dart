@@ -2457,8 +2457,8 @@ class PipBrain {
       if (run.skiing) {
         if (at(previewEventAt)) run.fallNow();
       } else {
-        if (at(previewEventAt - 2.5)) run.bugAhead(hits: false);
-        if (at(previewEventAt + 2)) run.bugAhead(hits: true);
+        if (at(previewEventAt - 4)) run.bugComing(hits: false);
+        if (at(previewEventAt + 1.5)) run.bugComing(hits: true);
       }
       if (at(previewLength)) run.want(onBreak: false, end: true);
     }

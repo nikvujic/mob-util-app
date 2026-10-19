@@ -807,48 +807,121 @@ class _RoomPainter extends CustomPainter {
       Season.winter => (PipColours.grassWinter, PipColours.frost),
       _ => (PipColours.grass, PipColours.grassLight),
     };
+    // Round 72: skiing down, the room is the slope (below).
+    final downhill = run?.downhill ?? false;
     // Pines along the back on a ski day.
-    if (skiSnow) {
+    if (skiSnow && !downhill) {
       for (final at in const [0.12, 0.42, 0.7, 0.9]) {
         final px = ((columns * at - shift * 0.5) % (columns + 12)) - 6;
-        sprite(PipSprites.pine, px.floorToDouble(),
-            groundTop - (run?.skiing == true ? PipRun.snowfield : 0),
+        sprite(PipSprites.pine, px.floorToDouble(), groundTop,
             colours: PipSprites.snowColours);
       }
     }
-    // Skiing: the snowfield raised, the slope's things rising past him.
-    if (run != null && run.skiing) {
-      final top = groundTop - PipRun.snowfield;
-      dot(0, top, PipColours.snowShade, columns.toDouble(), 1);
-      dot(0, top + 1, PipColours.snow, columns.toDouble(),
-          PipRun.snowfield.toDouble());
-      // His trail, up the slope behind him.
-      final mid = (run.x + PipBrain.width / 2).floorToDouble();
-      for (var k = 2; k < PipRun.snowfield; k += 2) {
-        final wiggle = ((run.drop + k) / 3).floor().isEven ? 0.0 : 1.0;
-        dot(mid - 4 + wiggle, groundTop - k, PipColours.snowShade);
-        dot(mid + 3 + wiggle, groundTop - k, PipColours.snowShade);
-      }
+
+    /// [rows] at [scale] (Round 72: smaller further away), its bottom
+    /// middle at [x], [bottom].
+    void scaled(List<String> rows, double x, double bottom, double scale,
+        Map<String, Color> colours) {
       canvas.save();
-      canvas.clipRect(
-          Rect.fromLTWH(0, (top + 1) * pixel, size.width, size.height));
-      for (final s in run.slope) {
-        final up = run.drop - s.at;
-        final art = switch (s.kind) {
-          SlopeThing.tree => PipSprites.pine,
-          SlopeThing.redFlag => PipSprites.flagRed,
-          SlopeThing.blueFlag => PipSprites.flagBlue,
-        };
-        sprite(art, s.x.floorToDouble(), (groundTop - up).floorToDouble(),
-            colours: PipSprites.snowColours);
-      }
-      if (run.bump case final up?) {
-        final bx = (run.x + 2).floorToDouble();
-        final by = (groundTop - up).floorToDouble();
-        dot(bx + 2, by - 2, PipColours.snowShade, PipBrain.width - 8.0, 1);
-        dot(bx, by - 1, PipColours.snowShade, PipBrain.width - 4.0, 1);
+      final width = rows.first.length * scale;
+      canvas.translate((x - width / 2) * pixel, bottom * pixel);
+      canvas.scale(scale);
+      for (var j = 0; j < rows.length; j++) {
+        for (var i = 0; i < rows[j].length; i++) {
+          final colour = colours[rows[j][i]];
+          if (colour == null) continue;
+          canvas.drawRect(
+              Rect.fromLTWH(i * pixel, (j - rows.length) * pixel, pixel + 0.5,
+                  pixel + 0.5),
+              paint..color = colour);
+        }
       }
       canvas.restore();
+    }
+
+    // Round 72 (Nikola: he should ski *down*): seen from below, the slope
+    // runs up to a horizon with mountains; what he passes comes up from
+    // the bottom of the screen and shrinks away to it, his tracks too.
+    if (downhill) {
+      final ski = run!;
+      final top = (groundTop * PipRun.horizon).floorToDouble();
+      final middle = columns / 2;
+      double yAt(double behind) =>
+          top + (groundTop - top) * PipRun.nearness(behind);
+      double xAt(double x, double behind) =>
+          middle + (x - middle) * PipRun.nearness(behind);
+      // The mountains, peaked, snow on their tops, the side away from
+      // the sun shaded.
+      final big = groundTop > 40;
+      final rise = big ? 16.0 : 10.0;
+      for (var x = 0; x < columns; x++) {
+        var high = 0.0;
+        var shaded = false;
+        for (var k = -1; k < columns ~/ 26 + 2; k++) {
+          final peak = k * 26.0 + (_hash(k + 7) % 12);
+          final tallest = rise * (0.55 + (_hash(k + 3) % 45) / 100);
+          final h = tallest - (x - peak).abs() * 0.75;
+          if (h > high) {
+            high = h;
+            shaded = x > peak;
+          }
+        }
+        if (high <= 0) continue;
+        final peakY = (top - high).floorToDouble();
+        final cap = math.min(high, math.max(1.0, high - rise * 0.45));
+        dot(x.toDouble(), peakY, PipColours.snow, 1, high - cap + 1);
+        dot(
+            x.toDouble(),
+            peakY + high - cap + 1,
+            shaded ? PipColours.mountainShade : PipColours.mountain,
+            1,
+            math.max(0, cap - 1));
+      }
+      // The slope: shaded far off, bright near.
+      for (var y = top; y < height; y++) {
+        final near = ((y - top) / (height - top)).clamp(0.0, 1.0);
+        dot(0, y, Color.lerp(PipColours.snowShade, PipColours.snow, near)!,
+            columns.toDouble(), 1);
+      }
+      // Specks of snow on it, going by.
+      for (var i = 0; i < columns; i++) {
+        final behind = (i * 29 + ski.drop) % (PipRun.farthest + 10) - 10.0;
+        final x = (_hash(i) % (columns * 16 ~/ 10)) - columns * 0.3;
+        dot(xAt(x, behind).floorToDouble(), yAt(behind).floorToDouble(),
+            PipColours.snowShade);
+      }
+      // His tracks, back up the slope behind him.
+      for (var behind = 1.0; behind < PipRun.farthest; behind += 2) {
+        final at =
+            ski.centre + PipRun.swayAt(ski.drop - behind) + PipBrain.width / 2;
+        final y = yAt(behind).floorToDouble();
+        if (y > groundTop - 1) continue; // under him
+        dot(xAt(at - 4, behind).floorToDouble(), y, PipColours.snowShade);
+        dot(xAt(at + 3, behind).floorToDouble(), y, PipColours.snowShade);
+      }
+      // A bump coming up under him.
+      if (ski.bump case final behind?) {
+        final f = PipRun.nearness(behind);
+        final x = xAt(ski.centre + PipBrain.width / 2, behind);
+        final y = yAt(behind);
+        dot((x - 8 * f).floorToDouble(), (y - 2 * f).floorToDouble(),
+            PipColours.snow, 16 * f, 2 * f);
+        dot((x - 8 * f).floorToDouble(), y.floorToDouble(),
+            PipColours.snowShade, 16 * f, 1);
+      }
+      // Trees and flags, the furthest first.
+      final things = [...ski.slope]..sort((a, b) => b.at.compareTo(a.at) * -1);
+      for (final s in things) {
+        final behind = ski.drop - s.at;
+        final f = PipRun.nearness(behind);
+        final (art, size) = switch (s.kind) {
+          SlopeThing.tree => (PipSprites.pine, 2.2),
+          SlopeThing.redFlag => (PipSprites.flagRed, 1.4),
+          SlopeThing.blueFlag => (PipSprites.flagBlue, 1.4),
+        };
+        scaled(art, xAt(s.x, behind), yAt(behind), f * size,
+            PipSprites.snowColours);
+      }
     }
     // Round 67: on the bus, a road moving under it, posts going by.
     final bus = brain.bus;
@@ -862,7 +935,7 @@ class _RoomPainter extends CustomPainter {
         dot(px - 1.0, groundTop - 9, PipColours.flagRed, 3, 1);
       }
     }
-    for (var x = 0; x < columns; x++) {
+    for (var x = 0; x < columns && !downhill; x++) {
       if (bus != null) {
         dot(x.toDouble(), groundTop, PipColours.road, 1,
             PipRoom.ground.toDouble());
@@ -914,10 +987,15 @@ class _RoomPainter extends CustomPainter {
         final bare = season == Season.winter;
         final art = bare ? PipSprites.bareTree : PipSprites.tree;
         final colours = PipSprites.treeColours[(season ?? Season.summer).index];
-        for (final (i, at)
-            in (home ? const [0.04, 0.7] : const [0.03, 0.76]).indexed) {
-          final left = along(at, 16, passing).floorToDouble();
-          final top = groundTop - art.length;
+        final wide = art.first.length.toDouble();
+        // Round 72: in their spots for this time the app's open, in full
+        // view; beside the road (not on it) while he rides the bus.
+        final base = bus != null ? groundTop - 1 : groundTop;
+        for (final (i, at) in _treeSpots.indexed) {
+          final room = math.max(0.0, columns - wide - 4);
+          final left =
+              along((2 + room * at) / columns, wide, passing).floorToDouble();
+          final top = base - art.length;
           for (var y = 0; y < art.length; y++) {
             // The crown sways, most at the top.
             final crown = y < PipSprites.treeCrown;
@@ -931,7 +1009,7 @@ class _RoomPainter extends CustomPainter {
               var colour = colours[art[y][x]];
               if (colour == null) continue;
               // Snow on a bare tree's branches while it snows.
-              if (snowy && bare && y < 8 && (x + y).isEven) {
+              if (snowy && bare && y < 18 && (x + y).isEven) {
                 colour = PipColours.snow;
               }
               dot(left + x + sway, top + y, colour);
@@ -961,6 +1039,26 @@ class _RoomPainter extends CustomPainter {
               dot(left + x, groundTop - art.length + y, colour);
             }
           }
+        }
+      }
+      if (props.contains(PipProp.badnjak)) {
+        // Round 72: Christmas: the badnjak, a candle by it (its flame
+        // flickering), straw scattered on the grass.
+        final left = along(0.74, 20, passing).floorToDouble();
+        sprite(PipSprites.badnjak, left, groundTop + 1,
+            colours: PipSprites.badnjakColours);
+        final flicker = (brain.sceneClock * 6).floor() % 3;
+        sprite(PipSprites.candle, left + 17, groundTop + 1, colours: {
+          'f': flicker == 0 ? PipColours.pumpkinGlow : PipColours.leafAutumn,
+          'F': flicker == 2 ? PipColours.lightRed : PipColours.starGold,
+          'k': PipColours.barkDark,
+          'w': PipColours.candle,
+          'W': PipColours.candleShade,
+        });
+        for (final at in home ? const [0.18, 0.4, 0.58] : const [0.2, 0.5]) {
+          sprite(PipSprites.straw, along(at, 7, passing).floorToDouble(),
+              groundTop + 1,
+              colours: PipSprites.badnjakColours);
         }
       }
       if (props.contains(PipProp.pumpkins)) {
@@ -1022,11 +1120,34 @@ class _RoomPainter extends CustomPainter {
     /// His ski trip's bus, its door open as he gets on or off.
     void drawBus(PipBus bus) {
       final left = bus.busX.floorToDouble();
+      final top = groundTop - PipBus.height;
       sprite(PipSprites.bus, left, groundTop, colours: PipSprites.busColours);
+      // Round 72: his window's glass over him (he's behind it).
+      const w = PipBus.window;
+      dot(
+          left + w.left,
+          top + w.top,
+          PipColours.busGlass.withValues(alpha: 0.28),
+          (w.right - w.left + 1).toDouble(),
+          (w.bottom - w.top + 1).toDouble());
+      dot(left + w.left + 2, top + w.top + 1,
+          PipColours.cloudLight.withValues(alpha: 0.5), 1, 3);
       if (bus.doorOpen) {
-        dot(left + PipBus.doorX + 1, groundTop - PipBus.height + 4,
-            PipColours.screenOff, PipBus.doorWidth - 2.0, 13);
+        dot(left + PipBus.doorX + 1, top + 4, PipColours.busInside,
+            PipBus.doorWidth - 2.0, 27);
       }
+    }
+
+    /// Round 72: inside the bus behind his window: the seats' row and a
+    /// seat back, drawn before him.
+    void busInside(PipBus bus) {
+      final left = bus.busX.floorToDouble();
+      final top = groundTop - PipBus.height;
+      const w = PipBus.window;
+      dot(left + w.left, top + w.top, PipColours.busInside,
+          (w.right - w.left + 1).toDouble(), (w.bottom - w.top + 1).toDouble());
+      dot(left + w.right - 4, top + w.top + 6, PipColours.busSeat, 4,
+          (w.bottom - w.top - 5).toDouble());
     }
 
     final eggLeft =
@@ -1166,8 +1287,10 @@ class _RoomPainter extends CustomPainter {
           colours: PipSprites.fieldColours);
     }
 
-    // Round 67: the bus, behind him while he's outside it.
+    // Round 67: the bus, behind him while he's outside it; Round 72: in
+    // it, the inside behind him first.
     if (bus != null && bus.busShown && !bus.inside) drawBus(bus);
+    if (bus != null && bus.busShown && bus.inside) busInside(bus);
 
     // Pip, clipped at the ground while he comes up.
     canvas.save();
@@ -1213,7 +1336,10 @@ class _RoomPainter extends CustomPainter {
     // Round 57: his hat, on his head: moved with him whatever he does.
     if (brain.hat case final hat? when !brain.hatBeside) {
       final art = PipSprites.hats[hat]!;
-      final top = PipSprites.hatBottom - art.length + 1;
+      final top = PipSprites.hatBottom -
+          art.length +
+          1 +
+          (PipSprites.hatDrop[hat] ?? 0);
       for (var y = 0; y < art.length; y++) {
         for (var x = 0; x < art[y].length; x++) {
           final colour = PipSprites.hatColours[art[y][x]];
@@ -1453,7 +1579,7 @@ class _RoomPainter extends CustomPainter {
     // he skis down).
     if (brain.snowing) {
       final t = brain.snowClock;
-      final rise = run?.skiing == true ? run!.drop * 0.9 : 0.0;
+      final rise = run?.downhill == true ? run!.drop * 0.5 : 0.0;
       final rows = height.toDouble();
       for (var i = 0; i < columns ~/ 3; i++) {
         final speedY = 5.0 + (i % 3) * 2;
@@ -1479,15 +1605,33 @@ class _RoomPainter extends CustomPainter {
       }
     }
     if (props.contains(PipProp.rain)) {
+      // Round 72 (Nikola didn't like the dashes): long thin streaks, slanted
+      // with the wind, in two layers (far ones fainter and slower), and
+      // little splashes where they hit the ground.
       final drizzle = scene?.weather == WeatherKind.drizzle;
-      final count = columns * (drizzle ? 1 : strength + 1) ~/ 5;
-      final drop = PipColours.raindrop.withValues(alpha: 0.8);
+      final count = columns * (drizzle ? 1 : strength + 1) ~/ 4;
+      final length = drizzle ? 2 : 4 + strength;
       for (var i = 0; i < count; i++) {
-        final speed = 55.0 + (i % 4) * 8;
-        final fy = ((i * 71 + t * speed) % (tall + 4)) - 4;
-        // Slanting a little with the wind.
-        final fx = ((i * 41 + fy * 0.3) % columns).floorToDouble();
-        dot(fx, fy.floorToDouble(), drop, 1, drizzle ? 1 : 2);
+        final far = i % 3 == 0;
+        final speed = (far ? 70.0 : 110.0) + (i % 5) * 6;
+        final span = tall + length + 4;
+        final head = (i * 71 + t * speed) % span - length;
+        final x0 = (i * 41 + head * 0.35) % (columns + 10) - 5;
+        final colour = PipColours.raindrop.withValues(alpha: far ? 0.35 : 0.65);
+        for (var k = 0; k < length; k++) {
+          final y = head - k;
+          if (y < 0 || y >= groundTop) continue;
+          dot((x0 - k * 0.35).floorToDouble(), y.floorToDouble(), colour);
+        }
+        // Landed: a splash for a moment.
+        if (!far && head >= groundTop && head < groundTop + 3) {
+          final sx = (x0 - (head - groundTop) * 0.35).floorToDouble();
+          final splash = PipColours.raindrop.withValues(alpha: 0.7);
+          dot(sx - 1, groundTop - 1, splash);
+          dot(sx + 1, groundTop - 1, splash);
+          dot(sx - 2, groundTop - 2, splash.withValues(alpha: 0.4));
+          dot(sx + 2, groundTop - 2, splash.withValues(alpha: 0.4));
+        }
       }
     }
     if (props.contains(PipProp.leaves) || props.contains(PipProp.petals)) {
@@ -1536,6 +1680,15 @@ class _RoomPainter extends CustomPainter {
   bool shouldRepaint(_RoomPainter old) => true;
 }
 
+/// Round 72: where his field's trees stand for this time the app's open.
+final List<double> _treeSpots = treeSpots(math.Random());
+
+/// Round 72: where his field's two trees stand (shares of the room's
+/// width), picked by [random]: one on the left part, one well to the
+/// right, so it isn't always the same view.
+List<double> treeSpots(math.Random random) =>
+    [random.nextDouble() * 0.3, 0.62 + random.nextDouble() * 0.38];
+
 /// A line of pixels from [x0], [y0] to [x1], [y1] (the cable).
 void _line(void Function(double, double, Color) dot, double x0, double y0,
     double x1, double y1, Color colour) {
@@ -1577,6 +1730,9 @@ List<String> pipFrameOf(PipBrain brain) {
 /// antenna, away from the fist. Round 58: in a hat (centred, over his
 /// antenna), further out, clear of it.
 double crossWordsLeft(PipBrain brain, double centre) {
-  final out = brain.hat != null && !brain.hatBeside ? 2 : 0;
+  final hat = brain.hatBeside ? null : PipSprites.hats[brain.hat];
+  // Clear of the hat's brim (Round 72: the beanie's as wide as his head).
+  final out =
+      hat == null ? 0 : math.max(2, 7 - PipSprites.hatLeftOf(hat)).toDouble();
   return brain.facingRight ? centre - 10 - out : centre + 3 + out;
 }
