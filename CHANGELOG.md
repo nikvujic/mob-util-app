@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-10-19
+
 ### Added
 - **Pip's adventures, watched**: his XP now goes up as he strikes bugs
   down. Each one collects what he's earned since the last, and the XP
