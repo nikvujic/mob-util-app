@@ -238,8 +238,21 @@ abstract class PipLink {
   /// break starts if it's due (Round 64); on it, how far through (0–1).
   PipOut? outing();
 
-  /// His adventure level now (Round 63: a level up seen, a flash).
+  /// His adventure level now (Round 63: a level up seen, a flash), by
+  /// the XP shown (Round 73).
   int get level;
+
+  /// Round 73: he's watched fighting on his day out ([on]), or not: his
+  /// XP shown then goes up only as he strikes bugs ([defeated]).
+  void fighting(bool on);
+
+  /// A bug (or a [boss]) struck down, watched: the XP shown collects
+  /// what he's gained since the last; a boss brings more. The XP shown
+  /// gained.
+  int defeated({bool boss = false});
+
+  /// Whether a boss may still come today (one a day out).
+  bool get bossDue;
 
   /// His ski trip now (Round 67): on its bus, snowy, skiing today.
   PipTripNow trip();

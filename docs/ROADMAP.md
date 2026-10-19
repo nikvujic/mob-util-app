@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 73 — Nikola on adventures (2026-10-19, 1.32.0)
+
+- [x] Watched, his **XP goes up as he strikes bugs** (each collects
+  what's gained since; "+N XP" rises). XP is now ten a minute, so most
+  bugs bring one or two.
+- [x] Pip Home's **adventure view**: a switch on the first card; opens
+  on it while he's out; his adventure card alone (no Animations card);
+  later more adventure cards (the inventory).
+- [x] **Foes**: beetles (2 strikes), spiders (3); a **boss** (6) once a
+  day out if he's watched, worth 50 XP; a Boss preview.
+
 ### Round 72 — Nikola on 1.28.1 (2026-10-19)
 
 Now: the planner's notification that stays (done), small fixes (Dates'

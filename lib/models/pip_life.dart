@@ -35,12 +35,14 @@ class PipLife {
   final String? wakeSeen;
 
   /// His adventures (Round 63): when he registered as an adventurer
-  /// (null: not yet), the XP banked from his days out before, and his
+  /// (null: not yet), the minutes out banked from his days out before
+  /// (Round 73: each worth ten XP, `PipAdventure.xpPerMinute`; stored as
+  /// "xp", which they were till then), and his
   /// latest day out: the day ([dayKey]-like, "2026-10-18"), from when
   /// (null: he hasn't gone out that day, or it's banked) and when his
   /// break started (Round 64; null: not had).
   final DateTime? registeredAt;
-  final int xp;
+  final int minutesOut;
   final String? outDay;
   final DateTime? outFrom;
   final DateTime? breakAt;
@@ -56,7 +58,7 @@ class PipLife {
     this.sleepSeen,
     this.wakeSeen,
     this.registeredAt,
-    this.xp = 0,
+    this.minutesOut = 0,
     this.outDay,
     this.outFrom,
     this.breakAt,
@@ -113,7 +115,7 @@ class PipLife {
     String? Function()? sleepSeen,
     String? Function()? wakeSeen,
     DateTime? Function()? registeredAt,
-    int? xp,
+    int? minutesOut,
     String? Function()? outDay,
     DateTime? Function()? outFrom,
     DateTime? Function()? breakAt,
@@ -130,7 +132,7 @@ class PipLife {
         sleepSeen: sleepSeen == null ? this.sleepSeen : sleepSeen(),
         wakeSeen: wakeSeen == null ? this.wakeSeen : wakeSeen(),
         registeredAt: registeredAt == null ? this.registeredAt : registeredAt(),
-        xp: xp ?? this.xp,
+        minutesOut: minutesOut ?? this.minutesOut,
         outDay: outDay == null ? this.outDay : outDay(),
         outFrom: outFrom == null ? this.outFrom : outFrom(),
         breakAt: breakAt == null ? this.breakAt : breakAt(),
@@ -153,7 +155,7 @@ class PipLife {
         if (adventurer)
           'adventure': {
             'registeredAt': _time(registeredAt!),
-            'xp': xp,
+            'xp': minutesOut,
             if (outDay != null) 'outDay': outDay,
             if (outFrom != null) 'outFrom': _time(outFrom!),
             if (breakAt != null) 'breakAt': _time(breakAt!),
@@ -176,7 +178,7 @@ class PipLife {
       sleepSeen: json['sleepSeen'] as String?,
       wakeSeen: json['wakeSeen'] as String?,
       registeredAt: _parse(out?['registeredAt']),
-      xp: math.max(0, (out?['xp'] as num?)?.toInt() ?? 0),
+      minutesOut: math.max(0, (out?['xp'] as num?)?.toInt() ?? 0),
       outDay: out?['outDay'] as String?,
       outFrom: _parse(out?['outFrom']),
       breakAt: _parse(out?['breakAt']),
@@ -196,7 +198,7 @@ class PipLife {
       other.sleepSeen == sleepSeen &&
       other.wakeSeen == wakeSeen &&
       other.registeredAt == registeredAt &&
-      other.xp == xp &&
+      other.minutesOut == minutesOut &&
       other.outDay == outDay &&
       other.outFrom == outFrom &&
       other.breakAt == breakAt;
@@ -213,7 +215,7 @@ class PipLife {
       sleepSeen,
       wakeSeen,
       registeredAt,
-      xp,
+      minutesOut,
       outDay,
       outFrom,
       breakAt);

@@ -91,6 +91,12 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // A long pause (e.g. the app away) doesn't jump him across the room.
     setState(() => widget.brain.step(dt.clamp(0, 0.1)));
     _charge(dt.clamp(0, 0.1));
+    // Round 73: bugs struck down, watched: his XP shown collects what
+    // he's gained (a boss brings more), rising over where it was.
+    for (final foe in widget.brain.takeDefeats()) {
+      final xp = widget.link?.defeated(boss: foe == PipFoe.boss) ?? 0;
+      if (xp > 0) widget.brain.showXp(xp);
+    }
     // Round 53: a buzz where something hits (a landing, a strike, a kick).
     for (final buzz in widget.brain.takeBuzzes()) {
       switch (buzz) {
@@ -216,6 +222,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 67: on his ski trip's bus.
     brain.ride(trip, animate: seen);
     brain.adventure(out, animate: seen);
+    // Round 73: watched fighting, his XP shown goes up only as he strikes
+    // bugs; a boss may come if none was beaten today.
+    brain.bossDue = link.bossDue;
+    link.fighting(_moving && brain.fighting);
     // A level up seen while he's out: a flash over him.
     final level = link.level;
     final before = _level;
@@ -1276,10 +1286,27 @@ class _RoomPainter extends CustomPainter {
         blade(Offset(sx * pixel, (groundTop - up) * pixel), angle, 1);
       }
     }
-    // A bug crawling in, its legs stepping; mirrored going right.
+    // A bug crawling in, its legs stepping; mirrored going right. Round
+    // 73: out, a beetle, a spider or the boss too, flashing as it's
+    // struck, the strikes it can still take over it.
     if (brain.bug case (final bx, final legsUp, final toRight)) {
-      sprite(legsUp ? PipSprites.bugUp : PipSprites.bugDown, bx, groundTop,
-          colours: PipSprites.fieldColours, mirror: toRight);
+      final fight =
+          brain.activity == PipActivity.adventuring ? brain.run : null;
+      final foe = fight?.foe ?? PipFoe.bug;
+      final art = PipSprites.foeArt(foe, legsUp);
+      sprite(art, bx, groundTop,
+          colours: fight?.foeFlash ?? false
+              ? PipSprites.foeFlashColours
+              : PipSprites.foeColours,
+          mirror: toRight);
+      if (fight != null && foe.hits > 1) {
+        final left = fight.foeHitsLeft;
+        final from = bx + (art.first.length - (left * 2 - 1)) / 2;
+        for (var i = 0; i < left; i++) {
+          dot((from + i * 2).floorToDouble(), groundTop - art.length - 3,
+              PipColours.bugEye);
+        }
+      }
     }
     // A ball, rolling (its stripe turning) or bouncing off.
     if (brain.ball case (final bx, final up, final turn)) {
@@ -1439,9 +1466,13 @@ class _RoomPainter extends CustomPainter {
             (groundTop - 1 - up).floorToDouble(), PipColours.puff);
       }
     }
-    // A bug struck: a poof.
+    // A bug struck: a poof (Round 73: bigger for a bigger foe).
     if (brain.poof case (final px, final t)) {
-      final out = 1 + 4 * t;
+      final size = brain.activity == PipActivity.adventuring
+          ? brain.run?.poofSize ?? 1
+          : 1.0;
+      final out = (1 + 4 * t) * math.sqrt(size);
+      final rise = (size - 1) * 1.5;
       for (final (ox, oy) in const [
         (-1, -1),
         (1, -1),
@@ -1451,9 +1482,23 @@ class _RoomPainter extends CustomPainter {
         (-1, 0),
         (1, 0),
       ]) {
-        dot((px + ox * out).floorToDouble(),
-            (groundTop - 2 + oy * out * 0.7).floorToDouble(), PipColours.puff);
+        dot(
+            (px + ox * out).floorToDouble(),
+            (groundTop - 2 - rise + oy * out * 0.7).floorToDouble(),
+            PipColours.puff);
       }
+    }
+    // Round 73: the XP he gained, rising over it and fading.
+    for (final (xp, px, f)
+        in brain.run?.xpRising ?? const <(int, double, double)>[]) {
+      final art = PipSprites.tinyText('+$xp XP');
+      final left = (px - art.first.length / 2).floorToDouble();
+      final top = groundTop - 16 - (8 * f).floorToDouble();
+      final fade = f < 0.6 ? 1.0 : 1 - (f - 0.6) / 0.4;
+      sprite(art, left + 1, top + 1,
+          alpha: fade, colours: const {'x': PipColours.levelUpShade});
+      sprite(art, left, top,
+          alpha: fade, colours: const {'x': PipColours.levelUp});
     }
     // His sword, in a floating hand: raised, swung, popping in and away.
     if (brain.sword case (final hx, final hy, final angle, final size)

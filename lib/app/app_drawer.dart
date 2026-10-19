@@ -233,5 +233,5 @@ int? _adventureLevel(WidgetRef ref) {
   final life = ref.read(pipLifeProvider.notifier);
   final now = ref.watch(clockProvider)();
   if (!life.outAt(now)) return null;
-  return PipAdventure.levelFor(life.xpAt(now));
+  return PipAdventure.levelFor(pipShownXp(ref, now));
 }

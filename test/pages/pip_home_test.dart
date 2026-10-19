@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/weather.dart';
+import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pixel_text.dart';
@@ -426,10 +428,85 @@ void main() {
         find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
     await tester.pumpAndSettle();
     expect(brain.activity, isNot(PipActivity.adventuring));
-    expect(container.read(pipLifeProvider).xp, 0, reason: 'no XP');
+    expect(container.read(pipLifeProvider).minutesOut, 0, reason: 'no XP');
+  });
+
+  testWidgets('Adventures previews (Round 73): the boss\'s fight, no XP',
+      (tester) async {
+    await open(tester);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAdventurePreviews')));
+    await tester.pumpAndSettle();
+    final brain = room(tester).brain;
+    await tester.ensureVisible(find.byKey(const Key('pipPreview-boss')));
+    await tester.tap(find.byKey(const Key('pipPreview-boss')));
+    await tester.pump();
+    expect(brain.activity, PipActivity.adventuring);
+    expect(brain.run!.spawns, isFalse, reason: 'the boss alone');
+    for (var i = 0; i < 60 * 4; i++) {
+      brain.step(1 / 60);
+    }
+    expect(brain.run!.foe, PipFoe.boss);
+    expect(brain.bug, isNotNull);
+    expect(brain.fighting, isFalse, reason: 'a preview: no XP');
   });
 
   group('adventures (Round 63)', () {
+    testWidgets(
+        'Round 73: out, it opens on his adventure view: his adventure card '
+        'alone (no settings, no animations); Info switches to his info '
+        'and settings, Adventures back', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.625;
+      addTearDown(tester.view.reset);
+      container = await pumpApp(tester,
+          clock: () => DateTime(2026, 10, 13, 13),
+          realPipLink: true,
+          pip: PipLife(
+            born: DateTime(2026, 10, 1),
+            energyAt: DateTime(2026, 10, 13, 11),
+            registeredAt: DateTime(2026, 10, 12, 14),
+            outDay: '2026-10-13',
+            outFrom: DateTime(2026, 10, 13, 12),
+          ));
+      await openTab(tester, 'Hub');
+      await tester.tap(find.byTooltip('Pip'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipAdventure')), findsOneWidget);
+      expect(words(), contains('LEVEL 1'));
+      expect(find.bySemanticsLabel(RegExp('Card 1 of')), findsNothing,
+          reason: 'one card');
+      await tester.fling(
+          find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipSettings')), findsNothing);
+      expect(find.byKey(const Key('pipAdventure')), findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('pipInfo')));
+      await tester.tap(find.byKey(const Key('pipInfo')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipStatus')), findsOneWidget);
+      await tester.fling(
+          find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipAnimations')), findsOneWidget);
+      await tester.fling(
+          find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(const Key('pipAdventures')));
+      await tester.tap(find.byKey(const Key('pipAdventures')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pipAdventure')), findsOneWidget);
+      expect(find.byKey(const Key('pipAnimations')), findsNothing);
+    });
+
+    testWidgets('not out: it opens on his info', (tester) async {
+      await open(tester, hour: 13);
+      expect(find.byKey(const Key('pipStatus')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('Card 1 of 2')), findsOneWidget);
+    });
+
     testWidgets(
         'the Adventures button turns his card; not registered: a button, '
         'only from 13:00 to 17:00', (tester) async {

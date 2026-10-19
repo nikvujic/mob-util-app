@@ -486,6 +486,13 @@ flashes. In the brain he's `PipActivity.adventuring` (a row of `false`
 in `mayStart`), driven by `core/pip_run.dart`'s `PipRun` (phases,
 the ground's shift, bugs, the knocked-off sword, the tavern and plate),
 which the painter draws in screen terms (world x − shift).
+Round 73: XP is ten a minute, worked out from `minutesOut`; while his
+room is shown and he's `fighting`, it calls `PipLink.fighting` each
+second (`pipHeldXpProvider` holds the XP shown, `shownXpAt`) and, for
+each foe `PipRun` reports struck down (`defeats`, a `PipFoe`),
+`PipLink.defeated`, which collects the XP (a boss banks
+`PipAdventure.bossMinutes` once a day out, `bossDueAt`) and returns
+what to show rising (`showXp`).
 
 His ski trips (Round 67): `providers/pip_trip.dart` works out from
 Dates the bus rides (`ridesNear`), ski days, bus days and the snowy

@@ -5,6 +5,23 @@ import 'package:the_app/core/pip_brain.dart';
 /// What stands on his ski slope (Round 67).
 enum SlopeThing { tree, redFlag, blueFlag }
 
+/// What he fights on his day out (Round 73): bugs, and now and then
+/// bigger ones that take more than one strike; once a day out, if he's
+/// watched, a boss.
+enum PipFoe {
+  bug(hits: 1, width: 8, crawl: 6),
+  beetle(hits: 2, width: 12, crawl: 5),
+  spider(hits: 3, width: 14, crawl: 7),
+  boss(hits: 6, width: 24, crawl: 3.5);
+
+  /// Strikes it takes, its width, and how fast it crawls at him.
+  final int hits;
+  final int width;
+  final double crawl;
+
+  const PipFoe({required this.hits, required this.width, required this.crawl});
+}
+
 /// Where he is in his day out (Round 63).
 enum RunPhase {
   /// Just registered: his sword held up high, a fanfare.
@@ -124,9 +141,8 @@ class PipRun {
   static const standUpTime = 0.4;
   static const endTime = 0.9;
 
-  /// How fast a bug crawls at him, how often they come (seconds, from
-  /// the last), and the chance one gets him first.
-  static const bugCrawl = 6.0;
+  /// How often bugs come (seconds, from the last; how fast each crawls
+  /// is its [PipFoe.crawl]), and the chance one gets him first.
   static const bugFrom = 2.5;
   static const bugSpread = 4.0;
   static const hitChance = 0.2;
@@ -265,9 +281,50 @@ class PipRun {
   double _nextBug = bugFrom;
   double _swing = -1;
 
-  // A struck bug's poof: its middle (world) and how far.
+  /// Round 73: what's coming ([PipFoe]), how many strikes it's taken,
+  /// and its stagger back after one that didn't finish it (seconds in;
+  /// -1: none).
+  PipFoe foe = PipFoe.bug;
+  int _struck = 0;
+  double _recoil = -1;
+  static const recoilTime = 0.3;
+  static const recoilSpeed = 40.0;
+  static const fleeSpeed = 30.0;
+
+  /// The odds of a beetle (two strikes) or a spider (three) instead of a
+  /// bug, and of the boss (six) while one may come ([bossDue]).
+  static const beetleChance = 0.22;
+  static const spiderChance = 0.08;
+  static const bossChance = 0.04;
+
+  /// A boss may come (his life says: none beaten today, and he's
+  /// watched); once one has, not again this run.
+  bool bossDue = false;
+  bool _bossCame = false;
+
+  /// Bugs come by themselves (a boss preview's fight: only its own).
+  bool spawns = true;
+
+  /// What he's struck down, taken by his brain (his life counts them).
+  final defeats = <PipFoe>[];
+
+  // A struck bug's poof: its middle (world), how far, and how big.
   double? _poofAt;
   double _poofT = 0;
+  double _poofSize = 1;
+
+  /// Round 73: XP gained, rising over where a foe was struck down: how
+  /// much, its middle on the screen (it stays there), seconds in.
+  final xpPops = <(int, double, double)>[];
+  static const xpPopTime = 1.2;
+
+  /// Shows [xp] gained over the last foe struck down.
+  void popXp(int xp) {
+    final at = _lastDown;
+    if (at != null) xpPops.add((xp, at - shift, 0));
+  }
+
+  double? _lastDown;
 
   // His sword flying off and lying there: from and to (world).
   double _swordFrom = 0;
@@ -293,12 +350,34 @@ class PipRun {
   /// A bug coming now (a preview's, tests): [hits] him or not. Round 72:
   /// it crawls in from the room's edge, as any does (it was put just
   /// ahead of him, and seemed to teleport); not while one is coming.
-  bool bugComing({required bool hits}) {
+  bool bugComing({required bool hits, PipFoe foe = PipFoe.bug}) {
     if (bugAt != null) return false;
-    bugAt = shift + roomWidth;
-    _hitter = hits;
-    _fleeing = false;
+    _come(foe, hits: hits);
     return true;
+  }
+
+  /// [kind] crawls in from the room's edge; [hits] him first or not (a
+  /// boss never does).
+  void _come(PipFoe kind, {required bool hits}) {
+    foe = kind;
+    _struck = 0;
+    _recoil = -1;
+    bugAt = shift + roomWidth;
+    _hitter = hits && kind != PipFoe.boss;
+    _fleeing = false;
+    if (kind == PipFoe.boss) _bossCame = true;
+  }
+
+  /// What comes next: a bug mostly; a beetle or a spider now and then;
+  /// the boss, rarely, while one may come.
+  PipFoe _pick() {
+    if (bossDue && !_bossCame && random.nextDouble() < bossChance) {
+      return PipFoe.boss;
+    }
+    final r = random.nextDouble();
+    if (r < spiderChance) return PipFoe.spider;
+    if (r < spiderChance + beetleChance) return PipFoe.beetle;
+    return PipFoe.bug;
   }
 
   /// Round 65: a battery given while he's out, flying from where it was
@@ -487,24 +566,34 @@ class PipRun {
       _swing += dt;
       if (_swing >= swingTime) {
         _swing = -1;
-        _poofAt = bugAt! + PipBrain.bugWidth / 2;
+        _struck++;
+        final boss = foe == PipFoe.boss;
+        if (_struck < foe.hits) {
+          // Round 73: not down yet: it staggers back, then comes again.
+          _recoil = 0;
+          buzzes.add(boss ? PipBuzz.medium : PipBuzz.light);
+          return;
+        }
+        _poofAt = bugAt! + foe.width / 2;
+        _lastDown = _poofAt;
         _poofT = 0;
+        _poofSize = foe.width / PipBrain.bugWidth;
         bugAt = null;
-        buzzes.add(PipBuzz.light);
+        defeats.add(foe);
+        buzzes.add(boss ? PipBuzz.heavy : PipBuzz.light);
       }
       return;
     }
     final bug = bugAt;
     if (bug == null) {
       _nextBug -= dt;
-      if (_nextBug <= 0 && !_wantBreak && !_wantEnd) {
-        bugAt = shift + roomWidth;
-        _hitter = random.nextDouble() < hitChance;
-        _fleeing = false;
+      if (_nextBug <= 0 && spawns && !_wantBreak && !_wantEnd) {
+        _come(_pick(), hits: random.nextDouble() < hitChance);
         _nextBug = bugFrom + random.nextDouble() * bugSpread;
       }
       return;
     }
+    if (_recoil >= 0) return;
     final gap = bug - shift - (x + PipBrain.width);
     if (_hitter && gap <= 1) {
       // It gets him: knocked back, the sword flying off behind him.
@@ -608,15 +697,34 @@ class PipRun {
   void _stepBug(double dt) {
     if (_poofAt != null) {
       _poofT += dt;
-      if (_poofT >= poofTime) _poofAt = null;
+      if (_poofT >= poofTime * math.sqrt(_poofSize)) _poofAt = null;
+    }
+    for (var i = xpPops.length - 1; i >= 0; i--) {
+      final (xp, at, t) = xpPops[i];
+      if (t + dt >= xpPopTime) {
+        xpPops.removeAt(i);
+      } else {
+        xpPops[i] = (xp, at, t + dt);
+      }
     }
     final bug = bugAt;
     if (bug == null) return;
-    if (_fleeing) {
-      bugAt = bug + bugCrawl * 3 * dt;
+    if (_recoil >= 0) {
+      // Staggering back from a strike (Round 73: away from him, the
+      // ground's run too).
+      _recoil += dt;
+      bugAt = bug + (speed + recoilSpeed * (1 - _recoil / recoilTime)) * dt;
+      if (_recoil >= recoilTime) _recoil = -1;
+    } else if (_fleeing) {
+      // Scurrying off (Round 73: faster than the ground, so one that got
+      // him is gone even once he's running again).
+      bugAt = bug + (speed + fleeSpeed) * dt;
       if (bugAt! - shift > roomWidth) bugAt = null;
     } else if (_swing < 0) {
-      bugAt = bug - bugCrawl * dt;
+      bugAt = bug - foe.crawl * dt;
+    } else {
+      // Struck at: it stands its ground where he reached it.
+      bugAt = bug + speed * dt;
     }
   }
 
@@ -759,8 +867,21 @@ class PipRun {
   (double, double)? get poof {
     final p = _poofAt;
     if (p == null) return null;
-    return (p - shift, _poofT / poofTime);
+    return (p - shift, _poofT / (poofTime * math.sqrt(_poofSize)));
   }
+
+  /// How big the poof is (Round 73: a boss's bigger).
+  double get poofSize => _poofSize;
+
+  /// Strikes the foe coming can still take (Round 73), and whether it's
+  /// staggering from one (it flashes).
+  int get foeHitsLeft => foe.hits - _struck;
+  bool get foeFlash => _recoil >= 0 && (_recoil * 20).floor().isEven;
+
+  /// XP gained, rising: (how much, its middle on the screen, 0 → 1).
+  Iterable<(int, double, double)> get xpRising => [
+        for (final (xp, at, t) in xpPops) (xp, at, t / xpPopTime),
+      ];
 
   /// The tavern's left edge on the screen, or null.
   double? get tavern {

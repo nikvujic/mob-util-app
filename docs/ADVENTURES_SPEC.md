@@ -52,6 +52,25 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   events** (flower, butterfly, ball, bug fights, screens) (decided).
 - He **keeps his hat of the day** (decided).
 
+## 3b. Round 73 (Nikola: "it feels like he gains XP when killing bugs")
+
+- **XP by the bug, watched**: XP is still earned by the time out (ten a
+  minute, an XP every six seconds), but while you watch him fight, the
+  XP shown only goes up when he strikes a foe down: it collects
+  everything since the last, and "+N XP" rises over it. Not watched
+  (or on his break, or skiing), it goes by the clock.
+- **Foes**: mostly bugs (one strike); a **beetle** (two strikes, about
+  one in five) or a **spider** (three, about one in twelve). Struck but
+  not down, a foe staggers back, flashing; dots over it show the strikes
+  left.
+- **Boss**: a giant bug in a crown, six strikes, never knocks him over;
+  at most once a day out, only while he's watched (a small chance with
+  each foe, so you need some luck); it brings **50 XP**.
+- **Pip Home**: two views, switched by the row on the first card: his
+  **info** (and the settings card) or his **adventures** (his adventure
+  card; more cards later, no settings). It opens on the adventure view
+  while he's out.
+
 ## 4. Starting and ending
 
 - **Start**: he walks to the centre, **draws his sword** and runs right;
@@ -91,7 +110,7 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
 
 ## 5. Levels and titles
 
-**XP = one per minute adventuring** (a full day is 360 XP). The level
+**XP = ten per minute adventuring** (Round 73; a full day is 3600 XP; it was one a minute). The level
 comes from his XP as days of adventuring (D = XP / 360). The curve is only the target: he goes up **one level
 at a time** as usual, each level costing a little more XP than the one
 before (decided):

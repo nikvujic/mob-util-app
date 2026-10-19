@@ -1147,7 +1147,7 @@ void main() {
       expect(pip.energy, 2.5);
       expect(pip.adventurer, isTrue);
       expect(pip.registeredAt!.toUtc(), DateTime.utc(2026, 10, 17, 11, 30));
-      expect(pip.xp, 390);
+      expect(pip.minutesOut, 390);
       expect(pip.outDay, '2026-10-18');
       expect(pip.outFrom!.toUtc(), DateTime.utc(2026, 10, 18, 10));
       expect(pip.breakAt!.toUtc(), DateTime.utc(2026, 10, 18, 12, 10));
@@ -1173,7 +1173,7 @@ void main() {
         directory: copyOf('test/fixtures/v18/storage'),
       );
       expect(storage.initialPip.adventurer, isFalse);
-      expect(storage.initialPip.xp, 0);
+      expect(storage.initialPip.minutesOut, 0);
     });
   });
 

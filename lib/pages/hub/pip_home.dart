@@ -14,7 +14,9 @@ import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/pip_life.dart';
+import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
+import 'package:the_app/providers/pip_trip.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/widgets/pip_energy_bar.dart';
 import 'package:the_app/widgets/pip_portrait.dart';
@@ -25,7 +27,10 @@ import 'package:the_app/widgets/pixel_text.dart';
 /// Pip Home (Round 35): his field, big, on top, following the time of
 /// day; under it a card in his own pixel letters, swiped between his
 /// status and his settings (rename, animations, backgrounds). Everything
-/// happens in the card: renaming has its own keyboard.
+/// happens in the card: renaming has its own keyboard. Round 73: two
+/// views, switched from the first card: his info (and his settings), or
+/// his adventures (his level, XP and items; later more cards), the one
+/// it opens in while he's out.
 class PipHomePage extends ConsumerStatefulWidget {
   const PipHomePage({super.key});
 
@@ -42,6 +47,22 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   final _pages = PageController();
   int _page = 0;
   _Settings _settings = _Settings.menu;
+
+  /// Round 73: the adventure view (his adventure card, no settings), or
+  /// his info; it opens in the adventure view while he's out.
+  late bool _adventureView = _outNow();
+
+  bool _outNow() {
+    final now = ref.read(clockProvider)();
+    return ref.read(pipLifeProvider.notifier).outAt(now) &&
+        // On his ski trip's bus there's no adventure to see.
+        !PipTrip.busDay(ref.read(datesProvider), now);
+  }
+
+  void _switchView() => setState(() {
+        _adventureView = !_adventureView;
+        _settings = _Settings.menu;
+      });
 
   /// Previews (Round 57): a background and a hat tried, together with
   /// his animations; back to his info card (or leaving), they're gone.
@@ -123,43 +144,50 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                               if (page == 0) _endPreviews();
                             }),
                             children: [
-                              _Status(cheer: () => setState(_brain.cheer)),
-                              switch (_settings) {
-                                _Settings.menu => _SettingsMenu(
-                                    background: background,
-                                    open: _show,
-                                  ),
-                                _Settings.rename => _Rename(
-                                    back: () => _show(_Settings.menu),
-                                  ),
-                                _Settings.animations => _Animations(
-                                    brain: _brain,
-                                    back: () => _show(_Settings.menu),
-                                  ),
-                                _Settings.adventures => _Adventures(
-                                    brain: _brain,
-                                    back: () => _show(_Settings.menu),
-                                  ),
-                                _Settings.backgrounds => _Backgrounds(
-                                    current: background,
-                                    pick: (b) =>
-                                        setState(() => _background = b),
-                                    look: _look,
-                                    tryOn: (key) => setState(
-                                        () => _look = _look.toggled(key)),
-                                    back: () => _show(_Settings.menu),
-                                  ),
-                                _Settings.hats => _Hats(
-                                    current: _brain.hat,
-                                    pick: (hat) =>
-                                        setState(() => _brain.tryOn(hat)),
-                                    back: () => _show(_Settings.menu),
-                                  ),
-                              },
+                              _Status(
+                                adventure: _adventureView,
+                                switchView: _switchView,
+                                cheer: () => setState(_brain.cheer),
+                              ),
+                              // Round 73: the settings (animations and
+                              // the rest) are his info's.
+                              if (!_adventureView)
+                                switch (_settings) {
+                                  _Settings.menu => _SettingsMenu(
+                                      background: background,
+                                      open: _show,
+                                    ),
+                                  _Settings.rename => _Rename(
+                                      back: () => _show(_Settings.menu),
+                                    ),
+                                  _Settings.animations => _Animations(
+                                      brain: _brain,
+                                      back: () => _show(_Settings.menu),
+                                    ),
+                                  _Settings.adventures => _Adventures(
+                                      brain: _brain,
+                                      back: () => _show(_Settings.menu),
+                                    ),
+                                  _Settings.backgrounds => _Backgrounds(
+                                      current: background,
+                                      pick: (b) =>
+                                          setState(() => _background = b),
+                                      look: _look,
+                                      tryOn: (key) => setState(
+                                          () => _look = _look.toggled(key)),
+                                      back: () => _show(_Settings.menu),
+                                    ),
+                                  _Settings.hats => _Hats(
+                                      current: _brain.hat,
+                                      pick: (hat) =>
+                                          setState(() => _brain.tryOn(hat)),
+                                      back: () => _show(_Settings.menu),
+                                    ),
+                                },
                             ],
                           ),
                         ),
-                        _Dots(count: 2, current: _page),
+                        if (!_adventureView) _Dots(count: 2, current: _page),
                       ],
                     ),
                   ),
@@ -227,10 +255,19 @@ Widget _words(String text, {Color colour = PipColours.screen, double? pixel}) =>
 
 /// His status: how he looks, his name, age and birthday.
 class _Status extends ConsumerStatefulWidget {
+  /// Round 73: his adventure card (the adventure view) or his info card,
+  /// and the row on it that switches between them.
+  final bool adventure;
+  final VoidCallback switchView;
+
   /// Just registered as an adventurer (Round 63): his sword up high.
   final VoidCallback cheer;
 
-  const _Status({required this.cheer});
+  const _Status({
+    required this.adventure,
+    required this.switchView,
+    required this.cheer,
+  });
 
   @override
   ConsumerState<_Status> createState() => _StatusState();
@@ -265,15 +302,14 @@ class _StatusState extends ConsumerState<_Status> {
     return h == 0 ? '${m}M' : (m == 0 ? '${h}H' : '${h}H ${m}M');
   }
 
-  /// Round 63: his adventure card instead of his info card, and what it
-  /// says after a tap on Register outside its hours.
-  bool _adventure = false;
+  /// What the adventure card says after a tap on Register outside its
+  /// hours (Round 63).
   String? _message;
 
-  void _toggle() => setState(() {
-        _adventure = !_adventure;
-        _message = null;
-      });
+  void _toggle() {
+    setState(() => _message = null);
+    widget.switchView();
+  }
 
   /// Registers him (Round 63): from 13:00 to 17:00; else come back then.
   void _register() {
@@ -309,7 +345,7 @@ class _StatusState extends ConsumerState<_Status> {
           _ => PipFace.veryTired,
         },
     };
-    if (_adventure) return _adventureCard(pip, life, now, face);
+    if (widget.adventure) return _adventureCard(pip, life, now, face);
     final next = pip.nextBatteryAt;
     // What a tap on his field would do (Round 37).
     final hint = switch (life.refusalAt(now)) {
@@ -384,7 +420,8 @@ class _StatusState extends ConsumerState<_Status> {
   /// next, his weapon, off-hand and hat; not registered yet, a button to.
   Widget _adventureCard(
       PipLife pip, PipLifeNotifier life, DateTime now, PipFace face) {
-    final xp = life.xpAt(now);
+    // Round 73: as shown in his room (up as he strikes bugs, watched).
+    final xp = pipShownXp(ref, now);
     final level = PipAdventure.levelFor(xp);
     final from = PipAdventure.xpFor(level);
     final to = PipAdventure.xpFor(level + 1);
@@ -832,6 +869,14 @@ class _AdventuresState extends State<_Adventures> {
                 label: 'ADVENTURE',
                 value: '>',
                 onTap: () => _play(brain.previewAdventure),
+              ),
+              // Round 73: the boss's fight (a real one's luck: once a
+              // day out, while watched).
+              _CardRow(
+                key: const Key('pipPreview-boss'),
+                label: 'BOSS',
+                value: '>',
+                onTap: () => _play(() => brain.previewAdventure(boss: true)),
               ),
               _CardRow(
                 key: const Key('pipPreview-skiing'),

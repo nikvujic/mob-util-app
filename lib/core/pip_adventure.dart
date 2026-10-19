@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 /// Pip's adventures (Round 63, `docs/ADVENTURES_SPEC.md`): plain rules,
 /// worked out from the clock, as his energy is. Once registered, he goes
-/// out every day from [startHour] to [endHour], gaining an XP a minute.
+/// out every day from [startHour] to [endHour], gaining [xpPerMinute] XP
+/// a minute.
 abstract final class PipAdventure {
   /// He's out from 12:00 to 18:00 (local time).
   static const startHour = 12;
@@ -25,8 +26,16 @@ abstract final class PipAdventure {
   static const breakLength = Duration(minutes: 30);
   static const unseenFor = Duration(minutes: 5);
 
-  /// An XP a minute out: a full day is 360.
-  static const xpPerDay = (endHour - startHour) * 60;
+  /// Round 73: ten XP a minute out (an XP every six seconds), so a bug
+  /// struck while he's watched brings one or two (they come every few
+  /// seconds); a full day is 3600. His time out is kept in minutes.
+  static const xpPerMinute = 10;
+  static const minutesPerDay = (endHour - startHour) * 60;
+  static const xpPerDay = minutesPerDay * xpPerMinute;
+
+  /// Round 73: a boss beaten (once a day out, if he's watched then) is
+  /// worth five minutes out: 50 XP.
+  static const bossMinutes = 5;
 
   /// The start and end of [t]'s day out.
   static DateTime startOf(DateTime t) =>
@@ -53,7 +62,7 @@ abstract final class PipAdventure {
       !now.isBefore(from) &&
       now.isBefore(endOf(from));
 
-  /// The days out (of 360 XP) [level] takes. The yearly targets: about
+  /// The days out (of [xpPerDay]) [level] takes. The yearly targets: about
   /// 90 after a year out, 160 after two, 230 after three, 280 after
   /// four, then 50 a year. Year one is a curve (early levels come fast),
   /// then straight lines; each level costs a little more than the last.

@@ -41,12 +41,12 @@ void main() {
     expect(pip.state.registeredAt, at(18, 13, 30));
     expect(pip.levelAt(at(18, 13, 30)), PipEnergy.full, reason: 'filled');
     expect(pip.outAt(at(18, 14)), isTrue);
-    expect(pip.xpAt(at(18, 14)), 30);
+    expect(pip.xpAt(at(18, 14)), 300);
     // Looked at again: still out since he registered.
     pip.collect(at(18, 14));
     pip.giveBattery(at(18, 14, 30));
     expect(pip.state.outFrom, at(18, 13, 30));
-    expect(pip.xpAt(at(18, 20)), 270, reason: 'till 18:00');
+    expect(pip.xpAt(at(18, 20)), 2700, reason: 'till 18:00');
     expect(pip.outAt(at(18, 18)), isFalse);
   });
 
@@ -59,16 +59,16 @@ void main() {
     final pip = hatched();
     pip.register(at(18, 16));
     pip.collect(at(19, 11));
-    expect(pip.state.xp, 120, reason: '16:00 to 18:00 banked');
+    expect(pip.state.minutesOut, 120, reason: '16:00 to 18:00 banked');
     expect(pip.outAt(at(19, 11)), isFalse);
     fill(pip, at(19, 11));
     // Not looked at till 15:00: out since 12:00 all the same.
     pip.collect(at(19, 15));
     expect(pip.state.outFrom, at(19, 12));
-    expect(pip.xpAt(at(19, 15)), 120 + 180);
+    expect(pip.xpAt(at(19, 15)), (120 + 180) * 10);
     // Not looked at again till the next morning: the whole day.
     pip.collect(at(20, 9));
-    expect(pip.state.xp, 120 + 360);
+    expect(pip.state.minutesOut, 120 + 360);
   });
 
   test('days not looked at at all: only the first is counted out', () {
@@ -76,7 +76,7 @@ void main() {
     final pip = hatched();
     pip.register(at(18, 17 - 1));
     pip.collect(at(25, 9));
-    expect(pip.state.xp, greaterThanOrEqualTo(120));
+    expect(pip.state.minutesOut, greaterThanOrEqualTo(120));
   });
 
   test('powered off at 12:00: no adventure, no XP', () {
@@ -100,7 +100,7 @@ void main() {
     pip.collect(at(19, 14));
     expect(pip.giveBattery(at(19, 14)), isTrue);
     expect(pip.state.outFrom, at(19, 14));
-    expect(pip.xpAt(at(19, 15)), 60);
+    expect(pip.xpAt(at(19, 15)), 600);
 
     final late = hatched(energy: 0, energyAt: at(19, 9));
     late.replace(late.state.copyWith(
@@ -134,7 +134,7 @@ void main() {
     expect(pip.outAt(at(19, 12)), isTrue);
     expect(pip.levelAt(at(19, 17)), greaterThan(0));
     expect(pip.showAt(at(19, 17)), PipShow.awake);
-    expect(pip.xpAt(at(19, 18)), 360);
+    expect(pip.xpAt(at(19, 18)), 3600);
     expect(pip.showAt(at(19, 18, 1)), PipShow.powerOff);
   });
 
@@ -151,7 +151,7 @@ void main() {
     pip.breakIfDue(at(18, 15));
     expect(pip.state.breakAt, at(18, 14, 10), reason: 'once');
     // XP goes on through it.
-    expect(pip.xpAt(at(18, 15)), 120);
+    expect(pip.xpAt(at(18, 15)), 1200);
     // The next day, a new break.
     fill(pip, at(19, 11));
     pip.collect(at(19, 14, 20));
@@ -255,11 +255,11 @@ void main() {
     pip.replace(
         pip.state.copyWith(energy: PipEnergy.full, energyAt: () => at(19, 11)));
     pip.collect(at(21, 9));
-    expect(pip.state.xp, 120 + 360, reason: 'the 19th; not the 20th');
+    expect(pip.state.minutesOut, 120 + 360, reason: 'the 19th; not the 20th');
     expect(pip.state.outDay, '2026-10-20');
     // Not counted twice.
     pip.collect(at(21, 10));
-    expect(pip.state.xp, 120 + 360);
+    expect(pip.state.minutesOut, 120 + 360);
   });
 
   test(
@@ -297,5 +297,125 @@ void main() {
     pip.lookedAt(at(19, 14, 30));
     pip.breakIfDue(at(19, 14, 30));
     expect(pip.state.breakAt, at(19, 14, 30));
+  });
+
+  group('Round 73: XP by the bug, watched', () {
+    test('ten XP a minute, one every six seconds; a day out banks 3600', () {
+      final pip = hatched();
+      pip.register(at(18, 16));
+      fill(pip, at(19, 11));
+      pip.collect(at(19, 12));
+      expect(pip.state.minutesOut, 120);
+      expect(pip.outAt(at(19, 12, 1)), isTrue);
+      final noon = at(19, 12);
+      const banked = 1200;
+      expect(pip.xpAt(noon.add(const Duration(seconds: 5))), banked);
+      expect(pip.xpAt(noon.add(const Duration(seconds: 6))), banked + 1);
+      expect(pip.xpAt(noon.add(const Duration(seconds: 59))), banked + 9);
+      expect(pip.xpAt(at(19, 12, 1)), banked + 10);
+      expect(pip.xpAt(at(19, 17, 59)), banked + 3590);
+      pip.collect(at(19, 18, 5));
+      expect(pip.state.minutesOut, 120 + 360);
+      expect(pip.xpAt(at(19, 18, 5)), banked + PipAdventure.xpPerDay,
+          reason: 'banked as it showed');
+    });
+
+    test(
+        'registered mid-minute: out from the minute, so the XP shown at '
+        '18:00 is what\'s banked', () {
+      final pip = hatched();
+      final t = at(18, 13, 30).add(const Duration(seconds: 42));
+      expect(pip.register(t), isTrue);
+      expect(pip.state.outFrom, at(18, 13, 30));
+      final shown = pip.xpAt(at(18, 17, 59).add(const Duration(seconds: 59)));
+      pip.collect(at(18, 18, 1));
+      expect(pip.xpAt(at(18, 18, 1)), greaterThanOrEqualTo(shown));
+      expect(pip.xpAt(at(18, 18, 1)), 270 * 10);
+    });
+
+    test('shown: held while his room keeps it up; else as it is', () {
+      final pip = hatched();
+      pip.register(at(18, 14));
+      final now = at(18, 14, 5);
+      expect(pip.shownXpAt(now, null), 50);
+      expect(pip.shownXpAt(now, (xp: 20, at: now)), 20);
+      expect(
+          pip.shownXpAt(
+              now, (xp: 20, at: now.subtract(PipLifeNotifier.heldFor))),
+          20);
+      expect(
+          pip.shownXpAt(
+              now, (xp: 20, at: now.subtract(const Duration(seconds: 4)))),
+          50,
+          reason: 'his room gone a moment: as it is');
+      expect(pip.shownXpAt(now, (xp: 90, at: now)), 50, reason: 'never more');
+    });
+
+    test('a boss: 50 XP banked, once a day out, only while out', () {
+      final pip = hatched();
+      expect(pip.bossDueAt(at(18, 14)), isFalse, reason: 'not out');
+      pip.register(at(18, 14));
+      expect(pip.bossDueAt(at(18, 14, 10)), isTrue);
+      expect(pip.bossBeaten(at(18, 14, 10)), 50);
+      expect(pip.state.minutesOut, PipAdventure.bossMinutes);
+      expect(pip.bossDueAt(at(18, 14, 20)), isFalse);
+      expect(pip.bossBeaten(at(18, 14, 20)), 0, reason: 'once');
+      expect(pip.state.minutesOut, PipAdventure.bossMinutes);
+      expect(pip.xpAt(at(18, 15)), 600 + 50);
+      // The next day out, another.
+      fill(pip, at(19, 11));
+      pip.collect(at(19, 12, 30));
+      expect(pip.bossDueAt(at(19, 12, 30)), isTrue);
+    });
+
+    test(
+        'through his room\'s link: watched fighting, the XP shown stays '
+        'till he strikes a bug, then collects it all; a boss brings 50 '
+        'more; not watched, it goes by the clock', () {
+      var now = at(18, 14);
+      final container = ProviderContainer(overrides: [
+        appStorageProvider.overrideWithValue(AppStorage.inMemory(
+            initialPip: PipLife(
+                born: at(10, 9),
+                energyAt: at(18, 9),
+                nextBatteryAt: at(30, 9)))),
+        clockProvider.overrideWithValue(() => now),
+        powerSourceProvider.overrideWithValue(FakePower()),
+      ]);
+      addTearDown(container.dispose);
+      final link = container.read(pipLinkProvider);
+      final pip = container.read(pipLifeProvider.notifier);
+      link.look();
+      pip.register(now);
+      int shown() => pip.shownXpAt(now, container.read(pipHeldXpProvider));
+      link.fighting(true);
+      for (var s = 1; s <= 40; s++) {
+        now = at(18, 14).add(Duration(seconds: s));
+        link.fighting(true);
+        expect(shown(), 0, reason: 'held at $s s');
+      }
+      expect(pip.xpAt(now), 6, reason: 'gained all the same');
+      expect(link.defeated(), 6);
+      expect(shown(), 6);
+      now = now.add(const Duration(seconds: 1));
+      link.fighting(true);
+      expect(link.defeated(), 0, reason: 'nothing more yet');
+      for (var s = 0; s < 11; s++) {
+        now = now.add(const Duration(seconds: 1));
+        link.fighting(true);
+      }
+      expect(link.bossDue, isTrue);
+      expect(link.defeated(boss: true), 2 + 50);
+      expect(link.bossDue, isFalse);
+      expect(shown(), pip.xpAt(now));
+      // His level goes by what's shown.
+      expect(link.level, PipAdventure.levelFor(shown()));
+      // Not watched: by the clock.
+      link.fighting(false);
+      expect(container.read(pipHeldXpProvider), isNull);
+      now = now.add(const Duration(minutes: 1));
+      expect(shown(), pip.xpAt(now));
+      expect(link.defeated(), 0, reason: 'nothing held, nothing collected');
+    });
   });
 }

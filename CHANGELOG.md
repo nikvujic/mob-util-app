@@ -6,6 +6,27 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Pip's adventures, watched**: his XP now goes up as he strikes bugs
+  down. Each one collects what he's earned since the last, and the XP
+  rises over it ("+2 XP"). He still earns it by the time he's out, so
+  days you don't look in count just the same. XP is now ten a minute
+  (3600 a full day; levels are as before, just ten times the numbers).
+- **Bigger foes**: now and then a blue **beetle** (two strikes) or a
+  purple **spider** (three) instead of a bug. They stagger back and
+  flash when struck, with dots over them for the strikes left.
+- **A boss**, once a day out, if you're lucky enough to be watching:
+  a giant bug in a crown, six strikes, worth **50 XP**. Pip Home's
+  Adventures has a **Boss** preview to see it.
+- **Pip Home's adventure view**: while he's out, Pip Home opens on his
+  adventure card (level, XP, items) by itself. *Info* on it switches
+  to his info card and settings (animations and the rest), *Adventures*
+  back; the adventure view has no settings card.
+
+### Fixed
+- A bug that knocked Pip over could stay on the screen after he got up
+  and ran on, so no other bug came.
+
 ## [1.31.0] - 2026-10-19
 
 ### Changed

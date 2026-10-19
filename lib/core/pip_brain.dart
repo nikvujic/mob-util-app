@@ -2321,23 +2321,29 @@ class PipBrain {
     _stand();
   }
 
-  /// Played from Pip Home's Adventures (Round 67): a short day out, or a
-  /// ski run ([ski]: snowing, his gear, a fall), with no XP; it ends by
-  /// itself, or with [stopPreviews]. True if he could (up and about).
-  bool previewAdventure({bool ski = false}) {
+  /// Played from Pip Home's Adventures (Round 67): a short day out (a
+  /// bug, one that gets him, a beetle), a ski run ([ski]: snowing, his
+  /// gear, a fall), or a boss fight ([boss], Round 73), with no XP; it
+  /// ends by itself, or with [stopPreviews]. True if he could (up and
+  /// about).
+  bool previewAdventure({bool ski = false, bool boss = false}) {
     if (!_canGoOut) return false;
     _run = PipRun(random, x: x, roomWidth: roomWidth, skiing: ski);
     _start(PipActivity.adventuring);
-    _run!.start(animate: true);
+    _run!
+      ..start(animate: true)
+      ..spawns = !boss;
     _runPreview = 0;
     _previewSki = ski;
+    _previewBoss = boss;
     return true;
   }
 
   double? _runPreview;
+  bool _previewBoss = false;
   bool _previewSki = false;
   static const previewEventAt = 6.0;
-  static const previewLength = 14.0;
+  static const previewLength = 17.0;
 
   /// Snowing: a ski day, or a ski preview.
   bool get snowing => snowy || _previewSki;
@@ -2456,14 +2462,26 @@ class PipBrain {
       bool at(double s) => preview < s && next >= s;
       if (run.skiing) {
         if (at(previewEventAt)) run.fallNow();
+      } else if (_previewBoss) {
+        if (at(previewEventAt - 3)) {
+          run.bugComing(hits: false, foe: PipFoe.boss);
+        }
       } else {
         if (at(previewEventAt - 4)) run.bugComing(hits: false);
         if (at(previewEventAt + 1.5)) run.bugComing(hits: true);
+        // Round 73: a beetle, two strikes.
+        if (at(previewEventAt + 5.5)) {
+          run.bugComing(hits: false, foe: PipFoe.beetle);
+        }
       }
       if (at(previewLength)) run.want(onBreak: false, end: true);
+    } else {
+      run.bossDue = bossDue;
     }
     run.roomWidth = roomWidth;
     run.step(dt);
+    // Struck down in a preview: no XP.
+    if (preview != null) run.defeats.clear();
     x = run.x;
     facingRight = run.facingRight;
     _buzzes.addAll(run.buzzes);
@@ -2475,6 +2493,7 @@ class PipBrain {
     final run = _run;
     _run = null;
     _runPreview = null;
+    _previewBoss = false;
     _previewSki = false;
     if (run != null) x = run.x;
     _stand();
@@ -2499,6 +2518,40 @@ class PipBrain {
       _ => PipFrame.idle,
     };
   }
+
+  /// Round 73: a boss may come today (his life says).
+  bool bossDue = false;
+
+  /// Out fighting, as he really is (not a preview, not skiing, not on
+  /// his break or setting off or back): watched, his XP shown goes up as
+  /// he strikes bugs.
+  bool get fighting {
+    final run = _run;
+    return activity == PipActivity.adventuring &&
+        run != null &&
+        _runPreview == null &&
+        !run.skiing &&
+        const {
+          RunPhase.running,
+          RunPhase.knocked,
+          RunPhase.down,
+          RunPhase.toSword,
+          RunPhase.pickUp,
+          RunPhase.back,
+        }.contains(run.phase);
+  }
+
+  /// What he's struck down since last asked (none in a preview).
+  List<PipFoe> takeDefeats() {
+    final run = _run;
+    if (run == null) return const [];
+    final taken = [...run.defeats];
+    run.defeats.clear();
+    return taken;
+  }
+
+  /// [xp] gained, rising over the last foe he struck down.
+  void showXp(int xp) => _run?.popXp(xp);
 
   /// A level up seen (Round 63): a flash over him for [levelFlashTime],
   /// with a buzz (no sound).

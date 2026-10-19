@@ -167,6 +167,7 @@ void main() {
     final b = standing();
     b.adventure(out, animate: false);
     b.run!.bugComing(hits: false);
+    steps(b, 0.5);
     b.adventure(null, animate: true);
     steps(b, 0.1);
     expect(b.run!.phase, RunPhase.ending);

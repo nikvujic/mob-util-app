@@ -139,13 +139,45 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
         now.isBefore(at.add(PipAdventure.breakLength));
   }
 
-  /// His XP at [now]: what's banked and this day out so far.
+  /// His XP at [now]: what's banked and this day out so far (Round 73:
+  /// an XP every six seconds of it).
   int xpAt(DateTime now) {
+    final banked = state.minutesOut * PipAdventure.xpPerMinute;
     final from = state.outFrom;
-    if (from == null) return state.xp;
+    if (from == null || !now.isAfter(from)) return banked;
     final end = PipAdventure.endOf(from);
-    return state.xp +
-        PipAdventure.minutesBetween(from, now.isBefore(end) ? now : end);
+    final seconds = (now.isBefore(end) ? now : end).difference(from).inSeconds;
+    return banked + seconds * PipAdventure.xpPerMinute ~/ 60;
+  }
+
+  /// His XP as shown at [now] (Round 73): while he's watched fighting,
+  /// what it was at the last bug he struck ([held], kept up while his
+  /// room is shown); else (or once his room's gone a moment) as it is.
+  int shownXpAt(DateTime now, PipHeldXp? held) {
+    final xp = xpAt(now);
+    if (held == null || now.difference(held.at).abs() > heldFor) return xp;
+    return math.min(held.xp, xp);
+  }
+
+  /// How long a hold lasts unless his room keeps it up (it does every
+  /// second while shown).
+  static const heldFor = Duration(seconds: 3);
+
+  /// The day out a boss was beaten on (Round 73: one a day out). In
+  /// memory: the app's first look is a fresh one.
+  String? _bossDay;
+
+  /// Whether a boss may still come at [now]: out, none beaten today.
+  bool bossDueAt(DateTime now) => outAt(now) && _bossDay != state.outDay;
+
+  /// A boss beaten at [now] (Round 73): [PipAdventure.bossMinutes] more
+  /// banked, once a day out. The XP it brought (none if not due).
+  int bossBeaten(DateTime now) {
+    if (!bossDueAt(now)) return 0;
+    _bossDay = state.outDay;
+    state =
+        state.copyWith(minutesOut: state.minutesOut + PipAdventure.bossMinutes);
+    return PipAdventure.bossMinutes * PipAdventure.xpPerMinute;
   }
 
   /// Registers him as an adventurer at [now] (Round 63): only between
@@ -163,7 +195,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       energyAt: () => now,
       offSeen: false,
       outDay: () => dayKey(now),
-      outFrom: () => now,
+      // On the minute (Round 73: so a day out banks the XP shown).
+      outFrom: () => _minuteOf(now),
       breakAt: () => null,
     );
     _startSeen = true;
@@ -180,7 +213,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     final from = state.outFrom;
     if (from != null && !now.isBefore(PipAdventure.endOf(from))) {
       state = state.copyWith(
-        xp: xpAt(now),
+        minutesOut: state.minutesOut +
+            PipAdventure.minutesBetween(from, PipAdventure.endOf(from)),
         outFrom: () => null,
         breakAt: () => null,
       );
@@ -199,7 +233,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     } else if (!since.isAfter(start) && levelAt(start) > 0) {
       out = start;
     } else if (now.hour < PipAdventure.lastStartHour && levelAt(now) > 0) {
-      out = now;
+      out = _minuteOf(now);
     }
     if (out == null) return;
     state = state.copyWith(
@@ -212,6 +246,9 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     // Not seen till after 18:00: the whole day out at once.
     if (!now.isBefore(PipAdventure.endOf(out))) _settle(now);
   }
+
+  static DateTime _minuteOf(DateTime t) =>
+      DateTime(t.year, t.month, t.day, t.hour, t.minute);
 
   /// When he was last looked at, and whether he was seen setting off
   /// today and not left unseen since (Round 66; in memory: the app's
@@ -238,20 +275,20 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     final parts = last.split('-').map(int.parse).toList();
     var day = DateTime(parts[0], parts[1], parts[2] + 1);
     final today = DateTime(now.year, now.month, now.day);
-    var xp = state.xp;
+    var minutes = state.minutesOut;
     String? done;
     for (var i = 0; i < 400 && day.isBefore(today); i++) {
       final start = PipAdventure.startOf(day);
       final since = state.energyAt ?? start;
       if (PipTrip.busDay(_dates(), day) ||
           (!since.isAfter(start) && levelAt(start) > 0)) {
-        xp += PipAdventure.xpPerDay;
+        minutes += PipAdventure.minutesPerDay;
       }
       done = dayKey(day);
       day = DateTime(day.year, day.month, day.day + 1);
     }
     if (done != null) {
-      state = state.copyWith(xp: xp, outDay: () => done);
+      state = state.copyWith(minutesOut: minutes, outDay: () => done);
     }
   }
 
@@ -383,6 +420,17 @@ final pipLifeProvider = StateNotifierProvider<PipLifeNotifier, PipLife>(
   ),
 );
 
+/// His XP as last collected while he's watched fighting (Round 73: it
+/// goes up as he strikes bugs, not by the clock), and when his room last
+/// kept it up; null: not watched, it shows as it is.
+typedef PipHeldXp = ({int xp, DateTime at});
+final pipHeldXpProvider = StateProvider<PipHeldXp?>((ref) => null);
+
+/// His XP as shown now (Round 73): [PipLifeNotifier.shownXpAt].
+int pipShownXp(WidgetRef ref, DateTime now) => ref
+    .read(pipLifeProvider.notifier)
+    .shownXpAt(now, ref.watch(pipHeldXpProvider));
+
 /// Pip's life as his room sees it (Round 37): what to show, what was
 /// shown, a battery given.
 class _Link implements PipLink {
@@ -432,7 +480,33 @@ class _Link implements PipLink {
   }
 
   @override
-  int get level => PipAdventure.levelFor(_pip.xpAt(_now));
+  int get level =>
+      PipAdventure.levelFor(_pip.shownXpAt(_now, _ref.read(pipHeldXpProvider)));
+
+  @override
+  void fighting(bool on) {
+    final held = _ref.read(pipHeldXpProvider.notifier);
+    if (!on) {
+      if (held.state != null) held.state = null;
+      return;
+    }
+    // Kept up: what's shown stays as it is till the next bug.
+    final now = _now;
+    held.state = (xp: _pip.shownXpAt(now, held.state), at: now);
+  }
+
+  @override
+  int defeated({bool boss = false}) {
+    final now = _now;
+    final held = _ref.read(pipHeldXpProvider.notifier);
+    final before = _pip.shownXpAt(now, held.state);
+    if (boss) _pip.bossBeaten(now);
+    if (held.state != null) held.state = (xp: _pip.xpAt(now), at: now);
+    return _pip.shownXpAt(now, held.state) - before;
+  }
+
+  @override
+  bool get bossDue => _pip.bossDueAt(_now);
 
   @override
   bool? get plugged => _ref.read(pipPowerProvider.notifier).known

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_run.dart' show PipFoe;
 import 'package:the_app/core/theme.dart';
 
 /// Pip's frames on a 20-wide grid (Round 26), one letter a pixel ('.'
@@ -514,6 +515,147 @@ abstract final class PipSprites {
     '.BBBBBB.',
     'K..K..K.',
   ];
+
+  /// Round 73: a beetle, 12 x 8, two strikes: a blue shell with a shine,
+  /// its legs one way or the other.
+  static const beetleUp = [
+    'K..K........',
+    '.KK..SSSSS..',
+    '...SShhsssS.',
+    '.rSShssssssS',
+    'SSSsssssssss',
+    '.ssssssssss.',
+    '..dddddddd..',
+    '.K..K..K..K.',
+  ];
+  static const beetleDown = [
+    'K..K........',
+    '.KK..SSSSS..',
+    '...SShhsssS.',
+    '.rSShssssssS',
+    'SSSsssssssss',
+    '.ssssssssss.',
+    '..dddddddd..',
+    'K..K..K..K..',
+  ];
+
+  /// Round 73: a spider, 14 x 9, three strikes: purple, red eyes, eight
+  /// legs.
+  static const spiderUp = [
+    '.....PPPPPP...',
+    '...PPppppppPP.',
+    '..PppppPPppppP',
+    '.rrppppPPppppP',
+    'rrpppppppppppP',
+    '.PPppppppppPP.',
+    'K..PPPPPPPP..K',
+    '.K.K..KK..K.K.',
+    'K.K..K..K..K.K',
+  ];
+  static const spiderDown = [
+    '.....PPPPPP...',
+    '...PPppppppPP.',
+    '..PppppPPppppP',
+    '.rrppppPPppppP',
+    'rrpppppppppppP',
+    '.PPppppppppPP.',
+    'K..PPPPPPPP..K',
+    'K.K..K..K..K.K',
+    '.K..K.KK.K..K.',
+  ];
+
+  /// Round 73: the boss, 24 x 16, six strikes: a giant bug in a crown,
+  /// its red eyes and teeth.
+  static const bossUp = [
+    '........y..y..y.........',
+    '........yyyyyyy.........',
+    '.K..K...YYYYYYY.........',
+    '..KK..bbbbbbbbbbb.......',
+    '....bbbBBbbBBbbBBbb.....',
+    '...brrbBBbbBBbbBBbbb....',
+    '..bbrrbBBbbBBbbBBbbbb...',
+    '.bbbbbbBBbbBBbbBBbbbbb..',
+    'bbbbbbbBBbbBBbbBBbbbbbb.',
+    'bWWWbbbBBbbBBbbBBbbbbbbb',
+    '.bWbWbbBBbbBBbbBBbbbbbbb',
+    '..BBBBBBBBBBBBBBBBBBBBB.',
+    '...BBBBBBBBBBBBBBBBBBB..',
+    '..K..K...K...K...K..K...',
+    '.K..K...K...K...K..K....',
+    'K..K...K...K...K..K.....',
+  ];
+  static const bossDown = [
+    '........y..y..y.........',
+    '........yyyyyyy.........',
+    '.K..K...YYYYYYY.........',
+    '..KK..bbbbbbbbbbb.......',
+    '....bbbBBbbBBbbBBbb.....',
+    '...brrbBBbbBBbbBBbbb....',
+    '..bbrrbBBbbBBbbBBbbbb...',
+    '.bbbbbbBBbbBBbbBBbbbbb..',
+    'bbbbbbbBBbbBBbbBBbbbbbb.',
+    'bWWWbbbBBbbBBbbBBbbbbbbb',
+    '.bWbWbbBBbbBBbbBBbbbbbbb',
+    '..BBBBBBBBBBBBBBBBBBBBB.',
+    '...BBBBBBBBBBBBBBBBBBB..',
+    '...K..K...K...K...K..K..',
+    '...K..K...K...K...K..K..',
+    '..K..K...K...K...K..K...',
+  ];
+
+  /// What [foe] looks like, its legs up or down.
+  static List<String> foeArt(PipFoe foe, bool legsUp) => switch (foe) {
+        PipFoe.bug => legsUp ? bugUp : bugDown,
+        PipFoe.beetle => legsUp ? beetleUp : beetleDown,
+        PipFoe.spider => legsUp ? spiderUp : spiderDown,
+        PipFoe.boss => legsUp ? bossUp : bossDown,
+      };
+
+  static const foeColours = {
+    'K': PipColours.face,
+    'b': PipColours.bug,
+    'B': PipColours.bugDark,
+    'r': PipColours.bugEye,
+    'S': PipColours.beetle,
+    's': PipColours.beetleDark,
+    'd': PipColours.beetleBelly,
+    'h': PipColours.bladeShine,
+    'P': PipColours.spider,
+    'p': PipColours.spiderDark,
+    'y': PipColours.hatGold,
+    'Y': PipColours.hatYellow,
+    'W': PipColours.hatWhite,
+  };
+
+  /// A foe flashing as it's struck (every pixel white).
+  static final foeFlashColours = {
+    for (final key in foeColours.keys) key: PipColours.hatWhite,
+  };
+
+  /// Round 73: little 3 x 5 letters for the XP he gains ("+2 XP").
+  static const _tiny = {
+    '0': ['xxx', 'x.x', 'x.x', 'x.x', 'xxx'],
+    '1': ['.x.', 'xx.', '.x.', '.x.', 'xxx'],
+    '2': ['xxx', '..x', 'xxx', 'x..', 'xxx'],
+    '3': ['xxx', '..x', '.xx', '..x', 'xxx'],
+    '4': ['x.x', 'x.x', 'xxx', '..x', '..x'],
+    '5': ['xxx', 'x..', 'xxx', '..x', 'xxx'],
+    '6': ['xxx', 'x..', 'xxx', 'x.x', 'xxx'],
+    '7': ['xxx', '..x', '.x.', '.x.', '.x.'],
+    '8': ['xxx', 'x.x', 'xxx', 'x.x', 'xxx'],
+    '9': ['xxx', 'x.x', 'xxx', '..x', 'xxx'],
+    '+': ['...', '.x.', 'xxx', '.x.', '...'],
+    'X': ['x.x', 'x.x', '.x.', 'x.x', 'x.x'],
+    'P': ['xx.', 'x.x', 'xx.', 'x..', 'x..'],
+    ' ': ['.', '.', '.', '.', '.'],
+  };
+
+  /// [text] (digits, +, X, P and spaces) in those letters, 5 rows, a
+  /// column between letters.
+  static List<String> tinyText(String text) => [
+        for (var row = 0; row < 5; row++)
+          [for (final c in text.split('')) _tiny[c]![row]].join('.'),
+      ];
 
   /// His sword (Round 53 redrawn), 5 x 13, pointing up: a blade with a
   /// shine down it, a gold guard with a red gem, the grip, a pommel.

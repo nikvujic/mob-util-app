@@ -580,6 +580,12 @@ abstract final class PipColours {
   static const bug = Color(0xFF6CC24A); // a computer bug: green
   static const bugDark = Color(0xFF3E7A2C);
   static const bugEye = Color(0xFFE0503E);
+  // Round 73: a beetle's blue shell, a spider's purple.
+  static const beetle = Color(0xFF5B8FD6);
+  static const beetleDark = Color(0xFF35609E);
+  static const beetleBelly = Color(0xFF243F6B);
+  static const spider = Color(0xFF9A6BC8);
+  static const spiderDark = Color(0xFF6A3F94);
   static const blade = Color(0xFFDDE3EA);
   static const bladeEdge = Color(0xFF9AA4B0);
   static const bladeShine = Color(0xFFFFFFFF);

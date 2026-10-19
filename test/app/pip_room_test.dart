@@ -333,6 +333,43 @@ void main() {
       }
       expect(pip().activity, isNot(PipActivity.adventuring));
     });
+
+    testWidgets(
+        'out and watched (Round 73): fighting; each bug struck down counted '
+        'for his XP, what it brought rising over it; a boss may come if his '
+        'life says', (tester) async {
+      final link = FakePipLink(batteries: 3)
+        ..at = DateTime(2026, 10, 15, 13)
+        ..out = (onBreak: false, breakDone: 0.0)
+        ..bossDue = true
+        ..xpEach = 3;
+      container =
+          await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
+        pipBrainProvider.overrideWithValue(PipBrain(random: math.Random(1))),
+      ]);
+      await openMenuMoving(tester);
+      for (var i = 0; i < 70; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().run!.phase, RunPhase.running);
+      expect(link.fightingNow, isTrue);
+      expect(pip().bossDue, isTrue);
+      pip().run!.bugComing(hits: false);
+      var rose = false;
+      for (var i = 0; i < 60 * 8 && link.defeats.isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await tester.pump(const Duration(milliseconds: 16));
+      rose = pip().run!.xpRising.any((p) => p.$1 == 3);
+      expect(link.defeats, [false]);
+      expect(rose, isTrue);
+      // Not out: not fighting.
+      link.out = null;
+      for (var i = 0; i < 200; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(link.fightingNow, isFalse);
+    });
   });
 
   group('his egg (Round 34)', () {
@@ -515,7 +552,7 @@ void main() {
       born: DateTime(2026, 10, 1),
       energyAt: DateTime(2026, 10, 15, 11),
       registeredAt: DateTime(2026, 10, 14, 14),
-      xp: 720,
+      minutesOut: 720,
       outDay: '2026-10-15',
       outFrom: DateTime(2026, 10, 15, 12),
     );
@@ -529,7 +566,7 @@ void main() {
       born: DateTime(2026, 10, 1),
       energyAt: DateTime(2026, 10, 15, 11),
       registeredAt: DateTime(2026, 10, 14, 14),
-      xp: 720,
+      minutesOut: 720,
       outDay: '2026-10-15',
       outFrom: DateTime(2026, 10, 15, 12),
     );

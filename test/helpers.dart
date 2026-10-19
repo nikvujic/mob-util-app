@@ -407,6 +407,24 @@ class FakePipLink implements PipLink {
 
   @override
   int level = 1;
+
+  /// Round 73: whether he's watched fighting, what was struck down (true:
+  /// a boss), and the XP each brings.
+  bool? fightingNow;
+  final defeats = <bool>[];
+  int xpEach = 1;
+
+  @override
+  void fighting(bool on) => fightingNow = on;
+
+  @override
+  int defeated({bool boss = false}) {
+    defeats.add(boss);
+    return boss ? 50 : xpEach;
+  }
+
+  @override
+  bool bossDue = false;
 }
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]

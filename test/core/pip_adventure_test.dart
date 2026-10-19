@@ -6,8 +6,9 @@ void main() {
   int levelAfterDays(double days) =>
       PipAdventure.levelFor((days * PipAdventure.xpPerDay).round());
 
-  test('a full day out is 360 XP', () {
-    expect(PipAdventure.xpPerDay, 360);
+  test('a full day out is 3600 XP (Round 73: ten a minute)', () {
+    expect(PipAdventure.xpPerDay, 3600);
+    expect(PipAdventure.minutesPerDay, 360);
   });
 
   test('levels hit the yearly targets: 90, 160, 230, 280, then 50 a year', () {

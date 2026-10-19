@@ -121,7 +121,7 @@ void main() {
         outDay: () => '2027-01-24',
       ));
       p.collect(at(26, 9));
-      expect(p.state.xp, PipAdventure.xpPerDay);
+      expect(p.state.minutesOut, PipAdventure.minutesPerDay);
     });
   });
 
@@ -152,6 +152,6 @@ void main() {
     link.look();
     expect(link.trip(), noTrip);
     expect(link.outing(), isNull, reason: 'a bus day: no adventure shown');
-    expect(container.read(pipLifeProvider.notifier).xpAt(now), 330);
+    expect(container.read(pipLifeProvider.notifier).xpAt(now), 3300);
   });
 }
