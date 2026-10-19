@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 79 — Nikola's notes (2026-10-19)
+
+- [ ] **Pip's trees**: don't sway them unless it's windy. Open-Meteo
+  gives wind speed too (not fetched yet): sway by the wind, still when
+  calm (and with the weather off, a light sway or none, to decide).
+
 ### Round 78 — Nikola on the planner (2026-10-19, 1.35.0)
 
 - [x] **Routines**: no confirm/check any more (no box, no Done on their
