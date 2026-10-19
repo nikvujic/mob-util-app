@@ -134,18 +134,6 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     );
   }
 
-  /// Ticks a routine off (or back) for [day] only.
-  void toggleDone(String id, DateTime day) => _setDay(
-        id,
-        day,
-        (d) => RoutineDay(
-          routineId: id,
-          day: day,
-          done: !d.done,
-          skipped: d.skipped,
-        ),
-      );
-
   /// Leaves a routine out on [day] only (or puts it back).
   void setSkipped(String id, DateTime day, {required bool skipped}) => _setDay(
         id,
@@ -241,9 +229,8 @@ final routinesProvider = StateNotifierProvider<RoutinesNotifier, RoutineBook>(
 class RoutineOccurrence {
   final Routine routine;
   final DateTime day;
-  final bool done;
 
-  const RoutineOccurrence(this.routine, this.day, {this.done = false});
+  const RoutineOccurrence(this.routine, this.day);
 }
 
 /// The routines shown on [day]: those that fall on it and aren't skipped
@@ -252,9 +239,5 @@ class RoutineOccurrence {
 List<RoutineOccurrence> routinesOn(DateTime day, RoutineBook book) => [
       for (final r in book.routines)
         if (r.occursOn(day) && !(book.dayOf(r.id, day)?.skipped ?? false))
-          RoutineOccurrence(
-            r,
-            day,
-            done: book.dayOf(r.id, day)?.done ?? false,
-          ),
+          RoutineOccurrence(r, day),
     ]..sort((a, b) => a.routine.start.compareTo(b.routine.start));

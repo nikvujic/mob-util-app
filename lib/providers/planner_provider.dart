@@ -120,6 +120,19 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     ];
   }
 
+  /// Round 78 (Nikola): a ticked-off task on a day before [today] isn't
+  /// kept; they're deleted. The ones deleted.
+  List<PlannerTask> dropDoneBefore(DateTime today) {
+    final gone = [
+      for (final t in state)
+        if (t.done && t.day.isBefore(today)) t,
+    ];
+    if (gone.isNotEmpty) {
+      state = state.where((t) => !gone.contains(t)).toList();
+    }
+    return gone;
+  }
+
   void removeTasks(Set<String> ids) {
     state = state.where((t) => !ids.contains(t.id)).toList();
   }

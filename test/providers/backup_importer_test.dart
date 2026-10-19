@@ -259,9 +259,9 @@ void main() {
           from: DateTime(2026, 10, 1),
           until: DateTime(2026, 12, 31),
         )!;
-    source.read(routinesProvider.notifier)
-      ..toggleDone(gym, DateTime(2026, 10, 12))
-      ..setSkipped(gym, DateTime(2026, 10, 14), skipped: true);
+    source
+        .read(routinesProvider.notifier)
+        .setSkipped(gym, DateTime(2026, 10, 14), skipped: true);
     source
         .read(pinsProvider.notifier)
         .add(DateTime(2026, 10, 12), 'Call mum', time: 630);

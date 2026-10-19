@@ -101,7 +101,7 @@ void main() {
 
   test(
       'routines remind on each of their days for two weeks, '
-      'not when ticked off or skipped', () {
+      'not when skipped', () {
     final gym = Routine(
       id: 'gym',
       title: 'Gym',
@@ -131,6 +131,9 @@ void main() {
     );
     expect(reminders.map((r) => r.at), [
       DateTime(2026, 10, 8, 17, 45), // today
+      // Round 78: an old tick (routines aren't ticked off now) is no
+      // reason to stay quiet.
+      DateTime(2026, 10, 15, 17, 45),
       DateTime(2026, 10, 19, 17, 45),
       DateTime(2026, 10, 22, 17, 45), // the 14th day ahead
     ]);

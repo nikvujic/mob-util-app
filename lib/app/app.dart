@@ -7,7 +7,9 @@ import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/providers/auto_backup_provider.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/format.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
+import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/app/app_drawer.dart';
 import 'package:the_app/app/bottom_nav.dart';
 import 'package:the_app/app/privacy_curtain.dart';
@@ -142,10 +144,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(reminderPlannerProvider).refresh();
       // Pip's battery, if one came while away (Round 37).
       _collectBattery();
+      // A past day's ticked-off blocks, gone (Round 78).
+      _dropDoneBlocks();
       // A day's automatic backup, if due (Round 39).
       ref.read(autoBackupProvider).run();
     },
   );
+
+  /// Ticked-off planner blocks on days before today are deleted (Round
+  /// 78), when the app opens or comes back.
+  void _dropDoneBlocks() => ref
+      .read(plannerProvider.notifier)
+      .dropDoneBefore(dayOf(ref.read(clockProvider)()));
 
   /// A battery for Pip, if one is due: it comes when the app is opened.
   void _collectBattery() =>
@@ -159,6 +169,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tellUnreadable();
       _collectBattery();
+      _dropDoneBlocks();
       // "Open the app to keep reminders": it's open.
       ref.read(clearShownProvider)(null);
       ref.read(autoBackupProvider).run();

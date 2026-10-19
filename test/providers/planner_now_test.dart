@@ -83,6 +83,11 @@ void main() {
         (NotificationTarget.parse(on.single.target) as PlannerNowTarget)
             .routine,
         isTrue);
+    // Round 78: nothing to tick off: no Done button; an old tick (from
+    // before) changes nothing.
+    expect(on.single.done, isFalse);
+    expect(
+        NotificationReminderScheduler.detailsFor(on.single).actions, isEmpty);
     final ticked = RoutineDay(routineId: 'gym', day: today, done: true);
     expect(
         nowOnes(planReminders(
@@ -90,7 +95,7 @@ void main() {
             tasks: const [],
             routines: RoutineBook(routines: [gym], days: {ticked.key: ticked}),
             onNow: true)),
-        isEmpty);
+        hasLength(1));
     expect(nowOnes(planReminders(now: now, tasks: const [], routines: book)),
         isEmpty,
         reason: 'off');
@@ -216,7 +221,9 @@ void main() {
           isTrue);
     });
 
-    testWidgets('a routine\'s Done ticks that day\'s', (tester) async {
+    testWidgets(
+        'Round 78: an old routine notification\'s Done just opens the '
+        'planner (routines aren\'t ticked off)', (tester) async {
       await start(tester);
       container.read(routinesProvider.notifier).replaceAll(RoutineBook(
             routines: [
@@ -235,9 +242,8 @@ void main() {
       final target = nowOnes(scheduler.scheduled).first.target!;
       scheduler.taps.add('$target|done');
       await tester.pumpAndSettle();
-      final occurrence =
-          routinesOn(today, container.read(routinesProvider)).single;
-      expect(occurrence.done, isTrue);
+      expect(container.read(routinesProvider).days, isEmpty);
+      expect(find.text('Gym'), findsWidgets);
     });
   });
 }

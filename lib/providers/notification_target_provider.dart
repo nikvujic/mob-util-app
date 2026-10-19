@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/notification_target.dart';
@@ -30,18 +29,11 @@ final notificationOpenerProvider = Provider<void>((ref) {
   scheduler.takeLaunch().then(take);
 });
 
-/// Ticks off the block or routine [target] is about (Round 72: its
-/// notification's Done), unless it already is (or is gone).
+/// Ticks off the block [target] is about (Round 72: its notification's
+/// Done), unless it already is (or is gone). Round 78: a routine isn't
+/// ticked off (an old notification's Done just opens the planner).
 void tickNow(Ref ref, PlannerNowTarget target) {
-  if (target.routine) {
-    final occurrence = routinesOn(target.day, ref.read(routinesProvider))
-        .where((o) => o.routine.id == target.id)
-        .firstOrNull;
-    if (occurrence != null && !occurrence.done) {
-      ref.read(routinesProvider.notifier).toggleDone(target.id, target.day);
-    }
-    return;
-  }
+  if (target.routine) return;
   final task =
       ref.read(plannerProvider).where((t) => t.id == target.id).firstOrNull;
   if (task != null && !task.done) {

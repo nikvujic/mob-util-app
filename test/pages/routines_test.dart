@@ -287,19 +287,16 @@ void main() {
             epsilon: 1));
   });
 
-  testWidgets('ticking a routine off counts for that day only', (tester) async {
+  testWidgets('a routine has nothing to tick off (Round 78)', (tester) async {
     await openPlanner(tester);
-    final id = addGym();
+    addGym();
     await tester.pump();
 
     // Off-screen blocks aren't in the screen reader's tree: scroll first.
     await tester.ensureVisible(find.text('Gym'));
     await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('Done: Gym'));
-    await tester.pumpAndSettle();
-    final book = container.read(routinesProvider);
-    expect(book.dayOf(id, today)!.done, isTrue);
-    expect(book.dayOf(id, tomorrow), isNull);
+    expect(find.bySemanticsLabel('Done: Gym'), findsNothing);
+    expect(find.byType(Checkbox), findsNothing);
   });
 
   group('the Routines screen', () {

@@ -278,6 +278,28 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     }
   }
 
+  /// A block ticked off (or back). Round 78: ticked off on a past day,
+  /// it's deleted at once, as the past's done blocks are (Undo puts it
+  /// back, not done).
+  void _tick(PlannerTask task) {
+    final planner = ref.read(plannerProvider.notifier);
+    planner.toggleDone(task.id);
+    final today = dayOf(_now);
+    if (task.done || !task.day.isBefore(today)) return;
+    planner.dropDoneBefore(today);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${task.title} done and cleared'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => planner.restoreTask(task),
+          ),
+        ),
+      );
+  }
+
   /// A routine's block on a day: change it just there, skip it there, or
   /// edit the routine itself (P8).
   Future<void> _routineTapped(RoutineOccurrence occurrence) async {
@@ -583,7 +605,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final tasks = all.where((t) => isSameDay(t.day, day)).toList();
     final timed = tasks.where((t) => t.hasTime).toList();
     final untimed = tasks.where((t) => !t.hasTime).toList();
-    final routines = routinesOn(day, ref.watch(routinesProvider)); // P8
+    // P8; Round 78: not on past days (they're just there, nothing to
+    // tick off).
+    final routines = day.isBefore(today)
+        ? const <RoutineOccurrence>[]
+        : routinesOn(day, ref.watch(routinesProvider));
     final pins = allPins.where((p) => isSameDay(p.day, day)).toList();
     ref.listen(plannerProvider, (_, next) {
       _selection.retain(next.map((t) => t.id));
@@ -604,9 +630,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           onTap: () => _selection.handleTap(task.id, () => _taskTapped(task)),
           onLongPress: () => _selection.handleLongPress(task.id),
           // While selecting, nothing ticks (as with reminders).
-          onToggleDone: selecting
-              ? () {}
-              : () => ref.read(plannerProvider.notifier).toggleDone(task.id),
+          onToggleDone: selecting ? () {} : () => _tick(task),
         ),
       // Routines aren't selected (they're deleted on the Routines screen).
       for (final o in routines)
@@ -615,17 +639,12 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           title: o.routine.title,
           start: o.routine.start,
           end: o.routine.end,
-          done: o.done,
           repeats: true,
           color: BlockColor.fromName(o.routine.color),
           reminds: o.routine.remind != null,
           description: o.routine.description,
+          // Round 78: no box to tick (Nikola: they're just there).
           onTap: selecting ? () {} : () => _routineTapped(o),
-          onToggleDone: selecting
-              ? () {}
-              : () => ref
-                  .read(routinesProvider.notifier)
-                  .toggleDone(o.routine.id, day),
         ),
     ];
 

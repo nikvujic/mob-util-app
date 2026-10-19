@@ -160,24 +160,19 @@ void main() {
     });
   });
 
-  test('ticking off and skipping count for one day only', () {
+  test('skipping counts for one day only', () {
     final id = gym();
-    routines().toggleDone(id, monday);
-    expect(book().dayOf(id, monday)!.done, isTrue);
-    expect(book().dayOf(id, wednesday), isNull);
-
     routines().setSkipped(id, wednesday, skipped: true);
     expect(shownOn(wednesday), isEmpty);
     expect(shownOn(nextMonday), ['Gym']);
+    expect(book().dayOf(id, monday), isNull);
 
     routines().setSkipped(id, wednesday, skipped: false);
-    routines().toggleDone(id, monday);
     expect(book().days, isEmpty, reason: 'nothing left to keep');
   });
 
-  test('editing changes every day, past too; ticks and skips stay', () {
+  test('editing changes every day, past too; skips stay', () {
     final id = gym();
-    routines().toggleDone(id, monday);
     routines().setSkipped(id, wednesday, skipped: true);
 
     routines().update(
@@ -190,14 +185,13 @@ void main() {
     );
     final routine = book().routines.single;
     expect((routine.title, routine.start), ('Gym (long)', at(17)));
-    expect(book().dayOf(id, monday)!.done, isTrue);
     expect(shownOn(wednesday), isEmpty);
     expect(shownOn(DateTime(2026, 10, 16)), isEmpty, reason: 'no Fridays');
   });
 
-  test('deleting removes it from every day, with its ticks', () {
+  test('deleting removes it from every day, with its skips', () {
     final id = gym();
-    routines().toggleDone(id, monday);
+    routines().setSkipped(id, monday, skipped: true);
     routines().remove(id);
     expect(book().routines, isEmpty);
     expect(book().days, isEmpty);

@@ -50,7 +50,7 @@ List<Reminder> planReminders({
 
   /// Round 72 ([onNow]): a notification that stays while it's on, from
   /// its start (or now, if it's already on) till its end; tapped, the
-  /// planner at it; Done ticks it.
+  /// planner at it; Done ticks it (a block's: Round 78, not a routine's).
   void addNow(
       DateTime day, String title, int start, int end, String id, bool routine) {
     final from = DateTime(day.year, day.month, day.day, 0, start);
@@ -68,6 +68,8 @@ List<Reminder> planReminders({
       target: target,
       until: until,
       onNow: !from.isAfter(now),
+      // Round 78: a routine has nothing to tick off.
+      done: !routine,
     ));
   }
 
@@ -112,10 +114,8 @@ List<Reminder> planReminders({
     }
     for (final o in routinesOn(day, routines)) {
       final r = o.routine;
-      if (!o.done && r.remind != null) {
-        add(day, r.title, r.start, r.end, r.remind!);
-      }
-      if (onNow && !o.done) addNow(day, r.title, r.start, r.end, r.id, true);
+      if (r.remind != null) add(day, r.title, r.start, r.end, r.remind!);
+      if (onNow) addNow(day, r.title, r.start, r.end, r.id, true);
     }
   }
   final last = addDays(today, reminderDays + 1);

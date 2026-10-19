@@ -36,6 +36,10 @@ class Reminder {
   final DateTime? until;
   final bool onNow;
 
+  /// Round 78: whether it has its Done button (a block's, not a
+  /// routine's: they aren't ticked off).
+  final bool done;
+
   const Reminder({
     required this.at,
     required this.title,
@@ -47,6 +51,7 @@ class Reminder {
     this.volume = NotifyVolume.loud,
     this.until,
     this.onNow = false,
+    this.done = true,
   });
 
   /// As its page's settings say (Round 31).
@@ -66,6 +71,7 @@ class Reminder {
         volume: volume,
         until: until,
         onNow: onNow,
+        done: done,
       );
 
   @override
@@ -185,13 +191,14 @@ class NotificationReminderScheduler implements ReminderScheduler {
         when: until.millisecondsSinceEpoch,
         usesChronometer: true,
         chronometerCountDown: true,
-        actions: const [
-          AndroidNotificationAction(
-            doneAction,
-            'Done',
-            showsUserInterface: true,
-            cancelNotification: true,
-          ),
+        actions: [
+          if (reminder.done)
+            const AndroidNotificationAction(
+              doneAction,
+              'Done',
+              showsUserInterface: true,
+              cancelNotification: true,
+            ),
         ],
       );
     }

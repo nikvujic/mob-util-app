@@ -17,6 +17,14 @@ Release with the installable APK.
 - Pip Home's status says *TAP HIM 3 TIMES TO WAKE HIM* when he can be
   woken, and the Animations list has *Woken at night*.
 
+### Changed
+- **Planner routines** are just there now: there's no box to tick them
+  off (and no Done on their notification), and they don't show on past
+  days.
+- **Ticked-off blocks on past days are deleted** by themselves, when the
+  app opens or comes back. Tick one off on a past day and it's cleared
+  at once (with Undo).
+
 ## [1.34.1] - 2026-10-19
 
 ### Fixed

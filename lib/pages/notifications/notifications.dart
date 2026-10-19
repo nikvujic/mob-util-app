@@ -337,7 +337,7 @@ class _PageSettings extends ConsumerWidget {
               title: const Text('While a block is on'),
               subtitle: Text(
                 'A quiet notification that stays till it ends, counting '
-                'down, with Done to tick it off (routines too).',
+                'down; a block\'s has Done to tick it off.',
                 style: muted(),
               ),
               value: preferences.plannerNow,

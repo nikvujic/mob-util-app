@@ -129,7 +129,9 @@ class Routine {
       );
 }
 
-/// What happened to a routine on one day: ticked off, or skipped.
+/// What happened to a routine on one day: ticked off, or skipped. Round
+/// 78: routines aren't ticked off any more; [done] is still read (and
+/// kept) from before, and means nothing now.
 class RoutineDay {
   final String routineId;
   final DateTime day;

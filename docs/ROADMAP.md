@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 78 — Nikola on the planner (2026-10-19, 1.35.0)
+
+- [x] **Routines**: no confirm/check any more (no box, no Done on their
+  notification); they're just there, and not shown on past days.
+- [x] **Blocks**: a ticked-off block on a past day is deleted
+  automatically (on opening or coming back to the app; at once if
+  ticked on a past day, with Undo).
+
 ### Round 77 — the wake-ups (2026-10-19, 1.35.0)
 
 - [x] **Night wake-up** (Round 62): three taps on him asleep (each

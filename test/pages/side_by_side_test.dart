@@ -151,16 +151,18 @@ void main() {
           reason: 'alone, the task takes the full width');
     });
 
-    testWidgets('each ticks off on its own', (tester) async {
+    testWidgets('the task ticks off; the routine has nothing to (Round 78)',
+        (tester) async {
       await openPlanner(tester);
-      final id = addMedicine();
+      addMedicine();
       planner().addTask(today, 'Work', start: at(10), end: at(12));
       await tester.pump();
 
-      await tester.tap(find.bySemanticsLabel('Done: Medicine'));
+      expect(find.bySemanticsLabel('Done: Medicine'), findsNothing);
+      await tester.tap(find.bySemanticsLabel('Done: Work'));
       await tester.pump();
-      expect(container.read(routinesProvider).dayOf(id, today)!.done, isTrue);
-      expect(container.read(plannerProvider).single.done, isFalse);
+      expect(container.read(plannerProvider).single.done, isTrue);
+      expect(container.read(routinesProvider).days, isEmpty);
     });
 
     testWidgets('a task added in free time can reach over a routine',
