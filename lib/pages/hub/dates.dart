@@ -83,13 +83,51 @@ class _DatesPageState extends ConsumerState<DatesPage> {
     final today = _today;
     final colors = context.colors;
     final picked = _picked;
+    // Round 72: what's on today, what's coming, and one-off dates gone
+    // by; a day picked on the calendar, only its dates.
+    final now = picked == null ? book.today(today) : const <DateOn>[];
+    final onNow = {for (final d in now) d.date.id};
     final shown = picked == null
-        ? book.upcoming(today)
+        ? [
+            for (final d in book.upcoming(today))
+              if (!onNow.contains(d.date.id)) d,
+          ]
         // Round 59: each from its first day (it may last several).
         : [
             for (final d in book.on(picked))
               (date: d, on: d.startCovering(picked) ?? picked),
           ];
+    final past = picked == null ? book.past(today) : const <DateOn>[];
+    Widget heading(String text, Key key) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Text(
+            key: key,
+            text,
+            style: TextStyle(
+              color: colors.accent,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
+            ),
+          ),
+        );
+    Widget cards(List<DateOn> items) => SliverList.list(
+          children: [
+            for (final item in items)
+              Padding(
+                key: ValueKey('${item.date.id}-${item.on}'),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                child: DateCard(
+                  date: item.date,
+                  on: item.on,
+                  today: today,
+                  onTap: () =>
+                      openDatesPage(context, DatePage(dateId: item.date.id)),
+                ),
+              ),
+          ],
+        );
     return Scaffold(
       appBar: AppBar(title: Text(HubTool.dates.label)),
       body: PullDownList(
@@ -107,21 +145,17 @@ class _DatesPageState extends ConsumerState<DatesPage> {
               ),
             ),
           ),
+          if (now.isNotEmpty) ...[
+            SliverToBoxAdapter(
+                child: heading('TODAY', const Key('datesToday'))),
+            cards(now),
+          ],
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text(
-                key: const Key('datesHeading'),
-                picked == null
-                    ? 'UPCOMING'
-                    : formatDay(picked, today: today).toUpperCase(),
-                style: TextStyle(
-                  color: colors.accent,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1,
-                ),
-              ),
+            child: heading(
+              picked == null
+                  ? 'UPCOMING'
+                  : formatDay(picked, today: today).toUpperCase(),
+              const Key('datesHeading'),
             ),
           ),
           if (shown.isEmpty)
@@ -138,23 +172,11 @@ class _DatesPageState extends ConsumerState<DatesPage> {
                 ),
               ),
             ),
-          SliverList.list(
-            children: [
-              for (final item in shown)
-                Padding(
-                  key: ValueKey(item.date.id),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                  child: DateCard(
-                    date: item.date,
-                    on: item.on,
-                    today: today,
-                    onTap: () =>
-                        openDatesPage(context, DatePage(dateId: item.date.id)),
-                  ),
-                ),
-            ],
-          ),
+          cards(shown),
+          if (past.isNotEmpty) ...[
+            SliverToBoxAdapter(child: heading('PAST', const Key('datesPast'))),
+            cards(past),
+          ],
         ],
       ),
       // Round 59: always on the right (as Medicine): opened from the Hub,
@@ -232,13 +254,30 @@ class DateCard extends StatelessWidget {
                     whenLabel(date, on, today),
                     style: TextStyle(color: colors.textSecondary, fontSize: 12),
                   ),
-                  // Round 61: all there is to know about it.
-                  if (dateDetails(date) case final details
+                  // Round 61: all there is to know about it; Round 72: its
+                  // reminders on a line of their own, with a bell.
+                  if (dateDetails(date, reminders: false) case final details
                       when details.isNotEmpty)
                     Text(
                       key: Key('dateDetails-${date.id}'),
                       details.join('  ·  '),
                       style: TextStyle(color: colors.textMuted, fontSize: 12),
+                    ),
+                  if (remindersLabel(date) case final reminders?)
+                    Row(
+                      key: Key('dateReminders-${date.id}'),
+                      children: [
+                        Icon(Icons.notifications_none,
+                            size: 13, color: colors.textMuted),
+                        const SizedBox(width: 3),
+                        Flexible(
+                          child: Text(
+                            reminders,
+                            style: TextStyle(
+                                color: colors.textMuted, fontSize: 12),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),

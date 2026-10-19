@@ -47,7 +47,7 @@ void main() {
     expect(reminders.asked, 1);
     // It starts at 00:00 (the free time's start), already past today:
     // nothing to schedule.
-    expect(reminders.scheduled, isEmpty);
+    expect(reminders.scheduledReminders, isEmpty);
   });
 
   testWidgets('scheduled when ahead; follows changes', (tester) async {
@@ -60,8 +60,9 @@ void main() {
           remind: 10,
         );
     await tester.pump();
-    expect(reminders.scheduled.single.title, 'Dentist');
-    expect(reminders.scheduled.single.at, DateTime(2026, 10, 8, 14, 50));
+    expect(reminders.scheduledReminders.single.title, 'Dentist');
+    expect(
+        reminders.scheduledReminders.single.at, DateTime(2026, 10, 8, 14, 50));
     expect(find.byIcon(Icons.notifications_none), findsOneWidget,
         reason: 'a bell on blocks with a reminder');
 
@@ -69,7 +70,7 @@ void main() {
         .read(plannerProvider.notifier)
         .toggleDone(container.read(plannerProvider).single.id);
     await tester.pump();
-    expect(reminders.scheduled, isEmpty, reason: 'ticked off');
+    expect(reminders.scheduledReminders, isEmpty, reason: 'ticked off');
   });
 
   testWidgets('no reminder: no permission asked', (tester) async {
@@ -99,7 +100,8 @@ void main() {
         );
     container.read(sectionLocksProvider.notifier).lock(AppSection.planner);
     await tester.pump();
-    expect(reminders.scheduled.single.title, 'Planner');
-    expect(reminders.scheduled.single.body, isNot(contains('Therapy')));
+    expect(reminders.scheduledReminders.single.title, 'Planner');
+    expect(
+        reminders.scheduledReminders.single.body, isNot(contains('Therapy')));
   });
 }

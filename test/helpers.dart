@@ -253,6 +253,13 @@ class FakeReminderScheduler implements ReminderScheduler {
   /// What's scheduled now.
   List<Reminder> scheduled = const [];
 
+  /// [scheduled] but the planner's notifications that stay while a block
+  /// is on (Round 72).
+  List<Reminder> get scheduledReminders => [
+        for (final r in scheduled)
+          if (r.kind != ReminderKind.plannerNow) r
+      ];
+
   /// Whether notifications are allowed; [asked] counts the requests.
   bool allowed = true;
   int asked = 0;

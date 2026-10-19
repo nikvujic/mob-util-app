@@ -43,7 +43,7 @@ String whenLabel(DateEntry date, DateTime on, DateTime today) {
 /// What else there is to say about [date] (Round 61, its card's second
 /// line): its kind ("Skiing"), how long it lasts ("4 days"), its year
 /// ("born 1995", "since 2016") and its reminders ("1 day, 1 week before").
-List<String> dateDetails(DateEntry date) => [
+List<String> dateDetails(DateEntry date, {bool reminders = true}) => [
       if (date.kindNow case final kind?) kind.label,
       if (date.span > 1) countOf(date.span, 'day', 'days'),
       if (date.year case final year? when date.yearly)
@@ -52,14 +52,19 @@ List<String> dateDetails(DateEntry date) => [
           DateType.anniversary => 'since $year',
           _ => 'from $year',
         },
-      if (date.reminders.isNotEmpty)
-        '${[
-          for (final r in [
-            ...date.reminders
-          ]..sort((a, b) => a.daysBefore.compareTo(b.daysBefore)))
-            beforeLabel(r.daysBefore),
-        ].join(', ')} before',
+      if (reminders)
+        if (remindersLabel(date) case final label?) label,
     ];
+
+/// A date's reminders, shortly: "1 day, 1 week before"; null for none.
+String? remindersLabel(DateEntry date) => date.reminders.isEmpty
+    ? null
+    : '${[
+        for (final r in [
+          ...date.reminders
+        ]..sort((a, b) => a.daysBefore.compareTo(b.daysBefore)))
+          beforeLabel(r.daysBefore),
+      ].join(', ')} before';
 
 /// How long before, shortly: "on the day", "1 day", "1 week", "1 month".
 String beforeLabel(int days) => switch (days) {

@@ -336,6 +336,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       switch (target) {
         case PlannerTarget():
           _show(AppSection.planner);
+        // Round 72: a block that's on (the opener passes on where it is).
+        case PlannerNowTarget():
+          ref.read(pendingTargetProvider.notifier).state = target.at;
         case MedicineTarget() || DatesTarget():
           _show(AppSection.hub);
         // Not a section: Backup opens on top of the one shown.

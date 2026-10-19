@@ -80,23 +80,37 @@ void main() {
   });
 
   testWidgets(
-      'upcoming: soonest first, how soon, turns N, N years; gone-by '
-      'one-offs left out', (tester) async {
+      'today on top (Round 72); upcoming: soonest first, how soon, turns '
+      'N, N years; gone-by one-offs under Past', (tester) async {
+    // A phone's height: all of it in view.
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.reset);
     await openDates(tester, start: [
       date('Mama i tata', 20, 10, year: 2016, type: DateType.anniversary),
       date('Ana', 24, 10, year: 1995),
       date('Exam', 1, 10, year: 2026, yearly: false, type: DateType.event),
       date('Bo', 15, 10),
     ]);
-    final bo = tester.getTopLeft(find.text('Bo')).dy;
-    final mama = tester.getTopLeft(find.text('Mama i tata')).dy;
-    final ana = tester.getTopLeft(find.text('Ana')).dy;
-    expect(bo < mama && mama < ana, isTrue);
+    double y(Finder f) => tester.getTopLeft(f).dy;
+    final bo = y(find.text('Bo'));
+    final mama = y(find.text('Mama i tata'));
+    final ana = y(find.text('Ana'));
+    expect(y(find.byKey(const Key('datesToday'))), lessThan(bo));
+    expect(bo, lessThan(y(find.byKey(const Key('datesHeading')))),
+        reason: 'today, above Upcoming');
+    expect(y(find.byKey(const Key('datesHeading'))), lessThan(mama));
+    expect(find.text('Bo'), findsOneWidget, reason: 'not in Upcoming too');
+    expect(mama < ana, isTrue);
     expect(whenOf(tester, 'Bo'), 'Thu, 15 Oct  ·  today');
     expect(whenOf(tester, 'Mama i tata'),
         'Tue, 20 Oct  ·  in 5 days  ·  10 years');
     expect(whenOf(tester, 'Ana'), 'Sat, 24 Oct  ·  in 9 days  ·  turns 31');
-    expect(find.text('Exam'), findsNothing, reason: 'gone by');
+    // Gone by: kept, under Past, at the end.
+    expect(y(find.text('Exam')),
+        greaterThan(y(find.byKey(const Key('datesPast')))));
+    expect(y(find.byKey(const Key('datesPast'))),
+        greaterThan(y(find.text('Ana'))));
   });
 
   testWidgets(
@@ -303,7 +317,15 @@ void main() {
     expect(whenOf(tester, 'ana'), 'Sun, 10 Oct  ·  in 360 days  ·  turns 32');
     String details(String id) =>
         tester.widget<Text>(find.byKey(Key('dateDetails-$id'))).data!;
-    expect(details('ana'), 'born 1995  ·  1 day before');
+    expect(details('ana'), 'born 1995');
+    // Round 72: its reminders on their own line, with a bell.
+    final reminders = find.byKey(const Key('dateReminders-ana'));
+    expect(find.descendant(of: reminders, matching: find.text('1 day before')),
+        findsOneWidget);
+    expect(
+        find.descendant(
+            of: reminders, matching: find.byIcon(Icons.notifications_none)),
+        findsOneWidget);
     expect(whenOf(tester, 'ski'),
         'Wed, 20 Jan 2027 – Sun, 24 Jan 2027  ·  in 97 days');
     expect(details('ski'), 'Skiing  ·  5 days');

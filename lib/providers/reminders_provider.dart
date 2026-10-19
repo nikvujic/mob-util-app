@@ -43,9 +43,33 @@ List<Reminder> planReminders({
   required RoutineBook routines,
   List<PlannerPin> pins = const [],
   bool hideTitles = false,
+  bool onNow = false,
 }) {
   final reminders = <Reminder>[];
   final today = dayOf(now);
+
+  /// Round 72 ([onNow]): a notification that stays while it's on, from
+  /// its start (or now, if it's already on) till its end; tapped, the
+  /// planner at it; Done ticks it.
+  void addNow(
+      DateTime day, String title, int start, int end, String id, bool routine) {
+    final from = DateTime(day.year, day.month, day.day, 0, start);
+    final until = DateTime(day.year, day.month, day.day, 0, end);
+    if (!until.isAfter(now)) return;
+    final target =
+        PlannerNowTarget(routine: routine, id: id, day: day, minutes: start)
+            .payload;
+    final time = '${formatMinutes(start)}–${formatMinutes(end)}';
+    reminders.add(Reminder(
+      at: from,
+      kind: ReminderKind.plannerNow,
+      title: hideTitles ? 'Planner' : title,
+      body: hideTitles ? 'A block is on · $time' : 'Now · $time',
+      target: target,
+      until: until,
+      onNow: !from.isAfter(now),
+    ));
+  }
 
   void add(DateTime day, String title, int start, int end, int remind) {
     // Minutes beyond 0–59 roll over, also into the day before.
@@ -82,12 +106,16 @@ List<Reminder> planReminders({
       if (isSameDay(t.day, day) && t.hasTime && !t.done && t.remind != null) {
         add(day, t.title, t.start!, t.end!, t.remind!);
       }
+      if (onNow && isSameDay(t.day, day) && t.hasTime && !t.done) {
+        addNow(day, t.title, t.start!, t.end!, t.id, false);
+      }
     }
     for (final o in routinesOn(day, routines)) {
       final r = o.routine;
       if (!o.done && r.remind != null) {
         add(day, r.title, r.start, r.end, r.remind!);
       }
+      if (onNow && !o.done) addNow(day, r.title, r.start, r.end, r.id, true);
     }
   }
   final last = addDays(today, reminderDays + 1);
@@ -142,6 +170,7 @@ class ReminderPlanner {
           before.medicineReminders != after.medicineReminders ||
           before.medicinePausedUntil != after.medicinePausedUntil ||
           before.plannerReminders != after.plannerReminders ||
+          before.plannerNow != after.plannerNow ||
           before.plannerPausedUntil != after.plannerPausedUntil ||
           before.datesReminders != after.datesReminders ||
           before.datesPausedUntil != after.datesPausedUntil ||
@@ -218,6 +247,7 @@ class ReminderPlanner {
         // Locked, or set private (Round 31): no names.
         hideTitles: password && locks.contains(AppSection.planner) ||
             private(NotifyPage.planner),
+        onNow: preferences.plannerNow,
       ),
       ...planMedicineReminders(
         now: now,
@@ -250,7 +280,12 @@ class ReminderPlanner {
     // Kept for the history (Round 31); nothing shows if not allowed (as
     // last looked at: asking here would hold planning up).
     if (_ref.read(notificationsAllowedProvider).valueOrNull ?? true) {
-      _ref.read(notificationLogProvider.notifier).planned(scheduled, now);
+      // Not the ones that stay while a block is on (Round 72): they're
+      // what's on, not something that came.
+      _ref.read(notificationLogProvider.notifier).planned([
+        for (final r in scheduled)
+          if (r.kind != ReminderKind.plannerNow) r
+      ], now);
     }
     await _ref.read(reminderSchedulerProvider).replaceAll(scheduled);
   }
@@ -262,6 +297,7 @@ final clearShownProvider = Provider<Future<void> Function(NotifyPage?)>(
   (ref) => (page) => ref.read(reminderSchedulerProvider).clearShown(
         switch (page) {
           null => ReminderKind.notice,
+          // Not the ones that stay while a block is on (Round 72).
           NotifyPage.planner => ReminderKind.planner,
           NotifyPage.medicine => ReminderKind.medicine,
           NotifyPage.backup => ReminderKind.backup,
@@ -272,7 +308,7 @@ final clearShownProvider = Provider<Future<void> Function(NotifyPage?)>(
 
 /// The page a kind of reminder comes from (none for the app's own).
 NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
-      ReminderKind.planner => NotifyPage.planner,
+      ReminderKind.planner || ReminderKind.plannerNow => NotifyPage.planner,
       ReminderKind.medicine => NotifyPage.medicine,
       ReminderKind.backup => NotifyPage.backup,
       ReminderKind.dates => NotifyPage.dates,

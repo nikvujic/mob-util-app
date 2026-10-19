@@ -124,6 +124,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setPlannerReminders(bool on) =>
       state = state.copyWith(plannerReminders: on);
 
+  /// Round 72: the notification that stays while a block is on.
+  void setPlannerNow(bool on) => state = state.copyWith(plannerNow: on);
+
   /// Pauses the planner's notifications through [day]; null resumes.
   void pausePlannerUntil(DateTime? day) => state = state.copyWith(
         plannerPausedUntil: () =>

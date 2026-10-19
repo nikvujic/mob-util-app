@@ -329,6 +329,20 @@ class _PageSettings extends ConsumerWidget {
           },
         ),
         if (on) ...[
+          // Round 72: the planner's notification that stays.
+          if (page == NotifyPage.planner)
+            SwitchListTile(
+              key: const Key('notifyNow-planner'),
+              secondary: const Icon(Icons.push_pin_outlined),
+              title: const Text('While a block is on'),
+              subtitle: Text(
+                'A quiet notification that stays till it ends, counting '
+                'down, with Done to tick it off (routines too).',
+                style: muted(),
+              ),
+              value: preferences.plannerNow,
+              onChanged: notifier.setPlannerNow,
+            ),
           if (page != NotifyPage.backup)
             ListTile(
               key: Key('notifyPause-${page.name}'),

@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/providers/routines_provider.dart';
+import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/notification_target.dart';
 
@@ -14,6 +16,12 @@ final notificationOpenerProvider = Provider<void>((ref) {
   final scheduler = ref.watch(reminderSchedulerProvider);
   void take(String? payload) {
     final target = NotificationTarget.parse(payload);
+    if (target is PlannerNowTarget) {
+      // Round 72: Done on a block that's on ticks it; either way, to it.
+      if (target.done) tickNow(ref, target);
+      ref.read(pendingTargetProvider.notifier).state = target.at;
+      return;
+    }
     if (target != null) ref.read(pendingTargetProvider.notifier).state = target;
   }
 
@@ -21,3 +29,22 @@ final notificationOpenerProvider = Provider<void>((ref) {
   ref.onDispose(taps.cancel);
   scheduler.takeLaunch().then(take);
 });
+
+/// Ticks off the block or routine [target] is about (Round 72: its
+/// notification's Done), unless it already is (or is gone).
+void tickNow(Ref ref, PlannerNowTarget target) {
+  if (target.routine) {
+    final occurrence = routinesOn(target.day, ref.read(routinesProvider))
+        .where((o) => o.routine.id == target.id)
+        .firstOrNull;
+    if (occurrence != null && !occurrence.done) {
+      ref.read(routinesProvider.notifier).toggleDone(target.id, target.day);
+    }
+    return;
+  }
+  final task =
+      ref.read(plannerProvider).where((t) => t.id == target.id).firstOrNull;
+  if (task != null && !task.done) {
+    ref.read(plannerProvider.notifier).toggleDone(target.id);
+  }
+}

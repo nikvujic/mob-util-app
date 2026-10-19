@@ -337,6 +337,27 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 72 — Nikola on 1.28.1 (2026-10-19)
+
+Now: the planner's notification that stays (done), small fixes (Dates'
+sections and bell). For the next run, Pip:
+- [ ] **Bus**: the window isn't his whole face; a **bigger bus**, him
+  seen in a window; the roadside trees not on the road.
+- [ ] **Skiing** (seen in Pip Home's previews): he should ski **down**,
+  not walk left and right on a layer of ground; the trees should come
+  up from the bottom of the screen and go up till they vanish at the
+  horizon.
+- [ ] **Adventure** (previews): the bugs seem to **teleport**.
+- [ ] A better **ski beanie**.
+- [ ] **Trees**: a lot bigger, more detailed, in a random spot each time
+  the app opens (not always one in view and one peeking in).
+- [ ] **Rain**: a better effect.
+- [ ] **Christmas**: not 20 Dec–7 Jan; just **New Year's Eve**, and the
+  **Orthodox Christmas (7 January)** with its own look.
+- His question: the longer wake-up (yawn and stretch) was done in
+  1.18.0; still open: **Night wake-up** (three taps at night wake
+  him for 15 minutes) and **Early wake-up** (from 08:00).
+
 ### Round 71 — Nikola on 1.28 (2026-10-19, patch 1.29.1)
 
 - [x] **Shop search** button beside **+** (G11), not in the top bar; it
@@ -474,13 +495,13 @@ Internet Access (a page in the menu, second to last):
 - Order: **adventures first**, then this and the backgrounds.
 
 Dates:
-- [ ] **No "Year known"** for Holiday and Event (they already carry
-  their year).
-- [ ] **Sections**: **Today** (dates happening now, including a
+- [x] **No "Year known"** for Holiday and Event (they already carry
+  their year). (Done in Round 61's forms.)
+- [x] **Sections**: **Today** (dates happening now, including a
   multi-day one in progress) above **Upcoming**, and **Past** at the
   end for one-off dates (anything but Birthday and Anniversary), kept
   so the date isn't lost.
-- [ ] **Cards**: a small bell icon next to the reminders text.
+- [x] **Cards**: a small bell icon next to the reminders text.
 ### Round 61 — Nikola's notes on 1.21.0 (2026-10-16)
 
 Pip:
@@ -1007,7 +1028,7 @@ all day, no drain seen, with the app in his recent apps)
   Later: type filters on the list, search by ingredient.
 
 **Idea: a planner notification that stays** (later; Nikola's)
-- [ ] While a planner **block** or **routine** is on, a notification
+- [x] While a planner **block** or **routine** is on, a notification
   that can't be swiped away shows what it is ("what I should be doing
   now"). It goes when the task is ticked, perhaps with a **Done** button
   on the notification itself. Planner blocks and routines only.

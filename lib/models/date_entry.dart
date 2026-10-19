@@ -359,6 +359,26 @@ class DateBook {
     return found;
   }
 
+  /// The dates on [today] (Round 72: the Today section), each from its
+  /// first day (one lasting several may have begun before), by title.
+  List<DateOn> today(DateTime today) => [
+        for (final d in dates)
+          if (d.startCovering(today) case final at?) (date: d, on: at),
+      ]..sort((a, b) =>
+          a.date.title.toLowerCase().compareTo(b.date.title.toLowerCase()));
+
+  /// One-off dates gone by (Round 72: the Past section, kept so they
+  /// aren't lost), the latest first.
+  List<DateOn> past(DateTime today) {
+    final day = DateTime(today.year, today.month, today.day);
+    return [
+      for (final d in dates)
+        if (!d.yearly && d.nextFrom(day) == null)
+          if (d.year case final year?)
+            if (d.inYear(year) case final at?) (date: d, on: at),
+    ]..sort((a, b) => b.on.compareTo(a.on));
+  }
+
   /// Whether someone has a birthday on [day] (Pip's party hat, the
   /// green dot).
   bool birthdayOn(DateTime day) =>

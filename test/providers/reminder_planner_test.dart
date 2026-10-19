@@ -67,7 +67,8 @@ void main() {
 
     scheduler.release();
     await Future<void>.delayed(Duration.zero);
-    expect(scheduler.calls.last, ['Dentist']);
+    // Its reminder, and (Round 72) its notification while it's on.
+    expect(scheduler.calls.last, ['Dentist', 'Dentist']);
     scheduler.release();
     await again;
 

@@ -33,6 +33,9 @@ void main() {
     await tester.tap(find.text('Backup'));
     await tester.pumpAndSettle();
     expect(scheduler.cleared.last, ReminderKind.backup);
-    expect(scheduler.cleared.toSet(), ReminderKind.values.toSet());
+    // All but the planner's notification that stays while a block is on
+    // (Round 72): it goes when the block ends or is ticked.
+    expect(scheduler.cleared.toSet(),
+        ReminderKind.values.toSet()..remove(ReminderKind.plannerNow));
   });
 }

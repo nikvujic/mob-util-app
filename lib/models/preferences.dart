@@ -28,6 +28,10 @@ class Preferences {
 
   /// The planner's notifications (Round 31): on, and paused through a day.
   final bool plannerReminders;
+
+  /// Round 72: while a block or routine is on, a notification that stays
+  /// (with Done), till it ends or is ticked.
+  final bool plannerNow;
   final DateTime? plannerPausedUntil;
 
   /// Birthdays & dates' notifications (Round 57): on, and paused through
@@ -117,6 +121,7 @@ class Preferences {
     this.medicineReminders = true,
     this.medicinePausedUntil,
     this.plannerReminders = true,
+    this.plannerNow = true,
     this.plannerPausedUntil,
     this.datesReminders = true,
     this.datesPausedUntil,
@@ -210,6 +215,7 @@ class Preferences {
     bool? medicineReminders,
     DateTime? Function()? medicinePausedUntil,
     bool? plannerReminders,
+    bool? plannerNow,
     DateTime? Function()? plannerPausedUntil,
     bool? datesReminders,
     DateTime? Function()? datesPausedUntil,
@@ -246,6 +252,7 @@ class Preferences {
             ? this.medicinePausedUntil
             : medicinePausedUntil(),
         plannerReminders: plannerReminders ?? this.plannerReminders,
+        plannerNow: plannerNow ?? this.plannerNow,
         plannerPausedUntil: plannerPausedUntil == null
             ? this.plannerPausedUntil
             : plannerPausedUntil(),
@@ -294,6 +301,7 @@ class Preferences {
         if (medicinePausedUntil != null)
           'medicinePausedUntil': PlannerTask.dayToJson(medicinePausedUntil!),
         'plannerReminders': plannerReminders,
+        if (!plannerNow) 'plannerNow': false,
         if (plannerPausedUntil != null)
           'plannerPausedUntil': PlannerTask.dayToJson(plannerPausedUntil!),
         'datesReminders': datesReminders,
@@ -343,6 +351,7 @@ class Preferences {
             ? null
             : PlannerTask.dayFromJson(json['medicinePausedUntil']),
         plannerReminders: json['plannerReminders'] as bool? ?? true,
+        plannerNow: json['plannerNow'] as bool? ?? true,
         plannerPausedUntil: json['plannerPausedUntil'] == null
             ? null
             : PlannerTask.dayFromJson(json['plannerPausedUntil']),

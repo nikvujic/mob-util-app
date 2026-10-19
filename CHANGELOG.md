@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Planner: a notification while a block is on.** From a block's (or
+  routine's) start, a quiet notification stays in the tray, counting
+  down to its end; its **Done** ticks it off. It goes when the block
+  ends, is ticked or changes. On by default; Notifications → Planner →
+  *While a block is on* turns it off.
+- **Dates**: what's on **today** is at the top, above Upcoming, and
+  one-off dates gone by are kept under **Past**, at the end. A card's
+  reminders are on their own line, with a bell.
+
 ## [1.29.1] - 2026-10-19
 
 ### Fixed

@@ -9,7 +9,9 @@ import 'package:timezone/timezone.dart' as tz;
 
 /// What a reminder is about: each kind has its own Android channel, so
 /// they can be set apart in the phone's settings.
-enum ReminderKind { planner, medicine, backup, notice, dates }
+/// Round 72: [plannerNow], the planner's notification that stays while a
+/// block or routine is on.
+enum ReminderKind { planner, medicine, backup, notice, dates, plannerNow }
 
 /// A reminder (P10, O13): a notification at [at].
 class Reminder {
@@ -28,6 +30,12 @@ class Reminder {
   final NotifySound sound;
   final NotifyVolume volume;
 
+  /// Round 72 ([ReminderKind.plannerNow]): it stays (can't be swiped
+  /// away) until then, counting down, with a Done button; and it's
+  /// already on ([at] gone by): shown at once, not scheduled.
+  final DateTime? until;
+  final bool onNow;
+
   const Reminder({
     required this.at,
     required this.title,
@@ -37,6 +45,8 @@ class Reminder {
     this.colour,
     this.sound = NotifySound.phone,
     this.volume = NotifyVolume.loud,
+    this.until,
+    this.onNow = false,
   });
 
   /// As its page's settings say (Round 31).
@@ -54,6 +64,8 @@ class Reminder {
         colour: colour,
         sound: sound,
         volume: volume,
+        until: until,
+        onNow: onNow,
       );
 
   @override
@@ -121,6 +133,18 @@ class NotificationReminderScheduler implements ReminderScheduler {
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
     ),
+    // Round 72: quiet (the block's own reminder rings), and stays.
+    ReminderKind.plannerNow: AndroidNotificationDetails(
+      'planner-now',
+      'Planner: on now',
+      channelDescription: 'While a block or routine is on, till it ends '
+          'or is ticked',
+      importance: Importance.low,
+      priority: Priority.low,
+      playSound: false,
+      enableVibration: false,
+      category: AndroidNotificationCategory.status,
+    ),
     ReminderKind.notice: AndroidNotificationDetails(
       'app-notices',
       'From the app',
@@ -132,9 +156,45 @@ class NotificationReminderScheduler implements ReminderScheduler {
   /// Its kind's channel, with its tint and sound (Round 31). Android fixes
   /// a channel's sound when it's made, so each sound is a channel of its
   /// own: the kind's as before for the phone's sound, `…-coin` etc.
+  /// The Done button on a block that's on (Round 72); the app opens and
+  /// ticks it.
+  static const doneAction = 'done';
+
   @visibleForTesting
-  static AndroidNotificationDetails detailsFor(Reminder reminder) {
+  static AndroidNotificationDetails detailsFor(Reminder reminder,
+      {DateTime? now}) {
     final channel = _channels[reminder.kind]!;
+    if (reminder.until case final until?) {
+      // Shown at [at] (or now, already on): gone at [until].
+      final from = reminder.onNow ? (now ?? DateTime.now()) : reminder.at;
+      final left = until.difference(from).inMilliseconds;
+      return AndroidNotificationDetails(
+        channel.channelId,
+        channel.channelName,
+        channelDescription: channel.channelDescription,
+        importance: channel.importance,
+        priority: channel.priority,
+        playSound: false,
+        enableVibration: false,
+        category: channel.category,
+        color: reminder.colour,
+        ongoing: true,
+        autoCancel: false,
+        onlyAlertOnce: true,
+        timeoutAfter: left > 0 ? left : 1,
+        when: until.millisecondsSinceEpoch,
+        usesChronometer: true,
+        chronometerCountDown: true,
+        actions: const [
+          AndroidNotificationAction(
+            doneAction,
+            'Done',
+            showsUserInterface: true,
+            cancelNotification: true,
+          ),
+        ],
+      );
+    }
     final sound = reminder.sound;
     // Round 41: a quieter copy of the sound for a quieter volume, each its
     // own channel too (`…-coin-quiet`).
@@ -181,11 +241,19 @@ class NotificationReminderScheduler implements ReminderScheduler {
     try {
       final details = await _plugin.getNotificationAppLaunchDetails();
       if (details?.didNotificationLaunchApp != true) return null;
-      return details!.notificationResponse?.payload;
+      final response = details!.notificationResponse;
+      return response?.payload == null ? null : _withAction(response!);
     } on PlatformException {
       return null;
     }
   }
+
+  /// The tapped notification's target; with `|done` for its Done button
+  /// (Round 72).
+  static String _withAction(NotificationResponse response) =>
+      response.actionId == doneAction
+          ? '${response.payload}|done'
+          : response.payload!;
 
   /// Sets the plugin up once; false where it can't run (e.g. tests).
   Future<bool> _init() => _ready ??= () async {
@@ -198,7 +266,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
             // Tapped while the app runs (or is in the background).
             onDidReceiveNotificationResponse: (response) {
               final payload = response.payload;
-              if (payload != null) _opened.add(payload);
+              if (payload != null) _opened.add(_withAction(response));
             },
           );
           return true;
@@ -260,9 +328,30 @@ class NotificationReminderScheduler implements ReminderScheduler {
       for (final pending in await _plugin.pendingNotificationRequests()) {
         if (!keep.contains(pending.id)) await _plugin.cancel(pending.id);
       }
+      // Round 72: a block's notification that stays goes once it's no
+      // longer on (ticked, moved, deleted); one on and not shown, shows.
+      final nowChannel = _channels[ReminderKind.plannerNow]!.channelId;
+      final shown = <int>{};
+      for (final n in await _android?.getActiveNotifications() ?? const []) {
+        final id = n.id;
+        if (id == null || n.channelId != nowChannel) continue;
+        if (keep.contains(id)) {
+          shown.add(id);
+        } else {
+          await _plugin.cancel(id);
+        }
+      }
       // Exact if Android allows it, else as close as it does.
       final exact = await _android?.canScheduleExactNotifications() ?? false;
       for (final (i, reminder) in reminders.indexed) {
+        if (reminder.onNow) {
+          if (!shown.contains(ids[i])) {
+            await _plugin.show(ids[i], reminder.title, reminder.body,
+                NotificationDetails(android: detailsFor(reminder)),
+                payload: reminder.target);
+          }
+          continue;
+        }
         await _plugin.zonedSchedule(
           ids[i],
           reminder.title,
