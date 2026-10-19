@@ -521,6 +521,7 @@ class PipRun {
         }
       case RunPhase.sitting:
         plate = math.min(1, (plate ?? 0) + dt / plateFlight);
+        if (plate! >= 1) _eat(dt);
         if (!_wantBreak || _wantEnd) _to(RunPhase.standUp);
       case RunPhase.standUp:
         if (t >= standUpTime) {
@@ -899,18 +900,88 @@ class PipRun {
     final toX = tav + tableLeft + tableWidth / 2, toY = tableHeight.toDouble();
     final px = fromX + (toX - fromX) * p;
     final py = fromY + (toY - fromY) * p + 5 * math.sin(math.pi * p);
-    return (px, py, phase == RunPhase.sitting ? 1 - breakDone : 0);
+    return (px, py, phase == RunPhase.sitting ? mealLeft : 0);
   }
 
   /// A fall now (a preview's, tests and pictures).
   void fallNow() => _nextFall = 0;
 
-  /// A bite now (his mouth open), sitting with his meal.
-  bool get biting =>
-      phase == RunPhase.sitting &&
-      (plate ?? 0) >= 1 &&
-      breakDone < 1 &&
-      (clock % 3.2) < 0.35;
+  /// Round 74: his meal (or hot chocolate) bite by bite (sip by sip):
+  /// every [biteEvery] seconds once the plate's down his hand takes a
+  /// bite from it to his mouth ([biteLength]: there at [mouthAt], then
+  /// chewing; a mug is carried back after a sip); [bitesPerMeal] finish
+  /// it. Not watched, it's gone by a quarter of the way into his break.
+  static const biteEvery = 3.0;
+  static const biteLength = 1.4;
+  static const mouthAt = 0.5;
+  static const bitesPerMeal = 6;
+  double _waited = biteEvery - biteLength - 0.6;
+  int _bites = 0;
+
+  /// Seconds into the bite going on; null: none.
+  double? biteT;
+
+  /// Where his mouth is from his left edge (he faces the table, left),
+  /// and how high.
+  static const mouthX = 10.0;
+  static const mouthUp = 6.0;
+
+  void _eat(double dt) {
+    final bite = biteT;
+    if (bite == null) {
+      if (mealLeft <= 0) return;
+      _waited += dt;
+      if (_waited >= biteEvery - biteLength) {
+        _waited = 0;
+        biteT = 0;
+      }
+      return;
+    }
+    final next = bite + dt;
+    if (bite < mouthAt && next >= mouthAt) _bites++;
+    biteT = next >= biteLength ? null : next;
+  }
+
+  /// What's left of his meal (or mug), 1 to 0.
+  double get mealLeft => (1 - math.max(breakDone * 4, _bites / bitesPerMeal))
+      .clamp(0.0, 1.0)
+      .toDouble();
+
+  /// Chewing (or sipping): his mouth open and shut.
+  bool get chewing {
+    final b = biteT;
+    if (b == null || b < mouthAt) return false;
+    // A sip: the mug at his mouth.
+    if (skiing) return b < mouthAt + 0.4;
+    return b < mouthAt + 0.7;
+  }
+
+  /// His hand taking a bite (or the mug) to his mouth: (x, height above
+  /// the ground, size 0–1, carrying a bite) on the screen; null: none.
+  (double, double, double, bool)? get hand {
+    final b = biteT;
+    final from = plateAt;
+    if (b == null || from == null) return null;
+    final (px, py, _) = from;
+    final mx = x + mouthX, my = mouthUp;
+    (double, double) along(double p) =>
+        (px + (mx - px) * _ease(p), py + 1 + (my - py - 1) * _ease(p));
+    if (b < mouthAt) {
+      final (hx, hy) = along(b / mouthAt);
+      return (hx, hy, math.min(1, b / 0.12), true);
+    }
+    if (skiing) {
+      // Held to his mouth, then carried back.
+      final back = b - mouthAt - 0.4;
+      if (back < 0) return (mx, my, 1, true);
+      final (hx, hy) = along(1 - back / (biteLength - mouthAt - 0.4));
+      return (hx, hy, 1, true);
+    }
+    // The bite in his mouth: the hand goes.
+    final gone = (b - mouthAt) / 0.25;
+    if (gone >= 1) return null;
+    return (mx, my, 1 - gone, false);
+  }
 
   static double _ease(double p) {
     final q = p.clamp(0.0, 1.0);

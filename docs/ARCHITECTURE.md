@@ -493,6 +493,10 @@ each foe `PipRun` reports struck down (`defeats`, a `PipFoe`),
 `PipLink.defeated`, which collects the XP (a boss banks
 `PipAdventure.bossMinutes` once a day out, `bossDueAt`) and returns
 what to show rising (`showXp`).
+Round 74: each room's brain has its own run, so the field's trees go by
+his time out from his life instead (`PipLink.outRun`, synced each
+second into `PipBrain.outRun`, read by `fieldPassing`), standing still
+at his break.
 
 His ski trips (Round 67): `providers/pip_trip.dart` works out from
 Dates the bus rides (`ridesNear`), ski days, bus days and the snowy

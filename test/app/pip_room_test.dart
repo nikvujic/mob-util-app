@@ -354,6 +354,13 @@ void main() {
       expect(pip().run!.phase, RunPhase.running);
       expect(link.fightingNow, isTrue);
       expect(pip().bossDue, isTrue);
+      // Round 74: his time out, from his life, for his field's trees.
+      expect(pip().outRun, isNull, reason: 'none known yet');
+      link.running = 1200;
+      for (var i = 0; i < 70; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(pip().outRun, greaterThanOrEqualTo(1200));
       pip().run!.bugComing(hits: false);
       var rose = false;
       for (var i = 0; i < 60 * 8 && link.defeats.isEmpty; i++) {

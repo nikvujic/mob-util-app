@@ -152,9 +152,9 @@ void main() {
 
     test('his break: the hut, the mug emptying, his skis off', () {
       final b = standing(ski: true);
-      b.adventure((onBreak: true, breakDone: 0.25), animate: false);
+      b.adventure((onBreak: true, breakDone: 0.1), animate: false);
       expect(b.run!.phase, RunPhase.sitting);
-      expect(b.run!.plateAt!.$3, 0.75);
+      expect(b.run!.plateAt!.$3, closeTo(0.6, 1e-9));
       expect(b.run!.skisOn, isFalse);
     });
 

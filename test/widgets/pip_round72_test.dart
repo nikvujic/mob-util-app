@@ -61,12 +61,43 @@ void main() {
   test('trees (Round 72): in a random spot each time, apart', () {
     final seen = <String>{};
     for (var seed = 0; seed < 50; seed++) {
-      final [a, b] = treeSpots(math.Random(seed));
+      final [(at: a, kind: _), (at: b, kind: _)] = treeSpots(math.Random(seed));
       expect(a, inInclusiveRange(0, 0.3));
       expect(b, inInclusiveRange(0.62, 1));
       seen.add('${(a * 10).floor()} ${(b * 10).floor()}');
     }
     expect(seen.length, greaterThan(5), reason: 'not the same each time');
+  });
+
+  test(
+      'trees (Round 74): an oak, a birch or a pine each, at random; each '
+      'drawn in every season (the pine green all year)', () {
+    final kinds = <PipTreeKind>{};
+    for (var seed = 0; seed < 50; seed++) {
+      for (final spot in treeSpots(math.Random(seed))) {
+        kinds.add(spot.kind);
+      }
+    }
+    expect(kinds, PipTreeKind.values.toSet());
+    for (final kind in PipTreeKind.values) {
+      for (final season in Season.values) {
+        final (art, colours, crown) = PipSprites.treeOf(kind, season);
+        expect(art.every((r) => r.length == art.first.length), isTrue);
+        expect(art.length, greaterThanOrEqualTo(PipBrain.height * 1.8),
+            reason: '${kind.name}: a lot bigger than him');
+        expect(crown, lessThan(art.length));
+        for (final c in art.join().split('')) {
+          if (c != '.') {
+            expect(colours.containsKey(c), isTrue,
+                reason: '${kind.name} ${season.name} $c');
+          }
+        }
+      }
+    }
+    expect(PipSprites.treeOf(PipTreeKind.pine, Season.winter).$1,
+        PipSprites.treeOf(PipTreeKind.pine, Season.summer).$1);
+    expect(PipSprites.treeOf(PipTreeKind.birch, Season.winter).$1,
+        PipSprites.bareBirch);
   });
 
   test(

@@ -254,6 +254,11 @@ abstract class PipLink {
   /// Whether a boss may still come today (one a day out).
   bool get bossDue;
 
+  /// Round 74: how long he's been running on his day out (seconds, his
+  /// break not counted), or null: not out. His field's trees go by with
+  /// it, so the menu's room and Pip Home's show them alike.
+  double? outRun();
+
   /// His ski trip now (Round 67): on its bus, snowy, skiing today.
   PipTripNow trip();
 }

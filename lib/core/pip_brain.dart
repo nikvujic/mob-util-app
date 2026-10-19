@@ -296,7 +296,20 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
 enum DronePhase { rising, out, beaming, back, sinking }
 
 /// Pip's frames, by name; drawn by `widgets/pip_room.dart`.
-enum PipFrame { idle, blink, step1, step2, step3, step4, oh, tuck }
+enum PipFrame {
+  idle,
+  blink,
+  step1,
+  step2,
+  step3,
+  step4,
+  oh,
+  tuck,
+
+  /// Round 74: sitting (legs tucked, as he looks), and chewing so.
+  sit,
+  chew,
+}
 
 /// Pip in his room (Round 26): where he is, which way he faces, what he's
 /// doing and how he looks this moment. Advanced by [step] with the time
@@ -915,6 +928,7 @@ class PipBrain {
 
   /// Moves on by [dt] seconds.
   void step(double dt) {
+    _outRunSince += dt;
     _t += dt;
     _stepStation(dt);
     _stepDrone(dt);
@@ -2514,13 +2528,36 @@ class PipBrain {
     return switch (run.phase) {
       RunPhase.knocked => PipFrame.oh,
       RunPhase.down => PipFrame.tuck,
-      RunPhase.sitting => run.biting ? PipFrame.oh : PipFrame.tuck,
+      // Round 74: sitting still (it was "oh" and tucked in turn: up and
+      // down, like squats), chewing as he eats.
+      RunPhase.sitting => run.chewing && (run.clock / 0.15).floor().isEven
+          ? PipFrame.chew
+          : PipFrame.sit,
       _ => PipFrame.idle,
     };
   }
 
   /// Round 73: a boss may come today (his life says).
   bool bossDue = false;
+
+  /// Round 74: how long he's been running on his day out, as his life
+  /// says ([syncOutRun], every second), going on between ([paused]: on
+  /// his break, it stands); null: not out. His field's trees go by with
+  /// it, alike in every room.
+  double? get outRun {
+    final base = _outRun;
+    return base == null ? null : base + (_outPaused ? 0 : _outRunSince);
+  }
+
+  double? _outRun;
+  double _outRunSince = 0;
+  bool _outPaused = false;
+
+  void syncOutRun(double? seconds, {required bool paused}) {
+    _outRun = seconds;
+    _outRunSince = 0;
+    _outPaused = paused;
+  }
 
   /// Out fighting, as he really is (not a preview, not skiing, not on
   /// his break or setting off or back): watched, his XP shown goes up as
@@ -2718,7 +2755,10 @@ class PipBrain {
           run.stepping && (frame == PipFrame.step1 || frame == PipFrame.step3)
               ? 1.0
               : 0.0;
-      return run.lift + bob - (frame == PipFrame.tuck ? 2 : 0);
+      final tucked = frame == PipFrame.tuck ||
+          frame == PipFrame.sit ||
+          frame == PipFrame.chew;
+      return run.lift + bob - (tucked ? 2 : 0);
     }
     // Round 52: dropping from the sky, or thrown in on an arc.
     if (activity == PipActivity.falling && _t < _fallTime) {

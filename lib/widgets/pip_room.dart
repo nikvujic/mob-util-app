@@ -222,6 +222,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 67: on his ski trip's bus.
     brain.ride(trip, animate: seen);
     brain.adventure(out, animate: seen);
+    // Round 74: his field's trees go by with his time out, alike here and
+    // in the other room.
+    brain.syncOutRun(out == null ? null : link.outRun(),
+        paused: out?.onBreak ?? false);
     // Round 73: watched fighting, his XP shown goes up only as he strikes
     // bugs; a boss may come if none was beaten today.
     brain.bossDue = link.bossDue;
@@ -985,7 +989,7 @@ class _RoomPainter extends CustomPainter {
     // pine, Halloween's lanterns, Easter's eggs.
     final props = scene?.props ?? const <PipProp>{};
     final home = groundTop > 40;
-    final passing = shift * 0.5 + road * 0.6;
+    final passing = fieldPassing(brain);
     double along(double at, double width, double by) {
       final wide = columns + width * 2;
       return ((columns * at - by) % wide + wide) % wide - width;
@@ -994,22 +998,25 @@ class _RoomPainter extends CustomPainter {
     if (!skiSnow) {
       final windy = scene?.weather?.wet ?? false;
       if (props.contains(PipProp.trees)) {
-        final bare = season == Season.winter;
-        final art = bare ? PipSprites.bareTree : PipSprites.tree;
-        final colours = PipSprites.treeColours[(season ?? Season.summer).index];
-        final wide = art.first.length.toDouble();
+        // Round 74: each spot's tree its own look (an oak, a birch, a pine).
+        final shade = season ?? Season.summer;
         // Round 72: in their spots for this time the app's open, in full
         // view; beside the road (not on it) while he rides the bus.
         final base = bus != null ? groundTop - 1 : groundTop;
-        for (final (i, at) in _treeSpots.indexed) {
+        for (final (i, (at: at, kind: kind)) in _treeSpots.indexed) {
+          final (art, colours, crownRows) = PipSprites.treeOf(kind, shade);
+          final bare = shade == Season.winter && kind != PipTreeKind.pine;
+          final wide = art.first.length.toDouble();
           final room = math.max(0.0, columns - wide - 4);
-          final left =
-              along((2 + room * at) / columns, wide, passing).floorToDouble();
+          // (along() takes the right edge's share: the whole tree in view.)
+          final left = along((2 + room * at + wide) / columns, wide, passing)
+              .floorToDouble();
           final top = base - art.length;
           for (var y = 0; y < art.length; y++) {
-            // The crown sways, most at the top.
-            final crown = y < PipSprites.treeCrown;
-            final reach = crown ? 1 - y / PipSprites.treeCrown : 0.0;
+            // The crown sways, most at the top (a pine's stiffer).
+            final crown = y < crownRows;
+            final reach = (crown ? 1 - y / crownRows : 0.0) *
+                (kind == PipTreeKind.pine ? 0.5 : 1);
             final sway =
                 (math.sin(brain.sceneClock * (windy ? 2.6 : 1.3) + i * 1.7) *
                         reach *
@@ -1018,8 +1025,12 @@ class _RoomPainter extends CustomPainter {
             for (var x = 0; x < art[y].length; x++) {
               var colour = colours[art[y][x]];
               if (colour == null) continue;
-              // Snow on a bare tree's branches while it snows.
-              if (snowy && bare && y < 18 && (x + y).isEven) {
+              // Snow on a bare tree's branches and a pine's tiers while it
+              // snows.
+              if (snowy &&
+                  (bare || kind == PipTreeKind.pine) &&
+                  y < crownRows &&
+                  (x + y).isEven) {
                 colour = PipColours.snow;
               }
               dot(left + x + sway, top + y, colour);
@@ -1262,7 +1273,7 @@ class _RoomPainter extends CustomPainter {
       sprite(PipSprites.gearBank, PipRun.gearX - 2, groundTop,
           colours: PipSprites.snowColours);
     }
-    // Round 64: his day out's tavern, its table and his stool (Round 67:
+    // Round 64: his day out's tavern, its table and his bench (Round 67:
     // a ski day's, a hut with snow on its roof).
     if (run != null) {
       if (run.tavern case final tx?) {
@@ -1272,7 +1283,7 @@ class _RoomPainter extends CustomPainter {
         sprite(PipSprites.table, (tx + PipRun.tableLeft).floorToDouble(),
             groundTop,
             colours: PipSprites.tavernColours);
-        sprite(PipSprites.stool, (tx + PipRun.seatOffset + 6).floorToDouble(),
+        sprite(PipSprites.bench, (tx + PipRun.seatOffset + 4).floorToDouble(),
             groundTop,
             colours: PipSprites.tavernColours);
       }
@@ -1530,9 +1541,14 @@ class _RoomPainter extends CustomPainter {
             (groundTop - 1 - up).floorToDouble(), PipColours.flake);
       }
     }
-    // Round 67: on a ski break, a mug of hot chocolate instead of a plate.
+    // Round 67: on a ski break, a mug of hot chocolate instead of a plate
+    // (Round 74: lifted to his mouth for a sip).
     if (run != null && run.skiing) {
-      if (run.plateAt case (final px, final py, final left)) {
+      if (run.plateAt case (final px0, final py0, final left)) {
+        final (px, py) = switch (run.hand) {
+          (final hx, final hy, _, _) => (hx, hy - 1),
+          null => (px0, py0),
+        };
         final mx = (px - 3).floorToDouble();
         final my = (groundTop - py).floorToDouble();
         sprite(PipSprites.mug, mx, my, colours: PipSprites.snowColours);
@@ -1558,6 +1574,26 @@ class _RoomPainter extends CustomPainter {
       sprite(PipSprites.meal((left * 3).ceil()), plateLeft,
           bottom - PipSprites.plate.length,
           colours: PipSprites.fieldColours);
+    }
+    // Round 74: his hand taking a bite to his mouth (or holding his mug).
+    if (run?.hand case (final hx, final hy, final size, final carrying)
+        when size > 0.05) {
+      final w = PipSprites.mitt[0].length * size;
+      final h = PipSprites.mitt.length * size;
+      final cx = hx + 1, cy = groundTop - hy - 1.5;
+      for (var y = 0; y < PipSprites.mitt.length; y++) {
+        for (var x = 0; x < PipSprites.mitt[y].length; x++) {
+          dot(cx - w / 2 + x * size, cy - h / 2 + y * size,
+              PipSprites.colours[PipSprites.mitt[y][x]]!, size, size);
+        }
+      }
+      if (carrying && !run!.skiing) {
+        // The bite, held up.
+        dot(cx.floorToDouble() - 1, (cy - h / 2 - 1).floorToDouble(),
+            PipColours.meal, 2, 1);
+        dot(cx.floorToDouble(), (cy - h / 2 - 2).floorToDouble(),
+            PipColours.mealDark);
+      }
     }
     // Round 63: LEVEL UP over him, rising and fading.
     if (brain.levelFlash case final f?) {
@@ -1725,14 +1761,42 @@ class _RoomPainter extends CustomPainter {
   bool shouldRepaint(_RoomPainter old) => true;
 }
 
-/// Round 72: where his field's trees stand for this time the app's open.
-final List<double> _treeSpots = treeSpots(math.Random());
+/// How far his field's things (the trees) have gone by: half the
+/// ground's shift (they're further off), and the bus's road. Round 74:
+/// out, by his time running (his life's), so the menu's room and Pip
+/// Home's agree (each has its own run).
+double fieldPassing(PipBrain brain) {
+  final running = brain.outRun;
+  if (running != null && brain.activity == PipActivity.adventuring) {
+    return running * PipRun.runSpeed * 0.5;
+  }
+  final shift = brain.run?.shift.floor() ?? 0;
+  final road = brain.bus?.road.floor() ?? 0;
+  return shift * 0.5 + road * 0.6;
+}
 
-/// Round 72: where his field's two trees stand (shares of the room's
-/// width), picked by [random]: one on the left part, one well to the
-/// right, so it isn't always the same view.
-List<double> treeSpots(math.Random random) =>
-    [random.nextDouble() * 0.3, 0.62 + random.nextDouble() * 0.38];
+/// Round 72: where his field's trees stand for this time the app's open
+/// (Round 74: and how each looks).
+List<PipTreeSpot> _treeSpots = treeSpots(math.Random());
+
+/// Sets the trees' spots and looks (tests and pictures).
+@visibleForTesting
+set debugTreeSpots(List<PipTreeSpot> spots) => _treeSpots = spots;
+
+/// A tree's spot (a share of the room's width) and look.
+typedef PipTreeSpot = ({double at, PipTreeKind kind});
+
+/// Round 72: where his field's two trees stand, picked by [random]: one
+/// on the left part, one well to the right, so it isn't always the same
+/// view. Round 74: each an oak, a birch or a pine.
+List<PipTreeSpot> treeSpots(math.Random random) {
+  PipTreeKind kind() =>
+      PipTreeKind.values[random.nextInt(PipTreeKind.values.length)];
+  return [
+    (at: random.nextDouble() * 0.3, kind: kind()),
+    (at: 0.62 + random.nextDouble() * 0.38, kind: kind()),
+  ];
+}
 
 /// A line of pixels from [x0], [y0] to [x1], [y1] (the cable).
 void _line(void Function(double, double, Color) dot, double x0, double y0,

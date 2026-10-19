@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 74 — Nikola on 1.32.0 (2026-10-19, 1.33.0)
+
+- [x] **Handles** (notes): the grab area from the icon outwards; on the
+  text's side of it a sliver (2 px).
+- [x] More than one look for **trees**: oak, birch, pine (random per spot
+  per app open).
+- [x] The **tavern break**: he eats (bite by bite, a hand to his mouth;
+  sips at the hut), sits still (no "squats"); a nicer tavern, table and
+  bench.
+- [x] The menu's Pip and Pip Home's **out of step** at the break (trees
+  elsewhere): the trees go by his time out, from his life.
+
 ### Round 73 — Nikola on adventures (2026-10-19, 1.32.0)
 
 - [x] Watched, his **XP goes up as he strikes bugs** (each collects

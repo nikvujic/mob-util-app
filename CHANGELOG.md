@@ -6,6 +6,31 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Pip's trees** come in three looks: the oak, a **birch** (white bark,
+  a tall crown, bare twigs hanging in winter) and a **pine** (green all
+  year, snowy when it snows). Each spot gets one at random each time the
+  app opens.
+
+### Changed
+- **Pip's break**: he sits still on a proper **bench** (he used to bob
+  up and down, like squats) and eats bite by bite: his hand brings each
+  bite from the plate to his mouth, and he chews. The plate empties
+  after a few bites. At the mountain hut he lifts his **hot chocolate**
+  to his mouth for each sip. The **tavern** is redrawn: a shingled roof,
+  timber-framed walls on a stone base, an arched door with a hanging sign
+  and a lantern, and a flower box under the window. The table is new
+  too.
+- **Selection handles** (notes and everywhere text is edited): a
+  handle's touch area now reaches outwards, away from the text (right of
+  the end's handle, left of the start's). Only a sliver of it is over
+  the text, so tapping beside a handle no longer grabs it.
+
+### Fixed
+- During his break, the menu's Pip and Pip Home's showed his field's
+  trees in different places. Both now follow his time out.
+- A tree on the left of his field could be drawn mostly off the edge.
+
 ## [1.32.0] - 2026-10-19
 
 ### Added

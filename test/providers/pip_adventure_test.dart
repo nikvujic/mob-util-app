@@ -418,4 +418,19 @@ void main() {
       expect(link.defeated(), 0, reason: 'nothing held, nothing collected');
     });
   });
+
+  test(
+      'Round 74: how long he\'s been running out (his field\'s trees go by '
+      'with it): his break not counted', () {
+    final pip = hatched();
+    expect(pip.runningAt(at(18, 14)), isNull, reason: 'not out');
+    pip.register(at(18, 14));
+    expect(pip.runningAt(at(18, 14, 10)), 600);
+    pip.lookedAt(at(18, 14, 30));
+    pip.breakIfDue(at(18, 14, 30));
+    expect(pip.state.breakAt, at(18, 14, 30));
+    expect(pip.runningAt(at(18, 14, 40)), 30 * 60, reason: 'at his break');
+    expect(pip.runningAt(at(18, 15, 10)), 40 * 60, reason: 'after it');
+    expect(pip.runningAt(at(18, 18, 1)), isNull, reason: 'back');
+  });
 }

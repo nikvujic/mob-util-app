@@ -163,6 +163,23 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// second while shown).
   static const heldFor = Duration(seconds: 3);
 
+  /// How long he's been running at [now] on his day out (seconds, his
+  /// break not counted), or null: not out (Round 74).
+  double? runningAt(DateTime now) {
+    final from = state.outFrom;
+    if (from == null || !outAt(now)) return null;
+    var seconds = now.difference(from).inMilliseconds / 1000;
+    final at = state.breakAt;
+    if (at != null && now.isAfter(at)) {
+      final off = now.difference(at);
+      seconds -=
+          (off < PipAdventure.breakLength ? off : PipAdventure.breakLength)
+                  .inMilliseconds /
+              1000;
+    }
+    return seconds;
+  }
+
   /// The day out a boss was beaten on (Round 73: one a day out). In
   /// memory: the app's first look is a fresh one.
   String? _bossDay;
@@ -507,6 +524,9 @@ class _Link implements PipLink {
 
   @override
   bool get bossDue => _pip.bossDueAt(_now);
+
+  @override
+  double? outRun() => _pip.runningAt(_now);
 
   @override
   bool? get plugged => _ref.read(pipPowerProvider.notifier).known

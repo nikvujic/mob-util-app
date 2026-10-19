@@ -507,6 +507,11 @@ abstract final class PipColours {
   // Round 64: the tavern on his day out.
   static const roof = Color(0xFFA2463A);
   static const roofDark = Color(0xFF7A3129);
+  // Round 74: the tavern's plaster walls, stone base, lighter planks.
+  static const plaster = Color(0xFFEADFC4);
+  static const stone = Color(0xFF9C948A);
+  static const stoneDark = Color(0xFF6F6860);
+  static const woodLight = Color(0xFFC99563);
   static const wood = Color(0xFFB07A4A);
   static const woodDark = Color(0xFF85552F);
   static const door = Color(0xFF6B4423);
@@ -524,6 +529,11 @@ abstract final class PipColours {
   static const flake = Color(0xFFFFFFFF);
   static const pine = Color(0xFF2E6040);
   static const pineDark = Color(0xFF1F4430);
+  // Round 74: a pine's lit side; a birch's white bark and its marks.
+  static const pineLight = Color(0xFF4A8A5A);
+  static const birch = Color(0xFFEDE8DC);
+  static const birchShade = Color(0xFFC9C2B2);
+  static const birchMark = Color(0xFF3A3530);
   static const flagRed = Color(0xFFDC3C32);
   static const flagBlue = Color(0xFF3C64DC);
   static const pole = Color(0xFF5A5A58);

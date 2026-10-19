@@ -425,6 +425,12 @@ class FakePipLink implements PipLink {
 
   @override
   bool bossDue = false;
+
+  /// Round 74: how long he's been running out (seconds).
+  double? running;
+
+  @override
+  double? outRun() => running;
 }
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]

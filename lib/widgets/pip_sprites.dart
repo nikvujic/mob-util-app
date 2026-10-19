@@ -1,7 +1,9 @@
 import 'dart:math' as math;
+import 'dart:ui' show Color;
 
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_run.dart' show PipFoe;
+import 'package:the_app/core/pip_scene.dart' show Season;
 import 'package:the_app/core/theme.dart';
 
 /// Pip's frames on a 20-wide grid (Round 26), one letter a pixel ('.'
@@ -9,6 +11,10 @@ import 'package:the_app/core/theme.dart';
 /// at first, less flat), his face on it, and legs that can step. The room
 /// draws them all; the menu header and the launcher icon
 /// (`tool/make_icon.py`) draw [PipFrame.idle].
+/// Round 74: the looks of his field's trees (each spot one at random,
+/// each time the app opens).
+enum PipTreeKind { oak, birch, pine }
+
 abstract final class PipSprites {
   /// His screen's size, in pixels.
   static const screenWidth = 14;
@@ -173,6 +179,8 @@ abstract final class PipSprites {
     PipFrame.step4: _frame('smile', 'stand', look: 1),
     PipFrame.oh: _frame('oh', 'stand'),
     PipFrame.tuck: _frame('oh', 'tuck'),
+    PipFrame.sit: _frame('smile', 'tuck'),
+    PipFrame.chew: _frame('oh', 'tuck'),
   };
 
   /// [frame] with [face] (Round 37): tired faces by his energy, asleep
@@ -196,7 +204,11 @@ abstract final class PipSprites {
       PipFace.tired when frame == PipFrame.blink => 'blink-tired',
       PipFace.veryTired when frame == PipFrame.blink => 'blink-very',
       _ when frame == PipFrame.blink => 'blink',
-      _ when frame == PipFrame.oh || frame == PipFrame.tuck => 'oh',
+      _
+          when frame == PipFrame.oh ||
+              frame == PipFrame.tuck ||
+              frame == PipFrame.chew =>
+        'oh',
       PipFace.tired => 'tired',
       _ => 'very',
     };
@@ -204,7 +216,7 @@ abstract final class PipSprites {
       PipFrame.step1 => ('stepL', 1),
       PipFrame.step2 || PipFrame.step4 => ('stand', 1),
       PipFrame.step3 => ('stepR', 1),
-      PipFrame.tuck => ('tuck', 0),
+      PipFrame.tuck || PipFrame.sit || PipFrame.chew => ('tuck', 0),
       _ => ('stand', 0),
     };
     return _frame(kind, legs, look: look);
@@ -903,48 +915,55 @@ abstract final class PipSprites {
     'v': PipColours.stem,
   };
 
-  /// Round 64: the tavern on his day out, 33 x 26: a roof and chimney,
-  /// wooden walls, a door, a sign with a mug, and a lit window with a
-  /// counter (the plate flies out of it).
+  /// Round 64: the tavern on his day out, 33 x 26 (Round 74 redrawn):
+  /// a shingled roof and a stone chimney, timber-framed plaster walls on
+  /// a stone base, an arched plank door with a hanging sign (a mug) and a
+  /// lantern, and a lit window with a counter (the plate flies out of
+  /// it) and a flower box.
   static const tavern = [
     '........................CCC......',
-    '........................ccc......',
-    '.............rRRrRRr....ccc......',
-    '...........RrRRrRRrRRr..ccc......',
-    '.........RRrRRrRRrRRrRRr.........',
-    '.......rRRrRRrRRrRRrRRrRRr.......',
-    '.....RrRRrRRrRRrRRrRRrRRrRRr.....',
-    '...RRrRRrRRrRRrRRrRRrRRrRRrRRr...',
-    '.rRRrRRrRRrRRrRRrRRrRRrRRrRRrRRr.',
+    '........................BbB......',
+    '..............rRRRr.....bBb......',
+    '............rRRRrrRRr...BbB......',
+    '..........rRrrRRRRrrRRr.bBb......',
+    '........rRrrRRRRrrRRRRrrrbB......',
+    '......rrRRRRrrRRRRrrRRRRrrr......',
+    '....rrRRRRrrRRRRrrRRRRrrRRRRr....',
+    '..rRRRrrRRRRrrRRRRrrRRRRrrRRRRr..',
+    'rRRrRRrRRrRRrRRrRRrRRrRRrRRrRRrRr',
     'rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr',
-    '..wWWWWWWWWWWWWWWWWWWWWWWWWWWWw..',
-    '..wWssssssssWWWWWWWWWWWWWWWWWWw..',
-    '..wWsSSyySSsWWWWWllllllllllllWw..',
-    '..wwsssssssswwwwwlLLLLLLLLLLlww..',
-    '..wWWWWWWWWWWWWWWlLLLLLLLLLLlWw..',
-    '..wWWddddddWWWWWWlLLLLLLLLLLlWw..',
-    '..wWWdDDDDdWWWWWWlLLLLLLLLLLlWw..',
-    '..wwwdDDDDdwwwwwwlLLLLLLLLLLlww..',
-    '..wWWdDDDDdWWWWWWlLLLLLLLLLLlWw..',
-    '..wWWdDDDDdWWWWWWllllllllllllWw..',
-    '..wWWdDDDkdWWWWWllllllllllllllw..',
-    '..wwwdDDDDdwwwwwwwwwwwwwwwwwwww..',
-    '..wWWdDDDDdWWWWWWWWWWWWWWWWWWWw..',
-    '..wWWdDDDDdWWWWWWWWWWWWWWWWWWWw..',
-    '..wWWdDDDDdWWWWWWWWWWWWWWWWWWWw..',
-    '..wwwdDDDDdwwwwwwwwwwwwwwwwwwww..',
+    '..wwwwwwwwwwwwwwwwwwwwwwwwwwwww..',
+    '..wPsSSyySSsPPPwPllllllllllllPw..',
+    '..wPsssssssswPPwPlLLLLllLLLLlPw..',
+    '..wPPddDdDdPoPPwPlLLLLllLLLLlPw..',
+    '..wPPddDdDdPoPPwPlLLLLllLLLLlPw..',
+    '..wPPddDdDdPwPPwPlLLLLLLLLLLlPw..',
+    '..wwwddDdDdwwwwwwlLLLLLLLLLLlww..',
+    '..wPPddDdDdPPPPwPlLLLLLLLLLLlPw..',
+    '..wPPddDdDdPPPPwPllllllllllllPw..',
+    '..wPPddDdkdPPPPwwwwwwwwwwwwwwww..',
+    '..wPwddDdDdPPPPwPgfgfgfgfgfgfPw..',
+    '..wwPddDdDdPPPPwPwwwwwwwwwwwwPw..',
+    '..bBBddDdDdbbbbBBbbbbBBbbbbBBbb..',
+    '..BbbddDdDdbbBBbbbbBBbbbbBBbbbb..',
+    '..bBBddDdDdbbbbBBbbbbBBbbbbBBbb..',
   ];
 
-  /// Its table (10 wide, 6 tall) and his stool (8 x 3), outside.
+  /// Its table (10 wide, 6 tall: a plank top, sturdy legs) and his bench
+  /// (12 x 3), outside (Round 74 redrawn).
   static const table = [
+    'wWWhWWWWhW',
     'wwwwwwwwww',
-    '.wWWWWWWw.',
-    '..w....w..',
-    '..w....w..',
-    '..w....w..',
-    '..w....w..',
+    '.ww....ww.',
+    '.ww....ww.',
+    '.ww....ww.',
+    'www....www',
   ];
-  static const stool = ['wwwwwwww', '.w....w.', '.w....w.'];
+  static const bench = [
+    'WWhWWWWWhWWW',
+    'wwwwwwwwwwww',
+    '.ww......ww.',
+  ];
 
   static const tavernColours = {
     'R': PipColours.roof,
@@ -961,6 +980,14 @@ abstract final class PipSprites {
     's': PipColours.windowFrame,
     'S': PipColours.sign,
     'y': PipColours.mug,
+    // Round 74.
+    'h': PipColours.woodLight,
+    'P': PipColours.plaster,
+    'B': PipColours.stone,
+    'b': PipColours.stoneDark,
+    'o': PipColours.windowGlow,
+    'f': PipColours.lightRed,
+    'g': PipColours.leafSummer,
   };
 
   /// Round 67: his ski days. A snowy pine, 7 x 9.
@@ -1280,6 +1307,159 @@ abstract final class PipSprites {
     '...........TTTTTUUU...........',
   ];
 
+  /// Round 74: a birch, 24 x 40: a tall oval crown (leaves as the tree's,
+  /// by the season) on a white trunk with dark marks ('W', 'w', 'K').
+  static const birch = [
+    '........HH.L.H..L.......',
+    '..........HLHLH.L.......',
+    '.......BHHLHBHLL........',
+    '.......HHHLHHBHLHH......',
+    '.....LBHHHLLLHHLLLL.....',
+    '.....HHHLLHHLLHLLLL.....',
+    '....HHHLLLHLHLHHLLLLD...',
+    '....HHBLHHLLLLLLLBLLB...',
+    '....LLHLHLLHLLLLLLLL....',
+    '...HHLHLLLLLLLLLLLLLL...',
+    '...HHLLHLLLLLLLDLDLL....',
+    '....LHLHBLLLLLLBDDLLDD..',
+    '...HLLLLLLLLDLLLDDLDLD..',
+    '....LLLLLLLLBBLBLLDDD...',
+    '...LLLLLLLLLLBDDDDLDD...',
+    '....LBLLLLLLLDDDDDDDL...',
+    '...BLLLLLLLLDDLDDDDD....',
+    '...HLLLLLDDDLDDLDDBD....',
+    '.....LLLLLLWKWDDBDL.....',
+    '......LLLLWWwDWLDD......',
+    '.....LDDBWDWwLDDD.......',
+    '........DLDKwDLDD.......',
+    '.......L.DLWwDWDD.......',
+    '........L.LWKW..........',
+    '...........Ww...........',
+    '..........DKw...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........WK...........',
+    '...........Kw...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........KK...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........Kw...........',
+    '...........WK...........',
+    '..........WWww..........',
+  ];
+  static const birchCrown = 22;
+
+  /// The birch in winter, bare: its twigs hanging.
+  static const bareBirch = [
+    '............w...........',
+    '.......W...W....w.......',
+    '....W..UW...w..wU.......',
+    '....UWWU.W.W..w.Uw..w...',
+    '....U.WU.W.Ww.w.UU.wU...',
+    '....U.UWW.WKww..wUw.U...',
+    '......U.WW.Ww..www..U...',
+    '........W.WWw..w........',
+    '.........W.WK.w.........',
+    '...W.....W.Kwww.........',
+    '...UWW....WWww......w...',
+    '...U..W...WWww.....wU...',
+    '...U...WW..Ww....ww.U...',
+    '.........WWKK...w...U...',
+    '...........Ww.ww........',
+    '...........Www..........',
+    '....W......Ww...........',
+    '....UWW....Kw......w....',
+    '....U..WW..WK....wwU....',
+    '....U....WWWw..ww..U....',
+    '...........Wwww....U....',
+    '...........Kw...........',
+    '...........Ww...........',
+    '...........WK...........',
+    '...........Ww...........',
+    '...........Kw...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........WK...........',
+    '...........Kw...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........KK...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........Ww...........',
+    '...........Kw...........',
+    '...........WK...........',
+    '..........WWww..........',
+  ];
+
+  /// Round 74: a big pine for his field, 22 x 38, green all year: five
+  /// tiers ('G', its shade 'g', lit 'h').
+  static const fieldPine = [
+    '..........hg..........',
+    '..........gg..........',
+    '.........hhgg.........',
+    '.........hGgg.........',
+    '........hhgggg........',
+    '........hGhggg........',
+    '.......gghGgggg.......',
+    '........hhGGgg........',
+    '........hGGGgg........',
+    '.......hGGggGgg.......',
+    '......hhGGhgGGgg......',
+    '.....gggGhGggGggg.....',
+    '........hGGGgg........',
+    '.......hGGGGGgg.......',
+    '......hhGGggGGgg......',
+    '.....hhGGGhggGGgg.....',
+    '....hhGGGhGGggGGgg....',
+    '...hggGhhGGGGggGggg...',
+    '......hhGGGGGGgg......',
+    '.....hhGGGggGGGgg.....',
+    '....hhGGGGhggGGGgg....',
+    '...hhGGGGhGGggGGGgg...',
+    '..hhGGGGhGGGGggGGGgg..',
+    '.ghgGGhhGGGGGGggGGggg.',
+    '.....hhGGGGGGGGgg.....',
+    '....hhGGGGhGGGGGgg....',
+    '...hhGGGGhGGGGGGGgg...',
+    '..hhGGGGhGGGGGGGGGgg..',
+    '.hhGGGGhGGGGGGGGGGGgg.',
+    'ghGGGGhGGGTUGGGGGGGGgg',
+    '..........TU..........',
+    '..........TU..........',
+    '..........TU..........',
+    '..........TU..........',
+    '..........TU..........',
+    '..........TU..........',
+    '..........TU..........',
+    '.........TTUU.........',
+  ];
+  static const pineCrown = 29;
+  static const pineColours = {
+    'G': PipColours.pine,
+    'g': PipColours.pineDark,
+    'h': PipColours.pineLight,
+    'T': PipColours.bark,
+    'U': PipColours.barkDark,
+  };
+
+  /// A tree of [kind] in [season]: its art, colours and crown's rows.
+  static (List<String>, Map<String, Color>, int) treeOf(
+      PipTreeKind kind, Season season) {
+    final bare = season == Season.winter;
+    final colours = treeColours[season.index];
+    return switch (kind) {
+      PipTreeKind.oak => (bare ? bareTree : tree, colours, treeCrown),
+      PipTreeKind.birch => (bare ? bareBirch : birch, colours, birchCrown),
+      PipTreeKind.pine => (fieldPine, pineColours, pineCrown),
+    };
+  }
+
   /// The tree's colours in each season (by its index: spring, summer,
   /// autumn, winter).
   static const treeColours = [
@@ -1290,6 +1470,9 @@ abstract final class PipSprites {
       'B': PipColours.blossom,
       'T': PipColours.bark,
       'U': PipColours.barkDark,
+      'W': PipColours.birch,
+      'w': PipColours.birchShade,
+      'K': PipColours.birchMark,
     },
     {
       'L': PipColours.leafSummer,
@@ -1298,6 +1481,9 @@ abstract final class PipSprites {
       'B': PipColours.leafSummerDark,
       'T': PipColours.bark,
       'U': PipColours.barkDark,
+      'W': PipColours.birch,
+      'w': PipColours.birchShade,
+      'K': PipColours.birchMark,
     },
     {
       'L': PipColours.leafAutumn,
@@ -1306,10 +1492,16 @@ abstract final class PipSprites {
       'B': PipColours.lightRed,
       'T': PipColours.bark,
       'U': PipColours.barkDark,
+      'W': PipColours.birch,
+      'w': PipColours.birchShade,
+      'K': PipColours.birchMark,
     },
     {
       'T': PipColours.bark,
       'U': PipColours.barkDark,
+      'W': PipColours.birch,
+      'w': PipColours.birchShade,
+      'K': PipColours.birchMark,
     },
   ];
 

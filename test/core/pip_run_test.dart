@@ -135,8 +135,12 @@ void main() {
     final (_, height, left) = b.run!.plateAt!;
     expect(height, closeTo(PipRun.tableHeight, 1e-9));
     expect(left, 1);
-    b.adventure((onBreak: true, breakDone: 0.5), animate: true);
-    expect(b.run!.plateAt!.$3, 0.5, reason: 'eaten as his break goes');
+    // Round 74: not watched, eaten by a quarter of the way into it.
+    b.adventure((onBreak: true, breakDone: 0.1), animate: true);
+    expect(b.run!.plateAt!.$3, closeTo(0.6, 1e-9),
+        reason: 'eaten as his break goes');
+    b.adventure((onBreak: true, breakDone: 0.25), animate: true);
+    expect(b.run!.plateAt!.$3, 0);
     b.adventure(out, animate: true);
     for (var i = 0; i < 60 * 10 && b.run!.phase != RunPhase.running; i++) {
       b.step(1 / 60);
@@ -157,9 +161,9 @@ void main() {
 
   test('opened during his break: at the table, eating', () {
     final b = standing();
-    b.adventure((onBreak: true, breakDone: 0.3), animate: false);
+    b.adventure((onBreak: true, breakDone: 0.1), animate: false);
     expect(b.run!.phase, RunPhase.sitting);
-    expect(b.run!.plateAt!.$3, closeTo(0.7, 1e-9));
+    expect(b.run!.plateAt!.$3, closeTo(0.6, 1e-9));
     expect(b.run!.speed, 0);
   });
 
