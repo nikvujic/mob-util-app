@@ -1,0 +1,199 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/format.dart';
+import 'package:the_app/core/theme.dart';
+import 'package:the_app/core/weather.dart';
+import 'package:the_app/models/internet.dart';
+import 'package:the_app/pages/internet/place_search_sheet.dart';
+import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/weather_provider.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
+
+/// Menu → Internet Access (Round 70): the app uses no internet unless a
+/// service is turned on here, one section each: what it is, what it's
+/// for, and its own settings once on. For now the weather (Open-Meteo),
+/// for Pip's sky.
+class InternetAccessPage extends ConsumerWidget {
+  const InternetAccessPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final internet = ref.watch(preferencesProvider.select((p) => p.internet));
+    final prefs = ref.read(preferencesProvider.notifier);
+    void set(InternetSettings next) => prefs.setInternet(next);
+
+    Future<void> addPlace() async {
+      final place = await showPlaceSearchSheet(context);
+      if (place == null) return;
+      set(ref.read(preferencesProvider).internet.withPlace(place));
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Internet Access')),
+      body: PullDownList.children(
+        children: [
+          Padding(
+            key: const Key('internetIntro'),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.wifi_off, color: colors.textSecondary),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'The app uses no internet unless you turn a service on '
+                    'below. Everything else stays on this phone: no '
+                    'accounts, no ads, no analytics.',
+                    style: TextStyle(color: colors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          SwitchListTile(
+            key: const Key('internetWeather'),
+            secondary: const Icon(Icons.wb_cloudy_outlined),
+            title: const Text('Weather'),
+            subtitle: Text(
+              'From Open-Meteo (open-meteo.com), free, with no account. '
+              "Pip's sky shows the weather where you are: rain, snow, "
+              'clouds, fog and storms. Only the place you search for, then '
+              'its position, is sent; every hour or so while the app is '
+              'open.',
+              style: TextStyle(color: colors.textSecondary),
+            ),
+            value: internet.weather,
+            onChanged: (on) => set(internet.copyWith(weather: on)),
+          ),
+          if (internet.weather) ...[
+            for (final place in internet.places)
+              _PlaceTile(
+                place: place,
+                picked: place.id == internet.place?.id,
+                onPick: () => set(internet.copyWith(placeId: () => place.id)),
+                onRemove: () => set(internet.withoutPlace(place.id)),
+              ),
+            ListTile(
+              key: const Key('addPlace'),
+              leading:
+                  Icon(Icons.add_location_alt_outlined, color: colors.accent),
+              title: Text(internet.places.isEmpty
+                  ? 'Add your town or city'
+                  : 'Add another place'),
+              subtitle: internet.places.isEmpty
+                  ? Text(
+                      'Searched by name; you pick it from the matches.',
+                      style: TextStyle(color: colors.textSecondary),
+                    )
+                  : null,
+              onTap: addPlace,
+            ),
+            if (internet.place != null) const _WeatherNow(),
+          ],
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Text(
+              'More services may come here later, each off until turned on.',
+              style: TextStyle(color: colors.textHint, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A place added: picked for the weather with a tap; removed with ×.
+class _PlaceTile extends StatelessWidget {
+  final WeatherPlace place;
+  final bool picked;
+  final VoidCallback onPick;
+  final VoidCallback onRemove;
+
+  const _PlaceTile({
+    required this.place,
+    required this.picked,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return ListTile(
+      key: Key('weatherPlace-${place.id}'),
+      leading: Icon(
+        picked ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+        color: picked ? colors.accent : colors.textHint,
+        semanticLabel: picked ? 'Picked' : null,
+      ),
+      title: Text(place.name),
+      subtitle: place.where.isEmpty
+          ? null
+          : Text(place.where, style: TextStyle(color: colors.textSecondary)),
+      selected: picked,
+      onTap: onPick,
+      trailing: IconButton(
+        tooltip: 'Remove ${place.name}',
+        icon: const Icon(Icons.close),
+        onPressed: onRemove,
+      ),
+    );
+  }
+}
+
+/// The weather now at the picked place, when it was fetched, and a
+/// button to fetch it again; or why it couldn't be.
+class _WeatherNow extends ConsumerWidget {
+  const _WeatherNow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final internet = ref.watch(preferencesProvider.select((p) => p.internet));
+    final fetch = ref.watch(weatherProvider);
+    final now = ref.watch(clockProvider)();
+    final report =
+        internet.report?.placeId == internet.place?.id ? internet.report : null;
+    final String text;
+    if (fetch.busy) {
+      text = 'Fetching the weather…';
+    } else if (report != null) {
+      final day = DateTime(now.year, now.month, now.day);
+      final at = report.fetchedAt;
+      final when = DateTime(at.year, at.month, at.day) == day
+          ? formatMinutes(at.hour * 60 + at.minute)
+          : formatDay(at, today: day);
+      final kind = WeatherKind.fromCode(report.code)?.label ?? 'Weather';
+      text = 'Now: $kind, '
+          '${report.temperature.round()}°C · updated $when';
+    } else {
+      text = 'No weather yet';
+    }
+    return ListTile(
+      key: const Key('weatherNow'),
+      leading: const SizedBox(width: 24),
+      title: Text(text, style: TextStyle(color: colors.textSecondary)),
+      subtitle: fetch.failed == null
+          ? null
+          : Text(
+              '${fetch.failed}. It tries again later.',
+              key: const Key('weatherFailed'),
+              style: TextStyle(color: colors.danger),
+            ),
+      trailing: IconButton(
+        key: const Key('weatherRefresh'),
+        tooltip: 'Fetch the weather now',
+        icon: const Icon(Icons.refresh),
+        onPressed: fetch.busy
+            ? null
+            : () => ref.read(weatherProvider.notifier).refresh(force: true),
+      ),
+    );
+  }
+}

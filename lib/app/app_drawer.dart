@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/routes.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/pages/internet/internet_access.dart';
 import 'package:the_app/pages/backup/backup.dart';
 import 'package:the_app/pages/notifications/notifications.dart';
 import 'package:the_app/pages/security/security.dart';
@@ -124,6 +125,12 @@ class AppDrawer extends ConsumerWidget {
                     leading: const Icon(Icons.notifications_outlined),
                     title: const Text('Notifications'),
                     onTap: () => _open(context, const NotificationsPage()),
+                  ),
+                  // Second to last (Round 70).
+                  ListTile(
+                    leading: const Icon(Icons.public),
+                    title: const Text('Internet Access'),
+                    onTap: () => _open(context, const InternetAccessPage()),
                   ),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined),

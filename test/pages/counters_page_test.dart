@@ -185,6 +185,8 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
       await openMenu(tester);
+      // Round 70: below Internet Access, scrolled to on a short screen.
+      await scrollMenuTo(tester, 'Settings');
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Counter click and vibration'));

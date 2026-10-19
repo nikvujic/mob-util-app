@@ -1,3 +1,4 @@
+import 'package:the_app/models/internet.dart';
 import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/planner_task.dart';
 
@@ -105,6 +106,9 @@ class Preferences {
   /// Shop's bought list shown A–Z (Round 69); its own order is kept.
   final bool shopSorted;
 
+  /// What the app may use the internet for (Round 70), and the weather.
+  final InternetSettings internet;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -136,6 +140,7 @@ class Preferences {
     this.autoBackupFailed = false,
     this.pipPlugged = false,
     this.shopSorted = false,
+    this.internet = const InternetSettings(),
   });
 
   /// How long until a backup is due again (D8).
@@ -228,6 +233,7 @@ class Preferences {
     bool? autoBackupFailed,
     bool? pipPlugged,
     bool? shopSorted,
+    InternetSettings? internet,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -276,6 +282,7 @@ class Preferences {
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
         pipPlugged: pipPlugged ?? this.pipPlugged,
         shopSorted: shopSorted ?? this.shopSorted,
+        internet: internet ?? this.internet,
       );
 
   Map<String, dynamic> toJson() => {
@@ -322,6 +329,7 @@ class Preferences {
         'autoBackupFailed': autoBackupFailed,
         if (pipPlugged) 'pipPlugged': true,
         if (shopSorted) 'shopSorted': true,
+        if (!internet.isEmpty) 'internet': internet.toJson(),
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -379,5 +387,9 @@ class Preferences {
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
         pipPlugged: json['pipPlugged'] as bool? ?? false,
         shopSorted: json['shopSorted'] as bool? ?? false,
+        internet: json['internet'] == null
+            ? const InternetSettings()
+            : InternetSettings.fromJson(
+                json['internet'] as Map<String, dynamic>),
       );
 }

@@ -3,6 +3,7 @@ import 'package:the_app/data/backup_folder.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/models/internet.dart';
 import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/preferences.dart';
 
@@ -109,6 +110,10 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
 
   /// Shop's bought list A–Z or in its own order (Round 69).
   void setShopSorted(bool sorted) => state = state.copyWith(shopSorted: sorted);
+
+  /// What the app may use the internet for, and the weather (Round 70).
+  void setInternet(InternetSettings internet) =>
+      state = state.copyWith(internet: internet);
 
   /// The Introduction was opened: no longer new.
   void readIntro() {

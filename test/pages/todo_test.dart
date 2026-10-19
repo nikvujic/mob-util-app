@@ -215,6 +215,8 @@ void main() {
   testWidgets('Settings turns it off (its list kept) and on', (tester) async {
     await start(tester, todo: const [TodoItem(id: 't1', text: 'Kept')]);
     await openMenu(tester);
+    // Round 70: below Internet Access, scrolled to on a short screen.
+    await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     // Round 58: under Introduction after updates.

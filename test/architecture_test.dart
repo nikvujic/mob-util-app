@@ -128,6 +128,9 @@ const plainScrollAllowed = {
   // All the planner's reminders (Round 70): a list in a bottom sheet,
   // capped in height, already at the bottom.
   'pages/planner/reminders_sheet.dart',
+  // A few places found for the weather (Round 70), above the search
+  // field at the bottom of a sheet: already in reach.
+  'pages/internet/place_search_sheet.dart',
   // The sounds to pick from (Round 39): a short list in a bottom sheet.
   'pages/notifications/notifications.dart',
   // A note's text while editing: a pull would move the text being typed.

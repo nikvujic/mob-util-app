@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Internet Access** in the menu (second to last). The app uses no
+  internet unless a service is turned on there; the first is the
+  **Weather**, from Open-Meteo (free, no account): search your town or
+  city, pick it from the matches, add more to switch between them. It's
+  fetched every hour or so while the app is open, for Pip's sky; the
+  page shows the weather now and fetches it again on a tap.
+
 ## [1.28.1] - 2026-10-19
 
 ### Fixed

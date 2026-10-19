@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/models/internet.dart';
+import 'package:the_app/data/weather_api.dart';
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
@@ -31,6 +34,19 @@ Future<void> openMenu(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Scrolls the open menu's list until [label] is built and in view
+/// (Round 70: on a short test screen the last items are below).
+Future<void> scrollMenuTo(WidgetTester tester, String label) async {
+  await tester.scrollUntilVisible(
+    find.text(label),
+    80,
+    scrollable: find
+        .descendant(of: find.byType(Drawer), matching: find.byType(Scrollable))
+        .first,
+  );
+  await tester.pumpAndSettle();
+}
+
 /// Starts the whole app with in-memory storage and returns its provider
 /// container, so tests can seed and inspect state.
 Future<ProviderContainer> pumpApp(
@@ -48,6 +64,7 @@ Future<ProviderContainer> pumpApp(
   BackupFolder? backupFolder,
   Preferences? preferences,
   PowerSource? power,
+  FakeWeatherApi? weather,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -73,6 +90,8 @@ Future<ProviderContainer> pumpApp(
         reminders ?? FakeReminderScheduler(),
       ),
       if (clock != null) clockProvider.overrideWithValue(clock),
+      // The weather (Round 70): never the real service.
+      weatherApiProvider.overrideWithValue(weather ?? FakeWeatherApi()),
       // Pip stands still (an endless animation never settles); his own
       // tests let him move.
       pipAnimatesProvider.overrideWithValue(pipMoves),
@@ -434,5 +453,45 @@ class FakeBackupFolder implements BackupFolder {
       keep: keep,
     ));
     return true;
+  }
+}
+
+/// The weather service (Round 70) as a test sets it: [places] for any
+/// search, [report] for any place; [failing] throws instead. Counts its
+/// calls.
+class FakeWeatherApi implements WeatherApi {
+  List<WeatherPlace> places;
+
+  /// A WMO code (61: rain).
+  int code;
+  double temperature;
+  String? failing;
+  int searches = 0;
+  int fetches = 0;
+
+  FakeWeatherApi({
+    this.places = const [],
+    this.code = 61,
+    this.temperature = 7.4,
+    this.failing,
+  });
+
+  @override
+  Future<List<WeatherPlace>> search(String name) async {
+    searches++;
+    if (failing case final message?) throw WeatherFailure(message);
+    return places;
+  }
+
+  @override
+  Future<WeatherReport> now(WeatherPlace place, DateTime at) async {
+    fetches++;
+    if (failing case final message?) throw WeatherFailure(message);
+    return WeatherReport(
+      placeId: place.id,
+      code: code,
+      temperature: temperature,
+      fetchedAt: at,
+    );
   }
 }

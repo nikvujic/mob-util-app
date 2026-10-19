@@ -110,6 +110,8 @@ void main() {
     // Settings offers to restore it; the menu has no entry.
     await openMenu(tester);
     expect(find.text('Introduction'), findsNothing);
+    // Round 70: below Internet Access, scrolled to on a short screen.
+    await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('restoreIntro')));
@@ -191,6 +193,8 @@ void main() {
   testWidgets('Settings: line numbers first (Round 20)', (tester) async {
     await start(tester);
     await openMenu(tester);
+    // Round 70: below Internet Access, scrolled to on a short screen.
+    await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     final tiles = tester
@@ -203,6 +207,8 @@ void main() {
   testWidgets('Settings switches it off for updates', (tester) async {
     await start(tester);
     await openMenu(tester);
+    // Round 70: below Internet Access, scrolled to on a short screen.
+    await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('introOnUpdates')));

@@ -83,6 +83,8 @@ void main() {
   testWidgets('from another page on top, back to the planner', (tester) async {
     await start(tester);
     await openMenu(tester);
+    // Round 70: below Internet Access, scrolled to on a short screen.
+    await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     await tapNotification(tester, PlannerTarget(today, 20 * 60).payload);

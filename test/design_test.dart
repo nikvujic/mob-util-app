@@ -714,11 +714,15 @@ void main() {
       },
       'settings': (t) async {
         await openMenu(t);
+        // Round 70: below Internet Access, scrolled to on a short screen.
+        await scrollMenuTo(t, 'Settings');
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
       },
       'clear data': (t) async {
         await openMenu(t);
+        // Round 70: below Internet Access, scrolled to on a short screen.
+        await scrollMenuTo(t, 'Settings');
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
         await t.tap(find.text('Clear data'));
@@ -728,6 +732,8 @@ void main() {
       },
       'clear data dialog': (t) async {
         await openMenu(t);
+        // Round 70: below Internet Access, scrolled to on a short screen.
+        await scrollMenuTo(t, 'Settings');
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
         await t.tap(find.text('Clear data'));

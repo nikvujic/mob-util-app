@@ -447,13 +447,13 @@ Pip:
   Seasons, events, day/night and all the animation need nothing.
 
 Internet Access (a page in the menu, second to last):
-- [ ] Says plainly the app uses **no internet** unless a section below
+- [x] Says plainly the app uses **no internet** unless a section below
   is turned on. The release APK has no INTERNET permission today and no
   analytics or network packages; adding the permission comes with this
   page (check the merged manifest of the built APK).
-- [ ] One **section per service**, each with a toggle, what it is, and
+- [x] One **section per service**, each with a toggle, what it is, and
   what it's used for. Turning one on opens the section.
-- [ ] **Weather** (Open-Meteo, no key): add a city by search, pick from
+- [x] **Weather** (Open-Meteo, no key): add a city by search, pick from
   the matches (name, region, country), saved with coordinates; several
   cities, to switch fast; "No place found" saves nothing. Fetched by
   coordinates every hour or two while the app is open; off → seasonal

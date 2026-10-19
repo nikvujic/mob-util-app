@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/models/notify_settings.dart';
+import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/providers/auto_backup_provider.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
@@ -321,6 +322,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(fingerprintProvider, (_, __) {});
     // Kept running, so reminders follow every planner change (P10).
     ref.listen(reminderPlannerProvider, (_, __) {});
+    // Kept running: the weather fetched while it's on (Round 70).
+    ref.listen(weatherProvider, (_, __) {});
     // A notification tapped: to its section, on top of everything (its
     // page takes it from there once unlocked, Round 19).
     ref.listen(notificationOpenerProvider, (_, __) {});

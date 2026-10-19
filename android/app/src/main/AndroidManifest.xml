@@ -7,6 +7,9 @@
     <uses-permission
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32"/>
+    <!-- Round 70: only for what's turned on in Internet Access (for now
+         the weather, from Open-Meteo); nothing is fetched otherwise. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="The App"
         android:name="${applicationName}"

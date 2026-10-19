@@ -83,6 +83,10 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 - A notification stays in the phone's tray until you open its page (the Planner, Medicine, Dates, Backup) or swipe it away.
 - If the phone blocks the app's notifications, this page says so at the top.
 
+## Internet Access
+- The app uses **no internet** unless you turn a service on in the menu's **Internet Access**. Nothing else leaves the phone: no accounts, no ads, no analytics.
+- **Weather** (from Open-Meteo, free, no account): search your town or city and pick it from the matches (add more to switch between them). Pip's sky then shows the weather there (rain, snow, clouds, fog, storms), fetched every hour or so while the app is open. The page shows the weather now, when it was fetched, and a button to fetch it again.
+
 ## Settings
 - Line numbers, the counter click and vibration, whether this introduction comes back after updates (and restoring it if deleted), the to-do note, and **Clear data**.
 - After updates, **What's new** below lists every version since the one you last read about.

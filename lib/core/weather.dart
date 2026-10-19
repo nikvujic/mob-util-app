@@ -1,0 +1,48 @@
+/// The weather as Pip's sky shows it (Round 70), from Open-Meteo's WMO
+/// weather codes (https://open-meteo.com/en/docs: "weather_code").
+enum WeatherKind {
+  clear('Clear'),
+  partlyCloudy('Partly cloudy'),
+  cloudy('Cloudy'),
+  fog('Fog'),
+  drizzle('Drizzle'),
+  rain('Rain'),
+  snow('Snow'),
+  storm('Thunderstorm');
+
+  final String label;
+
+  const WeatherKind(this.label);
+
+  /// The kind for WMO [code]; null for a code it doesn't know.
+  static WeatherKind? fromCode(int code) => switch (code) {
+        0 || 1 => clear,
+        2 => partlyCloudy,
+        3 => cloudy,
+        45 || 48 => fog,
+        51 || 53 || 55 || 56 || 57 => drizzle,
+        61 || 63 || 65 || 66 || 67 || 80 || 81 || 82 => rain,
+        71 || 73 || 75 || 77 || 85 || 86 => snow,
+        95 || 96 || 99 => storm,
+        _ => null,
+      };
+
+  /// Rain, drizzle or a storm: drops falling.
+  bool get wet => this == drizzle || this == rain || this == storm;
+
+  /// A grey sky (clouds over the sun, or the stars).
+  bool get grey => this == cloudy || this == fog || wet || this == snow;
+
+  /// The id it's stored by.
+  static WeatherKind? byName(String? name) =>
+      values.where((k) => k.name == name).firstOrNull;
+}
+
+/// How heavy a WMO [code]'s rain or snow is, 1 (light) to 3 (heavy); 0
+/// for neither.
+int weatherStrength(int code) => switch (code) {
+      51 || 56 || 61 || 66 || 71 || 77 || 80 || 85 => 1,
+      53 || 63 || 73 || 81 || 95 => 2,
+      55 || 57 || 65 || 67 || 75 || 82 || 86 || 96 || 99 => 3,
+      _ => 0,
+    };
