@@ -32,6 +32,7 @@ class HubPage extends ConsumerWidget {
     final target = switch (ref.watch(pendingTargetProvider)) {
       MedicineTarget() => HubTool.medicine,
       DatesTarget() => HubTool.dates,
+      SubscriptionsTarget() => HubTool.subscriptions,
       _ => null,
     };
     if (target != null) {
@@ -40,6 +41,7 @@ class HubPage extends ConsumerWidget {
         final still = switch (pending.state) {
           MedicineTarget() => HubTool.medicine,
           DatesTarget() => HubTool.dates,
+          SubscriptionsTarget() => HubTool.subscriptions,
           _ => null,
         };
         if (!context.mounted || still != target) return;

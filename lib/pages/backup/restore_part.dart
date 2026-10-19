@@ -8,6 +8,7 @@ import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
+import 'package:the_app/providers/subscriptions_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
@@ -156,6 +157,14 @@ class _RestorePartPageState extends ConsumerState<RestorePartPage> {
             plain(d.id, d.title, formatDayMonth(d.day, d.month, d.year)),
         ],
         ids(ref.watch(datesProvider).dates, (d) => d.id),
+      ),
+      (
+        BackupPart.subscriptions,
+        'Subscriptions',
+        [
+          for (final s in b.subscriptions) plain(s.id, s.name, s.state.label),
+        ],
+        ids(ref.watch(subscriptionsProvider).subscriptions, (s) => s.id),
       ),
     ];
   }

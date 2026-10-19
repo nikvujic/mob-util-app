@@ -14,6 +14,7 @@ import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/models/subscription.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
@@ -67,6 +68,7 @@ Future<ProviderContainer> pumpApp(
   PowerSource? power,
   FakeWeatherApi? weather,
   List<PlannerTask> plannerTasks = const [],
+  SubscriptionBook subscriptions = SubscriptionBook.empty,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -78,6 +80,7 @@ Future<ProviderContainer> pumpApp(
             (pipHatched ? PipLife(born: DateTime(2026, 10, 1)) : PipLife.egg),
         initialPreferences: preferences ?? const Preferences(),
         initialPlannerTasks: plannerTasks,
+        initialSubscriptions: subscriptions,
       )),
       // Automatic backup's folder (Round 39): a fake, never Android's.
       backupFolderProvider

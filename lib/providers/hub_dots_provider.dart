@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
+import 'package:the_app/providers/subscriptions_provider.dart';
 
 /// Whether a Hub page asks for attention with a red dot on its tile (O13).
 /// Exhaustive: a new [HubTool] doesn't compile until it's here.
@@ -13,6 +14,8 @@ final hubToolDotProvider = Provider.family<bool, HubTool>(
     HubTool.recipes => false,
     HubTool.food => false,
     HubTool.dates => false,
+    // Round 79: one to cancel soon (within its reminder).
+    HubTool.subscriptions => ref.watch(subscriptionsDotProvider),
     HubTool.pip => false,
   },
 );
@@ -33,6 +36,7 @@ final hubToolNewsProvider = Provider.family<bool, HubTool>(
     HubTool.medicine ||
     HubTool.recipes ||
     HubTool.food ||
+    HubTool.subscriptions ||
     HubTool.pip =>
       false,
   },

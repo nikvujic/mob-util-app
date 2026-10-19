@@ -28,6 +28,7 @@ void main() {
       'assets/icons/recipes.svg', // Round 42
       'assets/icons/food.svg', // Round 46
       'assets/icons/dates.svg', // Round 57
+      'assets/icons/subscriptions.svg', // Round 79
       'assets/icons/pip.svg', // hatched (Round 35)
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
@@ -63,6 +64,7 @@ void main() {
       HubTool.recipes,
       HubTool.food,
       HubTool.dates,
+      HubTool.subscriptions, // Round 79
     ]);
   });
 
@@ -91,6 +93,7 @@ void main() {
         HubTool.recipes,
         HubTool.food,
         HubTool.dates,
+        HubTool.subscriptions,
       ]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
@@ -126,6 +129,7 @@ void main() {
         HubTool.recipes,
         HubTool.food,
         HubTool.dates,
+        HubTool.subscriptions,
       ]);
       semantics.dispose();
     });
@@ -163,6 +167,7 @@ void main() {
         HubTool.recipes,
         HubTool.food,
         HubTool.dates,
+        HubTool.subscriptions,
       ]);
       semantics.dispose();
     });

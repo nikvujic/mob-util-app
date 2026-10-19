@@ -25,6 +25,8 @@ import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/subscriptions_alerts_provider.dart';
+import 'package:the_app/providers/subscriptions_provider.dart';
 
 /// How far ahead reminders are planned (P10); planned again on every
 /// change and app start, so routines keep reminding.
@@ -163,6 +165,7 @@ class ReminderPlanner {
     _ref.listen(securityProvider, (_, __) => _soon());
     _ref.listen(medicineProvider, (_, __) => _soon());
     _ref.listen(datesProvider, (_, __) => _soon());
+    _ref.listen(subscriptionsProvider, (_, __) => _soon());
     // Whether notifications are allowed, known for the history.
     _ref.listen(notificationsAllowedProvider, (_, __) {});
     _ref.listen(preferencesProvider, (before, after) {
@@ -174,6 +177,8 @@ class ReminderPlanner {
           before.plannerPausedUntil != after.plannerPausedUntil ||
           before.datesReminders != after.datesReminders ||
           before.datesPausedUntil != after.datesPausedUntil ||
+          before.subscriptionsReminders != after.subscriptionsReminders ||
+          before.subscriptionsPausedUntil != after.subscriptionsPausedUntil ||
           !_sameStyles(before.notifyStyles, after.notifyStyles) ||
           before.backupDueAt != after.backupDueAt ||
           before.lastBackupAt != after.lastBackupAt) {
@@ -269,6 +274,18 @@ class ReminderPlanner {
                     _ref.read(pageLocksProvider).contains(HubTool.dates)) ||
             private(NotifyPage.dates),
       ),
+      ...planSubscriptionReminders(
+        now: now,
+        book: _ref.read(subscriptionsProvider),
+        preferences: preferences,
+        days: reminderDays,
+        hideNames: password &&
+                (locks.contains(AppSection.hub) ||
+                    _ref
+                        .read(pageLocksProvider)
+                        .contains(HubTool.subscriptions)) ||
+            private(NotifyPage.subscriptions),
+      ),
       ...planBackupReminders(
         now: now,
         preferences: preferences,
@@ -302,6 +319,7 @@ final clearShownProvider = Provider<Future<void> Function(NotifyPage?)>(
           NotifyPage.medicine => ReminderKind.medicine,
           NotifyPage.backup => ReminderKind.backup,
           NotifyPage.dates => ReminderKind.dates,
+          NotifyPage.subscriptions => ReminderKind.subscriptions,
         },
       ),
 );
@@ -312,6 +330,7 @@ NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
       ReminderKind.medicine => NotifyPage.medicine,
       ReminderKind.backup => NotifyPage.backup,
       ReminderKind.dates => NotifyPage.dates,
+      ReminderKind.subscriptions => NotifyPage.subscriptions,
       ReminderKind.notice => null,
     };
 

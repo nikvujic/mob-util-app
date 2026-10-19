@@ -433,6 +433,15 @@ abstract final class DateColours {
   static const seen = Color(0xFF4CAF50); // the green dot (a birthday)
 }
 
+/// Subscriptions' states (Round 79), whatever the theme: a card's tint
+/// and edge.
+abstract final class SubscriptionColours {
+  static const active = Color(0xFF4CAF7A);
+  static const toCancel = Color(0xFFE8913A);
+  static const cancelled = Color(0xFF4F8FE0);
+  static const inactive = Color(0xFF9A8F86);
+}
+
 /// Pip's own colours (Round 25), the launcher icon's, whatever the theme.
 abstract final class PipColours {
   static const casing = Color(0xFFD97757); // head casing, antenna

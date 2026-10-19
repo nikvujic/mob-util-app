@@ -41,6 +41,11 @@ class Preferences {
   final DateTime? datesPausedUntil;
   final DateTime? datesSeenOn;
 
+  /// Subscriptions' notifications (Round 79): on, and paused through a
+  /// day.
+  final bool subscriptionsReminders;
+  final DateTime? subscriptionsPausedUntil;
+
   /// How each page's notifications look and sound (Round 31); a page not
   /// here is [NotifyStyle.plain].
   final Map<NotifyPage, NotifyStyle> notifyStyles;
@@ -126,6 +131,8 @@ class Preferences {
     this.datesReminders = true,
     this.datesPausedUntil,
     this.datesSeenOn,
+    this.subscriptionsReminders = true,
+    this.subscriptionsPausedUntil,
     this.notifyStyles = const {},
     this.introDeleted = false,
     this.introOnUpdates = true,
@@ -200,6 +207,10 @@ class Preferences {
   /// Whether the dates' notifications are paused on [day] (Round 57).
   bool datesPausedOn(DateTime day) => _pausedOn(datesPausedUntil, day);
 
+  /// Whether the subscriptions' notifications are paused on [day].
+  bool subscriptionsPausedOn(DateTime day) =>
+      _pausedOn(subscriptionsPausedUntil, day);
+
   static bool _pausedOn(DateTime? until, DateTime day) =>
       until != null && !DateTime(day.year, day.month, day.day).isAfter(until);
 
@@ -220,6 +231,8 @@ class Preferences {
     bool? datesReminders,
     DateTime? Function()? datesPausedUntil,
     DateTime? Function()? datesSeenOn,
+    bool? subscriptionsReminders,
+    DateTime? Function()? subscriptionsPausedUntil,
     Map<NotifyPage, NotifyStyle>? notifyStyles,
     bool? introDeleted,
     bool? introOnUpdates,
@@ -261,6 +274,11 @@ class Preferences {
             ? this.datesPausedUntil
             : datesPausedUntil(),
         datesSeenOn: datesSeenOn == null ? this.datesSeenOn : datesSeenOn(),
+        subscriptionsReminders:
+            subscriptionsReminders ?? this.subscriptionsReminders,
+        subscriptionsPausedUntil: subscriptionsPausedUntil == null
+            ? this.subscriptionsPausedUntil
+            : subscriptionsPausedUntil(),
         notifyStyles: notifyStyles ?? this.notifyStyles,
         introDeleted: introDeleted ?? this.introDeleted,
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
@@ -309,6 +327,10 @@ class Preferences {
           'datesPausedUntil': PlannerTask.dayToJson(datesPausedUntil!),
         if (datesSeenOn != null)
           'datesSeenOn': PlannerTask.dayToJson(datesSeenOn!),
+        if (!subscriptionsReminders) 'subscriptionsReminders': false,
+        if (subscriptionsPausedUntil != null)
+          'subscriptionsPausedUntil':
+              PlannerTask.dayToJson(subscriptionsPausedUntil!),
         if (notifyStyles.isNotEmpty)
           'notifyStyles': {
             for (final MapEntry(:key, :value) in notifyStyles.entries)
@@ -362,6 +384,10 @@ class Preferences {
         datesSeenOn: json['datesSeenOn'] == null
             ? null
             : PlannerTask.dayFromJson(json['datesSeenOn']),
+        subscriptionsReminders: json['subscriptionsReminders'] as bool? ?? true,
+        subscriptionsPausedUntil: json['subscriptionsPausedUntil'] == null
+            ? null
+            : PlannerTask.dayFromJson(json['subscriptionsPausedUntil']),
         // Pages unknown here (from a newer app) are skipped.
         notifyStyles: {
           for (final MapEntry(:key, :value)

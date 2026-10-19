@@ -148,6 +148,16 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
             day == null ? null : DateTime(day.year, day.month, day.day),
       );
 
+  /// Subscriptions' notifications on or off (Round 79).
+  void setSubscriptionsReminders(bool on) =>
+      state = state.copyWith(subscriptionsReminders: on);
+
+  /// Pauses the subscriptions' notifications through [day]; null resumes.
+  void pauseSubscriptionsUntil(DateTime? day) => state = state.copyWith(
+        subscriptionsPausedUntil: () =>
+            day == null ? null : DateTime(day.year, day.month, day.day),
+      );
+
   /// The Dates page was opened on [day] (its green dot goes).
   void sawDates(DateTime day) {
     final seen = DateTime(day.year, day.month, day.day);

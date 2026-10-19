@@ -8,6 +8,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
+import 'package:the_app/models/subscription.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/food_provider.dart';
@@ -19,6 +20,7 @@ import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/providers/subscriptions_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
 
 /// Everything a section holds, to count or clear it as a whole: the
@@ -55,6 +57,8 @@ class SectionData {
         // Its foods and meals.
         HubTool.food => _ref.read(foodProvider).size,
         HubTool.dates => _ref.read(datesProvider).dates.length,
+        HubTool.subscriptions =>
+          _ref.read(subscriptionsProvider).subscriptions.length,
         // His life isn't cleared with the Hub's pages.
         HubTool.pip => 0,
       };
@@ -77,6 +81,10 @@ class SectionData {
         _ref.read(foodProvider.notifier).replaceAll(FoodBook.empty);
       case HubTool.dates:
         _ref.read(datesProvider.notifier).replaceAll(DateBook.empty);
+      case HubTool.subscriptions:
+        _ref
+            .read(subscriptionsProvider.notifier)
+            .replaceAll(SubscriptionBook.empty);
       case HubTool.pip:
     }
   }

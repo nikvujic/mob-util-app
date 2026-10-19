@@ -11,7 +11,17 @@ import 'package:timezone/timezone.dart' as tz;
 /// they can be set apart in the phone's settings.
 /// Round 72: [plannerNow], the planner's notification that stays while a
 /// block or routine is on.
-enum ReminderKind { planner, medicine, backup, notice, dates, plannerNow }
+enum ReminderKind {
+  planner,
+  medicine,
+  backup,
+  notice,
+  dates,
+  plannerNow,
+
+  /// Round 79: a subscription renewing, to cancel, ending.
+  subscriptions,
+}
 
 /// A reminder (P10, O13): a notification at [at].
 class Reminder {
@@ -135,6 +145,15 @@ class NotificationReminderScheduler implements ReminderScheduler {
       'dates-reminders',
       'Dates reminders',
       channelDescription: 'Birthdays and dates coming up',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    ),
+    // Round 79: Subscriptions' own.
+    ReminderKind.subscriptions: AndroidNotificationDetails(
+      'subscriptions-reminders',
+      'Subscriptions reminders',
+      channelDescription: 'Subscriptions renewing, to cancel, or ending',
       importance: Importance.high,
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,

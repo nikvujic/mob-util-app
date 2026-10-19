@@ -9,6 +9,7 @@ import 'package:the_app/pages/hub/medicine.dart';
 import 'package:the_app/pages/hub/pip_home.dart';
 import 'package:the_app/pages/hub/placard.dart';
 import 'package:the_app/pages/hub/recipes.dart';
+import 'package:the_app/pages/hub/subscriptions.dart';
 
 /// How each of the Hub's pages (O9) looks and opens. Exhaustive: a new
 /// [HubTool] doesn't compile until it's here.
@@ -21,6 +22,7 @@ extension HubToolPage on HubTool {
         HubTool.recipes => 'assets/icons/recipes.svg',
         HubTool.food => 'assets/icons/food.svg',
         HubTool.dates => 'assets/icons/dates.svg',
+        HubTool.subscriptions => 'assets/icons/subscriptions.svg',
         HubTool.pip => 'assets/icons/pip.svg',
       };
 
@@ -34,6 +36,8 @@ extension HubToolPage on HubTool {
         HubTool.food => const FoodPage(),
         HubTool.dates =>
           const ClearsShown(page: NotifyPage.dates, child: DatesPage()),
+        HubTool.subscriptions => const ClearsShown(
+            page: NotifyPage.subscriptions, child: SubscriptionsPage()),
         HubTool.pip => const PipHomePage(),
       };
 }

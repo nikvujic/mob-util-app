@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "subscriptions": [
+    {
+      "id": "sub1",
+      "name": "Claude",
+      "price": 20,
+      "currency": "€",
+      "every": "month",
+      "state": "active",
+      "date": "2026-11-03",
+      "card": "Revolut 4421"
+    },
+    {
+      "id": "sub2",
+      "name": "Claude 2",
+      "price": 20,
+      "currency": "€",
+      "every": "month",
+      "state": "active",
+      "date": "2026-11-12"
+    },
+    {
+      "id": "sub3",
+      "name": "ChatGPT",
+      "price": 23,
+      "currency": "€",
+      "every": "month",
+      "state": "cancelled",
+      "date": "2026-11-13",
+      "note": "Cancelled"
+    },
+    {
+      "id": "sub4",
+      "name": "Grok",
+      "price": 16,
+      "currency": "€",
+      "every": "month",
+      "state": "toCancel",
+      "date": "2026-11-17",
+      "note": "real ~30€",
+      "remindBefore": 2
+    },
+    {
+      "id": "sub5",
+      "name": "AWS",
+      "price": 5,
+      "currency": "€",
+      "about": true,
+      "every": "month",
+      "state": "active",
+      "date": "2026-11-01",
+      "card": "Virtual 7731"
+    },
+    {
+      "id": "sub6",
+      "name": "Spotify",
+      "price": 6,
+      "currency": "€",
+      "about": true,
+      "every": "month",
+      "state": "inactive",
+      "card": "Virtual 0912",
+      "note": "payment failed"
+    }
+  ]
+}

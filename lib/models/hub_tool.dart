@@ -24,7 +24,10 @@ enum HubTool {
   food('Food'),
 
   /// Birthdays & dates (Round 57).
-  dates('Dates');
+  dates('Dates'),
+
+  /// Subscriptions (Round 79): what's paid, when, and what to do about it.
+  subscriptions('Subscriptions');
 
   const HubTool(this.label);
 

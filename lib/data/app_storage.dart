@@ -17,6 +17,7 @@ import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/date_entry.dart';
+import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -46,6 +47,8 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/food.json
 ///         {"version": 1, "foods": [...], "meals": [...]}
 ///     <app documents>/data/dates.json {"version": 3, "dates": [...]}
+///     <app documents>/data/subscriptions.json
+///         {"version": 1, "subscriptions": [...]}
 ///     <app documents>/data/notifications.json
 ///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
@@ -134,6 +137,10 @@ class AppStorage {
   /// travel (`travel`: hours, leave, back; Round 67).
   static const datesFormatVersion = 4;
 
+  /// Version of `subscriptions.json` (Round 79). History: 1 = first
+  /// format.
+  static const subscriptionsFormatVersion = 1;
+
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
@@ -153,6 +160,7 @@ class AppStorage {
   final JsonFileStore? _ingredientsStore;
   final JsonFileStore? _foodStore;
   final JsonFileStore? _datesStore;
+  final JsonFileStore? _subscriptionsStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -172,6 +180,7 @@ class AppStorage {
   final IngredientBook initialIngredients;
   final FoodBook initialFood;
   final DateBook initialDates;
+  final SubscriptionBook initialSubscriptions;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -209,7 +218,8 @@ class AppStorage {
     this._recipesStore,
     this._ingredientsStore,
     this._foodStore,
-    this._datesStore, {
+    this._datesStore,
+    this._subscriptionsStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -227,6 +237,7 @@ class AppStorage {
     required this.initialIngredients,
     required this.initialFood,
     required this.initialDates,
+    required this.initialSubscriptions,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
     required this.initialPageLocks,
@@ -252,6 +263,7 @@ class AppStorage {
     this.initialIngredients = IngredientBook.empty,
     this.initialFood = FoodBook.empty,
     this.initialDates = DateBook.empty,
+    this.initialSubscriptions = SubscriptionBook.empty,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
     this.initialPageLocks = const {},
@@ -275,6 +287,7 @@ class AppStorage {
         _ingredientsStore = null,
         _foodStore = null,
         _datesStore = null,
+        _subscriptionsStore = null,
         initialNotificationLog =
             initialNotificationLog ?? NotificationLog.empty,
         initialLayout = initialLayout ?? PageLayout.initial;
@@ -305,6 +318,8 @@ class AppStorage {
         JsonFileStore(File('${dir.path}/ingredients.json'));
     final foodStore = JsonFileStore(File('${dir.path}/food.json'));
     final datesStore = JsonFileStore(File('${dir.path}/dates.json'));
+    final subscriptionsStore =
+        JsonFileStore(File('${dir.path}/subscriptions.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
     final locks = await _load(
         settingsStore, (<AppSection>{}, <HubTool>{}, false), (json) {
@@ -340,6 +355,7 @@ class AppStorage {
       ingredientsStore,
       foodStore,
       datesStore,
+      subscriptionsStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -466,6 +482,12 @@ class AppStorage {
         DateBook.empty,
         maxVersion: datesFormatVersion,
         DateBook.fromJson,
+      ),
+      initialSubscriptions: await _load(
+        subscriptionsStore,
+        SubscriptionBook.empty,
+        maxVersion: subscriptionsFormatVersion,
+        SubscriptionBook.fromJson,
       ),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
@@ -617,6 +639,13 @@ class AppStorage {
     });
   }
 
+  Future<void> saveSubscriptions(SubscriptionBook book) async {
+    await _subscriptionsStore?.write({
+      'version': subscriptionsFormatVersion,
+      ...book.toJson(),
+    });
+  }
+
   Future<void> saveCounters(List<Counter> counters) async {
     await _countersStore?.write({
       'version': countersFormatVersion,
@@ -684,6 +713,7 @@ class AppStorage {
           _ingredientsStore,
           _foodStore,
           _datesStore,
+          _subscriptionsStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -714,6 +744,7 @@ class AppStorage {
           _ingredientsStore,
           _foodStore,
           _datesStore,
+          _subscriptionsStore,
         ])
           if (store != null) store,
       ];
@@ -756,6 +787,7 @@ class AppStorage {
     await _ingredientsStore?.flush();
     await _foodStore?.flush();
     await _datesStore?.flush();
+    await _subscriptionsStore?.flush();
   }
 }
 

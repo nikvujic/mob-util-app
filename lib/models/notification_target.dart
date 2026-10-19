@@ -23,6 +23,8 @@ sealed class NotificationTarget {
         return const BackupTarget();
       case ['dates']:
         return const DatesTarget();
+      case ['subscriptions']:
+        return const SubscriptionsTarget();
       case [
             'now',
             final kind,
@@ -97,6 +99,17 @@ class BackupTarget extends NotificationTarget {
 
   @override
   String toString() => 'BackupTarget()';
+}
+
+/// The Subscriptions page (Round 79: a subscription's reminder).
+class SubscriptionsTarget extends NotificationTarget {
+  const SubscriptionsTarget();
+
+  @override
+  String get payload => 'subscriptions';
+
+  @override
+  String toString() => 'SubscriptionsTarget()';
 }
 
 /// The Dates page (Round 57: a date's reminder).

@@ -6,7 +6,10 @@ enum NotifyPage {
   backup('Backup'),
 
   /// Birthdays & dates (Round 57).
-  dates('Dates');
+  dates('Dates'),
+
+  /// Subscriptions (Round 79): renewing, to cancel, ending.
+  subscriptions('Subscriptions');
 
   final String label;
 

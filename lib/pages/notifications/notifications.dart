@@ -283,12 +283,18 @@ class _PageSettings extends ConsumerWidget {
           preferences.datesReminders,
           'Before birthdays and dates, as each one is set to remind.',
         ),
+      NotifyPage.subscriptions => (
+          preferences.subscriptionsReminders,
+          'On a subscription\'s day at 09:00 (renewing, to cancel, '
+              'ending), and before it if one is set to.',
+        ),
     };
     final pausedUntil = switch (page) {
       NotifyPage.planner => preferences.plannerPausedUntil,
       NotifyPage.medicine => preferences.medicinePausedUntil,
       NotifyPage.backup => null,
       NotifyPage.dates => preferences.datesPausedUntil,
+      NotifyPage.subscriptions => preferences.subscriptionsPausedUntil,
     };
     final paused = pausedUntil != null && !today.isAfter(pausedUntil);
 
@@ -324,6 +330,8 @@ class _PageSettings extends ConsumerWidget {
                 notifier.setBackupReminder(on);
               case NotifyPage.dates:
                 notifier.setDatesReminders(on);
+              case NotifyPage.subscriptions:
+                notifier.setSubscriptionsReminders(on);
             }
             if (on) allowNotifications(context, ref);
           },
@@ -369,6 +377,8 @@ class _PageSettings extends ConsumerWidget {
                     notifier.pauseMedicineUntil(until);
                   case NotifyPage.dates:
                     notifier.pauseDatesUntil(until);
+                  case NotifyPage.subscriptions:
+                    notifier.pauseSubscriptionsUntil(until);
                   case NotifyPage.backup:
                 }
               },
@@ -383,6 +393,8 @@ class _PageSettings extends ConsumerWidget {
                   NotifyPage.planner =>
                     'Without names: "A block starts at 10:00"',
                   NotifyPage.dates => 'Without names: "A birthday tomorrow"',
+                  NotifyPage.subscriptions =>
+                    'Without names: "A subscription renews today"',
                   _ => 'Without names: "A dose is due at 08:00"',
                 },
                 style: muted(),

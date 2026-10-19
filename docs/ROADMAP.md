@@ -346,7 +346,11 @@ fixtures for every stored format.
 - [x] **Angry**: his fist went too far from his body (over his head,
   shaken out sideways): now beside his head, a pixel off his casing,
   shaken up and down.
-- [ ] **Subscriptions** (Nikola's note): a Hub page, below.
+- [x] **Subscriptions** (Nikola's note): a Hub page
+  (`docs/SUBSCRIPTIONS_SPEC.md`): two-column cards tinted by state
+  (active, to cancel, cancelled, inactive), price (~), card, note, a
+  reminder before shown on the card; notifications on its day at 09:00
+  and before; a month's total; a red dot when one's to be cancelled soon.
 
 ### Round 78 — Nikola on the planner (2026-10-19, 1.35.0)
 
@@ -492,7 +496,7 @@ Noted; adventures first (go given), the rest after.
   events later.
 - [x] **Note selection handles**: the left one's grab area reaches too
   high and catches touches by accident; lower it.
-- [ ] **Subscriptions**: a new Hub page (to spec).
+- [x] (Round 79) **Subscriptions**: a new Hub page (to spec).
 - [x] **Shop search**: a search button opens a field above the keyboard;
   typing filters the bought items; the list still scrolls with the
   keyboard open; closing the keyboard keeps the field (and filter), with

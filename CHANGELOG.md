@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Subscriptions**, a new Hub page: what you pay for, as cards two to a
+  row coloured by their state: **active** (green), **to cancel** (orange:
+  it still renews, but you mean to cancel it before then), **cancelled**
+  (blue: still on until a day) and **inactive** (grey: lapsed, the card
+  ran out, a payment failed). Each card shows the price (a ~ when it's
+  about that), its day (*Renews 3 Nov*, *Cancel by 17 Nov*, *Active
+  until 13 Nov*), the card it's paid with (or *Card unknown*), its
+  reminder and a note. At the top: what they come to a month. A
+  notification on its day at 09:00, and before it if you set one (2 days
+  before for one to cancel); a red dot on the tile when one's to be
+  cancelled soon. In backups, Clear data, and with a lock of its own.
+
 ### Changed
 - **Pip's trees** sway only in the wind: still when it's calm, a light
   sway in a breeze, hard when it's windy (or stormy). The wind comes

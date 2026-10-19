@@ -15,6 +15,7 @@ import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/date_entry.dart';
+import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -30,6 +31,7 @@ import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
+import 'package:the_app/providers/subscriptions_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -71,6 +73,7 @@ class BackupExporter {
       ingredients: _ref.read(ingredientsProvider),
       food: _ref.read(foodProvider),
       dates: _ref.read(datesProvider),
+      subscriptions: _ref.read(subscriptionsProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -146,6 +149,7 @@ class RestorableBackup {
   List<Medicine> get medicines => _backup.medicine.medicines;
   List<Recipe> get recipes => _backup.recipes;
   List<DateEntry> get dates => _backup.dates.dates;
+  List<Subscription> get subscriptions => _backup.subscriptions.subscriptions;
 }
 
 /// The kinds of things in a backup, to restore some of them (Round 28).
@@ -161,7 +165,10 @@ enum BackupPart {
   recipes,
 
   /// Birthdays & dates (Round 57).
-  dates
+  dates,
+
+  /// Subscriptions (Round 79).
+  subscriptions
 }
 
 /// [book] with the ingredients [ids] from [from] it doesn't have yet,
@@ -369,6 +376,7 @@ class BackupImporter {
       source.ingredients,
       source.food,
       source.dates,
+      source.subscriptions,
     );
     return RestoreUndo._(
       previous,
@@ -635,6 +643,25 @@ class BackupImporter {
           )));
     }
 
+    // Subscriptions (Round 79).
+    final pickedSubscriptions = [
+      for (final s in source.subscriptions.subscriptions)
+        if (chosen(BackupPart.subscriptions, s.id)) s,
+    ];
+    if (pickedSubscriptions.isNotEmpty) {
+      _ref.read(subscriptionsProvider.notifier).replaceAll(
+            SubscriptionBook(merged(
+              _ref.read(subscriptionsProvider).subscriptions,
+              pickedSubscriptions,
+              BackupPart.subscriptions,
+              (s) => s.id,
+              (s) => s.toJson(),
+              Subscription.fromJson,
+              name: 'name',
+            )),
+          );
+    }
+
     await _ref.read(appStorageProvider).flush();
     return PartRestore._(
       RestoreUndo._(
@@ -665,6 +692,7 @@ class BackupImporter {
       undo._previous.ingredients,
       undo._previous.food,
       undo._previous.dates,
+      undo._previous.subscriptions,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -744,6 +772,7 @@ class BackupImporter {
     IngredientBook ingredients,
     FoodBook food,
     DateBook dates,
+    SubscriptionBook subscriptions,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -760,6 +789,7 @@ class BackupImporter {
     _ref.read(ingredientsProvider.notifier).replaceAll(ingredients);
     _ref.read(foodProvider.notifier).replaceAll(food);
     _ref.read(datesProvider.notifier).replaceAll(dates);
+    _ref.read(subscriptionsProvider.notifier).replaceAll(subscriptions);
     await _ref.read(appStorageProvider).flush();
   }
 }

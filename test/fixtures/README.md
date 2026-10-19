@@ -160,6 +160,16 @@ app still reads every version, so an update can never lose existing data.
   no amount shown, "pola" kept).
 - `v28/backup-plain.json` — backup (version 28) with those items (and
   v27's dates and Pip).
+- `v29/storage/subscriptions.json` — subscriptions (Round 79,
+  subscriptions.json version 1, Nikola's list): Claude 20€ active
+  renewing 3 Nov 2026 (card "Revolut 4421"), Claude 2 20€ active 12 Nov
+  (no card), ChatGPT 23€ **cancelled** till 13 Nov (note "Cancelled"),
+  Grok 16€ **to cancel** by 17 Nov (note "real ~30€", no card, a
+  reminder 2 days before), AWS ~5€ active 1 Nov (card "Virtual 7731"),
+  Spotify ~6€ **inactive** (no date, card "Virtual 0912", note "payment
+  failed").
+- `v29/backup-plain.json` — backup (version 29) with them (and v28's
+  data).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

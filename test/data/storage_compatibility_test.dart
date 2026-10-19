@@ -17,6 +17,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/todo_item.dart';
@@ -359,6 +360,61 @@ void main() {
       );
       expect(storage.initialPlannerTasks.map((t) => t.description),
           everyElement(isNull));
+    });
+  });
+
+  group('subscriptions.json v1 / v29 backup (subscriptions, Round 79)', () {
+    void expectSample(SubscriptionBook book) {
+      expect(
+        book.subscriptions.map((s) => (s.name, s.price, s.about, s.state)),
+        [
+          ('Claude', 20.0, false, SubscriptionState.active),
+          ('Claude 2', 20.0, false, SubscriptionState.active),
+          ('ChatGPT', 23.0, false, SubscriptionState.cancelled),
+          ('Grok', 16.0, false, SubscriptionState.toCancel),
+          ('AWS', 5.0, true, SubscriptionState.active),
+          ('Spotify', 6.0, true, SubscriptionState.inactive),
+        ],
+      );
+      final grok = book.byId('sub4')!;
+      expect((grok.date, grok.card, grok.note, grok.remindBefore),
+          (DateTime(2026, 11, 17), '', 'real ~30€', 2));
+      expect(book.byId('sub6')!.date, isNull);
+      expect(book.byId('sub1')!.card, 'Revolut 4421');
+    }
+
+    test('subscriptions.json version 1 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v29/storage'),
+      );
+      expectSample(storage.initialSubscriptions);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v29 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v29/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.subscriptions);
+      expect(file.backup.shopItems, hasLength(4), reason: "v28's too");
+    });
+
+    test('written as read', () {
+      final json = jsonDecode(
+          File('test/fixtures/v29/storage/subscriptions.json')
+              .readAsStringSync()) as Map<String, dynamic>;
+      final subs = json['subscriptions'] as List<dynamic>;
+      expect([
+        for (final e in subs)
+          Subscription.fromJson(e as Map<String, dynamic>).toJson(),
+      ], subs);
+    });
+
+    test('older backups have none', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v28/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.subscriptions.isEmpty, isTrue);
     });
   });
 
@@ -1454,6 +1510,10 @@ void main() {
           'b6ce8ce3e2fcd44584170708142bce02ebc1a3f850497a3081b69ec89210a900',
       'test/fixtures/v28/backup-plain.json':
           '7f9bebf2576942a8b732d5c6ac3455a7d5c990c588543b135f76d05e2b6ce904',
+      'test/fixtures/v29/storage/subscriptions.json':
+          '36bd429d24107300b213915f6a335c69a9cd2d5910c778e9da285bee9768d159',
+      'test/fixtures/v29/backup-plain.json':
+          '30b51e18d1417ec1821bdbad8e7f6f20fab5295b7737f4e769e95757a82d0982',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':
