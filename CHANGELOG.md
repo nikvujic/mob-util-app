@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.36.1] - 2026-10-19
+
 ### Added
 - **Subscriptions**: the **card's expiry date** (a virtual card runs
   out), set on a subscription's page and shown on its card ("Virtual
