@@ -199,6 +199,7 @@ class AppDrawer extends ConsumerWidget {
                 ref.watch(clockProvider)(),
                 // Round 70: the weather, if it's on in Internet Access.
                 weatherCode: ref.watch(skyWeatherProvider),
+                windSpeed: ref.watch(skyWindProvider),
               ),
               // Round 52: in the menu he may be thrown in by its swing.
               entrances: const {

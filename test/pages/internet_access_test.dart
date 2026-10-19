@@ -128,12 +128,15 @@ void main() {
             placeId: noviSad.id,
             code: 73,
             temperature: -2,
+            wind: 18.4,
             fetchedAt: now.subtract(const Duration(minutes: 20)),
           ),
         ));
     await tester.pumpAndSettle();
     expect(api.fetches, 0);
-    expect(find.text('Now: Snow, -2°C · updated 10:00'), findsOneWidget);
+    // Round 79: with its wind.
+    expect(
+        find.text('Now: Snow, -2°C, 18 km/h · updated 10:00'), findsOneWidget);
     await tester.tap(find.byKey(const Key('weatherRefresh')));
     await tester.pumpAndSettle();
     expect(api.fetches, 1);

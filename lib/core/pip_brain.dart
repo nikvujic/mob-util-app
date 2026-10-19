@@ -1797,20 +1797,26 @@ class PipBrain {
     return landed / landHold;
   }
 
-  /// Angry (after a throw): his face says so, a fist shakes over his
+  /// Angry (after a throw): his face says so, a fist shakes beside his
   /// head, cross words (#!) above it.
   bool get angry => activity == PipActivity.angry;
 
   /// Seconds into what he's doing (for things that flicker with it).
   double get zsClock => _t;
 
+  /// The fist's top, above the ground, and how far it shakes up.
+  static const fistUp = height - 3.0;
+  static const fistShake = 2.0;
+
   /// The shaking fist: (x, height above the ground), or null.
   (double, double)? get fist {
     if (!angry) return null;
-    final shake = (_t * 8).floor().isEven ? -1.0 : 1.0;
-    // Round 54: by his side (drawn from its left pixel).
+    // Round 79 (Nikola: it went too far from his body): beside his
+    // head, a pixel off his casing as his other hands, shaken up and
+    // down (it was over his head, shaken out sideways).
+    final shake = (_t * 8).floor().isEven ? 0.0 : fistShake;
     final side = handBeside(right: facingRight) - 1;
-    return (side + shake, height + 1.0);
+    return (side, fistUp + shake);
   }
 
   // Round 52: events, now and then while he stands about.

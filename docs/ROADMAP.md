@@ -339,9 +339,14 @@ fixtures for every stored format.
 
 ### Round 79 — Nikola's notes (2026-10-19)
 
-- [ ] **Pip's trees**: don't sway them unless it's windy. Open-Meteo
-  gives wind speed too (not fetched yet): sway by the wind, still when
-  calm (and with the weather off, a light sway or none, to decide).
+- [x] **Pip's trees**: sway only in the wind. Open-Meteo's wind (km/h at
+  10 m, `wind_speed_10m`) comes with the weather: under 12 still, 12–30
+  a light sway, 30 and over (or a storm) hard (`PipWind`). With the
+  weather off (the wind not known), a light sway as before.
+- [x] **Angry**: his fist went too far from his body (over his head,
+  shaken out sideways): now beside his head, a pixel off his casing,
+  shaken up and down.
+- [ ] **Subscriptions** (Nikola's note): a Hub page, below.
 
 ### Round 78 — Nikola on the planner (2026-10-19, 1.35.0)
 

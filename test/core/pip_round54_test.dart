@@ -191,19 +191,29 @@ void main() {
       }
     });
 
-    test('the fist, angry: by his side', () {
-      final p = up()..enter(PipEntrance.side);
-      while (p.activity != PipActivity.angry) {
-        p.step(1 / 60);
+    test(
+        'the fist, angry: by his side, beside his head (Round 79: never '
+        'out from him or over his head), shaken up and down', () {
+      for (final right in [true, false]) {
+        final p = up()..enter(PipEntrance.side);
+        while (p.activity != PipActivity.angry) {
+          p.step(1 / 60);
+        }
+        p.facingRight = right;
+        final heights = <double>{};
+        while (p.activity == PipActivity.angry) {
+          final (fx, fy) = p.fist!;
+          // Drawn from its left pixel: a pixel off his casing, always.
+          besideHim(p, fx + 1, right: right);
+          // Its top (a mitt is 3 rows) no higher than his head's.
+          expect(fy, lessThanOrEqualTo(PipBrain.height.toDouble()));
+          expect(fy - 3, greaterThanOrEqualTo(PipBrain.height / 2),
+              reason: 'by his head, not his middle');
+          heights.add(fy);
+          p.step(1 / 60);
+        }
+        expect(heights, hasLength(2), reason: 'shaken');
       }
-      // Drawn from its left pixel, shaking a pixel either way.
-      final shakes = <double>{};
-      while (p.activity == PipActivity.angry) {
-        final (fx, _) = p.fist!;
-        shakes.add(fx + 1 - p.handBeside(right: p.facingRight));
-        p.step(1 / 60);
-      }
-      expect(shakes, {-1.0, 1.0});
     });
 
     test('the flower in his hand: by his side', () {

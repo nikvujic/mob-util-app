@@ -66,12 +66,16 @@ class WeatherReport {
 
   /// In °C.
   final double temperature;
+
+  /// Round 79: the wind, km/h at 10 m (null: a report from before).
+  final double? wind;
   final DateTime fetchedAt;
 
   const WeatherReport({
     required this.placeId,
     required this.code,
     required this.temperature,
+    this.wind,
     required this.fetchedAt,
   });
 
@@ -79,6 +83,7 @@ class WeatherReport {
         'placeId': placeId,
         'code': code,
         'temperature': temperature,
+        if (wind != null) 'wind': wind,
         'fetchedAt': fetchedAt.toUtc().toIso8601String(),
       };
 
@@ -86,6 +91,7 @@ class WeatherReport {
         placeId: json['placeId'] as String,
         code: (json['code'] as num).toInt(),
         temperature: (json['temperature'] as num).toDouble(),
+        wind: (json['wind'] as num?)?.toDouble(),
         fetchedAt: DateTime.parse(json['fetchedAt'] as String).toLocal(),
       );
 }

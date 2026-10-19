@@ -30,6 +30,10 @@ abstract class WeatherApi {
 class OpenMeteoApi implements WeatherApi {
   static const timeout = Duration(seconds: 12);
 
+  /// What's asked for now: the sky, the temperature, and (Round 79) the
+  /// wind, which [parseReport] reads.
+  static const currentFields = 'weather_code,temperature_2m,wind_speed_10m';
+
   Future<Map<String, dynamic>> _get(Uri uri) async {
     final client = HttpClient()..connectionTimeout = timeout;
     try {
@@ -69,7 +73,7 @@ class OpenMeteoApi implements WeatherApi {
     final json = await _get(Uri.https('api.open-meteo.com', '/v1/forecast', {
       'latitude': '${place.latitude}',
       'longitude': '${place.longitude}',
-      'current': 'weather_code,temperature_2m',
+      'current': currentFields,
     }));
     return parseReport(json, place, at);
   }
@@ -108,10 +112,13 @@ WeatherReport parseReport(
   if (code is! num || temperature is! num) {
     throw const WeatherFailure('The weather service made no sense');
   }
+  // Round 79: the wind (km/h), if it came; it isn't needed.
+  final wind = current['wind_speed_10m'];
   return WeatherReport(
     placeId: place.id,
     code: code.toInt(),
     temperature: temperature.toDouble(),
+    wind: wind is num ? wind.toDouble() : null,
     fetchedAt: at,
   );
 }

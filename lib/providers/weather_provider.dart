@@ -99,3 +99,9 @@ final skyWeatherProvider = Provider<int?>((ref) {
   final internet = ref.watch(preferencesProvider.select((p) => p.internet));
   return internet.reportAt(ref.watch(clockProvider)())?.code;
 });
+
+/// The wind for Pip's trees now (Round 79), km/h; null: not known.
+final skyWindProvider = Provider<double?>((ref) {
+  final internet = ref.watch(preferencesProvider.select((p) => p.internet));
+  return internet.reportAt(ref.watch(clockProvider)())?.wind;
+});

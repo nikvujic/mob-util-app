@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Pip's trees** sway only in the wind: still when it's calm, a light
+  sway in a breeze, hard when it's windy (or stormy). The wind comes
+  with the weather (Internet Access shows it too); with the weather off
+  they sway lightly as before.
+
+### Fixed
+- **Pip, angry** after being thrown in: his fist stays beside his head
+  now, shaken up and down. It floated above his head, too far out.
+
 ## [1.35.0] - 2026-10-19
 
 ### Added

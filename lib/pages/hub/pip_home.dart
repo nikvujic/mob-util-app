@@ -102,6 +102,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
       background: background,
       // Round 70: the weather, if it's on in Internet Access.
       weatherCode: ref.watch(skyWeatherProvider),
+      windSpeed: ref.watch(skyWindProvider),
       look: _look,
     );
     return Scaffold(

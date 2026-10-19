@@ -1036,7 +1036,8 @@ class _RoomPainter extends CustomPainter {
     }
 
     if (!skiSnow) {
-      final windy = scene?.weather?.wet ?? false;
+      // Round 79: by the wind (it was the rain): still when calm.
+      final wind = scene?.wind ?? PipWind.breeze;
       if (props.contains(PipProp.trees)) {
         // Round 74: each spot's tree its own look (an oak, a birch, a pine;
         // Round 75: by the season).
@@ -1060,11 +1061,7 @@ class _RoomPainter extends CustomPainter {
             final crown = y < crownRows;
             final reach = (crown ? 1 - y / crownRows : 0.0) *
                 (kind == PipTreeKind.pine ? 0.5 : 1);
-            final sway =
-                (math.sin(brain.sceneClock * (windy ? 2.6 : 1.3) + i * 1.7) *
-                        reach *
-                        (windy ? 2.2 : 1.2))
-                    .roundToDouble();
+            final sway = treeSway(wind, brain.sceneClock, i, reach);
             for (var x = 0; x < art[y].length; x++) {
               var colour = colours[art[y][x]];
               if (colour == null) continue;
@@ -2049,6 +2046,17 @@ set debugTreeSpots(List<PipTreeSpot> spots) => _treeSpots = spots;
 
 /// A tree's spot (a share of the room's width) and the rolls that pick
 /// its look by the season ([PipTreeSpot.kindIn]).
+/// How far (whole pixels) tree [i]'s row sways at [clock] seconds, its
+/// [reach] (0 at the trunk, 1 at the crown's top) in [wind] (Round 79:
+/// still when calm, a light sway in a breeze, hard when windy).
+double treeSway(PipWind wind, double clock, int i, double reach) =>
+    switch (wind) {
+      PipWind.calm => 0.0,
+      PipWind.breeze => (math.sin(clock * 1.3 + i * 1.7) * reach * 1.2),
+      PipWind.windy => (math.sin(clock * 2.6 + i * 1.7) * reach * 2.2),
+    }
+        .roundToDouble();
+
 typedef PipTreeSpot = ({double at, double pine, double kind});
 
 /// Round 75: how often a tree is a pine (green all year): rarely, but

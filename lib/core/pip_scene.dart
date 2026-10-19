@@ -333,6 +333,9 @@ class PipScene {
   final WeatherKind? weather;
   final int strength;
 
+  /// Round 79: how windy (his trees sway by it).
+  final PipWind wind;
+
   const PipScene._(
     this.place,
     this.background,
@@ -343,15 +346,18 @@ class PipScene {
     this.occasion,
     this.weather,
     this.strength = 0,
+    this.wind = PipWind.breeze,
   });
 
-  /// [weather]: Open-Meteo's code now (Round 70), if it's on; [look]:
-  /// what Pip Home is trying on, over all of it.
+  /// [weather]: Open-Meteo's code now (Round 70), if it's on, and the
+  /// wind (km/h, Round 79); [look]: what Pip Home is trying on, over all
+  /// of it (its weather tried on: windy if wet, else a breeze).
   factory PipScene.at(
     PipPlace place,
     DateTime now, {
     PipBackground? background = PipBackground.field,
     int? weatherCode,
+    double? windSpeed,
     PipLook look = PipLook.none,
   }) {
     final part = look.part ?? dayPartAt(now);
@@ -405,6 +411,10 @@ class PipScene {
       occasion: occasion,
       weather: weather,
       strength: strength,
+      wind: switch (look.weather) {
+        final tried? => tried.wet ? PipWind.windy : PipWind.breeze,
+        null => PipWind.of(windSpeed, weather),
+      },
     );
   }
 

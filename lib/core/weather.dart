@@ -38,6 +38,31 @@ enum WeatherKind {
       values.where((k) => k.name == name).firstOrNull;
 }
 
+/// How windy it is (Round 79, Nikola: trees sway only in the wind).
+enum PipWind {
+  /// Still: the trees don't sway.
+  calm,
+
+  /// A light sway (also when the wind isn't known: the weather off).
+  breeze,
+
+  /// Swaying hard.
+  windy;
+
+  /// Below this (km/h, at 10 m) it's calm; from [windyFrom] windy.
+  static const breezeFrom = 12.0;
+  static const windyFrom = 30.0;
+
+  /// The wind for [speed] km/h (null: not known, a breeze) in [weather]
+  /// (a storm's windy whatever it says).
+  static PipWind of(double? speed, WeatherKind? weather) {
+    if (weather == WeatherKind.storm) return windy;
+    if (speed == null) return breeze;
+    if (speed >= windyFrom) return windy;
+    return speed >= breezeFrom ? breeze : calm;
+  }
+}
+
 /// How heavy a WMO [code]'s rain or snow is, 1 (light) to 3 (heavy); 0
 /// for neither.
 int weatherStrength(int code) => switch (code) {

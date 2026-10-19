@@ -170,8 +170,10 @@ class _WeatherNow extends ConsumerWidget {
           ? formatMinutes(at.hour * 60 + at.minute)
           : formatDay(at, today: day);
       final kind = WeatherKind.fromCode(report.code)?.label ?? 'Weather';
+      // Round 79: the wind too, when it came.
+      final wind = report.wind == null ? '' : ', ${report.wind!.round()} km/h';
       text = 'Now: $kind, '
-          '${report.temperature.round()}°C · updated $when';
+          '${report.temperature.round()}°C$wind · updated $when';
     } else {
       text = 'No weather yet';
     }
