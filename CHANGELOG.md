@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.34.0] - 2026-10-19
+
 ### Added
 - **Pip and the weather** (with the weather on in Internet Access, or
   tried on in Pip Home):
