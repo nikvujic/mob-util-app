@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.29.0] - 2026-10-19
+
 ### Added
 - **Internet Access** in the menu (second to last). The app uses no
   internet unless a service is turned on there; the first is the
