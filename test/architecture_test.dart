@@ -125,6 +125,9 @@ const plainScrollAllowed = {
   'pages/hub/date_reminder_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
+  // All the planner's reminders (Round 70): a list in a bottom sheet,
+  // capped in height, already at the bottom.
+  'pages/planner/reminders_sheet.dart',
   // The sounds to pick from (Round 39): a short list in a bottom sheet.
   'pages/notifications/notifications.dart',
   // A note's text while editing: a pull would move the text being typed.

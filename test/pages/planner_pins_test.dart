@@ -45,7 +45,7 @@ void main() {
   testWidgets('the bell button adds one, from the next full hour',
       (tester) async {
     await openPlanner(tester);
-    await tester.tap(find.byTooltip('Add reminder'));
+    await tester.tap(find.byTooltip('Reminders'));
     await tester.pumpAndSettle();
 
     expect(find.text('At'), findsOneWidget);
@@ -70,7 +70,7 @@ void main() {
 
   testWidgets('it can be at any minute, 23:59 too', (tester) async {
     await openPlanner(tester);
-    await tester.tap(find.byTooltip('Add reminder'));
+    await tester.tap(find.byTooltip('Reminders'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(OutlinedButton, '11:00'));
     await tester.pumpAndSettle();
@@ -241,6 +241,105 @@ void main() {
         matching: find.byIcon(Icons.notifications),
       );
       expect(tester.getSize(bell).height, 20);
+    });
+  });
+
+  group('the reminders list (Round 70)', () {
+    final list = find.text('Reminders');
+
+    Future<void> openList(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('Reminders'));
+      await tester.pumpAndSettle();
+    }
+
+    String subtitleOf(WidgetTester tester, String title) {
+      final tile = tester.widget<CheckboxListTile>(find.ancestor(
+          of: find.text(title), matching: find.byType(CheckboxListTile)));
+      return (tile.subtitle! as Text).data!;
+    }
+
+    testWidgets('every one, the next first with its day and time; gone by last',
+        (tester) async {
+      await openPlanner(tester);
+      pins()
+        ..add(today.add(const Duration(days: 3)), 'Dentist', time: at(9))
+        ..add(today, 'Call mum', time: at(18.5))
+        ..add(today, 'Tea', time: at(11))
+        ..add(today.add(const Duration(days: 1)), 'Bins', time: at(7))
+        ..add(today.subtract(const Duration(days: 1)), 'Old', time: at(20))
+        ..add(today, 'Missed', time: at(8));
+      await openList(tester);
+      expect(list, findsOneWidget);
+      final titles = tester
+          .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+          .map((t) => (t.title as Text).data)
+          .toList();
+      expect(titles, ['Tea', 'Call mum', 'Bins', 'Dentist', 'Missed', 'Old']);
+      expect(subtitleOf(tester, 'Tea'), 'Next · Today · 11:00');
+      expect(subtitleOf(tester, 'Call mum'), 'Today · 18:30');
+      expect(subtitleOf(tester, 'Bins'), 'Tomorrow · 07:00');
+      expect(subtitleOf(tester, 'Dentist'), 'Sun, 11 Oct · 09:00');
+      expect(subtitleOf(tester, 'Missed'), 'Today · 08:00');
+      expect(subtitleOf(tester, 'Old'), 'Yesterday · 20:00');
+      expect(find.text('Gone by, not ticked off'), findsOneWidget);
+    });
+
+    testWidgets('several ticked and deleted at once, with Undo',
+        (tester) async {
+      await openPlanner(tester);
+      pins()
+        ..add(today, 'Tea', time: at(11))
+        ..add(today, 'Call mum', time: at(18))
+        ..add(today, 'Bins', time: at(20));
+      await openList(tester);
+      expect(find.byKey(const Key('remindersDelete')), findsNothing);
+      await tester.tap(find.text('Tea'));
+      await tester.tap(find.text('Bins'));
+      await tester.pump();
+      expect(find.text('Delete 2'), findsOneWidget);
+      await tester.tap(find.text('Bins'));
+      await tester.pump();
+      expect(find.text('Delete 1'), findsOneWidget);
+      await tester.tap(find.text('Bins'));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('remindersDelete')));
+      await tester.pumpAndSettle();
+      expect(list, findsNothing);
+      expect(container.read(pinsProvider).map((p) => p.title), ['Call mum']);
+      expect(find.text('2 reminders deleted'), findsOneWidget);
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(container.read(pinsProvider).map((p) => p.title),
+          unorderedEquals(['Tea', 'Call mum', 'Bins']));
+    });
+
+    testWidgets('one deleted: its name in the toast', (tester) async {
+      await openPlanner(tester);
+      pins().add(today, 'Tea', time: at(11));
+      await openList(tester);
+      await tester.tap(find.text('Tea'));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('remindersDelete')));
+      await tester.pumpAndSettle();
+      expect(find.text('Tea: deleted'), findsOneWidget);
+      expect(container.read(pinsProvider), isEmpty);
+    });
+
+    testWidgets('Add reminder from the list; with none, straight to adding',
+        (tester) async {
+      await openPlanner(tester);
+      await openList(tester);
+      expect(list, findsNothing);
+      expect(find.text('At'), findsOneWidget, reason: 'the add sheet');
+      await pressBack(tester);
+
+      pins().add(today, 'Tea', time: at(11));
+      await openList(tester);
+      expect(list, findsOneWidget);
+      await tester.tap(find.byKey(const Key('remindersAdd')));
+      await tester.pumpAndSettle();
+      expect(list, findsNothing);
+      expect(find.text('At'), findsOneWidget);
     });
   });
 }

@@ -33,7 +33,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 ## Planner
 - The strip at the bottom picks the day.
 - Each day is a **timeline**: tap free time to add a block that starts about where you tapped.
-- Tap the **left edge**, by the hours, to add a **reminder** at that time (or use the bell button at the bottom).
+- Tap the **left edge**, by the hours, to add a **reminder** at that time (or use the bell button at the bottom, which also **lists all your reminders**, the next first: tick several to delete them at once).
 - **Routines** repeat on the weekdays you pick; edit them from the Routines button.
 - Blocks can have a **colour**, a **description** and a **reminder** before they start.
 - Times that run into another block turn red; **Find a free time** moves them.

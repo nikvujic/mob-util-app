@@ -395,7 +395,7 @@ Noted; adventures first (go given), the rest after.
   **text quantity** ("1-2") beside the pickers, which Shop takes too
   (ingredients go to Shop). Round 70: a **Text** choice in both amount
   sheets.
-- [ ] **Planner reminders button**: a list of all scheduled reminders,
+- [x] **Planner reminders button**: a list of all scheduled reminders,
   next first with their times, with checkboxes to delete several.
 - [ ] **Hub pages ideas** (to talk through).
 - [x] **Pip**: the charging station seemed to flash when the app opened

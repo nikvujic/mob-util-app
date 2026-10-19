@@ -21,6 +21,10 @@ Release with the installable APK.
   back to none. A recipe's quantity sheet has **Text** too, and an
   ingredient's typed quantity (or spoons, "300 ml") now goes to Shop as
   its typed amount, instead of no amount.
+- **Planner: all reminders.** The bell button now lists every reminder,
+  the next first, with its day and time (those gone by, not ticked off,
+  last). Tick several and **Delete** them at once (with Undo), or **Add
+  reminder** from there. With none yet, it goes straight to adding one.
 
 ## [1.27.0] - 2026-10-19
 

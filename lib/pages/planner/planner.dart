@@ -11,6 +11,7 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/pages/planner/add_task_sheet.dart';
 import 'package:the_app/pages/planner/routines.dart';
 import 'package:the_app/pages/planner/pin_menu.dart';
+import 'package:the_app/pages/planner/reminders_sheet.dart';
 import 'package:the_app/pages/planner/timeline.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/notification_target_provider.dart';
@@ -494,6 +495,33 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     done ? _pinDone(pin) : await _editPin(pin);
   }
 
+  /// The bell button (Round 70): every reminder, the next first, to look
+  /// over, delete several, or add one ([day]'s); with none yet, straight
+  /// to adding one.
+  Future<void> _reminders(DateTime day) async {
+    final all = ref.read(pinsProvider);
+    if (all.isEmpty) return _addPin(day);
+    final choice = await showRemindersSheet(context, pins: all, now: _now);
+    if (choice == null || !mounted) return;
+    if (choice.add) return _addPin(day);
+    final pins = ref.read(pinsProvider.notifier);
+    final removed = [for (final pin in choice.delete) pins.remove(pin.id)];
+    final count = removed.length;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(count == 1
+              ? '${removed.single.title}: deleted'
+              : '$count reminders deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => removed.forEach(pins.restore),
+          ),
+        ),
+      );
+  }
+
   /// Ticking a reminder off deletes it (Nikola), with undo.
   void _pinDone(PlannerPin pin) => _removePin(pin, 'done');
 
@@ -679,7 +707,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                 )
               // No + button: free time on the timeline is where tasks are
               // added. Routines have their own screen; reminders (P14) are
-              // added here, outermost.
+              // listed and added here, outermost (Round 70).
               : BottomActions(
                   actions: [
                     BottomAction(
@@ -688,9 +716,9 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                       onPressed: () => _openRoutines(day),
                     ),
                     BottomAction(
-                      icon: Icons.add_alert_outlined,
-                      tooltip: 'Add reminder',
-                      onPressed: () => _addPin(day),
+                      icon: Icons.notifications_active_outlined,
+                      tooltip: 'Reminders',
+                      onPressed: () => _reminders(day),
                     ),
                   ],
                 ),
