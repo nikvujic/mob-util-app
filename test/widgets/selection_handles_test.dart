@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/widgets/format_bar.dart';
@@ -35,5 +36,41 @@ void main() {
       expect(drawn.top, box.top, reason: type.name);
       expect(drawn.height, lessThan(kMinInteractiveDimension));
     }
+  });
+
+  testWidgets(
+      'the cursor\'s one handle is drawn under the cursor, not off to the '
+      'side', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    final text = TextEditingController(text: 'Hello world, a line of text');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: TextField(
+            controller: text,
+            selectionControls: controls,
+            maxLines: null,
+          ),
+        ),
+      ),
+    ));
+    final at = tester.getTopLeft(find.byType(TextField)) + const Offset(40, 10);
+    // Focused by the first tap; the second shows the handle.
+    for (var i = 0; i < 2; i++) {
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+    }
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText))
+        .renderEditable;
+    final caret = editable.localToGlobal(
+        editable.getLocalRectForCaret(text.selection.base).center);
+    final handle = tester.getRect(find.byWidgetPredicate(
+        (w) => w is ValueListenableBuilder<Set<TextSelectionHandleType>>));
+    expect(handle.width, lessThan(kMinInteractiveDimension));
+    expect(handle.center.dx, closeTo(caret.dx, 2));
+    debugDefaultTargetPlatformOverride = null;
   });
 }

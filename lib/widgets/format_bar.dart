@@ -37,8 +37,10 @@ class FormatBarSelectionControls extends MaterialTextSelectionControls
     double textHeight, [
     VoidCallback? onTap,
   ]) {
-    final handle = SizedBox(
-      height: getHandleSize(textHeight).height,
+    // Its width too: the cursor's handle is given room to spread into,
+    // and centred in it, it was drawn off to the side.
+    final handle = SizedBox.fromSize(
+      size: getHandleSize(textHeight),
       child: Align(
         alignment: Alignment.topCenter,
         child: super.buildHandle(context, type, textHeight, onTap),

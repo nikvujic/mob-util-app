@@ -6,6 +6,11 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- **Notes** (and everywhere text is edited): since v1.27.0, tapping in
+  the text showed the cursor's handle far off to the right of the
+  cursor, every time.
+
 ## [1.28.0] - 2026-10-19
 
 ### Added
