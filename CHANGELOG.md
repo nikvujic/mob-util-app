@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.33.0] - 2026-10-19
+
 ### Added
 - **Pip's trees** come in three looks: the oak, a **birch** (white bark,
   a tall crown, bare twigs hanging in winter) and a **pine** (green all
