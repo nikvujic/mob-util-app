@@ -436,7 +436,8 @@ Pip:
   is allowed.
 - [ ] **Angry animation**: his hand goes too far from his body; keep it
   closer.
-- [ ] **Backgrounds** (answered below, waiting on Nikola's call): trees,
+- [x] **Backgrounds** (Round 70: seasons, trees, Halloween, Christmas,
+  New Year's Eve, Easter, the weather; previews in Pip Home): trees,
   seasons, event backgrounds (Halloween, New Year…), weather (rain,
   snow, clouds); moving parts (trees swaying, leaves falling, snoring
   Zs, clouds drifting). No location permission.

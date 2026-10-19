@@ -612,4 +612,44 @@ abstract final class PipColours {
   static const panelEdge = Color(0xFF4A3F38);
   static const key = Color(0xFF36302C);
   static const dim = Color(0xFF9A8F86); // quieter words on the panel
+
+  // Round 70: the seasons, occasions and weather in his field.
+  static const leafSpring = Color(0xFF8CC65A);
+  static const leafSpringDark = Color(0xFF5E9A3C);
+  static const blossom = Color(0xFFF7B8CC);
+  static const blossomLight = Color(0xFFFCE0EA);
+  static const leafSummer = Color(0xFF4F8E35);
+  static const leafSummerDark = Color(0xFF356A26);
+  static const leafAutumn = Color(0xFFE08A2E);
+  static const leafAutumnDark = Color(0xFFB8521F);
+  static const leafAutumnLight = Color(0xFFF2C14E);
+  static const bark = Color(0xFF6E4A2E);
+  static const barkDark = Color(0xFF4F3420);
+  static const grassAutumn = Color(0xFF7D8A3A);
+  static const grassAutumnLight = Color(0xFFA3A64C);
+  static const grassWinter = Color(0xFF5F7A55);
+  static const frost = Color(0xFFD8E4EA);
+  static const pumpkin = Color(0xFFE5782A);
+  static const pumpkinDark = Color(0xFFB4561A);
+  static const pumpkinStem = Color(0xFF4F6B2A);
+  static const pumpkinGlow = Color(0xFFFFD45A);
+  static const bat = Color(0xFF15111C);
+  static const lightRed = Color(0xFFE8463C);
+  static const lightGold = Color(0xFFFFD45A);
+  static const lightBlue = Color(0xFF5AB4F0);
+  static const lightGreen = Color(0xFF7FE07A);
+  static const starGold = Color(0xFFFFE07A);
+  static const eggPink = Color(0xFFF2A0C0);
+  static const eggBlue = Color(0xFF8FC4F0);
+  static const eggYellow = Color(0xFFF6DA6A);
+  static const eggRed = Color(0xFFE0574A);
+  static const raindrop = Color(0xFFB8CDE6);
+  static const fog = Color(0xFFDCE2E8);
+  static const lightning = Color(0xFFFFF6C8);
+  static const cloudGrey = Color(0xFFB4BCC6);
+  static const cloudGreyShade = Color(0xFF8E98A4);
+  static const cloudGreyLight = Color(0xFFD2D8DE);
+  static const cloudNight = Color(0xFF3A4150);
+  static const cloudNightShade = Color(0xFF2C3240);
+  static const cloudNightLight = Color(0xFF4A5262);
 }

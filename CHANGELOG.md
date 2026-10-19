@@ -13,6 +13,20 @@ Release with the installable APK.
   city, pick it from the matches, add more to switch between them. It's
   fetched every hour or so while the app is open, for Pip's sky; the
   page shows the weather now and fetches it again on a tap.
+- **Pip's field through the year.** A tree in its season's colours
+  (blossom and drifting petals in spring, green in summer, orange with
+  leaves falling in autumn, bare in winter), swaying in the wind; the
+  grass changes too, and clouds drift by. It dresses up for
+  **Halloween** (lanterns lit after dark, bats), **Christmas** (a pine
+  with blinking lights, 20 December to 7 January), **New Year's Eve**
+  (fireworks) and **Easter** (painted eggs).
+- **The weather in his sky**, with Internet Access's weather on: grey
+  clouds over the sun and stars, rain or drizzle, snow falling (and on
+  the ground), fog, and storms with lightning. No flowers or
+  butterflies in rain, snow or winter; no shooting stars under clouds.
+- Pip's page: under **Background**, try a **season**, the **weather**,
+  one of his **days** or a **time of day** on his field (with a
+  background and a hat; gone when you swipe back).
 
 ## [1.28.1] - 2026-10-19
 

@@ -1022,6 +1022,133 @@ abstract final class PipSprites {
     'R': PipColours.heart,
   };
 
+  // Round 70: his field through the year.
+
+  /// A tree, 15 x 18: its crown in [treeColours] for the season ('L'
+  /// leaves, 'D' darker, 'B' blossom or a lighter leaf), 'T' and 'U' its
+  /// trunk. The crown is its first [treeCrown] rows (they sway).
+  static const tree = [
+    '.....LLLLL.....',
+    '...LLLLBLLLL...',
+    '..LLBLLLLLLLL..',
+    '.LLLLLLLLLBLLL.',
+    '.LLLLLDLLLLLLL.',
+    'LLLBLLLLLLLLBLL',
+    'LLLLLLLLLDLLLLL',
+    'LLDLLLLBLLLLLDL',
+    '.LLLLLLLLLLLLL.',
+    '.LLBLLLLDLLBLL.',
+    '..DLLLLLLLLLD..',
+    '...DDLLLLLDD...',
+    '.....DTTUD.....',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '.....TTTUU.....',
+  ];
+  static const treeCrown = 12;
+
+  /// The same tree in winter, bare (its branches sway as a crown).
+  static const bareTree = [
+    '..U.....T....U.',
+    '...T..U..T..T..',
+    '....T.T..T.T...',
+    '.T...TT.TU...T.',
+    '..T...TTU...T..',
+    '...TU..T..UT...',
+    '.....T.T.U.....',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '......TTU......',
+    '.....TTTUU.....',
+  ];
+
+  /// The tree's colours in each season (by its index: spring, summer,
+  /// autumn, winter).
+  static const treeColours = [
+    {
+      'L': PipColours.leafSpring,
+      'D': PipColours.leafSpringDark,
+      'B': PipColours.blossom,
+      'T': PipColours.bark,
+      'U': PipColours.barkDark,
+    },
+    {
+      'L': PipColours.leafSummer,
+      'D': PipColours.leafSummerDark,
+      'B': PipColours.leafSpring,
+      'T': PipColours.bark,
+      'U': PipColours.barkDark,
+    },
+    {
+      'L': PipColours.leafAutumn,
+      'D': PipColours.leafAutumnDark,
+      'B': PipColours.leafAutumnLight,
+      'T': PipColours.bark,
+      'U': PipColours.barkDark,
+    },
+    {
+      'T': PipColours.bark,
+      'U': PipColours.barkDark,
+    },
+  ];
+
+  /// Christmas's pine, 13 x 20: a star on top, lights 'a' to 'd' (they
+  /// blink, each in turn: [festiveLights]).
+  static const festiveTree = [
+    '......S......',
+    '.....SSS.....',
+    '......S......',
+    '.....GaG.....',
+    '....GGgGG....',
+    '...GbGGGcG...',
+    '....GGgGG....',
+    '...GGGdGGG...',
+    '..GaGgGGGbG..',
+    '...GGGGgGG...',
+    '..GGcGGGaGG..',
+    '.GgGGGGGGGgG.',
+    '..GdGGgGGcG..',
+    '.GGGGbGGGGGG.',
+    'GGaGGGgGGdGGG',
+    '.GGgGGGGGGgG.',
+    'GGGGcGGGaGGGG',
+    '.....ttt.....',
+    '.....ttt.....',
+    '....ttttt....',
+  ];
+  static const festiveLights = [
+    PipColours.lightRed,
+    PipColours.lightGold,
+    PipColours.lightBlue,
+    PipColours.lightGreen,
+  ];
+
+  /// Halloween's jack-o'-lantern, 7 x 6; its face 'y' lit after dark.
+  static const pumpkin = [
+    '...s...',
+    '.pPsPp.',
+    'pPpppPp',
+    'pyPpPyp',
+    'pPyyyPp',
+    '.ppppp.',
+  ];
+
+  /// A bat, 7 x 3, wings up and down.
+  static const batUp = ['b.....b', 'bb.b.bb', '..bbb..'];
+  static const batDown = ['..bbb..', 'bb.b.bb', 'b.....b'];
+
+  /// An Easter egg, 3 x 4: 'e' its colour, 'E' a stripe.
+  static const easterEgg = ['.e.', 'eEe', 'eee', '.e.'];
+
   /// How many rows a frame has.
   static int get height => _head.length + 3;
 }

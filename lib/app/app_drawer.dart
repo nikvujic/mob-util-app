@@ -9,6 +9,7 @@ import 'package:the_app/pages/notifications/notifications.dart';
 import 'package:the_app/pages/security/security.dart';
 import 'package:the_app/pages/settings/settings.dart';
 import 'package:the_app/pages/settings/themes.dart';
+import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/core/clock.dart';
@@ -193,7 +194,12 @@ class AppDrawer extends ConsumerWidget {
               // His energy, sleep and batteries (Round 37).
               link: ref.watch(pipLinkProvider),
               // His sky follows the time of day (Round 35).
-              scene: PipScene.at(PipPlace.room, ref.watch(clockProvider)()),
+              scene: PipScene.at(
+                PipPlace.room,
+                ref.watch(clockProvider)(),
+                // Round 70: the weather, if it's on in Internet Access.
+                weatherCode: ref.watch(skyWeatherProvider),
+              ),
               // Round 52: in the menu he may be thrown in by its swing.
               entrances: const {
                 PipEntrance.ground,

@@ -9,6 +9,7 @@ import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/core/weather.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
 /// Pip's room (Round 26): a strip of field at the bottom of the menu where
@@ -406,8 +407,14 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
           builder: (context, box) {
             widget.brain.roomWidth = (box.maxWidth / pixel).floor();
             widget.brain.skyRows = widget.height - PipRoom.ground;
-            widget.brain.dark = widget.scene?.part == DayPart.night ||
-                widget.scene?.part == DayPart.dusk;
+            final scene = widget.scene;
+            widget.brain.dark =
+                scene?.part == DayPart.night || scene?.part == DayPart.dusk;
+            widget.brain.overcast = scene?.grey ?? false;
+            widget.brain.bleak = scene != null &&
+                (scene.season == Season.winter ||
+                    scene.props.contains(PipProp.rain) ||
+                    scene.props.contains(PipProp.snowfall));
             return SizedBox(
               width: box.maxWidth,
               height: widget.height * pixel,
@@ -455,6 +462,17 @@ class _RoomPainter extends CustomPainter {
           if (x * x + y * y <= r * r + r) {
             dot((cx + x).toDouble(), (cy + y).toDouble(), colour);
           }
+        }
+      }
+    }
+
+    /// Round 70: [rows] drawn in [colours], top left at [left], [top].
+    void pixels(List<String> rows, double left, double top,
+        Map<String, Color> colours) {
+      for (var y = 0; y < rows.length; y++) {
+        for (var x = 0; x < rows[y].length; x++) {
+          final colour = colours[rows[y][x]];
+          if (colour != null) dot(left + x, top + y, colour);
         }
       }
     }
@@ -509,7 +527,8 @@ class _RoomPainter extends CustomPainter {
 
     /// A pixel cloud (Round 52: three shapes, lit on top and shaded
     /// underneath; warm at dawn and dusk), its top left at [x], [y].
-    void cloud(double x, double y, int shape, DayPart part) {
+    void cloud(double x, double y, int shape, DayPart part,
+        {bool grey = false}) {
       const shapes = [
         [
           '...lll.....',
@@ -529,11 +548,23 @@ class _RoomPainter extends CustomPainter {
         ['..ll...', '.lccll.', 'cccccc.', '.ssss..'],
       ];
       final warm = part == DayPart.dawn || part == DayPart.dusk;
-      final colours = {
-        'l': PipColours.cloudLight,
-        'c': warm ? PipColours.cloudWarm : PipColours.cloud,
-        's': warm ? PipColours.cloudWarmShade : PipColours.cloudShade,
-      };
+      final night = part == DayPart.night;
+      // Round 70: grey under a grey sky, dark ones at night.
+      final colours = grey
+          ? {
+              'l': night
+                  ? PipColours.cloudNightLight
+                  : PipColours.cloudGreyLight,
+              'c': night ? PipColours.cloudNight : PipColours.cloudGrey,
+              's': night
+                  ? PipColours.cloudNightShade
+                  : PipColours.cloudGreyShade,
+            }
+          : {
+              'l': PipColours.cloudLight,
+              'c': warm ? PipColours.cloudWarm : PipColours.cloud,
+              's': warm ? PipColours.cloudWarmShade : PipColours.cloudShade,
+            };
       final rows = shapes[shape % shapes.length];
       for (var j = 0; j < rows.length; j++) {
         for (var i = 0; i < rows[j].length; i++) {
@@ -638,23 +669,106 @@ class _RoomPainter extends CustomPainter {
             final core = (bodyR / 3).ceil();
             disc(bodyX - 1, bodyY - 1, core, PipColours.sunCore);
           case PipProp.clouds:
-            final spots = home
-                ? const [
-                    (0.08, 0.18),
-                    (0.36, 0.08),
-                    (0.55, 0.3),
-                    (0.78, 0.45),
-                    (0.2, 0.5),
-                  ]
-                : const [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)];
-            // Round 63: out, they drift slowly back as he runs.
-            final drift = (brain.run?.shift ?? 0) * 0.12;
+            final spots = [
+              ...home
+                  ? const [
+                      (0.08, 0.18),
+                      (0.36, 0.08),
+                      (0.55, 0.3),
+                      (0.78, 0.45),
+                      (0.2, 0.5),
+                    ]
+                  : const [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)],
+              // Round 70: more under a grey sky, or a few more clouds.
+              if (scene.grey || scene.weather == WeatherKind.partlyCloudy)
+                ...home
+                    ? const [
+                        (0.0, 0.05),
+                        (0.27, 0.28),
+                        (0.48, 0.02),
+                        (0.66, 0.15),
+                        (0.9, 0.08),
+                        (0.42, 0.42),
+                      ]
+                    : const [(0.0, 0.05), (0.35, 0.3), (0.68, 0.02)],
+            ];
+            // Round 63: out, they drift slowly back as he runs; Round 70:
+            // and drift by anyway, slowly.
+            final drift =
+                (brain.run?.shift ?? 0) * 0.12 + brain.sceneClock * 0.4;
             for (final (i, (cx, cy)) in spots.indexed) {
               final wide = columns + 24;
               final at = ((columns * cx - drift) % wide + wide) % wide - 12;
               cloud(at.floorToDouble(), (groundTop * cy).floorToDouble(), i,
-                  scene.part);
+                  scene.part,
+                  grey: scene.grey);
             }
+          case PipProp.bats:
+            // Round 70: Halloween's bats, flapping across.
+            final t = brain.sceneClock;
+            for (var i = 0; i < (home ? 3 : 2); i++) {
+              final wide = columns + 14;
+              final bx = (columns * i / 3 + t * (6 + 3 * i)) % wide - 7;
+              final by =
+                  groundTop * (0.18 + 0.13 * i) + 2 * math.sin(t * 2 + i);
+              pixels(
+                  (t * 5 + i).floor().isEven
+                      ? PipSprites.batUp
+                      : PipSprites.batDown,
+                  bx.floorToDouble(),
+                  by.floorToDouble(),
+                  const {'b': PipColours.bat});
+            }
+          case PipProp.fireworks:
+            // Round 70: New Year's Eve: rockets up, bursts, fading.
+            final t = brain.sceneClock;
+            const colours = [
+              PipColours.lightRed,
+              PipColours.lightGold,
+              PipColours.lightBlue,
+              PipColours.lightGreen,
+            ];
+            for (var k = 0; k < 3; k++) {
+              const period = 2.4;
+              final local = t + k * 0.8;
+              final cycle = (local / period).floor();
+              final p = (local % period) / period;
+              final h = _hash(cycle * 3 + k);
+              final cx = (10 + h % math.max(1, columns - 20)).toDouble();
+              final cy = (groundTop * (0.12 + 0.1 * (h % 3))).floorToDouble();
+              if (p < 0.25) {
+                final y = groundTop - (groundTop - cy) * (p / 0.25);
+                dot(cx, y.floorToDouble(), PipColours.lightGold);
+              } else {
+                final q = (p - 0.25) / 0.75;
+                final r = q * (home ? 11 : 8);
+                final colour =
+                    colours[(h ~/ 3) % colours.length].withValues(alpha: 1 - q);
+                for (var a = 0; a < 12; a++) {
+                  final angle = a * math.pi / 6;
+                  dot(
+                      (cx + math.cos(angle) * r).roundToDouble(),
+                      (cy + math.sin(angle) * r + q * 3).roundToDouble(),
+                      colour);
+                }
+              }
+            }
+          case PipProp.lightning:
+            // Round 70: a storm's bolt now and then (the flash is drawn
+            // over everything, at the end).
+            final phase = brain.sceneClock % _stormEvery;
+            if (phase < _flashTime) {
+              final cycle = (brain.sceneClock / _stormEvery).floor();
+              var x = (_hash(cycle) % math.max(1, columns - 10) + 5).toDouble();
+              for (var y = 0.0; y < groundTop * 0.6; y++) {
+                dot(x, y, PipColours.lightning);
+                if (y % 3 == 2) x += _hash(cycle + y.toInt()).isEven ? 1 : -1;
+              }
+            }
+          default:
+            // Round 70: the field's things are drawn on the ground, the
+            // weather over everything.
+            break;
         }
       }
     }
@@ -683,10 +797,18 @@ class _RoomPainter extends CustomPainter {
     // now and then shows it).
     final run = brain.run;
     final shift = run?.shift.floor() ?? 0;
-    // Round 67: a ski day's snow instead of grass.
-    final snowy = brain.snowing;
+    // Round 67: a ski day's snow instead of grass; Round 70: or while it
+    // snows. The grass in its season's colours.
+    final skiSnow = brain.snowing;
+    final snowy = skiSnow || (scene?.snowyGround ?? false);
+    final season = scene?.season;
+    final (grass, grassLight) = switch (season) {
+      Season.autumn => (PipColours.grassAutumn, PipColours.grassAutumnLight),
+      Season.winter => (PipColours.grassWinter, PipColours.frost),
+      _ => (PipColours.grass, PipColours.grassLight),
+    };
     // Pines along the back on a ski day.
-    if (snowy) {
+    if (skiSnow) {
       for (final at in const [0.12, 0.42, 0.7, 0.9]) {
         final px = ((columns * at - shift * 0.5) % (columns + 12)) - 6;
         sprite(PipSprites.pine, px.floorToDouble(),
@@ -747,16 +869,19 @@ class _RoomPainter extends CustomPainter {
         if ((x + road) % 12 < 6) {
           dot(x.toDouble(), groundTop + 2, PipColours.roadLine);
         }
-        dot(x.toDouble(), groundTop - 1,
-            snowy ? PipColours.snow : PipColours.grass);
+        dot(x.toDouble(), groundTop - 1, snowy ? PipColours.snow : grass);
         continue;
       }
       final gx = x + shift;
       final h = (gx * 7919) % 13; // the same tufts every time
-      dot(x.toDouble(), groundTop, snowy ? PipColours.snow : PipColours.grass);
+      dot(x.toDouble(), groundTop, snowy ? PipColours.snow : grass);
       if (h < 3) {
-        dot(x.toDouble(), groundTop - 1,
-            snowy ? PipColours.snow : PipColours.grassLight);
+        dot(x.toDouble(), groundTop - 1, snowy ? PipColours.snow : grassLight);
+      }
+      // Round 70: autumn's fallen leaves on the grass.
+      if (!snowy && season == Season.autumn && (gx * 131) % 17 == 0) {
+        dot(x.toDouble(), groundTop,
+            gx.isEven ? PipColours.leafAutumnDark : PipColours.leafAutumnLight);
       }
       if (run != null && !snowy && gx % 47 == 0) {
         dot(x.toDouble(), groundTop - 1, PipColours.batteryCase, 2, 1);
@@ -769,6 +894,105 @@ class _RoomPainter extends CustomPainter {
             snowy
                 ? (speck ? PipColours.snowDark : PipColours.snowShade)
                 : (speck ? PipColours.dirtDark : PipColours.dirt));
+      }
+    }
+
+    // Round 70: his field's things through the year, behind him: a tree
+    // or two swaying (scrolling by as he runs, or rides), Christmas's
+    // pine, Halloween's lanterns, Easter's eggs.
+    final props = scene?.props ?? const <PipProp>{};
+    final home = groundTop > 40;
+    final passing = shift * 0.5 + road * 0.6;
+    double along(double at, double width, double by) {
+      final wide = columns + width * 2;
+      return ((columns * at - by) % wide + wide) % wide - width;
+    }
+
+    if (!skiSnow) {
+      final windy = scene?.weather?.wet ?? false;
+      if (props.contains(PipProp.trees)) {
+        final bare = season == Season.winter;
+        final art = bare ? PipSprites.bareTree : PipSprites.tree;
+        final colours = PipSprites.treeColours[(season ?? Season.summer).index];
+        for (final (i, at)
+            in (home ? const [0.04, 0.7] : const [0.03, 0.76]).indexed) {
+          final left = along(at, 16, passing).floorToDouble();
+          final top = groundTop - art.length;
+          for (var y = 0; y < art.length; y++) {
+            // The crown sways, most at the top.
+            final crown = y < PipSprites.treeCrown;
+            final reach = crown ? 1 - y / PipSprites.treeCrown : 0.0;
+            final sway =
+                (math.sin(brain.sceneClock * (windy ? 2.6 : 1.3) + i * 1.7) *
+                        reach *
+                        (windy ? 2.2 : 1.2))
+                    .roundToDouble();
+            for (var x = 0; x < art[y].length; x++) {
+              var colour = colours[art[y][x]];
+              if (colour == null) continue;
+              // Snow on a bare tree's branches while it snows.
+              if (snowy && bare && y < 8 && (x + y).isEven) {
+                colour = PipColours.snow;
+              }
+              dot(left + x + sway, top + y, colour);
+            }
+          }
+        }
+      }
+      if (props.contains(PipProp.festiveTree)) {
+        final art = PipSprites.festiveTree;
+        final left = along(0.74, 14, passing).floorToDouble();
+        final blink = (brain.sceneClock * 1.5).floor();
+        for (var y = 0; y < art.length; y++) {
+          for (var x = 0; x < art[y].length; x++) {
+            final c = art[y][x];
+            final colour = switch (c) {
+              'G' =>
+                snowy && (x + y) % 3 == 0 ? PipColours.snow : PipColours.pine,
+              'g' => PipColours.pineDark,
+              't' => PipColours.woodDark,
+              'S' => PipColours.starGold,
+              'a' || 'b' || 'c' || 'd' => PipSprites.festiveLights[
+                  (c.codeUnitAt(0) - 97 + blink) %
+                      PipSprites.festiveLights.length],
+              _ => null,
+            };
+            if (colour != null) {
+              dot(left + x, groundTop - art.length + y, colour);
+            }
+          }
+        }
+      }
+      if (props.contains(PipProp.pumpkins)) {
+        final lit = scene?.part == DayPart.night || scene?.part == DayPart.dusk;
+        final flicker = (brain.sceneClock * 7).floor() % 5 == 0;
+        for (final at in home ? const [0.3, 0.58, 0.88] : const [0.32, 0.9]) {
+          final left = along(at, 8, shift.toDouble()).floorToDouble();
+          sprite(PipSprites.pumpkin, left, groundTop, colours: {
+            'p': PipColours.pumpkin,
+            'P': PipColours.pumpkinDark,
+            's': PipColours.pumpkinStem,
+            'y': lit
+                ? (flicker
+                    ? PipColours.leafAutumnLight
+                    : PipColours.pumpkinGlow)
+                : PipColours.pumpkinDark,
+          });
+        }
+      }
+      if (props.contains(PipProp.eggs)) {
+        const colours = [
+          (PipColours.eggPink, PipColours.eggBlue),
+          (PipColours.eggYellow, PipColours.eggRed),
+          (PipColours.eggBlue, PipColours.eggYellow),
+          (PipColours.eggRed, PipColours.screen),
+        ];
+        for (final (i, at) in const [0.2, 0.45, 0.63, 0.86].indexed) {
+          final (e, stripe) = colours[i];
+          sprite(PipSprites.easterEgg,
+              along(at, 4, shift.toDouble()).floorToDouble(), groundTop + 1,
+              colours: {'e': e, 'E': stripe});
+        }
       }
     }
 
@@ -1239,11 +1463,74 @@ class _RoomPainter extends CustomPainter {
             i % 4 == 0 ? PipColours.snowShade : PipColours.flake);
       }
     }
+    // Round 70: the weather, over everything: snow falling (a ski day's
+    // is above), rain, leaves or petals drifting down, fog, a storm's
+    // flash.
+    final t = brain.sceneClock;
+    final tall = height.toDouble();
+    final strength = (scene?.strength ?? 1).clamp(1, 3);
+    if (props.contains(PipProp.snowfall) && !skiSnow) {
+      for (var i = 0; i < columns * strength ~/ 6; i++) {
+        final speedY = 5.0 + (i % 3) * 2;
+        final fx = (i * 37 + 3 * math.sin(t * 0.8 + i)) % columns;
+        final fy = ((i * 53 + t * speedY) % tall + tall) % tall;
+        dot(fx.floorToDouble(), fy.floorToDouble(),
+            i % 4 == 0 ? PipColours.snowShade : PipColours.flake);
+      }
+    }
+    if (props.contains(PipProp.rain)) {
+      final drizzle = scene?.weather == WeatherKind.drizzle;
+      final count = columns * (drizzle ? 1 : strength + 1) ~/ 5;
+      final drop = PipColours.raindrop.withValues(alpha: 0.8);
+      for (var i = 0; i < count; i++) {
+        final speed = 55.0 + (i % 4) * 8;
+        final fy = ((i * 71 + t * speed) % (tall + 4)) - 4;
+        // Slanting a little with the wind.
+        final fx = ((i * 41 + fy * 0.3) % columns).floorToDouble();
+        dot(fx, fy.floorToDouble(), drop, 1, drizzle ? 1 : 2);
+      }
+    }
+    if (props.contains(PipProp.leaves) || props.contains(PipProp.petals)) {
+      final petals = props.contains(PipProp.petals);
+      final colours = petals
+          ? const [PipColours.blossom, PipColours.blossomLight]
+          : const [
+              PipColours.leafAutumn,
+              PipColours.leafAutumnDark,
+              PipColours.leafAutumnLight,
+            ];
+      for (var i = 0; i < (home ? 7 : 4); i++) {
+        final fy = ((i * 29 + t * (4 + i % 3)) % tall);
+        final fx = ((i * 47 + t * 3 + 4 * math.sin(t * 1.2 + i * 2)) % columns +
+                columns) %
+            columns;
+        dot(fx.floorToDouble(), fy.floorToDouble(),
+            colours[i % colours.length]);
+      }
+    }
+    if (props.contains(PipProp.fog)) {
+      final fog = PipColours.fog.withValues(alpha: 0.28);
+      for (var band = 0; band < (home ? 4 : 2); band++) {
+        final top = (groundTop * (0.3 + band * 0.18)).floorToDouble();
+        final drift = (t * (3 + band) + band * 40) % columns;
+        dot(0, top, fog, columns.toDouble(), home ? 7 : 5);
+        dot(drift - columns / 2, top + 2, fog, columns / 2, 3);
+      }
+    }
+    if (props.contains(PipProp.lightning) && t % _stormEvery < _flashTime) {
+      canvas.drawRect(Offset.zero & size,
+          paint..color = PipColours.lightning.withValues(alpha: 0.3));
+    }
     // The egg's bottom half in front of him, as he jumps out of it.
     if (hatching) {
       sprite(PipSprites.eggBottom, eggLeft, groundTop, alpha: shell);
     }
   }
+
+  /// Round 70: a storm's bolt and flash, every [_stormEvery] seconds for
+  /// [_flashTime].
+  static const _stormEvery = 6.5;
+  static const _flashTime = 0.18;
 
   @override
   bool shouldRepaint(_RoomPainter old) => true;

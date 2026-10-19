@@ -92,3 +92,10 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
 final weatherProvider = StateNotifierProvider<WeatherNotifier, WeatherFetch>(
   (ref) => WeatherNotifier(ref),
 );
+
+/// The weather for Pip's sky now (Round 70): Open-Meteo's code, while
+/// it's on and the last report is fresh enough; null for a plain sky.
+final skyWeatherProvider = Provider<int?>((ref) {
+  final internet = ref.watch(preferencesProvider.select((p) => p.internet));
+  return internet.reportAt(ref.watch(clockProvider)())?.code;
+});

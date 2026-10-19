@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:the_app/models/internet.dart';
+import 'package:the_app/core/weather.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/widgets/pixel_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,9 +61,40 @@ void main() {
     final scene = tester.widget<PipRoom>(find.byType(PipRoom)).scene!;
     expect(scene.place, PipPlace.room);
     expect(scene.part, DayPart.night);
-    expect(scene.props, {PipProp.stars, PipProp.moon});
+    // Round 70: his autumn tree and leaves too; no weather (it's off).
+    expect(scene.props,
+        {PipProp.stars, PipProp.moon, PipProp.trees, PipProp.leaves});
+    expect(scene.weather, isNull);
     // Twice the first strip's 32 rows (Round 36): about 160 dp.
     expect(tester.getSize(find.byType(PipRoom)).height, greaterThan(140));
+  });
+
+  testWidgets(
+      'the weather (Round 70): on with a fresh report, his sky shows it; '
+      'an old one, or off, not', (tester) async {
+    final now = DateTime(2026, 10, 13, 12);
+    const place = WeatherPlace(
+        id: '1', name: 'Novi Sad', latitude: 45.25, longitude: 19.84);
+    WeatherReport report(int ago) => WeatherReport(
+        placeId: '1',
+        code: 63,
+        temperature: 9,
+        fetchedAt: now.subtract(Duration(minutes: ago)));
+    final container = await pumpApp(tester,
+        clock: () => now,
+        preferences: Preferences(
+            internet: InternetSettings(
+                weather: true, places: const [place], report: report(30))));
+    await openMenu(tester);
+    PipScene scene() => tester.widget<PipRoom>(find.byType(PipRoom)).scene!;
+    expect(scene().weather, WeatherKind.rain);
+    expect(scene().props, contains(PipProp.rain));
+    // Turned off: a plain sky (and its fetching stops).
+    final prefs = container.read(preferencesProvider.notifier);
+    prefs.setInternet(
+        container.read(preferencesProvider).internet.copyWith(weather: false));
+    await tester.pump();
+    expect(scene().weather, isNull);
   });
 
   group('moving', () {

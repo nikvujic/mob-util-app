@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/providers/weather_provider.dart';
+import 'package:the_app/core/weather.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/sound.dart';
@@ -45,8 +47,13 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   /// his animations; back to his info card (or leaving), they're gone.
   PipBackground _background = PipBackground.field;
 
+  /// Round 70: a season, the weather, an occasion or a time of day tried
+  /// on his field, with the background.
+  PipLook _look = PipLook.none;
+
   void _endPreviews() {
     _background = PipBackground.field;
+    _look = PipLook.none;
     _brain.stopTryingOn();
     // Round 67: an adventure preview stops too.
     _brain.stopPreviews();
@@ -71,6 +78,9 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
       PipPlace.home,
       ref.watch(clockProvider)(),
       background: background,
+      // Round 70: the weather, if it's on in Internet Access.
+      weatherCode: ref.watch(skyWeatherProvider),
+      look: _look,
     );
     return Scaffold(
       appBar: AppBar(title: const Text('Pip')),
@@ -134,6 +144,9 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                     current: background,
                                     pick: (b) =>
                                         setState(() => _background = b),
+                                    look: _look,
+                                    tryOn: (key) => setState(
+                                        () => _look = _look.toggled(key)),
                                     back: () => _show(_Settings.menu),
                                   ),
                                 _Settings.hats => _Hats(
@@ -561,20 +574,52 @@ class _SettingsMenu extends StatelessWidget {
 
 /// His backgrounds to pick from (Round 36: one for now, Field; day and
 /// night are the same one), the one in use marked. Round 57: a preview,
-/// not kept.
+/// not kept. Round 70: under it, what can be tried on it: the seasons,
+/// the weather, the occasions and the times of day (one of each at a
+/// time, tapped again to take it off).
 class _Backgrounds extends StatelessWidget {
   final PipBackground current;
   final ValueChanged<PipBackground> pick;
+  final PipLook look;
+  final ValueChanged<Object> tryOn;
   final VoidCallback back;
 
   const _Backgrounds({
     required this.current,
     required this.pick,
+    required this.look,
+    required this.tryOn,
     required this.back,
   });
 
+  /// What can be tried, in groups: each one's key, label and whether on.
+  static const weathers = [
+    WeatherKind.partlyCloudy,
+    WeatherKind.cloudy,
+    WeatherKind.fog,
+    WeatherKind.drizzle,
+    WeatherKind.rain,
+    WeatherKind.storm,
+    WeatherKind.snow,
+  ];
+
   @override
   Widget build(BuildContext context) {
+    Widget row(Object key, String label, bool on) => _CardRow(
+          key: Key('pipLook-${(key as Enum).name}'),
+          // The pixel letters have no apostrophe.
+          label: label.replaceAll("'", '').toUpperCase(),
+          value: on ? 'ON' : null,
+          valueColour: PipColours.light,
+          onTap: () => tryOn(key),
+        );
+    Widget heading(String text) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _words(text, colour: PipColours.dim, pixel: 2),
+          ),
+        );
     return Column(
       key: const Key('pipBackgroundList'),
       children: [
@@ -590,6 +635,18 @@ class _Backgrounds extends StatelessWidget {
                   valueColour: PipColours.light,
                   onTap: () => pick(b),
                 ),
+              heading('SEASONS'),
+              for (final season in Season.values)
+                row(season, season.label, look.season == season),
+              heading('WEATHER'),
+              for (final weather in weathers)
+                row(weather, weather.label, look.weather == weather),
+              heading('DAYS'),
+              for (final occasion in PipOccasion.values)
+                row(occasion, occasion.label, look.occasion == occasion),
+              heading('TIME OF DAY'),
+              for (final part in DayPart.values)
+                row(part, part.name, look.part == part),
             ],
           ),
         ),

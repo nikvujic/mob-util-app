@@ -1085,6 +1085,7 @@ class PipBrain {
     }
     _stepLevelFlash(dt);
     if (snowing) snowClock += dt;
+    sceneClock += dt;
     // Round 55: his medicine before charging (or anything else).
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
@@ -1703,8 +1704,9 @@ class PipBrain {
   bool _maybeEvent() {
     if (!_eventRoom || _wantsStation || _bedtime) return false;
     if (random.nextDouble() >= eventChance) return false;
-    // At dusk or night, now and then a shooting star.
-    if (dark && random.nextInt(4) == 0) {
+    // At dusk or night, now and then a shooting star (Round 70: not
+    // under a grey sky).
+    if (dark && !overcast && random.nextInt(4) == 0) {
       play(PipAnimation.shootingStar);
       return true;
     }
@@ -1712,10 +1714,13 @@ class PipBrain {
     switch (pick) {
       case 0 || 1:
         _startBugs();
-      case 2 || 3:
+      // Round 70: no flowers or butterflies in rain, snow or winter.
+      case 2 || 3 when !bleak:
         _startFlower();
-      case 4 || 5:
+      case 4 || 5 when !bleak:
         _startButterfly();
+      case 2 || 3 || 4 || 5:
+        _startBugs();
       case 6 || 7:
         _startBall();
       default:
@@ -1726,6 +1731,15 @@ class PipBrain {
 
   /// Dusk or night in his sky (the room says): shooting stars then.
   bool dark = false;
+
+  /// Round 70 (the room says): a grey sky (no shooting stars), and rain,
+  /// snow or winter (no flowers or butterflies).
+  bool overcast = false;
+  bool bleak = false;
+
+  /// Round 70: seconds going by for his field's moving things (trees
+  /// swaying, rain, leaves, lights), always.
+  double sceneClock = 0;
 
   // A shooting star.
   bool _starFromLeft = true;

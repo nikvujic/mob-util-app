@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_scene.dart';
+import 'package:the_app/core/weather.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pixel_text.dart';
@@ -97,6 +98,65 @@ void main() {
     await tester.tap(find.byKey(const Key('pipBack')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('pipRename')), findsOneWidget);
+  });
+
+  testWidgets(
+      'his field tried in a season, the weather, a day, a time of day '
+      '(Round 70); back to his info card, as it is', (tester) async {
+    await open(tester);
+    final now = room(tester).scene!;
+    expect(
+        (now.season, now.weather, now.occasion), (Season.autumn, null, null));
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipBackground')));
+    await tester.pumpAndSettle();
+    final list = find
+        .descendant(
+            of: find.byKey(const Key('pipBackgroundList')),
+            matching: find.byType(Scrollable))
+        .first;
+    Future<void> tryOn(String name, {bool up = false}) async {
+      final row = find.byKey(Key('pipLook-$name'));
+      await tester.scrollUntilVisible(row, up ? -60 : 60, scrollable: list);
+      // All of it in view, not cut off at the list's edge.
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pump();
+    }
+
+    await tryOn('winter');
+    await tryOn('snow');
+    await tryOn('christmas');
+    await tryOn('night');
+    var scene = room(tester).scene!;
+    expect((
+      scene.season,
+      scene.weather,
+      scene.occasion,
+      scene.part
+    ), (
+      Season.winter,
+      WeatherKind.snow,
+      PipOccasion.christmas,
+      DayPart.night
+    ));
+    expect(scene.props, containsAll({PipProp.festiveTree, PipProp.snowfall}));
+    expect(words(), contains('ON'));
+    await tryOn('rain', up: true);
+    await tryOn('winter', up: true);
+    scene = room(tester).scene!;
+    expect((scene.weather, scene.season), (WeatherKind.rain, Season.autumn),
+        reason: 'another weather replaces it; winter again takes it off');
+
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    await tester.fling(
+        find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+    await tester.pumpAndSettle();
+    scene = room(tester).scene!;
+    expect(
+        (scene.weather, scene.occasion, scene.part), (null, null, DayPart.day));
   });
 
   testWidgets(

@@ -75,17 +75,19 @@ void main() {
   test('what shows where, and when', () {
     final room = PipScene.at(PipPlace.room, at(12, 0));
     expect(room.part, DayPart.day);
-    expect(room.props, {PipProp.sun, PipProp.clouds},
+    // Round 70: and in October his field's autumn tree and leaves.
+    const autumn = {PipProp.trees, PipProp.leaves};
+    expect(room.props, {PipProp.sun, PipProp.clouds, ...autumn},
         reason: 'clouds since the room grew (Round 36)');
     expect(PipScene.at(PipPlace.home, at(12, 0)).props,
-        {PipProp.sun, PipProp.clouds});
+        {PipProp.sun, PipProp.clouds, ...autumn});
     expect(PipScene.at(PipPlace.room, at(23, 0)).props,
-        {PipProp.stars, PipProp.moon});
+        {PipProp.stars, PipProp.moon, ...autumn});
     final (_, set) = sunTimesOn(at(12, 0));
     final dusk = set + 10;
     expect(
         PipScene.at(PipPlace.home, at(dusk ~/ 60, (dusk % 60).floor())).props,
-        {PipProp.moon, PipProp.clouds});
+        {PipProp.moon, PipProp.clouds, PipProp.trees, PipProp.leaves});
   });
 
   test('never the sun and the moon, or stars by day', () {

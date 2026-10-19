@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui' show Color;
 
+import 'package:the_app/core/pip_hats.dart' show orthodoxEaster;
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/core/weather.dart';
 
 /// Where Pip is shown (Round 35): the menu's strip, or Pip Home's tall
 /// scene. Each has its own version of a background.
@@ -9,6 +11,64 @@ enum PipPlace { room, home }
 
 /// The part of the day his sky follows.
 enum DayPart { night, dawn, day, dusk }
+
+/// The season his field is in (Round 70), by the month: spring from
+/// March, summer from June, autumn from September, winter from December.
+enum Season {
+  spring('Spring'),
+  summer('Summer'),
+  autumn('Autumn'),
+  winter('Winter');
+
+  final String label;
+
+  const Season(this.label);
+
+  static Season of(DateTime day) => switch (day.month) {
+        3 || 4 || 5 => spring,
+        6 || 7 || 8 => summer,
+        9 || 10 || 11 => autumn,
+        _ => winter,
+      };
+}
+
+/// Days his field dresses up for (Round 70).
+///
+/// - **Halloween**, 24–31 October: jack-o'-lanterns (lit after dark),
+///   bats at night.
+/// - **Christmas**, 20 December to 7 January (the Orthodox Christmas, as
+///   kept where the app's made): a decorated pine, its lights blinking.
+/// - **New Year's Eve**, 31 December from 20:00 to 1 January 02:00:
+///   fireworks too.
+/// - **Easter**, Orthodox Easter Sunday and Monday: painted eggs in the
+///   grass.
+enum PipOccasion {
+  halloween('Halloween'),
+  christmas('Christmas'),
+  newYear("New Year's Eve"),
+  easter('Easter');
+
+  final String label;
+
+  const PipOccasion(this.label);
+
+  /// [now]'s occasion, if any (New Year's Eve over Christmas).
+  static PipOccasion? at(DateTime now) {
+    final (m, d, h) = (now.month, now.day, now.hour);
+    if ((m == 12 && d == 31 && h >= 20) || (m == 1 && d == 1 && h < 2)) {
+      return newYear;
+    }
+    if ((m == 12 && d >= 20) || (m == 1 && d <= 7)) return christmas;
+    if (m == 10 && d >= 24) return halloween;
+    final sunday = orthodoxEaster(now.year);
+    final day = DateTime(now.year, m, d);
+    if (day == sunday ||
+        day == DateTime(sunday.year, sunday.month, sunday.day + 1)) {
+      return PipOccasion.easter;
+    }
+    return null;
+  }
+}
 
 /// [now]'s part of the day (Round 59: with the seasons): dawn from 45
 /// minutes before sunrise to 20 after, day to 20 minutes before sunset,
@@ -146,47 +206,108 @@ enum PipBackground {
       };
 }
 
-/// Things drawn in his sky (Round 35). Each says where it may show: in
-/// which places, at which parts of the day, on which backgrounds. Later
-/// ones (snow, a Santa hat in the last week of the year...) say the same,
-/// so nothing turns up where it doesn't belong.
+/// Things drawn in his sky (Round 35) and field (Round 70). Each says
+/// where it may show: in which places, at which parts of the day, on
+/// which backgrounds; [PipScene.at] adds the season, the occasion and
+/// the weather, so nothing turns up where it doesn't belong.
 enum PipProp {
-  stars(
-    places: {PipPlace.room, PipPlace.home},
-    parts: {DayPart.night},
-    backgrounds: {PipBackground.field},
-  ),
-  moon(
-    places: {PipPlace.room, PipPlace.home},
-    parts: {DayPart.night, DayPart.dusk},
-    backgrounds: {PipBackground.field},
-  ),
-  sun(
-    places: {PipPlace.room, PipPlace.home},
-    parts: {DayPart.day, DayPart.dawn},
-    backgrounds: {PipBackground.field},
-  ),
-  // In both since the menu's room grew (Round 36).
-  clouds(
-    places: {PipPlace.room, PipPlace.home},
-    parts: {DayPart.day, DayPart.dawn, DayPart.dusk},
-    backgrounds: {PipBackground.field},
-  );
+  stars(parts: {DayPart.night}),
+  moon(parts: {DayPart.night, DayPart.dusk}),
+  sun(parts: {DayPart.day, DayPart.dawn}),
+  // In both since the menu's room grew (Round 36); at night too under a
+  // grey sky (Round 70).
+  clouds(parts: {DayPart.day, DayPart.dawn, DayPart.dusk}),
 
-  final Set<PipPlace> places;
+  // Round 70: his field.
+  /// A tree or two in their season's colours, swaying.
+  trees,
+
+  /// Autumn's leaves falling, and some on the grass.
+  leaves,
+
+  /// Spring's blossom petals drifting down.
+  petals,
+
+  /// Halloween's jack-o'-lanterns (lit after dark), and bats at night.
+  pumpkins,
+  bats(parts: {DayPart.night, DayPart.dusk}),
+
+  /// Christmas's decorated pine, its lights blinking.
+  festiveTree,
+
+  /// New Year's Eve's fireworks (it's night then).
+  fireworks(parts: {DayPart.night, DayPart.dusk}),
+
+  /// Easter's painted eggs in the grass.
+  eggs,
+
+  /// The weather: rain (drizzle lighter), snow falling, a storm's
+  /// lightning, fog.
+  rain,
+  snowfall,
+  lightning,
+  fog;
+
   final Set<DayPart> parts;
-  final Set<PipBackground> backgrounds;
+
+  /// All in both places and on his one background, for now.
+  Set<PipPlace> get places => const {PipPlace.room, PipPlace.home};
+  Set<PipBackground> get backgrounds => const {PipBackground.field};
 
   const PipProp({
-    required this.places,
-    required this.parts,
-    required this.backgrounds,
+    this.parts = const {
+      DayPart.night,
+      DayPart.dawn,
+      DayPart.day,
+      DayPart.dusk,
+    },
   });
 
   bool showsIn(PipPlace place, DayPart part, PipBackground background) =>
       places.contains(place) &&
       parts.contains(part) &&
       backgrounds.contains(background);
+}
+
+/// What's tried on his field in Pip Home (Round 70), over what now is:
+/// a season, the weather, an occasion, a part of the day. Not kept.
+class PipLook {
+  final Season? season;
+  final WeatherKind? weather;
+  final PipOccasion? occasion;
+  final DayPart? part;
+
+  const PipLook({this.season, this.weather, this.occasion, this.part});
+
+  static const none = PipLook();
+
+  bool get isNone =>
+      season == null && weather == null && occasion == null && part == null;
+
+  /// [key] tried, or untried if it was (one of each kind at a time).
+  PipLook toggled(Object key) => switch (key) {
+        Season s => PipLook(
+            season: season == s ? null : s,
+            weather: weather,
+            occasion: occasion,
+            part: part),
+        WeatherKind w => PipLook(
+            season: season,
+            weather: weather == w ? null : w,
+            occasion: occasion,
+            part: part),
+        PipOccasion o => PipLook(
+            season: season,
+            weather: weather,
+            occasion: occasion == o ? null : o,
+            part: part),
+        DayPart p => PipLook(
+            season: season,
+            weather: weather,
+            occasion: occasion,
+            part: part == p ? null : p),
+        _ => this,
+      };
 }
 
 /// What's showing in one place at one moment: the one place that works it
@@ -202,16 +323,66 @@ class PipScene {
   /// The real moon's phase (Round 38); at a new moon there's no moon.
   final MoonPhase moon;
 
-  const PipScene._(
-      this.place, this.background, this.part, this.props, this.moon);
+  /// Round 70: the season, the day's occasion, and the weather (null:
+  /// none known, a plain sky); how heavy its rain or snow is, 1 to 3.
+  final Season season;
+  final PipOccasion? occasion;
+  final WeatherKind? weather;
+  final int strength;
 
+  const PipScene._(
+    this.place,
+    this.background,
+    this.part,
+    this.props,
+    this.moon, {
+    required this.season,
+    this.occasion,
+    this.weather,
+    this.strength = 0,
+  });
+
+  /// [weather]: Open-Meteo's code now (Round 70), if it's on; [look]:
+  /// what Pip Home is trying on, over all of it.
   factory PipScene.at(
     PipPlace place,
     DateTime now, {
     PipBackground? background = PipBackground.field,
+    int? weatherCode,
+    PipLook look = PipLook.none,
   }) {
-    final part = dayPartAt(now);
+    final part = look.part ?? dayPartAt(now);
     final moon = moonPhaseAt(now);
+    final season = look.season ?? Season.of(now);
+    final occasion =
+        look.occasion ?? (look.isNone ? PipOccasion.at(now) : null);
+    final real = weatherCode == null ? null : WeatherKind.fromCode(weatherCode);
+    final weather = look.weather ?? real;
+    final strength = look.weather != null
+        ? 2
+        : weatherCode == null
+            ? 0
+            : weatherStrength(weatherCode);
+    final grey = weather?.grey ?? false;
+    bool shows(PipProp prop) => switch (prop) {
+          // A grey sky hides the sun, the moon and the stars.
+          PipProp.stars || PipProp.sun => !grey,
+          PipProp.moon => !grey && moon != MoonPhase.none,
+          PipProp.clouds => true,
+          PipProp.trees => occasion != PipOccasion.christmas &&
+              occasion != PipOccasion.newYear,
+          PipProp.leaves => season == Season.autumn,
+          PipProp.petals => season == Season.spring && !grey,
+          PipProp.pumpkins || PipProp.bats => occasion == PipOccasion.halloween,
+          PipProp.festiveTree => occasion == PipOccasion.christmas ||
+              occasion == PipOccasion.newYear,
+          PipProp.fireworks => occasion == PipOccasion.newYear,
+          PipProp.eggs => occasion == PipOccasion.easter,
+          PipProp.rain => weather?.wet ?? false,
+          PipProp.snowfall => weather == WeatherKind.snow,
+          PipProp.lightning => weather == WeatherKind.storm,
+          PipProp.fog => weather == WeatherKind.fog,
+        };
     return PipScene._(
       place,
       background,
@@ -219,17 +390,48 @@ class PipScene {
       {
         if (background != null)
           for (final prop in PipProp.values)
-            if (prop.showsIn(place, part, background) &&
-                !(prop == PipProp.moon && moon == MoonPhase.none))
+            if (shows(prop) &&
+                (prop.showsIn(place, part, background) ||
+                    // Clouds at night under a grey sky.
+                    (prop == PipProp.clouds && grey)))
               prop,
       },
       moon,
+      season: season,
+      occasion: occasion,
+      weather: weather,
+      strength: strength,
     );
   }
 
-  /// The sky's top and bottom colours, or null without a background.
-  (Color, Color)? get sky => background?.skyAt(part);
+  /// A grey sky (Round 70): clouds over everything.
+  bool get grey => weather?.grey ?? false;
 
-  /// Its colours top to bottom (Round 52), or null without a background.
-  List<Color>? get skyStops => background?.stopsAt(part);
+  /// Snow on the ground: while it snows (a ski day's is the brain's).
+  bool get snowyGround => weather == WeatherKind.snow;
+
+  /// The sky's top and bottom colours, or null without a background.
+  (Color, Color)? get sky {
+    final s = skyStops;
+    return s == null ? null : (s.first, s.last);
+  }
+
+  /// Its colours top to bottom (Round 52), or null without a background;
+  /// greyed under a grey sky (Round 70), darker in a storm.
+  List<Color>? get skyStops {
+    final stops = background?.stopsAt(part);
+    if (stops == null || !grey) return stops;
+    final storm = weather == WeatherKind.storm;
+    return [
+      for (final c in stops)
+        _greyed(c, storm ? 0.75 : 0.6, darker: storm ? 0.25 : 0),
+    ];
+  }
+}
+
+/// [c] moved [by] toward its own grey (and [darker]).
+Color _greyed(Color c, double by, {double darker = 0}) {
+  final grey = 0.3 * c.r + 0.59 * c.g + 0.11 * c.b;
+  double mix(double v) => ((v + (grey - v) * by) * (1 - darker)).clamp(0, 1);
+  return Color.from(alpha: c.a, red: mix(c.r), green: mix(c.g), blue: mix(c.b));
 }

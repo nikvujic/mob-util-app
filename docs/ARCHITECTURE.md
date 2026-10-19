@@ -399,7 +399,24 @@ the time zone's meridian, an hour later in summer time), a
 places, parts of the day and backgrounds it shows in. `PipScene.at` is
 the one place that works out what's showing (Round 38: with the real
 moon's phase, `moonPhaseAt`, counted from a known new moon; no moon
-drawn at a new moon); `PipRoom` only draws it.
+drawn at a new moon); `PipRoom` only draws it. Round 70: it also takes
+the `Season` (by the month), the day's `PipOccasion` (Halloween,
+Christmas to 7 January, New Year's Eve, Orthodox Easter) and the weather
+(an Open-Meteo WMO code, read by `core/weather.dart` into a
+`WeatherKind`), and a `PipLook` (what Pip Home tries on, over all of
+it); the field's props (trees, leaves, petals, pumpkins, bats, the
+festive pine, fireworks, eggs, rain, snowfall, lightning, fog) are
+decided there, a grey sky hiding the sun, moon and stars.
+
+The weather (Round 70): `data/weather_api.dart` (the only network code,
+`dart:io`'s `HttpClient`; `OpenMeteoApi`, a fake in tests) searches
+places and fetches the weather now; `providers/weather_provider.dart`
+fetches while Internet Access's weather is on (`WeatherNotifier`: on
+turning on or a new place, then when the report is over an hour old,
+checked every 15 minutes; kept alive by `app.dart`) and gives the sky
+its code (`skyWeatherProvider`: a report up to 3 hours old). Settings,
+places and the last report are `Preferences.internet`
+(`models/internet.dart`; this phone only).
 What he does goes through one table too: `mayStart(activity,
 animation)` in `pip_brain.dart`, and `play` asks it first (nothing
 interrupts the egg, the hatch or coming up). New props and animations
