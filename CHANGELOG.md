@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.36.2] - 2026-10-19
+
 ### Fixed
 - **Picking a date or a time** while typing in a field (a subscription's
   name, a date's title, the planner's, Medicine's, Food's): the field
