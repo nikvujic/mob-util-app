@@ -135,6 +135,9 @@ class _MedicineSheetState extends State<_MedicineSheet> {
   static const maxDoses = 8;
 
   Future<int?> _pickTime(int initial) async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: initial ~/ 60, minute: initial % 60),
@@ -160,6 +163,9 @@ class _MedicineSheetState extends State<_MedicineSheet> {
       });
 
   Future<void> _pickDate({required bool until}) async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final first = until ? _from : DateTime(widget.today.year - 5);
     final initial = until ? (_until ?? addDays(_from, 7)) : _from;
     final picked = await showDatePicker(

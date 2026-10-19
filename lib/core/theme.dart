@@ -361,12 +361,22 @@ abstract final class AppTheme {
       ),
       // Chips (e.g. the planner's quick times and repeat days): the app's
       // own colours, so every theme keeps readable labels.
+      // Round 81 (Nikola: the tick was hard to see, on a coloured dot
+      // worst): no tick; the one picked is plainly marked instead, filled
+      // with a wash of the accent and edged in it (checked in every
+      // theme).
       chipTheme: ChipThemeData(
         backgroundColor: palette.card,
-        selectedColor: palette.cardSelected,
+        selectedColor: Color.alphaBlend(
+            palette.accent.withValues(alpha: 0.24), palette.card),
         disabledColor: palette.surface,
-        checkmarkColor: palette.accent,
-        side: BorderSide(color: palette.divider),
+        showCheckmark: false,
+        side: WidgetStateBorderSide.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? BorderSide(
+                  color: palette.accentForeground ?? palette.accent, width: 1.5)
+              : BorderSide(color: palette.divider),
+        ),
         labelStyle: TextStyle(color: palette.textPrimary),
         secondaryLabelStyle: TextStyle(color: palette.textPrimary),
       ),

@@ -165,6 +165,9 @@ class _MealPageState extends ConsumerState<MealPage> {
 
   /// Another day, the same time; days to come aren't offered.
   Future<void> _pickDay() async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final local = _meal.at.toLocal();
     final today = dayOf(ref.read(clockProvider)());
     final picked = await showDatePicker(
@@ -181,6 +184,8 @@ class _MealPageState extends ConsumerState<MealPage> {
   }
 
   Future<void> _pickTime() async {
+    // Round 81: a field typed in lets go first.
+    FocusManager.instance.primaryFocus?.unfocus();
     final local = _meal.at.toLocal();
     final picked = await showTimePicker(
       context: context,

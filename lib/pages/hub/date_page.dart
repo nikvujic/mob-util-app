@@ -61,6 +61,9 @@ class _DatePageState extends ConsumerState<DatePage> {
   }
 
   Future<void> _pickDate() async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
     final d = _draft;
     final shownYear = d.year ?? today.year;
@@ -81,6 +84,9 @@ class _DatePageState extends ConsumerState<DatePage> {
   }
 
   Future<void> _editReminder(int? index) async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final reminders = [..._draft.reminders];
     final start = index == null ? DateReminder.standard : reminders[index];
     final picked = await showModalBottomSheet<DateReminder>(
@@ -136,6 +142,9 @@ class _DatePageState extends ConsumerState<DatePage> {
   /// by [apply].
   Future<void> _pickTravelTime(
       int minutes, DateEntry Function(int) apply) async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60),

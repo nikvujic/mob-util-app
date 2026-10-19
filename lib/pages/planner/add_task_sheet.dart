@@ -404,6 +404,9 @@ class _TaskSheetState extends State<TaskSheet> {
   /// A 24-hour time picker. Null if cancelled; 00:00 as an [end] is
   /// midnight at the end of the day.
   Future<int?> _pickTime(int initial, {bool end = false}) {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     return showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: initial ~/ 60 % 24, minute: initial % 60),
@@ -532,6 +535,9 @@ class _TaskSheetState extends State<TaskSheet> {
   }
 
   Future<void> _pickUntil() async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final from = widget.from ?? DateTime.now();
     final picked = await showDatePicker(
       context: context,

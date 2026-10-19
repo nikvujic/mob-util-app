@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- **Picking a date or a time** while typing in a field (a subscription's
+  name, a date's title, the planner's, Medicine's, Food's): the field
+  lets go, so the keyboard no longer comes back once the picker closes.
+
+### Changed
+- **Chips** (Subscriptions' state and reminders, Dates' types, the
+  planner's days and more): the one picked has no tick any more (it was
+  hard to see, worst on a coloured dot); it's filled with a wash of the
+  theme's colour and edged in it, clear in every theme.
+
 ## [1.36.1] - 2026-10-19
 
 ### Added

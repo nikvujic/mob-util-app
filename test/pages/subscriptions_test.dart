@@ -229,6 +229,35 @@ void main() {
     expect(find.text('Not set'), findsOneWidget);
   });
 
+  testWidgets(
+      'Round 81: typing its name, then its day: the name lets go, so the '
+      'keyboard doesn\'t come back once the picker closes', (tester) async {
+    await open(tester, start: SubscriptionBook([nikolas.byId('claude')!]));
+    await tester.tap(card('claude'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('subscriptionName')));
+    await tester.pumpAndSettle();
+    bool typing() => tester.testTextInput.isVisible;
+    expect(typing(), isTrue);
+    await tester.tap(find.byKey(const Key('subscriptionDate')));
+    await tester.pumpAndSettle();
+    expect(typing(), isFalse);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(typing(), isFalse, reason: 'not back to the name');
+    // The card's expiry too.
+    await tester.tap(find.byKey(const Key('subscriptionName')));
+    await tester.pumpAndSettle();
+    final expires = find.byKey(const Key('subscriptionCardExpires'));
+    await tester.scrollUntilVisible(expires, 200,
+        scrollable: find.byType(Scrollable).last);
+    await tester.tap(expires);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(typing(), isFalse);
+  });
+
   testWidgets('an inactive one set going again gets a day a month on',
       (tester) async {
     await open(tester, start: SubscriptionBook([nikolas.byId('spotify')!]));

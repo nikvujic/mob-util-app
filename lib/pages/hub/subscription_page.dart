@@ -91,6 +91,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   Future<void> _pickDate() async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
     final picked = await showDatePicker(
       context: context,
@@ -103,6 +106,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   Future<void> _pickCardExpiry() async {
+    // Round 81: a field typed in lets go first, or the keyboard comes
+    // back once the picker closes.
+    FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
     final picked = await showDatePicker(
       context: context,

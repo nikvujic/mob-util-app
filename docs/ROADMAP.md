@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 81 — Nikola on 1.36.1 (2026-10-19, patch 1.36.2)
+
+- [x] A field being typed in lets go when a date or time picker opens
+  (Subscriptions, Dates, the planner's sheet, Medicine, Food): the
+  keyboard used to come back once the picker closed.
+- [x] Chips: no tick (poor contrast, worst on the state's dot); the
+  picked one is a wash of the accent with an accent edge (`chipTheme`,
+  checked in all eight themes).
+
 ### Round 80 — Nikola on 1.36.0 (2026-10-19, patch 1.36.1)
 
 - [x] **Subscriptions**: the card that pays it: its name stays, and its

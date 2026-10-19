@@ -147,6 +147,22 @@ void main() {
   });
 
   testWidgets(
+      'Round 81: typing its title, then its day: the title lets go (the '
+      'keyboard stays down after the picker)', (tester) async {
+    await openDates(tester);
+    await tap(tester, find.byTooltip('Add a date'));
+    await tester.enterText(find.byKey(const Key('dateTitle')), 'Ana');
+    await tester.pumpAndSettle();
+    bool typing() => tester.testTextInput.isVisible;
+    expect(typing(), isTrue);
+    await tester.tap(find.byKey(const Key('dateDay')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(typing(), isFalse);
+  });
+
+  testWidgets(
       '+ on a picked day: a new date there, saved once titled; year '
       'not known; reminders (Round 61): a day and a week before at 09:00, '
       'another added, one removed', (tester) async {
