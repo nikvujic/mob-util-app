@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.34.1] - 2026-10-19
+
 ### Fixed
 - **Pip's adventure**: when a bug knocked him over, the trees kept going
   by while he lay there and fetched his sword. They now stand still with
