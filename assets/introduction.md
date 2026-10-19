@@ -27,7 +27,7 @@ Notes, a shopping list, a day planner and a few handy tools in one place, made t
 - **+** adds to the end of To buy; the box stays open for the next one. As you type, it offers your bought **Items** that match: tap one to put it back. Adding one that's there already moves it instead of making a copy.
 - **Hold** items to select them; with one selected, **Rename** sits beside Delete.
 - The small button by an item to buy sets a **count** or a **weight**; tap the amount to change it, or to **type** one ("1-2").
-- The **magnifier** searches: a field above the keyboard shows only the items with what you type (it stays when the keyboard closes; × or Back closes it). Nothing found: **Add** what you typed.
+- The **magnifier** beside **+** searches the bought items: a field above the keyboard shows only those with what you type (the list to buy stays as it is; the field stays when the keyboard closes; × or Back closes it). Nothing found: **Add** what you typed.
 - **A–Z** on the Items header shows the bought list alphabetically (again for its own order).
 
 ## Planner

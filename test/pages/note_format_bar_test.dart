@@ -94,6 +94,39 @@ void main() {
         reason: 'its line is far above, out of view');
     expect(find.byKey(const Key('handleOffScreen-right')), findsNothing,
         reason: 'the end is in view');
+    // 1.29.1: and the menu with it.
+    final copy = tester.getRect(find.text('Copy'));
+    expect(copy.top, greaterThanOrEqualTo(tester.getRect(scroll).top));
+  });
+
+  testWidgets(
+      'Select all on a long note: the menu is still there to Copy, in '
+      'view (1.29.1: it was left far above, with the note\'s start)',
+      (tester) async {
+    container = await pumpApp(tester);
+    addTearDown(tester.view.reset);
+    final text = [for (var i = 1; i <= 80; i++) 'Line number $i'].join('\n');
+    container
+        .read(notesProvider.notifier)
+        .addNote(title: 'Long', content: text);
+    await tester.pump();
+    await tester.tap(find.text('Long'));
+    await tester.pumpAndSettle();
+    // The keyboard up, a word near the top held.
+    tester.view.viewInsets =
+        FakeViewPadding(bottom: 250 * tester.view.devicePixelRatio);
+    await tester.pumpAndSettle();
+    final scroll = find.byKey(const Key('noteContentScroll'));
+    await tester.longPressAt(tester.getTopLeft(scroll) + const Offset(60, 30));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Select all'));
+    await tester.pumpAndSettle();
+    expect(content(tester).selection,
+        TextSelection(baseOffset: 0, extentOffset: text.length));
+    final view = tester.getRect(scroll);
+    final copy = tester.getRect(find.text('Copy'));
+    expect(copy.top, greaterThanOrEqualTo(view.top));
+    expect(copy.bottom, lessThanOrEqualTo(view.bottom));
   });
 
   void select(WidgetTester tester, int start, int end) =>

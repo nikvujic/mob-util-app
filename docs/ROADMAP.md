@@ -337,6 +337,16 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 71 — Nikola on 1.28 (2026-10-19, patch 1.29.1)
+
+- [x] **Shop search** button beside **+** (G11), not in the top bar; it
+  filters **only the bought list** (as asked in Round 64); its icon and
+  text aligned. Nikola asked whether this was sloppy: it was, both rules
+  were written down (G11, and the ask itself). The architecture test now
+  fails on any top-bar action, so it can't slip through again.
+- [x] **Notes, Select all**: the copy/paste menu didn't come back in a
+  long note (left at its start, scrolled away).
+
 ### Round 65 — Nikola on 1.25.0 (2026-10-18)
 
 - [x] **Batteries while he's out**: a tap gives one; it flies to him and

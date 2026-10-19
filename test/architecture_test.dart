@@ -160,6 +160,37 @@ List<String> toastViolations(String path, String source) {
   ];
 }
 
+/// Top bars with action buttons (G11: actions are at the bottom, on the
+/// hand's side; only the menu ☰ and back go at the top). 1.29.1: Shop's
+/// search went into the top bar unasked. A file listed in
+/// [appBarActionsAllowed] may, only where Nikola asked for it.
+const appBarActionsAllowed = <String>{};
+final _appBar = RegExp(r'(?<![A-Za-z_])AppBar\(');
+
+List<String> appBarActionViolations(String path, String source) {
+  final violations = <String>[];
+  if (appBarActionsAllowed.contains(path)) return violations;
+  for (final m in _appBar.allMatches(source)) {
+    // The call's own arguments, to its closing bracket.
+    var depth = 1;
+    var i = m.end;
+    final args = StringBuffer();
+    for (; i < source.length && depth > 0; i++) {
+      final c = source[i];
+      if (c == '(' || c == '[' || c == '{') depth++;
+      if (c == ')' || c == ']' || c == '}') depth--;
+      if (depth == 1 && RegExp(r'[a-zA-Z:]').hasMatch(c)) args.write(c);
+      if (depth == 1 && c == ',') args.write(',');
+    }
+    if (args.toString().split(',').any((a) => a.startsWith('actions:'))) {
+      final line = '\n'.allMatches(source.substring(0, m.start)).length + 1;
+      violations.add('$path:$line: actions in a top bar — put them at the '
+          'bottom (G11), unless Nikola asked for it');
+    }
+  }
+  return violations;
+}
+
 /// Content rule violations for one file.
 List<String> contentViolations(String path, String source) {
   final violations = <String>[];
@@ -240,6 +271,24 @@ void main() {
       for (final f in files) ...contentViolations(f.path, f.source),
     ];
     expect(violations, isEmpty, reason: violations.join('\n'));
+  });
+
+  test('no actions in top bars (G11)', () {
+    final violations = [
+      for (final f in files) ...appBarActionViolations(f.path, f.source),
+    ];
+    expect(violations, isEmpty, reason: violations.join('\n'));
+    expect(
+        appBarActionViolations('pages/a.dart',
+            "appBar: AppBar(title: Text('x'), actions: [IconButton()]),"),
+        hasLength(1));
+    expect(
+        appBarActionViolations(
+            'pages/a.dart',
+            "appBar: AppBar(title: f(actions: 1)),\n"
+                'b: BottomActions(actions: [])'),
+        isEmpty,
+        reason: 'only the bar\'s own actions');
   });
 
   group('the rules catch violations', () {

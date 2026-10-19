@@ -6,10 +6,8 @@ import 'package:the_app/core/theme.dart';
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
-  /// Buttons on the right (Round 69: Shop's search).
-  final List<Widget>? actions;
-
-  const MainAppBar({super.key, required this.title, this.actions});
+  /// No actions (G11: they're at the bottom, on the hand's side).
+  const MainAppBar({super.key, required this.title});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -33,7 +31,6 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
             context.findRootAncestorStateOfType<ScaffoldState>()?.openDrawer(),
       ),
       title: Text(title),
-      actions: actions,
     );
   }
 }

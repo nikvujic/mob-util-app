@@ -34,33 +34,35 @@ void main() {
       tester.getTopLeft(find.text(name)).dy;
 
   testWidgets(
-      'search: a field above the keyboard; typing filters by name, any '
-      'case; it stays when the keyboard goes; closed, all back',
-      (tester) async {
+      'search: a field above the keyboard; typing filters the bought list '
+      '(1.29.1: only that one) by name, any case; it stays when the '
+      'keyboard goes; closed, all back', (tester) async {
     await pumpShop(tester);
-    await tester.tap(find.byKey(const Key('shopSearch')));
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('shopSearchBar')), findsOneWidget);
     expect(find.byTooltip('Add item'), findsNothing);
     expect(tester.testTextInput.isVisible, isTrue);
     await tester.enterText(find.byKey(const Key('shopSearchField')), 'AP');
     await tester.pump();
-    expect(shown(), ['apples']);
+    expect(shown(), ['Bread', 'apples'], reason: 'to buy: all still there');
     await tester.enterText(find.byKey(const Key('shopSearchField')), 'MIL');
     await tester.pump();
-    expect(shown(), ['Milk']);
+    expect(shown(), ['Bread', 'Milk']);
     await tester.enterText(find.byKey(const Key('shopSearchField')), 'AP');
     await tester.pump();
-    // A match tapped: to buy, still shown (now on top).
+    // A match tapped: to buy, still shown (in the list to buy).
     await tester.tap(find.text('apples'));
     await tester.pump();
-    expect(find.text('TO BUY  ·  1'), findsOneWidget);
-    expect(shown(), ['apples']);
+    expect(find.text('TO BUY  ·  2'), findsOneWidget);
+    expect(shown(), ['Bread', 'apples']);
     // The keyboard closed: the field stays, filtering.
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('shopSearchBar')), findsOneWidget);
-    expect(shown(), ['apples']);
+    await tester.enterText(find.byKey(const Key('shopSearchField')), 'zu');
+    await tester.pump();
+    expect(shown(), ['Bread', 'apples', 'Zucchini']);
     await tester.tap(find.byKey(const Key('shopSearchClose')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('shopSearchBar')), findsNothing);
@@ -68,14 +70,53 @@ void main() {
     expect(find.byTooltip('Add item'), findsOneWidget);
   });
 
+  testWidgets(
+      'the search button beside + at the bottom (G11), none in the top '
+      'bar; only once something\'s bought', (tester) async {
+    container = await pumpApp(tester);
+    await openTab(tester, 'Shop');
+    container.read(shopProvider.notifier).addItem('Bread');
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Search'), findsNothing,
+        reason: 'nothing bought to search');
+    final shop = container.read(shopProvider.notifier);
+    shop.toggle(container.read(shopProvider).single.id);
+    await tester.pumpAndSettle();
+    final search = find.byTooltip('Search');
+    final add = find.byTooltip('Add item');
+    expect(search, findsOneWidget);
+    expect(find.descendant(of: find.byType(AppBar), matching: search),
+        findsNothing);
+    expect(tester.getCenter(search).dy,
+        moreOrLessEquals(tester.getCenter(add).dy, epsilon: 1),
+        reason: 'one row');
+    expect(tester.getCenter(search).dy, greaterThan(450),
+        reason: 'at the bottom');
+  });
+
+  testWidgets('the search\'s icon and its text on one line (1.29.1)',
+      (tester) async {
+    await pumpShop(tester);
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    final icon = tester.getCenter(find.byKey(const Key('shopSearchIcon')));
+    final text = tester.getCenter(find.descendant(
+        of: find.byKey(const Key('shopSearchField')),
+        matching: find.byType(EditableText)));
+    expect(icon.dy, moreOrLessEquals(text.dy, epsilon: 1));
+    final hint = tester.getCenter(find.text('Search bought items'));
+    expect(icon.dy, moreOrLessEquals(hint.dy, epsilon: 1));
+  });
+
   testWidgets('nothing matches: it offers to add what was typed',
       (tester) async {
     await pumpShop(tester);
-    await tester.tap(find.byKey(const Key('shopSearch')));
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('shopSearchField')), 'Eggs');
     await tester.pump();
     expect(find.text('Nothing called “Eggs”'), findsOneWidget);
+    expect(shown(), ['Bread'], reason: 'the list to buy still there');
     await tester.tap(find.byKey(const Key('shopAddTyped')));
     await tester.pumpAndSettle();
     expect(container.read(shopProvider).where((i) => i.name == 'Eggs'),
@@ -84,7 +125,7 @@ void main() {
 
   testWidgets('Back closes the search', (tester) async {
     await pumpShop(tester);
-    await tester.tap(find.byKey(const Key('shopSearch')));
+    await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('shopSearchField')), 'mi');
     await tester.pump();

@@ -165,6 +165,33 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
   final _scrollKey = GlobalKey();
 
+  /// The cut / copy / paste menu (1.29.1), with our own Select all: after
+  /// Flutter's, the note jumped to its end and the menu stayed behind at
+  /// its start, far above, out of sight. Ours selects the same, and the
+  /// menu is placed again once the note has moved, so it's in view.
+  Widget _contextMenu(BuildContext context, EditableTextState field) {
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      anchors: field.contextMenuAnchors,
+      buttonItems: [
+        for (final item in field.contextMenuButtonItems)
+          item.type == ContextMenuButtonType.selectAll
+              ? item.copyWith(onPressed: () => _selectAll(field))
+              : item,
+      ],
+    );
+  }
+
+  void _selectAll(EditableTextState field) {
+    final value = field.textEditingValue;
+    field.userUpdateTextEditingValue(
+      value.copyWith(
+        selection:
+            TextSelection(baseOffset: 0, extentOffset: value.text.length),
+      ),
+      SelectionChangedCause.toolbar,
+    );
+  }
+
   /// The text field, for the line numbers (N12) to follow.
   final _contentFieldKey = GlobalKey();
   late final AppLifecycleListener _lifecycleListener;
@@ -719,6 +746,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                                       key: const Key('noteContentField'),
                                       controller: _contentController,
                                       selectionControls: _selectionControls,
+                                      contextMenuBuilder: _contextMenu,
                                       focusNode: _contentFocusNode,
                                       autofocus: widget.isNew,
                                       keyboardType: TextInputType.multiline,

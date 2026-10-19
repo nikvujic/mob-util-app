@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- **Shop's search** is a button beside **+** at the bottom, not in the
+  top bar (buttons belong at the bottom, under your thumb), and it
+  searches the **bought items** only: the list to buy stays as it is.
+  Its magnifier and text now sit on one line.
+- **Notes**: after **Select all** in a long note, the Cut / Copy / Paste
+  menu was left out of sight at the note's start; it now shows where you
+  can tap it.
+
 ## [1.29.0] - 2026-10-19
 
 ### Added

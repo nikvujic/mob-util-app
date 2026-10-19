@@ -4,6 +4,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
@@ -230,8 +231,10 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       _selection.retain(next.map((i) => i.id));
     });
 
-    final toBuy = _matching(items.where((i) => i.toBuy).toList());
-    var stock = _matching(items.where((i) => !i.toBuy).toList());
+    // Round 69 (fixed in 1.29.1): the search filters the bought list only.
+    final toBuy = items.where((i) => i.toBuy).toList();
+    final bought = items.where((i) => !i.toBuy).toList();
+    var stock = _matching(bought);
     // Round 69: the bought list A–Z if asked (shown so; its own order is
     // kept, and new ones still go on its top).
     final sorted = ref.watch(preferencesProvider.select((p) => p.shopSorted));
@@ -254,24 +257,15 @@ class _ShopPageState extends ConsumerState<ShopPage> {
           child: Scaffold(
             appBar: _selection.isActive
                 ? SelectionAppBar(count: _selection.count)
-                : MainAppBar(
-                    title: 'Shop',
-                    actions: [
-                      if (items.isNotEmpty && !_searching)
-                        IconButton(
-                          key: const Key('shopSearch'),
-                          tooltip: 'Search',
-                          icon: const Icon(Icons.search),
-                          onPressed: _openSearch,
-                        ),
-                    ],
-                  ),
+                : const MainAppBar(title: 'Shop'),
             body: Column(children: [
-              Expanded(child: _list(items, toBuy, stock, sorted, typed)),
+              Expanded(
+                  child: _list(items, toBuy, stock, sorted, typed,
+                      anyBought: bought.isNotEmpty)),
               if (_searching && !_selection.isActive) _searchBar(context),
             ]),
             floatingActionButton: _selection.isActive || !_searching
-                ? _actions(items, toBuy, stock)
+                ? _actions(items, toBuy, stock, canSearch: bought.isNotEmpty)
                 : null,
           ),
         ),
@@ -280,37 +274,12 @@ class _ShopPageState extends ConsumerState<ShopPage> {
   }
 
   Widget _list(List<ShopItem> items, List<ShopItem> toBuy, List<ShopItem> stock,
-      bool sorted, String typed) {
+      bool sorted, String typed,
+      {required bool anyBought}) {
     if (items.isEmpty) {
       return const EmptyState(
         icon: Icons.shopping_cart_outlined,
         message: 'Your shopping list is empty',
-      );
-    }
-    if (_filtering && toBuy.isEmpty && stock.isEmpty) {
-      return Padding(
-        key: const Key('shopNoMatch'),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Nothing called “$typed”',
-                style: TextStyle(color: context.colors.textMuted)),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: const Key('shopAddTyped'),
-                icon: const Icon(Icons.add),
-                label: Text('Add “$typed”'),
-                onPressed: () {
-                  _add(typed);
-                  _query.clear();
-                },
-              ),
-            ),
-          ],
-        ),
       );
     }
     return PullDownList(
@@ -328,13 +297,13 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                 vertical: 8,
               ),
               child: Text(
-                _filtering ? 'None of these to buy' : 'Nothing to buy',
+                'Nothing to buy',
                 style: TextStyle(color: context.colors.textMuted),
               ),
             ),
           ),
         _section(toBuy, toBuy: true, reorderable: !_filtering),
-        if (stock.isNotEmpty) ...[
+        if (anyBought) ...[
           _SectionHeader(
             title: 'Items',
             count: stock.length,
@@ -349,6 +318,31 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                   ref.read(preferencesProvider.notifier).setShopSorted(!sorted),
             ),
           ),
+          // Nothing bought matches: say so, and offer to add it.
+          if (_filtering && stock.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                key: const Key('shopNoMatch'),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Nothing called “$typed”',
+                        style: TextStyle(color: context.colors.textMuted)),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      key: const Key('shopAddTyped'),
+                      icon: const Icon(Icons.add),
+                      label: Text('Add “$typed”'),
+                      onPressed: () {
+                        _add(typed);
+                        _query.clear();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           _section(stock, toBuy: false, reorderable: !sorted && !_filtering),
         ],
       ],
@@ -367,8 +361,14 @@ class _ShopPageState extends ConsumerState<ShopPage> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+          // 1.29.1: the icon beside the field, both centred on one line
+          // (as the field's own prefix it sat off its text).
           child: Row(
             children: [
+              Icon(Icons.search,
+                  key: const Key('shopSearchIcon'),
+                  color: colors.textSecondary),
+              const SizedBox(width: 12),
               Expanded(
                 child: TextField(
                   key: const Key('shopSearchField'),
@@ -376,9 +376,10 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                   focusNode: _queryFocus,
                   textInputAction: TextInputAction.search,
                   decoration: const InputDecoration(
-                    hintText: 'Search items',
-                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search bought items',
                     border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -396,7 +397,8 @@ class _ShopPageState extends ConsumerState<ShopPage> {
   }
 
   Widget _actions(
-      List<ShopItem> items, List<ShopItem> toBuy, List<ShopItem> stock) {
+      List<ShopItem> items, List<ShopItem> toBuy, List<ShopItem> stock,
+      {required bool canSearch}) {
     return _selection.isActive
         ? SelectionActions(
             allSelected: _selection.count == items.length,
@@ -413,13 +415,23 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                 ),
             ],
           )
-        : FloatingActionButton(
-            // Tabs are kept alive side by side; a shared default hero
-            // tag would clash when a route is pushed.
-            heroTag: null,
-            tooltip: 'Add item',
-            onPressed: _addItems,
-            child: const Icon(Icons.add),
+        // 1.29.1: search beside + (G11: no actions in the top bar), once
+        // there's something bought to search.
+        : BottomActions(
+            actions: [
+              if (canSearch)
+                BottomAction(
+                  icon: Icons.search,
+                  tooltip: 'Search',
+                  onPressed: _openSearch,
+                ),
+              BottomAction(
+                icon: Icons.add,
+                tooltip: 'Add item',
+                primary: true,
+                onPressed: _addItems,
+              ),
+            ],
           );
   }
 }
