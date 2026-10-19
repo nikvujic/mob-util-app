@@ -337,12 +337,26 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 80 — Nikola on 1.36.0 (2026-10-19, patch 1.36.1)
+
+- [x] **Subscriptions**: the card that pays it: its name stays, and its
+  **expiry date** (`cardExpires`, optional in subscriptions.json v1);
+  shown on the card, "Card expires before it renews" in red when it runs
+  out before the next renewal (`cardRunsOutOn`).
+- [x] **Cards**: normal ones (rounded, a light tint, a thin outline, the
+  state a pill): no thick left edge.
+- [x] **Weather off**: the trees stand still (`PipWind.of`: not known is
+  calm).
+- [x] **Patches** keep their minor version's changes in What's new (as
+  since Rounds 48/70); written into `docs/RELEASING.md`.
+
 ### Round 79 — Nikola's notes (2026-10-19)
 
 - [x] **Pip's trees**: sway only in the wind. Open-Meteo's wind (km/h at
   10 m, `wind_speed_10m`) comes with the weather: under 12 still, 12–30
   a light sway, 30 and over (or a storm) hard (`PipWind`). With the
-  weather off (the wind not known), a light sway as before.
+  weather off (the wind not known), a light sway as before (Round 80:
+  still).
 - [x] **Angry**: his fist went too far from his body (over his head,
   shaken out sideways): now beside his head, a pixel off his casing,
   shaken up and down.

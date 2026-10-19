@@ -40,10 +40,11 @@ enum WeatherKind {
 
 /// How windy it is (Round 79, Nikola: trees sway only in the wind).
 enum PipWind {
-  /// Still: the trees don't sway.
+  /// Still: the trees don't sway (Round 80: also when the wind isn't
+  /// known, the weather off).
   calm,
 
-  /// A light sway (also when the wind isn't known: the weather off).
+  /// A light sway.
   breeze,
 
   /// Swaying hard.
@@ -53,11 +54,11 @@ enum PipWind {
   static const breezeFrom = 12.0;
   static const windyFrom = 30.0;
 
-  /// The wind for [speed] km/h (null: not known, a breeze) in [weather]
-  /// (a storm's windy whatever it says).
+  /// The wind for [speed] km/h (null: not known, calm) in [weather] (a
+  /// storm's windy whatever it says).
   static PipWind of(double? speed, WeatherKind? weather) {
     if (weather == WeatherKind.storm) return windy;
-    if (speed == null) return breeze;
+    if (speed == null) return calm;
     if (speed >= windyFrom) return windy;
     return speed >= breezeFrom ? breeze : calm;
   }

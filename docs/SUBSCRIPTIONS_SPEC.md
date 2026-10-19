@@ -14,6 +14,7 @@ done about it.
 | **State** | One of four, below. |
 | **Date** | What it means goes with the state (below). A day, no time. |
 | **Card** | The (virtual) card it's paid with, any text: "Revolut 4421". Empty: **card unknown** (Grok: "didn't set a name"). |
+| **Card expires** | Round 80 (Nikola): the day that card expires (virtual cards run out). On the card: "· expires 10 Nov" (or "expired"); expiring before the next renewal, "Card expires before it renews" in red. |
 | **Note** | Anything: "real ~30€", "payment failed". |
 | **Reminder** | Besides the one on its date at 09:00 (always, while it's one with a date): **none** (default), or **1, 2, 3 days or a week before**, at 09:00. Shown on the card. |
 
@@ -38,11 +39,13 @@ an active one's, still marked to cancel.
   By currency if they differ (€ and $ each their own).
 - **Cards, two columns**, in order: to cancel, active, cancelled, then
   inactive and ended; within each, the soonest date first, then by name.
-  Each card, tinted by its state:
+  Each card, rounded, lightly tinted with a thin outline in its state's
+  colour (Round 80: no thick edge), its state a pill:
   - the name (bold), the price ("~16€ / month");
   - the state and date: *Renews 3 Nov* · *Cancel by 17 Nov* · *Active
     until 13 Nov* · *Ended 13 Nov* · *Inactive*;
-  - the card (a card icon; *Card unknown* in italics);
+  - the card and its expiry (a card icon; *Card unknown* in italics);
+    a warning if it expires before it renews;
   - the reminder (a bell): *2 days before* (none set: nothing);
   - the note, a line or two.
 - Tap a card: its **sheet** to edit everything (name, price, about,

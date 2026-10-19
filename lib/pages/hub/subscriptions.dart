@@ -148,8 +148,9 @@ class _TwoColumns extends StatelessWidget {
       );
 }
 
-/// A subscription's card (Round 79): tinted by its state, its name, price,
-/// state and date, card, reminder and note.
+/// A subscription's card (Round 79): tinted by its state (Round 80: a
+/// thin outline, its state a pill), its name, price, state and date, card
+/// (and when it expires), reminder and note.
 class SubscriptionCard extends StatelessWidget {
   final Subscription subscription;
   final DateTime today;
@@ -183,15 +184,18 @@ class SubscriptionCard extends StatelessWidget {
             ],
           ),
         );
+    // Round 80 (Nikola: no thick edge): a plain rounded card, lightly
+    // tinted, a thin outline in its state's colour.
     return SelectableCard(
       selected: false,
-      color: Color.alphaBlend(colour.withValues(alpha: 0.14), colors.card),
+      color: Color.alphaBlend(colour.withValues(alpha: 0.08), colors.card),
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        side: BorderSide(color: colour.withValues(alpha: 0.45)),
+      ),
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: colour, width: 4)),
-        ),
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -211,26 +215,45 @@ class SubscriptionCard extends StatelessWidget {
                 '$price / ${s.every.label}',
                 style: TextStyle(color: colors.textPrimary, fontSize: 13),
               ),
-            const SizedBox(height: 4),
-            Text(
-              key: Key('subscriptionState-${s.id}'),
-              stateLabel(s, today),
-              style: TextStyle(
-                color: colour,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+            const SizedBox(height: 6),
+            // Its state and day, as a small pill in its colour.
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: colour.withValues(alpha: 0.18),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Text(
+                key: Key('subscriptionState-${s.id}'),
+                stateLabel(s, today),
+                style: TextStyle(
+                  color: colour,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+            const SizedBox(height: 2),
             line(
               Icons.credit_card,
               Text(
-                s.card.isEmpty ? 'Card unknown' : s.card,
-                style: s.card.isEmpty
+                cardLabel(s, today),
+                style: s.card.isEmpty && s.cardExpires == null
                     ? small.copyWith(fontStyle: FontStyle.italic)
                     : small,
               ),
               key: Key('subscriptionCard-${s.id}'),
             ),
+            // Round 80: its card runs out before it renews.
+            if (s.cardRunsOutOn(today))
+              line(
+                Icons.warning_amber_rounded,
+                Text(
+                  'Card expires before it renews',
+                  style: small.copyWith(color: colors.danger),
+                ),
+                key: Key('subscriptionCardRunsOut-${s.id}'),
+              ),
             if (remindLabel(s) case final remind?)
               line(
                 Icons.notifications_none,

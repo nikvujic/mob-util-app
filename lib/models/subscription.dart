@@ -60,6 +60,10 @@ class Subscription {
 
   /// The card it's paid with; empty: not known.
   final String card;
+
+  /// Round 80 (Nikola): when that card expires (a virtual card runs out);
+  /// null: not set.
+  final DateTime? cardExpires;
   final String note;
 
   /// Days before [date] for a second reminder (at 09:00); null: none.
@@ -86,9 +90,13 @@ class Subscription {
     this.state = SubscriptionState.active,
     DateTime? date,
     this.card = '',
+    DateTime? cardExpires,
     this.note = '',
     this.remindBefore,
-  }) : date = date == null ? null : DateTime(date.year, date.month, date.day);
+  })  : date = date == null ? null : DateTime(date.year, date.month, date.day),
+        cardExpires = cardExpires == null
+            ? null
+            : DateTime(cardExpires.year, cardExpires.month, cardExpires.day);
 
   Subscription copyWith({
     String? name,
@@ -99,6 +107,7 @@ class Subscription {
     SubscriptionState? state,
     DateTime? Function()? date,
     String? card,
+    DateTime? Function()? cardExpires,
     String? note,
     int? Function()? remindBefore,
   }) =>
@@ -112,6 +121,7 @@ class Subscription {
         state: state ?? this.state,
         date: date == null ? this.date : date(),
         card: card ?? this.card,
+        cardExpires: cardExpires == null ? this.cardExpires : cardExpires(),
         note: note ?? this.note,
         remindBefore: remindBefore == null ? this.remindBefore : remindBefore(),
       );
@@ -173,6 +183,17 @@ class Subscription {
     return days <= (remindBefore ?? toCancelRemind);
   }
 
+  /// Its card expires before it next renews, on [today] (a renewing one:
+  /// the payment would fail).
+  bool cardRunsOutOn(DateTime today) {
+    final expires = cardExpires;
+    final at = dateOn(today);
+    return expires != null &&
+        state.renews &&
+        at != null &&
+        expires.isBefore(at);
+  }
+
   /// What it comes to a month (a year's price ÷ 12); null: no price.
   double? get perMonth => switch (price) {
         null => null,
@@ -189,6 +210,8 @@ class Subscription {
         'state': state.name,
         if (date != null) 'date': PlannerTask.dayToJson(date!),
         if (card.isNotEmpty) 'card': card,
+        if (cardExpires != null)
+          'cardExpires': PlannerTask.dayToJson(cardExpires!),
         if (note.isNotEmpty) 'note': note,
         if (remindBefore != null) 'remindBefore': remindBefore,
       };
@@ -204,6 +227,9 @@ class Subscription {
         date:
             json['date'] == null ? null : PlannerTask.dayFromJson(json['date']),
         card: json['card'] as String? ?? '',
+        cardExpires: json['cardExpires'] == null
+            ? null
+            : PlannerTask.dayFromJson(json['cardExpires']),
         note: json['note'] as String? ?? '',
         remindBefore: (json['remindBefore'] as num?)?.toInt(),
       );
@@ -220,12 +246,13 @@ class Subscription {
       other.state == state &&
       other.date == date &&
       other.card == card &&
+      other.cardExpires == cardExpires &&
       other.note == note &&
       other.remindBefore == remindBefore;
 
   @override
   int get hashCode => Object.hash(id, name, price, currency, about, every,
-      state, date, card, note, remindBefore);
+      state, date, card, cardExpires, note, remindBefore);
 }
 
 /// What the running subscriptions come to a month, in one currency.

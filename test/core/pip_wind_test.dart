@@ -17,15 +17,16 @@ void main() {
     longitude: 20.5,
   );
 
-  test('the wind by its speed (km/h); a storm\'s windy; unknown: a breeze', () {
+  test('the wind by its speed (km/h); a storm\'s windy; unknown: calm', () {
     expect(PipWind.of(0, WeatherKind.clear), PipWind.calm);
     expect(PipWind.of(11.9, WeatherKind.rain), PipWind.calm);
     expect(PipWind.of(12, WeatherKind.clear), PipWind.breeze);
     expect(PipWind.of(29.9, null), PipWind.breeze);
     expect(PipWind.of(30, WeatherKind.clear), PipWind.windy);
     expect(PipWind.of(3, WeatherKind.storm), PipWind.windy);
-    expect(PipWind.of(null, WeatherKind.clear), PipWind.breeze);
-    expect(PipWind.of(null, null), PipWind.breeze);
+    // Round 80 (Nikola): the weather off (not known), still.
+    expect(PipWind.of(null, WeatherKind.clear), PipWind.calm);
+    expect(PipWind.of(null, null), PipWind.calm);
   });
 
   test('read from Open-Meteo, kept, and missing from older reports', () {
@@ -57,7 +58,7 @@ void main() {
             .wind;
     expect(wind(4, code: 61), PipWind.calm, reason: 'rain, no wind');
     expect(wind(40, code: 0), PipWind.windy, reason: 'clear, windy');
-    expect(wind(null), PipWind.breeze, reason: 'the weather off');
+    expect(wind(null), PipWind.calm, reason: 'the weather off: still');
     expect(wind(4, code: 95), PipWind.windy, reason: 'a storm');
     expect(wind(4, code: 0, look: const PipLook(weather: WeatherKind.rain)),
         PipWind.windy);

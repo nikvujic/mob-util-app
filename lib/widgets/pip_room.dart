@@ -1037,7 +1037,7 @@ class _RoomPainter extends CustomPainter {
 
     if (!skiSnow) {
       // Round 79: by the wind (it was the rain): still when calm.
-      final wind = scene?.wind ?? PipWind.breeze;
+      final wind = scene?.wind ?? PipWind.calm;
       if (props.contains(PipProp.trees)) {
         // Round 74: each spot's tree its own look (an oak, a birch, a pine;
         // Round 75: by the season).

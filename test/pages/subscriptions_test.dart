@@ -192,6 +192,43 @@ void main() {
         reason: 'nothing that costs');
   });
 
+  testWidgets(
+      'Round 80: the card\'s expiry set on its page, shown on its card; '
+      'before it renews, a warning; cleared', (tester) async {
+    await open(tester, start: SubscriptionBook([nikolas.byId('claude')!]));
+    await tester.tap(card('claude'));
+    await tester.pumpAndSettle();
+    final expires = find.byKey(const Key('subscriptionCardExpires'));
+    await tester.scrollUntilVisible(expires, 200,
+        scrollable: find.byType(Scrollable).last);
+    expect(find.text('Not set'), findsOneWidget);
+    await tester.tap(expires);
+    await tester.pumpAndSettle();
+    // The picker opens on a month from today (19 Nov): taken as it is.
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(book().byId('claude')!.cardExpires, day(11, 19));
+    await pressBack(tester);
+    expect(find.text('Revolut 4421 · expires 19 Nov'), findsOneWidget);
+    expect(find.text('Card expires before it renews'), findsNothing,
+        reason: 'it renews on the 3rd, before');
+    // Expiring before it renews: a warning on the card and its page.
+    container
+        .read(subscriptionsProvider.notifier)
+        .save(book().byId('claude')!.copyWith(cardExpires: () => day(10, 30)));
+    await tester.pumpAndSettle();
+    expect(find.text('Card expires before it renews'), findsOneWidget);
+    await tester.tap(card('claude'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(expires, 200,
+        scrollable: find.byType(Scrollable).last);
+    expect(find.text('Before it renews'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('subscriptionCardExpiresClear')));
+    await tester.pumpAndSettle();
+    expect(book().byId('claude')!.cardExpires, isNull);
+    expect(find.text('Not set'), findsOneWidget);
+  });
+
   testWidgets('an inactive one set going again gets a day a month on',
       (tester) async {
     await open(tester, start: SubscriptionBook([nikolas.byId('spotify')!]));

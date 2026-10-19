@@ -32,6 +32,12 @@ as a short list — not step-by-step test instructions.
    *Added* / *Changed* / *Fixed* lists, written for the user: the app
    shows it as **What's new** in the Introduction note (N16). Update
    `assets/introduction.md` when a feature is added or changes.
+   **Patches keep their minor version's changes** (Nikola, Rounds 48,
+   70, 80): for a patch (1.36.1), What's new shows every section of that
+   minor version, newest first (1.36.1, then 1.36.0), so what came with
+   1.36.0 isn't lost behind the fix. A patch only adds its own section;
+   never fold or drop the minor version's (`core/changelog.dart`
+   `changesFor` / `changesSince`, tested in `introduction_test.dart`).
 3. Commit (`Release vX.Y.Z`) and push to `main`.
 4. Start the release, either way:
    - **On GitHub** (works from the phone too): *Actions → Release → Run

@@ -102,6 +102,19 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     _change(_draft.copyWith(date: () => picked));
   }
 
+  Future<void> _pickCardExpiry() async {
+    final today = _today;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _draft.cardExpires ?? _monthOn(today),
+      firstDate: DateTime(today.year - 5),
+      lastDate: DateTime(today.year + 15, 12, 31),
+      helpText: 'Card expires',
+    );
+    if (picked == null || !mounted) return;
+    _change(_draft.copyWith(cardExpires: () => picked));
+  }
+
   /// Asked first, then gone, with Undo.
   Future<void> _delete() async {
     final confirmed = await showConfirmDialog(
@@ -302,6 +315,32 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
               ),
               onChanged: (text) => _change(_draft.copyWith(card: text.trim())),
             ),
+          ),
+          // Round 80 (Nikola): when the card paying it expires.
+          ListTile(
+            key: const Key('subscriptionCardExpires'),
+            leading: const Icon(Icons.credit_card_off_outlined),
+            title: const Text('Card expires'),
+            subtitle: s.cardRunsOutOn(today)
+                ? Text('Before it renews',
+                    style: TextStyle(color: colors.danger))
+                : null,
+            trailing: s.cardExpires == null
+                ? Text('Not set', style: TextStyle(color: colors.textMuted))
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(formatDay(s.cardExpires!, today: today)),
+                      IconButton(
+                        key: const Key('subscriptionCardExpiresClear'),
+                        tooltip: 'No expiry date',
+                        icon: const Icon(Icons.close),
+                        onPressed: () =>
+                            _change(_draft.copyWith(cardExpires: () => null)),
+                      ),
+                    ],
+                  ),
+            onTap: _pickCardExpiry,
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),

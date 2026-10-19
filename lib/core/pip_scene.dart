@@ -346,7 +346,7 @@ class PipScene {
     this.occasion,
     this.weather,
     this.strength = 0,
-    this.wind = PipWind.breeze,
+    this.wind = PipWind.calm,
   });
 
   /// [weather]: Open-Meteo's code now (Round 70), if it's on, and the

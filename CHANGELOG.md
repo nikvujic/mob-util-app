@@ -6,6 +6,18 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Subscriptions**: the **card's expiry date** (a virtual card runs
+  out), set on a subscription's page and shown on its card ("Virtual
+  0912 · expires 10 Nov"). If the card expires before the subscription
+  next renews, the card says so in red.
+
+### Changed
+- **Subscriptions' cards** look like normal cards now: rounded, lightly
+  tinted with a thin outline in their state's colour, and the state as a
+  small pill. The thick edge on the left is gone.
+- **Pip's trees** stand still with the weather off (they swayed lightly).
+
 ## [1.36.0] - 2026-10-19
 
 ### Added
