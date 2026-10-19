@@ -12,6 +12,7 @@ import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_scene.dart';
+import 'package:the_app/core/pip_weather.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/dates_provider.dart';
@@ -162,6 +163,14 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                     ),
                                   _Settings.animations => _Animations(
                                       brain: _brain,
+                                      // Round 75: the weather's, tried on.
+                                      tryWeather: (kind) =>
+                                          setState(() => _look = PipLook(
+                                                season: _look.season,
+                                                weather: kind,
+                                                occasion: _look.occasion,
+                                                part: _look.part,
+                                              )),
                                       back: () => _show(_Settings.menu),
                                     ),
                                   _Settings.adventures => _Adventures(
@@ -741,7 +750,15 @@ class _Animations extends StatefulWidget {
   final PipBrain brain;
   final VoidCallback back;
 
-  const _Animations({required this.brain, required this.back});
+  /// Round 75: tries a weather on his field (the weather's animations,
+  /// and his tent and umbrella), as Background's list does.
+  final ValueChanged<WeatherKind> tryWeather;
+
+  const _Animations({
+    required this.brain,
+    required this.tryWeather,
+    required this.back,
+  });
 
   @override
   State<_Animations> createState() => _AnimationsState();
@@ -761,6 +778,10 @@ class _AnimationsState extends State<_Animations> {
 
   void _play(PipAnimation animation) {
     final brain = widget.brain;
+    // Round 75: the weather's in its weather (tried on, as Background's).
+    if (PipBrainWeather.eventOf(animation) case final event?) {
+      widget.tryWeather(weatherFor(event));
+    }
     if (brain.play(animation, demo: true)) {
       HapticFeedback.selectionClick();
       return;
@@ -799,6 +820,22 @@ class _AnimationsState extends State<_Animations> {
                     value: '>',
                     onTap: () => _play(a),
                   ),
+              // Round 75: the weather's cover, seen coming (it goes when
+              // the weather's taken off, in Background).
+              for (final (kind, label) in const [
+                (WeatherKind.storm, 'HIS TENT IN A STORM'),
+                (WeatherKind.rain, 'HIS UMBRELLA IN THE RAIN'),
+                (WeatherKind.fog, 'SLOW IN THE FOG'),
+              ])
+                _CardRow(
+                  key: Key('pipWeather-${kind.name}'),
+                  label: label,
+                  value: '>',
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    widget.tryWeather(kind);
+                  },
+                ),
             ],
           ),
         ),

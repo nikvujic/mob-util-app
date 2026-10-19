@@ -337,6 +337,21 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 75 — Nikola on 1.33.0 (2026-10-19, 1.34.0)
+
+- [x] **Trees**: the pine (green all year) rare, about 5%, but 60% in
+  winter; both trees the same kind but now and then (10%); the same
+  when the field moves out on his adventure.
+- [x] **Weather idling** (`core/pip_weather.dart`, one table of what each
+  weather does in each thing he's doing): a **storm**, his tent (over
+  sleep or being off too; events wait; batteries fly into it); **rain**,
+  his umbrella, puddle jumps, a twirl; **drizzle**, a hand out; **snow**,
+  a snowman (stays, melts after), flakes, a snowball splatting on the
+  glass; **fog**, slow, lost. The weather comes in and he looks up.
+- [x] **On his adventure**: a storm's tent by the path; snowmen in the
+  snow; slower in fog, foes looming; splashes in the rain.
+- [x] All in Pip Home's **Animations** (each trying its weather on).
+
 ### Round 74 — Nikola on 1.32.0 (2026-10-19, 1.33.0)
 
 - [x] **Handles** (notes): the grab area from the icon outwards; on the

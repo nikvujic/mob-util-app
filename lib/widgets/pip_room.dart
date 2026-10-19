@@ -8,6 +8,7 @@ import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
+import 'package:the_app/core/pip_weather.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/weather.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
@@ -425,6 +426,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
             widget.brain.dark =
                 scene?.part == DayPart.night || scene?.part == DayPart.dusk;
             widget.brain.overcast = scene?.grey ?? false;
+            // Round 75: the weather, for what he does in it.
+            widget.brain.weather = scene?.weather;
             widget.brain.bleak = scene != null &&
                 (scene.season == Season.winter ||
                     scene.props.contains(PipProp.rain) ||
@@ -998,12 +1001,15 @@ class _RoomPainter extends CustomPainter {
     if (!skiSnow) {
       final windy = scene?.weather?.wet ?? false;
       if (props.contains(PipProp.trees)) {
-        // Round 74: each spot's tree its own look (an oak, a birch, a pine).
+        // Round 74: each spot's tree its own look (an oak, a birch, a pine;
+        // Round 75: by the season).
         final shade = season ?? Season.summer;
         // Round 72: in their spots for this time the app's open, in full
         // view; beside the road (not on it) while he rides the bus.
         final base = bus != null ? groundTop - 1 : groundTop;
-        for (final (i, (at: at, kind: kind)) in _treeSpots.indexed) {
+        for (final (i, spot) in _treeSpots.indexed) {
+          final kind = spot.kindIn(shade);
+          final at = spot.at;
           final (art, colours, crownRows) = PipSprites.treeOf(kind, shade);
           final bare = shade == Season.winter && kind != PipTreeKind.pine;
           final wide = art.first.length.toDouble();
@@ -1171,6 +1177,178 @@ class _RoomPainter extends CustomPainter {
           (w.bottom - w.top - 5).toDouble());
     }
 
+    /// A filled disc of [colour], its middle at [cx], [cy], [r] across
+    /// (Round 75: any size, anywhere).
+    void ball(double cx, double cy, double r, Color colour) {
+      for (var dy = -r.ceil(); dy <= r.ceil(); dy++) {
+        for (var dx = -r.ceil(); dx <= r.ceil(); dx++) {
+          if (dx * dx + dy * dy <= r * r + 0.5) {
+            dot((cx + dx).floorToDouble(), (cy + dy).floorToDouble(), colour);
+          }
+        }
+      }
+    }
+
+    /// Round 75: his snowman, as far as it's built (a base, a body, a
+    /// head, coal eyes, a carrot nose, stick arms), shrinking as it melts.
+    void drawSnowman(PipSnowman man) {
+      final b = man.built;
+      final shrink = 1 - man.melted * 0.8;
+      final middle = man.left + PipSnowman.width / 2;
+      double part(double from, double to) =>
+          ((b - from) / (to - from)).clamp(0.0, 1.0);
+      final base = 5.0 * part(0, PipSnowman.baseUntil) * shrink;
+      final body =
+          3.5 * part(PipSnowman.baseUntil, PipSnowman.bodyUntil) * shrink;
+      final head =
+          2.5 * part(PipSnowman.bodyUntil, PipSnowman.headUntil) * shrink;
+      final alpha = 1 - man.melted * 0.5;
+      final snow = PipColours.snow.withValues(alpha: alpha);
+      final shade = PipColours.snowShade.withValues(alpha: alpha);
+      if (base > 0.4) {
+        ball(middle, groundTop - base, base, snow);
+        dot(middle + base - 1, groundTop - base, shade, 1, base);
+      }
+      final bodyAt = groundTop - 2 * base - body + 1;
+      if (body > 0.4) ball(middle, bodyAt, body, snow);
+      final headAt = bodyAt - body - head + 1;
+      if (head > 0.4) ball(middle, headAt, head, snow);
+      if (b >= PipSnowman.headUntil && man.melted < 0.6) {
+        dot(middle - 1, headAt - 1, PipColours.coal);
+        dot(middle + 1, headAt - 1, PipColours.coal);
+        dot(middle, headAt, PipColours.carrot, 2, 1);
+        dot(middle, bodyAt - 1, PipColours.coal);
+        dot(middle, bodyAt + 1, PipColours.coal);
+        if (b >= 0.95) {
+          // Stick arms.
+          for (var i = 1; i <= 3; i++) {
+            dot(middle - body - i, bodyAt - i * 0.6, PipColours.woodDark);
+            dot(middle + body + i - 1, bodyAt - i * 0.6, PipColours.woodDark);
+          }
+        }
+      }
+    }
+
+    /// Round 75: a snowball flying out at you, then splatted on the glass,
+    /// sliding a little, fading.
+    void drawSplat(PipSplat splat) {
+      if (splat.flying) {
+        final p = splat.flight;
+        final fx = splat.fromX + (splat.x - splat.fromX) * p;
+        final fy = (groundTop - splat.fromUp) +
+            (splat.y - (groundTop - splat.fromUp)) * p -
+            6 * math.sin(math.pi * p);
+        ball(fx, fy, 1 + 3 * p * p, PipColours.snow);
+        return;
+      }
+      final fade = splat.fade;
+      final alpha = fade < 0.6 ? 0.95 : 0.95 * (1 - (fade - 0.6) / 0.4);
+      final slide = 3 * fade;
+      final snow = PipColours.snow.withValues(alpha: alpha);
+      ball(splat.x, splat.y + slide, 8, snow);
+      for (var i = 0; i < 9; i++) {
+        final angle = i * 0.7 + splat.x;
+        final out = 9 + (i % 3) * 1.5;
+        ball(splat.x + out * math.cos(angle),
+            splat.y + slide + out * 0.8 * math.sin(angle), 2.0 + (i % 3), snow);
+      }
+      // Drips running down.
+      for (final dx in const [-5.0, -1.0, 3.0, 6.0]) {
+        dot(splat.x + dx, splat.y + 8 + slide, snow, 1, 2 + 8 * fade);
+      }
+      dot(splat.x - 2, splat.y - 2 + slide,
+          PipColours.snowShade.withValues(alpha: alpha), 2, 1);
+    }
+
+    /// Round 75: the weather's things with him, in front: his umbrella,
+    /// his tent (him in it, peeking), his hand out (a drop on it), a
+    /// snowball in his hand, flakes to his tongue, a question mark.
+    void drawWeatherWithHim(double centre, double bottom) {
+      // His umbrella over his head, held at his side: its handle down to
+      // his hand beside him (not across his face).
+      final open = brain.umbrella;
+      if (open > 0 && !brain.inTent) {
+        final art = PipSprites.umbrella;
+        final turned = (brain.umbrellaTurn / math.pi).floor().isOdd;
+        final w = art.first.length;
+        final hand = brain.handBeside(right: brain.facingRight);
+        final handleX = hand.floorToDouble() + (brain.facingRight ? 1 : 0);
+        final middle = centre * 0.7 + handleX * 0.3;
+        final top = bottom - PipBrain.height - 8;
+        for (var y = 0; y < art.length; y++) {
+          if (y > art.length * open + 1) continue;
+          for (var x = 0; x < w; x++) {
+            final c = art[y][turned ? w - 1 - x : x];
+            final colour = PipSprites.weatherColours[c];
+            if (colour == null) continue;
+            dot((middle + (x - w / 2) * open).floorToDouble(), top + y, colour);
+          }
+        }
+        final from = top + art.length - 1;
+        dot(handleX, from, PipColours.umbrellaHandle, 1, (bottom - 8) - from);
+        sprite(PipSprites.mitt, handleX - 1, bottom - 6);
+      }
+      // His tent: going up round him (it grows from the ground), shaking
+      // with the thunder; his eyes peeking out of it now and then.
+      if (brain.tent case final tent?) {
+        final art = PipSprites.tent;
+        final up = tent.up;
+        final shake = props.contains(PipProp.lightning) &&
+                brain.sceneClock % _stormEvery < 0.25
+            ? ((brain.sceneClock * 30).floor().isEven ? 1.0 : -1.0)
+            : 0.0;
+        for (var y = 0; y < art.length; y++) {
+          final rowTop = groundTop - (art.length - y) * up;
+          for (var x = 0; x < art[y].length; x++) {
+            final colour = PipSprites.weatherColours[art[y][x]];
+            if (colour == null) continue;
+            dot((tent.left + x + (y < 12 ? shake : 0)).floorToDouble(),
+                rowTop.floorToDouble(), colour, 1, math.max(1, up + 0.2));
+          }
+        }
+        if (brain.peeking) {
+          final door = tent.left + PipTent.width / 2;
+          dot(door - 2, groundTop - 6, PipColours.screen, 4, 2);
+          dot(door - 1, groundTop - 6, PipColours.face);
+          dot(door + 1, groundTop - 6, PipColours.face);
+        }
+      }
+      // His hand out (drizzle), scooping, winding up, throwing (snow).
+      if (brain.weatherHand case (final hx, final hy)) {
+        sprite(PipSprites.mitt, hx - 1, groundTop - hy + 3);
+        if (brain.holdingSnowball) {
+          dot(hx - 1, groundTop - hy - 2, PipColours.snow, 3, 2);
+        }
+        if (brain.dropOnHand case final p?) {
+          dot(hx, (groundTop - hy - 1 - 14 * (1 - p)).floorToDouble(),
+              PipColours.raindrop, 1, 2);
+        }
+      }
+      // Flakes drifting to his tongue.
+      if (brain.flakesIn case final f?) {
+        final mouthX = centre + (brain.facingRight ? 2 : -2);
+        final mouthY = bottom - 9;
+        for (var i = 0; i < 3; i++) {
+          final p = ((f * 3 + i / 3) % 1);
+          dot((mouthX + (i - 1) * 6 * (1 - p)).floorToDouble(),
+              (mouthY - 12 * (1 - p)).floorToDouble(), PipColours.flake);
+        }
+      }
+      // Lost in the fog: a question mark over his head; the weather
+      // changed: an exclamation mark, as he looks up.
+      final mark = brain.lost
+          ? '?'
+          : brain.activity == PipActivity.lookingUp && brain.zsClock < 0.9
+              ? '!'
+              : null;
+      if (mark != null) {
+        final art = PipSprites.tinyText(mark);
+        sprite(art, (centre - 1).floorToDouble(),
+            (bottom - PipBrain.height - 3).floorToDouble(),
+            colours: const {'x': PipColours.levelUp});
+      }
+    }
+
     final eggLeft =
         brain.eggX + (PipBrain.width - PipSprites.egg[0].length) / 2;
 
@@ -1305,7 +1483,12 @@ class _RoomPainter extends CustomPainter {
           brain.activity == PipActivity.adventuring ? brain.run : null;
       final foe = fight?.foe ?? PipFoe.bug;
       final art = PipSprites.foeArt(foe, legsUp);
+      // Round 75: out of the fog, looming as they come.
+      final fog = fight != null && brain.weather == WeatherKind.fog
+          ? ((columns * 0.9 - bx) / (columns * 0.35)).clamp(0.15, 1.0)
+          : 1.0;
       sprite(art, bx, groundTop,
+          alpha: fog,
           colours: fight?.foeFlash ?? false
               ? PipSprites.foeFlashColours
               : PipSprites.foeColours,
@@ -1323,6 +1506,37 @@ class _RoomPainter extends CustomPainter {
     if (brain.ball case (final bx, final up, final turn)) {
       sprite(PipSprites.ballFrames[turn], bx, groundTop - up,
           colours: PipSprites.fieldColours);
+    }
+
+    // Round 75: out in the rain, splashes at his feet as he runs.
+    if (run != null &&
+        run.stepping &&
+        !run.skiing &&
+        (brain.weather?.wet ?? false) &&
+        (brain.frame == PipFrame.step1 || brain.frame == PipFrame.step3)) {
+      final feet = brain.x + PipBrain.width / 2;
+      final kick = (run.clock * 9).floor() % 3;
+      for (final side in const [-1.0, 1.0]) {
+        dot((feet + side * (6 + kick)).floorToDouble(),
+            groundTop - 1 - kick % 2, PipColours.puddleLight);
+      }
+    }
+    // Round 75: rain's puddles (a splash in one), and his snowman.
+    for (final middle in brain.puddles) {
+      sprite(PipSprites.puddle, (middle - 6).floorToDouble(), groundTop + 1,
+          colours: PipSprites.puddleColours, alpha: brain.weatherIn);
+    }
+    if (brain.splash case (final middle, final p)) {
+      for (var i = 0; i < 6; i++) {
+        final side = i.isEven ? 1 : -1;
+        final out = (2 + i) * p * 2.5;
+        final up = 7 * math.sin(math.pi * p) * (1 - i * 0.1);
+        dot((middle + side * out).floorToDouble(),
+            (groundTop - 1 - up).floorToDouble(), PipColours.puddleLight);
+      }
+    }
+    if (brain.snowman case final man?) {
+      drawSnowman(man);
     }
 
     // Round 67: the bus, behind him while he's outside it; Round 72: in
@@ -1364,7 +1578,9 @@ class _RoomPainter extends CustomPainter {
       canvas.drawRect(Rect.fromLTWH(left, top, w, h), paint..color = colour);
     }
 
-    for (var y = 0; y < rows; y++) {
+    // Round 75: hidden in his tent.
+    final hidden = brain.inTent;
+    for (var y = 0; y < rows && !hidden; y++) {
       final row = sprite0[y];
       for (var x = 0; x < row.length; x++) {
         final colour = PipSprites.colours[row[x]];
@@ -1372,7 +1588,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
     // Round 57: his hat, on his head: moved with him whatever he does.
-    if (brain.hat case final hat? when !brain.hatBeside) {
+    if (brain.hat case final hat? when !brain.hatBeside && !hidden) {
       final art = PipSprites.hats[hat]!;
       final top = PipSprites.hatBottom -
           art.length +
@@ -1390,6 +1606,9 @@ class _RoomPainter extends CustomPainter {
     canvas.restore();
     // Round 67: in his seat: the bus over him, him in its window.
     if (bus != null && bus.busShown && bus.inside) drawBus(bus);
+    // Round 75: the weather's things with him: his umbrella over his
+    // head, his tent round him, his hand out, a question mark in the fog.
+    drawWeatherWithHim(centre, bottom);
     // Asleep, it's on the ground beside him (on the side with room).
     if (brain.hat case final hat? when brain.hatBeside) {
       final art = PipSprites.hats[hat]!;
@@ -1677,7 +1896,9 @@ class _RoomPainter extends CustomPainter {
     final tall = height.toDouble();
     final strength = (scene?.strength ?? 1).clamp(1, 3);
     if (props.contains(PipProp.snowfall) && !skiSnow) {
-      for (var i = 0; i < columns * strength ~/ 6; i++) {
+      // Round 75: coming in (thickening) as the weather changes.
+      final flakes = (columns * strength / 6 * brain.weatherIn).floor();
+      for (var i = 0; i < flakes; i++) {
         final speedY = 5.0 + (i % 3) * 2;
         final fx = (i * 37 + 3 * math.sin(t * 0.8 + i)) % columns;
         final fy = ((i * 53 + t * speedY) % tall + tall) % tall;
@@ -1690,7 +1911,9 @@ class _RoomPainter extends CustomPainter {
       // with the wind, in two layers (far ones fainter and slower), and
       // little splashes where they hit the ground.
       final drizzle = scene?.weather == WeatherKind.drizzle;
-      final count = columns * (drizzle ? 1 : strength + 1) ~/ 4;
+      final count =
+          (columns * (drizzle ? 1 : strength + 1) / 4 * brain.weatherIn)
+              .floor();
       final length = drizzle ? 2 : 4 + strength;
       for (var i = 0; i < count; i++) {
         final far = i % 3 == 0;
@@ -1746,6 +1969,8 @@ class _RoomPainter extends CustomPainter {
       canvas.drawRect(Offset.zero & size,
           paint..color = PipColours.lightning.withValues(alpha: 0.3));
     }
+    // Round 75: a snowball thrown at you, and its splat on the glass.
+    if (brain.splat case final splat?) drawSplat(splat);
     // The egg's bottom half in front of him, as he jumps out of it.
     if (hatching) {
       sprite(PipSprites.eggBottom, eggLeft, groundTop, alpha: shell);
@@ -1783,18 +2008,40 @@ List<PipTreeSpot> _treeSpots = treeSpots(math.Random());
 @visibleForTesting
 set debugTreeSpots(List<PipTreeSpot> spots) => _treeSpots = spots;
 
-/// A tree's spot (a share of the room's width) and look.
-typedef PipTreeSpot = ({double at, PipTreeKind kind});
+/// A tree's spot (a share of the room's width) and the rolls that pick
+/// its look by the season ([PipTreeSpot.kindIn]).
+typedef PipTreeSpot = ({double at, double pine, double kind});
+
+/// Round 75: how often a tree is a pine (green all year): rarely, but
+/// more often than not in winter.
+double pineChance(Season season) => season == Season.winter ? 0.6 : 0.05;
+
+/// Round 75: how often the two trees differ (else both the same kind).
+const mixedTrees = 0.1;
+
+extension PipTreeSpotKind on PipTreeSpot {
+  /// Its look in [season]: a pine at [pineChance], else an oak or a
+  /// birch.
+  PipTreeKind kindIn(Season season) => pine < pineChance(season)
+      ? PipTreeKind.pine
+      : (kind < 0.5 ? PipTreeKind.oak : PipTreeKind.birch);
+}
 
 /// Round 72: where his field's two trees stand, picked by [random]: one
 /// on the left part, one well to the right, so it isn't always the same
-/// view. Round 74: each an oak, a birch or a pine.
+/// view. Round 74: each an oak, a birch or a pine; Round 75: mostly both
+/// the same ([mixedTrees] of the time not), a pine rarely
+/// ([pineChance]).
 List<PipTreeSpot> treeSpots(math.Random random) {
-  PipTreeKind kind() =>
-      PipTreeKind.values[random.nextInt(PipTreeKind.values.length)];
+  final pine = random.nextDouble(), kind = random.nextDouble();
+  final mixed = random.nextDouble() < mixedTrees;
   return [
-    (at: random.nextDouble() * 0.3, kind: kind()),
-    (at: 0.62 + random.nextDouble() * 0.38, kind: kind()),
+    (at: random.nextDouble() * 0.3, pine: pine, kind: kind),
+    (
+      at: 0.62 + random.nextDouble() * 0.38,
+      pine: mixed ? random.nextDouble() : pine,
+      kind: mixed ? random.nextDouble() : kind,
+    ),
   ];
 }
 

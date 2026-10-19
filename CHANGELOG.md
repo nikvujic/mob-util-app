@@ -6,6 +6,38 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Pip and the weather** (with the weather on in Internet Access, or
+  tried on in Pip Home):
+  - **Thunderstorm**: his **tent** goes up round him and he waits it out
+    inside. He can't move and nothing else happens, though now and then
+    his eyes peek out and the tent shakes with the thunder. A battery you
+    give him flies into the tent. Asleep or off, the tent goes up over
+    him; busy with something, he finishes it first. When the storm's
+    over, the tent comes down.
+  - **Rain**: he opens his **umbrella**, jumps in **puddles** (a
+    splash), and now and then **twirls** under the umbrella.
+  - **Drizzle**: no umbrella; now and then he holds a hand out to feel
+    it.
+  - **Snow**: he **builds a snowman** (it stays while the snow lasts,
+    then melts), catches **flakes** on his tongue, and throws a
+    **snowball at you**; it splats on the glass.
+  - **Fog**: he walks slowly, and now and then he's **lost** (a question
+    mark, looking this way and that).
+  - When the weather changes, he stops and looks up, and the rain or
+    snow comes in over a few seconds.
+  - On his **adventure**: in a storm he stops and waits it out in his
+    tent by the path; in the snow, **snowmen** come at him among the
+    bugs (two strikes); in fog he runs slower and foes loom out of it;
+    in the rain, splashes at his feet.
+  - Pip Home's **Animations** has them all (each tries its weather on),
+    and his tent, his umbrella and the fog.
+
+### Changed
+- **Trees**: both usually the same kind (two kinds now and then), and
+  the evergreen **pine** is rare (about 1 in 20), except in **winter**,
+  when it's more likely than not.
+
 ## [1.33.0] - 2026-10-19
 
 ### Added

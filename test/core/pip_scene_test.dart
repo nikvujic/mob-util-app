@@ -235,6 +235,14 @@ void main() {
         // Round 53.
         'medicine',
         'eat',
+        // Round 75: the weather's.
+        'puddle',
+        'twirl',
+        'handOut',
+        'flakes',
+        'snowman',
+        'snowball',
+        'lost',
       ]);
     });
 

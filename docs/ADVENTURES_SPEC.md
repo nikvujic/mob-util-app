@@ -71,6 +71,19 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   card; more cards later, no settings). It opens on the adventure view
   while he's out.
 
+## 3c. The weather out (Round 75)
+
+- **Storm**: he slows to a stop, puts his sword away and waits it out in
+  his tent by the path (no bugs; a coming one runs off). Over, the tent
+  comes down and he draws his sword and runs on. 18:00 in it: it comes
+  down and he's back. A storm on as he'd set off: he stays in his tent
+  at home till it's over. On skis, no tent.
+- **Snow**: snowmen come at him among the bugs (about 3 in 10, two
+  strikes).
+- **Fog**: he runs slower (0.55); foes loom out of it, fading in.
+- **Rain**: splashes at his feet as he runs.
+- XP goes by the clock all the same.
+
 ## 4. Starting and ending
 
 - **Start**: he walks to the centre, **draws his sword** and runs right;

@@ -83,6 +83,48 @@ void main() {
     expect(find.byKey(const Key('pipBackground')), findsOneWidget);
   });
 
+  testWidgets(
+      'Round 75: the weather\'s animations, each in its weather (tried on); '
+      'his tent, umbrella and fog too; back to his info card, gone',
+      (tester) async {
+    await open(tester);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAnimations')));
+    await tester.pumpAndSettle();
+    final brain = room(tester).brain;
+    // Up and about first (an event of his own may be on).
+    for (var i = 0;
+        i < 60 * 60 && brain.activity != PipActivity.standing;
+        i++) {
+      brain.step(1 / 60);
+    }
+    final list = find.descendant(
+        of: find.byKey(const Key('pipAnimationList')),
+        matching: find.byType(Scrollable));
+    final snowman = find.byKey(const Key('pipPlay-snowman'));
+    await tester.scrollUntilVisible(snowman, 60, scrollable: list);
+    await tester.pumpAndSettle();
+    await tester.tap(snowman);
+    await tester.pump();
+    expect(room(tester).scene!.weather, WeatherKind.snow);
+    expect(brain.activity, PipActivity.weatherEvent);
+    expect(brain.snowman, isNotNull);
+    for (final kind in [WeatherKind.storm, WeatherKind.rain, WeatherKind.fog]) {
+      final row = find.byKey(Key('pipWeather-${kind.name}'));
+      await tester.scrollUntilVisible(row, 60, scrollable: list);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pump();
+      expect(room(tester).scene!.weather, kind);
+    }
+    await tester.tap(find.byKey(const Key('pipBack')));
+    await tester.pumpAndSettle();
+    await tester.fling(
+        find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(room(tester).scene!.weather, isNull, reason: 'a try-on: gone');
+  });
+
   testWidgets('the background: picked from a list (Round 36)', (tester) async {
     await open(tester);
     expect(room(tester).scene!.background, PipBackground.field);

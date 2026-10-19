@@ -493,6 +493,16 @@ each foe `PipRun` reports struck down (`defeats`, a `PipFoe`),
 `PipLink.defeated`, which collects the XP (a boss banks
 `PipAdventure.bossMinutes` once a day out, `bossDueAt`) and returns
 what to show rising (`showXp`).
+Round 75: the weather (`core/pip_weather.dart`: the table of what each
+weather does in each activity, `PipTent`, `PipUmbrella`, `PipSnowman`,
+`PipSplat`) is lived by the brain in a part file,
+`core/pip_brain_weather.dart` (`_PipWeatherState`, the
+`PipBrainWeather` extension: the room sets `weather` from its scene
+each build; `_stepWeather` every step pitches and packs his tent,
+opens his umbrella, melts his snowman; `PipActivity.sheltering`,
+`weatherEvent` and `lookingUp` have their rows in `mayStart`). Out, the
+run takes `storm`, `snowFoes` and `pace` from the brain
+(`RunPhase.toShelter`/`sheltering`, `PipFoe.snowman`).
 Round 74: each room's brain has its own run, so the field's trees go by
 his time out from his life instead (`PipLink.outRun`, synced each
 second into `PipBrain.outRun`, read by `fieldPassing`), standing still

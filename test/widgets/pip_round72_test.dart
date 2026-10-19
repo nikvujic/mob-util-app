@@ -61,7 +61,8 @@ void main() {
   test('trees (Round 72): in a random spot each time, apart', () {
     final seen = <String>{};
     for (var seed = 0; seed < 50; seed++) {
-      final [(at: a, kind: _), (at: b, kind: _)] = treeSpots(math.Random(seed));
+      final [(at: a, pine: _, kind: _), (at: b, pine: _, kind: _)] =
+          treeSpots(math.Random(seed));
       expect(a, inInclusiveRange(0, 0.3));
       expect(b, inInclusiveRange(0.62, 1));
       seen.add('${(a * 10).floor()} ${(b * 10).floor()}');
@@ -73,9 +74,10 @@ void main() {
       'trees (Round 74): an oak, a birch or a pine each, at random; each '
       'drawn in every season (the pine green all year)', () {
     final kinds = <PipTreeKind>{};
-    for (var seed = 0; seed < 50; seed++) {
+    for (var seed = 0; seed < 200; seed++) {
       for (final spot in treeSpots(math.Random(seed))) {
-        kinds.add(spot.kind);
+        kinds.add(spot.kindIn(Season.winter));
+        kinds.add(spot.kindIn(Season.summer));
       }
     }
     expect(kinds, PipTreeKind.values.toSet());
@@ -129,5 +131,29 @@ void main() {
     expect(PipSprites.candle.first.contains('f'), isTrue);
     expect(PipScene.at(PipPlace.room, DateTime(2027, 1, 7, 12)).props,
         contains(PipProp.badnjak));
+  });
+
+  test(
+      'trees (Round 75): a pine rarely (5%), but mostly in winter (60%); '
+      'the two the same kind but now and then (10%)', () {
+    const opens = 4000;
+    final pines = {for (final s in Season.values) s: 0};
+    var mixed = 0;
+    for (var seed = 0; seed < opens; seed++) {
+      final [a, b] = treeSpots(math.Random(seed));
+      for (final season in Season.values) {
+        if (a.kindIn(season) == PipTreeKind.pine) {
+          pines[season] = pines[season]! + 1;
+        }
+      }
+      if (a.kindIn(Season.summer) != b.kindIn(Season.summer)) mixed++;
+    }
+    expect(pines[Season.summer]! / opens, closeTo(0.05, 0.015));
+    expect(pines[Season.autumn]! / opens, closeTo(0.05, 0.015));
+    expect(pines[Season.winter]! / opens, closeTo(0.6, 0.03));
+    expect(mixed / opens, lessThan(0.1), reason: 'two kinds: rare');
+    expect(mixed, greaterThan(0));
+    expect(pineChance(Season.winter), 0.6);
+    expect(pineChance(Season.spring), 0.05);
   });
 }

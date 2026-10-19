@@ -6,6 +6,10 @@ import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_run.dart';
+import 'package:the_app/core/pip_weather.dart';
+import 'package:the_app/core/weather.dart';
+
+part 'pip_brain_weather.dart';
 
 /// What Pip is doing (Round 26).
 enum PipActivity {
@@ -104,6 +108,16 @@ enum PipActivity {
 
   /// Round 67: on his ski trip's bus ([PipBus]).
   riding,
+
+  /// Round 75: in his tent in a storm, awake (`core/pip_weather.dart`):
+  /// keeping still till it's over.
+  sheltering,
+
+  /// One of the weather's events ([PipWeatherEvent]).
+  weatherEvent,
+
+  /// The weather's changed: he stops and looks up.
+  lookingUp,
 }
 
 /// A hat on his head (Round 57): the party hat on a birthday, or one
@@ -224,7 +238,15 @@ enum PipAnimation {
   dance('A little dance'),
   // Round 53: a medicine due (the red dot), and after a recipe.
   medicine('A medicine reminder'),
-  eat('Eating');
+  eat('Eating'),
+  // Round 75: the weather's (Pip Home's list tries the weather on too).
+  puddle('Jumping in a puddle'),
+  twirl('A twirl under his umbrella'),
+  handOut('A hand out in the drizzle'),
+  flakes('Snowflakes on his tongue'),
+  snowman('Building a snowman'),
+  snowball('A snowball at you'),
+  lost('Lost in the fog');
 
   final String label;
 
@@ -275,6 +297,9 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.stargazing ||
       PipActivity.dancing ||
       PipActivity.eating ||
+      // Round 75: the weather's events, and looking up at it, too.
+      PipActivity.weatherEvent ||
+      PipActivity.lookingUp ||
       // Round 63: out, nothing else happens till he's back; Round 67: on
       // the bus, nor then.
       PipActivity.adventuring ||
@@ -286,6 +311,10 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
         next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
       PipActivity.asleep =>
         next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
+      // Round 75: in his tent in a storm, he keeps still: nothing starts
+      // but sleep, or running out (a battery flies into it).
+      PipActivity.sheltering =>
+        next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
       PipActivity.off => next == PipAnimation.powerOn,
       PipActivity.standing ||
       PipActivity.walking =>
@@ -349,6 +378,14 @@ class PipBrain {
   /// his left. Its two pixels are [handX] - 1 and [handX].
   double handBeside({required bool right}) =>
       right ? x + width - bodyInset + 2 : x + bodyInset - 2;
+
+  /// The same for him at [x], facing [right].
+  static double handBesideOf(double x, bool right) =>
+      right ? x + width - bodyInset + 2 : x + bodyInset - 2;
+
+  /// Round 75: the weather in his field and what it makes of his day
+  /// (`pip_brain_weather.dart`).
+  final _wx = _PipWeatherState();
 
   /// Walking speed, in pixels a second.
   static const speed = 14.0;
@@ -481,6 +518,15 @@ class PipBrain {
         _previewing = !medicineDue;
       case PipAnimation.eat:
         _start(PipActivity.eating);
+      case PipAnimation.puddle ||
+            PipAnimation.twirl ||
+            PipAnimation.handOut ||
+            PipAnimation.flakes ||
+            PipAnimation.snowman ||
+            PipAnimation.snowball ||
+            PipAnimation.lost:
+        if (!_eventRoom) return false;
+        _startWeatherEvent(_weatherAnimations[animation]!);
     }
     return true;
   }
@@ -502,7 +548,10 @@ class PipBrain {
 
   /// Walking speed now: slower the less energy he has (Round 37).
   double get pace =>
-      speed * switch (segments) { 3 => 1.0, 2 => 0.7, _ => 0.45 };
+      speed *
+      switch (segments) { 3 => 1.0, 2 => 0.7, _ => 0.45 } *
+      // Round 75: slower in the fog.
+      paceIn(_wx.weather);
 
   /// Hurrying (Round 44: to a battery, or his station), whatever his
   /// energy: quicker than his best walk.
@@ -529,7 +578,9 @@ class PipBrain {
       mayStart(activity, PipAnimation.fetch) ||
       mayStart(activity, PipAnimation.powerOn) ||
       // Round 65: out on his adventure, it flies to him as he runs.
-      (activity == PipActivity.adventuring && _run?.canCatch == true);
+      (activity == PipActivity.adventuring && _run?.canCatch == true) ||
+      // Round 75: in his tent, it flies in (one at a time).
+      (activity == PipActivity.sheltering && _wx.flyFrom == null);
 
   /// A battery dropped at [at] (room pixels from the left): he walks over
   /// and picks it up, or, off, it flies to him and he comes back on.
@@ -538,6 +589,11 @@ class PipBrain {
     final left = at.clamp(0, math.max(0, roomWidth - batteryWidth)).toDouble();
     if (activity == PipActivity.adventuring) {
       _run!.catchBattery(left);
+      return true;
+    }
+    if (activity == PipActivity.sheltering) {
+      _wx.flyFrom = left;
+      _wx.flyT = 0;
       return true;
     }
     _battery = left;
@@ -588,6 +644,7 @@ class PipBrain {
   /// (flying to him while he's off), or null.
   (double, double)? get battery {
     if (activity == PipActivity.adventuring) return _run?.battery;
+    if (activity == PipActivity.sheltering) return _tentBattery;
     final b = _battery;
     if (b == null) return null;
     if (activity == PipActivity.poweringOn) {
@@ -1096,7 +1153,14 @@ class PipBrain {
         _stepRun(dt);
       case PipActivity.riding:
         _stepBus(dt);
+      case PipActivity.sheltering:
+        break;
+      case PipActivity.weatherEvent:
+        _stepWeatherEvent(dt);
+      case PipActivity.lookingUp:
+        if (_t >= PipBrainWeather._lookUpTime) _stand();
     }
+    _stepWeather(dt);
     _stepLevelFlash(dt);
     if (snowing) snowClock += dt;
     sceneClock += dt;
@@ -1718,6 +1782,8 @@ class PipBrain {
   bool _maybeEvent() {
     if (!_eventRoom || _wantsStation || _bedtime) return false;
     if (random.nextDouble() >= eventChance) return false;
+    // Round 75: mostly the weather's, while it's doing something.
+    if (_maybeWeatherEvent()) return true;
     // At dusk or night, now and then a shooting star (Round 70: not
     // under a grey sky).
     if (dark && !overcast && random.nextInt(4) == 0) {
@@ -2492,6 +2558,11 @@ class PipBrain {
     } else {
       run.bossDue = bossDue;
     }
+    // Round 75: the weather out: a storm (his tent), snowmen, fog.
+    // (On skis he skis on: no tent.)
+    run.storm = _wx.weather == WeatherKind.storm;
+    run.snowFoes = _wx.weather == WeatherKind.snow;
+    run.pace = paceIn(_wx.weather);
     run.roomWidth = roomWidth;
     run.step(dt);
     // Struck down in a preview: no XP.
@@ -2715,6 +2786,10 @@ class PipBrain {
                 PipFrame.step4,
               ][(_t / stepTime).floor() % 4]
             : PipFrame.idle,
+        PipActivity.sheltering ||
+        PipActivity.weatherEvent ||
+        PipActivity.lookingUp =>
+          _weatherFrame,
       };
 
   /// Hurrying, his steps come quicker too (Round 44).
@@ -2760,6 +2835,8 @@ class PipBrain {
           frame == PipFrame.chew;
       return run.lift + bob - (tucked ? 2 : 0);
     }
+    // Round 75: a puddle jump, hops in the snow.
+    if (_weatherLift case final weather?) return weather;
     // Round 52: dropping from the sky, or thrown in on an arc.
     if (activity == PipActivity.falling && _t < _fallTime) {
       final left = _fallTime - _t;

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_weather.dart';
 
 /// What stands on his ski slope (Round 67).
 enum SlopeThing { tree, redFlag, blueFlag }
@@ -12,7 +13,10 @@ enum PipFoe {
   bug(hits: 1, width: 8, crawl: 6),
   beetle(hits: 2, width: 12, crawl: 5),
   spider(hits: 3, width: 14, crawl: 7),
-  boss(hits: 6, width: 24, crawl: 3.5);
+  boss(hits: 6, width: 24, crawl: 3.5),
+
+  /// Round 75: in the snow, a snowman coming at him (two strikes).
+  snowman(hits: 2, width: 12, crawl: 4);
 
   /// Strikes it takes, its width, and how fast it crawls at him.
   final int hits;
@@ -83,6 +87,12 @@ enum RunPhase {
 
   /// ...and stepping back in.
   skiOn,
+
+  /// Round 75: a storm: slowing to a stop, the sword away...
+  toShelter,
+
+  /// ...in his tent by the path till it's over (it comes down after).
+  sheltering,
 
   /// Over: he's back to his usual self.
   done,
@@ -158,6 +168,26 @@ class PipRun {
   double breakDone = 0;
 
   /// His life says: on his break or not (and how far), or over.
+  /// Round 75: the weather out (his brain says): a storm (he shelters
+  /// in his tent), snow (snowmen among the bugs), his pace (slower in
+  /// fog).
+  bool storm = false;
+  bool snowFoes = false;
+  double pace = 1;
+
+  /// His tent by the path in a storm (screen place; the ground's still).
+  PipTent? tent;
+
+  /// Hidden in his tent.
+  bool get inTent =>
+      (tent?.hides ?? false) &&
+      (phase == RunPhase.sheltering || phase == RunPhase.toShelter);
+
+  static const shelterSlow = 0.6;
+
+  /// The chance a foe in the snow is a snowman.
+  static const snowmanChance = 0.3;
+
   void want({required bool onBreak, double done = 0, bool end = false}) {
     _wantBreak = onBreak;
     breakDone = done;
@@ -374,6 +404,7 @@ class PipRun {
     if (bossDue && !_bossCame && random.nextDouble() < bossChance) {
       return PipFoe.boss;
     }
+    if (snowFoes && random.nextDouble() < snowmanChance) return PipFoe.snowman;
     final r = random.nextDouble();
     if (r < spiderChance) return PipFoe.spider;
     if (r < spiderChance + beetleChance) return PipFoe.beetle;
@@ -537,6 +568,32 @@ class PipRun {
           _sheathed = true;
           _to(skiing && _geared ? RunPhase.toGear : RunPhase.done);
         }
+      case RunPhase.toShelter:
+        speed = math.max(0, speed - runSpeed * dt / shelterSlow);
+        if (t >= sheatheTime) _sheathed = true;
+        if (t >= shelterSlow) {
+          speed = 0;
+          tent ??= PipTent((x + PipBrain.width / 2 - PipTent.width / 2)
+              .clamp(0, math.max(0, roomWidth - PipTent.width))
+              .toDouble());
+          _to(RunPhase.sheltering);
+        }
+      case RunPhase.sheltering:
+        final tent = this.tent!;
+        if (storm && !_wantEnd) {
+          tent.repitch();
+        } else {
+          tent.pack();
+        }
+        tent.step(dt);
+        if (tent.gone) {
+          this.tent = null;
+          if (_wantEnd) {
+            _to(RunPhase.done);
+          } else {
+            _to(RunPhase.drawing);
+          }
+        }
       case RunPhase.done:
         break;
     }
@@ -549,9 +606,17 @@ class PipRun {
       _ski(dt);
       return;
     }
-    speed = runSpeed;
+    // Round 75: slower in the fog.
+    speed = runSpeed * pace;
     facingRight = true;
     x = centre;
+    // Round 75: a storm: he stops and shelters in his tent (a foe coming
+    // runs off first).
+    if (storm && _swing < 0 && tavernAt == null && !_wantEnd) {
+      if (bugAt != null) _fleeing = true;
+      _to(RunPhase.toShelter);
+      return;
+    }
     if (_wantEnd && _swing < 0) {
       // A bug still coming scurries off.
       if (bugAt != null) _fleeing = true;
@@ -746,7 +811,7 @@ class PipRun {
         // Round 67: on skis he glides.
         RunPhase.running || RunPhase.arriving => !skiing,
         RunPhase.toGear || RunPhase.toSki => true,
-        RunPhase.ending => speed > 2,
+        RunPhase.ending || RunPhase.toShelter => speed > 2,
         RunPhase.toCentre ||
         RunPhase.toSword ||
         RunPhase.back ||
@@ -838,6 +903,9 @@ class PipRun {
       case RunPhase.ending:
         if (_sheathed) return null;
         return (hand, 7, forward * 0.3, 1 - (t / endTime).clamp(0.0, 1.0));
+      case RunPhase.toShelter:
+        if (_sheathed) return null;
+        return (hand, 7, forward * 0.3, 1 - (t / sheatheTime).clamp(0.0, 1.0));
       default:
         return null;
     }

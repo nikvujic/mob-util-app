@@ -20,7 +20,9 @@ void main() {
         }
       }
       expect(up, isNot(down), reason: '${foe.name}: its legs step');
-      expect(up.join().contains('r'), isTrue, reason: '${foe.name}: eyes');
+      // Its eyes: red, or coal (Round 75: a snowman's).
+      expect(up.join().contains(foe == PipFoe.snowman ? 'c' : 'r'), isTrue,
+          reason: '${foe.name}: eyes');
     }
     // Bigger ones bigger; the boss biggest, in a crown.
     final heights = [

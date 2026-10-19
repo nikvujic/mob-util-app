@@ -615,12 +615,52 @@ abstract final class PipSprites {
     '..K..K...K...K...K..K...',
   ];
 
+  /// Round 75: a snowman coming at him in the snow, 12 x 16: cross coal
+  /// eyes, a carrot nose, stick arms up (waving as it slides).
+  static const snowmanFoeUp = [
+    'k..........k',
+    '.k..nnnn..k.',
+    '..knnnnnnk..',
+    '...ncnncn...',
+    '...nnnoon...',
+    '....nnnn....',
+    '...nnnnnn...',
+    '..nnncnnnn..',
+    '..nnnnnnnN..',
+    '..nnncnnnN..',
+    '...nnnnnN...',
+    '..nnnnnnnN..',
+    '.nnnnnnnnnN.',
+    '.nnnnnnnnnN.',
+    '.nnnnnnnnNN.',
+    '..NNNNNNNN..',
+  ];
+  static const snowmanFoeDown = [
+    '............',
+    'k...nnnn...k',
+    '.kknnnnnnkk.',
+    '...ncnncn...',
+    '...nnnoon...',
+    '....nnnn....',
+    '...nnnnnn...',
+    '..nnncnnnn..',
+    '..nnnnnnnN..',
+    '..nnncnnnN..',
+    '...nnnnnN...',
+    '..nnnnnnnN..',
+    '.nnnnnnnnnN.',
+    '.nnnnnnnnnN.',
+    '.nnnnnnnnNN.',
+    '..NNNNNNNN..',
+  ];
+
   /// What [foe] looks like, its legs up or down.
   static List<String> foeArt(PipFoe foe, bool legsUp) => switch (foe) {
         PipFoe.bug => legsUp ? bugUp : bugDown,
         PipFoe.beetle => legsUp ? beetleUp : beetleDown,
         PipFoe.spider => legsUp ? spiderUp : spiderDown,
         PipFoe.boss => legsUp ? bossUp : bossDown,
+        PipFoe.snowman => legsUp ? snowmanFoeUp : snowmanFoeDown,
       };
 
   static const foeColours = {
@@ -637,11 +677,75 @@ abstract final class PipSprites {
     'y': PipColours.hatGold,
     'Y': PipColours.hatYellow,
     'W': PipColours.hatWhite,
+    // Round 75: a snowman's.
+    'n': PipColours.snow,
+    'N': PipColours.snowShade,
+    'c': PipColours.coal,
+    'o': PipColours.carrot,
+    'k': PipColours.woodDark,
   };
 
   /// A foe flashing as it's struck (every pixel white).
   static final foeFlashColours = {
     for (final key in foeColours.keys) key: PipColours.hatWhite,
+  };
+
+  /// Round 75: his tent in a storm, 30 x 19 ([PipTent]): orange canvas
+  /// (its far side darker), seams, a dark doorway with its flaps open, a
+  /// pole's tip at the top, pegs.
+  static const tent = [
+    '..............pp..............',
+    '.............ete..............',
+    '............eTtte.............',
+    '...........eTTttte............',
+    '..........eTTTtttte...........',
+    '.........eeTTTttttee..........',
+    '........eeTTTTtttttee.........',
+    '........eTTTTTottttte.........',
+    '.......eTTTTTfofttttte........',
+    '......eTTTTTfooofttttte.......',
+    '.....eTTTTTTfoooftttttte......',
+    '....eTTTTTTfoooooftttttte.....',
+    '...eTTTTTTTfooooofttttttte....',
+    '..eTTTTTTTfooooooofttttttte...',
+    '.eTTTTTTTTfoooooooftttttttte..',
+    'eeTTTTTTTfoooooooooftttttttee.',
+    'eTTTTTTTffooooooooofftttttttee',
+    '.eeeeeeeeeeeeeeeeeeeeeeeeeeee.',
+    'k............................k',
+  ];
+
+  /// His umbrella's canopy, 17 x 6: red and white panels, scalloped.
+  static const umbrella = [
+    '.......RRR.......',
+    '....RRRwwwRRR....',
+    '..RRwwwRRRwwwRR..',
+    '.RwwwRRRRRRRwwwR.',
+    'RRRRRRRRRRRRRRRRR',
+    'R.R.R.R.R.R.R.R.R',
+  ];
+
+  /// A puddle in the rain, 12 x 2, a glint on it.
+  static const puddle = [
+    '..pppPPppp..',
+    'pppppppPPppp',
+  ];
+
+  static const weatherColours = {
+    'T': PipColours.tent,
+    't': PipColours.tentDark,
+    'e': PipColours.tentSeam,
+    'o': PipColours.tentDoor,
+    'f': PipColours.tent,
+    'p': PipColours.woodDark,
+    'k': PipColours.woodDark,
+    'R': PipColours.umbrella,
+    'w': PipColours.umbrellaLight,
+  };
+
+  static const puddleColours = {
+    'p': PipColours.puddle,
+    'P': PipColours.puddleLight,
   };
 
   /// Round 73: little 3 x 5 letters for the XP he gains ("+2 XP").
@@ -659,6 +763,9 @@ abstract final class PipSprites {
     '+': ['...', '.x.', 'xxx', '.x.', '...'],
     'X': ['x.x', 'x.x', '.x.', 'x.x', 'x.x'],
     'P': ['xx.', 'x.x', 'xx.', 'x..', 'x..'],
+    // Round 75: lost in the fog.
+    '?': ['xxx', '..x', '.xx', '...', '.x.'],
+    '!': ['.x.', '.x.', '.x.', '...', '.x.'],
     ' ': ['.', '.', '.', '.', '.'],
   };
 

@@ -529,6 +529,19 @@ abstract final class PipColours {
   static const flake = Color(0xFFFFFFFF);
   static const pine = Color(0xFF2E6040);
   static const pineDark = Color(0xFF1F4430);
+  // Round 75: his tent, his umbrella, rain's puddles, a snowman's
+  // carrot and coal.
+  static const tent = Color(0xFFE07B39);
+  static const tentDark = Color(0xFFB4562A);
+  static const tentSeam = Color(0xFF8E4020);
+  static const tentDoor = Color(0xFF3A2A22);
+  static const umbrella = Color(0xFFD9423A);
+  static const umbrellaLight = Color(0xFFF2EDE4);
+  static const umbrellaHandle = Color(0xFF5A3A28);
+  static const puddle = Color(0xFF5B7EA8);
+  static const puddleLight = Color(0xFFA9C4E2);
+  static const carrot = Color(0xFFF08A2C);
+  static const coal = Color(0xFF2B2826);
   // Round 74: a pine's lit side; a birch's white bark and its marks.
   static const pineLight = Color(0xFF4A8A5A);
   static const birch = Color(0xFFEDE8DC);
