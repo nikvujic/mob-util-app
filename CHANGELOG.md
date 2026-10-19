@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.35.0] - 2026-10-19
+
 ### Added
 - **Waking Pip at night**: tap him **three times** while he's asleep and
   he wakes for **15 minutes**, so you can give him a battery or let him
