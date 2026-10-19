@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.28.1] - 2026-10-19
+
 ### Fixed
 - **Notes** (and everywhere text is edited): since v1.27.0, tapping in
   the text showed the cursor's handle far off to the right of the
