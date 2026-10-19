@@ -348,6 +348,8 @@ class _StatusState extends ConsumerState<_Status> {
     final face = switch (show) {
       PipShow.off || PipShow.powerOff => PipFace.off,
       PipShow.asleep => PipFace.asleep,
+      // Round 77: woken at night, drowsy.
+      _ when life.drowsyAt(now) => PipFace.veryTired,
       _ => switch (segments) {
           3 => PipFace.normal,
           2 => PipFace.tired,
@@ -360,7 +362,8 @@ class _StatusState extends ConsumerState<_Status> {
     final hint = switch (life.refusalAt(now)) {
       null => 'TAP THE FIELD TO GIVE HIM ONE',
       PipRefusal.full => "HE'S FULL",
-      PipRefusal.asleep => "HE'S ASLEEP",
+      PipRefusal.asleep =>
+        life.mayWakeAt(now) ? 'TAP HIM 3 TIMES TO WAKE HIM' : "HE'S ASLEEP",
       PipRefusal.charging => "HE'S CHARGING",
       PipRefusal.travelling => "HE'S ON HIS TRIP",
       PipRefusal.noBatteries || PipRefusal.egg => null,

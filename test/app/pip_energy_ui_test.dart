@@ -8,6 +8,7 @@ import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/widgets/pip_energy_bar.dart';
+import 'package:the_app/widgets/pip_portrait.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 import 'package:the_app/widgets/pixel_text.dart';
@@ -262,6 +263,45 @@ void main() {
           2);
       expect(words(), containsAll(['BATTERIES 2/3', 'NEXT IN 2H 15M']));
       expect(words(), contains('TAP THE FIELD TO GIVE HIM ONE'));
+    });
+
+    testWidgets('Round 77: asleep, how to wake him (if he may be)',
+        (tester) async {
+      final now = DateTime(2026, 10, 15, 2);
+      await start(
+          tester,
+          now,
+          pipWith(energy: 2, at: now, batteries: 1)
+              .copyWith(sleepSeen: () => '2026-10-14'));
+      await openHome(tester);
+      expect(words(), contains('TAP HIM 3 TIMES TO WAKE HIM'));
+      expect(tester.widget<PipPortrait>(find.byType(PipPortrait)).face,
+          PipFace.asleep);
+    });
+
+    testWidgets('Round 77: woken this night already: asleep', (tester) async {
+      final now = DateTime(2026, 10, 15, 2);
+      await start(
+          tester,
+          now,
+          pipWith(energy: 2, at: now, batteries: 1).copyWith(
+              sleepSeen: () => '2026-10-14',
+              wokenAt: () => DateTime(2026, 10, 15, 0, 30)));
+      await openHome(tester);
+      expect(words(), contains("HE'S ASLEEP"));
+    });
+
+    testWidgets('Round 77: woken: drowsy on his status', (tester) async {
+      final now = DateTime(2026, 10, 15, 2);
+      await start(
+          tester,
+          now,
+          pipWith(energy: 3, at: now, batteries: 1).copyWith(
+              sleepSeen: () => '2026-10-14',
+              wokenAt: () => DateTime(2026, 10, 15, 1, 55)));
+      await openHome(tester);
+      expect(tester.widget<PipPortrait>(find.byType(PipPortrait)).face,
+          PipFace.veryTired);
     });
 
     testWidgets('full: says so', (tester) async {

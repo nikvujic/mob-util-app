@@ -157,6 +157,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// Whether the phone's plugged in was known at an earlier look.
   bool _pluggedKnown = false;
 
+  /// Round 77: the taps on him asleep so far, close together.
+  final _wakeTaps = <DateTime>[];
+
   /// Asks his life what to show and makes it so (once a change, not over
   /// and over, so a demo from Pip Home's list isn't undone); also his
   /// energy for his face and pace. Never during a build: it may collect
@@ -171,6 +174,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     final (show, segments) = link.look();
     brain.segments = segments;
+    // Round 77: woken at night, drowsy.
+    brain.drowsy = link.drowsy;
     final now = link.now;
     // Round 63: out on his adventure (looked at: his break may start).
     final out = link.outing();
@@ -297,6 +302,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
           brain.step(PipBrain.fadeEnd);
         case PipActivity.fallingAsleep:
           brain.step(PipBrain.asleepEnd);
+        case PipActivity.stirring:
+          brain.step(PipBrain.stirEnd);
         case PipActivity.wakingUp:
           brain.step(PipBrain.wakeHopEnd);
         case PipActivity.poweringOff:
@@ -354,6 +361,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     final link = widget.link;
     final brain = widget.brain;
     if (link == null) return;
+    if (brain.activity == PipActivity.asleep) {
+      _tapAsleep(link);
+      return;
+    }
     if (brain.canTakeBattery && link.giveBattery()) {
       brain.takeBattery(atPixel - PipBrain.batteryWidth / 2);
       HapticFeedback.mediumImpact();
@@ -363,6 +374,32 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     } else {
       HapticFeedback.selectionClick();
     }
+  }
+
+  /// A tap on him asleep (Round 77): the third close together wakes him,
+  /// if his life lets it (at night once, for a while; from 07:00 for the
+  /// day): one eye opens first. A light buzz a tap.
+  void _tapAsleep(PipLink link) {
+    final now = link.now;
+    final last = _wakeTaps.lastOrNull;
+    if (last != null && now.difference(last) > PipEnergy.wakeTapGap) {
+      _wakeTaps.clear();
+    }
+    _wakeTaps.add(now);
+    if (_wakeTaps.length < PipEnergy.wakeTaps) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    _wakeTaps.clear();
+    if (!link.wake()) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    widget.brain.play(PipAnimation.nightWake);
+    HapticFeedback.mediumImpact();
+    _shown = null; // awake now: look again
+    setState(_sync);
+    _checkSoon();
   }
 
   /// A tap on his egg: a crack and a buzz; the last pops him out, with a

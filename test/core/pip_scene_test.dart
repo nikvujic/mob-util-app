@@ -196,11 +196,18 @@ void main() {
       }
     });
 
-    test('asleep: only waking (or running out); off: only back on', () {
+    test(
+        'asleep: only waking (Round 77: woken at night too) or running out; '
+        'off: only back on; stirring: nothing', () {
       for (final a in PipAnimation.values) {
-        expect(mayStart(PipActivity.asleep, a),
-            a == PipAnimation.wakeUp || a == PipAnimation.powerOff,
+        expect(
+            mayStart(PipActivity.asleep, a),
+            a == PipAnimation.wakeUp ||
+                a == PipAnimation.nightWake ||
+                a == PipAnimation.powerOff,
             reason: 'asleep ${a.name}');
+        expect(mayStart(PipActivity.stirring, a), isFalse,
+            reason: 'stirring ${a.name}');
         expect(mayStart(PipActivity.off, a), a == PipAnimation.powerOn,
             reason: 'off ${a.name}');
       }
@@ -220,6 +227,7 @@ void main() {
         'turn',
         'fallAsleep',
         'powerOff',
+        'nightWake', // Round 77
         'fetch', // Round 54
         'charge',
         // Round 52.

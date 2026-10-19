@@ -34,6 +34,10 @@ class PipLife {
   final String? sleepSeen;
   final String? wakeSeen;
 
+  /// Round 77: when three taps last woke him in his sleeping hours (at
+  /// night for a while, early for the day: `PipEnergy.wokenAt`).
+  final DateTime? wokenAt;
+
   /// His adventures (Round 63): when he registered as an adventurer
   /// (null: not yet), the minutes out banked from his days out before
   /// (Round 73: each worth ten XP, `PipAdventure.xpPerMinute`; stored as
@@ -57,6 +61,7 @@ class PipLife {
     this.offSeen = false,
     this.sleepSeen,
     this.wakeSeen,
+    this.wokenAt,
     this.registeredAt,
     this.minutesOut = 0,
     this.outDay,
@@ -114,6 +119,7 @@ class PipLife {
     bool? offSeen,
     String? Function()? sleepSeen,
     String? Function()? wakeSeen,
+    DateTime? Function()? wokenAt,
     DateTime? Function()? registeredAt,
     int? minutesOut,
     String? Function()? outDay,
@@ -131,6 +137,7 @@ class PipLife {
         offSeen: offSeen ?? this.offSeen,
         sleepSeen: sleepSeen == null ? this.sleepSeen : sleepSeen(),
         wakeSeen: wakeSeen == null ? this.wakeSeen : wakeSeen(),
+        wokenAt: wokenAt == null ? this.wokenAt : wokenAt(),
         registeredAt: registeredAt == null ? this.registeredAt : registeredAt(),
         minutesOut: minutesOut ?? this.minutesOut,
         outDay: outDay == null ? this.outDay : outDay(),
@@ -152,6 +159,7 @@ class PipLife {
         'offSeen': offSeen,
         if (sleepSeen != null) 'sleepSeen': sleepSeen,
         if (wakeSeen != null) 'wakeSeen': wakeSeen,
+        if (wokenAt != null) 'wokenAt': _time(wokenAt!),
         if (adventurer)
           'adventure': {
             'registeredAt': _time(registeredAt!),
@@ -177,6 +185,7 @@ class PipLife {
       offSeen: json['offSeen'] as bool? ?? false,
       sleepSeen: json['sleepSeen'] as String?,
       wakeSeen: json['wakeSeen'] as String?,
+      wokenAt: _parse(json['wokenAt']),
       registeredAt: _parse(out?['registeredAt']),
       minutesOut: math.max(0, (out?['xp'] as num?)?.toInt() ?? 0),
       outDay: out?['outDay'] as String?,
@@ -197,6 +206,7 @@ class PipLife {
       other.offSeen == offSeen &&
       other.sleepSeen == sleepSeen &&
       other.wakeSeen == wakeSeen &&
+      other.wokenAt == wokenAt &&
       other.registeredAt == registeredAt &&
       other.minutesOut == minutesOut &&
       other.outDay == outDay &&
@@ -214,6 +224,7 @@ class PipLife {
       offSeen,
       sleepSeen,
       wakeSeen,
+      wokenAt,
       registeredAt,
       minutesOut,
       outDay,

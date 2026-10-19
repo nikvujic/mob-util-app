@@ -346,7 +346,27 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
         offSeen: state.offSeen,
         sleepSeen: state.sleepSeen,
         wakeSeen: state.wakeSeen,
+        wokenAt: state.wokenAt,
       );
+
+  /// Round 77: three taps on him asleep at [now]: woken (true), if he may
+  /// be (`PipEnergy.mayWakeAt`; not on his trip's bus).
+  bool wake(DateTime now) {
+    _settle(now);
+    if (!mayWakeAt(now)) return false;
+    state = state.copyWith(wokenAt: () => now);
+    return true;
+  }
+
+  /// Whether three taps would wake him at [now] (Pip Home says so).
+  bool mayWakeAt(DateTime now) =>
+      state.hatched &&
+      showAt(now) == PipShow.asleep &&
+      PipEnergy.mayWakeAt(state.wokenAt, now) &&
+      PipTrip.at(_dates(), now).leg == null;
+
+  /// Woken at night and still up at [now]: drowsy.
+  bool drowsyAt(DateTime now) => PipEnergy.drowsyAt(state.wokenAt, now);
 
   /// [show] was shown at [now]: remembered, so it isn't played again.
   void shown(PipShow show, DateTime now) {
@@ -473,6 +493,12 @@ class _Link implements PipLink {
 
   @override
   bool giveBattery() => _pip.giveBattery(_now);
+
+  @override
+  bool wake() => _pip.wake(_now);
+
+  @override
+  bool get drowsy => _pip.drowsyAt(_now);
 
   @override
   bool chargeTick() => _pip.chargeTick(_now);

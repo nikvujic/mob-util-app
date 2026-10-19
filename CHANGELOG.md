@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Waking Pip at night**: tap him **three times** while he's asleep and
+  he wakes for **15 minutes**, so you can give him a battery or let him
+  charge. One eye opens first and looks about, then he gets up the usual
+  way. He looks very tired the whole time and walks slowly, then falls
+  asleep again. Once a night.
+- **Waking him early**: from **07:00**, three taps wake him for the day,
+  instead of waiting till 08:00.
+- Pip Home's status says *TAP HIM 3 TIMES TO WAKE HIM* when he can be
+  woken, and the Animations list has *Woken at night*.
+
 ## [1.34.1] - 2026-10-19
 
 ### Fixed

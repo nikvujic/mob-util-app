@@ -97,6 +97,14 @@ abstract final class PipSprites {
           (mouth + 2, 6),
           (mouth + 3, 6),
         };
+      case 'peek':
+        // Round 77: woken at night, one eye open (his right, the far one
+        // looking ahead), the other shut; a small mouth.
+        return {
+          (eyes[0], 3), (eyes[0] + 1, 3), //
+          (eyes[1], 2), (eyes[1] + 1, 2), (eyes[1], 3), (eyes[1] + 1, 3),
+          (mouth + 2, 6), (mouth + 3, 6),
+        };
       case 'off':
         return const {};
       case 'yawn':
@@ -146,7 +154,11 @@ abstract final class PipSprites {
   static List<String> _frame(String face, String legs, {int look = 0}) {
     final rows = [for (final r in _head) r.split('')];
     // Asleep his screen dims; off it's dark, with a glint (Round 37).
-    final screen = switch (face) { 'asleep' => 'D', 'off' => 'X', _ => null };
+    final screen = switch (face) {
+      'asleep' || 'peek' => 'D',
+      'off' => 'X',
+      _ => null,
+    };
     if (screen != null) {
       for (var y = 0; y < screenRows; y++) {
         for (var x = 0; x < screenWidth; x++) {
@@ -201,6 +213,7 @@ abstract final class PipSprites {
       PipFace.asleep => 'asleep',
       PipFace.off => 'off',
       PipFace.yawn => 'yawn',
+      PipFace.peek => 'peek',
       PipFace.tired when frame == PipFrame.blink => 'blink-tired',
       PipFace.veryTired when frame == PipFrame.blink => 'blink-very',
       _ when frame == PipFrame.blink => 'blink',

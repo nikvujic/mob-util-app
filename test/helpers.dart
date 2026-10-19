@@ -350,6 +350,24 @@ class FakePipLink implements PipLink {
     return true;
   }
 
+  /// Round 77: three taps wake him while [wakeable] (then awake, drowsy
+  /// if [drowsyWoken]); how many times he was.
+  bool wakeable = false;
+  bool drowsyWoken = true;
+  int wakes = 0;
+  @override
+  bool drowsy = false;
+
+  @override
+  bool wake() {
+    if (!wakeable) return false;
+    wakeable = false;
+    wakes++;
+    show = PipShow.awake;
+    drowsy = drowsyWoken;
+    return true;
+  }
+
   /// The phone plugged in (Round 44).
   @override
   bool plugged = false;

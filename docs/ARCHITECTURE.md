@@ -536,6 +536,12 @@ again), and tells it back (`shown`, so an animation isn't replayed); a
 tap gives a battery (`giveBattery`, then `PipBrain.takeBattery`). Tests
 override the link with `FakePipLink` unless they ask for the real one.
 The brain's new activities all have their row in `mayStart`.
+Round 77: asleep, the room counts taps instead (three within
+`PipEnergy.wakeTapGap` of each other) and asks the life to wake him
+(`PipLink.wake`: `mayWakeAt`, kept as `PipLife.wokenAt`, after which
+`pipShowAt` says awake for a while); the brain stirs
+(`PipAnimation.nightWake`, `PipActivity.stirring`) then wakes, and is
+`drowsy` while `PipLink.drowsy` says.
 
 Pip Home (`pages/hub/pip_home.dart`, `HubTool.pip`): its own `PipBrain`
 (the menu's stays put) in a `PipRoom` with the menu's `pixel` (Round 38)

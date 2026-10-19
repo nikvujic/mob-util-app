@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 77 — the wake-ups (2026-10-19, 1.35.0)
+
+- [x] **Night wake-up** (Round 62): three taps on him asleep (each
+  within 0.8 s of the last) wake him for **15 minutes**, once a night
+  (`PipEnergy.mayWakeAt`, `nightKey`; `PipLife.wokenAt`, optional in
+  pip.json v3); one eye opens first (`PipActivity.stirring`, face
+  `peek`), then the usual wake; drowsy (face and pace as at one segment)
+  till he falls asleep again. Batteries and his station work while up.
+- [x] **Early wake-up** (Nikola: from 07:00): three taps then wake him
+  for the day (not drowsy). His energy goes as asleep either way.
+
 ### Round 76 — Nikola on 1.34.0 (2026-10-19, patch 1.34.1)
 
 - [x] Out, knocked over: the trees stand with the ground (they kept
@@ -508,11 +519,11 @@ Medicine:
   Not a bug (Round 68, Nikola): the time shown is the dose's daily slot.
 
 Pip:
-- [ ] **Night wake-up**: tapping Pip three times at night wakes him for
+- [x] (Round 77) **Night wake-up**: tapping Pip three times at night wakes him for
   **15 minutes**, once per night (so he can be charged). Special wake-up
   animation: he looks with one eye open first. During the 15 minutes he
   looks tired, like at 1 battery tick, then goes back to sleep.
-- [ ] **Early wake-up**: from 08:00 on, waking him before his usual time
+- [x] (Round 77; Nikola: from 07:00) **Early wake-up**: from 08:00 on, waking him before his usual time
   is allowed.
 - [ ] **Angry animation**: his hand goes too far from his body; keep it
   closer.

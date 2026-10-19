@@ -99,6 +99,17 @@ void main() {
       return p;
     }
 
+    test('Round 77: asleep on the bus, taps don\'t wake him; after, they do',
+        () {
+      final p = pip();
+      expect(p.showAt(at(20, 6, 30)), PipShow.asleep);
+      expect(p.mayWakeAt(at(20, 6, 30)), isFalse);
+      expect(p.wake(at(20, 6, 30)), isFalse);
+      expect(p.state.wokenAt, isNull);
+      p.replace(p.state.copyWith(energy: 3, energyAt: () => at(21, 1)));
+      expect(p.wake(at(21, 2)), isTrue, reason: 'at the resort');
+    });
+
     test('on the bus he uses no energy', () {
       final p = pip();
       final before = p.levelAt(at(20, 6));

@@ -33,6 +33,42 @@ abstract final class PipEnergy {
   /// Whether he's asleep at [t] (for how fast he uses energy).
   static bool asleepAt(DateTime t) => t.hour >= bedHour || t.hour < wakeHour;
 
+  /// Round 77: three taps on him asleep wake him ([wakeTaps], each within
+  /// [wakeTapGap] of the last). At night, for [nightWake], once a night
+  /// (so he can be charged), drowsy, then back to sleep; from [earlyHour],
+  /// for the day. His energy goes as asleep all the same.
+  static const wakeTaps = 3;
+  static const wakeTapGap = Duration(milliseconds: 800);
+  static const nightWake = Duration(minutes: 15);
+  static const earlyHour = 7;
+
+  /// Woken at [woken] early (from [earlyHour]): up for the day.
+  static bool _early(DateTime woken) => woken.hour == earlyHour;
+
+  /// Whether, woken at [woken], he's up at [now] (in his sleeping hours:
+  /// after them he's up anyway).
+  static bool wokenAt(DateTime? woken, DateTime now) {
+    if (woken == null || now.isBefore(woken)) return false;
+    if (_early(woken)) {
+      return now
+          .isBefore(DateTime(woken.year, woken.month, woken.day, wakeHour));
+    }
+    return now.isBefore(woken.add(nightWake));
+  }
+
+  /// Woken at night and up at [now]: drowsy (his face as at one segment,
+  /// his pace too).
+  static bool drowsyAt(DateTime? woken, DateTime now) =>
+      woken != null && !_early(woken) && wokenAt(woken, now);
+
+  /// Whether three taps may wake him at [now], last woken at [woken]: in
+  /// his sleeping hours, early any time, at night if he wasn't this night.
+  static bool mayWakeAt(DateTime? woken, DateTime now) {
+    if (!asleepAt(now) || wokenAt(woken, now)) return false;
+    if (now.hour == earlyHour) return true;
+    return woken == null || nightKey(woken) != nightKey(now);
+  }
+
   /// The next moment after [t] that sleep starts or ends.
   static DateTime _nextChange(DateTime t) {
     final wake = DateTime(t.year, t.month, t.day, wakeHour);
@@ -164,17 +200,25 @@ enum PipShow {
 String dayKey(DateTime t) => '${t.year}-${t.month.toString().padLeft(2, '0')}-'
     '${t.day.toString().padLeft(2, '0')}';
 
+/// The night [t] is in (Round 77): its evening's [dayKey] (before
+/// [PipEnergy.wakeHour], the day before's).
+String nightKey(DateTime t) => dayKey(
+    t.hour < PipEnergy.wakeHour ? DateTime(t.year, t.month, t.day - 1) : t);
+
 /// What to show at [now], given his [level] then, whether he was already
 /// seen off, and the night ([sleepSeen]) and morning ([wakeSeen]) whose
-/// animations were already shown (as [dayKey]s).
+/// animations were already shown (as [dayKey]s). Round 77: woken by taps
+/// at [wokenAt], he's up while [PipEnergy.wokenAt] says.
 PipShow pipShowAt(
   DateTime now, {
   required double level,
   required bool offSeen,
   String? sleepSeen,
   String? wakeSeen,
+  DateTime? wokenAt,
 }) {
   if (level <= 0) return offSeen ? PipShow.off : PipShow.powerOff;
+  if (PipEnergy.wokenAt(wokenAt, now)) return PipShow.awake;
   final h = now.hour;
   if (h == PipEnergy.bedHour) {
     return sleepSeen == dayKey(now) ? PipShow.asleep : PipShow.fallAsleep;
@@ -201,6 +245,13 @@ abstract class PipLink {
   /// A battery given, if there's one and he isn't full or asleep: true
   /// if it was (he then gets its energy).
   bool giveBattery();
+
+  /// Round 77: three taps on him asleep: woken, if he may be now (at
+  /// night once, for a while; from 07:00 for the day). True if he was.
+  bool wake();
+
+  /// Woken at night and up: drowsy (his face and pace as at one segment).
+  bool get drowsy;
 
   /// The phone is plugged in now (Round 44): his charging station. Round
   /// 64: null till Android has said (the app just opened: what was known

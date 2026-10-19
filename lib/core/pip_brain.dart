@@ -37,6 +37,10 @@ enum PipActivity {
   /// Asleep, settled down, little z's rising.
   asleep,
 
+  /// Round 77: woken by taps, still lying there: one eye opens and looks
+  /// about a moment, shuts, then he wakes ([wakingUp]).
+  stirring,
+
   /// Waking: eyes open, he gets up with a little hop.
   wakingUp,
 
@@ -206,6 +210,9 @@ enum PipFace {
 
   /// Round 57: waking up, a big yawn (eyes shut, mouth wide).
   yawn,
+
+  /// Round 77: woken at night, one eye open (the other shut).
+  peek,
 }
 
 /// His animations that can be played on request (Round 35: Pip Home's
@@ -221,6 +228,8 @@ enum PipAnimation {
   fallAsleep('Falling asleep'),
   powerOff('Running out'),
   wakeUp('Waking up', listed: false),
+  // Round 77: three taps at night; in the list, he falls asleep first.
+  nightWake('Woken at night'),
   powerOn('Back on', listed: false),
   // Round 54: in the list too, as a preview (no battery used).
   fetch('Changing his battery'),
@@ -278,6 +287,7 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.hatching ||
       PipActivity.spawning ||
       PipActivity.fallingAsleep ||
+      PipActivity.stirring ||
       PipActivity.wakingUp ||
       PipActivity.poweringOff ||
       PipActivity.poweringOn ||
@@ -309,8 +319,9 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       // keeps on) gives way to bedtime, or running out.
       PipActivity.showing =>
         next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
-      PipActivity.asleep =>
-        next == PipAnimation.wakeUp || next == PipAnimation.powerOff,
+      PipActivity.asleep => next == PipAnimation.wakeUp ||
+          next == PipAnimation.nightWake ||
+          next == PipAnimation.powerOff,
       // Round 75: in his tent in a storm, he keeps still: nothing starts
       // but sleep, or running out (a battery flies into it).
       PipActivity.sheltering =>
@@ -474,6 +485,15 @@ class PipBrain {
         _demo = demo;
       case PipAnimation.wakeUp:
         _start(PipActivity.wakingUp);
+      case PipAnimation.nightWake:
+        // Asleep: stirring. Up (Pip Home's list): asleep first, then so.
+        if (activity == PipActivity.asleep) {
+          _start(PipActivity.stirring);
+        } else {
+          _start(PipActivity.fallingAsleep);
+          _demo = true;
+          _demoStir = true;
+        }
       case PipAnimation.powerOff:
         _fallRight = x + width + height <= roomWidth;
         _start(PipActivity.poweringOff);
@@ -542,6 +562,13 @@ class PipBrain {
   bool _demo = false;
   static const demoHold = 1.5;
 
+  /// Round 77: the list's night wake: after his demo sleep, stirring.
+  bool _demoStir = false;
+
+  /// Round 77: woken at night (his life says): drowsy, his face and pace
+  /// as at one segment.
+  bool drowsy = false;
+
   /// His energy's segments (0 to 3), from his life: his face, and how
   /// fast he walks.
   int segments = 3;
@@ -549,7 +576,7 @@ class PipBrain {
   /// Walking speed now: slower the less energy he has (Round 37).
   double get pace =>
       speed *
-      switch (segments) { 3 => 1.0, 2 => 0.7, _ => 0.45 } *
+      switch (drowsy ? 1 : segments) { 3 => 1.0, 2 => 0.7, _ => 0.45 } *
       // Round 75: slower in the fog.
       paceIn(_wx.weather);
 
@@ -754,6 +781,12 @@ class PipBrain {
   static const wakeHopStart = 3.6;
   static const wakeHopEnd = 4.3;
 
+  /// Round 77: stirring's parts: still a moment, one eye open, shut again,
+  /// then waking.
+  static const stirOpenAt = 0.6;
+  static const stirShutAt = 2.0;
+  static const stirEnd = 2.4;
+
   /// Turning off: the screen flickers out, he falls over, bounces.
   static const flickerEnd = 0.9;
   static const fallEnd = 1.3;
@@ -897,7 +930,7 @@ class PipBrain {
 
   /// His face now.
   PipFace get face {
-    PipFace byEnergy() => switch (segments) {
+    PipFace byEnergy() => switch (drowsy ? 1 : segments) {
           3 => PipFace.normal,
           2 => PipFace.tired,
           _ => PipFace.veryTired,
@@ -913,6 +946,10 @@ class PipBrain {
         return PipFace.angry;
       case PipActivity.fallingAsleep:
         return _t < eyesCloseAt ? PipFace.tired : PipFace.asleep;
+      case PipActivity.stirring:
+        return _t >= stirOpenAt && _t < stirShutAt
+            ? PipFace.peek
+            : PipFace.asleep;
       case PipActivity.wakingUp:
         if (_t < legsOutAt) return PipFace.asleep;
         if (_t >= yawnAt && _t < yawnEnd) return PipFace.yawn;
@@ -1030,7 +1067,13 @@ class PipBrain {
           _demo = demo;
         }
       case PipActivity.asleep:
-        if (_demo && _t >= demoHold) play(PipAnimation.wakeUp);
+        if (_demo && _t >= demoHold) {
+          final stir = _demoStir;
+          _demoStir = false;
+          play(stir ? PipAnimation.nightWake : PipAnimation.wakeUp);
+        }
+      case PipActivity.stirring:
+        if (_t >= stirEnd) _start(PipActivity.wakingUp);
       case PipActivity.wakingUp:
         if (_t >= wakeHopEnd) _stand();
       case PipActivity.poweringOff:
@@ -1883,6 +1926,7 @@ class PipBrain {
       frame == PipFrame.tuck &&
       (activity == PipActivity.asleep ||
           activity == PipActivity.fallingAsleep ||
+          activity == PipActivity.stirring ||
           activity == PipActivity.wakingUp);
 
   // Round 53: his medicine reminder.
@@ -2773,7 +2817,7 @@ class PipBrain {
         PipActivity.walking => _stepFrame,
         PipActivity.fallingAsleep =>
           _t < settleAt ? PipFrame.idle : PipFrame.tuck,
-        PipActivity.asleep => PipFrame.tuck,
+        PipActivity.asleep || PipActivity.stirring => PipFrame.tuck,
         PipActivity.wakingUp => _t < legsOutAt
             ? PipFrame.tuck
             // Eyes still shut, before the yawn and after it.
@@ -2911,6 +2955,7 @@ class PipBrain {
     if (frame == PipFrame.tuck &&
         (activity == PipActivity.asleep ||
             activity == PipActivity.fallingAsleep ||
+            activity == PipActivity.stirring ||
             activity == PipActivity.wakingUp)) {
       return -2;
     }

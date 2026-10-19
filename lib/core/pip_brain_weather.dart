@@ -53,6 +53,7 @@ const _inTent = {
   PipActivity.sheltering,
   PipActivity.fallingAsleep,
   PipActivity.asleep,
+  PipActivity.stirring,
   PipActivity.wakingUp,
   PipActivity.poweringOff,
   PipActivity.off,
