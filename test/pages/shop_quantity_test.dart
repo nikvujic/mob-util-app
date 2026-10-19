@@ -117,6 +117,43 @@ void main() {
     expect(milk().quantity, isNull);
   });
 
+  testWidgets(
+      'typed as text (Round 70): shown as typed; the button takes it to '
+      'none', (tester) async {
+    await openShop(tester);
+    await tester.tap(kind);
+    await tester.pump();
+    await openAmount(tester);
+    await tester.tap(find.text('Text'));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('shopAmountText')), ' 1-2 ');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('shopAmountText')), findsNothing);
+    expect((milk().quantity, milk().text), (Quantity.text, '1-2'));
+    expect(shown(tester), '1-2');
+    expect(find.byTooltip('Amount: text'), findsOneWidget);
+    expect(milk().count, 1, reason: 'the count is kept');
+
+    await tester.tap(kind);
+    await tester.pump();
+    expect(milk().quantity, isNull);
+    expect(milk().text, '1-2', reason: 'kept, like the others');
+  });
+
+  testWidgets('Text picked but nothing typed: no amount', (tester) async {
+    await openShop(tester);
+    await tester.tap(kind);
+    await tester.pump();
+    await openAmount(tester);
+    await tester.tap(find.text('Text'));
+    await tester.pump();
+    expect(milk().quantity, Quantity.text);
+    await tester.tapAt(const Offset(200, 50));
+    await tester.pumpAndSettle();
+    expect(milk().quantity, isNull);
+  });
+
   testWidgets('bought: the amount shows, but nothing changes it',
       (tester) async {
     await openShop(tester);

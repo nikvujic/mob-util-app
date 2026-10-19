@@ -434,6 +434,37 @@ void main() {
           recipes().single.ingredients.map((i) => i.name), ['Flour', 'Eggs']);
     });
 
+    testWidgets(
+        'or typed as text (Round 70): "1-2", kept, and read back as text',
+        (tester) async {
+      await openEdit(tester);
+      await options(tester, 1, 'quantity');
+      final field = find.byKey(const Key('amountTypedText'));
+      expect(field, findsNothing);
+      await tester.tap(find.byKey(const Key('amount-text')));
+      await tester.pump();
+      expect(tester.widget<TextField>(field).controller!.text, '2',
+          reason: 'starts from the amount picked');
+      expect(find.byTooltip('More'), findsNothing);
+      await tester.enterText(field, ' 1-2 ');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(recipes().single.ingredients[1].quantity, '1-2');
+
+      await options(tester, 1, 'quantity');
+      expect(tester.widget<TextField>(field).controller!.text, '1-2');
+      expect(
+          tester
+              .widget<ChoiceChip>(find.byKey(const Key('amount-text')))
+              .selected,
+          isTrue);
+      await tester.tap(find.byKey(const Key('amount-count')));
+      await tester.pump();
+      expect(field, findsNothing);
+      await pressBack(tester);
+      expect(recipes().single.ingredients[1].quantity, '1');
+    });
+
     testWidgets('holding selects (no hold-to-delete); several removed at once',
         (tester) async {
       await openEdit(tester);

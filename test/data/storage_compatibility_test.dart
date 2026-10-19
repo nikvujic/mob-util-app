@@ -362,6 +362,55 @@ void main() {
     });
   });
 
+  group('shop v4 / v28 backup (typed amounts, Round 70)', () {
+    void expectSample(List<ShopItem> items) {
+      expect(
+        items.map((i) => (i.name, i.quantity, i.count, i.text)),
+        [
+          ('Jaja 🥚', Quantity.text, 1, '1-2 kutije'),
+          ('Peršun', Quantity.text, 3, 'a bunch'),
+          ('Milk', Quantity.count, 2, '1 l'),
+          ('Bread', null, 1, 'pola'),
+        ],
+      );
+      expect(items.last.toBuy, isFalse);
+    }
+
+    test('shop.json version 4 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v28/storage'),
+      );
+      expectSample(storage.initialShopItems);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v28 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v28/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.shopItems);
+    });
+
+    test('written as read (no text where none was)', () {
+      for (final version in ['v8', 'v28']) {
+        final json = jsonDecode(File('test/fixtures/$version/storage/shop.json')
+            .readAsStringSync());
+        final items = json['items'] as List<dynamic>;
+        expect([
+          for (final e in items)
+            ShopItem.fromJson(e as Map<String, dynamic>).toJson(),
+        ], items, reason: version);
+      }
+    });
+
+    test('older shop items have no typed amount', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v8/storage'),
+      );
+      expect(storage.initialShopItems.map((i) => i.text), everyElement(''));
+    });
+  });
+
   group('shop v3 / v8 backup (quantities)', () {
     void expectSample(List<ShopItem> items) {
       expect(
@@ -1401,6 +1450,10 @@ void main() {
           '295073184b7b5ea52bcc6820d4839ce81910a0937032f22443f8b7b1490eda14',
       'test/fixtures/v27/backup-plain.json':
           '0744095d21a1f853bf48d572002bc9d8b668794e58674bc363f5f260f8348188',
+      'test/fixtures/v28/storage/shop.json':
+          'b6ce8ce3e2fcd44584170708142bce02ebc1a3f850497a3081b69ec89210a900',
+      'test/fixtures/v28/backup-plain.json':
+          '7f9bebf2576942a8b732d5c6ac3455a7d5c990c588543b135f76d05e2b6ce904',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

@@ -96,8 +96,9 @@ class AppStorage {
   static const medicineFormatVersion = 5;
 
   /// Version of `shop.json`, which moves on its own from here. History:
-  /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7).
-  static const shopFormatVersion = 3;
+  /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7); 4 =
+  /// or a typed one (`text`, Round 70).
+  static const shopFormatVersion = 4;
 
   /// Version of `todo.json` (Round 28). History: 1 = first format; 2 =
   /// things may be done (`done`, Round 30); 3 = or waiting (`waiting`,

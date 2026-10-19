@@ -70,14 +70,15 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     state = moved.toBuy ? [...others, moved] : [moved, ...others];
   }
 
-  /// The quantity button (S7): none → count → weight → none.
+  /// The quantity button (S7): none → count → weight → none; a typed
+  /// amount (Round 70, set in the amount sheet) → none.
   void cycleQuantity(String id) => _update(
         id,
         (item) => item.copyWith(
           quantity: () => switch (item.quantity) {
             null => Quantity.count,
             Quantity.count => Quantity.weight,
-            Quantity.weight => null,
+            Quantity.weight || Quantity.text => null,
           },
         ),
       );
@@ -95,6 +96,10 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     if (grams <= 0 || grams.isNaN || grams.isInfinite) return;
     _update(id, (item) => item.copyWith(grams: grams));
   }
+
+  /// A typed amount (Round 70), trimmed.
+  void setText(String id, String text) =>
+      _update(id, (item) => item.copyWith(text: text.trim()));
 
   void _update(String id, ShopItem Function(ShopItem) change) {
     state = [

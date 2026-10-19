@@ -1,0 +1,1 @@
+{"version":4,"items":[{"id":"s1","name":"Jaja 🥚","toBuy":true,"quantity":"text","text":"1-2 kutije"},{"id":"s2","name":"Peršun","toBuy":true,"quantity":"text","count":3,"text":"a bunch"},{"id":"s3","name":"Milk","toBuy":true,"quantity":"count","count":2,"text":"1 l"},{"id":"s4","name":"Bread","toBuy":false,"text":"pola"}]}

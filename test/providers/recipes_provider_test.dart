@@ -217,21 +217,23 @@ void main() {
       expect(amountDown((kind: AmountKind.count, value: 1)), isNull);
       expect(amountUp((kind: AmountKind.tablespoon, value: 1)), 1.5);
       expect(amountDown((kind: AmountKind.teaspoon, value: 0.5)), isNull);
-      // Spoons aren't a Shop amount: the name only there.
-      expect(shopQuantityOf('2 tbsp').quantity, isNull);
+      // Spoons aren't a Shop amount: typed there (Round 70).
+      expect(shopQuantityOf('2 tbsp').quantity, Quantity.text);
+      expect(shopQuantityOf('2 tbsp').text, '2 tbsp');
       expect(shopQuantityOf('1.5 kg').quantity, Quantity.weight);
     });
   });
 
   group('To Shop (Round 41)', () {
     test('quantities as Shop reads them', () {
-      ({Quantity? q, num n}) read(String text) {
+      ({Quantity? q, Object n}) read(String text) {
         final r = shopQuantityOf(text);
         return (
           q: r.quantity,
           n: switch (r.quantity) {
             Quantity.weight => r.grams,
             Quantity.count => r.count,
+            Quantity.text => r.text,
             null => 0,
           },
         );
@@ -243,11 +245,13 @@ void main() {
       expect(read('0,5 KG'), (q: Quantity.weight, n: 500));
       expect(read('2'), (q: Quantity.count, n: 2));
       expect(read('3 pcs'), (q: Quantity.count, n: 3));
-      expect(read('1.5'), (q: null, n: 0), reason: 'half a piece');
-      expect(read('1 tbsp'), (q: null, n: 0));
-      expect(read('a pinch'), (q: null, n: 0));
+      expect(read('1.5'), (q: Quantity.text, n: '1.5'), reason: 'half a piece');
+      expect(read('1 tbsp'), (q: Quantity.text, n: '1 tbsp'));
+      expect(read(' a pinch '), (q: Quantity.text, n: 'a pinch'));
+      expect(read('1-2'), (q: Quantity.text, n: '1-2'));
       expect(read(''), (q: null, n: 0));
-      expect(read('300 ml'), (q: null, n: 0));
+      expect(read('  '), (q: null, n: 0));
+      expect(read('300 ml'), (q: Quantity.text, n: '300 ml'));
     });
 
     test(
@@ -269,8 +273,12 @@ void main() {
             toBuy: false,
             quantity: Quantity.count,
             count: 6),
-        // Already to buy, no quantity either: left as it is.
-        ShopItem(id: 'c', name: 'Salt'),
+        // Already to buy, the same typed amount (any case, Round 70):
+        // left as it is.
+        ShopItem(
+            id: 'c', name: 'Salt', quantity: Quantity.text, text: 'A pinch'),
+        // Another typed amount.
+        ShopItem(id: 'd', name: 'Milk', quantity: Quantity.text, text: '1 l'),
       ]);
       final recipe = Recipe(
         id: 'r',
@@ -292,11 +300,13 @@ void main() {
       expect(eggs.last.toBuy, isTrue);
       expect((eggs.last.quantity, eggs.last.count), (Quantity.count, 2));
       expect(items.where((i) => i.name == 'Salt'), hasLength(1));
-      final milk = items.singleWhere((i) => i.name == 'Milk');
-      expect((milk.toBuy, milk.quantity), (true, null));
+      final milk = items.lastWhere((i) => i.name == 'Milk');
+      expect(milk.id, isNot('d'));
+      expect((milk.toBuy, milk.quantity, milk.text),
+          (true, Quantity.text, '300 ml'));
       // Undo: Shop as it was.
       shop.replaceAll(done.before);
-      expect(container.read(shopProvider), hasLength(3));
+      expect(container.read(shopProvider), hasLength(4));
     });
   });
 

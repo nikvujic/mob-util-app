@@ -162,11 +162,20 @@ class _ShopPageState extends ConsumerState<ShopPage> {
   }
 
   /// The amount sheet (S7): big − / + at the bottom, in thumb reach; a
-  /// weight can also be typed exactly.
-  Future<void> _editAmount(String id) => showModalBottomSheet<void>(
-        context: context,
-        builder: (_) => _AmountSheet(id: id),
-      );
+  /// weight can also be typed exactly, or the amount as text (Round 70).
+  Future<void> _editAmount(String id) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      // Room for the keyboard when typing.
+      isScrollControlled: true,
+      builder: (_) => _AmountSheet(id: id),
+    );
+    // Text picked but none typed: no amount.
+    final item = ref.read(shopProvider).where((i) => i.id == id).firstOrNull;
+    if (item != null && item.quantity == Quantity.text && item.text.isEmpty) {
+      _notifier.setQuantity(id, null);
+    }
+  }
 
   Widget _section(List<ShopItem> items,
       {required bool toBuy, bool reorderable = true}) {
@@ -572,11 +581,14 @@ class _ShopItemTile extends StatelessWidget {
                       null => 'Amount: none',
                       Quantity.count => 'Amount: count',
                       Quantity.weight => 'Amount: weight',
+                      Quantity.text => 'Amount: text',
                     },
                     icon: Icon(
-                      quantity == Quantity.weight
-                          ? Icons.scale_outlined
-                          : Icons.numbers,
+                      switch (quantity) {
+                        Quantity.weight => Icons.scale_outlined,
+                        Quantity.text => Icons.short_text,
+                        _ => Icons.numbers,
+                      },
                       size: 20,
                       color: quantity == null ? colors.textHint : colors.accent,
                     ),
@@ -607,9 +619,11 @@ class _AmountChip extends StatelessWidget {
     required this.onLongPress,
   });
 
-  static String text(ShopItem item) => item.quantity == Quantity.weight
-      ? formatGrams(item.grams)
-      : '×${item.count}';
+  static String text(ShopItem item) => switch (item.quantity) {
+        Quantity.weight => formatGrams(item.grams),
+        Quantity.text => item.text.isEmpty ? '…' : item.text,
+        _ => '×${item.count}',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -713,7 +727,8 @@ class _AmountSheet extends ConsumerWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        padding: EdgeInsets.fromLTRB(
+            16, 16, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -733,13 +748,22 @@ class _AmountSheet extends ConsumerWidget {
                 ButtonSegment(value: null, label: Text('None')),
                 ButtonSegment(value: Quantity.count, label: Text('Count')),
                 ButtonSegment(value: Quantity.weight, label: Text('Weight')),
+                ButtonSegment(value: Quantity.text, label: Text('Text')),
               ],
               selected: {item.quantity},
               showSelectedIcon: false,
               onSelectionChanged: (picked) =>
                   shop.setQuantity(id, picked.first),
             ),
-            if (item.quantity != null) ...[
+            if (item.quantity == Quantity.text)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: _TypedAmount(
+                  initial: item.text,
+                  onChanged: (text) => shop.setText(id, text),
+                ),
+              )
+            else if (item.quantity != null) ...[
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -789,4 +813,42 @@ class _AmountSheet extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// A typed amount (Round 70): "1-2", "a bunch"; saved as it's typed.
+class _TypedAmount extends StatefulWidget {
+  final String initial;
+  final ValueChanged<String> onChanged;
+
+  const _TypedAmount({required this.initial, required this.onChanged});
+
+  @override
+  State<_TypedAmount> createState() => _TypedAmountState();
+}
+
+class _TypedAmountState extends State<_TypedAmount> {
+  late final _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => TextField(
+        key: const Key('shopAmountText'),
+        controller: _controller,
+        autofocus: widget.initial.isEmpty,
+        maxLength: 30,
+        textAlign: TextAlign.center,
+        textCapitalization: TextCapitalization.none,
+        style: const TextStyle(fontSize: 20),
+        decoration: const InputDecoration(
+          hintText: 'e.g. 1-2, a bunch',
+          counterText: '',
+        ),
+        onChanged: widget.onChanged,
+        onSubmitted: (_) => Navigator.of(context).pop(),
+      );
 }

@@ -16,6 +16,11 @@ Release with the installable APK.
   in alphabetical order (no drag handles then); again for its own order.
   It's only how it's shown: items still go on top of its own order, and
   the choice is remembered.
+- **Typed amounts** ("1-2", "a bunch"). Shop's amount sheet has a
+  **Text** choice to type the amount; the button by the item takes it
+  back to none. A recipe's quantity sheet has **Text** too, and an
+  ingredient's typed quantity (or spoons, "300 ml") now goes to Shop as
+  its typed amount, instead of no amount.
 
 ## [1.27.0] - 2026-10-19
 

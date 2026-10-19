@@ -1018,28 +1018,34 @@ Future<String?> showChoicesSheet(
 
 /// The quantity picker (Round 43): Shop's kinds (a count, a weight)
 /// and spoons, small and big; big − / + at the bottom, a weight typed
-/// exactly at a tap. Resolves to the quantity as text when closed.
+/// exactly at a tap; or free text ("1-2", Round 70). Resolves to the
+/// quantity as text when closed.
 Future<String?> showAmountSheet(
   BuildContext context, {
   required String name,
   required String quantity,
 }) async {
   final picked = ValueNotifier<Amount?>(readAmount(quantity));
+  // Text the picker doesn't know is typed text.
+  final typed = ValueNotifier(picked.value == null ? quantity.trim() : '');
   await showModalBottomSheet<void>(
     context: context,
-    builder: (_) => _AmountSheet(name: name, typed: quantity, picked: picked),
+    // Room for the keyboard when typing.
+    isScrollControlled: true,
+    builder: (_) => _AmountSheet(name: name, typed: typed, picked: picked),
   );
   final amount = picked.value;
+  final text = typed.value.trim();
   picked.dispose();
-  // Text from before the picker, left as it was.
-  return amount == null ? quantity : amountText(amount);
+  typed.dispose();
+  return amount == null ? text : amountText(amount);
 }
 
 class _AmountSheet extends StatelessWidget {
   final String name;
 
-  /// The quantity as it was, shown while it isn't one the picker knows.
-  final String typed;
+  /// The typed quantity, while [picked] is null (Text).
+  final ValueNotifier<String> typed;
   final ValueNotifier<Amount?> picked;
 
   const _AmountSheet({
@@ -1084,7 +1090,8 @@ class _AmountSheet extends StatelessWidget {
 
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(
+                16, 16, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1098,15 +1105,6 @@ class _AmountSheet extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (amount == null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      typed,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: colors.textSecondary),
-                    ),
-                  ),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -1122,8 +1120,24 @@ class _AmountSheet extends StatelessWidget {
                             ? amount
                             : (kind: option, value: startOf(option)),
                       ),
+                    ChoiceChip(
+                      key: const Key('amount-text'),
+                      label: const Text('Text'),
+                      selected: amount == null,
+                      onSelected: (_) {
+                        if (amount == null) return;
+                        // Starts from the amount picked, to edit.
+                        typed.value = amountText(amount);
+                        picked.value = null;
+                      },
+                    ),
                   ],
                 ),
+                if (amount == null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: _TypedAmount(typed),
+                  ),
                 if (amount != null && kind != AmountKind.none) ...[
                   const SizedBox(height: 20),
                   Row(
@@ -1166,6 +1180,42 @@ class _AmountSheet extends StatelessWidget {
       },
     );
   }
+}
+
+/// The quantity typed as text (Round 70), into [typed].
+class _TypedAmount extends StatefulWidget {
+  final ValueNotifier<String> typed;
+
+  const _TypedAmount(this.typed);
+
+  @override
+  State<_TypedAmount> createState() => _TypedAmountState();
+}
+
+class _TypedAmountState extends State<_TypedAmount> {
+  late final _controller = TextEditingController(text: widget.typed.value);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => TextField(
+        key: const Key('amountTypedText'),
+        controller: _controller,
+        autofocus: true,
+        maxLength: 30,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 20),
+        decoration: const InputDecoration(
+          hintText: 'e.g. 1-2, a pinch',
+          counterText: '',
+        ),
+        onChanged: (text) => widget.typed.value = text,
+        onSubmitted: (_) => Navigator.of(context).pop(),
+      );
 }
 
 /// The prep time picker (Round 41): − / + by 5 minutes, or a common time

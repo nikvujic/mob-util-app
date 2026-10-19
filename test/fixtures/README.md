@@ -154,6 +154,12 @@ app still reads every version, so an update can never lose existing data.
   leaving at 07:00 on its first day and 10:00 the day after its last.
 - `v27/backup-plain.json` — backup (version 27) with them (and v26's
   Pip).
+- `v28/storage/shop.json` — typed amounts (Round 70, shop.json version
+  4, `text`): "Jaja 🥚" typed "1-2 kutije"; "Peršun" typed "a bunch" (a
+  count of 3 kept); Milk ×2 with "1 l" kept from before; Bread (bought,
+  no amount shown, "pola" kept).
+- `v28/backup-plain.json` — backup (version 28) with those items (and
+  v27's dates and Pip).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

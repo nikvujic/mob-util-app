@@ -269,24 +269,28 @@ final ingredientsProvider =
 );
 
 /// A recipe's quantity as Shop reads it (Round 41): "200 g" or "1.5 kg" a
-/// weight, "2" or "3 pcs" a count; anything else ("1 tbsp", "a pinch")
-/// none.
-({Quantity? quantity, int count, double grams}) shopQuantityOf(String text) {
-  const none = (
-    quantity: null,
+/// weight, "2" or "3 pcs" a count; anything else ("1 tbsp", "1-2") typed
+/// text (Round 70); empty none.
+({Quantity? quantity, int count, double grams, String text}) shopQuantityOf(
+    String text) {
+  final trimmed = text.trim();
+  final typed = (
+    quantity: trimmed.isEmpty ? null : Quantity.text,
     count: ShopItem.defaultCount,
     grams: ShopItem.defaultGrams,
+    text: trimmed,
   );
-  final match = _quantity.firstMatch(text.trim().toLowerCase());
-  if (match == null) return none;
+  final match = _quantity.firstMatch(trimmed.toLowerCase());
+  if (match == null) return typed;
   final number = double.tryParse(match[1]!.replaceAll(',', '.'));
-  if (number == null || number <= 0) return none;
+  if (number == null || number <= 0) return typed;
   final unit = match[2] ?? '';
   if (unit == 'kg') {
     return (
       quantity: Quantity.weight,
       count: ShopItem.defaultCount,
       grams: number * 1000,
+      text: '',
     );
   }
   if (unit.startsWith('g')) {
@@ -294,14 +298,16 @@ final ingredientsProvider =
       quantity: Quantity.weight,
       count: ShopItem.defaultCount,
       grams: number,
+      text: '',
     );
   }
   // A count: whole pieces only.
-  if (number != number.roundToDouble()) return none;
+  if (number != number.roundToDouble()) return typed;
   return (
     quantity: Quantity.count,
     count: number.round().clamp(1, ShopNotifier.maxCount),
     grams: ShopItem.defaultGrams,
+    text: '',
   );
 }
 
@@ -334,6 +340,7 @@ ToShop sendToShop(
           null => true,
           Quantity.count => item.count == wanted.count,
           Quantity.weight => item.grams == wanted.grams,
+          Quantity.text => item.text.toLowerCase() == wanted.text.toLowerCase(),
         };
     final same = read(shopProvider).where((item) =>
         item.name.toLowerCase() == name.toLowerCase() && sameQuantity(item));
@@ -358,6 +365,9 @@ ToShop sendToShop(
       case Quantity.weight:
         shop.setQuantity(id, Quantity.weight);
         shop.setGrams(id, wanted.grams);
+      case Quantity.text:
+        shop.setQuantity(id, Quantity.text);
+        shop.setText(id, wanted.text);
     }
   }
   return (added: added, putBack: putBack, before: before);

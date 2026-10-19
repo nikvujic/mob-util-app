@@ -1,5 +1,6 @@
-/// How much of an item to buy (S7): a count or a weight.
-enum Quantity { count, weight }
+/// How much of an item to buy (S7): a count or a weight; or, from Round
+/// 70, free text ("1-2", "a bunch").
+enum Quantity { count, weight, text }
 
 class ShopItem {
   /// A count starts at 1, a weight at 200 g (Nikola).
@@ -28,6 +29,9 @@ class ShopItem {
   final int count;
   final double grams;
 
+  /// The typed amount, for [Quantity.text]; kept like the others.
+  final String text;
+
   const ShopItem({
     required this.id,
     required this.name,
@@ -35,6 +39,7 @@ class ShopItem {
     this.quantity,
     this.count = defaultCount,
     this.grams = defaultGrams,
+    this.text = '',
   });
 
   ShopItem copyWith({
@@ -43,6 +48,7 @@ class ShopItem {
     Quantity? Function()? quantity,
     int? count,
     double? grams,
+    String? text,
   }) {
     return ShopItem(
       id: id,
@@ -51,6 +57,7 @@ class ShopItem {
       quantity: quantity == null ? this.quantity : quantity(),
       count: count ?? this.count,
       grams: grams ?? this.grams,
+      text: text ?? this.text,
     );
   }
 
@@ -62,6 +69,7 @@ class ShopItem {
         if (quantity != null) 'quantity': quantity!.name,
         if (count != defaultCount) 'count': count,
         if (grams != defaultGrams) 'grams': grams,
+        if (text.isNotEmpty) 'text': text,
       };
 
   factory ShopItem.fromJson(Map<String, dynamic> json) => ShopItem(
@@ -74,6 +82,7 @@ class ShopItem {
             .firstOrNull,
         count: (json['count'] as num?)?.toInt() ?? defaultCount,
         grams: (json['grams'] as num?)?.toDouble() ?? defaultGrams,
+        text: json['text'] as String? ?? '',
       );
 }
 
