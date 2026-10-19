@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.31.0] - 2026-10-19
+
 ### Changed
 - **Pip's skiing**: he now skis **down** the slope, swaying gently side
   to side, seen from behind: trees and flags come up from below him and
