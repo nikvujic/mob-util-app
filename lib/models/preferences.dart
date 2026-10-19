@@ -102,6 +102,9 @@ class Preferences {
   /// charging. This phone only.
   final bool pipPlugged;
 
+  /// Shop's bought list shown A–Z (Round 69); its own order is kept.
+  final bool shopSorted;
+
   const Preferences({
     this.theme = 'clay',
     this.counterFeedback = true,
@@ -132,6 +135,7 @@ class Preferences {
     this.lastAutoBackupAt,
     this.autoBackupFailed = false,
     this.pipPlugged = false,
+    this.shopSorted = false,
   });
 
   /// How long until a backup is due again (D8).
@@ -223,6 +227,7 @@ class Preferences {
     DateTime? Function()? lastAutoBackupAt,
     bool? autoBackupFailed,
     bool? pipPlugged,
+    bool? shopSorted,
   }) =>
       Preferences(
         theme: theme ?? this.theme,
@@ -270,6 +275,7 @@ class Preferences {
             : lastAutoBackupAt(),
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
         pipPlugged: pipPlugged ?? this.pipPlugged,
+        shopSorted: shopSorted ?? this.shopSorted,
       );
 
   Map<String, dynamic> toJson() => {
@@ -315,6 +321,7 @@ class Preferences {
           'lastAutoBackupAt': lastAutoBackupAt!.toUtc().toIso8601String(),
         'autoBackupFailed': autoBackupFailed,
         if (pipPlugged) 'pipPlugged': true,
+        if (shopSorted) 'shopSorted': true,
       };
 
   /// Missing values take their defaults, so older files stay readable.
@@ -371,5 +378,6 @@ class Preferences {
             : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
         pipPlugged: json['pipPlugged'] as bool? ?? false,
+        shopSorted: json['shopSorted'] as bool? ?? false,
       );
 }

@@ -318,12 +318,20 @@ class ReorderOrSelectIndicator extends StatelessWidget {
   final bool selectionMode;
   final bool selected;
 
+  /// Round 69: false, no handle (a list shown sorted or filtered can't
+  /// be reordered).
+  final bool reorderable;
+
   const ReorderOrSelectIndicator({
     super.key,
     required this.index,
     required this.selectionMode,
     required this.selected,
+    this.reorderable = true,
   });
+
+  /// Its width without a handle.
+  static const bareWidth = 16.0;
 
   /// Width of the area: wider than the icon, so the handle is easy to
   /// grab with a thumb. It's as tall as the row when the row lets it
@@ -335,6 +343,9 @@ class ReorderOrSelectIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!reorderable && !selectionMode) {
+      return const SizedBox(width: bareWidth);
+    }
     final area = ExcludeSemantics(
       child: ConstrainedBox(
         constraints: const BoxConstraints(

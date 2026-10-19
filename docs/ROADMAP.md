@@ -383,11 +383,11 @@ Noted; adventures first (go given), the rest after.
 - [x] **Note selection handles**: the left one's grab area reaches too
   high and catches touches by accident; lower it.
 - [ ] **Subscriptions**: a new Hub page (to spec).
-- [ ] **Shop search**: a search button opens a field above the keyboard;
+- [x] **Shop search**: a search button opens a field above the keyboard;
   typing filters the bought items; the list still scrolls with the
   keyboard open; closing the keyboard keeps the field (and filter), with
   a cancel button beside it.
-- [ ] **Shop sort**: a toggle on the bought list: alphabetical, drag
+- [x] **Shop sort**: a toggle on the bought list: alphabetical, drag
   handles hidden; again for the normal order. Items added while sorted
   still go on top of the normal order.
 - [x] **Recipes**: typing the title makes the page bounce at every key.

@@ -4,6 +4,19 @@ All notable changes to the app. Versions follow `MAJOR.MINOR.PATCH`
 (see [docs/RELEASING.md](docs/RELEASING.md)); each version is a GitHub
 Release with the installable APK.
 
+## [Unreleased]
+
+### Added
+- **Shop: search.** The magnifier opens a search field above the
+  keyboard; typing shows only the items with it in their name (any
+  case), in both lists, and the list still scrolls. Closing the keyboard
+  keeps the field (for a better view); its **×** closes it, as does Back.
+  Nothing matching: **Add “…”** adds what you typed.
+- **Shop: A–Z.** A button on the **Items** header shows the bought list
+  in alphabetical order (no drag handles then); again for its own order.
+  It's only how it's shown: items still go on top of its own order, and
+  the choice is remembered.
+
 ## [1.27.0] - 2026-10-19
 
 ### Changed

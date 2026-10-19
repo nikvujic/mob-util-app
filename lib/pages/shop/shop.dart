@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/shop_item.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
@@ -29,9 +30,46 @@ class _ShopPageState extends ConsumerState<ShopPage> {
   /// About how much of the list the add sheet covers.
   static const _sheetHeight = 80.0;
 
+  /// Round 69: searching (a field above the keyboard, kept when the
+  /// keyboard goes), and what's typed.
+  bool _searching = false;
+  final _query = TextEditingController();
+  final _queryFocus = FocusNode();
+
+  void _openSearch() {
+    setState(() => _searching = true);
+    _queryFocus.requestFocus();
+  }
+
+  void _closeSearch() {
+    _queryFocus.unfocus();
+    _query.clear();
+    setState(() => _searching = false);
+  }
+
+  /// The items whose names have what's typed (any case).
+  List<ShopItem> _matching(List<ShopItem> items) {
+    final q = _query.text.trim().toLowerCase();
+    if (!_searching || q.isEmpty) return items;
+    return [
+      for (final i in items)
+        if (i.name.toLowerCase().contains(q)) i,
+    ];
+  }
+
+  bool get _filtering => _searching && _query.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _query.addListener(() => setState(() {}));
+  }
+
   @override
   void dispose() {
     _selection.dispose();
+    _query.dispose();
+    _queryFocus.dispose();
     super.dispose();
   }
 
@@ -130,7 +168,8 @@ class _ShopPageState extends ConsumerState<ShopPage> {
         builder: (_) => _AmountSheet(id: id),
       );
 
-  Widget _section(List<ShopItem> items, {required bool toBuy}) {
+  Widget _section(List<ShopItem> items,
+      {required bool toBuy, bool reorderable = true}) {
     return SliverReorderableList(
       itemCount: items.length,
       // onReorderItem only exists on newer Flutter than we target.
@@ -161,6 +200,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
                 ? null
                 : () => _editAmount(item.id),
             index: index,
+            reorderable: reorderable,
             selectionMode: _selection.isActive,
             selected: _selection.isSelected(item.id),
             onTap: () => _selection.handleTap(
@@ -181,77 +221,197 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       _selection.retain(next.map((i) => i.id));
     });
 
-    final toBuy = items.where((i) => i.toBuy).toList();
-    final stock = items.where((i) => !i.toBuy).toList();
+    final toBuy = _matching(items.where((i) => i.toBuy).toList());
+    var stock = _matching(items.where((i) => !i.toBuy).toList());
+    // Round 69: the bought list A–Z if asked (shown so; its own order is
+    // kept, and new ones still go on its top).
+    final sorted = ref.watch(preferencesProvider.select((p) => p.shopSorted));
+    if (sorted) {
+      stock = [...stock]
+        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    }
+    final typed = _query.text.trim();
 
     return SelectionPopScope(
       controller: _selection,
       child: ListenableBuilder(
         listenable: _selection,
-        builder: (context, _) => Scaffold(
-          appBar: _selection.isActive
-              ? SelectionAppBar(count: _selection.count)
-              : const MainAppBar(title: 'Shop'),
-          body: items.isEmpty
-              ? const EmptyState(
-                  icon: Icons.shopping_cart_outlined,
-                  message: 'Your shopping list is empty',
-                )
-              : PullDownList(
-                  bottomSpace: SelectionActions.listBottomSpace,
-                  // Rows stay built, so a new one can be scrolled to
-                  // wherever the list is (shopping lists are short).
-                  cacheExtent: 10000,
-                  slivers: [
-                    _SectionHeader(title: 'To buy', count: toBuy.length),
-                    if (toBuy.isEmpty)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Text(
-                            'Nothing to buy',
-                            style: TextStyle(color: context.colors.textMuted),
-                          ),
+        builder: (context, _) => PopScope(
+          // Round 69: Back closes the search first.
+          canPop: !_searching || _selection.isActive,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop && _searching) _closeSearch();
+          },
+          child: Scaffold(
+            appBar: _selection.isActive
+                ? SelectionAppBar(count: _selection.count)
+                : MainAppBar(
+                    title: 'Shop',
+                    actions: [
+                      if (items.isNotEmpty && !_searching)
+                        IconButton(
+                          key: const Key('shopSearch'),
+                          tooltip: 'Search',
+                          icon: const Icon(Icons.search),
+                          onPressed: _openSearch,
                         ),
-                      ),
-                    _section(toBuy, toBuy: true),
-                    if (stock.isNotEmpty) ...[
-                      _SectionHeader(title: 'Items', count: stock.length),
-                      _section(stock, toBuy: false),
                     ],
-                  ],
-                ),
-          floatingActionButton: _selection.isActive
-              ? SelectionActions(
-                  allSelected: _selection.count == items.length,
-                  onSelectAll: () =>
-                      _selection.selectAll(items.map((i) => i.id)),
-                  onDeselectAll: _selection.clear,
-                  onDelete: _deleteSelected,
-                  select: _selectStep(toBuy, stock),
-                  nearDelete: [
-                    if (_selection.count == 1)
-                      SelectionAction(
-                        icon: Icons.edit_outlined,
-                        tooltip: 'Rename',
-                        onPressed: _renameSelected,
-                      ),
-                  ],
-                )
-              : FloatingActionButton(
-                  // Tabs are kept alive side by side; a shared default hero
-                  // tag would clash when a route is pushed.
-                  heroTag: null,
-                  tooltip: 'Add item',
-                  onPressed: _addItems,
-                  child: const Icon(Icons.add),
-                ),
+                  ),
+            body: Column(children: [
+              Expanded(child: _list(items, toBuy, stock, sorted, typed)),
+              if (_searching && !_selection.isActive) _searchBar(context),
+            ]),
+            floatingActionButton: _selection.isActive || !_searching
+                ? _actions(items, toBuy, stock)
+                : null,
+          ),
         ),
       ),
     );
+  }
+
+  Widget _list(List<ShopItem> items, List<ShopItem> toBuy, List<ShopItem> stock,
+      bool sorted, String typed) {
+    if (items.isEmpty) {
+      return const EmptyState(
+        icon: Icons.shopping_cart_outlined,
+        message: 'Your shopping list is empty',
+      );
+    }
+    if (_filtering && toBuy.isEmpty && stock.isEmpty) {
+      return Padding(
+        key: const Key('shopNoMatch'),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Nothing called “$typed”',
+                style: TextStyle(color: context.colors.textMuted)),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('shopAddTyped'),
+                icon: const Icon(Icons.add),
+                label: Text('Add “$typed”'),
+                onPressed: () {
+                  _add(typed);
+                  _query.clear();
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return PullDownList(
+      bottomSpace: SelectionActions.listBottomSpace,
+      // Rows stay built, so a new one can be scrolled to
+      // wherever the list is (shopping lists are short).
+      cacheExtent: 10000,
+      slivers: [
+        _SectionHeader(title: 'To buy', count: toBuy.length),
+        if (toBuy.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+              child: Text(
+                _filtering ? 'None of these to buy' : 'Nothing to buy',
+                style: TextStyle(color: context.colors.textMuted),
+              ),
+            ),
+          ),
+        _section(toBuy, toBuy: true, reorderable: !_filtering),
+        if (stock.isNotEmpty) ...[
+          _SectionHeader(
+            title: 'Items',
+            count: stock.length,
+            trailing: IconButton(
+              key: const Key('shopSort'),
+              tooltip: sorted ? 'Own order' : 'Sort A–Z',
+              isSelected: sorted,
+              icon: const Icon(Icons.sort_by_alpha),
+              color:
+                  sorted ? context.colors.accent : context.colors.textSecondary,
+              onPressed: () =>
+                  ref.read(preferencesProvider.notifier).setShopSorted(!sorted),
+            ),
+          ),
+          _section(stock, toBuy: false, reorderable: !sorted && !_filtering),
+        ],
+      ],
+    );
+  }
+
+  /// Round 69: the search field, above the keyboard (kept when it goes),
+  /// and its close button.
+  Widget _searchBar(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      key: const Key('shopSearchBar'),
+      color: colors.surface,
+      elevation: 3,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  key: const Key('shopSearchField'),
+                  controller: _query,
+                  focusNode: _queryFocus,
+                  textInputAction: TextInputAction.search,
+                  decoration: const InputDecoration(
+                    hintText: 'Search items',
+                    prefixIcon: Icon(Icons.search),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              IconButton(
+                key: const Key('shopSearchClose'),
+                tooltip: 'Close search',
+                icon: const Icon(Icons.close),
+                onPressed: _closeSearch,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _actions(
+      List<ShopItem> items, List<ShopItem> toBuy, List<ShopItem> stock) {
+    return _selection.isActive
+        ? SelectionActions(
+            allSelected: _selection.count == items.length,
+            onSelectAll: () => _selection.selectAll(items.map((i) => i.id)),
+            onDeselectAll: _selection.clear,
+            onDelete: _deleteSelected,
+            select: _selectStep(toBuy, stock),
+            nearDelete: [
+              if (_selection.count == 1)
+                SelectionAction(
+                  icon: Icons.edit_outlined,
+                  tooltip: 'Rename',
+                  onPressed: _renameSelected,
+                ),
+            ],
+          )
+        : FloatingActionButton(
+            // Tabs are kept alive side by side; a shared default hero
+            // tag would clash when a route is pushed.
+            heroTag: null,
+            tooltip: 'Add item',
+            onPressed: _addItems,
+            child: const Icon(Icons.add),
+          );
   }
 }
 
@@ -259,22 +419,29 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final int count;
 
-  const _SectionHeader({required this.title, required this.count});
+  /// On its right (Round 69: the bought list's sort).
+  final Widget? trailing;
+
+  const _SectionHeader(
+      {required this.title, required this.count, this.trailing});
 
   @override
   Widget build(BuildContext context) {
+    final text = Text(
+      '${title.toUpperCase()}  ·  $count',
+      style: TextStyle(
+        color: context.colors.accent,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1,
+      ),
+    );
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-        child: Text(
-          '${title.toUpperCase()}  ·  $count',
-          style: TextStyle(
-            color: context.colors.accent,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1,
-          ),
-        ),
+        padding: EdgeInsets.fromLTRB(16, 12, trailing == null ? 16 : 4, 4),
+        child: trailing == null
+            ? text
+            : Row(children: [Expanded(child: text), trailing!]),
       ),
     );
   }
@@ -294,6 +461,9 @@ class _ShopItemTile extends StatelessWidget {
 
   final ShopItem item;
   final int index;
+
+  /// Round 69: a drag handle (not while shown sorted or filtered).
+  final bool reorderable;
   final bool selectionMode;
   final bool selected;
   final VoidCallback onTap;
@@ -309,6 +479,7 @@ class _ShopItemTile extends StatelessWidget {
     super.key,
     required this.item,
     required this.index,
+    this.reorderable = true,
     required this.selectionMode,
     required this.selected,
     required this.onTap,
@@ -369,6 +540,7 @@ class _ShopItemTile extends StatelessWidget {
               ),
               indicator: ReorderOrSelectIndicator(
                 index: index,
+                reorderable: reorderable,
                 selectionMode: selectionMode,
                 selected: selected,
               ),
@@ -379,7 +551,9 @@ class _ShopItemTile extends StatelessWidget {
           Positioned(
             top: 0,
             bottom: 0,
-            right: ReorderOrSelectIndicator.width,
+            right: reorderable || selectionMode
+                ? ReorderOrSelectIndicator.width
+                : ReorderOrSelectIndicator.bareWidth,
             child: Row(
               children: [
                 if (quantity != null)

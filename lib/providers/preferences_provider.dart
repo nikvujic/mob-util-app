@@ -107,6 +107,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
     }
   }
 
+  /// Shop's bought list A–Z or in its own order (Round 69).
+  void setShopSorted(bool sorted) => state = state.copyWith(shopSorted: sorted);
+
   /// The Introduction was opened: no longer new.
   void readIntro() {
     if (state.introUnread) state = state.copyWith(introUnread: false);
