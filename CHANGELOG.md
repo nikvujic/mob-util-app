@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.28.0] - 2026-10-19
+
 ### Added
 - **Shop: search.** The magnifier opens a search field above the
   keyboard; typing shows only the items with it in their name (any
