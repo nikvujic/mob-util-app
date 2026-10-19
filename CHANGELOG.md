@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- **Pip's adventure**: when a bug knocked him over, the trees kept going
+  by while he lay there and fetched his sword. They now stand still with
+  the ground, and catch up a little as he runs on (so the menu's Pip and
+  Pip Home's still agree).
+- His **sword**, knocked flying, now turns over in an arc and lands flat
+  on the ground. It used to come down point first, through the ground,
+  and then lie partly in it.
+
 ## [1.34.0] - 2026-10-19
 
 ### Added

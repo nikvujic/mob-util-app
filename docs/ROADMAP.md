@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 76 — Nikola on 1.34.0 (2026-10-19, patch 1.34.1)
+
+- [x] Out, knocked over: the trees stand with the ground (they kept
+  going by his time out); they catch up as he runs on (up to half as
+  fast again, or put in place if 20 s off), so every room still agrees.
+- [x] His sword flying off: an arc, two turns and a quarter, landing flat
+  and never into the ground (`PipRun.swordBelow`).
+
 ### Round 75 — Nikola on 1.33.0 (2026-10-19, 1.34.0)
 
 - [x] **Trees**: the pine (green all year) rare, about 5%, but 60% in

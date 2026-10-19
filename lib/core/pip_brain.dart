@@ -986,6 +986,7 @@ class PipBrain {
   /// Moves on by [dt] seconds.
   void step(double dt) {
     _outRunSince += dt;
+    _stepTrees(dt);
     _t += dt;
     _stepStation(dt);
     _stepDrone(dt);
@@ -2628,6 +2629,38 @@ class PipBrain {
     _outRun = seconds;
     _outRunSince = 0;
     _outPaused = paused;
+  }
+
+  /// Round 76: how far his field's trees have gone by (seconds of his
+  /// running): they move with the ground (still while he's knocked over,
+  /// fetching his sword, at his break), catching up with [outRun] a little
+  /// as he runs on (a little quicker or slower), so every room keeps to
+  /// it; a long way off (just opened), they're simply there.
+  double? get treeRun => _treeRun;
+  double? _treeRun;
+
+  /// The most the trees hurry or hold back to keep to [outRun].
+  static const treeCatchUp = 0.5;
+
+  /// How far off before they're simply put there.
+  static const treeJump = 20.0;
+
+  void _stepTrees(double dt) {
+    final target = outRun;
+    final run = _run;
+    final trees = _treeRun;
+    if (target == null || run == null) {
+      _treeRun = null;
+      return;
+    }
+    if (trees == null || (target - trees).abs() > treeJump) {
+      _treeRun = target;
+      return;
+    }
+    // Moving as the ground does (at his pace: 1 running, 0 stopped).
+    final moving = run.speed / (PipRun.runSpeed * run.pace);
+    final catchUp = ((target - trees) / 4).clamp(-treeCatchUp, treeCatchUp);
+    _treeRun = trees + dt * moving * (1 + catchUp);
   }
 
   /// Out fighting, as he really is (not a preview, not skiing, not on

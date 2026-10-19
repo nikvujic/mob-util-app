@@ -911,18 +911,41 @@ class PipRun {
     }
   }
 
-  /// The sword flying off or lying on the ground: (its middle x, height
-  /// above the ground, angle) on the screen; null: in his hand.
+  /// The sword flying off or lying on the ground: (its grip's middle x,
+  /// height above the ground, angle) on the screen; null: in his hand.
+  /// Round 76: it turns over twice and a quarter in the air, up in an
+  /// arc and down, and lands flat; never into the ground (it used to
+  /// come down point first, through it, then flip flat).
   (double, double, double)? get lyingSword {
     final at = swordAt;
     if (at == null) return null;
     if (phase == RunPhase.knocked) {
       final p = (t / knockTime).clamp(0.0, 1.0);
       final sx = _swordFrom + (at - _swordFrom) * p - shift;
-      return (sx, 7 + 12 * math.sin(math.pi * p) - 6 * p, -3 * math.pi * p);
+      final angle = landedAngle * _easeOut(p);
+      final arc = 7 * (1 - p) + 14 * math.sin(math.pi * p);
+      return (sx, math.max(arc, swordBelow(angle)), angle);
     }
-    return (at - shift, 1, -math.pi / 2);
+    return (at - shift, swordBelow(landedAngle), landedAngle);
   }
+
+  /// How it lies: flat (pointing back, the way it flew), after two turns.
+  static const landedAngle = -2.5 * math.pi;
+
+  /// How far below its grip's middle the sword reaches, turned by [angle]
+  /// (0: pointing up): its blade 10.5 pixels up from there, its pommel 2.5
+  /// down, 5 wide.
+  static double swordBelow(double angle) {
+    var low = double.negativeInfinity;
+    for (final px in const [-2.5, 2.5]) {
+      for (final py in const [-10.5, 2.5]) {
+        low = math.max(low, px * math.sin(angle) + py * math.cos(angle));
+      }
+    }
+    return low;
+  }
+
+  static double _easeOut(double p) => 1 - math.pow(1 - p, 2).toDouble();
 
   /// The bug: its left edge on the screen, its legs up, walking right
   /// (running off); null: none.

@@ -1991,7 +1991,9 @@ class _RoomPainter extends CustomPainter {
 /// out, by his time running (his life's), so the menu's room and Pip
 /// Home's agree (each has its own run).
 double fieldPassing(PipBrain brain) {
-  final running = brain.outRun;
+  // Round 76: with the ground (still when he's knocked over), keeping to
+  // his time out.
+  final running = brain.treeRun;
   if (running != null && brain.activity == PipActivity.adventuring) {
     return running * PipRun.runSpeed * 0.5;
   }

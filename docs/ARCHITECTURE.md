@@ -504,7 +504,8 @@ opens his umbrella, melts his snowman; `PipActivity.sheltering`,
 run takes `storm`, `snowFoes` and `pace` from the brain
 (`RunPhase.toShelter`/`sheltering`, `PipFoe.snowman`).
 Round 74: each room's brain has its own run, so the field's trees go by
-his time out from his life instead (`PipLink.outRun`, synced each
+his time out from his life instead (Round 76: through `treeRun`, which
+moves with the run's ground and eases back to that time) (`PipLink.outRun`, synced each
 second into `PipBrain.outRun`, read by `fieldPassing`), standing still
 at his break.
 

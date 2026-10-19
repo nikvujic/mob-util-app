@@ -106,7 +106,8 @@ void main() {
 
   test(
       'his field\'s trees go by with his time out: two rooms (each its own '
-      'run, the ground moved differently) agree; at his break they stand', () {
+      'run, the ground moved differently) agree; Round 76: knocked over, '
+      'they stand with the ground, then catch up as he runs on', () {
     final a = PipBrain(roomWidth: 200, random: math.Random(1));
     final b = PipBrain(roomWidth: 140, random: math.Random(2));
     for (final p in [a, b]) {
@@ -116,20 +117,86 @@ void main() {
     steps(a, 3);
     steps(b, 1);
     expect(a.run!.shift, isNot(closeTo(b.run!.shift, 1)));
-    a.syncOutRun(600, paused: false);
-    b.syncOutRun(600, paused: false);
-    expect(fieldPassing(a), fieldPassing(b));
-    steps(a, 0.5);
-    steps(b, 0.5);
+    var clock = 600.0;
+    void both(double seconds, {bool knock = false}) {
+      for (var t = 0.0; t < seconds; t += 1 / 60) {
+        clock += 1 / 60;
+        // His life's clock, told each second (here every step).
+        for (final p in [a, b]) {
+          p.syncOutRun(clock, paused: false);
+          p.step(1 / 60);
+        }
+      }
+    }
+
+    both(0.1);
+    expect(fieldPassing(a), closeTo(fieldPassing(b), 1e-9),
+        reason: 'put where his time says');
+    both(0.5);
     expect(fieldPassing(a), closeTo(fieldPassing(b), 0.5));
-    expect(fieldPassing(a), greaterThan(600 * PipRun.runSpeed * 0.5));
-    a.syncOutRun(600, paused: true);
+    expect(a.treeRun, closeTo(clock, 0.05));
+    // Knocked over (the ground stops): they stand.
+    while (!a.run!.bugComing(hits: true)) {
+      both(1 / 60);
+    }
+    for (var i = 0; i < 60 * 8 && a.run!.phase != RunPhase.knocked; i++) {
+      both(1 / 60);
+    }
+    both(PipRun.knockTime);
+    final still = fieldPassing(a);
+    both(PipRun.downTime * 0.9);
+    expect(fieldPassing(a), closeTo(still, 0.01), reason: 'with the ground');
+    // Running again: a little quicker till they've caught up.
+    for (var i = 0; i < 60 * 10 && a.run!.phase != RunPhase.running; i++) {
+      both(1 / 60);
+    }
+    final behind = clock - a.treeRun!;
+    expect(behind, greaterThan(1));
+    both(1);
+    expect(clock - a.treeRun!, lessThan(behind), reason: 'catching up');
+    both(15);
+    expect(a.treeRun, closeTo(clock, 0.2));
+    expect(fieldPassing(a), closeTo(fieldPassing(b), 2));
+    // At his break (his time stands, he's still): they stand.
+    a.syncOutRun(clock, paused: true);
+    a.run!.want(onBreak: true);
+    for (var i = 0; i < 60 * 30 && a.run!.phase != RunPhase.sitting; i++) {
+      a.step(1 / 60);
+    }
     final at = fieldPassing(a);
     steps(a, 2);
     expect(fieldPassing(a), at, reason: 'his break: they stand');
     // Not out: by the ground, as before.
     a.syncOutRun(null, paused: false);
+    a.step(1 / 60);
     expect(fieldPassing(a), a.run!.shift.floor() * 0.5);
+  });
+
+  test(
+      'Round 76: his sword knocked flying turns over in an arc and lands '
+      'flat, never down into the ground', () {
+    final b = PipBrain(roomWidth: 200, random: math.Random(1));
+    b.step(PipBrain.landEnd);
+    b.adventure(out, animate: false);
+    b.run!.bugComing(hits: true);
+    for (var i = 0; i < 60 * 8 && b.run!.phase != RunPhase.knocked; i++) {
+      b.step(1 / 60);
+    }
+    var high = 0.0;
+    for (var i = 0; i < 60 * PipRun.knockTime; i++) {
+      b.step(1 / 60);
+      final (_, up, angle) = b.run!.lyingSword!;
+      expect(up, greaterThanOrEqualTo(PipRun.swordBelow(angle) - 1e-9),
+          reason: 'clear of the ground');
+      high = math.max(high, up);
+    }
+    expect(high, greaterThan(10), reason: 'up in an arc');
+    steps(b, 0.2);
+    final (_, up, angle) = b.run!.lyingSword!;
+    expect(math.cos(angle).abs(), lessThan(1e-9), reason: 'lying flat');
+    expect(up, closeTo(2.5, 1e-9), reason: 'on the ground, not in it');
+    expect(PipRun.swordBelow(0), 2.5);
+    expect(PipRun.swordBelow(math.pi), 10.5);
   });
 
   test('the tavern, its table and bench drawn in its colours', () {
