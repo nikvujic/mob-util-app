@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.36.3] - 2026-10-20
+
 ### Changed
 - **Notifications show names unless set to Private.** A locked page
   (the Planner, the Hub, or one of its pages) used to hide its
