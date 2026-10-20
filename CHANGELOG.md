@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Spotify in the morning**, a new Hub page: turn it on, pick a time,
+  the days and a volume. At that time the phone sets its music volume
+  and presses play, so Spotify carries on with what it last played. It
+  works with the app closed and after a restart. (If Spotify was closed
+  completely, it may not start.)
+
 ## [1.38.2] - 2026-10-20
 
 ### Fixed

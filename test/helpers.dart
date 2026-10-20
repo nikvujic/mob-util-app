@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/data/morning_music_alarm.dart';
+import 'package:the_app/models/morning_music.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/data/weather_api.dart';
 import 'package:the_app/core/pip_adventure.dart';
@@ -66,6 +68,7 @@ Future<ProviderContainer> pumpApp(
   BackupFolder? backupFolder,
   Preferences? preferences,
   PowerSource? power,
+  FakeMorningMusicAlarm? morningMusic,
   FakeWeatherApi? weather,
   List<PlannerTask> plannerTasks = const [],
   SubscriptionBook subscriptions = SubscriptionBook.empty,
@@ -88,6 +91,8 @@ Future<ProviderContainer> pumpApp(
       appVersionProvider.overrideWithValue(testAppVersion),
       // The phone's power (Round 44): a fake, unplugged unless told.
       powerSourceProvider.overrideWithValue(power ?? FakePower()),
+      morningMusicAlarmProvider
+          .overrideWithValue(morningMusic ?? FakeMorningMusicAlarm()),
       backupFilesProvider.overrideWithValue(backupFiles ?? FakeBackupFiles()),
       fingerprintVaultProvider.overrideWithValue(
         fingerprint ?? FakeFingerprintVault(available: false),
@@ -472,6 +477,14 @@ class FakePipLink implements PipLink {
 
 /// Whether the phone is plugged in, in tests (Round 44): [isPlugged]
 /// now; [plug] tells the app it changed.
+/// Spotify's morning alarm (Round 93): what the phone was last told.
+class FakeMorningMusicAlarm implements MorningMusicAlarm {
+  final sent = <MorningMusic>[];
+
+  @override
+  Future<void> set(MorningMusic music) async => sent.add(music);
+}
+
 class FakePower implements PowerSource {
   bool isPlugged;
   final _changes = StreamController<bool>.broadcast();

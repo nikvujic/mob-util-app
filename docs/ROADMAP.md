@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 93 — Nikola on 1.38.2 (2026-10-20, 1.39.0)
+
+- [x] **Spotify in the morning** (O40): a Hub page (`HubTool.spotify`,
+  no lock, nothing to clear) with on/off, time, days and volume, kept in
+  `Preferences.morningMusic`; `morningMusicSyncProvider` sends them to
+  Android (`the_app/morning_music`) at start and on each change;
+  `MorningMusic.kt` keeps them, sets an exact alarm for the next time,
+  and on it sets the music volume, presses play (`KEYCODE_MEDIA_PLAY`)
+  and sets the next; `BOOT_COMPLETED` / `MY_PACKAGE_REPLACED` set it
+  again. No play button (Nikola).
+- [ ] Next: the recipe import/export, then Packing lists (a spec first).
+
 ### Round 91 — Nikola on 1.38.0 (2026-10-20, patch 1.38.1)
 
 - [x] **Save or Discard** on back, as a note's, for the pages saved as

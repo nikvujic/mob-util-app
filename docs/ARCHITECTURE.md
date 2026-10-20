@@ -822,3 +822,16 @@ Every `TextField` / `TextFormField` takes `selectionControls: lowHandles`
 the text (Rounds 64, 74), so a tap on the text doesn't grab one. Notes
 and a recipe's method use `FormatBarSelectionControls`, built on it. The
 architecture test fails on a field without `selectionControls`.
+
+## Spotify in the morning (Round 93)
+
+`models/morning_music.dart` (on, minutes, weekdays, volume) lives in
+`Preferences.morningMusic`; the Spotify page (`pages/hub/spotify.dart`)
+edits it. `providers/morning_music_provider.dart` sends it to Android
+through `data/morning_music_alarm.dart` (`the_app/morning_music`) when
+the app starts and on every change. On Android, `MorningMusic.kt` keeps
+it in SharedPreferences and sets an exact alarm for the next time; its
+receiver sets `STREAM_MUSIC`'s volume, dispatches the media play key to
+whatever had the music last, and sets the next alarm, so it runs with
+the app closed; after a restart or an update the same receiver sets it
+again.

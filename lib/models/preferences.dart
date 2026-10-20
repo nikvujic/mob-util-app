@@ -1,3 +1,4 @@
+import 'package:the_app/models/morning_music.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -45,6 +46,9 @@ class Preferences {
   /// day.
   final bool subscriptionsReminders;
   final DateTime? subscriptionsPausedUntil;
+
+  /// Spotify in the morning (Round 93).
+  final MorningMusic morningMusic;
 
   /// How each page's notifications look and sound (Round 31); a page not
   /// here is [NotifyStyle.plain].
@@ -133,6 +137,7 @@ class Preferences {
     this.datesSeenOn,
     this.subscriptionsReminders = true,
     this.subscriptionsPausedUntil,
+    this.morningMusic = MorningMusic.initial,
     this.notifyStyles = const {},
     this.introDeleted = false,
     this.introOnUpdates = true,
@@ -233,6 +238,7 @@ class Preferences {
     DateTime? Function()? datesSeenOn,
     bool? subscriptionsReminders,
     DateTime? Function()? subscriptionsPausedUntil,
+    MorningMusic? morningMusic,
     Map<NotifyPage, NotifyStyle>? notifyStyles,
     bool? introDeleted,
     bool? introOnUpdates,
@@ -279,6 +285,7 @@ class Preferences {
         subscriptionsPausedUntil: subscriptionsPausedUntil == null
             ? this.subscriptionsPausedUntil
             : subscriptionsPausedUntil(),
+        morningMusic: morningMusic ?? this.morningMusic,
         notifyStyles: notifyStyles ?? this.notifyStyles,
         introDeleted: introDeleted ?? this.introDeleted,
         introOnUpdates: introOnUpdates ?? this.introOnUpdates,
@@ -331,6 +338,8 @@ class Preferences {
         if (subscriptionsPausedUntil != null)
           'subscriptionsPausedUntil':
               PlannerTask.dayToJson(subscriptionsPausedUntil!),
+        if (morningMusic != MorningMusic.initial)
+          'morningMusic': morningMusic.toJson(),
         if (notifyStyles.isNotEmpty)
           'notifyStyles': {
             for (final MapEntry(:key, :value) in notifyStyles.entries)
@@ -388,6 +397,10 @@ class Preferences {
         subscriptionsPausedUntil: json['subscriptionsPausedUntil'] == null
             ? null
             : PlannerTask.dayFromJson(json['subscriptionsPausedUntil']),
+        morningMusic: json['morningMusic'] is Map<String, dynamic>
+            ? MorningMusic.fromJson(
+                json['morningMusic'] as Map<String, dynamic>)
+            : MorningMusic.initial,
         // Pages unknown here (from a newer app) are skipped.
         notifyStyles: {
           for (final MapEntry(:key, :value)

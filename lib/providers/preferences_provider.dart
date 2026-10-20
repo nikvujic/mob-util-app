@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/models/morning_music.dart';
 import 'package:the_app/data/backup_folder.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
@@ -149,6 +150,10 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
       );
 
   /// Subscriptions' notifications on or off (Round 79).
+  /// Spotify in the morning (Round 93).
+  void setMorningMusic(MorningMusic music) =>
+      state = state.copyWith(morningMusic: music);
+
   void setSubscriptionsReminders(bool on) =>
       state = state.copyWith(subscriptionsReminders: on);
 

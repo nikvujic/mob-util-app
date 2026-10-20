@@ -93,6 +93,24 @@ class MainActivity: FlutterFragmentActivity() {
                     receiver = null
                 }
             })
+        // Spotify in the morning (Round 93): the page's settings, kept for
+        // the alarm (MorningMusic.kt), which is set again from them.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/morning_music")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "set") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                MorningMusic.save(
+                    this,
+                    call.argument<Boolean>("on") ?: false,
+                    call.argument<Int>("minutes") ?: 7 * 60,
+                    call.argument<List<Int>>("weekdays") ?: emptyList(),
+                    call.argument<Int>("volume") ?: 30,
+                )
+                MorningMusic.schedule(this)
+                result.success(null)
+            }
         // A recipe open (Round 42): the screen stays on while the app is in
         // front (Android lets it go dark again in the background).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/screen")

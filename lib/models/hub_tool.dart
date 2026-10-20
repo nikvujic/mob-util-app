@@ -27,15 +27,19 @@ enum HubTool {
   dates('Dates'),
 
   /// Subscriptions (Round 79): what's paid, when, and what to do about it.
-  subscriptions('Subscriptions');
+  subscriptions('Subscriptions'),
+
+  /// Spotify in the morning (Round 93): a time, days and a volume; no
+  /// data to lock or clear.
+  spotify('Spotify');
 
   const HubTool(this.label);
 
   /// Whether it can have a lock of its own (O7).
-  bool get lockable => this != pip;
+  bool get lockable => this != pip && this != spotify;
 
   /// Whether Clear data lists it.
-  bool get clearable => this != pip;
+  bool get clearable => this != pip && this != spotify;
 
   /// Shown to the user (and said by screen readers).
   final String label;

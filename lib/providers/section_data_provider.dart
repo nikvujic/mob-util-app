@@ -59,8 +59,9 @@ class SectionData {
         HubTool.dates => _ref.read(datesProvider).dates.length,
         HubTool.subscriptions =>
           _ref.read(subscriptionsProvider).subscriptions.length,
-        // His life isn't cleared with the Hub's pages.
-        HubTool.pip => 0,
+        // His life isn't cleared with the Hub's pages; Spotify's morning
+        // is a setting (Round 93).
+        HubTool.pip || HubTool.spotify => 0,
       };
 
   /// Empties one of the Hub's pages (saved with the next flush).
@@ -86,6 +87,7 @@ class SectionData {
             .read(subscriptionsProvider.notifier)
             .replaceAll(SubscriptionBook.empty);
       case HubTool.pip:
+      case HubTool.spotify:
     }
   }
 
