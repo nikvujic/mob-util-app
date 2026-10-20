@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.37.4] - 2026-10-20
+
 ### Fixed
 - **Calendars always open on today's month** (picking a subscription's
   day, a date's, a medicine's, a meal's, a routine's last day, moving a
