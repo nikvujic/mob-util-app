@@ -24,17 +24,54 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     return item.id;
   }
 
+  /// Where each thing done was among the things to do (Round 83): its
+  /// place, whether it was waiting, and the things to do as they were
+  /// left (ids, waiting or not). Kept while the app runs.
+  final _left = <String, (int, bool, List<(String, bool)>)>{};
+
+  /// The things to do as they are: ids, waiting or not.
+  List<(String, bool)> get _toDo => [
+        for (final item in state)
+          if (!item.done) (item.id, item.waiting),
+      ];
+
   /// Done, or not done again: to the top of *Completed* (done most
   /// recently), or back to the end of the things to do. As Shop's toggle.
-  /// Done, it's no longer waiting.
+  /// Done, it's no longer waiting. Round 83 (Nikola): not done again,
+  /// it goes back where it was (waiting again, if it was), unless the
+  /// things to do changed since.
   void toggle(String id) {
     final index = state.indexWhere((item) => item.id == id);
     if (index == -1) return;
-    final moved =
-        state[index].copyWith(done: !state[index].done, waiting: false);
+    final item = state[index];
     final others = [...state.take(index), ...state.skip(index + 1)];
-    state = moved.done ? [moved, ...others] : [...others, moved];
+    if (!item.done) {
+      final toDo = _toDo;
+      final at = toDo.indexWhere((t) => t.$1 == id);
+      toDo.removeAt(at);
+      _left[id] = (at, item.waiting, toDo);
+      state = [item.copyWith(done: true, waiting: false), ...others];
+      return;
+    }
+    final undone = item.copyWith(done: false, waiting: false);
+    state = others;
+    final left = _left.remove(id);
+    if (left case (final at, final waiting, final toDo)
+        when _same(toDo, _toDo)) {
+      final back = undone.copyWith(waiting: waiting);
+      // Before the thing to do that followed it (at the end: none did).
+      final next = at < toDo.length
+          ? others.indexWhere((i) => i.id == toDo[at].$1)
+          : others.length;
+      state = [...others.take(next), back, ...others.skip(next)];
+    } else {
+      state = [...others, undone];
+    }
   }
+
+  static bool _same(List<(String, bool)> a, List<(String, bool)> b) =>
+      a.length == b.length &&
+      [for (var i = 0; i < a.length; i++) a[i] == b[i]].every((s) => s);
 
   /// Deletes the completed things; returns them (for Undo).
   List<TodoItem> deleteCompleted() {

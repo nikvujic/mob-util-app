@@ -337,6 +337,22 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 83 — Nikola on 1.36.3 (2026-10-20, 1.37.0)
+
+- [x] **Tavern**: Pip sits on the bench (his body on its top, his feet
+  over its front; `seatHeight` 2, was 3: standing on it), centred under
+  him (`benchLeft`, drawn off the grid as he is).
+- [x] **Planner**: new blocks and routines remind **at their start** by
+  default (the add sheets' `remind: 0`).
+- [x] **Planner: Move to another day** in a block's menu (P28): a date
+  picker (next day first; tomorrow for a missed one), its time kept if
+  free, else the nearest free time as long (`fitTime`) after a *That time
+  is taken* dialog saying to what; Undo moves it back
+  (`PlannerNotifier.moveTask`).
+- [x] **To-do**: un-ticked, a thing goes back to its place (waiting
+  again if it was) unless the things to do changed meanwhile (added,
+  moved, done, set waiting); else the end, as before.
+
 ### Round 82 — Nikola on 1.36.2 (2026-10-20, patch 1.36.3)
 
 - [x] Notifications are private only when set Private, not because the

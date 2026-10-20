@@ -54,6 +54,66 @@ void main() {
     expect(todo.state, hasLength(4));
   });
 
+  group('Round 83: back from Completed', () {
+    setUp(() {
+      todo
+        ..add('A')
+        ..add('B')
+        ..add('C')
+        ..add('D');
+    });
+
+    test('goes back where it was (first, middle, last)', () {
+      for (final text in ['A', 'C', 'D']) {
+        todo.toggle(idOf(text));
+        expect(open(), isNot(contains(text)));
+        todo.toggle(idOf(text));
+        expect(open(), ['A', 'B', 'C', 'D'], reason: text);
+      }
+    });
+
+    test('several done: back in turn, last done first, each in its place', () {
+      todo
+        ..toggle(idOf('B'))
+        ..toggle(idOf('C'))
+        ..toggle(idOf('C'))
+        ..toggle(idOf('B'));
+      expect(open(), ['A', 'B', 'C', 'D']);
+    });
+
+    test('the list changed meanwhile: to the end, as before', () {
+      todo.toggle(idOf('B'));
+      todo.add('E');
+      todo.toggle(idOf('B'));
+      expect(open(), ['A', 'C', 'D', 'E', 'B'], reason: 'one added');
+
+      todo.toggle(idOf('A'));
+      todo.reorder(done: false, oldIndex: 0, newIndex: 2);
+      todo.toggle(idOf('A'));
+      expect(open(), ['D', 'C', 'E', 'B', 'A'], reason: 'reordered');
+
+      todo.toggle(idOf('C'));
+      todo.toggle(idOf('D'));
+      todo.toggle(idOf('C'));
+      expect(open(), ['E', 'B', 'A', 'C'], reason: 'another done');
+    });
+
+    test('one set waiting meanwhile is a change', () {
+      todo.toggle(idOf('B'));
+      // The same order, all now waiting.
+      todo.place(toDo: [], waiting: [idOf('A'), idOf('C'), idOf('D')]);
+      todo.toggle(idOf('B'));
+      expect(open(), ['A', 'C', 'D', 'B']);
+    });
+
+    test('an edited text is no change to the list', () {
+      todo.toggle(idOf('B'));
+      todo.edit(idOf('C'), 'See');
+      todo.toggle(idOf('B'));
+      expect(open(), ['A', 'B', 'See', 'D']);
+    });
+  });
+
   test('Delete completed takes only the done ones', () {
     todo
       ..add('A')
@@ -150,13 +210,22 @@ void main() {
       expect(toDo(), ['B']);
     });
 
-    test('done, it is no longer waiting; back, it is to do', () {
-      todo.add('A');
-      todo.place(toDo: [], waiting: [idOf('A')]);
+    test(
+        'done, it is no longer waiting; back, waiting again (Round 83), '
+        'or to do once the list changed', () {
+      todo
+        ..add('A')
+        ..add('B');
+      todo.place(toDo: [idOf('B')], waiting: [idOf('A')]);
       todo.toggle(idOf('A'));
-      expect(todo.state.single.waiting, isFalse);
+      expect(todo.state.firstWhere((i) => i.text == 'A').waiting, isFalse);
       todo.toggle(idOf('A'));
-      expect(toDo(), ['A']);
+      expect(waiting(), ['A']);
+      todo.toggle(idOf('A'));
+      todo.add('C');
+      todo.toggle(idOf('A'));
+      expect(waiting(), isEmpty);
+      expect(toDo(), ['B', 'C', 'A']);
     });
 
     test('kept in todo.json (only when waiting)', () async {

@@ -281,7 +281,10 @@ and a page (`pages/notes/todo.dart`), not a stored note. Its list is
 v15; v16 with `done`), counted and cleared with Notes (`SectionData`).
 Like Shop, one ordered list shown as two (to do, *Completed*);
 `TodoNotifier.toggle` moves a thing between them, `deleteCompleted`
-clears the done ones. The
+clears the done ones. Round 83: done, it remembers (in memory, `_left`)
+the thing's place among the things to do and those as it left them (ids,
+waiting or not); back, it goes to that place if they're unchanged, else
+to the end. The
 `todoNote` preference turns the tile on and off (the list stays); like
 the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
@@ -497,7 +500,9 @@ banked, today's started at 12:00 or when he's back on before 17:00;
 his room (starting the break when it's due) and `PipLink.level` its
 flashes. In the brain he's `PipActivity.adventuring` (a row of `false`
 in `mayStart`), driven by `core/pip_run.dart`'s `PipRun` (phases,
-the ground's shift, bugs, the knocked-off sword, the tavern and plate),
+the ground's shift, bugs, the knocked-off sword, the tavern and plate;
+Round 83: `seatHeight` puts his body on the bench, `benchLeft` centres it
+under him, drawn off the pixel grid as he is),
 which the painter draws in screen terms (world x − shift).
 Round 73: XP is ten a minute, worked out from `minutesOut`; while his
 room is shown and he's `fighting`, it calls `PipLink.fighting` each
@@ -605,7 +610,9 @@ there (task left, routine right). A block is one `SelectableCard` whose
 corners only; the shape also limits where it takes taps. Free time is
 time with neither; a task's room (`PlannerNotifier.roomFor` / `freeOn`)
 only counts tasks, and the add sheet switches to the routines' room
-while Repeat is on.
+while Repeat is on. Round 83: a block moved to another day
+(`PlannerNotifier.moveTask`) keeps its time if `freeOn` that day has it,
+else takes `fitTime`'s nearest free time as long (the page says so first).
 
 ## The timeline's scale (Round 10)
 

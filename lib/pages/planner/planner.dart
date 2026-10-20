@@ -231,6 +231,8 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     switch (choice) {
       case _TaskChoice.edit:
         await _edit(task);
+      case _TaskChoice.move:
+        await _move(task);
       case _TaskChoice.delete:
         final planner = ref.read(plannerProvider.notifier)
           ..removeTasks({task.id});
@@ -277,6 +279,67 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       _taken();
     }
   }
+
+  /// Round 83 (Nikola): moves [task] to a picked day (the next one first:
+  /// tomorrow for a missed one), at its time if that's free there, else
+  /// the nearest free time as long, after saying so. Undo moves it back.
+  Future<void> _move(PlannerTask task) async {
+    final today = dayOf(_now);
+    final day = await showDatePicker(
+      context: context,
+      helpText: 'Move to',
+      initialDate: addDays(task.day.isBefore(today) ? today : task.day, 1),
+      firstDate: today,
+      lastDate: DateTime(today.year + 10),
+      selectableDayPredicate: (d) => !isSameDay(d, task.day),
+    );
+    if (day == null || !mounted) return;
+    final planner = ref.read(plannerProvider.notifier);
+    final span = (start: task.start!, end: task.end!);
+    final fit = fitTime(planner.freeOn(day), span);
+    final label = formatDay(day, today: today);
+    if (fit == null) {
+      _taken('No free time that long on $label.');
+      return;
+    }
+    if (fit != span) {
+      final move = await showConfirmDialog(
+        context,
+        title: 'That time is taken',
+        message: '${_span(span)} is taken on $label, so its time will '
+            'change to fit: ${_span(fit)}.',
+        confirmLabel: 'Move',
+      );
+      if (!move || !mounted) return;
+    }
+    try {
+      planner.moveTask(task.id, day, start: fit.start, end: fit.end);
+    } on TaskOverlapException {
+      _taken();
+      return;
+    }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${task.title} moved to $label'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              try {
+                planner.moveTask(task.id, task.day,
+                    start: task.start!, end: task.end!);
+              } on TaskOverlapException {
+                _taken();
+              }
+            },
+          ),
+        ),
+      );
+  }
+
+  static String _span(TimeSpan span) =>
+      '${formatMinutes(span.start)}–${formatMinutes(span.end)}';
 
   /// A block ticked off (or back). Round 78: ticked off on a past day,
   /// it's deleted at once, as the past's done blocks are (Undo puts it
@@ -822,6 +885,7 @@ class _DayHeader extends StatelessWidget {
 /// What can be done with a task's block (P15).
 enum _TaskChoice {
   edit('Edit', Icons.edit_outlined),
+  move('Move to another day', Icons.event_repeat_outlined),
   delete('Delete', Icons.delete_outline);
 
   final String label;

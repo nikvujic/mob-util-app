@@ -367,13 +367,15 @@ class PipRun {
   double? plate;
 
   /// The tavern's size, and where in it: the window's middle, the table,
-  /// and his seat (his left edge, from the tavern's left).
+  /// and his seat (his left edge, from the tavern's left); his bench
+  /// (Round 83: centred under him).
   static const tavernWidth = 54;
   static const windowMiddle = 22;
   static const tableLeft = 33;
   static const tableWidth = 10;
   static const tableHeight = 6;
   static const seatOffset = 42;
+  static const benchLeft = seatOffset + (PipBrain.width - 12) / 2;
 
   double _seatX(double near) => near + 8;
 
@@ -840,7 +842,9 @@ class PipRun {
         _ => 0,
       };
 
-  static const seatHeight = 3.0;
+  /// Round 83: sitting on it, his feet over its front (no longer standing
+  /// on its top): his body on its top, a row under his bench's 3.
+  static const seatHeight = 2.0;
 
   /// Crouched picking up the sword: 0 to 1.
   double? get crouch => switch (phase) {

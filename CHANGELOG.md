@@ -6,6 +6,21 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Planner: move a block to another day.** Tap a block: **Move to
+  another day** picks the day (tomorrow first, handy for a missed one).
+  It keeps its time if that's free there; if not, it says so and to what
+  time it'll move (the nearest free time as long), Move or Cancel. Undo
+  moves it back.
+
+### Changed
+- **Planner: new blocks and routines remind at their start** by default
+  (it was Off); pick Off in the sheet for none.
+- **To-do: a completed thing tapped goes back where it was** (waiting
+  again if it was), not to the end, unless the list changed meanwhile.
+- **Pip at the tavern** sits on his bench, his feet over its front (he
+  stood on it), centred on it.
+
 ## [1.36.3] - 2026-10-20
 
 ### Changed

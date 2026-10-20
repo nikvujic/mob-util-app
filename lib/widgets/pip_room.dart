@@ -1495,8 +1495,8 @@ class _RoomPainter extends CustomPainter {
         sprite(PipSprites.table, (tx + PipRun.tableLeft).floorToDouble(),
             groundTop,
             colours: PipSprites.tavernColours);
-        sprite(PipSprites.bench, (tx + PipRun.seatOffset + 4).floorToDouble(),
-            groundTop,
+        // Round 83: not snapped to the grid, as he isn't: centred under him.
+        sprite(PipSprites.bench, tx + PipRun.benchLeft, groundTop,
             colours: PipSprites.tavernColours);
       }
       // A ski come off in a fall, sliding away, then lying there.

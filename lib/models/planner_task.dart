@@ -64,12 +64,13 @@ class PlannerTask {
   /// Whether it has a place on the timeline (tasks from v1 don't).
   bool get hasTime => start != null;
 
-  PlannerTask copyWith({bool? done}) => PlannerTask(
+  PlannerTask copyWith({bool? done, DateTime? day, int? start, int? end}) =>
+      PlannerTask(
         id: id,
         title: title,
-        day: day,
-        start: start,
-        end: end,
+        day: day ?? this.day,
+        start: start ?? this.start,
+        end: end ?? this.end,
         done: done ?? this.done,
         color: color,
         remind: remind,
@@ -120,6 +121,23 @@ typedef FreeSlot = ({int start, int end});
 
 /// A stretch of time in a day, in minutes (end exclusive).
 typedef TimeSpan = ({int start, int end});
+
+/// Where [span] fits in [free] (Round 83: a block moved to another day):
+/// itself if it's free there, else the nearest time of its length (the
+/// earlier of two as near); null if no free stretch is that long.
+TimeSpan? fitTime(List<FreeSlot> free, TimeSpan span) {
+  final length = span.end - span.start;
+  TimeSpan? best;
+  for (final slot in free) {
+    if (slot.end - slot.start < length) continue;
+    final start = span.start.clamp(slot.start, slot.end - length);
+    if (best == null ||
+        (start - span.start).abs() < (best.start - span.start).abs()) {
+      best = (start: start, end: start + length);
+    }
+  }
+  return best;
+}
 
 /// The free stretches of a day with [tasks] (any order; tasks without a
 /// time are ignored), from 00:00 to 24:00.

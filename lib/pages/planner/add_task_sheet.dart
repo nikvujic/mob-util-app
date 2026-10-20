@@ -77,6 +77,8 @@ Future<NewTask?> showAddTaskSheet(
       from: day,
       note: note,
       color: BlockColor.taskDefault.name,
+      // Round 83: a new one reminds at its start, unless set otherwise.
+      remind: 0,
     ),
   );
 }
@@ -106,6 +108,8 @@ Future<NewTask?> showAddRoutineSheet(
       weekdays: {weekday},
       from: from,
       color: BlockColor.routineDefault.name,
+      // Round 83: a new one reminds at its start, unless set otherwise.
+      remind: 0,
     ),
   );
 }

@@ -103,6 +103,20 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     ];
   }
 
+  /// Round 83: moves a task to [day], from [start] to [end]. Throws
+  /// [TaskOverlapException] if that time isn't free there.
+  void moveTask(String id, DateTime day,
+      {required int start, required int end}) {
+    final free = _free(_on(day).where((t) => t.id != id));
+    if (!free.any((s) => s.start <= start && end <= s.end)) {
+      throw const TaskOverlapException();
+    }
+    state = [
+      for (final t in state)
+        if (t.id == id) t.copyWith(day: day, start: start, end: end) else t,
+    ];
+  }
+
   /// The time [task] could take: up to the tasks around it (its own time
   /// included); routines don't count (P12).
   FreeSlot roomFor(PlannerTask task) =>
