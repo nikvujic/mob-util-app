@@ -337,6 +337,19 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 88 — Nikola on 1.37.4 (2026-10-20, patch 1.37.5)
+
+- [x] **Pip's station**: a segment every **15 s** watched
+  (`PipBrain.chargeEvery`, was 30).
+- [x] **Tap outside a field** lets it go, app-wide: a translucent
+  `GestureDetector` at the app's root (`MaterialApp.builder`, out of
+  semantics) unfocuses on a tap nothing else takes (fields, buttons and
+  rows keep theirs).
+- [x] A subscription added after another: its calendar opened on next
+  month (its default day) — fixed by 1.37.4's today-first calendars.
+- [ ] **Subscriptions' cards moved** by holding and dragging (Round 89,
+  1.38.0).
+
 ### Round 87 — Nikola on 1.37.3 (2026-10-20, patch 1.37.4)
 
 - [x] **Calendars open on today** (Nikola: they seemed to carry on where

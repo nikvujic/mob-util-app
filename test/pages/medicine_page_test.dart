@@ -340,6 +340,7 @@ void main() {
     final row = find.byKey(Key('historyRow-$id-2026-09-01'));
     await tester.scrollUntilVisible(row, 500,
         scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
     await tester.tap(row);
     await tester.pumpAndSettle();
     final mark = find.byKey(Key('mark-$id-2026-09-01-0'));

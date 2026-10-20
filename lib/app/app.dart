@@ -59,9 +59,20 @@ class MyApp extends ConsumerWidget {
       // for a moment (Nikola saw the old theme flash on the next page).
       themeAnimationDuration: Duration.zero,
       // Tracks which side the user touches, for G11 bottom actions; the
-      // curtain hides what's unlocked as the app leaves.
-      builder: (context, child) =>
-          PrivacyCurtain(child: HandTracker(child: child!)),
+      // curtain hides what's unlocked as the app leaves. Round 88
+      // (Nikola): a tap on nothing (not a field, button or the like) lets
+      // a field being typed in go, on every page, sheet and dialog.
+      builder: (context, child) => PrivacyCurtain(
+        child: HandTracker(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            // Not a button to screen readers: just letting go.
+            excludeFromSemantics: true,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: child!,
+          ),
+        ),
+      ),
       home: const HomeScreen(),
       onGenerateRoute: _route,
     );

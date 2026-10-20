@@ -437,8 +437,9 @@ void main() {
       await frames(tester, 1);
     }
 
-    testWidgets('at it: a segment every 30 seconds, up to full',
+    testWidgets('at it: a segment every 15 seconds (Round 88), up to full',
         (tester) async {
+      expect(PipBrain.chargeEvery, 15);
       final link = FakePipLink(segments: 1)
         ..at = DateTime(2026, 10, 15, 12)
         ..plugged = true;

@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Pip charges twice as fast** at his station while you watch: a
+  segment every 15 seconds (it was 30).
+
+### Fixed
+- **A tap outside a field lets it go** (the keyboard closes), on every
+  page, sheet and dialog: the Subscription page's fields and others used
+  to stay focused.
+
 ## [1.37.4] - 2026-10-20
 
 ### Fixed

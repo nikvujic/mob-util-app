@@ -799,3 +799,10 @@ Every date is picked with `widgets/date_pick.dart`'s `pickDate`, not
 allowed if today isn't), with today marked, and shows the day already
 set as picked only when it falls in that month (Nikola: a calendar
 opening on the thing's own month looked like it carried on from before).
+
+## Letting a field go (Round 88)
+
+`MaterialApp.builder` wraps every route in a translucent `GestureDetector`
+(excluded from semantics) whose tap unfocuses the primary focus: a tap on
+nothing (not a field, button, row or chip, which win the gesture arena)
+lets the field being typed in go, on every page, sheet and dialog.
