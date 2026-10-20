@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.37.0] - 2026-10-20
+
 ### Added
 - **Planner: move a block to another day.** Tap a block: **Move to
   another day** picks the day (tomorrow first, handy for a missed one).
