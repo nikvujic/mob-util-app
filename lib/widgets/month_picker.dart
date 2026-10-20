@@ -81,28 +81,29 @@ class _MonthPickerState extends State<_MonthPicker> {
             ],
           ),
           const SizedBox(height: 8),
-          for (var row = 0; row < 3; row++)
-            Row(
-              children: [
-                for (var month = row * 4 + 1; month <= row * 4 + 4; month++)
-                  Expanded(
-                    child: Center(
-                      child: ChoiceChip(
-                        label: SizedBox(
-                          width: 32,
-                          child: Text(
-                            monthShort(month),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        selected: _year == widget.initial.year &&
+          // Round 86 (Nikola: four across were squished): three across,
+          // four rows, spaced, each a full-width button.
+          for (var row = 0; row < 4; row++)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  for (var month = row * 3 + 1;
+                      month <= row * 3 + 3;
+                      month++) ...[
+                    if (month % 3 != 1) const SizedBox(width: 8),
+                    Expanded(
+                      child: _Month(
+                        month: month,
+                        picked: _year == widget.initial.year &&
                             month == widget.initial.month,
-                        onSelected: (_) =>
+                        onTap: () =>
                             Navigator.of(context).pop(DateTime(_year, month)),
                       ),
                     ),
-                  ),
-              ],
+                  ],
+                ],
+              ),
             ),
         ],
       ),
@@ -112,6 +113,55 @@ class _MonthPickerState extends State<_MonthPicker> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
+    );
+  }
+}
+
+/// A month's button: its short name; the picked one washed and edged in
+/// the accent, as a picked chip.
+class _Month extends StatelessWidget {
+  final int month;
+  final bool picked;
+  final VoidCallback onTap;
+
+  const _Month({
+    required this.month,
+    required this.picked,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final accent = colors.accentForeground ?? colors.accent;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: picked
+          ? BorderSide(color: accent, width: 1.5)
+          : BorderSide(color: colors.divider),
+    );
+    return Material(
+      color: picked
+          ? Color.alphaBlend(colors.accent.withValues(alpha: 0.24), colors.card)
+          : colors.card,
+      shape: shape,
+      child: InkWell(
+        key: Key('month-$month'),
+        customBorder: shape,
+        onTap: onTap,
+        child: SizedBox(
+          height: 44,
+          child: Center(
+            child: Text(
+              monthShort(month),
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontWeight: picked ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

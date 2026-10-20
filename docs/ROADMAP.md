@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 86 — Nikola on 1.37.2 (2026-10-20, patch 1.37.3)
+
+- [x] **Month picker** squished (four chips across): three across, four
+  rows, 44-high buttons 8 apart (the picked one washed and edged in the
+  accent); checked narrow with large text.
+
 ### Round 85 — Nikola on 1.37.1 (2026-10-20, patch 1.37.2)
 
 - [x] **Subscriptions' card lines**: icons centred on their text's first
