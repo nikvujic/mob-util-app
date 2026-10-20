@@ -8,6 +8,7 @@ import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/recipe_read_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
@@ -601,9 +602,46 @@ void main() {
     });
 
     testWidgets(
-        'a section moved by touching and moving its name (Round 45: no '
-        'handle shown); the first one stays', (tester) async {
+        'Round 92: one already there isn\'t added again: said where it is, '
+        'the sheet kept; renaming to another\'s name the same', (tester) async {
       await openList(tester);
+      await tapTooltip(tester, 'Add ingredients');
+      await tester.enterText(find.byType(TextField).last, ' milk ');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.text('Milk is already in Dairy'), findsOneWidget);
+      expect(find.text(' milk '), findsOneWidget, reason: 'kept to fix');
+      expect(book().all.where((i) => i.name.toLowerCase() == 'milk'),
+          hasLength(1));
+      await tester.enterText(find.byType(TextField).last, 'Butter');
+      await tester.pump();
+      expect(find.byKey(const Key('textInputProblem')), findsNothing,
+          reason: 'gone once changed');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      await pressBack(tester);
+      expect(book().sections.first.items.first.name, 'Butter');
+
+      await tester.longPress(find.text('Sugar'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rename'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'flour');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.text('Flour is already in Baking'), findsOneWidget);
+      expect(book().all.map((i) => i.name), contains('Sugar'));
+    });
+
+    testWidgets(
+        'Round 92: a section dragged only from its right edge (no handle '
+        'drawn); dropped only between sections, where a line shows; the '
+        'first stays', (tester) async {
+      await openList(tester);
+      container.read(ingredientsProvider.notifier).addSection('Fruit');
+      await tester.pumpAndSettle();
+      List<String> names() => book().sections.map((s) => s.name).toList();
+      expect(names(), ['Baking', 'Fruit', 'Dairy']);
       Finder handleOf(String id) => find.byKey(Key('sectionHandle-$id'));
       expect(handleOf('s1'), findsNothing, reason: 'the first stays');
       expect(
@@ -612,43 +650,98 @@ void main() {
               matching: find.byIcon(Icons.drag_handle)),
           findsNothing,
           reason: 'no handle drawn');
-      expect(tester.getSize(handleOf('s2')).height,
-          greaterThanOrEqualTo(kMinInteractiveDimension));
+      final handle = tester.getRect(handleOf('s2'));
+      final name = tester.getRect(find.byKey(const ValueKey('section-s2')));
+      expect(handle.right, name.right, reason: 'at the right edge');
+      expect(handle.width, ReorderOrSelectIndicator.width);
+      expect(handle.height, greaterThanOrEqualTo(kMinInteractiveDimension));
       // Adding a section: a list with a plus, not a folder.
       expect(
           find.descendant(
               of: find.byTooltip('Add a section'),
               matching: find.byIcon(Icons.playlist_add)),
           findsOneWidget);
-      final handle = handleOf('s2');
-      expect(handle, findsOneWidget);
-      // Dairy dragged above Baking's ingredients: it can't pass the first.
-      final gesture = await tester.startGesture(tester.getCenter(handle));
-      await tester.pump(const Duration(milliseconds: 100));
-      await gesture.moveTo(tester.getCenter(find.text('BAKING  ·  2')));
-      await tester.pump(const Duration(milliseconds: 500));
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(book().sections.map((s) => s.name), ['Baking', 'Dairy']);
 
-      // A third, under the first, then Dairy dragged to the end.
-      container.read(ingredientsProvider.notifier).addSection('Fruit');
-      await tester.pumpAndSettle();
-      expect(book().sections.map((s) => s.name), ['Baking', 'Fruit', 'Dairy']);
-      // Dairy dragged up onto Fruit's name: between Baking and Fruit.
-      final drag = await tester.startGesture(tester.getCenter(handleOf('s2')));
-      await tester.pump(const Duration(milliseconds: 100));
-      final from = tester.getCenter(handleOf('s2'));
-      final to =
-          Offset(from.dx, tester.getTopLeft(find.textContaining('FRUIT')).dy);
-      for (var i = 1; i <= 10; i++) {
-        await drag.moveTo(Offset.lerp(from, to, i / 10)!);
-        await tester.pump(const Duration(milliseconds: 50));
+      Future<TestGesture> dragTo(String id, Finder over) async {
+        final from = tester.getCenter(handleOf(id));
+        final to = Offset(from.dx, tester.getCenter(over).dy);
+        final drag = await tester.startGesture(from);
+        await tester.pump();
+        for (var i = 1; i <= 10; i++) {
+          await drag.moveTo(Offset.lerp(from, to, i / 10)!);
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        return drag;
       }
-      await tester.pump(const Duration(milliseconds: 500));
+
+      double line(int before) =>
+          tester.getSize(find.byKey(Key('sectionDropLine-$before'))).height;
+
+      // From its name: no drag (a tap gives its options).
+      final byName = await tester
+          .startGesture(tester.getCenter(find.textContaining('DAIRY')));
+      await tester.pump();
+      await byName.moveBy(const Offset(0, -150));
+      await tester.pump();
+      await byName.up();
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Fruit', 'Dairy']);
+
+      // Dairy over Fruit's name: a line above Fruit; let go, it's there.
+      var drag = await dragTo('s2', find.textContaining('FRUIT'));
+      await tester.pumpAndSettle();
+      expect(line(1), greaterThan(0));
       await drag.up();
       await tester.pumpAndSettle();
-      expect(book().sections.map((s) => s.name), ['Baking', 'Dairy', 'Fruit']);
+      expect(names(), ['Baking', 'Dairy', 'Fruit']);
+      expect(line(1), 0, reason: 'gone once dropped');
+
+      // Over one of Baking's ingredients: after Baking (it can't go above
+      // the first; it's there already: nothing moves).
+      drag = await dragTo('s2', find.text('Flour'));
+      await tester.pumpAndSettle();
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Dairy', 'Fruit']);
+
+      final fruit = book().sections.last.id;
+      // Fruit dragged over Dairy's ingredient (Milk): after Dairy.
+      container.read(ingredientsProvider.notifier).moveSection(fruit, 1);
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Fruit', 'Dairy']);
+      drag = await dragTo(fruit, find.text('Milk'));
+      await tester.pumpAndSettle();
+      expect(line(3), greaterThan(0), reason: 'the end line');
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Dairy', 'Fruit']);
+
+      // Over the first's name: right under it (never above), the line
+      // there.
+      drag = await dragTo(fruit, find.textContaining('BAKING'));
+      await tester.pumpAndSettle();
+      expect(line(1), greaterThan(0));
+      expect(
+          find.byKey(const Key('sectionDropLine-0')).evaluate().isEmpty
+              ? 0.0
+              : line(0),
+          0);
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Fruit', 'Dairy']);
+
+      // Down past one: a fourth, Fruit over its name, lands just above it.
+      container.read(ingredientsProvider.notifier).addSection('Meat');
+      await tester.pumpAndSettle();
+      container.read(ingredientsProvider.notifier).moveSection(
+          book().sections.firstWhere((s) => s.name == 'Meat').id, 3);
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Fruit', 'Dairy', 'Meat']);
+      drag = await dragTo(fruit, find.textContaining('MEAT'));
+      await tester.pumpAndSettle();
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(names(), ['Baking', 'Dairy', 'Fruit', 'Meat']);
     });
 
     testWidgets('holding one renames or deletes it', (tester) async {

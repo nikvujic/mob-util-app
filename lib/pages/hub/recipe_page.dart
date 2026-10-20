@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/markdown.dart';
 import 'package:the_app/core/screen.dart';
@@ -698,6 +699,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     return CheckboxBoxes(
       controller: _method,
       child: TextField(
+        selectionControls: lowHandles,
         key: const Key('recipeMethodView'),
         controller: _method,
         readOnly: true,
@@ -784,6 +786,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           sliver: SliverList.list(children: [
             TextField(
+              selectionControls: lowHandles,
               key: const Key('recipeName'),
               controller: _name,
               focusNode: _nameFocus,
@@ -1203,6 +1206,7 @@ class _TypedAmountState extends State<_TypedAmount> {
 
   @override
   Widget build(BuildContext context) => TextField(
+        selectionControls: lowHandles,
         key: const Key('amountTypedText'),
         controller: _controller,
         autofocus: true,

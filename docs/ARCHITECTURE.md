@@ -814,3 +814,11 @@ or deletes a new one.
 (excluded from semantics) whose tap unfocuses the primary focus: a tap on
 nothing (not a field, button, row or chip, which win the gesture arena)
 lets the field being typed in go, on every page, sheet and dialog.
+
+## Text fields (Round 92)
+
+Every `TextField` / `TextFormField` takes `selectionControls: lowHandles`
+(`widgets/low_handles.dart`): finger-sized handles reaching away from
+the text (Rounds 64, 74), so a tap on the text doesn't grab one. Notes
+and a recipe's method use `FormatBarSelectionControls`, built on it. The
+architecture test fails on a field without `selectionControls`.

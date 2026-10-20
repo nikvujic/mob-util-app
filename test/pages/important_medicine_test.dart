@@ -192,6 +192,74 @@ void main() {
       expect(taken(), isTrue);
     });
 
+    testWidgets(
+        'Round 92: while held, and once full, nothing closes it (outside, '
+        'Back, Cancel); full, it\'s taken', (tester) async {
+      await start(tester);
+      await tester.tap(find.byKey(Key('dose-$id-0')));
+      await tester.pumpAndSettle();
+      bool cancelOn() => tester
+          .widget<OutlinedButton>(find.widgetWithText(OutlinedButton, 'Cancel'))
+          .enabled;
+      Future<void> tryToClose() async {
+        // A second finger outside, then Back.
+        final outside =
+            await tester.startGesture(const Offset(8, 300), pointer: 9);
+        await outside.up();
+        await tester.pump();
+        await tester.binding.handlePopRoute();
+        await tester.pump();
+      }
+
+      expect(cancelOn(), isTrue);
+      final gesture = await tester.startGesture(tester.getCenter(hold));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      expect(cancelOn(), isFalse, reason: 'held');
+      await tryToClose();
+      expect(find.text('Take Iron?'), findsOneWidget, reason: 'held');
+
+      await tester.pump(holdToTakeTime);
+      await gesture.up();
+      await tester.pump();
+      expect(cancelOn(), isFalse, reason: 'full');
+      await tryToClose();
+      expect(find.text('Take Iron?'), findsOneWidget, reason: 'full');
+      await tester.pump(holdToTakeEnd);
+      await tester.pumpAndSettle();
+      expect(find.text('Take Iron?'), findsNothing);
+      expect(taken(), isTrue);
+    });
+
+    testWidgets(
+        'full, then closed some other way before it closes itself (a lock '
+        'taking the page): still taken', (tester) async {
+      await start(tester);
+      await tester.tap(find.byKey(Key('dose-$id-0')));
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(tester.getCenter(hold));
+      await tester.pump();
+      await tester.pump(holdToTakeTime + const Duration(milliseconds: 100));
+      await gesture.up();
+      await tester.pump();
+      Navigator.of(tester.element(find.text('Take Iron?'))).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Take Iron?'), findsNothing);
+      expect(taken(), isTrue);
+      await tester.pump(holdToTakeEnd);
+    });
+
+    testWidgets('not held: outside and Back close it, not taken',
+        (tester) async {
+      await start(tester);
+      await tester.tap(find.byKey(Key('dose-$id-0')));
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(8, 300));
+      await tester.pumpAndSettle();
+      expect(find.text('Take Iron?'), findsNothing);
+      expect(taken(), isFalse);
+    });
+
     testWidgets('unticking asks as before, no hold', (tester) async {
       await start(tester);
       medicine().toggleDose(id, today, 0);

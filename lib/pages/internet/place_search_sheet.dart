@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/providers/weather_provider.dart';
@@ -124,6 +125,7 @@ class _PlaceSearchSheetState extends ConsumerState<_PlaceSearchSheet> {
                   children: [
                     Expanded(
                       child: TextField(
+                        selectionControls: lowHandles,
                         key: const Key('placeSearchField'),
                         controller: _name,
                         autofocus: true,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
@@ -235,6 +236,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           TextField(
+                            selectionControls: lowHandles,
                             key: const Key('medicineName'),
                             controller: _name,
                             autofocus: widget.medicine == null,

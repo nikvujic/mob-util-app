@@ -6,6 +6,20 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- **Important medicine, hold to take**: while you hold, and once it's
+  full, the dialog can't be closed (Cancel greys out, a tap outside and
+  Back do nothing), and a full one always counts as taken (one was lost).
+- **Ingredients: no duplicates.** Adding or renaming to a name that's
+  there already (capitals and spaces aside) says where it is ("Milk is
+  already in Dairy") and keeps the box open to fix it.
+- **Ingredients' sections** are dragged only from the right edge of
+  their name (where an ingredient's handle is); a line shows where the
+  section will go (only between sections), and it drops there without
+  dipping and snapping back. Dragging near the top or bottom scrolls.
+- **Text selection handles** grab from below the text in every field
+  (as in notes since 1.33.0), not just notes and recipes.
+
 ## [1.38.1] - 2026-10-20
 
 ### Added

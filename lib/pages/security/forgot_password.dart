@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/app_section.dart';
@@ -146,6 +147,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog>
             const DialogMessage('Everything else stays. $backups'),
             const SizedBox(height: 16),
             TextField(
+              selectionControls: lowHandles,
               key: const Key('resetConfirm'),
               controller: _confirm,
               autocorrect: false,

@@ -146,11 +146,24 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
       ? [IngredientSection(id: generateId(), name: firstSectionName)]
       : state.sections;
 
+  /// The ingredient called [name] (Round 92: case and spaces aside) and
+  /// its section, other than [except]; null if there's none.
+  (Ingredient, IngredientSection)? named(String name, {String? except}) {
+    final key = ingredientKey(name);
+    for (final s in state.sections) {
+      for (final i in s.items) {
+        if (i.id != except && ingredientKey(i.name) == key) return (i, s);
+      }
+    }
+    return null;
+  }
+
   /// Adds [name] at the top of the first section (made if there's none);
-  /// returns its id, or null for a blank name.
+  /// returns its id, or null for a blank name or one already there
+  /// (Round 92: no two of the same).
   String? add(String name) {
     final trimmed = name.trim();
-    if (trimmed.isEmpty) return null;
+    if (trimmed.isEmpty || named(trimmed) != null) return null;
     final item = Ingredient(id: generateId(), name: trimmed);
     final sections = _withFirst();
     state = IngredientBook([
@@ -199,7 +212,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
   /// Renames an ingredient, here and in the recipes that use it.
   void rename(String id, String name) {
     final trimmed = name.trim();
-    if (trimmed.isEmpty) return;
+    if (trimmed.isEmpty || named(trimmed, except: id) != null) return;
     state = IngredientBook([
       for (final s in state.sections)
         s.copyWith(items: [
@@ -372,3 +385,7 @@ ToShop sendToShop(
   }
   return (added: added, putBack: putBack, before: before);
 }
+
+/// An ingredient's name as compared (Round 92): no case, single spaces.
+String ingredientKey(String name) =>
+    name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');

@@ -17,23 +17,36 @@ const holdToTakeEnd = Duration(milliseconds: 900);
 /// [time]. A big round button has to be held for [holdToTakeTime]: it
 /// fills up like a glass, with a sound and small ticks while held, and
 /// drains if let go early. True once held to the end; false if cancelled.
+/// Round 92 (Nikola: a take was lost): while it's held, and once full,
+/// it can't be closed (no Cancel, no tap outside, no Back), and a full
+/// one counts however the dialog goes.
 Future<bool> showHoldToTake(
   BuildContext context, {
   required String name,
   required String time,
 }) async {
+  final full = ValueNotifier(false);
   final taken = await showDialog<bool>(
     context: context,
-    builder: (_) => _HoldToTakeDialog(name: name, time: time),
+    builder: (_) => _HoldToTakeDialog(name: name, time: time, full: full),
   );
-  return taken ?? false;
+  final done = (taken ?? false) || full.value;
+  full.dispose();
+  return done;
 }
 
 class _HoldToTakeDialog extends StatefulWidget {
   final String name;
   final String time;
 
-  const _HoldToTakeDialog({required this.name, required this.time});
+  /// Set once it's held to the end.
+  final ValueNotifier<bool> full;
+
+  const _HoldToTakeDialog({
+    required this.name,
+    required this.time,
+    required this.full,
+  });
 
   @override
   State<_HoldToTakeDialog> createState() => _HoldToTakeDialogState();
@@ -103,6 +116,7 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
 
   void _done() {
     if (_finished) return;
+    widget.full.value = true;
     setState(() {
       _finished = true;
       _holding = false;
@@ -129,106 +143,111 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return AppDialog(
-      title: 'Take ${widget.name}?',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DialogMessage(
-            'The ${widget.time} dose. Hold the button until it fills up.',
-          ),
-          const SizedBox(height: 20),
-          Semantics(
-            button: true,
-            label: 'Hold to take',
-            // Screen readers: a long press does it.
-            onLongPress: _done,
-            child: Listener(
-              key: const Key('holdToTake'),
-              onPointerDown: (_) {
-                if (++_fingers == 1) _press();
-              },
-              onPointerUp: (_) => _lift(),
-              onPointerCancel: (_) => _lift(),
-              child: AnimatedBuilder(
-                animation: Listenable.merge([_fill, _waves, _pop]),
-                builder: (context, _) {
-                  final fill = _fill.value;
-                  // A little swell while held, growing as it fills.
-                  // The pop: a quick swell past full size, then back.
-                  final burst = math.sin(math.pi * _pop.value);
-                  final scale = _finished
-                      ? 1.0 + 0.16 * burst
-                      : 1.0 + (_holding ? 0.04 + 0.04 * fill : 0.0);
-                  return AnimatedScale(
-                    scale: scale,
-                    duration: const Duration(milliseconds: 150),
-                    // How full, for screen readers (and tests).
-                    child: Semantics(
-                      key: const Key('holdToTakeFill'),
-                      value: '${(fill * 100).round()}%',
-                      child: SizedBox.square(
-                        dimension: 168,
-                        child: CustomPaint(
-                          painter: _GlassPainter(
-                            fill: fill,
-                            wave: _waves.value,
-                            pop: _pop.value,
-                            ground: colors.card,
-                            liquid: colors.accent,
-                            ring: colors.accent,
-                            track: colors.divider,
-                          ),
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Light once the liquid is over it.
-                                Icon(
-                                  // A tick once taken (Round 25).
-                                  _finished
-                                      ? Icons.check_rounded
-                                      : Icons.medication_outlined,
-                                  key:
-                                      Key(_finished ? 'holdTaken' : 'holdIcon'),
-                                  size: 40,
-                                  color: fill > 0.62
-                                      ? colors.onAccent
-                                      : colors.textPrimary,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _finished
-                                      ? 'Taken'
-                                      : _holding
-                                          ? 'Keep holding'
-                                          : 'Hold',
-                                  style: TextStyle(
-                                    color: fill > 0.47
+    // Held, or full: nothing closes it (it closes itself when full).
+    final locked = _holding || _finished;
+    return PopScope(
+      canPop: !locked,
+      child: AppDialog(
+        title: 'Take ${widget.name}?',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DialogMessage(
+              'The ${widget.time} dose. Hold the button until it fills up.',
+            ),
+            const SizedBox(height: 20),
+            Semantics(
+              button: true,
+              label: 'Hold to take',
+              // Screen readers: a long press does it.
+              onLongPress: _done,
+              child: Listener(
+                key: const Key('holdToTake'),
+                onPointerDown: (_) {
+                  if (++_fingers == 1) _press();
+                },
+                onPointerUp: (_) => _lift(),
+                onPointerCancel: (_) => _lift(),
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([_fill, _waves, _pop]),
+                  builder: (context, _) {
+                    final fill = _fill.value;
+                    // A little swell while held, growing as it fills.
+                    // The pop: a quick swell past full size, then back.
+                    final burst = math.sin(math.pi * _pop.value);
+                    final scale = _finished
+                        ? 1.0 + 0.16 * burst
+                        : 1.0 + (_holding ? 0.04 + 0.04 * fill : 0.0);
+                    return AnimatedScale(
+                      scale: scale,
+                      duration: const Duration(milliseconds: 150),
+                      // How full, for screen readers (and tests).
+                      child: Semantics(
+                        key: const Key('holdToTakeFill'),
+                        value: '${(fill * 100).round()}%',
+                        child: SizedBox.square(
+                          dimension: 168,
+                          child: CustomPaint(
+                            painter: _GlassPainter(
+                              fill: fill,
+                              wave: _waves.value,
+                              pop: _pop.value,
+                              ground: colors.card,
+                              liquid: colors.accent,
+                              ring: colors.accent,
+                              track: colors.divider,
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Light once the liquid is over it.
+                                  Icon(
+                                    // A tick once taken (Round 25).
+                                    _finished
+                                        ? Icons.check_rounded
+                                        : Icons.medication_outlined,
+                                    key: Key(
+                                        _finished ? 'holdTaken' : 'holdIcon'),
+                                    size: 40,
+                                    color: fill > 0.62
                                         ? colors.onAccent
                                         : colors.textPrimary,
-                                    fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _finished
+                                        ? 'Taken'
+                                        : _holding
+                                            ? 'Keep holding'
+                                            : 'Hold',
+                                    style: TextStyle(
+                                      color: fill > 0.47
+                                          ? colors.onAccent
+                                          : colors.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
+          ],
+        ),
+        actions: [
+          DialogButton(
+            label: 'Cancel',
+            onPressed: locked ? null : () => Navigator.of(context).pop(false),
           ),
         ],
       ),
-      actions: [
-        DialogButton(
-          label: 'Cancel',
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-      ],
     );
   }
 }

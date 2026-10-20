@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -205,6 +206,7 @@ class _DatePageState extends ConsumerState<DatePage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('dateTitle'),
                 controller: _title,
                 autofocus: widget.dateId == null,
@@ -438,6 +440,7 @@ class _DatePageState extends ConsumerState<DatePage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('dateNote'),
                 controller: _note,
                 minLines: 1,

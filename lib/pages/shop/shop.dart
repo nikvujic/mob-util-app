@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/preferences_provider.dart';
@@ -371,6 +372,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
+                  selectionControls: lowHandles,
                   key: const Key('shopSearchField'),
                   controller: _query,
                   focusNode: _queryFocus,
@@ -849,6 +851,7 @@ class _TypedAmountState extends State<_TypedAmount> {
 
   @override
   Widget build(BuildContext context) => TextField(
+        selectionControls: lowHandles,
         key: const Key('shopAmountText'),
         controller: _controller,
         autofocus: widget.initial.isEmpty,

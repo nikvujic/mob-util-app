@@ -265,6 +265,25 @@ void main() {
         isEmpty);
   });
 
+  test(
+      'every text field has the lowered selection handles (Round 92: '
+      'selectionControls set)', () {
+    List<String> missing(String path, String source) => [
+          for (final m
+              in RegExp(r'\b(TextField|TextFormField)\(').allMatches(source))
+            if (!_argsOf(source, m.end).contains('selectionControls'))
+              '$path: a ${m.group(1)} without selectionControls',
+        ];
+    final violations = [
+      for (final f in files) ...missing(f.path, f.source),
+    ];
+    expect(violations, isEmpty, reason: violations.join('\n'));
+    expect(missing('a.dart', 'TextField(controller: c)'), hasLength(1));
+    expect(
+        missing('a.dart', 'TextField(a: f(1), selectionControls: lowHandles)'),
+        isEmpty);
+  });
+
   test('no raw colors outside the theme, no print(), lists have reach mode',
       () {
     final violations = [
@@ -425,4 +444,18 @@ void main() {
       );
     });
   });
+}
+
+/// What's between the parenthesis opening at [start] (just after it) and
+/// its match.
+String _argsOf(String source, int start) {
+  var depth = 1;
+  var i = start;
+  while (depth > 0 && i < source.length) {
+    final c = source[i];
+    if (c == '(') depth++;
+    if (c == ')') depth--;
+    i++;
+  }
+  return source.substring(start, i - 1);
 }

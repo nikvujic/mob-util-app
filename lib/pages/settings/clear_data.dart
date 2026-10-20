@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/storage_error.dart';
 import 'package:the_app/core/theme.dart';
@@ -257,6 +258,7 @@ class _ClearDataDialogState extends State<_ClearDataDialog> {
           const DialogMessage('Backups you saved are not touched.'),
           const SizedBox(height: 16),
           TextField(
+            selectionControls: lowHandles,
             key: const Key('clearConfirm'),
             controller: _confirm,
             autocorrect: false,

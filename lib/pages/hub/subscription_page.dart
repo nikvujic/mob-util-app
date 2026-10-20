@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -206,6 +207,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('subscriptionName'),
                 controller: _name,
                 autofocus: widget.subscriptionId == null,
@@ -221,6 +223,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                   Expanded(
                     flex: 3,
                     child: TextField(
+                      selectionControls: lowHandles,
                       key: const Key('subscriptionPrice'),
                       controller: _price,
                       keyboardType:
@@ -234,6 +237,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                   SizedBox(
                     width: 72,
                     child: TextField(
+                      selectionControls: lowHandles,
                       key: const Key('subscriptionCurrency'),
                       controller: _currency,
                       decoration: const InputDecoration(labelText: 'Currency'),
@@ -341,6 +345,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('subscriptionCardField'),
                 controller: _card,
                 decoration: const InputDecoration(
@@ -380,6 +385,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('subscriptionNoteField'),
                 controller: _note,
                 minLines: 1,

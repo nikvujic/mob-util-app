@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/hub_tool.dart';
@@ -71,6 +74,16 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
   late bool _picking = widget.picking;
   final _picked = <String>{};
 
+  /// In the list, to find it (Round 92: scrolled at its edges while a
+  /// section's dragged).
+  final _listKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _edgeScroll?.cancel();
+    super.dispose();
+  }
+
   IngredientsNotifier get _notifier => ref.read(ingredientsProvider.notifier);
 
   /// The list flat, as shown: each section's name, then its ingredients.
@@ -98,9 +111,17 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       hint: 'Add an ingredient',
       submitLabel: 'Add',
       keepOpen: true,
+      check: (name) => _already(name),
       onSubmit: _notifier.add,
     );
   }
+
+  /// Round 92: said when [name] is there already (no two of the same).
+  String? _already(String name, {String? except}) =>
+      switch (_notifier.named(name, except: except)) {
+        null => null,
+        (final i, final s) => '${i.name} is already in ${s.name}',
+      };
 
   void _addSection() {
     showTextInputSheet(
@@ -190,6 +211,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
           context,
           hint: 'Ingredient',
           initialValue: item.name,
+          check: (name) => _already(name, except: item.id),
           onSubmit: (name) => _notifier.rename(item.id, name),
         );
       case 'delete':
@@ -270,27 +292,191 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       ),
     );
     if (_picking) return KeyedSubtree(key: key, child: header);
-    header = GestureDetector(
+    final tap = GestureDetector(
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: true,
       onTap: () => _sectionMenu(section),
-      child: SizedBox(width: double.infinity, child: header),
+      child: header,
     );
-    if (index != null) {
-      // A move (past a touch's slop) drags; a tap stays a tap.
-      header = ReorderableDragStartListener(
-        key: Key('sectionHandle-${section.id}'),
-        index: index,
-        child: header,
-      );
-    }
+    // Round 92 (Nikola): dragged only from the right, where an
+    // ingredient's handle is (no handle drawn, Round 45); a tap anywhere
+    // gives its options. The first stays on top.
+    final row = IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: tap),
+          if (index != null)
+            Draggable<String>(
+              key: Key('sectionHandle-${section.id}'),
+              data: section.id,
+              axis: Axis.vertical,
+              // Nothing drawn, still taken hold of.
+              hitTestBehavior: HitTestBehavior.opaque,
+              // The card held across the row, as its name sits, not
+              // hanging off the right edge from the handle.
+              dragAnchorStrategy: (_, __, position) =>
+                  Offset(position.dx - 12, kMinInteractiveDimension / 2),
+              onDragStarted: () => _sectionDragStarted(section.id),
+              onDragUpdate: (details) => _sectionDragMoved(
+                  ref.read(ingredientsProvider), details.globalPosition.dy),
+              onDragEnd: (_) => _sectionDropped(ref.read(ingredientsProvider)),
+              feedback: _sectionFeedback(section),
+              childWhenDragging:
+                  const SizedBox(width: ReorderOrSelectIndicator.width),
+              child: const SizedBox(width: ReorderOrSelectIndicator.width),
+            )
+          else
+            const SizedBox(width: ReorderOrSelectIndicator.width),
+        ],
+      ),
+    );
     return Semantics(
       key: key,
       button: true,
       onTap: () => _sectionMenu(section),
-      child: header,
+      child: Opacity(
+        opacity: _draggingSection == section.id ? 0.3 : 1,
+        child: row,
+      ),
     );
   }
+
+  /// The section being dragged (Round 92), and before which section it
+  /// would go (an index in the book's sections; their count: the end).
+  String? _draggingSection;
+  int? _dropBefore;
+
+  /// The finger, while a section is dragged, for scrolling at the edges.
+  double? _dragY;
+  Timer? _edgeScroll;
+
+  void _sectionDragStarted(String id) {
+    HapticFeedback.selectionClick();
+    setState(() => _draggingSection = id);
+    _edgeScroll = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      final y = _dragY;
+      final inList = _listKey.currentContext;
+      if (y == null || inList == null) return;
+      final scrollable = Scrollable.of(inList);
+      final box = scrollable.context.findRenderObject() as RenderBox;
+      final top = box.localToGlobal(Offset.zero).dy;
+      final position = scrollable.position;
+      const edge = 64.0;
+      final by = y < top + edge
+          ? -8.0
+          : y > top + box.size.height - edge
+              ? 8.0
+              : 0.0;
+      if (by != 0) {
+        position.jumpTo((position.pixels + by)
+            .clamp(position.minScrollExtent, position.maxScrollExtent));
+      }
+    });
+  }
+
+  void _sectionDragEnded() {
+    _edgeScroll?.cancel();
+    _edgeScroll = null;
+    _dragY = null;
+    if (mounted) {
+      setState(() {
+        _draggingSection = null;
+        _dropBefore = null;
+      });
+    }
+  }
+
+  /// Where the dragged section would go hovering a row of [sectionIndex]
+  /// (its name: before it; one of its ingredients: after it); null where
+  /// it wouldn't move. Never above the first.
+  int? _dropAt(IngredientBook book, int sectionIndex, {required bool name}) {
+    final moving = book.sections.indexWhere((s) => s.id == _draggingSection);
+    if (moving < 0) return null;
+    final before = (name ? sectionIndex : sectionIndex + 1).clamp(1, 1 << 30);
+    return before == moving || before == moving + 1 ? null : before;
+  }
+
+  /// The rows shown (Round 92), for where a dragged section would go:
+  /// each row's context and its (section's index, whether it's the name).
+  final _rowsShown = <BuildContext, (int, bool)>{};
+
+  /// A row a section can be dropped on (Round 92): known by where it is,
+  /// so the finger's height alone finds it (the buttons in the corner
+  /// don't get in the way).
+  Widget _sectionDropTarget(IngredientBook book, int sectionIndex,
+      {required bool name, required Widget child}) {
+    if (_picking) return child;
+    return Builder(builder: (context) {
+      _rowsShown[context] = (sectionIndex, name);
+      return child;
+    });
+  }
+
+  /// The finger at [y] while a section's dragged: the row under it marks
+  /// where the section would go.
+  void _sectionDragMoved(IngredientBook book, double y) {
+    _dragY = y;
+    _rowsShown.removeWhere((context, _) => !context.mounted);
+    for (final MapEntry(key: context, value: (sectionIndex, name))
+        in _rowsShown.entries) {
+      final box = context.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      final top = box.localToGlobal(Offset.zero).dy;
+      if (y < top || y >= top + box.size.height) continue;
+      final at = _dropAt(book, sectionIndex, name: name);
+      if (at != _dropBefore) setState(() => _dropBefore = at);
+      return;
+    }
+  }
+
+  /// Let go: the section goes where the line is, if anywhere.
+  void _sectionDropped(IngredientBook book) {
+    final at = _dropBefore;
+    final id = _draggingSection;
+    if (at != null && id != null) {
+      final moving = book.sections.indexWhere((s) => s.id == id);
+      // Its place among the others (it's taken out first).
+      _notifier.moveSection(id, at > moving ? at - 1 : at);
+    }
+    _sectionDragEnded();
+  }
+
+  /// The line where a dragged section would go: above [sectionIndex]'s
+  /// name (or, its count, under the last row).
+  Widget _dropLine(int sectionIndex) => AnimatedContainer(
+        key: Key('sectionDropLine-$sectionIndex'),
+        duration: const Duration(milliseconds: 120),
+        height: _draggingSection != null && _dropBefore == sectionIndex ? 3 : 0,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        color: context.colors.accent,
+      );
+
+  /// The section under the finger while dragged: its name on a card.
+  Widget _sectionFeedback(IngredientSection section) => Material(
+        elevation: 6,
+        color: context.colors.card,
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          width: MediaQuery.sizeOf(context).width - 24,
+          height: kMinInteractiveDimension,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '${section.name.toUpperCase()}  ·  ${section.items.length}',
+                style: TextStyle(
+                  color: context.colors.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 
   Widget _editRow(Ingredient item, int index) {
     return SelectableCard(
@@ -405,20 +591,45 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
             itemBuilder: (context, index) {
               final row = rows[index];
               final item = row.item;
+              final sectionIndex =
+                  book.sections.indexWhere((s) => s.id == row.section.id);
               if (item == null) {
-                final first = row.section.id == book.sections.first.id;
+                final first = sectionIndex == 0;
                 return Material(
                   key: ValueKey('section-${row.section.id}'),
                   type: MaterialType.transparency,
-                  child: _header(row.section, index: first ? null : index),
+                  child: _sectionDropTarget(
+                    book,
+                    sectionIndex,
+                    name: true,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _dropLine(sectionIndex),
+                        _header(row.section, index: first ? null : index),
+                      ],
+                    ),
+                  ),
                 );
               }
               return Padding(
                 key: ValueKey(item.id),
                 padding: const EdgeInsets.symmetric(vertical: 2),
-                child: _editRow(item, index),
+                child: _sectionDropTarget(
+                  book,
+                  sectionIndex,
+                  name: false,
+                  child: _editRow(item, index),
+                ),
               );
             },
+          ),
+          // Round 92: a dragged section's place at the very end.
+          SliverToBoxAdapter(
+            child: KeyedSubtree(
+              key: _listKey,
+              child: _dropLine(book.sections.length),
+            ),
           ),
         ],
       );

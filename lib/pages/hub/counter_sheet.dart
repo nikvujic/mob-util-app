@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/widgets/colour_choice.dart';
@@ -99,6 +100,7 @@ class _CounterSheetState extends State<_CounterSheet> {
     }) =>
         Expanded(
           child: TextField(
+            selectionControls: lowHandles,
             key: Key(key),
             controller: controller,
             keyboardType: signed,
@@ -122,6 +124,7 @@ class _CounterSheetState extends State<_CounterSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
+                selectionControls: lowHandles,
                 key: const Key('counterName'),
                 controller: _name,
                 // Typing right away when adding; not when editing.

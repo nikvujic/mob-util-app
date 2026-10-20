@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 
 /// A generic yes/no confirmation dialog.
@@ -207,6 +208,7 @@ class _TypeToConfirmDialogState extends State<_TypeToConfirmDialog> {
           if (widget.message case final message?) DialogMessage(message),
           const SizedBox(height: 16),
           TextField(
+            selectionControls: lowHandles,
             key: const Key('typeToConfirm'),
             controller: _typed,
             autofocus: true,

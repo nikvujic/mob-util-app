@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/theme.dart';
 
 /// A password input with a show/hide toggle. Never auto-corrected or
@@ -44,6 +45,7 @@ class _PasswordFieldState extends State<PasswordField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      selectionControls: lowHandles,
       controller: widget.controller,
       enabled: widget.enabled,
       autofocus: widget.autofocus,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/theme.dart';
 
 /// Bottom sheet with a single text field.
@@ -29,6 +30,10 @@ class TextInputSheet extends StatefulWidget {
   /// How many suggestions show at most.
   static const mostSuggestions = 6;
 
+  /// Why the text can't be taken (Round 92: an ingredient already
+  /// there), or null when it can: said over the field, the sheet kept.
+  final String? Function(String text)? check;
+
   const TextInputSheet({
     super.key,
     required this.hint,
@@ -39,6 +44,7 @@ class TextInputSheet extends StatefulWidget {
     this.controller,
     this.keyboardType,
     this.suggestions,
+    this.check,
   });
 
   @override
@@ -53,6 +59,18 @@ class _TextInputSheetState extends State<TextInputSheet> {
           extentOffset: widget.initialValue.length,
         ));
   final FocusNode _focusNode = FocusNode();
+
+  /// What [TextInputSheet.check] said about the text submitted; gone once
+  /// it's changed.
+  String? _problem;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if (_problem != null) setState(() => _problem = null);
+    });
+  }
 
   /// Whether the on-screen keyboard has been shown for this sheet.
   bool _keyboardShown = false;
@@ -93,6 +111,12 @@ class _TextInputSheetState extends State<TextInputSheet> {
     final text = (picked ?? _controller.text).trim();
     if (text.isEmpty) {
       if (!widget.keepOpen) Navigator.of(context).pop();
+      return;
+    }
+    final problem = widget.check?.call(text);
+    if (problem != null) {
+      setState(() => _problem = problem);
+      _focusNode.requestFocus();
       return;
     }
     widget.onSubmit?.call(text);
@@ -148,13 +172,23 @@ class _TextInputSheetState extends State<TextInputSheet> {
         top: 8,
         bottom: MediaQuery.viewInsetsOf(context).bottom + 8,
       ),
-      child: widget.suggestions == null
-          ? field
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_suggestions(context), field],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.suggestions != null) _suggestions(context),
+          if (_problem case final problem?)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                problem,
+                key: const Key('textInputProblem'),
+                style: TextStyle(color: context.colors.danger),
+              ),
             ),
+          field,
+        ],
+      ),
     );
   }
 
@@ -163,6 +197,7 @@ class _TextInputSheetState extends State<TextInputSheet> {
       children: [
         Expanded(
           child: TextField(
+            selectionControls: lowHandles,
             controller: _controller,
             focusNode: _focusNode,
             autofocus: true,
@@ -205,6 +240,7 @@ Future<String?> showTextInputSheet(
   TextEditingController? controller,
   TextInputType? keyboardType,
   List<String> Function(String typed)? suggestions,
+  String? Function(String text)? check,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -218,6 +254,7 @@ Future<String?> showTextInputSheet(
       controller: controller,
       keyboardType: keyboardType,
       suggestions: suggestions,
+      check: check,
     ),
   );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -384,6 +385,7 @@ class _MealPageState extends ConsumerState<MealPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('mealFoodField'),
                 controller: _food,
                 focusNode: _foodFocus,
@@ -464,6 +466,7 @@ class _MealPageState extends ConsumerState<MealPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               child: TextField(
+                selectionControls: lowHandles,
                 key: const Key('mealNote'),
                 controller: _note,
                 minLines: 1,

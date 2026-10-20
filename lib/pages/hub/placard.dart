@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
@@ -363,6 +364,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
+            selectionControls: lowHandles,
             key: const Key('placardTextField'),
             controller: _text,
             textCapitalization: TextCapitalization.sentences,
@@ -372,6 +374,7 @@ class _SettingsDialogState extends State<_SettingsDialog> {
           ),
           const SizedBox(height: 8),
           TextField(
+            selectionControls: lowHandles,
             key: const Key('placardCountField'),
             controller: _count,
             keyboardType: TextInputType.number,

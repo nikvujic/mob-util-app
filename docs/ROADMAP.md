@@ -352,15 +352,18 @@ fixtures for every stored format.
 ### Round 90 — Nikola on 1.38.0 (2026-10-20): notes, plan (waiting for a go)
 
 Fixes (a patch):
-- [ ] **Medicine, hold to take**: once the hold has started (and once
+- [x] **Medicine, hold to take** (1.38.2): once the hold has started (and once
   it's filled) the dialog can't be closed (no tap outside, no Back, no
   Cancel), and the take registers the moment it's full (a case where it
   filled and the take was lost).
-- [ ] **Ingredients: no two of the same** (name, case and spaces
+- [x] **Ingredients: no two of the same** (1.38.2) (name, case and spaces
   ignored), when adding or renaming; says where it already is.
-- [ ] **Ingredients' sections** dragged only from the right edge, where
+- [x] **Ingredients' sections** (1.38.2: a `Draggable` on the right
+  edge; rows found by the finger's height, a line between sections)
+  dragged only from the right edge, where
   a handle would be; the drop no longer dips and snaps back.
-- [ ] **The lowered selection-handle grab area** (Round 74, Notes and
+- [x] (1.38.2: `widgets/low_handles.dart`, on every field, checked by
+  the architecture test) **The lowered selection-handle grab area** (Round 74, Notes and
   the recipe method only so far) on every text field in the app.
 
 Features:

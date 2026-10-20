@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/format_bar.dart';
 
 /// The text's selection handles (Round 64): their touch area starts at
@@ -130,12 +131,12 @@ void main() {
     // The start's handle left of the text, its area reaching left.
     expect(startDrawn.right, closeTo(start, 2));
     expect(startArea.right - startDrawn.right,
-        closeTo(FormatBarSelectionControls.inner, 0.5));
+        closeTo(LowHandleSelectionControls.inner, 0.5));
     expect(startArea.left, lessThan(startDrawn.left - 20));
     // The end's right of it, reaching right.
     expect(endDrawn.left, closeTo(end, 2));
     expect(endDrawn.left - endArea.left,
-        closeTo(FormatBarSelectionControls.inner, 0.5));
+        closeTo(LowHandleSelectionControls.inner, 0.5));
     expect(endArea.right, greaterThan(endDrawn.right + 20));
     debugDefaultTargetPlatformOverride = null;
   });

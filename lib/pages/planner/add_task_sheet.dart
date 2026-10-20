@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
@@ -679,6 +680,7 @@ class _TaskSheetState extends State<TaskSheet> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           TextField(
+                            selectionControls: lowHandles,
                             key: const Key('taskTitle'),
                             controller: _title,
                             // Only when adding: tapping a block to edit it
@@ -697,6 +699,7 @@ class _TaskSheetState extends State<TaskSheet> {
                           if (!widget.point) ...[
                             const SizedBox(height: 4),
                             TextField(
+                              selectionControls: lowHandles,
                               key: const Key('taskDescription'),
                               controller: _description,
                               textCapitalization: TextCapitalization.sentences,

@@ -94,6 +94,22 @@ void main() {
   });
 
   group('ingredients', () {
+    test('Round 92: no two of the same (case and spaces aside)', () {
+      final flour = ingredients().add('Flour')!;
+      ingredients().add('Olive oil');
+      expect(ingredients().add('flour'), isNull);
+      expect(ingredients().add('  OLIVE   oil '), isNull);
+      expect(book().all.map((i) => i.name), ['Olive oil', 'Flour']);
+      expect(ingredients().named('olive  OIL')!.$1.name, 'Olive oil');
+      expect(ingredients().named('Flour', except: flour), isNull);
+      // Renamed to another's name: kept as it was; to its own, in
+      // another case: fine.
+      ingredients().rename(flour, 'Olive Oil');
+      expect(book().all.map((i) => i.name), ['Olive oil', 'Flour']);
+      ingredients().rename(flour, 'FLOUR');
+      expect(book().all.map((i) => i.name), ['Olive oil', 'FLOUR']);
+    });
+
     test('the first one makes a section; new ones go to its top', () {
       ingredients().add('Flour');
       ingredients().add('  Sugar ');
