@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/id.dart';
@@ -96,11 +97,12 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _draft.dateOn(today) ?? today,
-      firstDate: DateTime(today.year - 5),
-      lastDate: DateTime(today.year + 10, 12, 31),
+    final picked = await pickDate(
+      context,
+      today: today,
+      value: _draft.dateOn(today),
+      first: DateTime(today.year - 5),
+      last: DateTime(today.year + 10, 12, 31),
     );
     if (picked == null || !mounted) return;
     _change(_draft.copyWith(date: () => picked));
@@ -115,7 +117,8 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     final picked = await showMonthPicker(
       context,
       title: 'Card expires',
-      initial: _draft.cardExpires ?? today,
+      initial: _draft.cardExpires,
+      today: today,
       firstYear: today.year - 5,
       lastYear: today.year + 15,
     );

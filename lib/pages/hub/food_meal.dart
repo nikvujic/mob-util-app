@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/id.dart';
@@ -170,11 +171,12 @@ class _MealPageState extends ConsumerState<MealPage> {
     FocusManager.instance.primaryFocus?.unfocus();
     final local = _meal.at.toLocal();
     final today = dayOf(ref.read(clockProvider)());
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: dayOf(local).isAfter(today) ? today : dayOf(local),
-      firstDate: DateTime(2000),
-      lastDate: today,
+    final picked = await pickDate(
+      context,
+      today: today,
+      value: dayOf(local),
+      first: DateTime(2000),
+      last: today,
     );
     if (picked == null || !mounted) return;
     _change(_meal.copyWith(

@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 87 — Nikola on 1.37.3 (2026-10-20, patch 1.37.4)
+
+- [x] **Calendars open on today** (Nikola: they seemed to carry on where
+  one was last, for other things): every date picker goes through
+  `widgets/date_pick.dart`'s `pickDate`: today's month (or the nearest
+  allowed), today marked, the set day picked only if in that month; the
+  month picker opens on this year, the set month marked in its own.
+
 ### Round 86 — Nikola on 1.37.2 (2026-10-20, patch 1.37.3)
 
 - [x] **Month picker** squished (four chips across): three across, four

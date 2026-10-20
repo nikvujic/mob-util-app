@@ -13,7 +13,8 @@ void main() {
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
   }
 
-  Future<Future<DateTime?>> show(WidgetTester tester) async {
+  Future<Future<DateTime?>> show(WidgetTester tester,
+      {DateTime? initial}) async {
     late Future<DateTime?> picked;
     await tester.pumpWidget(MaterialApp(
       theme: AppTheme.dark,
@@ -22,7 +23,8 @@ void main() {
           body: TextButton(
             onPressed: () => picked = showMonthPicker(context,
                 title: 'Card expires',
-                initial: DateTime(2026, 10),
+                initial: initial,
+                today: DateTime(2026, 10, 20),
                 firstYear: 2021,
                 lastYear: 2041),
             child: const Text('go'),

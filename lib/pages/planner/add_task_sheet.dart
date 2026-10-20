@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/app_dialog.dart';
@@ -543,11 +544,12 @@ class _TaskSheetState extends State<TaskSheet> {
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final from = widget.from ?? DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _until ?? from.add(const Duration(days: 30)),
-      firstDate: from,
-      lastDate: DateTime(from.year + 10),
+    final picked = await pickDate(
+      context,
+      today: DateTime.now(),
+      value: _until,
+      first: from,
+      last: DateTime(from.year + 10),
     );
     if (picked != null && mounted) {
       _keepBelow(() {

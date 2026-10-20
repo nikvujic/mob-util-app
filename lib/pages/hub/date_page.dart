@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/id.dart';
@@ -68,11 +69,12 @@ class _DatePageState extends ConsumerState<DatePage> {
     final d = _draft;
     final shownYear = d.year ?? today.year;
     final last = DateTime(shownYear, d.month + 1, 0).day;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(shownYear, d.month, d.day > last ? last : d.day),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(today.year + 50, 12, 31),
+    final picked = await pickDate(
+      context,
+      today: today,
+      value: DateTime(shownYear, d.month, d.day > last ? last : d.day),
+      first: DateTime(1900),
+      last: DateTime(today.year + 50, 12, 31),
     );
     if (picked == null || !mounted) return;
     _change(_draft.copyWith(

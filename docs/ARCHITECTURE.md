@@ -493,7 +493,7 @@ Round 84: `Subscription.cardExpiryOn` (`CardExpiry` fine / soon /
 expired) colours a card's expiry part (`cardExpiryLabel`) orange or red.
 Round 85: `cardExpires` is kept as its month's last day (the constructor
 moves any day there), picked with `widgets/month_picker.dart`'s
-`showMonthPicker` (Round 86: three across, four rows) and shown `formatCardMonth` ("10/26").
+`showMonthPicker` (Round 86: three across, four rows; Round 87: opens on this year) and shown `formatCardMonth` ("10/26").
 
 His adventures (Round 63): `core/pip_adventure.dart` has the rules
 (the 12:00–18:00 day out, registering 13:00–17:00, the break window,
@@ -791,3 +791,11 @@ functions in `core/markdown.dart` (`toggleWrap`, `toggleLines`,
 `cycleHeading`, `toggleCodeBlock`, `insertDivider`) returning the new text
 and selection; `widgets/format_bar.dart` is the row, in `BottomActions`'
 `bar` slot.
+
+## Date pickers (Round 87)
+
+Every date is picked with `widgets/date_pick.dart`'s `pickDate`, not
+`showDatePicker` directly: it opens on today's month (the nearest one
+allowed if today isn't), with today marked, and shows the day already
+set as picked only when it falls in that month (Nikola: a calendar
+opening on the thing's own month looked like it carried on from before).

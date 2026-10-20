@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
@@ -167,12 +168,12 @@ class _MedicineSheetState extends State<_MedicineSheet> {
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final first = until ? _from : DateTime(widget.today.year - 5);
-    final initial = until ? (_until ?? addDays(_from, 7)) : _from;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial.isBefore(first) ? first : initial,
-      firstDate: first,
-      lastDate: DateTime(widget.today.year + 10),
+    final picked = await pickDate(
+      context,
+      today: widget.today,
+      value: until ? _until : _from,
+      first: first,
+      last: DateTime(widget.today.year + 10),
     );
     if (picked == null || !mounted) return;
     setState(() {

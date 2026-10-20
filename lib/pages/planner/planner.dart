@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
@@ -285,13 +286,14 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   /// the nearest free time as long, after saying so. Undo moves it back.
   Future<void> _move(PlannerTask task) async {
     final today = dayOf(_now);
-    final day = await showDatePicker(
-      context: context,
+    final day = await pickDate(
+      context,
+      today: today,
       helpText: 'Move to',
-      initialDate: addDays(task.day.isBefore(today) ? today : task.day, 1),
-      firstDate: today,
-      lastDate: DateTime(today.year + 10),
-      selectableDayPredicate: (d) => !isSameDay(d, task.day),
+      value: addDays(task.day.isBefore(today) ? today : task.day, 1),
+      first: today,
+      last: DateTime(today.year + 10),
+      selectable: (d) => !isSameDay(d, task.day),
     );
     if (day == null || !mounted) return;
     final planner = ref.read(plannerProvider.notifier);

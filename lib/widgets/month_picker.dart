@@ -5,12 +5,13 @@ import 'package:the_app/widgets/app_dialog.dart';
 
 /// Asks for a month (Round 85: a card's expiry, which has no day): a year
 /// with ‹ › between [firstYear] and [lastYear], and its twelve months; a
-/// tap on one picks it. Opens on [initial]'s year, its month marked. The
-/// month's first day, or null if dismissed.
+/// tap on one picks it. Opens on [today]'s year (Round 87); [initial]'s
+/// month (if set) marked in its year. The month's first day, or null if dismissed.
 Future<DateTime?> showMonthPicker(
   BuildContext context, {
   required String title,
-  required DateTime initial,
+  required DateTime today,
+  DateTime? initial,
   required int firstYear,
   required int lastYear,
 }) =>
@@ -19,6 +20,7 @@ Future<DateTime?> showMonthPicker(
       builder: (_) => _MonthPicker(
         title: title,
         initial: initial,
+        today: today,
         firstYear: firstYear,
         lastYear: lastYear,
       ),
@@ -26,13 +28,15 @@ Future<DateTime?> showMonthPicker(
 
 class _MonthPicker extends StatefulWidget {
   final String title;
-  final DateTime initial;
+  final DateTime? initial;
+  final DateTime today;
   final int firstYear;
   final int lastYear;
 
   const _MonthPicker({
     required this.title,
     required this.initial,
+    required this.today,
     required this.firstYear,
     required this.lastYear,
   });
@@ -42,7 +46,8 @@ class _MonthPicker extends StatefulWidget {
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
-  late int _year = widget.initial.year.clamp(widget.firstYear, widget.lastYear);
+  // Round 87 (Nikola): opens on this year, whatever was set.
+  late int _year = widget.today.year.clamp(widget.firstYear, widget.lastYear);
 
   @override
   Widget build(BuildContext context) {
@@ -95,8 +100,8 @@ class _MonthPickerState extends State<_MonthPicker> {
                     Expanded(
                       child: _Month(
                         month: month,
-                        picked: _year == widget.initial.year &&
-                            month == widget.initial.month,
+                        picked: _year == widget.initial?.year &&
+                            month == widget.initial?.month,
                         onTap: () =>
                             Navigator.of(context).pop(DateTime(_year, month)),
                       ),

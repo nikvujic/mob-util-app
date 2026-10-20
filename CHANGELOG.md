@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Fixed
+- **Calendars always open on today's month** (picking a subscription's
+  day, a date's, a medicine's, a meal's, a routine's last day, moving a
+  block): they used to open where the thing's own day was, which looked
+  like where you'd last been. The day already set shows picked when it's
+  in this month. The card expiry's month picker opens on this year.
+
 ## [1.37.3] - 2026-10-20
 
 ### Fixed
