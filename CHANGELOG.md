@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.39.0] - 2026-10-20
+
 ### Added
 - **Spotify in the morning**, a new Hub page: turn it on, pick a time,
   the days and a volume. At that time the phone sets its music volume
