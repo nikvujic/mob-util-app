@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.37.5] - 2026-10-20
+
 ### Changed
 - **Pip charges twice as fast** at his station while you watch: a
   segment every 15 seconds (it was 30).
