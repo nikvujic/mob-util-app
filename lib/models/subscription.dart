@@ -40,6 +40,9 @@ enum SubscriptionState {
       values.where((s) => s.name == id).firstOrNull ?? active;
 }
 
+/// How a subscription's card stands (Round 84), for its colour.
+enum CardExpiry { fine, soon, expired }
+
 /// One subscription (Round 79): a name, what it costs and how often, what
 /// state it's in and its date, the card it's paid with, a note, and a
 /// reminder some days before its date (besides the one on the day).
@@ -193,6 +196,23 @@ class Subscription {
         at != null &&
         expires.isBefore(at);
   }
+
+  /// Round 84 (Nikola): how its card stands on [today]: expired (gone
+  /// by), soon (a week or less away, the day itself included), or fine
+  /// (later, or no expiry set).
+  CardExpiry cardExpiryOn(DateTime today) {
+    final expires = cardExpires;
+    if (expires == null) return CardExpiry.fine;
+    final day = DateTime(today.year, today.month, today.day);
+    if (expires.isBefore(day)) return CardExpiry.expired;
+    final days = DateTime.utc(expires.year, expires.month, expires.day)
+        .difference(DateTime.utc(day.year, day.month, day.day))
+        .inDays;
+    return days <= cardSoonDays ? CardExpiry.soon : CardExpiry.fine;
+  }
+
+  /// A card expiring within this many days is soon (Round 84).
+  static const cardSoonDays = 7;
 
   /// What it comes to a month (a year's price ÷ 12); null: no price.
   double? get perMonth => switch (price) {

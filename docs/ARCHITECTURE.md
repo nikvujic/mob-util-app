@@ -489,6 +489,8 @@ and `NotifyPage.subscriptions` (Preferences `subscriptionsReminders`,
 `subscriptionsPausedUntil`); `SubscriptionsTarget` opens the page. The
 page (`pages/hub/subscriptions.dart`) lays its cards out two to a row;
 `subscription_page.dart` edits one, saved as it changes.
+Round 84: `Subscription.cardExpiryOn` (`CardExpiry` fine / soon /
+expired) colours a card's expiry part (`cardExpiryLabel`) orange or red.
 
 His adventures (Round 63): `core/pip_adventure.dart` has the rules
 (the 12:00–18:00 day out, registering 13:00–17:00, the break window,

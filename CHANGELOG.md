@@ -6,6 +6,10 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Subscriptions**: a card's expiry shows in **orange** when it's a
+  week or less away and in **red** once it has gone by.
+
 ## [1.37.0] - 2026-10-20
 
 ### Added

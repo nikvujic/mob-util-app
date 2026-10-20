@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 84 — Nikola on 1.37.0 (2026-10-20, patch 1.37.1)
+
+- [x] **Subscriptions**: a card's expiry on the card is **orange** a week
+  or less ahead (the day itself included) and **red** once gone by
+  (`Subscription.cardExpiryOn`, `cardExpiryLabel`); checked in the themes.
+  A notification for it was planned, then dropped (Nikola).
+- [x] Not wanted for now: missed blocks' prompt, Shop's un-tick place,
+  Pip's inventory, his events log. Cloud save: a project of its own.
+- [x] Stale boxes ticked: the angry animation's hand (Round 79), Skiing
+  holidays (Round 72).
+
 ### Round 83 — Nikola on 1.36.3 (2026-10-20, 1.37.0)
 
 - [x] **Tavern**: Pip sits on the bench (his body on its top, his feet
@@ -596,7 +607,7 @@ Pip:
   looks tired, like at 1 battery tick, then goes back to sleep.
 - [x] (Round 77; Nikola: from 07:00) **Early wake-up**: from 08:00 on, waking him before his usual time
   is allowed.
-- [ ] **Angry animation**: his hand goes too far from his body; keep it
+- [x] **Angry animation** (Round 79): his hand goes too far from his body; keep it
   closer.
 - [x] **Backgrounds** (Round 70: seasons, trees, Halloween, Christmas,
   New Year's Eve, Easter, the weather; previews in Pip Home): trees,
@@ -653,7 +664,7 @@ Pip:
   tired Pip smiles for each blink. A blink should keep his mouth.
 
 Dates:
-- [ ] **Holiday kinds**, starting with **Skiing**: during its days Pip
+- [x] **Holiday kinds** (Round 72), starting with **Skiing**: during its days Pip
   is on a **snowy mountain** (snowing all the time), dressed as a skier
   in his usual events, with ski events of his own (the coming
   *adventures* could be him skiing).

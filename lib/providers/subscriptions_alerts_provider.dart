@@ -37,14 +37,23 @@ String stateLabel(Subscription s, DateTime today) {
 /// it expires ("expires 30 Nov"; "expired …" once it has); "Card
 /// unknown" for neither.
 String cardLabel(Subscription s, DateTime today) {
-  final expires = s.cardExpires;
-  if (s.card.isEmpty && expires == null) return 'Card unknown';
+  if (s.card.isEmpty && s.cardExpires == null) return 'Card unknown';
   final name = s.card.isEmpty ? 'Card' : s.card;
-  if (expires == null) return name;
+  return switch (cardExpiryLabel(s, today)) {
+    null => name,
+    final expiry => '$name · $expiry',
+  };
+}
+
+/// When [s]'s card expires, shortly: "expires 10 Nov", "expired 10 Nov";
+/// null for no expiry (Round 84: its own part, coloured on the card).
+String? cardExpiryLabel(Subscription s, DateTime today) {
+  final expires = s.cardExpires;
+  if (expires == null) return null;
   final gone = expires.isBefore(today);
   // Shortly, without the weekday ("10 Nov", "31 Mar 2027").
   final day = formatDay(expires, today: today).split(', ').last;
-  return '$name · ${gone ? 'expired' : 'expires'} $day';
+  return '${gone ? 'expired' : 'expires'} $day';
 }
 
 /// [s]'s reminder before, shortly: "2 days before"; null for none.

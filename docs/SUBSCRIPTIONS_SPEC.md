@@ -14,7 +14,7 @@ done about it.
 | **State** | One of four, below. |
 | **Date** | What it means goes with the state (below). A day, no time. |
 | **Card** | The (virtual) card it's paid with, any text: "Revolut 4421". Empty: **card unknown** (Grok: "didn't set a name"). |
-| **Card expires** | Round 80 (Nikola): the day that card expires (virtual cards run out). On the card: "· expires 10 Nov" (or "expired"); expiring before the next renewal, "Card expires before it renews" in red. |
+| **Card expires** | Round 80 (Nikola): the day that card expires (virtual cards run out). On the card: "· expires 10 Nov" (or "expired"); expiring before the next renewal, "Card expires before it renews" in red. Round 84 (Nikola): the expiry itself orange when it's a week or less away (the day included), red once gone by; no notification. |
 | **Note** | Anything: "real ~30€", "payment failed". |
 | **Reminder** | Besides the one on its date at 09:00 (always, while it's one with a date): **none** (default), or **1, 2, 3 days or a week before**, at 09:00. Shown on the card. |
 

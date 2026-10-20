@@ -236,12 +236,32 @@ class SubscriptionCard extends StatelessWidget {
             const SizedBox(height: 2),
             line(
               Icons.credit_card,
-              Text(
-                cardLabel(s, today),
-                style: s.card.isEmpty && s.cardExpires == null
-                    ? small.copyWith(fontStyle: FontStyle.italic)
-                    : small,
-              ),
+              // Round 84: its expiry orange a week or less ahead, red gone by.
+              switch ((cardExpiryLabel(s, today), s.cardExpiryOn(today))) {
+                (final expiry?, final state) when state != CardExpiry.fine =>
+                  Text.rich(
+                    key: Key('subscriptionCardExpiry-${s.id}'),
+                    TextSpan(children: [
+                      TextSpan(text: '${s.card.isEmpty ? 'Card' : s.card} · '),
+                      TextSpan(
+                        text: expiry,
+                        style: TextStyle(
+                          color: state == CardExpiry.expired
+                              ? colors.danger
+                              : SubscriptionColours.toCancel,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ]),
+                    style: small,
+                  ),
+                _ => Text(
+                    cardLabel(s, today),
+                    style: s.card.isEmpty && s.cardExpires == null
+                        ? small.copyWith(fontStyle: FontStyle.italic)
+                        : small,
+                  ),
+              },
               key: Key('subscriptionCard-${s.id}'),
             ),
             // Round 80: its card runs out before it renews.
