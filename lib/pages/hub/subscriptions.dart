@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -47,7 +49,9 @@ class SubscriptionsPage extends ConsumerWidget {
     final book = ref.watch(subscriptionsProvider);
     final today = dayOf(ref.watch(clockProvider)());
     final colors = context.colors;
-    final shown = book.ordered(today);
+    // Round 89 (Nikola): in his order, set by dragging their cards.
+    final shown = book.subscriptions;
+    final notifier = ref.read(subscriptionsProvider.notifier);
     final totals = book.monthly();
     return Scaffold(
       appBar: AppBar(title: Text(HubTool.subscriptions.label)),
@@ -87,13 +91,21 @@ class SubscriptionsPage extends ConsumerWidget {
             sliver: SliverToBoxAdapter(
               child: _TwoColumns(
                 children: [
-                  for (final s in shown)
-                    SubscriptionCard(
+                  for (final (index, s) in shown.indexed)
+                    _MovableCard(
                       key: ValueKey(s.id),
-                      subscription: s,
-                      today: today,
-                      onTap: () => openSubscriptionPage(
-                          context, SubscriptionPage(subscriptionId: s.id)),
+                      id: s.id,
+                      // Dragged over another card: takes its place at once.
+                      onHover: (dragged) => notifier.moveTo(dragged, index),
+                      onMove: (by) => notifier.moveTo(s.id, index + by),
+                      canMoveBy: (by) =>
+                          index + by >= 0 && index + by < shown.length,
+                      card: SubscriptionCard(
+                        subscription: s,
+                        today: today,
+                        onTap: () => openSubscriptionPage(
+                            context, SubscriptionPage(subscriptionId: s.id)),
+                      ),
                     ),
                 ],
               ),
@@ -112,6 +124,59 @@ class SubscriptionsPage extends ConsumerWidget {
                 openSubscriptionPage(context, const SubscriptionPage()),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A card held and dragged to a new place (Round 89, as the Hub's tiles,
+/// O8); screen readers get "Move earlier" / "Move later" instead.
+class _MovableCard extends StatelessWidget {
+  final String id;
+  final Widget card;
+  final ValueChanged<String> onHover;
+  final ValueChanged<int> onMove;
+  final bool Function(int by) canMoveBy;
+
+  const _MovableCard({
+    super.key,
+    required this.id,
+    required this.card,
+    required this.onHover,
+    required this.onMove,
+    required this.canMoveBy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // As wide as a card in its column (the page's 10 at each side, 8
+    // between them), as tall as it needs.
+    final width = (MediaQuery.sizeOf(context).width - 28) / 2;
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (details) {
+        if (details.data != id) onHover(details.data);
+        return true;
+      },
+      builder: (context, _, __) => Semantics(
+        customSemanticsActions: {
+          if (canMoveBy(-1))
+            const CustomSemanticsAction(label: 'Move earlier'): () =>
+                onMove(-1),
+          if (canMoveBy(1))
+            const CustomSemanticsAction(label: 'Move later'): () => onMove(1),
+        },
+        child: LongPressDraggable<String>(
+          data: id,
+          onDragStarted: HapticFeedback.selectionClick,
+          // The card under the finger, a little lifted.
+          feedback: SizedBox(
+            width: width,
+            child: Opacity(opacity: 0.9, child: card),
+          ),
+          // Its place stays marked while it moves.
+          childWhenDragging: Opacity(opacity: 0.3, child: card),
+          child: card,
+        ),
       ),
     );
   }

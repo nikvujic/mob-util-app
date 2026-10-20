@@ -481,7 +481,8 @@ Subscriptions (Round 79, `docs/SUBSCRIPTIONS_SPEC.md`):
 `models/subscription.dart` (`Subscription`: price, about, currency,
 every, `SubscriptionState`, a date read by `dateOn` — one that renews
 moves on past days gone by — `endedOn`, `cancelDueOn`; `SubscriptionBook`:
-`ordered`, `monthly`), `subscriptionsProvider` (subscriptions.json, in
+`monthly`; Round 89: the list's order is the page's, `moveTo` sets it
+by dragging, `ordered` gone), `subscriptionsProvider` (subscriptions.json, in
 backups from v29) and `subscriptionsDotProvider` (the red dot: one to
 cancel within its reminder); `planSubscriptionReminders` and the card's
 labels in `subscriptions_alerts_provider.dart`; `ReminderKind.subscriptions`

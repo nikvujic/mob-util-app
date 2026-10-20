@@ -96,27 +96,6 @@ void main() {
     expect(const SubscriptionBook([]).monthly(), isEmpty);
   });
 
-  test('the order: to cancel, active, cancelled, inactive and ended', () {
-    final book = SubscriptionBook([
-      sub('Spotify', state: SubscriptionState.inactive),
-      sub('Old', state: SubscriptionState.cancelled, date: day(10, 1)),
-      sub('ChatGPT', state: SubscriptionState.cancelled, date: day(11, 13)),
-      sub('b Claude', date: day(11, 3)),
-      sub('AWS', date: day(11, 1)),
-      sub('a Claude', date: day(11, 3)),
-      sub('Grok', state: SubscriptionState.toCancel, date: day(11, 17)),
-    ]);
-    expect(book.ordered(today).map((s) => s.name), [
-      'Grok',
-      'AWS',
-      'a Claude',
-      'b Claude',
-      'ChatGPT',
-      'Old',
-      'Spotify',
-    ]);
-  });
-
   test('to cancel soon (within its reminder): the red dot', () {
     final grok =
         sub('Grok', state: SubscriptionState.toCancel, date: day(10, 21));

@@ -37,8 +37,10 @@ an active one's, still marked to cancel.
 - At the top, **per month**: what the running ones come to (active and to
   cancel; a year's price ÷ 12; ~ if any is about), e.g. **~61€ a month**.
   By currency if they differ (€ and $ each their own).
-- **Cards, two columns**, in order: to cancel, active, cancelled, then
-  inactive and ended; within each, the soonest date first, then by name.
+- **Cards, two columns**, in Nikola's order (Round 89): as added, a new
+  one last; **held and dragged** to a new place, as the Hub's tiles
+  (screen readers: Move earlier / Move later). (Rounds 79–88: to cancel,
+  active, cancelled, then inactive and ended, by date then name.)
   Each card, rounded, lightly tinted with a thin outline in its state's
   colour (Round 80: no thick edge), its state a pill:
   - the name (bold), the price ("~16€ / month");

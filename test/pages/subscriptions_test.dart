@@ -75,13 +75,13 @@ void main() {
   });
 
   testWidgets(
-      'his list: two to a row, in order, tinted by state, with all there is '
+      'his list: two to a row, in his order, tinted by state, with all there is '
       'to know; a month\'s total', (tester) async {
     await open(tester, start: nikolas);
     expect(find.text('~61€ a month'), findsOneWidget,
         reason: 'Claude, Claude 2, Grok, AWS: running ones that cost');
-    // To cancel first, then active by date, then cancelled, then inactive.
-    final order = ['grok', 'aws', 'claude', 'claude2', 'gpt', 'spotify'];
+    // Round 89: in his order (as added; moved by dragging), not by state.
+    final order = ['claude', 'claude2', 'gpt', 'grok', 'aws', 'spotify'];
     final at = [for (final id in order) tester.getTopLeft(card(id))];
     for (var i = 0; i < at.length; i += 2) {
       expect(at[i].dy, at[i + 1].dy, reason: 'a row: ${order[i]}');

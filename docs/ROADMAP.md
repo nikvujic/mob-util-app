@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 89 — Nikola on 1.37.4 (2026-10-20, 1.38.0)
+
+- [x] **Subscriptions' cards held and dragged** to a new place, as the
+  Hub's tiles (`LongPressDraggable` / `DragTarget`, taking the place of
+  the card under the finger at once; Move earlier / later for screen
+  readers). The page shows the list in its own order (`moveTo`; a new
+  one last); the by-state order is gone (Nikola's were already in his
+  note's order).
+
 ### Round 88 — Nikola on 1.37.4 (2026-10-20, patch 1.37.5)
 
 - [x] **Pip's station**: a segment every **15 s** watched
@@ -347,7 +356,7 @@ fixtures for every stored format.
   rows keep theirs).
 - [x] A subscription added after another: its calendar opened on next
   month (its default day) — fixed by 1.37.4's today-first calendars.
-- [ ] **Subscriptions' cards moved** by holding and dragging (Round 89,
+- [x] **Subscriptions' cards moved** by holding and dragging (Round 89,
   1.38.0).
 
 ### Round 87 — Nikola on 1.37.3 (2026-10-20, patch 1.37.4)

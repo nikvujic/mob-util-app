@@ -294,26 +294,6 @@ class SubscriptionBook {
   Subscription? byId(String id) =>
       subscriptions.where((s) => s.id == id).firstOrNull;
 
-  /// The order the page shows them in on [today]: to cancel, active,
-  /// cancelled (still on), then inactive and ended; each by the soonest
-  /// date, then by name.
-  List<Subscription> ordered(DateTime today) {
-    int rank(Subscription s) => switch (s.state) {
-          SubscriptionState.toCancel => 0,
-          SubscriptionState.active => 1,
-          SubscriptionState.cancelled => s.endedOn(today) ? 3 : 2,
-          SubscriptionState.inactive => 3,
-        };
-    return [...subscriptions]..sort((a, b) {
-        final byRank = rank(a).compareTo(rank(b));
-        if (byRank != 0) return byRank;
-        final da = a.dateOn(today), db = b.dateOn(today);
-        if (da != null && db != null && da != db) return da.compareTo(db);
-        if ((da == null) != (db == null)) return da == null ? 1 : -1;
-        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-      });
-  }
-
   /// What the ones that cost (active, to cancel) come to a month, by
   /// currency, in the order first met.
   List<MonthlyTotal> monthly() {
