@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.0] - 2026-10-21
+
 ### Added
 - **Packing lists**, a new Hub page: lists like "Ski trip" or "Beach",
   each showing how much is packed. A list opens with its things under
