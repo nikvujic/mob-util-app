@@ -337,7 +337,35 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
-### Round 89 — Nikola on 1.37.4 (2026-10-20, 1.38.0)
+### Round 90 — Nikola on 1.38.0 (2026-10-20): notes, plan (waiting for a go)
+
+Fixes (a patch):
+- [ ] **Medicine, hold to take**: once the hold has started (and once
+  it's filled) the dialog can't be closed (no tap outside, no Back, no
+  Cancel), and the take registers the moment it's full (a case where it
+  filled and the take was lost).
+- [ ] **Ingredients: no two of the same** (name, case and spaces
+  ignored), when adding or renaming; says where it already is.
+- [ ] **Ingredients' sections** dragged only from the right edge, where
+  a handle would be; the drop no longer dips and snaps back.
+- [ ] **The lowered selection-handle grab area** (Round 74, Notes and
+  the recipe method only so far) on every text field in the app.
+
+Features:
+- [ ] **Recipes: export / import** as JSON (to have ChatGPT write new
+  ones in the same shape): the recipe (name, prep minutes, type, method
+  in Markdown, ingredients with quantity and section) plus every
+  ingredient name by section, so a new recipe can use the names there
+  are; pasted in when adding a recipe, it fills everything, and
+  ingredients not there yet are added to their section (a new section
+  if needed), after a summary to confirm.
+- [ ] **Packing lists** (Round 57's order had it second, after Dates;
+  missed when asked "what's next"): a spec first.
+
+Question: Spotify in the morning (answered: an alarm can send a play
+key to Android's media session; or the Clock app's Spotify alarm).
+
+ (2026-10-20, 1.38.0)
 
 - [x] **Subscriptions' cards held and dragged** to a new place, as the
   Hub's tiles (`LongPressDraggable` / `DragTarget`, taking the place of
