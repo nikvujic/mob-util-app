@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.37.3] - 2026-10-20
+
 ### Fixed
 - **The month picker** (a card's expiry): the months were squished
   together; now three to a row, four rows, roomy buttons with space
