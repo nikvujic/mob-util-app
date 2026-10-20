@@ -65,7 +65,8 @@ class Subscription {
   final String card;
 
   /// Round 80 (Nikola): when that card expires (a virtual card runs out);
-  /// null: not set.
+  /// null: not set. Round 85: the last day of its month (cards have no
+  /// day).
   final DateTime? cardExpires;
   final String note;
 
@@ -97,9 +98,11 @@ class Subscription {
     this.note = '',
     this.remindBefore,
   })  : date = date == null ? null : DateTime(date.year, date.month, date.day),
+        // Round 85 (Nikola): a card expires with its month (it has no
+        // day): kept as that month's last day, whatever day is given.
         cardExpires = cardExpires == null
             ? null
-            : DateTime(cardExpires.year, cardExpires.month, cardExpires.day);
+            : DateTime(cardExpires.year, cardExpires.month + 1, 0);
 
   Subscription copyWith({
     String? name,

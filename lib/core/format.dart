@@ -84,6 +84,15 @@ int daysBetween(DateTime from, DateTime to) =>
         .difference(DateTime.utc(from.year, from.month, from.day))
         .inDays;
 
+/// `Nov` for [month] 11.
+String monthShort(int month) => _months[month - 1];
+
+/// `11/26`: a card's expiry (Round 85), its month and year as printed on
+/// cards.
+String formatCardMonth(DateTime month) =>
+    '${month.month.toString().padLeft(2, '0')}/'
+    '${(month.year % 100).toString().padLeft(2, '0')}';
+
 /// `08:30` for minutes from midnight; 1440 is `24:00` (end of the day).
 String formatMinutes(int minutes) =>
     '${(minutes ~/ 60).toString().padLeft(2, '0')}:'

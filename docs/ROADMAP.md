@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 85 — Nikola on 1.37.1 (2026-10-20, patch 1.37.2)
+
+- [x] **Subscriptions' card lines**: icons centred on their text's first
+  line (they sat high), at any text size.
+- [x] **Card expiry: a month**, no day: `showMonthPicker` (a year with
+  ‹ ›, twelve months), "expires 10/26" kept on one line, good through
+  the month's last day (stored as it; an older day reads as its month).
+
 ### Round 84 — Nikola on 1.37.0 (2026-10-20, patch 1.37.1)
 
 - [x] **Subscriptions**: a card's expiry on the card is **orange** a week

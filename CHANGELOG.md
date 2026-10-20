@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Subscriptions: a card's expiry is a month and year** ("expires
+  10/26", as on the card), picked from a year's twelve months; it's good
+  through the month's last day. One set with a day before keeps its
+  month.
+
+### Fixed
+- **Subscriptions' cards**: the card, warning and reminder icons line up
+  with their text.
+
 ## [1.37.1] - 2026-10-20
 
 ### Changed

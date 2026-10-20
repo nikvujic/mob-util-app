@@ -167,35 +167,44 @@ void main() {
     expect(SubscriptionEvery.fromId(null), SubscriptionEvery.month);
   });
 
-  test('Round 80: its card\'s expiry: kept; before it renews, it runs out', () {
+  test(
+      'Round 80: its card\'s expiry: kept; before it renews, it runs out. '
+      'Round 85: a month (its last day), no day', () {
     final s = Subscription(
       id: 'g',
       name: 'Grok',
       date: day(11, 17),
       card: 'Virtual',
-      cardExpires: DateTime(2026, 11, 10, 18),
+      cardExpires: DateTime(2026, 10, 10, 18),
     );
-    expect(s.cardExpires, day(11, 10), reason: 'a day');
+    expect(s.cardExpires, day(10, 31), reason: 'its month\'s last day');
     expect(Subscription.fromJson(s.toJson()), s);
-    expect(s.toJson()['cardExpires'], '2026-11-10');
+    expect(s.toJson()['cardExpires'], '2026-10-31');
+    expect(
+        Subscription.fromJson({...s.toJson(), 'cardExpires': '2026-10-10'})
+            .cardExpires,
+        day(10, 31),
+        reason: 'one kept with a day (1.37) reads as its month');
     expect(Subscription(id: 'x', name: 'x').toJson(),
         isNot(contains('cardExpires')));
     expect(s.copyWith(cardExpires: () => null).cardExpires, isNull);
     expect(s == s.copyWith(cardExpires: () => day(12, 1)), isFalse);
     expect(s.cardRunsOutOn(today), isTrue);
-    expect(s.copyWith(cardExpires: () => day(11, 17)).cardRunsOutOn(today),
-        isFalse,
-        reason: 'on the day: still good');
+    expect(
+        s.copyWith(cardExpires: () => day(11, 1)).cardRunsOutOn(today), isFalse,
+        reason: 'good through November: it renews on the 17th');
     expect(s.copyWith(cardExpires: () => null).cardRunsOutOn(today), isFalse);
     expect(s.copyWith(state: SubscriptionState.cancelled).cardRunsOutOn(today),
         isFalse,
         reason: 'it won\'t renew');
     expect(s.copyWith(state: SubscriptionState.toCancel).cardRunsOutOn(today),
         isTrue);
-    // Its label on the card.
-    expect(cardLabel(s, today), 'Virtual · expires 10 Nov');
-    expect(cardLabel(s, day(11, 11)), 'Virtual · expired 10 Nov');
-    expect(cardLabel(s.copyWith(card: ''), today), 'Card · expires 10 Nov');
+    // Its label on the card: the month as on cards.
+    expect(cardLabel(s, today), 'Virtual · expires 10/26');
+    expect(cardLabel(s, day(10, 31)), 'Virtual · expires 10/26',
+        reason: 'good through its last day');
+    expect(cardLabel(s, day(11, 1)), 'Virtual · expired 10/26');
+    expect(cardLabel(s.copyWith(card: ''), today), 'Card · expires 10/26');
     expect(cardLabel(s.copyWith(cardExpires: () => null), today), 'Virtual');
     expect(cardLabel(s.copyWith(card: '', cardExpires: () => null), today),
         'Card unknown');

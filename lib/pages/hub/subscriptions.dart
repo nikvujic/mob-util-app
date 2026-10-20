@@ -156,6 +156,9 @@ class SubscriptionCard extends StatelessWidget {
   final DateTime today;
   final VoidCallback onTap;
 
+  /// Its small lines' height, a multiple of their size.
+  static const _lineHeight = 1.35;
+
   const SubscriptionCard({
     super.key,
     required this.subscription,
@@ -168,16 +171,26 @@ class SubscriptionCard extends StatelessWidget {
     final s = subscription;
     final colors = context.colors;
     final colour = subscriptionColour(s, today);
-    final small = TextStyle(color: colors.textSecondary, fontSize: 12);
+    final small = TextStyle(
+      color: colors.textSecondary,
+      fontSize: 12,
+      height: _lineHeight,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
+    // Round 85 (Nikola): each icon centred on its text's first line (it
+    // sat high), whatever the text size.
+    final firstLine = MediaQuery.textScalerOf(context).scale(12) * _lineHeight;
     Widget line(IconData icon, Widget text, {Key? key}) => Padding(
           key: key,
           padding: const EdgeInsets.only(top: 3),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 1),
-                child: Icon(icon, size: 13, color: colors.textMuted),
+              SizedBox(
+                height: firstLine,
+                child: Center(
+                  child: Icon(icon, size: 13, color: colors.textMuted),
+                ),
               ),
               const SizedBox(width: 4),
               Expanded(child: text),
@@ -244,7 +257,8 @@ class SubscriptionCard extends StatelessWidget {
                     TextSpan(children: [
                       TextSpan(text: '${s.card.isEmpty ? 'Card' : s.card} · '),
                       TextSpan(
-                        text: expiry,
+                        // Kept on one line ("expires 10/26").
+                        text: expiry.replaceAll(' ', '\u00A0'),
                         style: TextStyle(
                           color: state == CardExpiry.expired
                               ? colors.danger

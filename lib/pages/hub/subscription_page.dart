@@ -9,6 +9,7 @@ import 'package:the_app/pages/hub/subscriptions.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/subscriptions_alerts_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
+import 'package:the_app/widgets/month_picker.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
@@ -110,12 +111,13 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _draft.cardExpires ?? _monthOn(today),
-      firstDate: DateTime(today.year - 5),
-      lastDate: DateTime(today.year + 15, 12, 31),
-      helpText: 'Card expires',
+    // Round 85 (Nikola): a month and year, as on the card.
+    final picked = await showMonthPicker(
+      context,
+      title: 'Card expires',
+      initial: _draft.cardExpires ?? today,
+      firstYear: today.year - 5,
+      lastYear: today.year + 15,
     );
     if (picked == null || !mounted) return;
     _change(_draft.copyWith(cardExpires: () => picked));
@@ -336,7 +338,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(formatDay(s.cardExpires!, today: today)),
+                      Text(formatCardMonth(s.cardExpires!)),
                       IconButton(
                         key: const Key('subscriptionCardExpiresClear'),
                         tooltip: 'No expiry date',

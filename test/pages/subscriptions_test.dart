@@ -204,12 +204,21 @@ void main() {
     expect(find.text('Not set'), findsOneWidget);
     await tester.tap(expires);
     await tester.pumpAndSettle();
-    // The picker opens on a month from today (19 Nov): taken as it is.
-    await tester.tap(find.text('OK'));
+    // Round 85: a month and year (cards have no day): this year first,
+    // the next one picked, then March.
+    expect(find.text('Card expires'), findsNWidgets(2));
+    expect(find.byKey(const Key('monthPickerYear')), findsOneWidget);
+    expect(find.text('2026'), findsOneWidget);
+    await tester.tap(find.byTooltip('Year after'));
     await tester.pumpAndSettle();
-    expect(book().byId('claude')!.cardExpires, day(11, 19));
+    expect(find.text('2027'), findsOneWidget);
+    await tester.tap(find.text('Mar'));
+    await tester.pumpAndSettle();
+    expect(book().byId('claude')!.cardExpires, DateTime(2027, 3, 31),
+        reason: 'good through its last day');
+    expect(find.text('03/27'), findsOneWidget);
     await pressBack(tester);
-    expect(find.text('Revolut 4421 · expires 19 Nov'), findsOneWidget);
+    expect(find.text('Revolut 4421 · expires 03/27'), findsOneWidget);
     expect(find.text('Card expires before it renews'), findsNothing,
         reason: 'it renews on the 3rd, before');
     // Expiring before it renews: a warning on the card and its page.

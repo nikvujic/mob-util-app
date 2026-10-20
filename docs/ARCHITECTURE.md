@@ -491,6 +491,9 @@ page (`pages/hub/subscriptions.dart`) lays its cards out two to a row;
 `subscription_page.dart` edits one, saved as it changes.
 Round 84: `Subscription.cardExpiryOn` (`CardExpiry` fine / soon /
 expired) colours a card's expiry part (`cardExpiryLabel`) orange or red.
+Round 85: `cardExpires` is kept as its month's last day (the constructor
+moves any day there), picked with `widgets/month_picker.dart`'s
+`showMonthPicker` and shown `formatCardMonth` ("10/26").
 
 His adventures (Round 63): `core/pip_adventure.dart` has the rules
 (the 12:00–18:00 day out, registering 13:00–17:00, the break window,
