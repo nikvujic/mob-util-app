@@ -6,6 +6,22 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Save or Discard on Subscriptions, Dates and meals**, as on a note:
+  changed, Back asks; **Discard** puts it back as it was (a new one is
+  deleted), **Save** keeps it, a tap outside stays. As before, what you
+  type is kept as you go (Back again, closing the app).
+
+### Changed
+- **Pip charges faster still**: a segment every 8 seconds at his
+  station while watched (it was 15).
+
+### Fixed
+- **Calendars open on the day set**, and on today when none is: 1.37.4
+  opened them all on today's month. A new subscription's day (a month on
+  until you pick one) opens on today. The card expiry's months open on
+  its year.
+
 ## [1.38.0] - 2026-10-20
 
 ### Added

@@ -5,8 +5,9 @@ import 'package:the_app/widgets/app_dialog.dart';
 
 /// Asks for a month (Round 85: a card's expiry, which has no day): a year
 /// with ‹ › between [firstYear] and [lastYear], and its twelve months; a
-/// tap on one picks it. Opens on [today]'s year (Round 87); [initial]'s
-/// month (if set) marked in its year. The month's first day, or null if dismissed.
+/// tap on one picks it. Opens on [initial]'s year, its month marked, or
+/// with none set on [today]'s (Round 91). The month's first day, or null
+/// if dismissed.
 Future<DateTime?> showMonthPicker(
   BuildContext context, {
   required String title,
@@ -46,8 +47,10 @@ class _MonthPicker extends StatefulWidget {
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
-  // Round 87 (Nikola): opens on this year, whatever was set.
-  late int _year = widget.today.year.clamp(widget.firstYear, widget.lastYear);
+  // Round 91 (Nikola): opens on the set month's year; none set, this one.
+  late int _year = (widget.initial ?? widget.today)
+      .year
+      .clamp(widget.firstYear, widget.lastYear);
 
   @override
   Widget build(BuildContext context) {

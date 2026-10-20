@@ -91,7 +91,7 @@ void main() {
     expect(saved.symptoms, {Symptom.heartburn});
     expect(saved.at, now);
 
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(find.text('Sarma, Bread'), findsOneWidget);
     expect(find.text('Lunch  ·  13:20'), findsOneWidget);
     expect(find.byKey(Key('mealRating-${saved.id}')), findsOneWidget);
@@ -103,7 +103,7 @@ void main() {
     await tapTooltip(tester, 'Log a meal');
     await tester.tap(find.byKey(const Key('mealKind-dinner')));
     await tester.pumpAndSettle();
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(book().meals, isEmpty);
     expect(find.text('No meals logged'), findsOneWidget);
   });
@@ -142,8 +142,8 @@ void main() {
 
     // Round 54: no Same as (repeating a recent meal). Round 58: the
     // first Back closes the index.
-    await pressBack(tester);
-    await pressBack(tester);
+    await leaveSaved(tester);
+    await leaveSaved(tester);
     await tapTooltip(tester, 'Log a meal');
     expect(find.text('SAME AS'), findsNothing);
     expect(find.byIcon(Icons.replay), findsNothing);
@@ -285,7 +285,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('indexRecipe-Pancakes')));
     await tester.pumpAndSettle();
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(tester.testTextInput.isVisible, isFalse, reason: 'stays down');
     expect(find.byKey(const Key('foodIndex')), findsOneWidget);
     // The X closes it then too.
@@ -542,7 +542,7 @@ void main() {
     expect(book().mealById('a')!.at, DateTime(2026, 10, 12, 8, 30));
 
     // Statistics say unrated meals don't count yet (Round 50).
-    await pressBack(tester);
+    await leaveSaved(tester);
     await tapTooltip(tester, 'Statistics');
     expect(find.textContaining("1 meal isn't rated yet"), findsOneWidget);
   });
@@ -552,7 +552,7 @@ void main() {
     await openFood(tester);
     await tapTooltip(tester, 'Statistics');
     expect(find.text('Rate meals to see what agrees with you'), findsOneWidget);
-    await pressBack(tester);
+    await leaveSaved(tester);
 
     final day = DateTime(2026, 10, 1, 12);
     container.read(foodProvider.notifier).replaceAll(FoodBook(
@@ -699,11 +699,11 @@ void main() {
       await openIndex(tester);
       await tester.enterText(find.byKey(const Key('mealFoodField')), 'Mi');
       await tester.pumpAndSettle();
-      await pressBack(tester);
+      await leaveSaved(tester);
       expect(find.text('New meal'), findsOneWidget);
       expect(focused(tester), isFalse);
       expect(find.byKey(const Key('foodIndex')), findsNothing);
-      await pressBack(tester);
+      await leaveSaved(tester);
       expect(find.text('New meal'), findsNothing);
       expect(find.text('No meals logged'), findsOneWidget);
     });

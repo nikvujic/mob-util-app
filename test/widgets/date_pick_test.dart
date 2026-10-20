@@ -7,8 +7,9 @@ import 'package:the_app/widgets/month_picker.dart';
 
 import '../helpers.dart';
 
-/// Round 87 (Nikola): every calendar opens on today's month, never where
-/// an earlier one (or the thing's own day) was.
+/// Round 91 (Nikola): a calendar opens on the day set; with none set, on
+/// today (a new subscription's didn't). (Round 87 had opened every one
+/// on today's month.)
 void main() {
   final today = DateTime(2026, 10, 20, 12);
 
@@ -51,15 +52,15 @@ void main() {
     );
   }
 
-  testWidgets('a day set in another month: opens on today\'s, none picked',
+  testWidgets('a day set in another month: opens there, it picked',
       (tester) async {
     await open(tester, value: DateTime(2027, 3, 31));
-    expect(shown(tester), ('October 2026', null));
+    expect(shown(tester), ('March 2027', '31'));
   });
 
-  testWidgets('nothing set: today\'s month', (tester) async {
+  testWidgets('nothing set: today\'s month, today picked', (tester) async {
     await open(tester);
-    expect(shown(tester), ('October 2026', null));
+    expect(shown(tester), ('October 2026', '20'));
   });
 
   testWidgets('a day set this month: picked there', (tester) async {
@@ -75,15 +76,23 @@ void main() {
     expect(shown(tester), ('December 2026', '5'));
   });
 
-  testWidgets(
-      'in the app: a subscription renewing next month opens on this month; '
-      'its card expiry on this year, though set for another', (tester) async {
+  Future<void> openSubscriptions(
+      WidgetTester tester, SubscriptionBook book) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
-    await pumpApp(tester,
-        clock: () => today,
-        subscriptions: SubscriptionBook([
+    await pumpApp(tester, clock: () => today, subscriptions: book);
+    await openTab(tester, 'Hub');
+    await tester.tap(find.byTooltip('Subscriptions'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets(
+      'in the app: a subscription\'s day opens where it is; its card '
+      'expiry on its own year, the month marked', (tester) async {
+    await openSubscriptions(
+        tester,
+        SubscriptionBook([
           Subscription(
               id: 'c',
               name: 'Claude',
@@ -91,14 +100,11 @@ void main() {
               date: DateTime(2026, 11, 3),
               cardExpires: DateTime(2028, 2)),
         ]));
-    await openTab(tester, 'Hub');
-    await tester.tap(find.byTooltip('Subscriptions'));
-    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('c')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('subscriptionDate')));
     await tester.pumpAndSettle();
-    expect(shown(tester), ('October 2026', null));
+    expect(shown(tester), ('November 2026', '3'));
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
@@ -107,14 +113,8 @@ void main() {
         scrollable: find.byType(Scrollable).last);
     await tester.tap(expires);
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('monthPickerYear')), findsOneWidget);
     expect(tester.widget<Text>(find.byKey(const Key('monthPickerYear'))).data,
-        '2026');
-    await tester.tap(find.byTooltip('Year after'));
-    await tester.tap(find.byTooltip('Year after'));
-    await tester.pumpAndSettle();
-    expect(find.text('2028'), findsOneWidget);
-    // Its month marked in its own year.
+        '2028');
     final feb = tester.widget<Material>(find
         .ancestor(
             of: find.byKey(const Key('month-2')),
@@ -125,7 +125,24 @@ void main() {
             of: find.byKey(const Key('month-3')),
             matching: find.byType(Material))
         .first);
-    expect(feb.color, isNot(mar.color));
+    expect(feb.color, isNot(mar.color), reason: 'its month marked');
+  });
+
+  testWidgets(
+      'a new subscription: its day (a month on by default) not set yet, '
+      'the calendar opens on today; once picked, on that', (tester) async {
+    await openSubscriptions(tester, SubscriptionBook.empty);
+    await tester.tap(find.byTooltip('Add a subscription'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('subscriptionDate')));
+    await tester.pumpAndSettle();
+    expect(shown(tester), ('October 2026', '20'));
+    await tester.tap(find.text('25'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('subscriptionDate')));
+    await tester.pumpAndSettle();
+    expect(shown(tester), ('October 2026', '25'));
   });
 
   testWidgets('the month picker, nothing set: this year, none marked',

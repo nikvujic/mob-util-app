@@ -158,6 +158,19 @@ Future<void> pressBack(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Leaves a page saved as it's typed (Round 91: subscriptions, dates,
+/// meals) with back, answering Save if it asks.
+Future<void> leaveSaved(WidgetTester tester) async {
+  await pressBack(tester);
+  final save = find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.widgetWithText(FilledButton, 'Save'));
+  if (save.evaluate().isNotEmpty) {
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+  }
+}
+
 /// Leaves the note editor with back. If [save] is given, the "Save
 /// changes?" dialog is expected and answered with Save (true) or Discard
 /// (false).

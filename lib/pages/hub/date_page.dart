@@ -12,6 +12,7 @@ import 'package:the_app/pages/hub/dates.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/discard_scope.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// A date (Round 57): its title, type, day (and year), every year or
@@ -40,6 +41,11 @@ class _DatePageState extends ConsumerState<DatePage> {
         year: (widget.on ?? DateTime.now()).year,
         reminders: DateReminder.defaults,
       );
+
+  /// As it was when the page opened (null: a new one), for Discard
+  /// (Round 91).
+  late final DateEntry? _original =
+      ref.read(datesProvider).byId(widget.dateId ?? '');
 
   late final _title = TextEditingController(text: _draft.title);
   late final _note = TextEditingController(text: _draft.note);
@@ -180,282 +186,293 @@ class _DatePageState extends ConsumerState<DatePage> {
     final colors = context.colors;
     final today = _today;
     final next = date.nextFrom(today);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.dateId == null && !saved ? 'New date' : 'Date'),
-      ),
-      body: PullDownList.children(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: TextField(
-              key: const Key('dateTitle'),
-              controller: _title,
-              autofocus: widget.dateId == null,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Title'),
-              onChanged: (text) => _change(_draft.copyWith(title: text)),
+    // Round 91 (Nikola): back asks Save or Discard once it's changed.
+    final now = ref.watch(datesProvider).byId(_draft.id);
+    return DiscardScope(
+      changed: now != _original,
+      isNew: _original == null,
+      what: 'date',
+      onDiscard: () => switch (_original) {
+        final o? => _notifier.save(o),
+        null => _notifier.delete(_draft.id),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.dateId == null && !saved ? 'New date' : 'Date'),
+        ),
+        body: PullDownList.children(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: TextField(
+                key: const Key('dateTitle'),
+                controller: _title,
+                autofocus: widget.dateId == null,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(labelText: 'Title'),
+                onChanged: (text) => _change(_draft.copyWith(title: text)),
+              ),
             ),
-          ),
-          _heading('TYPE'),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final type in DateType.values)
-                  ChoiceChip(
-                    key: Key('dateType-${type.name}'),
-                    avatar: Icon(type.icon, size: 18, color: type.colour),
-                    label: Text(type.label),
-                    selected: date.type == type,
-                    // A type sets every year or once (Round 61: only
-                    // Other can change it after); once needs a year.
-                    onSelected: (_) => _change(date.copyWith(
-                      type: type,
-                      yearly: type.yearly,
-                      year: () =>
-                          date.year ?? (type.yearly ? null : today.year),
-                      reminders: _remindersFor(date, date.kindNow,
-                          type == date.kind?.type ? date.kind : null),
-                    )),
-                  ),
-              ],
-            ),
-          ),
-          // Round 61: a holiday's or an event's kind.
-          if (date.type.kinds.isNotEmpty) ...[
-            _heading('KIND'),
+            _heading('TYPE'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
                 children: [
-                  for (final kind in [null, ...date.type.kinds])
+                  for (final type in DateType.values)
                     ChoiceChip(
-                      key: Key('dateKind-${kind?.name ?? 'none'}'),
-                      avatar: Icon(kind?.icon ?? date.type.icon, size: 18),
-                      label: Text(kind?.label ?? date.type.label),
-                      selected: date.kindNow == kind,
+                      key: Key('dateType-${type.name}'),
+                      avatar: Icon(type.icon, size: 18, color: type.colour),
+                      label: Text(type.label),
+                      selected: date.type == type,
+                      // A type sets every year or once (Round 61: only
+                      // Other can change it after); once needs a year.
                       onSelected: (_) => _change(date.copyWith(
-                        kind: () => kind,
-                        reminders: _remindersFor(date, date.kindNow, kind),
+                        type: type,
+                        yearly: type.yearly,
+                        year: () =>
+                            date.year ?? (type.yearly ? null : today.year),
+                        reminders: _remindersFor(date, date.kindNow,
+                            type == date.kind?.type ? date.kind : null),
                       )),
                     ),
                 ],
               ),
             ),
-          ],
-          _heading('WHEN'),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ActionChip(
-                key: const Key('dateDay'),
-                avatar: const Icon(Icons.calendar_today, size: 18),
-                label: Text(formatDayMonth(date.day, date.month, date.year)),
-                onPressed: _pickDate,
-              ),
-            ),
-          ),
-          // Round 59: a holiday or an event can last several days.
-          if (date.type.lasts)
-            ListTile(
-              key: const Key('dateLasts'),
-              title: const Text('Lasts'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    key: const Key('dateDaysLess'),
-                    tooltip: 'A day less',
-                    icon: const Icon(Icons.remove),
-                    onPressed: date.days > 1
-                        ? () => _change(date.copyWith(days: date.days - 1))
-                        : null,
-                  ),
-                  SizedBox(
-                    width: 64,
-                    child: Text(
-                      key: const Key('dateDays'),
-                      countOf(date.days, 'day', 'days'),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('dateDaysMore'),
-                    tooltip: 'A day more',
-                    icon: const Icon(Icons.add),
-                    onPressed: date.days < DateEntry.mostDays
-                        ? () => _change(date.copyWith(days: date.days + 1))
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          // Round 67: a ski trip's bus there and back (Pip rides it).
-          if (date.kindNow == DateKind.skiing) ...[
-            ListTile(
-              key: const Key('dateTravel'),
-              title: const Text('Travel'),
-              subtitle: const Text('Hours each way'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    key: const Key('dateTravelLess'),
-                    tooltip: 'An hour less',
-                    icon: const Icon(Icons.remove),
-                    onPressed: date.travelHours > 0
-                        ? () => _change(
-                            date.copyWith(travelHours: date.travelHours - 1))
-                        : null,
-                  ),
-                  SizedBox(
-                    width: 64,
-                    child: Text(
-                      key: const Key('dateTravelHours'),
-                      date.travelHours == 0
-                          ? 'None'
-                          : countOf(date.travelHours, 'hour', 'hours'),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('dateTravelMore'),
-                    tooltip: 'An hour more',
-                    icon: const Icon(Icons.add),
-                    onPressed: date.travelHours < DateEntry.mostTravelHours
-                        ? () => _change(
-                            date.copyWith(travelHours: date.travelHours + 1))
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-            if (date.travelHours > 0) ...[
-              ListTile(
-                key: const Key('dateLeaves'),
-                title: const Text('Leaves'),
-                subtitle: const Text('On the first day'),
-                trailing: Text(formatMinutes(date.leaveAt)),
-                onTap: () => _pickTravelTime(
-                    date.leaveAt, (m) => _draft.copyWith(leaveAt: m)),
-              ),
-              ListTile(
-                key: const Key('dateComesBack'),
-                title: const Text('Comes back'),
-                subtitle: const Text('The day after the last day'),
-                trailing: Text(formatMinutes(date.backAt)),
-                onTap: () => _pickTravelTime(
-                    date.backAt, (m) => _draft.copyWith(backAt: m)),
+            // Round 61: a holiday's or an event's kind.
+            if (date.type.kinds.isNotEmpty) ...[
+              _heading('KIND'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final kind in [null, ...date.type.kinds])
+                      ChoiceChip(
+                        key: Key('dateKind-${kind?.name ?? 'none'}'),
+                        avatar: Icon(kind?.icon ?? date.type.icon, size: 18),
+                        label: Text(kind?.label ?? date.type.label),
+                        selected: date.kindNow == kind,
+                        onSelected: (_) => _change(date.copyWith(
+                          kind: () => kind,
+                          reminders: _remindersFor(date, date.kindNow, kind),
+                        )),
+                      ),
+                  ],
+                ),
               ),
             ],
+            _heading('WHEN'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ActionChip(
+                  key: const Key('dateDay'),
+                  avatar: const Icon(Icons.calendar_today, size: 18),
+                  label: Text(formatDayMonth(date.day, date.month, date.year)),
+                  onPressed: _pickDate,
+                ),
+              ),
+            ),
+            // Round 59: a holiday or an event can last several days.
+            if (date.type.lasts)
+              ListTile(
+                key: const Key('dateLasts'),
+                title: const Text('Lasts'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      key: const Key('dateDaysLess'),
+                      tooltip: 'A day less',
+                      icon: const Icon(Icons.remove),
+                      onPressed: date.days > 1
+                          ? () => _change(date.copyWith(days: date.days - 1))
+                          : null,
+                    ),
+                    SizedBox(
+                      width: 64,
+                      child: Text(
+                        key: const Key('dateDays'),
+                        countOf(date.days, 'day', 'days'),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('dateDaysMore'),
+                      tooltip: 'A day more',
+                      icon: const Icon(Icons.add),
+                      onPressed: date.days < DateEntry.mostDays
+                          ? () => _change(date.copyWith(days: date.days + 1))
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            // Round 67: a ski trip's bus there and back (Pip rides it).
+            if (date.kindNow == DateKind.skiing) ...[
+              ListTile(
+                key: const Key('dateTravel'),
+                title: const Text('Travel'),
+                subtitle: const Text('Hours each way'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      key: const Key('dateTravelLess'),
+                      tooltip: 'An hour less',
+                      icon: const Icon(Icons.remove),
+                      onPressed: date.travelHours > 0
+                          ? () => _change(
+                              date.copyWith(travelHours: date.travelHours - 1))
+                          : null,
+                    ),
+                    SizedBox(
+                      width: 64,
+                      child: Text(
+                        key: const Key('dateTravelHours'),
+                        date.travelHours == 0
+                            ? 'None'
+                            : countOf(date.travelHours, 'hour', 'hours'),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('dateTravelMore'),
+                      tooltip: 'An hour more',
+                      icon: const Icon(Icons.add),
+                      onPressed: date.travelHours < DateEntry.mostTravelHours
+                          ? () => _change(
+                              date.copyWith(travelHours: date.travelHours + 1))
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+              if (date.travelHours > 0) ...[
+                ListTile(
+                  key: const Key('dateLeaves'),
+                  title: const Text('Leaves'),
+                  subtitle: const Text('On the first day'),
+                  trailing: Text(formatMinutes(date.leaveAt)),
+                  onTap: () => _pickTravelTime(
+                      date.leaveAt, (m) => _draft.copyWith(leaveAt: m)),
+                ),
+                ListTile(
+                  key: const Key('dateComesBack'),
+                  title: const Text('Comes back'),
+                  subtitle: const Text('The day after the last day'),
+                  trailing: Text(formatMinutes(date.backAt)),
+                  onTap: () => _pickTravelTime(
+                      date.backAt, (m) => _draft.copyWith(backAt: m)),
+                ),
+              ],
+            ],
+            if (next != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: Text(
+                  key: const Key('dateNext'),
+                  whenLabel(date, next, today),
+                  style: TextStyle(color: colors.textMuted, fontSize: 12),
+                ),
+              ),
+            // Round 61: only Other chooses; a birthday or an anniversary is
+            // every year, a holiday or an event once.
+            if (date.type.choosesYearly)
+              SwitchListTile(
+                key: const Key('dateYearly'),
+                title: const Text('Every year'),
+                value: date.yearly,
+                onChanged: (on) => _change(date.copyWith(
+                  yearly: on,
+                  year: () => on ? date.year : (date.year ?? today.year),
+                )),
+              ),
+            if (date.yearly && (date.type.choosesYearly || date.type.yearly))
+              SwitchListTile(
+                key: const Key('dateYearKnown'),
+                title: const Text('Year known'),
+                subtitle: Text(switch (date.type) {
+                  DateType.birthday => 'For the age',
+                  DateType.anniversary => 'For which anniversary',
+                  _ => 'For how many years',
+                }),
+                value: date.year != null,
+                onChanged: (on) =>
+                    _change(date.copyWith(year: () => on ? today.year : null)),
+              ),
+            _heading('REMINDERS'),
+            for (final (i, r) in date.reminders.indexed)
+              ListTile(
+                key: Key('dateReminder-$i'),
+                leading: const Icon(Icons.notifications_outlined),
+                title: Text(reminderLabel(r)),
+                onTap: () => _editReminder(i),
+                trailing: IconButton(
+                  key: Key('dateReminderRemove-$i'),
+                  tooltip: 'Remove reminder',
+                  icon: const Icon(Icons.close),
+                  onPressed: () => _change(date.copyWith(reminders: [
+                    for (final (j, other) in date.reminders.indexed)
+                      if (j != i) other,
+                  ])),
+                ),
+              ),
+            if (date.reminders.length < DateReminder.most)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('dateAddReminder'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add a reminder'),
+                    onPressed: () => _editReminder(null),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              child: TextField(
+                key: const Key('dateNote'),
+                controller: _note,
+                minLines: 1,
+                maxLines: 6,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: 'Note',
+                  // Round 61: a hint for each type.
+                  hintText: switch (date.type) {
+                    DateType.birthday => 'Gift ideas…',
+                    DateType.anniversary => 'Plans, gift ideas…',
+                    DateType.holiday => 'Bookings, what to pack…',
+                    DateType.event => 'Where, what to bring…',
+                    DateType.other => null,
+                  },
+                ),
+                onChanged: (text) => _change(_draft.copyWith(note: text)),
+              ),
+            ),
+            if (saved)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('deleteDate'),
+                    style: TextButton.styleFrom(foregroundColor: colors.danger),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Delete date'),
+                    onPressed: _delete,
+                  ),
+                ),
+              ),
           ],
-          if (next != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-              child: Text(
-                key: const Key('dateNext'),
-                whenLabel(date, next, today),
-                style: TextStyle(color: colors.textMuted, fontSize: 12),
-              ),
-            ),
-          // Round 61: only Other chooses; a birthday or an anniversary is
-          // every year, a holiday or an event once.
-          if (date.type.choosesYearly)
-            SwitchListTile(
-              key: const Key('dateYearly'),
-              title: const Text('Every year'),
-              value: date.yearly,
-              onChanged: (on) => _change(date.copyWith(
-                yearly: on,
-                year: () => on ? date.year : (date.year ?? today.year),
-              )),
-            ),
-          if (date.yearly && (date.type.choosesYearly || date.type.yearly))
-            SwitchListTile(
-              key: const Key('dateYearKnown'),
-              title: const Text('Year known'),
-              subtitle: Text(switch (date.type) {
-                DateType.birthday => 'For the age',
-                DateType.anniversary => 'For which anniversary',
-                _ => 'For how many years',
-              }),
-              value: date.year != null,
-              onChanged: (on) =>
-                  _change(date.copyWith(year: () => on ? today.year : null)),
-            ),
-          _heading('REMINDERS'),
-          for (final (i, r) in date.reminders.indexed)
-            ListTile(
-              key: Key('dateReminder-$i'),
-              leading: const Icon(Icons.notifications_outlined),
-              title: Text(reminderLabel(r)),
-              onTap: () => _editReminder(i),
-              trailing: IconButton(
-                key: Key('dateReminderRemove-$i'),
-                tooltip: 'Remove reminder',
-                icon: const Icon(Icons.close),
-                onPressed: () => _change(date.copyWith(reminders: [
-                  for (final (j, other) in date.reminders.indexed)
-                    if (j != i) other,
-                ])),
-              ),
-            ),
-          if (date.reminders.length < DateReminder.most)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  key: const Key('dateAddReminder'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add a reminder'),
-                  onPressed: () => _editReminder(null),
-                ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: TextField(
-              key: const Key('dateNote'),
-              controller: _note,
-              minLines: 1,
-              maxLines: 6,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: 'Note',
-                // Round 61: a hint for each type.
-                hintText: switch (date.type) {
-                  DateType.birthday => 'Gift ideas…',
-                  DateType.anniversary => 'Plans, gift ideas…',
-                  DateType.holiday => 'Bookings, what to pack…',
-                  DateType.event => 'Where, what to bring…',
-                  DateType.other => null,
-                },
-              ),
-              onChanged: (text) => _change(_draft.copyWith(note: text)),
-            ),
-          ),
-          if (saved)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  key: const Key('deleteDate'),
-                  style: TextButton.styleFrom(foregroundColor: colors.danger),
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete date'),
-                  onPressed: _delete,
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

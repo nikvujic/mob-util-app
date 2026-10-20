@@ -793,13 +793,20 @@ functions in `core/markdown.dart` (`toggleWrap`, `toggleLines`,
 and selection; `widgets/format_bar.dart` is the row, in `BottomActions`'
 `bar` slot.
 
-## Date pickers (Round 87)
+## Date pickers (Rounds 87, 91)
 
 Every date is picked with `widgets/date_pick.dart`'s `pickDate`, not
-`showDatePicker` directly: it opens on today's month (the nearest one
-allowed if today isn't), with today marked, and shows the day already
-set as picked only when it falls in that month (Nikola: a calendar
-opening on the thing's own month looked like it carried on from before).
+`showDatePicker` directly: it opens on the day set, or with none on
+today (the nearest day allowed if today isn't), today marked. A new
+subscription's default day isn't "set" until picked.
+
+## Save or Discard (Round 91)
+
+Pages saved as they're typed (Subscription, Date, Meal) sit in a
+`DiscardScope`: with the item changed since the page opened (the store's
+copy against the one read then), back asks Save / Discard
+(`showSaveChangesDialog`, as a note); Discard puts the original back,
+or deletes a new one.
 
 ## Letting a field go (Round 88)
 

@@ -14,6 +14,7 @@ import 'package:the_app/pages/hub/food_recipe_sheet.dart';
 import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/discard_scope.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// A meal (Round 46): what kind and when, its foods, and how it went.
@@ -45,6 +46,11 @@ class _MealPageState extends ConsumerState<MealPage> {
     at: widget.at ?? DateTime.now(),
     kind: MealKind.at(widget.at ?? DateTime.now()),
   );
+
+  /// As it was when the page opened (null: a new one), for Discard
+  /// (Round 91).
+  late final Meal? _original =
+      ref.read(foodProvider).mealById(widget.mealId ?? '');
 
   late final _note = TextEditingController(text: _meal.note);
   final _food = TextEditingController();
@@ -283,10 +289,21 @@ class _MealPageState extends ConsumerState<MealPage> {
             indexRecipes.isNotEmpty ||
             indexIngredients.isNotEmpty);
 
-    return PopScope(
-      canPop: !_indexOpen,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _closeIndex();
+    // Round 91 (Nikola): back asks Save or Discard once it's changed;
+    // an open index closes first (Round 58).
+    final now = ref.watch(foodProvider).mealById(_draft.id);
+    return DiscardScope(
+      changed: now != _original,
+      isNew: _original == null,
+      what: 'meal',
+      handleBack: () {
+        if (!_indexOpen) return false;
+        _closeIndex();
+        return true;
+      },
+      onDiscard: () => switch (_original) {
+        final o? => _notifier.saveMeal(o),
+        null => _notifier.deleteMeal(_draft.id),
       },
       child: Scaffold(
         appBar: AppBar(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:the_app/core/format.dart';
 
-/// Asks for a day, the app's one way (Round 87, Nikola: a calendar opened
-/// where an earlier one had been, for something else): it always opens
-/// on [today]'s month (or the nearest one allowed, between [first] and
-/// [last]), today marked. [value], the day already set, shows picked only
-/// when it's in that month. Null if dismissed.
+/// Asks for a day, the app's one way: it opens on [value], the day
+/// already set; with none set (Round 91, Nikola: a new subscription's
+/// calendar didn't open on today), on [today] (or the nearest day
+/// allowed, between [first] and [last]). Today is marked. Null if
+/// dismissed. (Round 87 opened every one on today's month; Nikola: a day
+/// set should open where it is.)
 Future<DateTime?> pickDate(
   BuildContext context, {
   required DateTime today,
@@ -16,21 +17,18 @@ Future<DateTime?> pickDate(
   SelectableDayPredicate? selectable,
 }) {
   final day = dayOf(today);
-  final shown = day.isBefore(first)
-      ? dayOf(first)
-      : day.isAfter(last)
-          ? dayOf(last)
-          : day;
   bool fits(DateTime d) =>
       !d.isBefore(dayOf(first)) &&
       !d.isAfter(last) &&
       (selectable?.call(d) ?? true);
+  final nearest = day.isBefore(first)
+      ? dayOf(first)
+      : day.isAfter(last)
+          ? dayOf(last)
+          : day;
   final DateTime? initial = switch (value) {
-    final v? when v.year == shown.year && v.month == shown.month && fits(v) =>
-      dayOf(v),
-    // Today out of reach: open where it can, on that day if it may be
-    // picked (the picker needs one to show a month other than today's).
-    _ when shown != day && fits(shown) => shown,
+    final v? when fits(dayOf(v)) => dayOf(v),
+    _ when fits(nearest) => nearest,
     _ => null,
   };
   return showDatePicker(

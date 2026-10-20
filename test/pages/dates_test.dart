@@ -205,7 +205,7 @@ void main() {
     await tap(tester, find.byKey(const Key('dateNote')));
     expect(find.byKey(const Key('dateReminder-2')), findsOneWidget);
     expect(find.byKey(const Key('dateAddReminder')), findsNothing);
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(whenOf(tester, saved.id), 'Sat, 24 Oct  ·  in 9 days');
   });
 
@@ -213,7 +213,7 @@ void main() {
     await openDates(tester);
     await tap(tester, find.byTooltip('Add a date'));
     await tap(tester, find.byKey(const Key('dateType-anniversary')));
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(book().dates, isEmpty);
     expect(find.text('No dates'), findsOneWidget);
   });
@@ -413,7 +413,7 @@ void main() {
     expect(book().dates.single.days, 2);
     await tap(tester, find.byKey(const Key('dateType-event')));
     expect(find.text('2 days'), findsOneWidget, reason: 'an event lasts too');
-    await pressBack(tester);
+    await leaveSaved(tester);
     final id = book().dates.single.id;
     List<Color> mark(String day) =>
         (tester.widget<CustomPaint>(find.byKey(Key('datesMark-$day'))).painter!

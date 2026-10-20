@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 91 — Nikola on 1.38.0 (2026-10-20, patch 1.38.1)
+
+- [x] **Save or Discard** on back, as a note's, for the pages saved as
+  typed: Subscription, Date, Meal (`widgets/discard_scope.dart`: changed
+  since it opened, Back asks; Discard restores it, or deletes a new one;
+  a tap outside stays; a meal's open food list closes first). Medicine's
+  sheet and a recipe's edit mode had their own already.
+- [x] **Calendars**: open on the day set, today when none (Round 87
+  went too far: all on today). A new subscription's default day (a month
+  on) counts as not set until picked; the month picker on its year.
+- [x] **Pip's station**: a segment every **8 s** watched.
+
 ### Round 90 — Nikola on 1.38.0 (2026-10-20): notes, plan (waiting for a go)
 
 Fixes (a patch):

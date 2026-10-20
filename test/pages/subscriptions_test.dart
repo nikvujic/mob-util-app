@@ -124,7 +124,7 @@ void main() {
     await tester.tap(find.byTooltip('Add a subscription'));
     await tester.pumpAndSettle();
     expect(appBarTitle('New subscription'), findsOneWidget);
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(book().isEmpty, isTrue, reason: 'no name: not kept');
 
     await tester.tap(find.byTooltip('Add a subscription'));
@@ -148,7 +148,7 @@ void main() {
       SubscriptionState.active,
       day(11, 19)
     ));
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(find.text('19.99€ / month'), findsOneWidget);
     expect(find.text('Renews Thu, 19 Nov'), findsOneWidget);
   });
@@ -170,7 +170,7 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('subscriptionAbout')));
     await tester.tap(find.byKey(const Key('subscriptionAbout')));
     await tester.pumpAndSettle();
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(find.text('1 week before'), findsOneWidget);
     expect(find.text('~20€ / month'), findsOneWidget);
     expect(find.text('Cancel by Tue, 3 Nov'), findsOneWidget);
@@ -186,7 +186,7 @@ void main() {
         reason: 'no day while inactive');
     await tester.tap(find.byKey(const Key('subscriptionStateChip-cancelled')));
     await tester.pumpAndSettle();
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(find.text('Active until Tue, 3 Nov'), findsOneWidget);
     expect(find.byKey(const Key('subscriptionsTotal')), findsNothing,
         reason: 'nothing that costs');
@@ -217,7 +217,7 @@ void main() {
     expect(book().byId('claude')!.cardExpires, DateTime(2027, 3, 31),
         reason: 'good through its last day');
     expect(find.text('03/27'), findsOneWidget);
-    await pressBack(tester);
+    await leaveSaved(tester);
     expect(find.text('Revolut 4421 · expires 03/27'), findsOneWidget);
     expect(find.text('Card expires before it renews'), findsNothing,
         reason: 'it renews on the 3rd, before');

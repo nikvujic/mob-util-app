@@ -1362,9 +1362,9 @@ class PipBrain {
     }
   }
 
-  /// Round 58: at his station, watched, a segment this often (Round 88,
-  /// Nikola: twice as fast, it was 30 s).
-  static const chargeEvery = 15.0;
+  /// Round 58: at his station, watched, a segment this often (Nikola:
+  /// Round 88 15 s, it was 30; Round 91 8 s).
+  static const chargeEvery = 8.0;
 
   // Round 58: off with the phone plugged in, the station's drone flies
   // over and charges him a segment; then he's up and walks over to plug
