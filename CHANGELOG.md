@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.38.1] - 2026-10-20
+
 ### Added
 - **Save or Discard on Subscriptions, Dates and meals**, as on a note:
   changed, Back asks; **Discard** puts it back as it was (a new one is
