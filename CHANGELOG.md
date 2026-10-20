@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.38.2] - 2026-10-20
+
 ### Fixed
 - **Important medicine, hold to take**: while you hold, and once it's
   full, the dialog can't be closed (Cancel greys out, a tap outside and
