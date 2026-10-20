@@ -69,7 +69,8 @@ void main() {
     expect(dateReminders(), isEmpty);
   });
 
-  testWidgets('private, or the page locked: no names', (tester) async {
+  testWidgets('private: no names; Round 82: locked, names still',
+      (tester) async {
     await start(tester, dates: [ana]);
     final prefs = container.read(preferencesProvider.notifier);
     prefs.setNotifyStyle(
@@ -93,7 +94,7 @@ void main() {
         .setPassword('master password'));
     container.read(pageLocksProvider.notifier).lock(HubTool.dates);
     await tester.pumpAndSettle();
-    expect(dateReminders(), ['23 9:0 Dates: A birthday tomorrow']);
+    expect(dateReminders(), ['23 9:0 Ana: Birthday tomorrow · turns 31']);
   });
 
   testWidgets('a date\'s reminder tapped: the Dates page', (tester) async {

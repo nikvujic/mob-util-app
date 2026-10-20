@@ -63,7 +63,8 @@ void main() {
     expect(ours(), isEmpty);
   });
 
-  testWidgets('private, or the page locked: no names', (tester) async {
+  testWidgets('private: no names; Round 82: locked, names still',
+      (tester) async {
     await start(tester);
     final prefs = container.read(preferencesProvider.notifier);
     prefs.setNotifyStyle(
@@ -98,7 +99,6 @@ void main() {
         .setPassword('master password'));
     container.read(pageLocksProvider.notifier).lock(HubTool.subscriptions);
     await tester.pumpAndSettle();
-    expect(ours().first,
-        '20 9:0 Subscriptions: A subscription to cancel renews in 2 days');
+    expect(ours().first, startsWith('20 9:0 Cancel Grok'));
   });
 }

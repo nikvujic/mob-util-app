@@ -57,7 +57,7 @@ String? remindLabel(Subscription s) => switch (s.remindBefore) {
 /// [days] days: on each one's day at 09:00, and its reminder before (if
 /// set) at 09:00: renewing (active), to cancel, ending (cancelled). None
 /// for an inactive or ended one, nor while off or paused. With
-/// [hideNames] (the Hub or the page is locked, or set private), no names
+/// [hideNames] (set private), no names
 /// or prices.
 List<Reminder> planSubscriptionReminders({
   required DateTime now,

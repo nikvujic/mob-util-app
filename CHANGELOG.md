@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Notifications show names unless set to Private.** A locked page
+  (the Planner, the Hub, or one of its pages) used to hide its
+  notifications' names too ("A block is on"); now only the Private
+  setting on the Notifications page does.
+
 ## [1.36.2] - 2026-10-19
 
 ### Fixed

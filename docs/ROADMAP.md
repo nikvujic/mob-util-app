@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 82 — Nikola on 1.36.2 (2026-10-20, patch 1.36.3)
+
+- [x] Notifications are private only when set Private, not because the
+  page is locked (the planner's "on now" said "A block is on").
+- [x] The planner's "on now" notification can be swiped away: since
+  Android 14 an ongoing notification can be dismissed (only a foreground
+  service's can't); it comes back when the app opens. Kept so (a
+  foreground service for it isn't worth it, nor allowed for this).
+
 ### Round 81 — Nikola on 1.36.1 (2026-10-19, patch 1.36.2)
 
 - [x] A field being typed in lets go when a date or time picker opens

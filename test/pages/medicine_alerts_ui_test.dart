@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/hub_tool.dart';
@@ -144,7 +145,7 @@ void main() {
       expect(medicineReminders(), isEmpty);
     });
 
-    testWidgets('with the Hub locked, no names', (tester) async {
+    testWidgets('Round 82: with the Hub locked, names still', (tester) async {
       await start(tester, seed: () {
         medicine().add('Pills', times: [600], from: today);
       });
@@ -156,11 +157,11 @@ void main() {
       });
       container.read(sectionLocksProvider.notifier).lock(AppSection.hub);
       await tester.pumpAndSettle();
-      expect(medicineReminders().first,
-          '12 10:0 Medicine: A dose is due at 10:00');
+      expect(medicineReminders().first, startsWith('12 10:0 Pills'));
     });
 
-    testWidgets('with only the Medicine page locked, no names either (O7)',
+    testWidgets(
+        'Round 82: the Medicine page locked, names still; set private, none',
         (tester) async {
       await start(tester, seed: () {
         medicine().add('Pills', times: [600], from: today);
@@ -171,11 +172,15 @@ void main() {
             .setPassword('password1');
         await container.read(sessionProvider.notifier).unlock('password1');
       });
-      container.read(pageLocksProvider.notifier).lock(HubTool.counters);
-      await tester.pumpAndSettle();
-      expect(medicineReminders().first, startsWith('12 10:0 Pills'),
-          reason: "another page's lock doesn't hide them");
       container.read(pageLocksProvider.notifier).lock(HubTool.medicine);
+      await tester.pumpAndSettle();
+      expect(medicineReminders().first, startsWith('12 10:0 Pills'));
+      container.read(preferencesProvider.notifier).setNotifyStyle(
+          NotifyPage.medicine,
+          container
+              .read(preferencesProvider)
+              .styleOf(NotifyPage.medicine)
+              .copyWith(private: true));
       await tester.pumpAndSettle();
       expect(medicineReminders().first,
           '12 10:0 Medicine: A dose is due at 10:00');

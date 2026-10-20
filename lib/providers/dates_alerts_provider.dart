@@ -91,8 +91,7 @@ String? yearsLabel(DateEntry date, DateTime on) {
 /// days: each of a date's reminders, its days before the date, at its
 /// time. A reminder up to 30 days before a date is planned once its time
 /// comes into those days, like the others. None while off or paused.
-/// With [hideNames] (the Hub or the Dates page is locked, or set
-/// private), no titles. Those due at the same moment come as one.
+/// With [hideNames] (set private), no titles. Those due at the same moment come as one.
 List<Reminder> planDateReminders({
   required DateTime now,
   required DateBook book,

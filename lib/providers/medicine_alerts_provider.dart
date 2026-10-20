@@ -11,8 +11,8 @@ import 'package:the_app/providers/preferences_provider.dart';
 /// The medicine reminders (O13) due after [now] for the next [days] days:
 /// one at each dose time not yet marked, and for a medicine with a
 /// follow-up (Round 16), another that many minutes later. None while off
-/// or paused ([Preferences]). With [hideNames] (the Hub or the Medicine
-/// page is locked) the medicine's name is left out.
+/// or paused ([Preferences]). With [hideNames] (set private) the
+/// medicine's name is left out.
 ///
 /// Doses due at the same moment come as one notification (Round 23):
 /// Android holds back alarms that follow each other closely while the

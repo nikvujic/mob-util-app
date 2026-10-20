@@ -5,8 +5,6 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
-import 'package:the_app/models/app_section.dart';
-import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/notification_target.dart';
 import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/planner_pin.dart';
@@ -23,8 +21,6 @@ import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
-import 'package:the_app/providers/section_locks_provider.dart';
-import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/subscriptions_alerts_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
 
@@ -38,7 +34,7 @@ const maxReminders = 400;
 /// The reminders due after [now] for the next [reminderDays] days: tasks
 /// and routines with a reminder, not ticked off (nor skipped), and the
 /// planner's own reminders ([pins], P14) at their time. With [hideTitles]
-/// (the Planner section is locked), titles are left out.
+/// (set private), titles are left out.
 List<Reminder> planReminders({
   required DateTime now,
   required List<PlannerTask> tasks,
@@ -160,9 +156,6 @@ class ReminderPlanner {
     _ref.listen(plannerProvider, (_, __) => _soon());
     _ref.listen(routinesProvider, (_, __) => _soon());
     _ref.listen(pinsProvider, (_, __) => _soon());
-    _ref.listen(sectionLocksProvider, (_, __) => _soon());
-    _ref.listen(pageLocksProvider, (_, __) => _soon());
-    _ref.listen(securityProvider, (_, __) => _soon());
     _ref.listen(medicineProvider, (_, __) => _soon());
     _ref.listen(datesProvider, (_, __) => _soon());
     _ref.listen(subscriptionsProvider, (_, __) => _soon());
@@ -238,10 +231,10 @@ class ReminderPlanner {
       NotifyPage.values.every((p) => a[p] == b[p]);
 
   Future<void> _plan() async {
-    final locks = _ref.read(sectionLocksProvider);
-    final password = _ref.read(securityProvider) != null;
     final now = _ref.read(clockProvider)();
     final preferences = _ref.read(preferencesProvider);
+    // Round 82 (Nikola): names are left out only when a page's
+    // notifications are set private, not because the page is locked.
     bool private(NotifyPage page) => preferences.styleOf(page).private;
     final reminders = [
       ...planReminders(
@@ -249,9 +242,7 @@ class ReminderPlanner {
         tasks: _ref.read(plannerProvider),
         routines: _ref.read(routinesProvider),
         pins: _ref.read(pinsProvider),
-        // Locked, or set private (Round 31): no names.
-        hideTitles: password && locks.contains(AppSection.planner) ||
-            private(NotifyPage.planner),
+        hideTitles: private(NotifyPage.planner),
         onNow: preferences.plannerNow,
       ),
       ...planMedicineReminders(
@@ -259,32 +250,21 @@ class ReminderPlanner {
         book: _ref.read(medicineProvider),
         preferences: preferences,
         days: reminderDays,
-        hideNames: password &&
-                (locks.contains(AppSection.hub) ||
-                    _ref.read(pageLocksProvider).contains(HubTool.medicine)) ||
-            private(NotifyPage.medicine),
+        hideNames: private(NotifyPage.medicine),
       ),
       ...planDateReminders(
         now: now,
         book: _ref.read(datesProvider),
         preferences: preferences,
         days: reminderDays,
-        hideNames: password &&
-                (locks.contains(AppSection.hub) ||
-                    _ref.read(pageLocksProvider).contains(HubTool.dates)) ||
-            private(NotifyPage.dates),
+        hideNames: private(NotifyPage.dates),
       ),
       ...planSubscriptionReminders(
         now: now,
         book: _ref.read(subscriptionsProvider),
         preferences: preferences,
         days: reminderDays,
-        hideNames: password &&
-                (locks.contains(AppSection.hub) ||
-                    _ref
-                        .read(pageLocksProvider)
-                        .contains(HubTool.subscriptions)) ||
-            private(NotifyPage.subscriptions),
+        hideNames: private(NotifyPage.subscriptions),
       ),
       ...planBackupReminders(
         now: now,

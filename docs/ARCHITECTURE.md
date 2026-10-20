@@ -642,8 +642,9 @@ Medicine reminders (O13) come from `planMedicineReminders`
 planner, merged with the planner's and capped together; it also runs on
 medicine and medicine-setting changes. Each `Reminder` has a kind, and
 each kind its own Android channel (`planner-reminders`,
-`medicine-reminders`). A locked section's reminders leave out titles and
-names.
+`medicine-reminders`). A page's reminders leave out titles and names
+only when its notifications are set private (Round 82: a lock no longer
+does, Nikola).
 
 ## Years of medicine history (Round 18)
 

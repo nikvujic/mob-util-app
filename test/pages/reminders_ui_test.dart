@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/notify_settings.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
@@ -86,7 +88,9 @@ void main() {
     expect(find.textContaining('reminders won\'t show'), findsOneWidget);
   });
 
-  testWidgets('a locked Planner hides titles in reminders', (tester) async {
+  testWidgets(
+      'Round 82: a locked Planner still names its reminders; set private, '
+      'they don\'t', (tester) async {
     await openPlanner(tester);
     await tester.runAsync(
       () => container.read(securityProvider.notifier).setPassword('password1'),
@@ -99,6 +103,16 @@ void main() {
           remind: 0,
         );
     container.read(sectionLocksProvider.notifier).lock(AppSection.planner);
+    await tester.pump();
+    expect(reminders.scheduledReminders.single.title, 'Therapy',
+        reason: 'locked is no reason to hide it');
+    final prefs = container.read(preferencesProvider.notifier);
+    prefs.setNotifyStyle(
+        NotifyPage.planner,
+        container
+            .read(preferencesProvider)
+            .styleOf(NotifyPage.planner)
+            .copyWith(private: true));
     await tester.pump();
     expect(reminders.scheduledReminders.single.title, 'Planner');
     expect(
