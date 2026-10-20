@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.38.0] - 2026-10-20
+
 ### Added
 - **Subscriptions: move cards around.** Hold a card and drag it to
   where you want it, as on the Hub. The cards stay in your order (a new
