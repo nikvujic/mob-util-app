@@ -66,7 +66,7 @@ void main() {
     final snapshot = container.read(backupExporterProvider).snapshot();
     final back = Backup.decode(snapshot.encode());
     expect(back.subscriptions.subscriptions.single, claude());
-    expect(jsonDecode(snapshot.encode())['version'], 29);
+    expect(jsonDecode(snapshot.encode())['version'], greaterThanOrEqualTo(29));
     final data = container.read(sectionDataProvider);
     expect(data.countOf(HubTool.subscriptions), 1);
     data.clearOf(HubTool.subscriptions);

@@ -141,6 +141,9 @@ const plainScrollAllowed = {
   // A recipe in view mode (Round 42): Nikola wants no reach mode there,
   // only in edit mode (which has it).
   'pages/hub/recipe_page.dart',
+  // Copy list's sheet (Round 94): a name and a few sections to tick, in
+  // a bottom sheet, scrolling only to stay clear of the keyboard.
+  'pages/hub/packing_copy_sheet.dart',
 };
 
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');

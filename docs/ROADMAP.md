@@ -337,6 +337,23 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 94 — Nikola on 1.39.0 (2026-10-21, 1.40.0)
+
+- [x] **Packing lists** (O41): a Hub page (`HubTool.packing`, lockable,
+  Clear data) of lists (`models/packing.dart`, `packing.json` v1, backup
+  v30, partial restore). Nikola's answers: several lists as cards;
+  sections shared by every list, starting as Documents, Clothes,
+  Toiletries, Electronics, Medicine and Other (always last), editable on
+  their own page; a count only (×2); ticked ones don't move; **Copy
+  list** asks the name and which sections to take. View mode: a big box
+  per row, a tap anywhere ticks, Reset (Undo), progress. Edit mode like a
+  recipe's (saved as made, Undo, Discard changes, Done): a section's +
+  adds several in a row, a tap renames / counts / deletes, the handle
+  drags into another section too. Not tied to Dates (Nikola).
+- [x] **Spotify**: its page drops "may not start if Spotify was closed"
+  (Nikola tried it: it starts).
+- [ ] Next: the recipe import/export (Nikola: tomorrow).
+
 ### Round 93 — Nikola on 1.38.2 (2026-10-20, 1.39.0)
 
 - [x] **Spotify in the morning** (O40): a Hub page (`HubTool.spotify`,
@@ -347,7 +364,8 @@ fixtures for every stored format.
   and on it sets the music volume, presses play (`KEYCODE_MEDIA_PLAY`)
   and sets the next; `BOOT_COMPLETED` / `MY_PACKAGE_REPLACED` set it
   again. No play button (Nikola).
-- [ ] Next: the recipe import/export, then Packing lists (a spec first).
+- [x] Next: Packing lists came first (Round 94); then the recipe
+  import/export.
 
 ### Round 91 — Nikola on 1.38.0 (2026-10-20, patch 1.38.1)
 
@@ -386,8 +404,8 @@ Features:
   are; pasted in when adding a recipe, it fills everything, and
   ingredients not there yet are added to their section (a new section
   if needed), after a summary to confirm.
-- [ ] **Packing lists** (Round 57's order had it second, after Dates;
-  missed when asked "what's next"): a spec first.
+- [x] **Packing lists** (Round 57's order had it second, after Dates;
+  missed when asked "what's next"): built in Round 94 (1.40.0).
 
 Question: Spotify in the morning (answered: an alarm can send a play
 key to Android's media session; or the Clock app's Spotify alarm).

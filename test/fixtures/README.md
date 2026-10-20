@@ -170,6 +170,13 @@ app still reads every version, so an update can never lose existing data.
   failed").
 - `v29/backup-plain.json` — backup (version 29) with them (and v28's
   data).
+- `v30/storage/packing.json` — packing lists (Round 94, packing.json
+  version 1): the usual sections with "Ski gear" added after Clothes;
+  "Jahorina ⛷" (Pasoš packed, Lična karta, Čarape ×5, Naočare packed in
+  Ski gear, Punjač, and Kišobran in a section that's gone, so shown
+  under Other) and "Beach" (Sunscreen ×2, Swimsuit).
+- `v30/backup-plain.json` — backup (version 30) with them (and v29's
+  data).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

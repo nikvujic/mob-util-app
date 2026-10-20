@@ -18,6 +18,7 @@ final hubToolDotProvider = Provider.family<bool, HubTool>(
     HubTool.subscriptions => ref.watch(subscriptionsDotProvider),
     HubTool.pip => false,
     HubTool.spotify => false,
+    HubTool.packing => false,
   },
 );
 
@@ -39,7 +40,8 @@ final hubToolNewsProvider = Provider.family<bool, HubTool>(
     HubTool.food ||
     HubTool.subscriptions ||
     HubTool.pip ||
-    HubTool.spotify =>
+    HubTool.spotify ||
+    HubTool.packing =>
       false,
   },
 );

@@ -31,7 +31,10 @@ enum HubTool {
 
   /// Spotify in the morning (Round 93): a time, days and a volume; no
   /// data to lock or clear.
-  spotify('Spotify');
+  spotify('Spotify'),
+
+  /// Packing lists (Round 94): lists of things to pack, by section.
+  packing('Packing');
 
   const HubTool(this.label);
 

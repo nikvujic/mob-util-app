@@ -139,8 +139,8 @@ class SpotifyPage extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             child: Text(
               'At that time the phone sets its music volume and presses '
-              'play: Spotify carries on with what it last played. If '
-              'Spotify was closed completely, it may not start.',
+              'play: Spotify carries on with what it last played, even '
+              'when it was closed.',
               style: TextStyle(color: colors.textMuted, height: 1.4),
             ),
           ),

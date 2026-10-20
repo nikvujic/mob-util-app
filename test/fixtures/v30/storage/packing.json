@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "sections": [
+    {
+      "id": "documents",
+      "name": "Documents"
+    },
+    {
+      "id": "clothes",
+      "name": "Clothes"
+    },
+    {
+      "id": "k1",
+      "name": "Ski gear"
+    },
+    {
+      "id": "toiletries",
+      "name": "Toiletries"
+    },
+    {
+      "id": "electronics",
+      "name": "Electronics"
+    },
+    {
+      "id": "medicine",
+      "name": "Medicine"
+    },
+    {
+      "id": "other",
+      "name": "Other"
+    }
+  ],
+  "lists": [
+    {
+      "id": "p1",
+      "name": "Jahorina ⛷",
+      "items": [
+        {
+          "id": "i1",
+          "name": "Pasoš",
+          "section": "documents",
+          "packed": true
+        },
+        {
+          "id": "i2",
+          "name": "Lična karta",
+          "section": "documents"
+        },
+        {
+          "id": "i3",
+          "name": "Čarape",
+          "section": "clothes",
+          "count": 5
+        },
+        {
+          "id": "i4",
+          "name": "Naočare",
+          "section": "k1",
+          "packed": true
+        },
+        {
+          "id": "i5",
+          "name": "Punjač",
+          "section": "electronics"
+        },
+        {
+          "id": "i6",
+          "name": "Kišobran",
+          "section": "gone"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "name": "Beach",
+      "items": [
+        {
+          "id": "i7",
+          "name": "Sunscreen",
+          "section": "toiletries",
+          "count": 2
+        },
+        {
+          "id": "i8",
+          "name": "Swimsuit",
+          "section": "clothes"
+        }
+      ]
+    }
+  ]
+}

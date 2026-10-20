@@ -9,6 +9,7 @@ import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/subscription.dart';
+import 'package:the_app/models/packing.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/food_provider.dart';
@@ -21,6 +22,7 @@ import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
+import 'package:the_app/providers/packing_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
 
 /// Everything a section holds, to count or clear it as a whole: the
@@ -62,6 +64,8 @@ class SectionData {
         // His life isn't cleared with the Hub's pages; Spotify's morning
         // is a setting (Round 93).
         HubTool.pip || HubTool.spotify => 0,
+        // Its lists (Round 94).
+        HubTool.packing => _ref.read(packingProvider).lists.length,
       };
 
   /// Empties one of the Hub's pages (saved with the next flush).
@@ -86,6 +90,9 @@ class SectionData {
         _ref
             .read(subscriptionsProvider.notifier)
             .replaceAll(SubscriptionBook.empty);
+      case HubTool.packing:
+        // Its sections back to the usual ones too.
+        _ref.read(packingProvider.notifier).replaceAll(PackingBook.initial);
       case HubTool.pip:
       case HubTool.spotify:
     }

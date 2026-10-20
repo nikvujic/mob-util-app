@@ -18,6 +18,7 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/models/subscription.dart';
+import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/todo_item.dart';
@@ -415,6 +416,82 @@ void main() {
         File('test/fixtures/v28/backup-plain.json').readAsStringSync(),
       ) as PlainBackupFile;
       expect(file.backup.subscriptions.isEmpty, isTrue);
+    });
+  });
+
+  group('packing.json v1 / v30 backup (packing lists, Round 94)', () {
+    void expectSample(PackingBook book) {
+      expect(book.sections.map((s) => s.name), [
+        'Documents',
+        'Clothes',
+        'Ski gear',
+        'Toiletries',
+        'Electronics',
+        'Medicine',
+        'Other',
+      ]);
+      expect(book.lists.map((l) => l.name), ['Jahorina ⛷', 'Beach']);
+      final trip = book.byId('p1')!;
+      expect(
+        trip.items.map((i) => (i.name, i.sectionId, i.count, i.packed)),
+        [
+          ('Pasoš', 'documents', 1, true),
+          ('Lična karta', 'documents', 1, false),
+          ('Čarape', 'clothes', 5, false),
+          ('Naočare', 'k1', 1, true),
+          ('Punjač', 'electronics', 1, false),
+          ('Kišobran', 'gone', 1, false),
+        ],
+      );
+      // Its section gone: shown under Other.
+      expect(
+        trip.grouped(book.sections).map((g) => (g.$1.name, g.$2.length)),
+        [
+          ('Documents', 2),
+          ('Clothes', 1),
+          ('Ski gear', 1),
+          ('Electronics', 1),
+          ('Other', 1)
+        ],
+      );
+      expect(book.byId('p2')!.items.first.count, 2);
+    }
+
+    test('packing.json version 1 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v30/storage'),
+      );
+      expectSample(storage.initialPacking);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v30 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v30/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.packing);
+      expect(file.backup.subscriptions.subscriptions, hasLength(6),
+          reason: "v29's too");
+    });
+
+    test('written as read', () {
+      final json = jsonDecode(
+              File('test/fixtures/v30/storage/packing.json').readAsStringSync())
+          as Map<String, dynamic>;
+      expect(PackingBook.fromJson(json).toJson(),
+          {'sections': json['sections'], 'lists': json['lists']});
+    });
+
+    test('older backups and phones: the usual sections, no lists', () async {
+      final file = BackupFile.parse(
+        File('test/fixtures/v29/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.packing.lists, isEmpty);
+      expect(file.backup.packing.sections, PackingBook.initial.sections);
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v29/storage'),
+      );
+      expect(storage.initialPacking.sections, PackingBook.initial.sections);
     });
   });
 
@@ -1514,6 +1591,10 @@ void main() {
           '36bd429d24107300b213915f6a335c69a9cd2d5910c778e9da285bee9768d159',
       'test/fixtures/v29/backup-plain.json':
           '30b51e18d1417ec1821bdbad8e7f6f20fab5295b7737f4e769e95757a82d0982',
+      'test/fixtures/v30/storage/packing.json':
+          'c43964e11e0e15344ae7efc8a3843bb10bb036c5a372ebe48c5fc80bf1095b70',
+      'test/fixtures/v30/backup-plain.json':
+          'd92d548956785c285c4988c5ae732f4cb86df202938c2d227df3cd02c4146230',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

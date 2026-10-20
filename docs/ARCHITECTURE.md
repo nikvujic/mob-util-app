@@ -835,3 +835,19 @@ receiver sets `STREAM_MUSIC`'s volume, dispatches the media play key to
 whatever had the music last, and sets the next alarm, so it runs with
 the app closed; after a restart or an update the same receiver sets it
 again.
+
+## Packing lists (Round 94)
+
+`models/packing.dart`: a `PackingBook` holds the sections every list
+shares (Other always there, put last by its constructor) and the lists;
+a `PackingList` its items, each with a section id, a count and whether
+it's packed. `grouped()` shows a list by section (an item whose section
+is gone falls under Other); `moved()` is edit mode's drag over the rows
+(headings and items), the item taking the heading above where it lands.
+`providers/packing_provider.dart` saves the book to `packing.json` and
+does the rest (ticks, Reset, Copy list with the sections picked, the
+sections' changes). Pages: `pages/hub/packing.dart` (the lists),
+`packing_list.dart` (a list's view and edit modes), `packing_sections.dart`
+and `packing_copy_sheet.dart`. Backups carry the book (`packing`,
+version 30); partial restore brings the sections the restored lists'
+items need (`withPackingLists`, matching by name first).

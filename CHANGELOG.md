@@ -6,6 +6,24 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- **Packing lists**, a new Hub page: lists like "Ski trip" or "Beach",
+  each showing how much is packed. A list opens with its things under
+  their sections (Documents, Clothes, Toiletries, Electronics, Medicine,
+  Other, and your own), each with a big box: tap anywhere on a row to
+  tick it; ticked things stay in place, struck through. **Reset**
+  unticks them all (with Undo). **Edit**: the name, a section's **+**
+  adds things (no two of a name in a section), a tap renames one, sets
+  how many or deletes it, and its handle drags it, into another section
+  too. **Copy list** asks the new name and which sections come along.
+  The sections are shared by every list (the button beside +): add,
+  rename, reorder, delete (its things move to Other). Locks, Clear data,
+  backups and restoring part of a backup include it.
+
+### Changed
+- **Spotify**: the page no longer says it may not start when Spotify
+  was closed: it does.
+
 ## [1.39.0] - 2026-10-20
 
 ### Added
