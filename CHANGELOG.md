@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.37.2] - 2026-10-20
+
 ### Changed
 - **Subscriptions: a card's expiry is a month and year** ("expires
   10/26", as on the card), picked from a year's twelve months; it's good
