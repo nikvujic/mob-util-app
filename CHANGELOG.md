@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.4] - 2026-10-21
+
 ### Changed
 - **Pip buzzes the phone through his animations:** wherever something
   lands, hits or clicks while you watch: the battery dropping and its
