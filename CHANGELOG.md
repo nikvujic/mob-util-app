@@ -6,6 +6,18 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Packing, editing a list:**
+  - Sections are **dragged** by the right of their name, as in
+    Ingredients (a line shows where one goes); Move up / down are gone.
+  - **Add section** is a button by Done, not at the end of the list.
+  - **+ Add** under a section taps anywhere across its width.
+  - Deleting a section says how many **items** go with it.
+
+### Fixed
+- **Packing:** an item dropped between two sections no longer settles
+  there and snaps back: it stays where you let it go.
+
 ## [1.40.1] - 2026-10-21
 
 ### Changed

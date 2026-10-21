@@ -844,8 +844,8 @@ a new list starts with) and the lists; a `PackingList` its own sections
 and whether it's packed. `grouped()` shows a list by its sections, every
 one (a thing whose section is gone falls under the last); `moved()` is
 edit mode's drag over the rows (headings and things), the thing taking
-the heading above where it lands; `sectionMoved()` and `withoutSection()`
-(its things with it) are a heading's options. `providers/packing_provider.dart`
+the heading above where it lands; `sectionMovedTo()` (a heading dragged, Round 96) and
+`withoutSection()` (its things with it). `providers/packing_provider.dart`
 saves the book to `packing.json` (v2; v1's lists get the shared sections
 as their own) and does the rest (a new list's `draft()`, kept on its
 first `save()`, ticks, Reset, Copy list with the sections picked, the

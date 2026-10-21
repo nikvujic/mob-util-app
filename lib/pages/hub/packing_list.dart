@@ -95,6 +95,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
 
   @override
   void dispose() {
+    _edgeScroll?.cancel();
     _saveNow();
     _name.dispose();
     _nameFocus.dispose();
@@ -116,7 +117,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
 
   void _saveNow() {
     _saveTimer?.cancel();
-    if (_gone || !_editing) return;
+    if (_gone || !_editing || !_notifier.mounted) return;
     // A new one is kept once something's in it.
     if (_isNew && !_kept && _list.isEmpty) return;
     _notifier.save(_list);
@@ -342,12 +343,8 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
 
   Future<void> _sectionOptions(PackingSection section) async {
     _leaveFields();
-    final at = _list.sections.indexOf(section);
-    final choice = await showChoicesSheet(context, section.name, [
+    final choice = await showChoicesSheet(context, section.name, const [
       (Icons.edit_outlined, 'Rename', 'rename'),
-      if (at > 0) (Icons.arrow_upward, 'Move up', 'up'),
-      if (at < _list.sections.length - 1)
-        (Icons.arrow_downward, 'Move down', 'down'),
       (Icons.delete_outline, 'Delete', 'delete'),
     ]);
     if (!mounted || !_editing) return;
@@ -364,10 +361,6 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
           for (final s in _list.sections)
             if (s.id == section.id) s.copyWith(name: name.trim()) else s,
         ]));
-      case 'up':
-        _change(_list.sectionMoved(section.id, -1));
-      case 'down':
-        _change(_list.sectionMoved(section.id, 1));
       case 'delete':
         await _deleteSection(section);
     }
@@ -386,8 +379,8 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
         context,
         title: 'Delete ${section.name}?',
         message: things.length == 1
-            ? 'Its 1 thing goes with it.'
-            : 'Its ${things.length} things go with it.',
+            ? 'Its 1 item goes with it.'
+            : 'Its ${things.length} items go with it.',
         confirmLabel: 'Delete',
         destructive: true,
       );
@@ -477,13 +470,21 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
                       danger: true,
                       onPressed: _deleteSelected,
                     )
-                  else
+                  else ...[
+                    // Round 96 (Nikola): by Done, not at the list's end.
+                    BottomAction(
+                      icon: Icons.playlist_add,
+                      tooltip: 'Add section',
+                      onPressed: _addSection,
+                    ),
+                    // Outermost, under the thumb.
                     BottomAction(
                       icon: Icons.check,
                       tooltip: 'Done',
                       primary: true,
                       onPressed: _done,
                     ),
+                  ],
                 ],
               )
             : BottomActions(
@@ -603,20 +604,196 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     );
   }
 
+  // Round 96 (Nikola, as Ingredients'): a section dragged by the right
+  // of its heading; a line shows where it'd go; the list scrolls at its
+  // edges.
+
+  /// In the list, to find it (scrolled at its edges while dragging).
+  final _listKey = GlobalKey();
+
+  /// The section being dragged, and before which section it'd go (an
+  /// index in the list's sections; their count: the end).
+  String? _draggingSection;
+  int? _dropBefore;
+
+  /// The finger, while a section is dragged.
+  double? _dragY;
+  Timer? _edgeScroll;
+
+  /// The rows shown, for where a dragged section would go: each row's
+  /// context and the section index it puts the dragged one before.
+  final _rowsShown = <BuildContext, int>{};
+
+  void _sectionDragStarted(String id) {
+    _leaveFields();
+    HapticFeedback.selectionClick();
+    setState(() => _draggingSection = id);
+    _edgeScroll = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      final y = _dragY;
+      final inList = _listKey.currentContext;
+      if (y == null || inList == null) return;
+      final scrollable = Scrollable.of(inList);
+      final box = scrollable.context.findRenderObject() as RenderBox;
+      final top = box.localToGlobal(Offset.zero).dy;
+      final position = scrollable.position;
+      const edge = 64.0;
+      final by = y < top + edge
+          ? -8.0
+          : y > top + box.size.height - edge
+              ? 8.0
+              : 0.0;
+      if (by != 0) {
+        position.jumpTo((position.pixels + by)
+            .clamp(position.minScrollExtent, position.maxScrollExtent));
+      }
+    });
+  }
+
+  void _sectionDragEnded() {
+    _edgeScroll?.cancel();
+    _edgeScroll = null;
+    _dragY = null;
+    if (mounted) {
+      setState(() {
+        _draggingSection = null;
+        _dropBefore = null;
+      });
+    }
+  }
+
+  /// A row a section can be dropped on, known by where it is (the finger's
+  /// height alone finds it): it puts the dragged one before [before].
+  Widget _dropTarget(int before, Widget child) => Builder(builder: (context) {
+        _rowsShown[context] = before;
+        return child;
+      });
+
+  void _sectionDragMoved(double y) {
+    _dragY = y;
+    _rowsShown.removeWhere((context, _) => !context.mounted);
+    final moving = _list.sections.indexWhere((s) => s.id == _draggingSection);
+    for (final MapEntry(key: context, value: before) in _rowsShown.entries) {
+      final box = context.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      final top = box.localToGlobal(Offset.zero).dy;
+      if (y < top || y >= top + box.size.height) continue;
+      // Where it is already: nowhere to go.
+      final at = before == moving || before == moving + 1 ? null : before;
+      if (at != _dropBefore) setState(() => _dropBefore = at);
+      return;
+    }
+  }
+
+  /// Let go: the section goes where the line is, if anywhere.
+  void _sectionDropped() {
+    final at = _dropBefore;
+    final id = _draggingSection;
+    if (at != null && id != null && _editing) {
+      final moving = _list.sections.indexWhere((s) => s.id == id);
+      // Its place among the others (it's taken out first).
+      _change(_list.sectionMovedTo(id, at > moving ? at - 1 : at));
+    }
+    _sectionDragEnded();
+  }
+
+  /// The line where a dragged section would go: above section [index]
+  /// (or, the count, under the last).
+  Widget _dropLine(int index) => AnimatedContainer(
+        key: Key('sectionDropLine-$index'),
+        duration: const Duration(milliseconds: 120),
+        height: _draggingSection != null && _dropBefore == index ? 3 : 0,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        color: context.colors.accent,
+      );
+
+  /// A section's heading in edit mode: a tap gives its options; its right
+  /// (where a thing's handle is) drags it.
+  Widget _editHeading(PackingSection section, int count) {
+    final label = _heading(
+      '${section.name.toUpperCase()}  ·  $count',
+      key: Key('packingSection-${section.id}'),
+      onTap: () => _sectionOptions(section),
+    );
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: label),
+          Draggable<String>(
+            key: Key('sectionHandle-${section.id}'),
+            data: section.id,
+            axis: Axis.vertical,
+            // Nothing drawn, still taken hold of.
+            hitTestBehavior: HitTestBehavior.opaque,
+            dragAnchorStrategy: (_, __, position) =>
+                Offset(position.dx - 12, kMinInteractiveDimension / 2),
+            onDragStarted: () => _sectionDragStarted(section.id),
+            onDragUpdate: (details) =>
+                _sectionDragMoved(details.globalPosition.dy),
+            onDragEnd: (_) => _sectionDropped(),
+            feedback: Material(
+              elevation: 6,
+              color: context.colors.card,
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: MediaQuery.sizeOf(context).width - 24,
+                height: kMinInteractiveDimension,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${section.name.toUpperCase()}  ·  $count',
+                      style: TextStyle(
+                        color: context.colors.accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            childWhenDragging:
+                const SizedBox(width: ReorderOrSelectIndicator.width),
+            child: const SizedBox(width: ReorderOrSelectIndicator.width),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// "+ Add" under a section's things (Round 96: the whole width taps).
+  Widget _addRow(PackingSection section) => Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+        child: TextButton.icon(
+          key: Key('packingAdd-${section.id}'),
+          style: TextButton.styleFrom(
+            minimumSize: const Size.fromHeight(kMinInteractiveDimension),
+            alignment: Alignment.centerLeft,
+          ),
+          icon: const Icon(Icons.add),
+          label: const Text('Add'),
+          onPressed: () => _addTo(section),
+        ),
+      );
+
   Widget _editBody(BuildContext context) {
     final colors = context.colors;
     const clearance = BottomActions.contentClearance;
-    // A heading, its things, then its "+ Add" row; the add rows aren't in
-    // the model's rows (headings and things), so indexes are mapped.
+    final groups = _list.grouped();
+    // Round 96: the first heading above the list and the last "+ Add"
+    // under it; between sections, one row holds a section's "+ Add" and
+    // the next one's heading. So every place a thing can be dropped is
+    // where it ends up (a gap between "+ Add" and a heading settled there,
+    // then snapped back).
     final rows = <Object>[
-      for (final (section, items) in _list.grouped()) ...[
-        section,
-        ...items,
-        (add: section),
+      for (var i = 0; i < groups.length; i++) ...[
+        if (i > 0) i, // the break before section i
+        ...groups[i].$2,
       ],
     ];
-    int modelIndex(int index) =>
-        index - rows.take(index).whereType<({PackingSection add})>().length;
     return PullDownList(
       key: const Key('packingEdit'),
       bottomSpace: clearance,
@@ -646,12 +823,25 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
             ),
           ),
         ),
+        SliverToBoxAdapter(
+          child: _dropTarget(
+            0,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _dropLine(0),
+                _editHeading(groups.first.$1, groups.first.$2.length),
+              ],
+            ),
+          ),
+        ),
         SliverReorderableList(
           itemCount: rows.length,
           // onReorderItem only exists on newer Flutter than we target.
           // ignore: deprecated_member_use
           onReorder: (from, to) {
-            final next = _list.moved(modelIndex(from), modelIndex(to));
+            // The model's rows have the first heading before these.
+            final next = _list.moved(from + 1, to + 1);
             if (!next.sameAs(_list)) _change(next);
           },
           proxyDecorator: (child, _, __) => Material(
@@ -661,66 +851,64 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
           ),
           itemBuilder: (context, index) {
             final row = rows[index];
-            if (row is PackingSection) {
-              final count = _list.grouped().firstWhere((g) => g.$1 == row).$2;
-              return KeyedSubtree(
-                key: ValueKey('section-${row.id}'),
-                child: _heading(
-                  '${row.name.toUpperCase()}  ·  ${count.length}',
-                  key: Key('packingSection-${row.id}'),
-                  onTap: () => _sectionOptions(row),
-                ),
-              );
-            }
-            if (row is ({PackingSection add})) {
-              return Padding(
-                key: ValueKey('add-${row.add.id}'),
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    key: Key('packingAdd-${row.add.id}'),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add'),
-                    onPressed: () => _addTo(row.add),
+            if (row is int) {
+              final (before, _) = groups[row - 1];
+              final (section, items) = groups[row];
+              return Material(
+                key: ValueKey('section-${section.id}'),
+                type: MaterialType.transparency,
+                child: _dropTarget(
+                  row,
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _addRow(before),
+                      _dropLine(row),
+                      _editHeading(section, items.length),
+                    ],
                   ),
                 ),
               );
             }
             final item = row as PackingItem;
             final selected = _selected.contains(item.id);
+            final inSection =
+                groups.indexWhere((g) => g.$2.any((i) => i.id == item.id));
             return Padding(
               key: ValueKey(item.id),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-              child: SelectableCard(
-                key: Key('packingItem-${item.id}'),
-                selected: selected,
-                onTap: () => _selected.isNotEmpty
-                    ? _toggleSelected(item.id)
-                    : _itemOptions(item),
-                onLongPress: () => _toggleSelected(item.id),
-                child: ReorderableRow(
-                  content: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 0, 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.name,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: colors.textPrimary,
+              child: _dropTarget(
+                inSection + 1,
+                SelectableCard(
+                  key: Key('packingItem-${item.id}'),
+                  selected: selected,
+                  onTap: () => _selected.isNotEmpty
+                      ? _toggleSelected(item.id)
+                      : _itemOptions(item),
+                  onLongPress: () => _toggleSelected(item.id),
+                  child: ReorderableRow(
+                    content: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 0, 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.name,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: colors.textPrimary,
+                              ),
                             ),
                           ),
-                        ),
-                        if (item.count > 1) _CountChip(item.count),
-                      ],
+                          if (item.count > 1) _CountChip(item.count),
+                        ],
+                      ),
                     ),
-                  ),
-                  indicator: ReorderOrSelectIndicator(
-                    index: index,
-                    selectionMode: _selected.isNotEmpty,
-                    selected: selected,
+                    indicator: ReorderOrSelectIndicator(
+                      index: index,
+                      selectionMode: _selected.isNotEmpty,
+                      selected: selected,
+                    ),
                   ),
                 ),
               ),
@@ -728,13 +916,17 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
           },
         ),
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: OutlinedButton.icon(
-              key: const Key('packingAddSection'),
-              icon: const Icon(Icons.add),
-              label: const Text('Add section'),
-              onPressed: _addSection,
+          child: KeyedSubtree(
+            key: _listKey,
+            child: _dropTarget(
+              groups.length,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _addRow(groups.last.$1),
+                  _dropLine(groups.length),
+                ],
+              ),
             ),
           ),
         ),

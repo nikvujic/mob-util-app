@@ -129,13 +129,17 @@ void main() {
       expect(trip.moved(0, 3).sameAs(trip), isTrue);
     });
 
-    test('a section moved up or down, its things with it', () {
-      expect(
-          shown(trip.sectionMoved('gear', -1)).first, 'documents: passport id');
-      expect(trip.sectionMoved('gear', -1).sections.map((s) => s.id),
-          ['documents', 'gear', 'clothes']);
-      expect(trip.sectionMoved('documents', -1).sameAs(trip), isTrue);
-      expect(trip.sectionMoved('gear', 1).sameAs(trip), isTrue);
+    test('a section moved to another place, its things with it', () {
+      final moved = trip.sectionMovedTo('gear', 0);
+      expect(moved.sections.map((s) => s.id), ['gear', 'documents', 'clothes']);
+      expect(shown(moved).first, 'gear: goggles');
+      expect(trip.sectionMovedTo('documents', 2).sections.map((s) => s.id),
+          ['clothes', 'gear', 'documents']);
+      expect(shown(trip.sectionMovedTo('documents', 2)).last,
+          'documents: passport id umbrella',
+          reason: 'a lost thing stays under the last');
+      expect(trip.sectionMovedTo('gear', 3).sameAs(trip), isTrue);
+      expect(trip.sectionMovedTo('gear', -1).sameAs(trip), isTrue);
     });
 
     test('a section deleted with its things; the last one stays', () {

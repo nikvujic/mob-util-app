@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 96 — Nikola on 1.40.1 (2026-10-21, patch 1.40.2)
+
+- [x] **Packing's edit mode**: sections dragged by the right of their
+  heading, as Ingredients' (a line where it'd go, the list scrolled at
+  its edges; `PackingList.sectionMovedTo`); no Move up / down. **Add
+  section** a button by Done. **+ Add** the whole width. "Its 1 item
+  goes with it". An item let go between "+ Add" and the next heading
+  settled there, then snapped into the section above: the first heading
+  is above the reorderable rows, the last "+ Add" under them, and each
+  other "+ Add" shares a row with the next heading, so every gap is
+  where it lands.
+
 ### Round 95 — Nikola on 1.40.0 (2026-10-21, patch 1.40.1)
 
 - [x] **Packing, his changes** (O41): each list has its **own sections**

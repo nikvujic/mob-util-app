@@ -204,11 +204,11 @@ class PackingList {
     return copyWith(items: order);
   }
 
-  /// Section [id] moved [by] places (−1 up, +1 down), its things with it.
-  PackingList sectionMoved(String id, int by) {
+  /// Section [id] moved to [to] among the sections (Round 96: dragged,
+  /// as Ingredients'), its things with it.
+  PackingList sectionMovedTo(String id, int to) {
     final at = sections.indexWhere((s) => s.id == id);
-    final to = at + by;
-    if (at == -1 || to < 0 || to >= sections.length) return this;
+    if (at == -1 || to < 0 || to >= sections.length || at == to) return this;
     final list = [...sections];
     list.insert(to, list.removeAt(at));
     return copyWith(sections: list);

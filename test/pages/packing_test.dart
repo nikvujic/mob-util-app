@@ -214,14 +214,15 @@ void main() {
   });
 
   testWidgets(
-      "edit mode: the list's own sections added, renamed, moved, deleted "
-      'with their things (asked); the last one stays; Save keeps it',
+      "edit mode: the list's own sections added (by Done), renamed, deleted "
+      'with their items (asked); the last one stays; Save keeps it',
       (tester) async {
     await openPacking(tester, start: sample());
     await openTrip(tester, edit: true);
 
-    await tester.tap(find.byKey(const Key('packingAddSection')));
-    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('packingAddSection')), findsNothing,
+        reason: 'Round 96: a button by Done, not at the end');
+    await tapTooltip(tester, 'Add section');
     await tester.enterText(sheetField(), 'clothes');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
@@ -232,24 +233,23 @@ void main() {
     expect(trip().sections.map((s) => s.name),
         ['Documents', 'Clothes', 'Ski gear', 'Food']);
 
-    // Moved up, renamed.
+    // Renamed (Round 96: moved by dragging, not from here).
     await tester.tap(find.byKey(const Key('packingSection-gear')));
     await tester.pumpAndSettle();
-    await choose(tester, 'up');
-    await tester.tap(find.byKey(const Key('packingSection-gear')));
-    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('choice-up')), findsNothing);
     await choose(tester, 'rename');
     await tester.enterText(sheetField(), 'Gear');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(trip().sections.map((s) => s.name),
-        ['Documents', 'Gear', 'Clothes', 'Food']);
+        ['Documents', 'Clothes', 'Gear', 'Food']);
 
     // With a thing in it: asked, then gone with it.
     await tester.tap(find.byKey(const Key('packingSection-clothes')));
     await tester.pumpAndSettle();
     await choose(tester, 'delete');
     expect(find.text('Delete Clothes?'), findsOneWidget);
+    expect(find.text('Its 1 item goes with it.'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await tester.pumpAndSettle();
     expect(trip().sections.map((s) => s.name), ['Documents', 'Gear', 'Food']);
@@ -282,6 +282,82 @@ void main() {
     expect(trip().sections.map((s) => s.name), ['Documents']);
     // The defaults untouched.
     expect(book().sections, PackingBook.defaults);
+  });
+
+  testWidgets(
+      'edit mode: a section dragged by the right of its heading, a line '
+      'where it goes; its items with it', (tester) async {
+    await openPacking(tester, start: sample());
+    await openTrip(tester, edit: true);
+
+    final handle =
+        tester.getCenter(find.byKey(const Key('sectionHandle-gear')));
+    final top =
+        tester.getRect(find.byKey(const Key('packingSection-documents')));
+    final to = Offset(handle.dx, top.center.dy);
+    final gesture = await tester.startGesture(handle);
+    await tester.pump();
+    for (var i = 1; i <= 10; i++) {
+      await gesture.moveTo(Offset.lerp(handle, to, i / 10)!);
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(tester.getSize(find.byKey(const Key('sectionDropLine-0'))).height,
+        greaterThan(0),
+        reason: 'a line above the first');
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(trip().sections.map((s) => s.id), ['gear', 'documents', 'clothes']);
+    expect(trip().items.firstWhere((i) => i.id == 'i3').sectionId, 'gear');
+  });
+
+  testWidgets('+ Add: the whole width opens it', (tester) async {
+    await openPacking(tester, start: sample());
+    await openTrip(tester, edit: true);
+    final add = tester.getRect(find.byKey(const Key('packingAdd-clothes')));
+    expect(add.width, greaterThan(300));
+    await tester.tapAt(Offset(add.right - 20, add.center.dy));
+    await tester.pumpAndSettle();
+    expect(find.text('Add to Clothes'), findsOneWidget);
+  });
+
+  testWidgets(
+      'edit mode: an item dropped between sections stays where it was let '
+      'go (end of the section above), no snap', (tester) async {
+    await openPacking(tester, start: sample());
+    await openTrip(tester, edit: true);
+
+    // Socks (Clothes) dropped just above Ski gear's heading: under
+    // Clothes' "+ Add" there's no gap any more; it ends Clothes.
+    final socks = find.byKey(const Key('packingItem-i2'));
+    final handle =
+        Offset(tester.getRect(socks).right - 30, tester.getCenter(socks).dy);
+    final gear = tester.getRect(find.byKey(const Key('packingSection-gear')));
+    final gesture = await tester.startGesture(handle);
+    await gesture.moveBy(const Offset(0, 20));
+    await tester.pump();
+    await gesture.moveTo(Offset(handle.dx, gear.top - 2));
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(trip().items.firstWhere((i) => i.id == 'i2').sectionId, 'clothes');
+    // Dropped above Passport, the first: the top of Documents.
+    final passport = tester.getRect(find.byKey(const Key('packingItem-i1')));
+    final goggles = find.byKey(const Key('packingItem-i3'));
+    final from = Offset(
+        tester.getRect(goggles).right - 30, tester.getCenter(goggles).dy);
+    final to = Offset(from.dx, passport.top + 4);
+    final g2 = await tester.startGesture(from);
+    await tester.pump();
+    for (var i = 1; i <= 12; i++) {
+      await g2.moveTo(Offset.lerp(from, to, i / 12)!);
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await tester.pump(const Duration(milliseconds: 300));
+    await g2.up();
+    await tester.pumpAndSettle();
+    expect(trip().items.first.id, 'i3');
+    expect(trip().items.first.sectionId, 'documents');
   });
 
   testWidgets('edit mode: a thing dragged by its handle into another section',
