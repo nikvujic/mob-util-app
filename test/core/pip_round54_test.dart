@@ -44,8 +44,9 @@ void main() {
       expect(p.takeBattery(80), isTrue);
       toSwap(p);
       expect(p.facingRight, isTrue);
-      expect(p.x, closeTo(80 - (rightOf(p) - p.x) - 1, 0.01),
-          reason: 'it a pixel off his casing, by his hand');
+      expect(
+          p.x, closeTo(80 - (rightOf(p) - p.x) - 1 - PipBrain.batteryGap, 0.01),
+          reason: 'Round 97: a few pixels off his casing, by his hand');
       expect(p.batterySlot, isNull, reason: 'shut till the hand is there');
       final slots = <double>{};
       final olds = <(double, double, double, bool)>[];
@@ -57,6 +58,14 @@ void main() {
         p.step(1 / 60);
         if (p.batterySlot case final s?) slots.add(s);
         if (p.oldBattery case final o?) olds.add(o);
+        // Round 97 (Nikola): the old one never over the new one.
+        if ((p.oldBattery, p.battery) case ((final o?, final b?))) {
+          final apart = o.$1 + PipBrain.batteryWidth <= b.$1 ||
+              b.$1 + PipBrain.batteryWidth <= o.$1 ||
+              o.$2 >= b.$2 + PipBrain.batteryHeight ||
+              b.$2 >= o.$2 + PipBrain.batteryHeight;
+          expect(apart, isTrue, reason: 'old $o over new $b');
+        }
         if (p.mitts.isNotEmpty) {
           expect(p.mitts, hasLength(1), reason: 'one hand');
           hands.add(p.mitts.single.$2);
@@ -72,11 +81,14 @@ void main() {
       expect(olds.first.$1, lessThan(rightOf(p)));
       final out = olds.firstWhere((o) => o.$2 > PipBrain.slotUp);
       expect(out.$1, rightOf(p) + 1);
-      // …then thrown off to his right, up, end over end, fading away.
-      expect(olds.last.$1, greaterThan(out.$1 + 30));
-      expect(olds.map((o) => o.$2).reduce(math.max),
-          greaterThan(PipBrain.slotUp + 10));
+      // …then (Round 97) thrown over his head to his other side, end over
+      // end; it lands there, lies a moment, fading away.
+      expect(olds.last.$1 + PipBrain.batteryWidth, lessThan(leftOf(p)));
+      expect(
+          olds.map((o) => o.$2).reduce(math.max), greaterThan(PipBrain.height),
+          reason: 'over his head');
       expect(olds.map((o) => o.$4).toSet(), {true, false});
+      expect(olds.last.$2, lessThan(1), reason: 'on the ground');
       expect(olds.last.$3, greaterThan(0.8));
       expect(crouched, isTrue);
       expect(hands.reduce(math.min), lessThan(PipBrain.slotUp),
@@ -103,13 +115,21 @@ void main() {
       expect(last.$2, PipBrain.slotUp);
     });
 
-    test('on his left: he faces it, and throws the old one to the left', () {
+    test('on his left: he faces it, and throws the old one over to his right',
+        () {
       final p = up()..x = 100;
       p.takeBattery(10);
       toSwap(p);
       expect(p.facingRight, isFalse);
-      expect(p.x,
-          closeTo(10 + PipBrain.batteryWidth + 1 - PipBrain.bodyInset, 0.01));
+      expect(
+          p.x,
+          closeTo(
+              10 +
+                  PipBrain.batteryWidth +
+                  1 +
+                  PipBrain.batteryGap -
+                  PipBrain.bodyInset,
+              0.01));
       besideHim(p, p.mitts.single.$1 + 1, right: false);
       final olds = <double>[];
       for (var i = 0; i < 60 * 5 && p.activity == PipActivity.fetching; i++) {
@@ -117,7 +137,7 @@ void main() {
         if (p.oldBattery case final o?) olds.add(o.$1);
         if (p.batterySlot case final s?) expect(s, leftOf(p));
       }
-      expect(olds.last, lessThan(olds.first - 30));
+      expect(olds.last, greaterThan(rightOf(p)));
     });
 
     test('no room on the side he comes from: the other side', () {
@@ -135,7 +155,8 @@ void main() {
       q.takeBattery(118);
       toSwap(q);
       expect(q.facingRight, isTrue);
-      expect(q.x, closeTo(118 - (rightOf(q) - q.x) - 1, 0.01));
+      expect(q.x,
+          closeTo(118 - (rightOf(q) - q.x) - 1 - PipBrain.batteryGap, 0.01));
     });
 
     test('the hand moves smoothly, and carries the new one up to the slot', () {

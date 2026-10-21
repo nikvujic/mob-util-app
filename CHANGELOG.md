@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Pip changing his battery, livelier:** the new battery bounces as it
+  lands and glints while it waits; he stands a little off it, so the
+  two batteries never overlap; the old one (no red bit in it any more)
+  is thrown over his head to his other side, lands with a clunk and a
+  puff of dust, and fades there; the new one clicks in with a crackle of
+  sparks; then a happy little shake and a hop with sparkles. In Pip
+  Home's Animations (*Changing his battery*) it plays when he's full
+  too, and gives no energy.
+
 ## [1.40.2] - 2026-10-21
 
 ### Changed

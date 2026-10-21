@@ -247,15 +247,15 @@ abstract final class PipSprites {
     'gggg',
   ];
 
-  /// His old battery (Round 54), thrown away: dark inside, a red bit
-  /// left at the bottom.
+  /// His old battery (Round 54), thrown away: dark inside (Round 97,
+  /// Nikola: no red bit left in it).
   static const batteryEmpty = [
     '.hh.',
     'gXXg',
     'gXXg',
     'gXXg',
     'gXXg',
-    'gRRg',
+    'gXXg',
     'gggg',
   ];
 

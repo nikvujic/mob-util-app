@@ -1470,6 +1470,24 @@ class _RoomPainter extends CustomPainter {
           (groundTop - up).floorToDouble(),
           alpha: 1 - faded, flip: turned);
     }
+    // Round 97: its landing, a puff of dust.
+    for (final (dx, up, fade) in brain.batteryDust) {
+      dot(dx.floorToDouble(), (groundTop - up - 1).floorToDouble(),
+          PipColours.dirt.withValues(alpha: 1 - fade));
+    }
+    // Round 97: a glint on the new one while it waits: a little star.
+    if (brain.batteryGlint case (final gx, final gy)) {
+      final cx = gx.floorToDouble(), cy = (groundTop - gy - 1).floorToDouble();
+      dot(cx, cy, PipColours.screen);
+      for (final (ox, oy) in const [
+        (-1.0, 0.0),
+        (1.0, 0.0),
+        (0.0, -1.0),
+        (0.0, 1.0)
+      ]) {
+        dot(cx + ox, cy + oy, PipColours.screen.withValues(alpha: 0.6));
+      }
+    }
 
     // Round 52: what's in his field, behind him. A flower coming up
     // (only its grown part shows), or still in the ground.

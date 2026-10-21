@@ -626,6 +626,7 @@ class PipBrain {
     _battery = left;
     _batteryFrom = left;
     _batteryHeight = dropHeight;
+    _batteryLanded = null;
     if (activity == PipActivity.off) {
       _start(PipActivity.poweringOn);
       return true;
@@ -634,9 +635,13 @@ class PipBrain {
     _picking = null;
     // Round 54: to stand beside it (it by the hand he'll use), on the
     // side he comes from if there's room there.
+    // Round 97 (Nikola): a few pixels off, so the old one pulled out of
+    // his side isn't over the new one.
     final rightOf = left + batteryWidth / 2 >= x + width / 2;
-    final besideLeft = left - (width - bodyInset + 1); // it on his right
-    final besideRight = left + batteryWidth + 1 - bodyInset; // his left
+    final besideLeft =
+        left - (width - bodyInset + 1 + batteryGap); // it on his right
+    final besideRight =
+        left + batteryWidth + 1 + batteryGap - bodyInset; // his left
     bool fits(double at) => at >= 0 && at <= _maxX;
     final take = rightOf
         ? (fits(besideLeft) || !fits(besideRight))
@@ -649,6 +654,17 @@ class PipBrain {
 
   /// Which side of him the dropped battery is (Round 54).
   bool _batteryOnRight = true;
+
+  /// Seconds since the dropped battery hit the ground (Round 97: it
+  /// bounces once), or null while it falls.
+  double? _batteryLanded;
+
+  /// How far off his casing he stands from a new battery (Round 97).
+  static const batteryGap = 4;
+
+  /// Its bounce on landing: how long, how high.
+  static const bounceTime = 0.3;
+  static const bounceHeight = 2.0;
 
   /// A spot a few steps off for a battery to drop at (Round 54: the
   /// preview), on whichever side has room.
@@ -696,8 +712,30 @@ class PipBrain {
           _ease(((p - atSlotAgain) / (pushedIn - atSlotAgain)).clamp(0.0, 1.0));
       return _lerp((out, slotUp), (_slotLeft(out: false), slotUp), q);
     }
-    return (b, _batteryHeight);
+    final landed = _batteryLanded;
+    final bounce = landed != null && landed < bounceTime
+        ? bounceHeight * math.sin(math.pi * landed / bounceTime)
+        : 0.0;
+    return (b, _batteryHeight + bounce);
   }
+
+  /// Round 97: a glint on the new battery now and then while it waits on
+  /// the ground ((x, height above the ground) of its middle), or null.
+  (double, double)? get batteryGlint {
+    final b = _battery;
+    final landed = _batteryLanded;
+    if (activity != PipActivity.fetching || b == null || landed == null) {
+      return null;
+    }
+    final p = _picking;
+    if (p != null && p >= grabbed) return null;
+    if (landed % glintEvery >= glintFor) return null;
+    return (b + batteryWidth - 1, batteryHeight - 1);
+  }
+
+  /// How often it glints, and for how long.
+  static const glintEvery = 0.8;
+  static const glintFor = 0.2;
 
   /// What to show, from his life (Round 37), made so: straight away if
   /// he's just appeared (instead of coming out of the ground), or with
@@ -814,7 +852,16 @@ class PipBrain {
   static const atSlotAgain = 2.05;
   static const pushedIn = 2.4;
   static const handOut = 2.6;
-  static const pickEnd = 3.0;
+
+  /// Round 97: a happy little shake, then a hop with sparkles.
+  static const shakeEnd = 3.0;
+  static const pickEnd = 3.45;
+
+  /// Round 97: the old one thrown over his head, landing on his other
+  /// side (a clunk, a puff of dust), lying there a moment, fading.
+  static const landedLies = 0.5;
+  static const landedFades = 0.4;
+  static const sparkFor = 0.35;
 
   /// The slot's bottom (height above the ground) and its height.
   static const slotUp = 6.0;
@@ -852,15 +899,53 @@ class PipBrain {
       final q = _ease((p - pulledOut) / (throwAt - pulledOut));
       return (out, slotUp + 4 * q, 0, false);
     }
+    final land = _oldBatteryLands;
     final q = (p - throwAt) / throwFlight;
-    if (q >= 1) return null;
-    final away = _batteryOnRight ? 1.0 : -1.0;
-    return (
-      out + away * 50 * q,
-      slotUp + 4 + 16 * math.sin(math.pi * q * 0.9),
-      q < 0.6 ? 0 : (q - 0.6) / 0.4,
-      (q * 8).floor().isOdd,
-    );
+    if (q < 1) {
+      // Round 97 (Nikola: never over the new one): over his head to his
+      // other side, end over end.
+      return (
+        out + (land - out) * q,
+        (slotUp + 4) * (1 - q) + (height + 6) * math.sin(math.pi * q),
+        0,
+        (q * 8).floor().isOdd,
+      );
+    }
+    final on = p - throwAt - throwFlight;
+    if (on >= landedLies + landedFades) return null;
+    // A small hop as it lands, then still, then fading.
+    final bounce = on < 0.12 ? 1.0 * math.sin(math.pi * on / 0.12) : 0.0;
+    final fade =
+        on < landedLies ? 0.0 : ((on - landedLies) / landedFades).clamp(0, 1);
+    return (land, bounce, fade.toDouble(), false);
+  }
+
+  /// Where the old battery lands: his other side, a little off.
+  double get _oldBatteryLands {
+    final at = _batteryOnRight
+        ? x + bodyInset - 1 - batteryWidth - 8
+        : x + width - bodyInset + 1 + 8;
+    return at.clamp(0, math.max(0, roomWidth - batteryWidth)).toDouble();
+  }
+
+  /// Round 97: the old battery's landing, a puff of dust: (x, height
+  /// above the ground, how faded) for each speck.
+  List<(double, double, double)> get batteryDust {
+    final p = _picking;
+    if (activity != PipActivity.fetching || p == null) return const [];
+    final on = p - throwAt - throwFlight;
+    if (on < 0 || on >= 0.4) return const [];
+    final q = on / 0.4;
+    final mid = _oldBatteryLands + batteryWidth / 2;
+    return [
+      for (final (dx, rise) in const [
+        (-1.0, 0.6),
+        (1.0, 0.6),
+        (-0.6, 1.0),
+        (0.6, 1.0)
+      ])
+        (mid + dx * (3 + 4 * q), rise * 3 * math.sin(math.pi * q), q),
+    ];
   }
 
   /// The slot in his side, open while the batteries go in and out: the
@@ -1091,6 +1176,7 @@ class PipBrain {
         if (_t >= flyEnd) _battery = null;
         if (_t >= onEnd) _stand();
       case PipActivity.fetching:
+        if (_batteryHeight == 0) _batteryLanded = (_batteryLanded ?? 0) + dt;
         _batteryHeight = math.max(0, _batteryHeight - fallSpeed * dt);
         final picking = _picking;
         if (picking == null) {
@@ -1682,6 +1768,40 @@ class PipBrain {
     final screen = activity == PipActivity.charging &&
         _screen == ChargeScreen.sparks &&
         (_screenT * 6).floor().isEven;
+    final p = _picking;
+    if (activity == PipActivity.fetching && p != null) {
+      // Round 97: a crackle at his slot as the new one clicks in.
+      if (p >= pushedIn && p < pushedIn + sparkFor) {
+        final q = (p - pushedIn) / sparkFor;
+        final side = _batteryOnRight ? 1.0 : -1.0;
+        final sx = _batteryOnRight ? x + width - bodyInset : x + bodyInset - 1;
+        final sy = slotUp + slotRows / 2;
+        return [
+          for (final (dx, dy) in const [
+            (1.0, 1.0),
+            (1.0, -1.0),
+            (1.4, 0.0),
+            (0.4, 1.6),
+            (0.4, -1.6)
+          ])
+            (sx + side * dx * (1 + 4 * q), sy + dy * (1 + 3 * q)),
+        ];
+      }
+      // Round 97: sparkles round him as he hops for joy.
+      if (p >= shakeEnd && p < pickEnd) {
+        final q = (p - shakeEnd) / (pickEnd - shakeEnd);
+        final mid = x + width / 2;
+        return [
+          for (final (dx, up) in const [
+            (-1.0, 0.3),
+            (1.0, 0.3),
+            (-0.7, 1.0),
+            (0.7, 1.0)
+          ])
+            (mid + dx * (width / 2 + 2 + 4 * q), 6 + up * (height - 4) + 4 * q),
+        ];
+      }
+    }
     if (!pushing && !screen) return const [];
     final (px, py) = _port;
     final out = _stationRight ? 1.0 : -1.0;
@@ -2973,8 +3093,9 @@ class PipBrain {
         return hop(riseUpEnd, onEnd, 3);
       case PipActivity.fetching when _picking != null:
         final p = _picking!;
-        if (p < handOut || p >= pickEnd) return 0;
-        return 3 * math.sin(math.pi * (p - handOut) / (pickEnd - handOut));
+        if (p < shakeEnd || p >= pickEnd) return 0;
+        // Round 97: after his shake, a hop.
+        return 4 * math.sin(math.pi * (p - shakeEnd) / (pickEnd - shakeEnd));
       default:
     }
     if (frame == PipFrame.step1 || frame == PipFrame.step3) return 1;
@@ -2988,6 +3109,15 @@ class PipBrain {
     if (activity == PipActivity.wakingUp && _t >= yawnAt && _t < yawnEnd) {
       final s = 0.12 * math.sin(math.pi * (_t - yawnAt) / (yawnEnd - yawnAt));
       return (1 - s / 2, 1 + s);
+    }
+    // Round 97: a happy little shake once the new battery's in.
+    if (activity == PipActivity.fetching &&
+        _picking != null &&
+        _picking! >= handOut &&
+        _picking! < shakeEnd) {
+      final s = 0.07 *
+          math.sin(math.pi * 8 * (_picking! - handOut) / (shakeEnd - handOut));
+      return (1 + s, 1 - s);
     }
     final crouch = switch (activity) {
       PipActivity.adventuring => _run?.crouch,

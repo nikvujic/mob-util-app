@@ -422,6 +422,34 @@ void main() {
     expect(link.batteries, 1, reason: 'yours not used');
   });
 
+  testWidgets(
+      'Round 97: Changing his battery plays when he is full, and gives no '
+      'energy', (tester) async {
+    final link = FakePipLink(batteries: 1, segments: 3);
+    await open(tester, link: link);
+    await toSettings(tester);
+    await tester.tap(find.byKey(const Key('pipAnimations')));
+    await tester.pumpAndSettle();
+    final brain = room(tester).brain;
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('pipPlay-fetch')),
+      100,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('pipAnimationList')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pipPlay-fetch')));
+    await tester.pump();
+    expect(brain.activity, PipActivity.fetching);
+    for (var i = 0; i < 60 * 8 && brain.activity == PipActivity.fetching; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(link.segments, 3);
+    expect(link.batteries, 1);
+  });
+
   testWidgets("at his station, Charging says so (Round 45)", (tester) async {
     await open(tester, link: FakePipLink(segments: 2)..plugged = true);
     final brain = room(tester).brain;

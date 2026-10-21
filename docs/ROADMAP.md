@@ -337,6 +337,19 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 97 — Nikola on 1.40.2 (2026-10-21, patch 1.40.3)
+
+- [x] **Changing his battery, livelier** (O24): the new battery bounces
+  on landing (`bounceHeight`) and glints while it waits
+  (`batteryGlint`); he stands `batteryGap` off it, so the old one pulled
+  out isn't over it; the old one (no red bit: `batteryEmpty`) is thrown
+  over his head to his other side (`_oldBatteryLands`), lands with a
+  puff of dust (`batteryDust`), lies, fades; a crackle of sparks at the
+  slot as the new one clicks in; a shake, then a hop with sparkles
+  (`shakeEnd`, `pickEnd` 3.45). Nikola: "the batteries overlapping"
+  (old over new) gone. The Animations entry was there already (plays
+  when full, no energy): a test now says so.
+
 ### Round 96 — Nikola on 1.40.1 (2026-10-21, patch 1.40.2)
 
 - [x] **Packing's edit mode**: sections dragged by the right of their

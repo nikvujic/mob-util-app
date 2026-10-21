@@ -216,8 +216,17 @@ void main() {
         p.step(0.05);
       }
       expect(p.battery, isNull, reason: 'picked up');
-      // Round 54: beside it (on his right), not over it.
-      expect(p.x, closeTo(80 - (PipBrain.width - PipBrain.bodyInset + 1), 0.5));
+      // Round 54: beside it (on his right), not over it; Round 97: a few
+      // pixels off.
+      expect(
+          p.x,
+          closeTo(
+              80 -
+                  (PipBrain.width -
+                      PipBrain.bodyInset +
+                      1 +
+                      PipBrain.batteryGap),
+              0.5));
       expect(p.activity, isNot(PipActivity.fetching));
     });
 
