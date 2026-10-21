@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.3] - 2026-10-21
+
 ### Changed
 - **Pip changing his battery, livelier:** the new battery bounces as it
   lands and glints while it waits; he stands a little off it, so the
