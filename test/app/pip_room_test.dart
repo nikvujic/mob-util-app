@@ -277,7 +277,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
       expect(pip().activity, isNot(PipActivity.ball));
-      expect(buzzes, [contains('medium')]);
+      // The kick; Round 98: then its bounces.
+      expect(buzzes.first, contains('medium'));
+      expect(buzzes.skip(1), isNotEmpty);
+      expect(buzzes.skip(1), everyElement(contains('light')));
     });
 
     testWidgets('the phone set to remove animations: he just stands',
@@ -448,11 +451,23 @@ void main() {
         await frames(tester, 0.1);
       }
       expect(pip().activity, PipActivity.charging);
-      await frames(tester, PipBrain.chargeEvery - 1.5);
+      await frames(tester, 1);
+      final buzzes = <String>[];
+      tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'HapticFeedback.vibrate') {
+          buzzes.add(call.arguments as String);
+        }
+        return null;
+      });
+      await frames(tester, PipBrain.chargeEvery - 2.5);
       expect(link.charges, 0, reason: 'not yet');
+      expect(buzzes, isEmpty);
       await frames(tester, 2);
       expect(link.charges, 1);
       expect(pip().segments, 2, reason: 'his icon at once');
+      // Round 98: a buzz for the segment.
+      expect(buzzes, [contains('light')]);
       await frames(tester, PipBrain.chargeEvery);
       expect(link.charges, 2);
       expect(pip().segments, 3);

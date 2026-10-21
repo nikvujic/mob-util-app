@@ -134,7 +134,11 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
       _charging = 0;
     }
     if (brain.takeDroneCharge()) charged = link.chargeTick() || charged;
-    if (charged) brain.segments = link.look().$2;
+    if (charged) {
+      brain.segments = link.look().$2;
+      // Round 98: a buzz for each segment he gains, watched.
+      HapticFeedback.lightImpact();
+    }
   }
 
   /// Whether his way in was picked (once a room's time).

@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 98 — Nikola on 1.40.3 (2026-10-21, patch 1.40.4)
+
+- [x] **Buzzes through Pip's animations** (O42): "make us use vibration
+  often, everywhere where it makes sense (like battery drop)". The brain
+  queues a `PipBuzz` as an animation's clock passes a mark
+  (`_passed`, `_buzzOn`): light for hops landing, small hits and steps,
+  medium for thuds (the battery drop, the old one landing, falling over,
+  plugging in and out, the snowball), heavy for the new battery clicking
+  in. The room buzzes for each segment charged, watched. The ball buzzes
+  only on bounces faster than `ballBuzzSpeed`.
+
 ### Round 97 — Nikola on 1.40.2 (2026-10-21, patch 1.40.3)
 
 - [x] **Changing his battery, livelier** (O24): the new battery bounces

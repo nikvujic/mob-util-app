@@ -106,7 +106,9 @@ void main() {
 
   group('buzzes', () {
     test('landing from the sky: a medium one, once', () {
-      final p = up()..enter(PipEntrance.sky);
+      final p = up()
+        ..takeBuzzes() // Round 98: his landing's
+        ..enter(PipEntrance.sky);
       final buzzes = <PipBuzz>[];
       for (var i = 0; i < 60 * 10 && p.activity == PipActivity.falling; i++) {
         p.step(1 / 60);
@@ -116,7 +118,9 @@ void main() {
     });
 
     test('landing from a throw: a heavy one, once', () {
-      final p = up()..enter(PipEntrance.side);
+      final p = up()
+        ..takeBuzzes()
+        ..enter(PipEntrance.side);
       final buzzes = <PipBuzz>[];
       for (var i = 0; i < 60 * 10 && p.activity == PipActivity.thrown; i++) {
         p.step(1 / 60);
@@ -126,7 +130,9 @@ void main() {
     });
 
     test('a bug struck: a light one each; the ball kicked: a medium one', () {
-      final bugs = up()..play(PipAnimation.bugs);
+      final bugs = up()
+        ..takeBuzzes()
+        ..play(PipAnimation.bugs);
       final struck = <PipBuzz>[];
       var poofs = 0;
       var wasPoof = false;
@@ -139,13 +145,17 @@ void main() {
         wasPoof = bugs.poof != null;
       }
       expect(struck, List.filled(poofs, PipBuzz.light));
-      final ball = up(seed: 7)..play(PipAnimation.ball);
+      final ball = up(seed: 7)
+        ..takeBuzzes()
+        ..play(PipAnimation.ball);
       final kicked = <PipBuzz>[];
       for (var i = 0; i < 60 * 30 && ball.activity == PipActivity.ball; i++) {
         ball.step(1 / 60);
         kicked.addAll(ball.takeBuzzes());
       }
-      expect(kicked, [PipBuzz.medium]);
+      // Round 98: then a light one on each real bounce.
+      expect(kicked.first, PipBuzz.medium);
+      expect(kicked.skip(1), everyElement(PipBuzz.light));
     });
 
     test('taken once: then none until the next', () {

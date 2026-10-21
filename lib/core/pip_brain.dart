@@ -1116,6 +1116,8 @@ class PipBrain {
       case PipActivity.egg:
         break;
       case PipActivity.hatching:
+        // Round 98: a buzz as he lands from his jump out.
+        _buzzOn(hatchLandEnd, dt, PipBuzz.light);
         if (_t >= popEnd) {
           final p = ((_t - popEnd) / (jumpEnd - popEnd)).clamp(0.0, 1.0);
           x = _eggX - hatchJump * p;
@@ -1124,6 +1126,8 @@ class PipBrain {
         if (_t >= hatchLandEnd) facingRight = true;
         if (_t >= fadeEnd) _stand();
       case PipActivity.spawning:
+        _buzzOn(crackEnd, dt, PipBuzz.light); // the ground cracks
+        _buzzOn(hopEnd, dt, PipBuzz.light); // down from his hop
         if (_t >= landEnd) _stand();
       case PipActivity.standing:
         _blinkIn -= dt;
@@ -1146,6 +1150,7 @@ class PipBrain {
           x += _target > x ? distance : -distance;
         }
       case PipActivity.fallingAsleep:
+        _buzzOn(settleAt, dt, PipBuzz.light); // settling down
         if (_t >= asleepEnd) {
           final demo = _demo;
           _start(PipActivity.asleep);
@@ -1160,8 +1165,10 @@ class PipBrain {
       case PipActivity.stirring:
         if (_t >= stirEnd) _start(PipActivity.wakingUp);
       case PipActivity.wakingUp:
+        _buzzOn(wakeHopEnd, dt, PipBuzz.light); // down from his hop
         if (_t >= wakeHopEnd) _stand();
       case PipActivity.poweringOff:
+        _buzzOn(fallEnd, dt, PipBuzz.medium); // falling over
         if (_t >= offEnd) {
           final demo = _demo;
           _start(PipActivity.off);
@@ -1173,11 +1180,22 @@ class PipBrain {
           play(PipAnimation.powerOn);
         }
       case PipActivity.poweringOn:
+        _buzzOn(flyEnd, dt, PipBuzz.medium); // the battery reaches him
+        _buzzOn(onEnd, dt, PipBuzz.light); // down from his hop
         if (_t >= flyEnd) _battery = null;
         if (_t >= onEnd) _stand();
       case PipActivity.fetching:
-        if (_batteryHeight == 0) _batteryLanded = (_batteryLanded ?? 0) + dt;
+        if (_batteryHeight == 0) {
+          _batteryLanded = (_batteryLanded ?? 0) + dt;
+          // Round 98: down again after its bounce.
+          if (_passed(bounceTime, _batteryLanded!, dt)) {
+            _buzzes.add(PipBuzz.light);
+          }
+        }
+        final falling = _batteryHeight > 0;
         _batteryHeight = math.max(0, _batteryHeight - fallSpeed * dt);
+        // Round 98: the battery drop.
+        if (falling && _batteryHeight == 0) _buzzes.add(PipBuzz.medium);
         final picking = _picking;
         if (picking == null) {
           final distance = hurry * dt;
@@ -1191,7 +1209,17 @@ class PipBrain {
             x += _target > x ? distance : -distance;
           }
         } else {
-          _picking = picking + dt;
+          final p = _picking = picking + dt;
+          // Round 98: the old one pulled out, landing with its clunk; the
+          // new one clicking in; down from his hop of joy.
+          for (final (at, buzz) in const [
+            (pulledOut, PipBuzz.light),
+            (throwAt + throwFlight, PipBuzz.medium),
+            (pushedIn, PipBuzz.heavy),
+            (pickEnd, PipBuzz.light),
+          ]) {
+            if (_passed(at, p, dt)) _buzzes.add(buzz);
+          }
           if (_picking! >= pushedIn) _battery = null;
           if (_picking! >= pickEnd) _stand();
         }
@@ -1205,6 +1233,8 @@ class PipBrain {
           x += _target > x ? distance : -distance;
         }
       case PipActivity.plugging:
+        _buzzOn(grabEnd, dt, PipBuzz.light); // the cable taken
+        _buzzOn(pushEnd, dt, PipBuzz.medium); // plugged in
         if (_t >= plugEnd) {
           _start(PipActivity.charging);
           _nextScreen();
@@ -1230,6 +1260,7 @@ class PipBrain {
           _startUnplugging();
         }
       case PipActivity.unplugging:
+        _buzzOn(pullEnd, dt, PipBuzz.medium); // pulled out
         if (_t >= unplugEnd) {
           _stand();
           // The phone unplugged: the station goes too.
@@ -1254,6 +1285,9 @@ class PipBrain {
       case PipActivity.bugHunt:
         _stepBugs(dt);
       case PipActivity.showing:
+        // Round 98: down from his hop.
+        if (_screenShow.hops) _buzzOn(showHop, dt, PipBuzz.light);
+        if (_screenShow == PipScreen.pill) _buzzOn(0.9, dt, PipBuzz.light);
         // Round 55: his medicine reminder, marked, stops at once; still
         // due, it starts over ([_stepMedicine]), a hop each time.
         if ((_screenShow == PipScreen.pill && !medicineDue && !_previewing) ||
@@ -1273,11 +1307,18 @@ class PipBrain {
         }
         if (_t >= starTime + 1.2) _stand();
       case PipActivity.dancing:
-        // Turning on each beat.
+        // Turning on each beat (Round 98: a buzz on each).
         final beat = (_t / beatTime).floor();
+        if (beat > ((_t - dt) / beatTime).floor() && _t < danceTime) {
+          _buzzes.add(PipBuzz.light);
+        }
         facingRight = beat.isEven;
         if (_t >= danceTime) _stand();
       case PipActivity.eating:
+        // Round 98: a buzz on each bite.
+        for (final b in bites) {
+          _buzzOn(b + biteTime / 2, dt, PipBuzz.light);
+        }
         if (_t >= eatTime) _stand();
       case PipActivity.adventuring:
         _stepRun(dt);
@@ -1879,6 +1920,17 @@ class PipBrain {
   /// Moments to feel (Round 53: a kick, a strike, a landing), taken by
   /// his room to buzz the phone.
   final List<PipBuzz> _buzzes = [];
+
+  /// Round 98: whether [mark] was passed in this step of [dt] (with
+  /// [now] after it).
+  static bool _passed(double mark, double now, double dt) =>
+      now >= mark && now - dt < mark;
+
+  /// A [buzz] as his animation's clock passes [mark] (Round 98).
+  void _buzzOn(double mark, double dt, PipBuzz buzz) {
+    if (_passed(mark, _t, dt)) _buzzes.add(buzz);
+  }
+
   List<PipBuzz> takeBuzzes() {
     final taken = [..._buzzes];
     _buzzes.clear();
@@ -2163,6 +2215,9 @@ class PipBrain {
   PipScreen _screenShow = PipScreen.happy;
   double _showFor = 3;
 
+  /// How long his hop is when something comes (it lands with a buzz).
+  static const showHop = 0.4;
+
   void _startShowing(PipScreen screen) {
     _screenShow = screen;
     _showFor = screen.hops ? 4.0 : 3.2;
@@ -2364,6 +2419,7 @@ class PipBrain {
         }
       case 2:
         if (_t >= flowerPick) {
+          _buzzes.add(PipBuzz.light); // Round 98: picked
           _flowerPhase = 3;
           _t = 0;
         }
@@ -2445,6 +2501,9 @@ class PipBrain {
   static const ballSize = 4;
   static const kickTime = 0.25;
 
+  /// Round 98: how fast the ball must come down for its bounce to buzz.
+  static const ballBuzzSpeed = 15.0;
+
   void _startBall() {
     final fromRight = random.nextBool();
     _ballX = fromRight ? roomWidth.toDouble() : -ballSize.toDouble();
@@ -2496,6 +2555,8 @@ class PipBrain {
         _ballUp += _ballVy * dt;
         if (_ballUp < 0) {
           _ballUp = 0;
+          // Round 98: a buzz on each bounce that's still a bounce.
+          if (_ballVy < -ballBuzzSpeed) _buzzes.add(PipBuzz.light);
           _ballVy = -_ballVy * 0.5; // a bounce
         }
         if (_ballX > roomWidth + 2 || _ballX < -ballSize - 2) _stand();
@@ -3053,8 +3114,8 @@ class PipBrain {
       // A hop on every beat.
       return 3 * math.sin(math.pi * ((_t / beatTime) % 1)).abs();
     }
-    if (activity == PipActivity.showing && _screenShow.hops && _t < 0.4) {
-      return 3 * math.sin(math.pi * _t / 0.4); // a hop: something came
+    if (activity == PipActivity.showing && _screenShow.hops && _t < showHop) {
+      return 3 * math.sin(math.pi * _t / showHop); // a hop: something came
     }
     // Round 53: the pill twice (a second hop).
     if (activity == PipActivity.showing &&

@@ -315,6 +315,7 @@ extension PipBrainWeather on PipBrain {
           case 1: // building
             wx.snowman?.built = math.min(1, wx.t / _buildTime);
             if (wx.t >= _buildTime) {
+              _buzzes.add(PipBuzz.light); // Round 98: done
               facingRight = !facingRight;
               next();
             }
@@ -337,7 +338,11 @@ extension PipBrainWeather on PipBrain {
               next();
             }
           case 2:
-            if (wx.t >= _throwTime) next();
+            if (wx.t >= _throwTime) {
+              // Round 98: it splats on the glass, at you.
+              _buzzes.add(PipBuzz.medium);
+              next();
+            }
           default:
             if (wx.t >= _laughTime) _stand();
         }

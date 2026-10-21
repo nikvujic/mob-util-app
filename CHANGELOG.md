@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Pip buzzes the phone through his animations:** wherever something
+  lands, hits or clicks while you watch: the battery dropping and its
+  bounce, the old one pulled out and landing, the new one clicking in,
+  his hop after; falling over when he runs out, the battery reaching him
+  and his hop when he's back on; out of the ground, out of his egg,
+  settling down to sleep, the hop on waking; taking the cable and
+  plugging in, unplugging, each segment his station or drone gives him;
+  each bite, each dance beat, the hop when a notification or his pill
+  comes, a flower picked, the ball bouncing, the snowman finished and
+  the snowball hitting the glass. Calm ones (a blink, a butterfly, a
+  shooting star) stay quiet.
+
 ## [1.40.3] - 2026-10-21
 
 ### Changed

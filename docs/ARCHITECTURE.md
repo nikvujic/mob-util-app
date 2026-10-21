@@ -442,6 +442,10 @@ notification came since its last look. The sky's colours are stops
 Round 53: the brain queues `PipBuzz`es where something hits;
 `takeBuzzes()` hands them to the room's tick, which buzzes the phone
 (and drops them when it runs an event to its end unseen).
+Round 98: most animations buzz on their marks: `_buzzOn(mark, dt,
+buzz)` queues one when the activity's clock `_t` passes `mark` this
+step (`_passed`; the battery swap passes its own `_picking` clock and
+`_batteryLanded`); the room buzzes itself for a charged segment.
 `PipSprites.screenTurned` turns a screen picture so it reads right when
 he's drawn mirrored.
 Round 53 (1.16.0): `PipLink.medicineDue` (the red dot's rule, read
