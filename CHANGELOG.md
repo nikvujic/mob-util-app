@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.1] - 2026-10-21
+
 ### Changed
 - **Packing lists, your way:**
   - **Each list has its own sections.** In edit mode, a section's name
