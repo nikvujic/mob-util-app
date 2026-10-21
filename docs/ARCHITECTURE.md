@@ -838,16 +838,19 @@ again.
 
 ## Packing lists (Round 94)
 
-`models/packing.dart`: a `PackingBook` holds the sections every list
-shares (Other always there, put last by its constructor) and the lists;
-a `PackingList` its items, each with a section id, a count and whether
-it's packed. `grouped()` shows a list by section (an item whose section
-is gone falls under Other); `moved()` is edit mode's drag over the rows
-(headings and items), the item taking the heading above where it lands.
-`providers/packing_provider.dart` saves the book to `packing.json` and
-does the rest (ticks, Reset, Copy list with the sections picked, the
-sections' changes). Pages: `pages/hub/packing.dart` (the lists),
-`packing_list.dart` (a list's view and edit modes), `packing_sections.dart`
+`models/packing.dart`: a `PackingBook` holds the default sections (what
+a new list starts with) and the lists; a `PackingList` its own sections
+(Round 95; at least one) and its things, each with a section id, a count
+and whether it's packed. `grouped()` shows a list by its sections, every
+one (a thing whose section is gone falls under the last); `moved()` is
+edit mode's drag over the rows (headings and things), the thing taking
+the heading above where it lands; `sectionMoved()` and `withoutSection()`
+(its things with it) are a heading's options. `providers/packing_provider.dart`
+saves the book to `packing.json` (v2; v1's lists get the shared sections
+as their own) and does the rest (a new list's `draft()`, kept on its
+first `save()`, ticks, Reset, Copy list with the sections picked, the
+default sections). Pages: `pages/hub/packing.dart` (the lists),
+`packing_list.dart` (a list's view and edit modes; edits saved as made,
+Back asks Save or Discard), `packing_sections.dart` (default sections)
 and `packing_copy_sheet.dart`. Backups carry the book (`packing`,
-version 30); partial restore brings the sections the restored lists'
-items need (`withPackingLists`, matching by name first).
+version 31).

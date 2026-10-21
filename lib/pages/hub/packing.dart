@@ -13,14 +13,14 @@ import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
-/// Opens a packing list (view mode), or a new one in edit mode ([isNew]).
-void openPackingList(BuildContext context, String id, {bool isNew = false}) {
+/// Opens a packing list (view mode).
+void openPackingList(BuildContext context, String id) =>
+    _open(context, PackingListPage(listId: id));
+
+void _open(BuildContext context, Widget page) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => PageGate(
-        page: HubTool.packing,
-        child: PackingListPage(listId: id, isNew: isNew),
-      ),
+      builder: (_) => PageGate(page: HubTool.packing, child: page),
     ),
   );
 }
@@ -28,8 +28,8 @@ void openPackingList(BuildContext context, String id, {bool isNew = false}) {
 /// Packing (Round 94, Nikola): the lists, as cards with their name and
 /// how much is packed, in the user's order (the handle moves them). A tap
 /// opens one; holding one selects it (to delete several, asked first).
-/// + makes a new one, opened in edit mode; Sections opens the sections
-/// every list shares.
+/// + makes a new one (Round 95: "New list", back here when done); Default
+/// sections opens what a new list starts with.
 class PackingPage extends ConsumerStatefulWidget {
   const PackingPage({super.key});
 
@@ -48,7 +48,8 @@ class _PackingPageState extends ConsumerState<PackingPage> {
     super.dispose();
   }
 
-  void _add() => openPackingList(context, _notifier.add(), isNew: true);
+  void _add() =>
+      _open(context, PackingListPage.create(draft: _notifier.draft()));
 
   /// Asked first, and no Undo after (like Recipes).
   Future<void> _deleteSelected() async {
@@ -137,7 +138,7 @@ class _PackingPageState extends ConsumerState<PackingPage> {
                   actions: [
                     BottomAction(
                       icon: Icons.view_agenda_outlined,
-                      tooltip: 'Sections',
+                      tooltip: 'Default sections',
                       onPressed: () => openPackingSections(context),
                     ),
                     // Outermost, under the thumb.

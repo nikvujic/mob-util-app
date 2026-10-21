@@ -177,6 +177,13 @@ app still reads every version, so an update can never lose existing data.
   under Other) and "Beach" (Sunscreen ×2, Swimsuit).
 - `v30/backup-plain.json` — backup (version 30) with them (and v29's
   data).
+- `v31/storage/packing.json` — each packing list with its own sections
+  (Round 95, packing.json version 2; `sections` at the top are the
+  defaults: Documents, Clothes, Toiletries, Other). "Jahorina ⛷" with
+  Dokumenta (Pasoš packed), Ski oprema (Naočare, Kaciga packed) and Odeća
+  (Čarape ×5); "Beach" with one empty section, "Beach stuff".
+- `v31/backup-plain.json` — backup (version 31) with them (and v30's
+  other data).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

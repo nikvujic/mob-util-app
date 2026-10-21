@@ -4,7 +4,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/packing.dart';
 
 /// Packing (Round 94), saved to `packing.json`: the lists, in the user's
-/// order, and the sections they share.
+/// order, and the default sections a new one starts with.
 class PackingNotifier extends StateNotifier<PackingBook> {
   PackingNotifier(AppStorage storage) : super(storage.initialPacking) {
     addListener(storage.savePacking, fireImmediately: false);
@@ -12,18 +12,19 @@ class PackingNotifier extends StateNotifier<PackingBook> {
 
   PackingList? byId(String id) => state.byId(id);
 
-  /// A new, empty list at the top; returns its id.
-  String add() {
-    final list = PackingList(id: generateId(), name: '');
-    state = state.copyWith(lists: [list, ...state.lists]);
-    return list.id;
-  }
+  /// A new list, not kept yet ([save] keeps it, at the top), with the
+  /// default sections.
+  PackingList draft() =>
+      PackingList(id: generateId(), name: '', sections: state.sections);
 
-  /// [list] as it is now (from its editor, or ticked).
+  /// [list] as it is now (from its editor, or ticked); a new one goes on
+  /// top.
   void save(PackingList list) {
     final old = byId(list.id);
-    if (old == null || identical(old, list)) return;
-    state = state.withList(list);
+    if (identical(old, list)) return;
+    state = old == null
+        ? state.copyWith(lists: [list, ...state.lists])
+        : state.withList(list);
   }
 
   /// [itemId] in [listId] ticked, or unticked.
@@ -33,30 +34,34 @@ class PackingNotifier extends StateNotifier<PackingBook> {
     state = state.withList(list.toggled(itemId));
   }
 
-  /// Everything in [listId] unticked; returns it as it was (for Undo).
-  PackingList? reset(String listId) {
+  /// Everything in [listId] unticked.
+  void reset(String listId) {
     final list = byId(listId);
-    if (list == null) return null;
+    if (list == null) return;
     state = state.withList(list.reset());
-    return list;
   }
 
-  /// A copy of [id] called [name], just below it, with only its items in
-  /// [sectionIds], none ticked; returns its id.
+  /// A copy of [id] called [name], just below it, with only its sections
+  /// [sectionIds] and their things, none ticked; returns its id.
   String? copy(String id, String name, Set<String> sectionIds) {
     final index = state.lists.indexWhere((l) => l.id == id);
     if (index == -1) return null;
+    final from = state.lists[index];
+    final groups = [
+      for (final g in from.grouped())
+        if (sectionIds.contains(g.$1.id)) g,
+    ];
     final copy = PackingList(
       id: generateId(),
       name: name,
+      // At least one, as every list.
+      sections: groups.isEmpty
+          ? [from.sections.first]
+          : [for (final (s, _) in groups) s],
       items: [
-        // As shown: one whose section is gone is in Other.
-        for (final (section, items)
-            in state.lists[index].grouped(state.sections))
-          if (sectionIds.contains(section.id))
-            for (final i in items)
-              i.copyWith(
-                  id: generateId(), sectionId: section.id, packed: false),
+        for (final (section, items) in groups)
+          for (final i in items)
+            i.copyWith(id: generateId(), sectionId: section.id, packed: false),
       ],
     );
     state = state.copyWith(lists: [
@@ -101,9 +106,10 @@ class PackingNotifier extends StateNotifier<PackingBook> {
     state = state.copyWith(lists: lists);
   }
 
-  // The sections every list shares.
+  // The default sections (Round 95): what a new list starts with; the
+  // lists there are keep their own.
 
-  /// A new section called [name], last before Other; returns its id.
+  /// A new default section called [name], last; returns its id.
   String addSection(String name) {
     final section = PackingSection(id: generateId(), name: name.trim());
     state = state.copyWith(sections: [...state.sections, section]);
@@ -117,30 +123,33 @@ class PackingNotifier extends StateNotifier<PackingBook> {
     ]);
   }
 
-  /// Section [id] deleted, its items moved to Other; returns the book as
-  /// it was (for Undo).
-  PackingBook removeSection(String id) {
-    final before = state;
-    state = state.withoutSection(id);
+  /// Default section [id] deleted (not the last one); returns the
+  /// sections as they were (for Undo), or null if it stayed.
+  List<PackingSection>? removeSection(String id) {
+    if (state.sections.length <= 1) return null;
+    final before = state.sections;
+    state = state.copyWith(sections: [
+      for (final s in state.sections)
+        if (s.id != id) s,
+    ]);
     return before;
   }
 
-  /// Sections reordered (`onReorder` semantics), Other not among them:
-  /// it stays last.
+  /// The default sections reordered (`onReorder` semantics).
   void reorderSections(int oldIndex, int newIndex) {
-    final movable = [
-      for (final s in state.sections)
-        if (!s.isOther) s,
-    ];
-    if (oldIndex < 0 || oldIndex >= movable.length) return;
+    final list = [...state.sections];
+    if (oldIndex < 0 || oldIndex >= list.length) return;
     if (newIndex > oldIndex) newIndex--;
-    newIndex = newIndex.clamp(0, movable.length - 1);
+    newIndex = newIndex.clamp(0, list.length - 1);
     if (oldIndex == newIndex) return;
-    movable.insert(newIndex, movable.removeAt(oldIndex));
-    state = state.copyWith(sections: movable);
+    list.insert(newIndex, list.removeAt(oldIndex));
+    state = state.copyWith(sections: list);
   }
 
-  /// Replaces everything (restoring a backup, Clear data, Undo).
+  void restoreSections(List<PackingSection> sections) =>
+      state = state.copyWith(sections: sections);
+
+  /// Replaces everything (restoring a backup, Clear data).
   void replaceAll(PackingBook book) => state = book;
 }
 

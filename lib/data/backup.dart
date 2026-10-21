@@ -91,8 +91,9 @@ class Backup {
   /// 63); 27 = a ski trip's travel (in `dates`, Round 67); 28 = a shop
   /// item's typed amount (in `shopItems`, Round 70); 29 = subscriptions
   /// (`subscriptions`, as in `subscriptions.json`, Round 79); 30 =
-  /// packing lists (`packing`, as in `packing.json`, Round 94).
-  static const version = 30;
+  /// packing lists (`packing`, as in `packing.json`, Round 94); 31 = a
+  /// packing list's own sections (in `packing`, Round 95).
+  static const version = 31;
 
   final DateTime createdAt;
   final String appVersion;
@@ -134,8 +135,8 @@ class Backup {
   /// Subscriptions (Round 79); empty in backups from before them.
   final SubscriptionBook subscriptions;
 
-  /// Packing lists and their sections (Round 94); the usual sections and
-  /// no lists in backups from before them.
+  /// Packing lists and the default sections (Round 94); the usual
+  /// sections and no lists in backups from before them.
   PackingBook get packing => _packing ?? PackingBook.initial;
   final PackingBook? _packing;
 

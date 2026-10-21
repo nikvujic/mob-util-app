@@ -1,11 +1,10 @@
 import 'dart:convert';
-
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/core/app_info.dart';
+import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/hub_tool.dart';
@@ -15,20 +14,22 @@ import 'package:the_app/providers/packing_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 94 (Nikola): packing lists, items under sections every list
-/// shares (Other always last), a count, ticks.
+/// Round 94 (Nikola): packing lists, things under sections, a count,
+/// ticks. Round 95: each list has its own sections (at least one; Other
+/// is like any other), the defaults are what a new one starts with.
 void main() {
   const documents = PackingSection(id: 'documents', name: 'Documents');
   const clothes = PackingSection(id: 'clothes', name: 'Clothes');
   const gear = PackingSection(id: 'gear', name: 'Ski gear');
-  final sections = [documents, clothes, gear, PackingSection.other];
+  const sections = [documents, clothes, gear];
 
   PackingItem item(String id, String section,
           {int count = 1, bool packed = false}) =>
       PackingItem(
           id: id, name: id, sectionId: section, count: count, packed: packed);
 
-  final trip = PackingList(id: 'l1', name: 'Ski trip', items: [
+  final trip =
+      PackingList(id: 'l1', name: 'Ski trip', sections: sections, items: [
     item('passport', 'documents', packed: true),
     item('socks', 'clothes', count: 5),
     item('goggles', 'gear'),
@@ -36,8 +37,13 @@ void main() {
     item('umbrella', 'gone'),
   ]);
 
+  List<String> shown(PackingList list) => [
+        for (final (s, items) in list.grouped())
+          '${s.id}: ${items.map((i) => i.id).join(' ')}',
+      ];
+
   group('PackingBook', () {
-    test('the usual sections at first, Other last; no lists', () {
+    test('the usual default sections at first, Other a normal one', () {
       expect(PackingBook.initial.sections.map((s) => s.name), [
         'Documents',
         'Clothes',
@@ -47,33 +53,8 @@ void main() {
         'Other',
       ]);
       expect(PackingBook.initial.lists, isEmpty);
-    });
-
-    test('Other always there and last, wherever it was', () {
-      expect(
-        PackingBook(sections: [PackingSection.other, documents])
-            .sections
-            .map((s) => s.id),
-        ['documents', 'other'],
-      );
-      expect(PackingBook(sections: [documents]).sections.last.isOther, isTrue);
-    });
-
-    test('a section deleted: its items, in every list, go to Other', () {
-      final book = PackingBook(sections: sections, lists: [trip]);
-      final after = book.withoutSection('gear');
-      expect(
-          after.sections.map((s) => s.id), ['documents', 'clothes', 'other']);
-      expect(
-          after
-              .byId('l1')!
-              .items
-              .firstWhere((i) => i.id == 'goggles')
-              .sectionId,
-          'other');
-      expect(book.withoutSection('other').sections, book.sections,
-          reason: 'Other stays');
-      expect(book.itemsIn('documents'), 2);
+      expect(PackingBook(sections: const []).sections, PackingBook.defaults,
+          reason: 'never none');
     });
 
     test('written as read; sections missing: the usual ones', () {
@@ -84,31 +65,35 @@ void main() {
       expect(item('a', 'clothes').toJson(),
           {'id': 'a', 'name': 'a', 'section': 'clothes'},
           reason: 'a count of 1, not packed: not written');
-      expect(PackingBook.fromJson(const {}).sections,
-          PackingBook.initial.sections);
+      expect(PackingBook.fromJson(const {}).sections, PackingBook.defaults);
       expect(PackingItem.fromJson(const {'id': 'x', 'count': 500}).count, 99);
+    });
+
+    test("Round 94's lists (no sections of their own) get the shared ones", () {
+      final book = PackingBook.fromJson({
+        'sections': [for (final s in sections) s.toJson()],
+        'lists': [
+          {
+            'id': 'old',
+            'name': 'Old',
+            'items': [item('socks', 'clothes').toJson()],
+          },
+        ],
+      });
+      expect(book.byId('old')!.sections, sections);
     });
   });
 
   group('PackingList', () {
-    test('shown by section, in the sections\' order; lost ones in Other', () {
-      expect(
-        [
-          for (final (s, items) in trip.grouped(sections))
-            '${s.id}: ${items.map((i) => i.id).join(' ')}',
-        ],
-        [
-          'documents: passport id',
-          'clothes: socks',
-          'gear: goggles',
-          'other: umbrella',
-        ],
-      );
-      final noGear = trip.copyWith(items: [trip.items.first]);
-      expect(noGear.grouped(sections).map((g) => g.$1.id), ['documents'],
-          reason: 'empty sections left out');
-      expect(noGear.grouped(sections, keepEmpty: true).map((g) => g.$1.id),
-          ['documents', 'clothes', 'gear', 'other']);
+    test('every section shown, empty ones too; lost things in the last', () {
+      expect(shown(trip), [
+        'documents: passport id',
+        'clothes: socks',
+        'gear: goggles umbrella',
+      ]);
+      final empty = trip.copyWith(items: [trip.items.first]);
+      expect(shown(empty), ['documents: passport', 'clothes: ', 'gear: '],
+          reason: 'set up in edit mode, shown in view mode (Nikola)');
     });
 
     test('ticked, unticked in place; Reset unticks all', () {
@@ -120,34 +105,58 @@ void main() {
       expect(ticked.reset().packedCount, 0);
     });
 
-    test('no two of a name in a section (any case)', () {
+    test('no two of a name in a section, nor two sections of a name', () {
       expect(trip.named(' SOCKS ', 'clothes')?.id, 'socks');
       expect(trip.named('socks', 'gear'), isNull);
       expect(trip.named('socks', 'clothes', except: 'socks'), isNull);
+      expect(trip.sectionNamed('ski GEAR')?.id, 'gear');
+      expect(trip.sectionNamed('ski gear', except: 'gear'), isNull);
     });
 
-    test('an item dragged in edit mode takes the section it lands in', () {
+    test('a thing dragged in edit mode takes the section it lands in', () {
       // Rows: [Documents] passport id [Clothes] socks [Ski gear] goggles
-      //       [Other] umbrella
-      final moved = trip.moved(sections, 1, 5); // passport under Clothes
-      expect(
-        [
-          for (final (s, items) in moved.grouped(sections, keepEmpty: true))
-            '${s.id}: ${items.map((i) => i.id).join(' ')}',
-        ],
-        [
-          'documents: id',
-          'clothes: socks passport',
-          'gear: goggles',
-          'other: umbrella',
-        ],
-      );
+      //       umbrella
+      expect(shown(trip.moved(1, 5)), [
+        'documents: id',
+        'clothes: socks passport',
+        'gear: goggles umbrella',
+      ]);
       // Above every heading: into the first.
-      final top = trip.moved(sections, 6, 0);
-      expect(top.items.firstWhere((i) => i.id == 'goggles').sectionId,
+      expect(
+          trip.moved(6, 0).items.firstWhere((i) => i.id == 'goggles').sectionId,
           'documents');
-      // A heading doesn't move.
-      expect(trip.moved(sections, 0, 3).sameAs(trip), isTrue);
+      // A heading doesn't move this way.
+      expect(trip.moved(0, 3).sameAs(trip), isTrue);
+    });
+
+    test('a section moved up or down, its things with it', () {
+      expect(
+          shown(trip.sectionMoved('gear', -1)).first, 'documents: passport id');
+      expect(trip.sectionMoved('gear', -1).sections.map((s) => s.id),
+          ['documents', 'gear', 'clothes']);
+      expect(trip.sectionMoved('documents', -1).sameAs(trip), isTrue);
+      expect(trip.sectionMoved('gear', 1).sameAs(trip), isTrue);
+    });
+
+    test('a section deleted with its things; the last one stays', () {
+      final noClothes = trip.withoutSection('clothes');
+      expect(shown(noClothes), [
+        'documents: passport id',
+        'gear: goggles umbrella',
+      ]);
+      // The last one's lost things go with it too.
+      expect(trip.withoutSection('gear').items.map((i) => i.id),
+          ['passport', 'socks', 'id']);
+      final one = trip.copyWith(sections: [documents]);
+      expect(one.withoutSection('documents').sections, [documents]);
+    });
+
+    test('changed or not, for Save or Discard: its sections count', () {
+      expect(trip.sameAs(trip.copyWith()), isTrue);
+      expect(
+          trip.sameAs(trip.copyWith(sections: [documents, clothes])), isFalse);
+      expect(trip.sameAs(trip.copyWith(name: 'Other')), isFalse);
+      expect(trip.sameAs(trip.toggled('id')), isFalse);
     });
   });
 
@@ -166,47 +175,64 @@ void main() {
     });
     tearDown(() => container.dispose());
 
-    test('copy: a new name, only the sections picked, nothing ticked', () {
-      final id = notifier.copy('l1', 'Ski trip 2027', {'documents', 'other'})!;
+    test('a new list: the default sections, kept on top once saved', () {
+      final draft = notifier.draft();
+      expect(draft.sections, sections);
+      expect(book().lists, hasLength(1), reason: 'not kept yet');
+      notifier.save(draft.copyWith(name: 'Beach'));
+      expect(book().lists.map((l) => l.name), ['Beach', 'Ski trip']);
+    });
+
+    test(
+        'copy: a new name, only the sections picked and their things, '
+        'nothing ticked', () {
+      final id = notifier.copy('l1', 'Ski trip 2027', {'documents', 'gear'})!;
       expect(book().lists.map((l) => l.name), ['Ski trip', 'Ski trip 2027']);
       final copy = book().byId(id)!;
-      expect(copy.items.map((i) => i.name), ['passport', 'id', 'umbrella']);
+      expect(copy.sections, [documents, gear]);
+      expect(copy.items.map((i) => i.name),
+          ['passport', 'id', 'goggles', 'umbrella']);
       expect(copy.packedCount, 0);
       expect(copy.items.map((i) => i.id), isNot(contains('passport')),
-          reason: 'its own items');
-      expect(copy.items.last.sectionId, 'other');
+          reason: 'its own things');
+      expect(copy.items.last.sectionId, 'gear', reason: 'lost one placed');
       expect(book().byId('l1')!.packedCount, 1, reason: 'the original stays');
+      final bare = notifier.copy('l1', 'Bare', <String>{})!;
+      expect(book().byId(bare)!.sections, [documents],
+          reason: 'a list has at least one section');
     });
 
-    test('reset, with what it was for Undo', () {
-      final before = notifier.reset('l1')!;
+    test('reset', () {
+      notifier.reset('l1');
       expect(book().byId('l1')!.packedCount, 0);
-      notifier.save(before);
-      expect(book().byId('l1')!.packedCount, 1);
     });
 
-    test('sections: added before Other, reordered with Other kept last', () {
+    test(
+        'default sections: added, reordered, deleted (Undo; one stays); '
+        'the lists keep theirs', () {
       notifier.addSection('Beach');
       expect(book().sections.map((s) => s.name),
-          ['Documents', 'Clothes', 'Ski gear', 'Beach', 'Other']);
+          ['Documents', 'Clothes', 'Ski gear', 'Beach']);
       notifier.reorderSections(3, 0);
-      expect(book().sections.map((s) => s.name).first, 'Beach');
-      notifier.reorderSections(0, 10);
-      expect(book().sections.map((s) => s.name),
-          ['Documents', 'Clothes', 'Ski gear', 'Beach', 'Other']);
-      final before = notifier.removeSection('documents');
-      expect(book().byId('l1')!.items.first.sectionId, 'other');
-      notifier.replaceAll(before);
-      expect(book().sections.first.id, 'documents');
+      expect(book().sections.first.name, 'Beach');
+      final before = notifier.removeSection('documents')!;
+      expect(book().sections.map((s) => s.id), isNot(contains('documents')));
+      expect(book().byId('l1')!.sections, sections, reason: 'untouched');
+      notifier.restoreSections(before);
+      expect(book().sections.map((s) => s.id), contains('documents'));
+      for (final s in [...book().sections].skip(1)) {
+        notifier.removeSection(s.id);
+      }
+      expect(book().sections, hasLength(1));
+      expect(notifier.removeSection(book().sections.single.id), isNull);
     });
 
-    test('a new list on top; removed and put back where it was', () {
-      final id = notifier.add();
-      expect(book().lists.first.id, id);
+    test('removed and put back where it was', () {
+      notifier.save(notifier.draft().copyWith(name: 'New'));
       final removed = notifier.remove({'l1'});
-      expect(book().lists.map((l) => l.id), [id]);
+      expect(book().lists.map((l) => l.name), ['New']);
       notifier.undoRemove(removed);
-      expect(book().lists.map((l) => l.id), [id, 'l1']);
+      expect(book().lists.map((l) => l.name), ['New', 'Ski trip']);
     });
   });
 
@@ -216,27 +242,8 @@ void main() {
     expect(HubTool.packing.clearable, isTrue);
   });
 
-  test('a part restored: its sections come too, by name if there', () {
-    final now = PackingBook(sections: [
-      const PackingSection(id: 'mine', name: 'Ski Gear'),
-      documents,
-    ]);
-    final restored = withPackingLists(
-      now,
-      PackingBook(sections: sections, lists: [trip]),
-      [trip],
-    );
-    expect(restored.sections.map((s) => s.id),
-        ['mine', 'documents', 'clothes', 'other'],
-        reason: 'Ski gear is "Ski Gear" here; Clothes is added');
-    final items = restored.byId('l1')!.items;
-    expect(items.firstWhere((i) => i.id == 'goggles').sectionId, 'mine');
-    expect(items.firstWhere((i) => i.id == 'umbrella').sectionId, 'gone',
-        reason: 'shown under Other');
-  });
-
-  test('in backups (version 30), the usual sections when missing', () {
-    expect(Backup.version, 30);
+  test('in backups (version 31), the usual sections when missing', () {
+    expect(Backup.version, 31);
     final backup = Backup(
       createdAt: DateTime.utc(2026, 10, 21),
       appVersion: 'test',
@@ -249,8 +256,8 @@ void main() {
     expect(again.packing.sections, sections);
     final json = backup.toJson();
     (json['data'] as Map<String, dynamic>).remove('packing');
-    expect(Backup.decode(jsonEncode(json)).packing.sections,
-        PackingBook.initial.sections);
+    expect(
+        Backup.decode(jsonEncode(json)).packing.sections, PackingBook.defaults);
   });
 
   group('a backup restored', () {
@@ -261,11 +268,14 @@ void main() {
       container = ProviderContainer(overrides: [
         appStorageProvider.overrideWithValue(AppStorage.inMemory(
           initialPacking: PackingBook(
-            sections: PackingBook.initial.sections,
-            lists: [PackingList(id: 'l1', name: 'Here')],
+            sections: PackingBook.defaults,
+            lists: [
+              PackingList(
+                  id: 'l1', name: 'Here', sections: PackingBook.defaults),
+            ],
           ),
         )),
-        appVersionProvider.overrideWithValue('1.40.0 (96)'),
+        appVersionProvider.overrideWithValue('1.40.1 (97)'),
         backupFilesProvider.overrideWithValue(FakeBackupFiles()),
       ]);
       addTearDown(container.dispose);
@@ -274,12 +284,15 @@ void main() {
     PlainPick read() => container.read(backupImporterProvider).read(
           Uint8List.fromList(utf8.encode(Backup(
             createdAt: DateTime(2026, 10, 21),
-            appVersion: '1.40.0 (96)',
+            appVersion: '1.40.1 (97)',
             notes: const [],
             shopItems: const [],
             packing: PackingBook(
               sections: sections,
-              lists: [trip, PackingList(id: 'l2', name: 'Beach')],
+              lists: [
+                trip,
+                PackingList(id: 'l2', name: 'Beach', sections: sections),
+              ],
             ),
           ).encode())),
         ) as PlainPick;
@@ -293,7 +306,7 @@ void main() {
       expect(book().lists.single.name, 'Here');
     });
 
-    test('in part: the lists picked, a copy of one here, its sections',
+    test('in part: the lists picked with their sections, a copy of one here',
         () async {
       final pick = read();
       expect(
@@ -305,9 +318,9 @@ void main() {
       });
       expect((done!.added, done.copies), (1, 1));
       expect(book().lists.map((l) => l.name), ['Here', 'Ski trip (Copy)']);
-      expect(book().section('gear')?.name, 'Ski gear',
-          reason: 'its things need it');
-      expect(book().sections.last.isOther, isTrue);
+      expect(book().lists.last.sections, sections);
+      expect(book().sections, PackingBook.defaults,
+          reason: 'the defaults here stay');
     });
   });
 }

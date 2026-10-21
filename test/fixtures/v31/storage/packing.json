@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "sections": [
+    {
+      "id": "documents",
+      "name": "Documents"
+    },
+    {
+      "id": "clothes",
+      "name": "Clothes"
+    },
+    {
+      "id": "toiletries",
+      "name": "Toiletries"
+    },
+    {
+      "id": "other",
+      "name": "Other"
+    }
+  ],
+  "lists": [
+    {
+      "id": "p1",
+      "name": "Jahorina ⛷",
+      "sections": [
+        {
+          "id": "documents",
+          "name": "Dokumenta"
+        },
+        {
+          "id": "k1",
+          "name": "Ski oprema"
+        },
+        {
+          "id": "clothes",
+          "name": "Odeća"
+        }
+      ],
+      "items": [
+        {
+          "id": "i1",
+          "name": "Pasoš",
+          "section": "documents",
+          "packed": true
+        },
+        {
+          "id": "i2",
+          "name": "Naočare",
+          "section": "k1"
+        },
+        {
+          "id": "i3",
+          "name": "Kaciga",
+          "section": "k1",
+          "packed": true
+        },
+        {
+          "id": "i4",
+          "name": "Čarape",
+          "section": "clothes",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "name": "Beach",
+      "sections": [
+        {
+          "id": "b1",
+          "name": "Beach stuff"
+        }
+      ],
+      "items": []
+    }
+  ]
+}

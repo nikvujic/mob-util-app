@@ -51,7 +51,7 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/subscriptions.json
 ///         {"version": 1, "subscriptions": [...]}
 ///     <app documents>/data/packing.json
-///         {"version": 1, "sections": [...], "lists": [...]}
+///         {"version": 2, "sections": [...], "lists": [...]}
 ///     <app documents>/data/notifications.json
 ///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
@@ -144,8 +144,10 @@ class AppStorage {
   /// format.
   static const subscriptionsFormatVersion = 1;
 
-  /// Version of `packing.json` (Round 94). History: 1 = first format.
-  static const packingFormatVersion = 1;
+  /// Version of `packing.json` (Round 94). History: 1 = first format;
+  /// 2 = each list has its own sections, `sections` being the defaults
+  /// (Round 95).
+  static const packingFormatVersion = 2;
 
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;

@@ -20,7 +20,7 @@ Future<({String name, Set<String> sectionIds})?> showCopyListSheet(
 class _CopySheet extends StatefulWidget {
   final PackingList list;
 
-  /// The list's sections with something in them, and what.
+  /// The list's sections, and what's in each.
   final List<(PackingSection, List<PackingItem>)> groups;
 
   const _CopySheet({required this.list, required this.groups});
@@ -73,10 +73,7 @@ class _CopySheetState extends State<_CopySheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (widget.groups.isEmpty)
-                Text('Nothing in it yet: the copy starts empty.',
-                    style: TextStyle(color: colors.textMuted))
-              else ...[
+              ...[
                 Text('Sections to copy',
                     style: TextStyle(color: colors.textSecondary)),
                 for (final (s, items) in widget.groups)

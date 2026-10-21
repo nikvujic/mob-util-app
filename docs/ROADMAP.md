@@ -337,6 +337,21 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 95 — Nikola on 1.40.0 (2026-10-21, patch 1.40.1)
+
+- [x] **Packing, his changes** (O41): each list has its **own sections**
+  (`PackingList.sections`, packing.json v2, backup v31; Round 94's lists
+  get the shared ones), edited in its edit mode (a heading's tap:
+  Rename, Move up/down, Delete with its things, asked; Add section at
+  the end; at least one; Other is a normal one). The Sections page is
+  **Default sections**, what a new list starts with. **+ Add** under each
+  section. A new list is **New list**, kept once something's in it, and
+  Done goes back to the lists. Back asks **Save or Discard**. No Undo /
+  Redo / Discard button: held things are selected and deleted. View rows
+  a normal size, every section shown, Reset asked (no toast). Copy list
+  back to the lists. Typing the name bounced the page (asked room above
+  it at the list's top, as a recipe's in Round 64): `scrollPadding` top 0.
+
 ### Round 94 — Nikola on 1.39.0 (2026-10-21, 1.40.0)
 
 - [x] **Packing lists** (O41): a Hub page (`HubTool.packing`, lockable,

@@ -22,15 +22,17 @@ void openPackingSections(BuildContext context) {
   );
 }
 
-/// Why [name] can't be a section's (one of that name is there), or null.
+/// Why [name] can't be a default section's (one of that name is there),
+/// or null.
 String? sectionTaken(PackingBook book, String name, {String? except}) =>
     book.sectionNamed(name, except: except) == null
         ? null
         : '${name.trim()} is already a section';
 
-/// The sections every packing list shares (Round 94): in order, the
-/// handle moves them; a tap renames or deletes one (its items, in every
-/// list, go to Other). Other is always there, last, as it is.
+/// The default sections (Round 95, Nikola): what a new packing list starts
+/// with; each list then has its own, changed in its edit mode. In order,
+/// the handle moves them; a tap renames or deletes one. At least one
+/// stays. Changing them doesn't touch the lists there are.
 class PackingSectionsPage extends ConsumerWidget {
   const PackingSectionsPage({super.key});
 
@@ -76,103 +78,74 @@ class PackingSectionsPage extends ConsumerWidget {
           onSubmit: (name) => notifier.renameSection(section.id, name),
         );
       case 'delete':
-        final items = ref.read(packingProvider).itemsIn(section.id);
         final before = notifier.removeSection(section.id);
-        _toast(
-          context,
-          items == 0
-              ? '${section.name} deleted'
-              : '${section.name} deleted; its items moved to Other',
-          undo: () => notifier.replaceAll(before),
-        );
+        if (before == null) {
+          _toast(context, 'At least one section stays');
+        } else {
+          _toast(context, '${section.name} deleted',
+              undo: () => notifier.restoreSections(before));
+        }
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final book = ref.watch(packingProvider);
-    final movable = [
-      for (final s in book.sections)
-        if (!s.isOther) s,
-    ];
+    final sections = ref.watch(packingProvider.select((b) => b.sections));
     final colors = context.colors;
 
-    Widget row(PackingSection section, {int? index}) {
-      final items = book.itemsIn(section.id);
-      final content = Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 0, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(section.name,
-                style: TextStyle(fontSize: 16, color: colors.textPrimary)),
-            if (section.isOther)
-              Text(
-                'Always there, last',
-                style: TextStyle(fontSize: 13, color: colors.textMuted),
-              )
-            else if (items > 0)
-              Text(
-                items == 1 ? '1 item' : '$items items',
-                style: TextStyle(fontSize: 13, color: colors.textSecondary),
-              ),
-          ],
-        ),
-      );
-      return SelectableCard(
-        key: Key('packingSection-${section.id}'),
-        selected: false,
-        onTap: section.isOther ? null : () => _options(context, ref, section),
-        child: ReorderableRow(
-          content: content,
-          indicator: ReorderOrSelectIndicator(
-            index: index ?? 0,
-            reorderable: index != null,
-            selectionMode: false,
-            selected: false,
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Sections')),
+      appBar: AppBar(title: const Text('Default sections')),
       body: PullDownList(
         bottomSpace: BottomActions.contentClearance,
         slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.only(top: 4),
-            sliver: SliverReorderableList(
-              itemCount: movable.length,
-              // onReorderItem only exists on newer Flutter than we target.
-              // ignore: deprecated_member_use
-              onReorder: ref.read(packingProvider.notifier).reorderSections,
-              proxyDecorator: (child, _, __) => Material(
-                type: MaterialType.transparency,
-                elevation: 6,
-                child: child,
-              ),
-              itemBuilder: (context, index) => Padding(
-                key: ValueKey(movable[index].id),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                child: row(movable[index], index: index),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-            sliver: SliverToBoxAdapter(child: row(book.sections.last)),
-          ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Text(
-                'Every packing list uses these sections.',
+                'A new list starts with these; each list can change its own.',
                 style: TextStyle(color: colors.textMuted),
               ),
             ),
+          ),
+          SliverReorderableList(
+            itemCount: sections.length,
+            // onReorderItem only exists on newer Flutter than we target.
+            // ignore: deprecated_member_use
+            onReorder: ref.read(packingProvider.notifier).reorderSections,
+            proxyDecorator: (child, _, __) => Material(
+              type: MaterialType.transparency,
+              elevation: 6,
+              child: child,
+            ),
+            itemBuilder: (context, index) {
+              final section = sections[index];
+              return Padding(
+                key: ValueKey(section.id),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                child: SelectableCard(
+                  key: Key('packingSection-${section.id}'),
+                  selected: false,
+                  onTap: () => _options(context, ref, section),
+                  child: ReorderableRow(
+                    content: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 0, 14),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(section.name,
+                            style: TextStyle(
+                                fontSize: 16, color: colors.textPrimary)),
+                      ),
+                    ),
+                    indicator: ReorderOrSelectIndicator(
+                      index: index,
+                      selectionMode: false,
+                      selected: false,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

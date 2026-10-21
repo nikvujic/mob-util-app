@@ -6,25 +6,34 @@ import 'package:the_app/providers/packing_provider.dart';
 
 import '../helpers.dart';
 
-/// Hub → Packing (Round 94, Nikola): lists, a list's view mode (big
-/// boxes, a tap ticks, Reset), edit mode, the shared sections, Copy list.
+/// Hub → Packing (Round 94, Nikola; Round 95: his changes): lists, a
+/// list's view mode (rows of a normal size, a tap ticks, Reset asked),
+/// edit mode (its own sections, + Add under each, hold to select and
+/// delete, Save or Discard on back), Copy list, the default sections.
 void main() {
   late ProviderContainer container;
   PackingBook book() => container.read(packingProvider);
 
+  const sections = [
+    PackingSection(id: 'documents', name: 'Documents'),
+    PackingSection(id: 'clothes', name: 'Clothes'),
+    PackingSection(id: 'gear', name: 'Ski gear'),
+  ];
+
   PackingBook sample() => PackingBook(
-        sections: PackingBook.initial.sections,
+        sections: PackingBook.defaults,
         lists: [
-          PackingList(id: 'l1', name: 'Ski trip', items: const [
-            PackingItem(id: 'i1', name: 'Passport', sectionId: 'documents'),
-            PackingItem(
-                id: 'i2', name: 'Socks', sectionId: 'clothes', count: 5),
-            PackingItem(
-                id: 'i3',
-                name: 'Charger',
-                sectionId: 'electronics',
-                packed: true),
-          ]),
+          PackingList(
+              id: 'l1',
+              name: 'Ski trip',
+              sections: sections,
+              items: const [
+                PackingItem(id: 'i1', name: 'Passport', sectionId: 'documents'),
+                PackingItem(
+                    id: 'i2', name: 'Socks', sectionId: 'clothes', count: 5),
+                PackingItem(
+                    id: 'i3', name: 'Goggles', sectionId: 'gear', packed: true),
+              ]),
         ],
       );
 
@@ -48,157 +57,238 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openTrip(WidgetTester tester, {bool edit = false}) async {
+    await tester.tap(find.text('Ski trip'));
+    await tester.pumpAndSettle();
+    if (edit) await tapTooltip(tester, 'Edit');
+  }
+
+  Finder sheetField() => find.descendant(
+      of: find.byType(BottomSheet), matching: find.byType(TextField));
+
   String text(WidgetTester tester, Key key) =>
       tester.widget<Text>(find.byKey(key)).data!;
 
-  testWidgets('no lists at first; a new one opens in edit mode',
-      (tester) async {
+  PackingList trip() => book().byId('l1')!;
+
+  testWidgets(
+      'a new list: "New list", the default sections, + Add under each; '
+      'Done goes back to the lists, where it shows', (tester) async {
     await openPacking(tester);
-    expect(appBarTitle('Packing'), findsOneWidget);
     expect(find.text('No packing lists'), findsOneWidget);
 
     await tapTooltip(tester, 'New list');
-    expect(appBarTitle('Edit list'), findsOneWidget);
-    // Every section shown, the usual ones, Other last.
-    for (final s in PackingBook.initial.sections) {
+    expect(appBarTitle('New list'), findsOneWidget);
+    for (final s in PackingBook.defaults) {
       expect(find.byKey(Key('packingAdd-${s.id}')), findsOneWidget);
     }
+    // Round 95: no room asked above the name, so typing doesn't bounce
+    // the page into its reach space.
+    final name = tester.widget<TextField>(find.byKey(const Key('packingName')));
+    expect(name.scrollPadding.top, 0);
     await tester.enterText(find.byKey(const Key('packingName')), 'Beach');
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    // Items added to Clothes, several in a row; no two of a name.
+    // Under Clothes, several in a row; no two of a name.
     await tester.tap(find.byKey(const Key('packingAdd-clothes')));
     await tester.pumpAndSettle();
-    final field = find.descendant(
-        of: find.byType(BottomSheet), matching: find.byType(TextField));
-    await tester.enterText(field, 'Swimsuit');
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    await tester.pumpAndSettle();
-    await tester.enterText(field, 'Hat');
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    await tester.pumpAndSettle();
-    await tester.enterText(field, 'swimsuit');
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    await tester.pumpAndSettle();
+    for (final thing in ['Swimsuit', 'Hat', 'swimsuit']) {
+      await tester.enterText(sheetField(), thing);
+      await tester.testTextInput.receiveAction(TextInputAction.send);
+      await tester.pumpAndSettle();
+    }
     expect(find.text('swimsuit is already in Clothes'), findsOneWidget);
     await pressBack(tester);
 
+    await tapTooltip(tester, 'Done');
+    expect(appBarTitle('Packing'), findsOneWidget,
+        reason: 'back on the lists, not its view');
     final list = book().lists.single;
     expect(list.name, 'Beach');
+    expect(list.sections, PackingBook.defaults);
     expect(list.items.map((i) => (i.name, i.sectionId)),
         [('Swimsuit', 'clothes'), ('Hat', 'clothes')]);
-
-    await tapTooltip(tester, 'Done');
-    expect(appBarTitle('Beach'), findsOneWidget);
-    expect(text(tester, const Key('packingProgress')), '0 of 2 packed');
-  });
-
-  testWidgets('a new list left empty is dropped', (tester) async {
-    await openPacking(tester);
-    await tapTooltip(tester, 'New list');
-    await tapTooltip(tester, 'Done');
-    expect(book().lists, isEmpty);
-    expect(find.text('No packing lists'), findsOneWidget);
+    expect(find.text('0 of 2 packed'), findsOneWidget);
   });
 
   testWidgets(
-      'view mode: by section, empty ones left out; a tap anywhere on a '
-      'row ticks it, in place; Reset unticks all, with Undo', (tester) async {
-    await openPacking(tester, start: sample());
-    expect(text(tester, const Key('packingListProgress-l1')), '1 of 3 packed');
-    await tester.tap(find.text('Ski trip'));
-    await tester.pumpAndSettle();
+      'a new list: Back asks Save or Discard once something is in it; '
+      'Discard leaves nothing; left untouched, nothing asked', (tester) async {
+    await openPacking(tester);
+    await tapTooltip(tester, 'New list');
+    await pressBack(tester); // the keyboard
+    await pressBack(tester);
+    expect(find.text('Save new list?'), findsNothing);
+    expect(appBarTitle('Packing'), findsOneWidget);
+    expect(book().lists, isEmpty);
 
-    expect(find.byKey(const Key('packingSection-documents')), findsOneWidget);
-    expect(find.byKey(const Key('packingSection-toiletries')), findsNothing,
-        reason: 'nothing in it');
+    await tapTooltip(tester, 'New list');
+    await tester.enterText(find.byKey(const Key('packingName')), 'Beach');
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await pressBack(tester); // the keyboard
+    await pressBack(tester);
+    expect(find.text('Save new list?'), findsOneWidget);
+    await tester.tap(find.text('Discard'));
+    await tester.pumpAndSettle();
+    expect(appBarTitle('Packing'), findsOneWidget);
+    expect(book().lists, isEmpty);
+  });
+
+  testWidgets(
+      'view mode: every section, empty ones too; normal rows; a tap '
+      'anywhere ticks, in place; Reset asks, no toast', (tester) async {
+    await openPacking(tester, start: sample());
+    expect(find.text('1 of 3 packed'), findsOneWidget);
+    await openTrip(tester);
+
+    for (final s in sections) {
+      expect(find.byKey(Key('packingSection-${s.id}')), findsOneWidget);
+    }
     expect(find.text('× 5'), findsOneWidget);
-    expect(text(tester, const Key('packingProgress')), '1 of 3 packed');
+    // Round 95: a normal row, as Shop's.
+    expect(tester.getSize(find.byKey(const Key('packingTick-i1'))).height,
+        lessThanOrEqualTo(56));
 
     final socks = tester.getTopLeft(find.text('Socks'));
-    // The row's far right, not the box or the name.
     final row = tester.getRect(find.byKey(const Key('packingTick-i2')));
     await tester.tapAt(Offset(row.right - 30, row.center.dy));
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items[1].packed, isTrue);
+    expect(trip().items[1].packed, isTrue);
     expect(tester.getTopLeft(find.text('Socks')), socks,
         reason: "ticked ones don't move");
-    expect(tester.widget<Icon>(find.byKey(const Key('packingBox-i2'))).icon,
-        Icons.check_box);
     expect(text(tester, const Key('packingProgress')), '2 of 3 packed');
 
-    await tester.tap(find.text('Socks'));
-    await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items[1].packed, isFalse, reason: 'unticked');
-
     await tapTooltip(tester, 'Reset');
-    expect(book().byId('l1')!.packedCount, 0);
-    expect(find.text('All unticked'), findsOneWidget);
-    await tester.tap(find.text('Undo'));
+    expect(find.text('Reset the list?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.packedCount, 1);
-
-    // All packed: said so.
-    await tester.tap(find.text('Passport'));
-    await tester.tap(find.text('Socks'));
+    expect(trip().packedCount, 2);
+    await tapTooltip(tester, 'Reset');
+    await tester.tap(find.widgetWithText(FilledButton, 'Reset'));
     await tester.pumpAndSettle();
-    expect(text(tester, const Key('packingProgress')), 'All 3 packed');
+    expect(trip().packedCount, 0);
+    expect(find.byType(SnackBar), findsNothing, reason: 'no Undo toast');
   });
 
   testWidgets(
-      'edit mode: an item renamed, its count set, deleted (Undo); '
-      'Discard changes goes back', (tester) async {
+      'edit mode: a thing renamed and counted; held ones selected and '
+      'deleted; Back asks, Discard puts it back', (tester) async {
     await openPacking(tester, start: sample());
-    await tester.tap(find.text('Ski trip'));
-    await tester.pumpAndSettle();
-    await tapTooltip(tester, 'Edit');
+    await openTrip(tester, edit: true);
+    expect(appBarTitle('Edit list'), findsOneWidget);
+    expect(find.byTooltip('Undo'), findsNothing, reason: 'no Undo or Redo');
 
     await tester.tap(find.text('Passport'));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('choice-delete')), findsNothing,
+        reason: 'deleting is by holding');
     await choose(tester, 'count');
     await tester.tap(find.byKey(const Key('packingCountMore')));
-    await tester.tap(find.byKey(const Key('packingCountMore')));
     await tester.pump();
-    expect(text(tester, const Key('packingCountValue')), '3');
     await tester.tap(find.byKey(const Key('packingCountSet')));
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items.first.count, 3, reason: 'saved as made');
+    expect(trip().items.first.count, 2, reason: 'saved as made');
 
     await tester.tap(find.text('Passport'));
     await tester.pumpAndSettle();
     await choose(tester, 'rename');
-    await tester.enterText(
-        find.descendant(
-            of: find.byType(BottomSheet), matching: find.byType(TextField)),
-        'Pasoš');
+    await tester.enterText(sheetField(), 'Pasoš');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items.first.name, 'Pasoš');
+    expect(trip().items.first.name, 'Pasoš');
 
-    await tester.tap(find.text('Socks'));
+    await tester.longPress(find.text('Socks'));
     await tester.pumpAndSettle();
-    await choose(tester, 'delete');
-    expect(book().byId('l1')!.items.map((i) => i.name), ['Pasoš', 'Charger']);
-    await tester.tap(find.text('Undo'));
+    await tester.tap(find.text('Goggles'));
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items.map((i) => i.name),
-        ['Pasoš', 'Socks', 'Charger']);
+    await tapTooltip(tester, 'Delete selected');
+    expect(trip().items.map((i) => i.name), ['Pasoš']);
 
-    await tapTooltip(tester, 'Discard changes');
+    await pressBack(tester);
+    expect(find.text('Save changes?'), findsOneWidget);
     await tester.tap(find.text('Discard'));
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items.first.name, 'Passport');
-    expect(book().byId('l1')!.items.first.count, 1);
+    expect(appBarTitle('Ski trip'), findsOneWidget, reason: 'back to view');
+    expect(trip().items.map((i) => (i.name, i.count)),
+        [('Passport', 1), ('Socks', 5), ('Goggles', 1)]);
   });
 
-  testWidgets('edit mode: an item dragged by its handle into another section',
+  testWidgets(
+      "edit mode: the list's own sections added, renamed, moved, deleted "
+      'with their things (asked); the last one stays; Save keeps it',
       (tester) async {
     await openPacking(tester, start: sample());
-    await tester.tap(find.text('Ski trip'));
-    await tester.pumpAndSettle();
-    await tapTooltip(tester, 'Edit');
+    await openTrip(tester, edit: true);
 
-    // Passport's handle, dragged down below Socks (into Clothes).
+    await tester.tap(find.byKey(const Key('packingAddSection')));
+    await tester.pumpAndSettle();
+    await tester.enterText(sheetField(), 'clothes');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.text('clothes is already a section'), findsOneWidget);
+    await tester.enterText(sheetField(), 'Food');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(trip().sections.map((s) => s.name),
+        ['Documents', 'Clothes', 'Ski gear', 'Food']);
+
+    // Moved up, renamed.
+    await tester.tap(find.byKey(const Key('packingSection-gear')));
+    await tester.pumpAndSettle();
+    await choose(tester, 'up');
+    await tester.tap(find.byKey(const Key('packingSection-gear')));
+    await tester.pumpAndSettle();
+    await choose(tester, 'rename');
+    await tester.enterText(sheetField(), 'Gear');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(trip().sections.map((s) => s.name),
+        ['Documents', 'Gear', 'Clothes', 'Food']);
+
+    // With a thing in it: asked, then gone with it.
+    await tester.tap(find.byKey(const Key('packingSection-clothes')));
+    await tester.pumpAndSettle();
+    await choose(tester, 'delete');
+    expect(find.text('Delete Clothes?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.pumpAndSettle();
+    expect(trip().sections.map((s) => s.name), ['Documents', 'Gear', 'Food']);
+    expect(trip().items.map((i) => i.name), ['Passport', 'Goggles']);
+
+    // Empty: not asked. Down to one: it stays.
+    for (final id in ['food', 'gear']) {
+      final section = trip()
+          .sections
+          .firstWhere((s) => s.id == id || s.name.toLowerCase() == id);
+      await tester.tap(find.byKey(Key('packingSection-${section.id}')));
+      await tester.pumpAndSettle();
+      await choose(tester, 'delete');
+      if (find.widgetWithText(FilledButton, 'Delete').evaluate().isNotEmpty) {
+        await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+        await tester.pumpAndSettle();
+      }
+    }
+    expect(trip().sections.map((s) => s.name), ['Documents']);
+    await tester.tap(find.byKey(const Key('packingSection-documents')));
+    await tester.pumpAndSettle();
+    await choose(tester, 'delete');
+    expect(find.text('A list needs at least one section'), findsOneWidget);
+    expect(trip().sections, hasLength(1));
+
+    await pressBack(tester);
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(appBarTitle('Ski trip'), findsOneWidget);
+    expect(trip().sections.map((s) => s.name), ['Documents']);
+    // The defaults untouched.
+    expect(book().sections, PackingBook.defaults);
+  });
+
+  testWidgets('edit mode: a thing dragged by its handle into another section',
+      (tester) async {
+    await openPacking(tester, start: sample());
+    await openTrip(tester, edit: true);
+
     final passport = find.byKey(const Key('packingItem-i1'));
     final handle = Offset(
         tester.getRect(passport).right - 30, tester.getCenter(passport).dy);
@@ -211,75 +301,69 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    final items = book().byId('l1')!.items;
-    expect(items.firstWhere((i) => i.id == 'i1').sectionId, 'clothes');
+    expect(trip().items.firstWhere((i) => i.id == 'i1').sectionId, 'clothes');
   });
 
   testWidgets(
-      'Copy list: a new name, only the sections picked, nothing ticked; '
-      'it opens', (tester) async {
+      'Copy list: a name and the sections picked; back on the lists, with '
+      'the copy', (tester) async {
     await openPacking(tester, start: sample());
-    await tester.tap(find.text('Ski trip'));
-    await tester.pumpAndSettle();
+    await openTrip(tester);
     await tapTooltip(tester, 'More');
     await choose(tester, 'copy');
 
     expect(find.text('Ski trip (Copy)'), findsOneWidget);
-    // Only the list's sections with something in them, all picked.
-    expect(
-        find.byKey(const Key('packingCopySection-documents')), findsOneWidget);
-    expect(
-        find.byKey(const Key('packingCopySection-toiletries')), findsNothing);
     await tester.enterText(find.byKey(const Key('packingCopyName')), 'Weekend');
-    await tester.tap(find.byKey(const Key('packingCopySection-clothes')));
+    await tester.tap(find.byKey(const Key('packingCopySection-gear')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('packingCopyGo')));
     await tester.pumpAndSettle();
 
+    expect(appBarTitle('Packing'), findsOneWidget);
     expect(book().lists.map((l) => l.name), ['Ski trip', 'Weekend']);
     final copy = book().lists.last;
-    expect(copy.items.map((i) => i.name), ['Passport', 'Charger']);
+    expect(copy.sections.map((s) => s.name), ['Documents', 'Clothes']);
+    expect(copy.items.map((i) => i.name), ['Passport', 'Socks']);
     expect(copy.packedCount, 0);
-    expect(appBarTitle('Weekend'), findsOneWidget);
   });
 
   testWidgets(
-      'Sections: added (no two of a name), deleted with its '
-      'items moved to Other (Undo); Other stays', (tester) async {
+      'Default sections: what a new list starts with; added, deleted '
+      '(Undo), one stays; the lists keep theirs', (tester) async {
     await openPacking(tester, start: sample());
-    await tapTooltip(tester, 'Sections');
-    expect(appBarTitle('Sections'), findsOneWidget);
-    expect(find.text('Always there, last'), findsOneWidget);
+    await tapTooltip(tester, 'Default sections');
+    expect(appBarTitle('Default sections'), findsOneWidget);
 
     await tapTooltip(tester, 'New section');
-    final field = find.descendant(
-        of: find.byType(BottomSheet), matching: find.byType(TextField));
-    await tester.enterText(field, 'Ski gear');
+    await tester.enterText(sheetField(), 'Ski gear');
     await tester.testTextInput.receiveAction(TextInputAction.send);
     await tester.pumpAndSettle();
-    await tester.enterText(field, 'clothes');
+    await tester.enterText(sheetField(), 'other');
     await tester.testTextInput.receiveAction(TextInputAction.send);
     await tester.pumpAndSettle();
-    expect(find.text('clothes is already a section'), findsOneWidget);
+    expect(find.text('other is already a section'), findsOneWidget);
     await pressBack(tester);
-    expect(book().sections.map((s) => s.name).toList().reversed.take(2),
-        ['Other', 'Ski gear'],
-        reason: 'before Other');
+    expect(book().sections.last.name, 'Ski gear');
 
-    await tester.tap(find.text('Electronics'));
+    await tester.tap(find.text('Other'));
     await tester.pumpAndSettle();
     await choose(tester, 'delete');
-    expect(find.text('Electronics deleted; its items moved to Other'),
-        findsOneWidget);
-    expect(book().byId('l1')!.items.last.sectionId, 'other');
+    expect(book().sections.map((s) => s.name), isNot(contains('Other')),
+        reason: 'Other is like any other');
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
-    expect(book().byId('l1')!.items.last.sectionId, 'electronics');
+    expect(book().sections.map((s) => s.name), contains('Other'));
+    expect(trip().sections, sections);
 
-    // Other: no options.
-    await tester.tap(find.byKey(const Key('packingSection-other')));
+    container
+        .read(packingProvider.notifier)
+        .restoreSections(const [PackingSection(id: 'only', name: 'Only')]);
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('choice-delete')), findsNothing);
+    await tester.tap(find.text('Only'));
+    await tester.pumpAndSettle();
+    await choose(tester, 'delete');
+    expect(find.text('At least one section stays'), findsOneWidget);
+    expect(book().sections, hasLength(1));
   });
 
   testWidgets('lists held to select, deleted after asking', (tester) async {

@@ -1,20 +1,13 @@
 /// Packing lists (Round 94, Nikola): lists like "Ski trip" or "Beach",
-/// each with its items under sections. The sections (Documents, Clothes,
-/// …) are shared by all lists, set up once; Other is always there, last.
-/// Not tied to Dates or anything else.
+/// each with its own sections (Round 95: set up in edit mode, for that
+/// trip) and its things under them. A new list starts with the default
+/// sections (Documents, Clothes, …), which Nikola can change. Not tied to
+/// Dates or anything else.
 class PackingSection {
   final String id;
   final String name;
 
   const PackingSection({required this.id, required this.name});
-
-  /// Other's id: always in the book, always last; items whose section is
-  /// gone go there.
-  static const otherId = 'other';
-
-  static const other = PackingSection(id: otherId, name: 'Other');
-
-  bool get isOther => id == otherId;
 
   PackingSection copyWith({String? name}) =>
       PackingSection(id: id, name: name ?? this.name);
@@ -81,7 +74,7 @@ class PackingItem {
   factory PackingItem.fromJson(Map<String, dynamic> json) => PackingItem(
         id: json['id'] as String,
         name: json['name'] as String? ?? '',
-        sectionId: json['section'] as String? ?? PackingSection.otherId,
+        sectionId: json['section'] as String? ?? '',
         count: ((json['count'] as num?)?.toInt() ?? 1).clamp(1, maxCount),
         packed: json['packed'] as bool? ?? false,
       );
@@ -99,30 +92,51 @@ class PackingItem {
   int get hashCode => Object.hash(id, name, sectionId, count, packed);
 }
 
-/// A packing list: a name and its items, in the user's order (shown
-/// grouped by section, in the sections' order).
+/// A packing list: a name, its sections in order (always at least one,
+/// Nikola) and its things, in the user's order (shown grouped by
+/// section).
 class PackingList {
   final String id;
   final String name;
+  final List<PackingSection> sections;
   final List<PackingItem> items;
 
   PackingList({
     required this.id,
     required this.name,
+    required List<PackingSection> sections,
     List<PackingItem> items = const [],
-  }) : items = List.unmodifiable(items);
+  })  : sections = List.unmodifiable(sections),
+        items = List.unmodifiable(items);
 
-  /// Nothing in it at all (a new list left so is dropped).
+  /// Nothing put in it (a new list left so isn't kept).
   bool get isEmpty => name.trim().isEmpty && items.isEmpty;
 
   int get packedCount => items.where((i) => i.packed).length;
 
-  PackingList copyWith({String? id, String? name, List<PackingItem>? items}) =>
+  PackingList copyWith({
+    String? id,
+    String? name,
+    List<PackingSection>? sections,
+    List<PackingItem>? items,
+  }) =>
       PackingList(
         id: id ?? this.id,
         name: name ?? this.name,
+        sections: sections ?? this.sections,
         items: items ?? this.items,
       );
+
+  PackingSection? section(String id) =>
+      sections.where((s) => s.id == id).firstOrNull;
+
+  /// The section already called [name] (any case), if any.
+  PackingSection? sectionNamed(String name, {String? except}) {
+    final key = name.trim().toLowerCase();
+    return sections
+        .where((s) => s.id != except && s.name.trim().toLowerCase() == key)
+        .firstOrNull;
+  }
 
   /// [itemId] ticked if it wasn't, unticked if it was.
   PackingList toggled(String itemId) => copyWith(items: [
@@ -134,7 +148,7 @@ class PackingList {
   PackingList reset() =>
       copyWith(items: [for (final i in items) i.copyWith(packed: false)]);
 
-  /// The item in [sectionId] already called [name] (any case), if any.
+  /// The thing in [sectionId] already called [name] (any case), if any.
   PackingItem? named(String name, String sectionId, {String? except}) {
     final key = name.trim().toLowerCase();
     return items
@@ -145,44 +159,39 @@ class PackingList {
         .firstOrNull;
   }
 
-  /// Its items under [sections], in their order; an item whose section
-  /// isn't there goes under Other. Sections with no items are left out
-  /// unless [keepEmpty].
-  List<(PackingSection, List<PackingItem>)> grouped(
-    List<PackingSection> sections, {
-    bool keepEmpty = false,
-  }) {
+  /// Its things under its sections, every section (Nikola: one set up in
+  /// edit mode shows in view mode too, empty or not); a thing whose
+  /// section isn't there goes under the last.
+  List<(PackingSection, List<PackingItem>)> grouped() {
     final known = {for (final s in sections) s.id};
     return [
       for (final s in sections)
-        if ([
-          for (final i in items)
-            if (i.sectionId == s.id ||
-                (s.isOther && !known.contains(i.sectionId)))
-              i,
-        ]
-            case final inIt when keepEmpty || inIt.isNotEmpty)
-          (s, inIt),
+        (
+          s,
+          [
+            for (final i in items)
+              if (i.sectionId == s.id ||
+                  (s == sections.last && !known.contains(i.sectionId)))
+                i,
+          ],
+        ),
     ];
   }
 
-  /// Edit mode's rows, a heading then its items, every section shown
-  /// ([grouped] with the empty ones): the item at row [from] dragged to
-  /// row [to] (`ReorderableList.onReorder` semantics), taking the section
-  /// of the heading above where it lands (the first, if above them all).
-  PackingList moved(List<PackingSection> sections, int from, int to) {
+  /// Edit mode's rows, a heading then its things: the thing at row [from]
+  /// dragged to row [to] (`ReorderableList.onReorder` semantics), taking
+  /// the section of the heading above where it lands (the first, if above
+  /// them all). Headings don't move this way.
+  PackingList moved(int from, int to) {
     final rows = <Object>[
-      for (final (section, inIt) in grouped(sections, keepEmpty: true)) ...[
-        section,
-        ...inIt,
-      ],
+      for (final (section, inIt) in grouped()) ...[section, ...inIt],
     ];
     if (from < 0 || from >= rows.length || rows[from] is! PackingItem) {
       return this;
     }
     if (to > from) to--;
     rows.insert(to.clamp(0, rows.length - 1), rows.removeAt(from));
-    var section = sections.isEmpty ? PackingSection.otherId : sections.first.id;
+    var section = sections.first.id;
     final order = <PackingItem>[];
     for (final row in rows) {
       if (row is PackingSection) {
@@ -195,63 +204,114 @@ class PackingList {
     return copyWith(items: order);
   }
 
-  /// Same contents (for Discard changes).
+  /// Section [id] moved [by] places (−1 up, +1 down), its things with it.
+  PackingList sectionMoved(String id, int by) {
+    final at = sections.indexWhere((s) => s.id == id);
+    final to = at + by;
+    if (at == -1 || to < 0 || to >= sections.length) return this;
+    final list = [...sections];
+    list.insert(to, list.removeAt(at));
+    return copyWith(sections: list);
+  }
+
+  /// Section [id] gone, and its things with it (asked first, Nikola). The
+  /// last one left stays: a list has at least one.
+  PackingList withoutSection(String id) {
+    if (sections.length <= 1) return this;
+    final gone = grouped()
+        .where((g) => g.$1.id == id)
+        .expand((g) => g.$2)
+        .map((i) => i.id)
+        .toSet();
+    return copyWith(
+      sections: [
+        for (final s in sections)
+          if (s.id != id) s,
+      ],
+      items: [
+        for (final i in items)
+          if (!gone.contains(i.id)) i,
+      ],
+    );
+  }
+
+  /// Same contents (for Save or Discard).
   bool sameAs(PackingList other) =>
       other.name == name &&
-      other.items.length == items.length &&
-      [
-        for (var i = 0; i < items.length; i++) other.items[i] == items[i],
-      ].every((same) => same);
+      _same(other.sections, sections) &&
+      _same(other.items, items);
+
+  static bool _same<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'sections': [for (final s in sections) s.toJson()],
         'items': [for (final i in items) i.toJson()],
       };
 
-  factory PackingList.fromJson(Map<String, dynamic> json) => PackingList(
-        id: json['id'] as String,
-        name: json['name'] as String? ?? '',
-        items: [
-          for (final i in json['items'] as List<dynamic>? ?? const [])
-            PackingItem.fromJson(i as Map<String, dynamic>),
-        ],
-      );
+  /// Round 94's lists had no sections of their own: they get [shared]
+  /// (the sections all lists shared then).
+  factory PackingList.fromJson(
+    Map<String, dynamic> json, {
+    List<PackingSection> shared = const [],
+  }) {
+    final own = json['sections'] as List<dynamic>?;
+    final sections = own == null
+        ? shared
+        : [
+            for (final s in own)
+              PackingSection.fromJson(s as Map<String, dynamic>),
+          ];
+    return PackingList(
+      id: json['id'] as String,
+      name: json['name'] as String? ?? '',
+      sections: sections.isEmpty ? PackingBook.defaults : sections,
+      items: [
+        for (final i in json['items'] as List<dynamic>? ?? const [])
+          PackingItem.fromJson(i as Map<String, dynamic>),
+      ],
+    );
+  }
 }
 
-/// Everything Packing holds: the sections every list shares (Other always
-/// last) and the lists, in the user's order.
+/// Everything Packing holds: the default sections a new list starts with
+/// (Round 95; Round 94's shared ones) and the lists, in the user's order.
 class PackingBook {
   final List<PackingSection> sections;
   final List<PackingList> lists;
 
-  /// Other is put last if it's elsewhere, and added if it's missing.
   PackingBook({
     required List<PackingSection> sections,
     List<PackingList> lists = const [],
-  })  : sections = List.unmodifiable([
-          for (final s in sections)
-            if (!s.isOther) s,
-          sections.where((s) => s.isOther).firstOrNull ?? PackingSection.other,
-        ]),
+  })  : sections = List.unmodifiable(sections.isEmpty ? defaults : sections),
         lists = List.unmodifiable(lists);
 
-  /// Nikola's (Round 94): the usual sections, and no lists yet.
-  static final initial = PackingBook(sections: const [
+  /// Nikola's (Round 94): the usual sections.
+  static const defaults = [
     PackingSection(id: 'documents', name: 'Documents'),
     PackingSection(id: 'clothes', name: 'Clothes'),
     PackingSection(id: 'toiletries', name: 'Toiletries'),
     PackingSection(id: 'electronics', name: 'Electronics'),
     PackingSection(id: 'medicine', name: 'Medicine'),
-    PackingSection.other,
-  ]);
+    PackingSection(id: 'other', name: 'Other'),
+  ];
+
+  /// The usual sections, and no lists yet.
+  static final initial = PackingBook(sections: defaults);
 
   PackingList? byId(String id) => lists.where((l) => l.id == id).firstOrNull;
 
   PackingSection? section(String id) =>
       sections.where((s) => s.id == id).firstOrNull;
 
-  /// The section already called [name] (any case), if any.
+  /// The default section already called [name] (any case), if any.
   PackingSection? sectionNamed(String name, {String? except}) {
     final key = name.trim().toLowerCase();
     return sections
@@ -274,49 +334,27 @@ class PackingBook {
           if (l.id == list.id) list else l,
       ]);
 
-  /// Section [id] gone; its items, in every list, go to Other. Other
-  /// itself stays.
-  PackingBook withoutSection(String id) {
-    if (id == PackingSection.otherId) return this;
-    return PackingBook(
-      sections: [
-        for (final s in sections)
-          if (s.id != id) s,
-      ],
-      lists: [
-        for (final l in lists)
-          l.copyWith(items: [
-            for (final i in l.items)
-              i.sectionId == id
-                  ? i.copyWith(sectionId: PackingSection.otherId)
-                  : i,
-          ]),
-      ],
-    );
-  }
-
-  /// How many items, over all lists, are in section [id].
-  int itemsIn(String id) => lists.fold(
-      0, (n, l) => n + l.items.where((i) => i.sectionId == id).length);
-
   Map<String, dynamic> toJson() => {
         'sections': [for (final s in sections) s.toJson()],
         'lists': [for (final l in lists) l.toJson()],
       };
 
-  /// No sections stored (none written yet): the usual ones.
+  /// No sections stored: the usual ones. A list without its own sections
+  /// (Round 94's) gets the ones stored here.
   factory PackingBook.fromJson(Map<String, dynamic> json) {
-    final sections = json['sections'] as List<dynamic>?;
+    final stored = json['sections'] as List<dynamic>?;
+    final sections = stored == null
+        ? defaults
+        : [
+            for (final s in stored)
+              PackingSection.fromJson(s as Map<String, dynamic>),
+          ];
     return PackingBook(
-      sections: sections == null
-          ? initial.sections
-          : [
-              for (final s in sections)
-                PackingSection.fromJson(s as Map<String, dynamic>),
-            ],
+      sections: sections,
       lists: [
         for (final l in json['lists'] as List<dynamic>? ?? const [])
-          PackingList.fromJson(l as Map<String, dynamic>),
+          PackingList.fromJson(l as Map<String, dynamic>,
+              shared: sections.isEmpty ? defaults : sections),
       ],
     );
   }

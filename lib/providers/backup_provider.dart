@@ -205,43 +205,6 @@ IngredientBook withIngredients(
   return IngredientBook(sections);
 }
 
-/// [book] with [lists] added (Round 94: restoring part of a backup), and
-/// the sections of [from] their items are in: one of the same name there
-/// is used, else it's added (before Other).
-PackingBook withPackingLists(
-  PackingBook book,
-  PackingBook from,
-  List<PackingList> lists,
-) {
-  final sections = [...book.sections];
-  final moved = <String, String>{};
-  for (final id in {
-    for (final l in lists)
-      for (final i in l.items) i.sectionId,
-  }) {
-    if (sections.any((s) => s.id == id)) continue;
-    final section = from.section(id);
-    if (section == null) continue; // shown under Other
-    final same = sections
-        .where((s) =>
-            s.name.trim().toLowerCase() == section.name.trim().toLowerCase())
-        .firstOrNull;
-    if (same != null) {
-      moved[id] = same.id;
-    } else {
-      sections.add(section);
-    }
-  }
-  return PackingBook(sections: sections, lists: [
-    ...book.lists,
-    for (final l in lists)
-      l.copyWith(items: [
-        for (final i in l.items)
-          i.copyWith(sectionId: moved[i.sectionId] ?? i.sectionId),
-      ]),
-  ]);
-}
-
 /// A copy's title (Round 30): "Bank" → "Bank (Copy)".
 String copyTitle(String title) => '$title (Copy)';
 
@@ -707,7 +670,7 @@ class BackupImporter {
           );
     }
 
-    // Packing lists (Round 94), with the sections their items are in.
+    // Packing lists (Round 94), each with its own sections (Round 95).
     final pickedLists = [
       for (final l in source.packing.lists)
         if (chosen(BackupPart.packing, l.id)) l,
@@ -723,11 +686,7 @@ class BackupImporter {
         PackingList.fromJson,
         name: 'name',
       );
-      _ref.read(packingProvider.notifier).replaceAll(withPackingLists(
-            now.copyWith(lists: const []),
-            source.packing,
-            all,
-          ));
+      _ref.read(packingProvider.notifier).replaceAll(now.copyWith(lists: all));
     }
 
     await _ref.read(appStorageProvider).flush();

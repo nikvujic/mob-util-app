@@ -6,6 +6,28 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Changed
+- **Packing lists, your way:**
+  - **Each list has its own sections.** In edit mode, a section's name
+    gives Rename, Move up, Move down and Delete (its things go with it,
+    asked first; a list keeps at least one); **Add section** is at the
+    end. Other is a section like any other.
+  - **Default sections** (the button beside +) are what a new list
+    starts with; changing them doesn't touch the lists there are.
+  - **+ Add** sits under each section's things, not by its name.
+  - A new list says **New list**, and Done takes you back to the lists,
+    where it shows (not into it).
+  - **Back** while editing asks **Save or Discard** if anything changed
+    (Discard puts the list back, or drops a new one).
+  - Things are deleted by **holding** them to select (no Undo or Redo
+    needed); a tap renames one or sets its count.
+  - In view mode, rows are a **normal size**; every section shows, empty
+    ones too; **Reset** asks first, with no Undo toast.
+  - Copy list goes back to the lists, with the copy.
+
+### Fixed
+- Typing a packing list's name no longer makes the page bounce.
+
 ## [1.40.0] - 2026-10-21
 
 ### Added

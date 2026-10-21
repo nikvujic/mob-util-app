@@ -1,0 +1,286 @@
+{
+  "format": "the-app-backup",
+  "version": 31,
+  "createdAt": "2026-10-21T10:00:00.000Z",
+  "appVersion": "1.40.1 (97)",
+  "data": {
+    "notes": [],
+    "shopItems": [
+      {
+        "id": "s1",
+        "name": "Jaja 🥚",
+        "toBuy": true,
+        "quantity": "text",
+        "text": "1-2 kutije"
+      },
+      {
+        "id": "s2",
+        "name": "Peršun",
+        "toBuy": true,
+        "quantity": "text",
+        "count": 3,
+        "text": "a bunch"
+      },
+      {
+        "id": "s3",
+        "name": "Milk",
+        "toBuy": true,
+        "quantity": "count",
+        "count": 2,
+        "text": "1 l"
+      },
+      {
+        "id": "s4",
+        "name": "Bread",
+        "toBuy": false,
+        "text": "pola"
+      }
+    ],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [],
+    "recipes": [],
+    "ingredients": {
+      "sections": []
+    },
+    "food": {
+      "foods": [],
+      "meals": []
+    },
+    "dates": [
+      {
+        "id": "d1",
+        "title": "Jahorina ⛷",
+        "type": "holiday",
+        "day": 20,
+        "month": 1,
+        "year": 2027,
+        "yearly": false,
+        "note": "Ski pass",
+        "reminders": [
+          {
+            "daysBefore": 7,
+            "minutes": 540
+          }
+        ],
+        "days": 5,
+        "kind": "skiing",
+        "travel": {
+          "hours": 5,
+          "leave": 420,
+          "back": 600
+        }
+      },
+      {
+        "id": "d2",
+        "title": "Venčanje Ane i Marka",
+        "type": "event",
+        "day": 12,
+        "month": 6,
+        "year": 2027,
+        "yearly": false,
+        "note": "",
+        "reminders": [
+          {
+            "daysBefore": 7,
+            "minutes": 540
+          },
+          {
+            "daysBefore": 30,
+            "minutes": 540
+          }
+        ],
+        "kind": "wedding"
+      },
+      {
+        "id": "d3",
+        "title": "Ana 🎂",
+        "type": "birthday",
+        "day": 24,
+        "month": 10,
+        "year": 1995,
+        "yearly": true,
+        "note": "",
+        "reminders": [
+          {
+            "daysBefore": 1,
+            "minutes": 540
+          },
+          {
+            "daysBefore": 7,
+            "minutes": 540
+          }
+        ]
+      }
+    ],
+    "pip": {
+      "born": "2026-10-10T07:00:00.000Z",
+      "name": "Bip 4",
+      "energy": 2.5,
+      "energyAt": "2026-10-18T10:00:00.000Z",
+      "batteries": 1,
+      "nextBatteryAt": "2026-10-18T14:00:00.000Z",
+      "offSeen": false,
+      "adventure": {
+        "registeredAt": "2026-10-17T11:30:00.000Z",
+        "xp": 390,
+        "outDay": "2026-10-18",
+        "outFrom": "2026-10-18T10:00:00.000Z",
+        "breakAt": "2026-10-18T12:10:00.000Z"
+      }
+    },
+    "subscriptions": [
+      {
+        "id": "sub1",
+        "name": "Claude",
+        "price": 20,
+        "currency": "€",
+        "every": "month",
+        "state": "active",
+        "date": "2026-11-03",
+        "card": "Revolut 4421"
+      },
+      {
+        "id": "sub2",
+        "name": "Claude 2",
+        "price": 20,
+        "currency": "€",
+        "every": "month",
+        "state": "active",
+        "date": "2026-11-12"
+      },
+      {
+        "id": "sub3",
+        "name": "ChatGPT",
+        "price": 23,
+        "currency": "€",
+        "every": "month",
+        "state": "cancelled",
+        "date": "2026-11-13",
+        "note": "Cancelled"
+      },
+      {
+        "id": "sub4",
+        "name": "Grok",
+        "price": 16,
+        "currency": "€",
+        "every": "month",
+        "state": "toCancel",
+        "date": "2026-11-17",
+        "note": "real ~30€",
+        "remindBefore": 2
+      },
+      {
+        "id": "sub5",
+        "name": "AWS",
+        "price": 5,
+        "currency": "€",
+        "about": true,
+        "every": "month",
+        "state": "active",
+        "date": "2026-11-01",
+        "card": "Virtual 7731"
+      },
+      {
+        "id": "sub6",
+        "name": "Spotify",
+        "price": 6,
+        "currency": "€",
+        "about": true,
+        "every": "month",
+        "state": "inactive",
+        "card": "Virtual 0912",
+        "note": "payment failed"
+      }
+    ],
+    "packing": {
+      "sections": [
+        {
+          "id": "documents",
+          "name": "Documents"
+        },
+        {
+          "id": "clothes",
+          "name": "Clothes"
+        },
+        {
+          "id": "toiletries",
+          "name": "Toiletries"
+        },
+        {
+          "id": "other",
+          "name": "Other"
+        }
+      ],
+      "lists": [
+        {
+          "id": "p1",
+          "name": "Jahorina ⛷",
+          "sections": [
+            {
+              "id": "documents",
+              "name": "Dokumenta"
+            },
+            {
+              "id": "k1",
+              "name": "Ski oprema"
+            },
+            {
+              "id": "clothes",
+              "name": "Odeća"
+            }
+          ],
+          "items": [
+            {
+              "id": "i1",
+              "name": "Pasoš",
+              "section": "documents",
+              "packed": true
+            },
+            {
+              "id": "i2",
+              "name": "Naočare",
+              "section": "k1"
+            },
+            {
+              "id": "i3",
+              "name": "Kaciga",
+              "section": "k1",
+              "packed": true
+            },
+            {
+              "id": "i4",
+              "name": "Čarape",
+              "section": "clothes",
+              "count": 5
+            }
+          ]
+        },
+        {
+          "id": "p2",
+          "name": "Beach",
+          "sections": [
+            {
+              "id": "b1",
+              "name": "Beach stuff"
+            }
+          ],
+          "items": []
+        }
+      ]
+    }
+  }
+}

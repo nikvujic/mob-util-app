@@ -443,14 +443,18 @@ void main() {
           ('Kišobran', 'gone', 1, false),
         ],
       );
-      // Its section gone: shown under Other.
+      // Round 95: the shared sections became each list's own; its
+      // section gone, it's shown under the last (Other, as before).
+      expect(trip.sections, book.sections);
       expect(
-        trip.grouped(book.sections).map((g) => (g.$1.name, g.$2.length)),
+        trip.grouped().map((g) => (g.$1.name, g.$2.length)),
         [
           ('Documents', 2),
           ('Clothes', 1),
           ('Ski gear', 1),
+          ('Toiletries', 0),
           ('Electronics', 1),
+          ('Medicine', 0),
           ('Other', 1)
         ],
       );
@@ -474,12 +478,16 @@ void main() {
           reason: "v29's too");
     });
 
-    test('written as read', () {
+    test('written as read (now with each list\'s sections)', () {
       final json = jsonDecode(
               File('test/fixtures/v30/storage/packing.json').readAsStringSync())
           as Map<String, dynamic>;
-      expect(PackingBook.fromJson(json).toJson(),
-          {'sections': json['sections'], 'lists': json['lists']});
+      final again = PackingBook.fromJson(json).toJson();
+      expect(again['sections'], json['sections']);
+      expect([
+        for (final l in again['lists'] as List<dynamic>)
+          {...l as Map<String, dynamic>}..remove('sections'),
+      ], json['lists']);
     });
 
     test('older backups and phones: the usual sections, no lists', () async {
@@ -487,11 +495,59 @@ void main() {
         File('test/fixtures/v29/backup-plain.json').readAsStringSync(),
       ) as PlainBackupFile;
       expect(file.backup.packing.lists, isEmpty);
-      expect(file.backup.packing.sections, PackingBook.initial.sections);
+      expect(file.backup.packing.sections, PackingBook.defaults);
       final storage = await AppStorage.open(
         directory: copyOf('test/fixtures/v29/storage'),
       );
-      expect(storage.initialPacking.sections, PackingBook.initial.sections);
+      expect(storage.initialPacking.sections, PackingBook.defaults);
+    });
+  });
+
+  group('packing.json v2 / v31 backup (each list its sections, Round 95)', () {
+    void expectSample(PackingBook book) {
+      expect(book.sections.map((s) => s.name),
+          ['Documents', 'Clothes', 'Toiletries', 'Other'],
+          reason: 'the defaults');
+      final trip = book.byId('p1')!;
+      expect(trip.name, 'Jahorina ⛷');
+      expect(trip.sections.map((s) => s.name),
+          ['Dokumenta', 'Ski oprema', 'Odeća']);
+      expect(
+        trip
+            .grouped()
+            .map((g) => '${g.$1.name}: ${g.$2.map((i) => i.name).join(', ')}'),
+        ['Dokumenta: Pasoš', 'Ski oprema: Naočare, Kaciga', 'Odeća: Čarape'],
+      );
+      expect(trip.items.map((i) => (i.count, i.packed)),
+          [(1, true), (1, false), (1, true), (5, false)]);
+      final beach = book.byId('p2')!;
+      expect(beach.sections.map((s) => s.name), ['Beach stuff']);
+      expect(beach.items, isEmpty, reason: 'an empty section kept');
+    }
+
+    test('packing.json version 2 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v31/storage'),
+      );
+      expectSample(storage.initialPacking);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v31 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v31/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.packing);
+      expect(file.backup.subscriptions.subscriptions, hasLength(6),
+          reason: "v29's too");
+    });
+
+    test('written as read', () {
+      final json = jsonDecode(
+              File('test/fixtures/v31/storage/packing.json').readAsStringSync())
+          as Map<String, dynamic>;
+      expect(PackingBook.fromJson(json).toJson(),
+          {'sections': json['sections'], 'lists': json['lists']});
     });
   });
 
@@ -1595,6 +1651,10 @@ void main() {
           'c43964e11e0e15344ae7efc8a3843bb10bb036c5a372ebe48c5fc80bf1095b70',
       'test/fixtures/v30/backup-plain.json':
           'd92d548956785c285c4988c5ae732f4cb86df202938c2d227df3cd02c4146230',
+      'test/fixtures/v31/storage/packing.json':
+          '5e70786fd57462721c9fb51b4cbfd1e736f84430dd5a70eb42144c71ff011344',
+      'test/fixtures/v31/backup-plain.json':
+          'c6bbfdff61670c7be366669847fbf381332ad0a88a1f925aa27ddc2da6316dbe',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':
