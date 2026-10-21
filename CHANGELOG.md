@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.2] - 2026-10-21
+
 ### Changed
 - **Packing, editing a list:**
   - Sections are **dragged** by the right of their name, as in
