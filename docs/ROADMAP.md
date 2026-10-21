@@ -337,6 +337,16 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 99 — Nikola on 1.40.4 (2026-10-21, noted)
+
+- [ ] **Rain heard, Pip dry** (W1/O36): Belgrade raining, the app said
+  cloudy. Open-Meteo's `current` `weather_code` is a model value, and
+  light rain often comes as 3 (overcast). Also ask for `precipitation`
+  (current, mm) and read "cloudy/overcast with precipitation > 0" as
+  drizzle (rain from ~0.5 mm). A field in `WeatherApi.currentFields`, a
+  rule beside `WeatherKind.fromCode`, a test. (Couldn't check the live
+  answer from the dev container: Open-Meteo is blocked there.)
+
 ### Round 98 — Nikola on 1.40.3 (2026-10-21, patch 1.40.4)
 
 - [x] **Buzzes through Pip's animations** (O42): "make us use vibration
