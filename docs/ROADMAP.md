@@ -340,12 +340,13 @@ fixtures for every stored format.
 ### Round 99 — Nikola on 1.40.4 (2026-10-21, noted)
 
 - [ ] **Rain heard, Pip dry** (W1/O36): Belgrade raining, the app said
-  cloudy. Open-Meteo's `current` `weather_code` is a model value, and
-  light rain often comes as 3 (overcast). Also ask for `precipitation`
-  (current, mm) and read "cloudy/overcast with precipitation > 0" as
-  drizzle (rain from ~0.5 mm). A field in `WeatherApi.currentFields`, a
-  rule beside `WeatherKind.fromCode`, a test. (Couldn't check the live
-  answer from the dev container: Open-Meteo is blocked there.)
+  cloudy. Nikola's own Open-Meteo check (01:30): `weather_code` 3,
+  `precipitation` 0, `rain` 0: its model saw no rain at all, so reading
+  precipitation won't help. **Switch to a better weather API** (one
+  that uses station / radar observations for "now", not only a model):
+  compare candidates (free tier, key or not, Serbia coverage, terms)
+  and propose before building; keep `WeatherReport` and the Internet
+  Access page as they are, only `data/weather_api.dart` changes.
 
 ### Round 98 — Nikola on 1.40.3 (2026-10-21, patch 1.40.4)
 
