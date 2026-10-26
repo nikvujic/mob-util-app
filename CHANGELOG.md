@@ -6,6 +6,8 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.5] - 2026-10-26
+
 ### Fixed
 - **Recipes:** going into edit and back no longer jumps to the top; the
   page stays where it was scrolled.
