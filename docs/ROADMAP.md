@@ -337,6 +337,28 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 101 — the road to v2, then Pip's quests (2026-10-26)
+
+**v2.0.0** — productivity and the tasks left open, before anything
+big for Pip:
+
+1. [ ] Recipe edit keeps its scroll (Round 100).
+2. [ ] Recipes: export / import as JSON (Round 54 notes, below).
+3. [ ] A better weather API (Round 99): candidates compared first.
+4. [ ] People: an index of people, notes, a family tree (Round 100;
+   planned with Nikola first).
+5. [ ] Page organizer (O10, already marked v2): to talk through.
+6. [ ] Other productivity ideas Nikola brings (the Hub pages ideas list).
+
+Released as **2.0.0** once these are in.
+
+**After v2: Pip's quests** (a plan, to be specced with Nikola before
+building; big). Open questions: what a quest is (given by the app,
+found by him, tied to what Nikola does in the app?), how long, what it
+gives (XP, items, hats), how it's shown (Pip Home card, a log), and how
+it fits his adventures and the old Godville-style items and events log
+ideas (Rounds 26 and 30).
+
 ### Round 100 — Nikola's notes (2026-10-26)
 
 - [ ] **Recipe edit keeps its scroll**: starting and ending edit on a
