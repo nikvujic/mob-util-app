@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 100 — Nikola's notes (2026-10-26)
+
+- [ ] **Recipe edit keeps its scroll**: starting and ending edit on a
+  recipe jumps back to the top; it should stay where it was.
+- [ ] **People** (new Hub page, to plan with Nikola first): a big index
+  of people he knows, notes on each, and a **family tree** with a good
+  visual overview.
+
 ### Round 99 — Nikola on 1.40.4 (2026-10-21, noted)
 
 - [ ] **Rain heard, Pip dry** (W1/O36): Belgrade raining, the app said
