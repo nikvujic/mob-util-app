@@ -337,6 +337,21 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 104 — recipe import / export (2026-10-26, 1.41.0)
+
+- [x] Nikola: "export for import and export for agent"; text only
+  (import is paste, export is copy); an extra button on the Recipes
+  page; import makes a new recipe, export picks one from a list.
+  `providers/recipe_transfer.dart`: `exportRecipe` (JSON:
+  `format` "the-app/recipe", `version` 1, the recipe with each
+  ingredient's section), `exportForAgent` (what to answer, the rules,
+  his ingredients by section, the example), `parseRecipe` (the JSON from
+  the first `{` to the last `}`, so an agent's words and fences don't
+  matter; the recipe alone too; a newer version refused), and
+  `importRecipe` (`IngredientsNotifier.ensure`: an ingredient there by
+  name, or added to its section, made if new). A confirm lists what's
+  new to the ingredients first. `pages/hub/recipe_transfer_sheet.dart`.
+
 ### Round 103 — Nikola on 1.40.5 (2026-10-26, patch 1.40.6)
 
 - [x] Packing, an item's options: Count first, then Rename.
@@ -348,7 +363,7 @@ big for Pip:
 
 1. [x] Recipe edit keeps its scroll (Round 100; 1.40.5, Round 102:
    the view's offset opens edit there, edit's comes back).
-2. [ ] Recipes: export / import as JSON (Round 54 notes, below).
+2. [x] Recipes: export / import as text (Round 104; 1.41.0).
 3. [ ] A better weather API (Round 99): candidates compared first.
 4. [ ] People: an index of people, notes, a family tree (Round 100;
    planned with Nikola first).
@@ -494,7 +509,7 @@ Fixes (a patch):
   the recipe method only so far) on every text field in the app.
 
 Features:
-- [ ] **Recipes: export / import** as JSON (to have ChatGPT write new
+- [x] **Recipes: export / import** (Round 104) as JSON (to have ChatGPT write new
   ones in the same shape): the recipe (name, prep minutes, type, method
   in Markdown, ingredients with quantity and section) plus every
   ingredient name by section, so a new recipe can use the names there

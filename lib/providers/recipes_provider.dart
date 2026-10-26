@@ -24,6 +24,27 @@ class RecipesNotifier extends StateNotifier<List<Recipe>> {
     return recipe.id;
   }
 
+  /// Round 104: a whole new recipe at the top (imported); returns its id.
+  String addWhole({
+    required String name,
+    int? prepMinutes,
+    RecipeType? type,
+    List<RecipeIngredient> ingredients = const [],
+    String method = '',
+  }) {
+    final recipe = Recipe(
+      id: generateId(),
+      name: name,
+      prepMinutes: prepMinutes,
+      type: type,
+      ingredients: ingredients,
+      method: method,
+      createdAt: _now(),
+    );
+    state = [recipe, ...state];
+    return recipe.id;
+  }
+
   /// [recipe] as it is now (from its editor); its modified time moves on
   /// only when something changed.
   void save(Recipe recipe) {
@@ -171,6 +192,26 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
       ...sections.skip(1),
     ]);
     return item.id;
+  }
+
+  /// Round 104 (an imported recipe): the id of the ingredient called
+  /// [name], added at the top of the section called [section] (made, as
+  /// a new section, if there's none; the first section if null) when
+  /// it isn't there yet.
+  String ensure(String name, {String? section}) {
+    if (named(name) case (final item, _)) return item.id;
+    final id = add(name)!;
+    final wanted = section?.trim().toLowerCase();
+    if (wanted == null || wanted == state.sections.first.name.toLowerCase()) {
+      return id;
+    }
+    final sectionId = state.sections
+            .where((s) => s.name.toLowerCase() == wanted)
+            .firstOrNull
+            ?.id ??
+        addSection(section!)!;
+    move(id, sectionId: sectionId, index: 0);
+    return id;
   }
 
   /// A new section just under the first one (Round 43); returns its id,

@@ -314,6 +314,12 @@ only). Tests use `FakeBackupFolder`.
 
 ## Recipes (Round 42)
 
+Round 104: recipes as text (`providers/recipe_transfer.dart`): pure
+export / parse functions over `Recipe` and `IngredientBook`, and
+`importRecipe`, which takes the two notifiers (so it's tested without
+widgets); the page side (`pages/hub/recipe_transfer_sheet.dart`) only
+copies, pastes and asks.
+
 `models/recipe.dart`: `Recipe` (name, prep minutes, `RecipeType`, its
 `RecipeIngredient`s, the method as Markdown) and the ingredients list
 (`IngredientBook` → `IngredientSection` → `Ingredient`), in

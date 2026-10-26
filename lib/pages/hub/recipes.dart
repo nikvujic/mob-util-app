@@ -6,6 +6,7 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/pages/hub/ingredients.dart';
 import 'package:the_app/pages/hub/page_gate.dart';
 import 'package:the_app/pages/hub/recipe_page.dart';
+import 'package:the_app/pages/hub/recipe_transfer_sheet.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
@@ -138,6 +139,12 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                       icon: Icons.kitchen_outlined,
                       tooltip: 'Ingredients',
                       onPressed: () => openIngredients(context),
+                    ),
+                    // Round 104: recipes as text, copied and pasted.
+                    BottomAction(
+                      icon: Icons.import_export,
+                      tooltip: 'Import / export',
+                      onPressed: () => showRecipeTransfer(context, ref),
                     ),
                     // Outermost, under the thumb.
                     BottomAction(

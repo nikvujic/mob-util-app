@@ -6,6 +6,21 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.41.0] - 2026-10-26
+
+### Added
+- **Recipes: import / export as text.** A new button on the Recipes page
+  (beside Ingredients):
+  - **Export for import** copies a recipe you pick, for someone to
+    import into their app.
+  - **Export for ChatGPT** copies a recipe you pick as an example, with
+    the rules of its shape and your ingredient names by section: paste it
+    into ChatGPT, ask for a new recipe like it, and copy its answer.
+  - **Import (paste)** reads a copied recipe (words or a code block
+    around it are fine) and, after showing which ingredients are new to
+    your list and where they'll go, adds it as a new recipe on top; new
+    ingredients go into their sections (a new section if needed).
+
 ## [1.40.6] - 2026-10-26
 
 ### Changed

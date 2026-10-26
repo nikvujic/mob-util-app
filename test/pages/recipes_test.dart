@@ -6,6 +6,7 @@ import 'package:the_app/core/screen.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/recipe_read_provider.dart';
+import 'package:the_app/providers/recipe_transfer.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
@@ -352,6 +353,104 @@ void main() {
     expect(then, greaterThan(0));
     await tapTooltip(tester, 'Done');
     expect(view().pixels, closeTo(then, 1), reason: 'and back, where it is');
+  });
+
+  group('import / export (Round 104)', () {
+    String? clipboard;
+    setUp(() {
+      clipboard = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          clipboard = (call.arguments as Map)['text'] as String;
+        }
+        if (call.method == 'Clipboard.getData') {
+          return clipboard == null ? null : {'text': clipboard};
+        }
+        return null;
+      });
+    });
+    tearDown(() => TestDefaultBinaryMessengerBinding
+        .instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null));
+
+    Future<void> pick(WidgetTester tester, String choice) async {
+      await tapTooltip(tester, 'Import / export');
+      await tester.tap(find.byKey(Key('choice-$choice')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('export for import: a recipe picked, copied', (tester) async {
+      await openRecipes(tester,
+          start: [pancakes(), pancakes().copyWith(id: 'r2', name: 'Soup')],
+          ingredients: sampleBook());
+      await pick(tester, 'export');
+      expect(find.text('Export which recipe?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('exportRecipe-r2')));
+      await tester.pumpAndSettle();
+      expect(find.text('Copied: Soup'), findsOneWidget);
+      expect(parseRecipe(clipboard!).name, 'Soup');
+      expect(clipboard, isNot(contains('Rules:')));
+    });
+
+    testWidgets('export for ChatGPT: the example with the rules',
+        (tester) async {
+      await openRecipes(tester, start: [pancakes()], ingredients: sampleBook());
+      await pick(tester, 'agent');
+      await tester.tap(find.byKey(const Key('exportRecipe-r1')));
+      await tester.pumpAndSettle();
+      expect(find.text('Copied for ChatGPT: Pancakes'), findsOneWidget);
+      expect(clipboard, contains('Rules:'));
+      expect(clipboard, contains('- Dairy: Eggs, Milk'));
+    });
+
+    testWidgets('no recipes: nothing to export', (tester) async {
+      await openRecipes(tester);
+      await pick(tester, 'export');
+      expect(find.text('No recipes to export'), findsOneWidget);
+    });
+
+    testWidgets(
+        'import: what it adds asked first, then a new recipe on top; '
+        'Cancel adds nothing', (tester) async {
+      await openRecipes(tester, start: [pancakes()], ingredients: sampleBook());
+      clipboard = '```json\n{"format": "the-app/recipe", "version": 1, '
+          '"recipe": {"name": "Cake", "ingredients": ['
+          '{"name": "Flour", "quantity": "300 g", "section": "Baking"}, '
+          '{"name": "Butter", "section": "Dairy"}, '
+          '{"name": "Vanilla", "section": "Flavours"}], '
+          '"method": "1. Bake"}}\n```';
+      await pick(tester, 'import');
+      expect(find.text('Import "Cake"?'), findsOneWidget);
+      expect(find.textContaining('3 ingredients.'), findsOneWidget);
+      expect(find.textContaining('• Butter (Dairy)'), findsOneWidget);
+      expect(find.textContaining('• Vanilla (new section Flavours)'),
+          findsOneWidget);
+      expect(find.textContaining('Flour ('), findsNothing,
+          reason: 'already there');
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(recipes(), hasLength(1));
+      expect(book().size, 4);
+
+      await pick(tester, 'import');
+      await tester.tap(find.text('Import'));
+      await tester.pumpAndSettle();
+      expect(find.text('Imported: Cake'), findsOneWidget);
+      expect(recipes().map((r) => r.name), ['Cake', 'Pancakes']);
+      expect(book().size, 6);
+      expect(find.text('Cake'), findsOneWidget, reason: 'in the list');
+    });
+
+    testWidgets('import: says why when the text is no recipe', (tester) async {
+      await openRecipes(tester);
+      await pick(tester, 'import');
+      expect(find.text('Copy a recipe first, then import'), findsOneWidget);
+      clipboard = 'a shopping list';
+      await pick(tester, 'import');
+      expect(find.text('No recipe in the copied text.'), findsOneWidget);
+      expect(recipes(), isEmpty);
+    });
   });
 
   group('edit mode', () {
