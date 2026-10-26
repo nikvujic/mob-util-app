@@ -182,6 +182,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('choice-delete')), findsNothing,
         reason: 'deleting is by holding');
+    // Round 103 (Nikola): Count above Rename.
+    expect(tester.getTopLeft(find.byKey(const Key('choice-count'))).dy,
+        lessThan(tester.getTopLeft(find.byKey(const Key('choice-rename'))).dy));
     await choose(tester, 'count');
     await tester.tap(find.byKey(const Key('packingCountMore')));
     await tester.pump();

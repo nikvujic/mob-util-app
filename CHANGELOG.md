@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.40.6] - 2026-10-26
+
+### Changed
+- **Packing:** tapping an item while editing offers **Count** first,
+  then Rename.
+
 ## [1.40.5] - 2026-10-26
 
 ### Fixed

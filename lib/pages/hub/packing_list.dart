@@ -395,8 +395,9 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
   Future<void> _itemOptions(PackingItem item) async {
     _leaveFields();
     final choice = await showChoicesSheet(context, item.name, const [
-      (Icons.edit_outlined, 'Rename', 'rename'),
+      // Count first (Nikola, Round 103): the one used most.
       (Icons.numbers, 'Count', 'count'),
+      (Icons.edit_outlined, 'Rename', 'rename'),
     ]);
     if (!mounted || !_editing) return;
     void replace(PackingItem next) => _change(_list.copyWith(items: [

@@ -337,6 +337,10 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 103 — Nikola on 1.40.5 (2026-10-26, patch 1.40.6)
+
+- [x] Packing, an item's options: Count first, then Rename.
+
 ### Round 101 — the road to v2, then Pip's quests (2026-10-26)
 
 **v2.0.0** — productivity and the tasks left open, before anything
