@@ -342,7 +342,8 @@ fixtures for every stored format.
 **v2.0.0** — productivity and the tasks left open, before anything
 big for Pip:
 
-1. [ ] Recipe edit keeps its scroll (Round 100).
+1. [x] Recipe edit keeps its scroll (Round 100; 1.40.5, Round 102:
+   the view's offset opens edit there, edit's comes back).
 2. [ ] Recipes: export / import as JSON (Round 54 notes, below).
 3. [ ] A better weather API (Round 99): candidates compared first.
 4. [ ] People: an index of people, notes, a family tree (Round 100;
@@ -361,7 +362,7 @@ ideas (Rounds 26 and 30).
 
 ### Round 100 — Nikola's notes (2026-10-26)
 
-- [ ] **Recipe edit keeps its scroll**: starting and ending edit on a
+- [x] **Recipe edit keeps its scroll**: starting and ending edit on a
   recipe jumps back to the top; it should stay where it was.
 - [ ] **People** (new Hub page, to plan with Nikola first): a big index
   of people he knows, notes on each, and a **family tree** with a good

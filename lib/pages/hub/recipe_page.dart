@@ -136,6 +136,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     _nameFocus.dispose();
     _methodFocus.dispose();
     _formatShown.dispose();
+    _viewScroll.dispose();
     super.dispose();
   }
 
@@ -183,7 +184,15 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     _saveNow();
   }
 
+  /// Round 102 (Nikola): switching between view and edit keeps the
+  /// scroll: the view list's controller, and a context inside the edit
+  /// list to ask how far down it is.
+  ScrollController _viewScroll = ScrollController();
+  BuildContext? _editInside;
+  double _editFrom = 0;
+
   void _edit() => setState(() {
+        _editFrom = _viewScroll.hasClients ? _viewScroll.offset : 0;
         _original = _recipe;
         _history.clear();
         _lastTyped = null;
@@ -199,6 +208,12 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       return;
     }
     _saveNow();
+    final inside = _editInside;
+    final scrolled = inside != null && inside.mounted
+        ? PullDownList.scrolledOf(inside)
+        : 0.0;
+    _viewScroll.dispose();
+    _viewScroll = ScrollController(initialScrollOffset: scrolled);
     setState(() {
       _editing = false;
       _formatOpen = false;
@@ -722,6 +737,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     // No pull-down reach here (Nikola): only in edit mode.
     return ListView(
       key: const Key('recipeView'),
+      controller: _viewScroll,
       padding: const EdgeInsets.fromLTRB(
           16, 12, 16, BottomActions.contentClearance + 16),
       children: [
@@ -781,7 +797,15 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         (_formatOpen ? FormatBar.height + 8 : 0);
     return PullDownList(
       bottomSpace: clearance,
+      initialOffset: _editFrom,
       slivers: [
+        // Always built (not lazily, like the rows): how far down it is.
+        SliverToBoxAdapter(
+          child: Builder(builder: (inside) {
+            _editInside = inside;
+            return const SizedBox.shrink();
+          }),
+        ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           sliver: SliverList.list(children: [

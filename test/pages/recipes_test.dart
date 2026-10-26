@@ -9,6 +9,7 @@ import 'package:the_app/providers/recipe_read_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
+import 'package:the_app/widgets/pull_down_list.dart';
 
 import '../helpers.dart';
 
@@ -311,6 +312,46 @@ void main() {
       await tester.pumpAndSettle();
       expect(recipes().single.name, 'Pancakes');
     });
+  });
+
+  testWidgets(
+      'Round 102: into edit and back, the page stays where it was scrolled',
+      (tester) async {
+    final long = pancakes().copyWith(
+      ingredients: [
+        for (var i = 0; i < 30; i++)
+          RecipeIngredient(name: 'Thing $i', quantity: '$i g'),
+      ],
+      method: [for (var i = 1; i <= 40; i++) '$i. Step'].join('\n'),
+    );
+    await openRecipes(tester, start: [long]);
+    await tester.tap(find.text('Pancakes'));
+    await tester.pumpAndSettle();
+    ScrollPosition view() => tester
+        .state<ScrollableState>(find.descendant(
+            of: find.byKey(const Key('recipeView')),
+            matching: find.byType(Scrollable)))
+        .position;
+    double edit() => PullDownList.scrolledOf(tester.element(find
+        .descendant(
+            of: find.byType(PullDownList), matching: find.byType(Builder))
+        .first));
+
+    await tester.drag(
+        find.byKey(const Key('recipeView')), const Offset(0, -500));
+    await tester.pumpAndSettle();
+    final down = view().pixels;
+    expect(down, greaterThan(300));
+    await tapTooltip(tester, 'Edit');
+    expect(edit(), closeTo(down, 1), reason: 'edit opens where view was');
+
+    await tester.drag(find.byType(PullDownList), const Offset(0, 200));
+    await tester.pumpAndSettle();
+    final then = edit();
+    expect(then, lessThan(down - 100));
+    expect(then, greaterThan(0));
+    await tapTooltip(tester, 'Done');
+    expect(view().pixels, closeTo(then, 1), reason: 'and back, where it is');
   });
 
   group('edit mode', () {
