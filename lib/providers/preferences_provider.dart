@@ -112,6 +112,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   /// Shop's bought list A–Z or in its own order (Round 69).
   void setShopSorted(bool sorted) => state = state.copyWith(shopSorted: sorted);
 
+  void setHidePeopleNotes(bool hide) =>
+      state = state.copyWith(hidePeopleNotes: hide);
+
   /// What the app may use the internet for, and the weather (Round 70).
   void setInternet(InternetSettings internet) =>
       state = state.copyWith(internet: internet);

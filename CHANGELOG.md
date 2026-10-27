@@ -6,6 +6,42 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.43.1] - 2026-10-27
+
+### Changed
+- **People, the board.** Highlighted people are no longer bigger. Zoomed
+  out, names and ages grow and faces shrink, so they stay readable. The
+  cake on a birthday has room before the age.
+- **A main person**, set in Edit: a star on their box, and the board
+  opens on them. The bar's **options** (⋮, where Tidy was) has *Center on
+  main person*, *Highlight family* (a gold ring round everyone in the
+  main person's family) and *Tidy*.
+- **Editing a person, laid out again:** Male / Female above the name;
+  **From Dates** a button beside the birthday; *Deceased* under it;
+  relations as cards with their faces; *Highlighted* and *Main person*
+  under them; **Delete** a full button. Every row's icon lines up.
+- **Edit can be undone:** back asks *Save changes?*, and Discard puts
+  everything back (a birthday and its date in Dates too; a new person
+  goes). Done keeps it, nothing asked; there's also a *Discard changes*
+  button by Done.
+- **The note** moved to the end of a person's info, shown as Markdown,
+  and is written on its own page with the format bar, as a recipe's
+  method (Done keeps it; back asks).
+- Removing a birthday asks first: its date in Dates goes with it, with
+  its reminders and note.
+- A swipe down on the name closes a person's info.
+- No toast with Undo after Tidy or Delete: both are asked first.
+- **Settings → Hide People notes.** Showing them again asks for the
+  password, when there is one.
+- **Dates:** a birthday from People also has *Year known* locked, and a
+  birthday made in People gets the usual reminders (the day before and a
+  week before).
+
+### Fixed
+- Pinching the board then lifting one finger made it jump (or picked up
+  a person under the finger lifted).
+- The list of birthdays from Dates didn't scroll.
+
 ## [1.43.0] - 2026-10-27
 
 ### Added

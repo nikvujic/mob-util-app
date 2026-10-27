@@ -251,4 +251,23 @@ void main() {
     expect(familyPull(BoardSizes.boxWidth * 0.2, partner: true), 0,
         reason: 'fine-tuning');
   });
+
+  test(
+      'the main person (Round 109): kept, read back; their family shown '
+      'only when on; gone with them', () {
+    final book = PeopleBook(
+      people: [person('a'), person('b'), person('c')],
+      relations: [rel('1', RelationKind.parent, 'a', 'b')],
+      mainId: 'b',
+    );
+    expect(book.main!.id, 'b');
+    expect(book.familyShown, isEmpty, reason: 'off');
+    final on = book.copyWith(highlightFamily: true);
+    expect(on.familyShown, {'a', 'b'});
+    final again = PeopleBook.fromJson(on.toJson());
+    expect((again.mainId, again.highlightFamily), ('b', true));
+    expect(on.without('b').mainId, isNull);
+    expect(on.without('b').familyShown, isEmpty);
+    expect(on.without('c').mainId, 'b');
+  });
 }

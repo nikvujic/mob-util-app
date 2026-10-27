@@ -3,12 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/people.dart';
+import 'package:the_app/pages/hub/person_note_page.dart';
 import 'package:the_app/pages/hub/recipe_page.dart' show showChoicesSheet;
+import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/people_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/widgets/low_handles.dart';
+import 'package:the_app/widgets/markdown_text.dart';
 import 'package:the_app/widgets/people_avatar.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
@@ -64,10 +69,29 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
   late bool _editing = widget.startEditing;
   late Person _draft = widget.person;
   late final _name = TextEditingController(text: widget.person.name);
-  late final _note = TextEditingController(text: widget.person.note);
+  final _nameFocus = FocusNode();
+
+  /// The note as shown (Markdown, read only); written on its own page.
+  late final _noteView = MarkdownEditingController(text: widget.person.note);
+
+  /// As it all was when Edit was pressed (Round 109): Discard goes back.
+  PeopleBook? _bookBefore;
+  DateBook? _datesBefore;
+
+  /// Something changed since Edit was pressed.
+  bool _dirty = false;
+
+  /// The header's downward swipe so far (Round 109: down closes).
+  double _swipe = 0;
 
   PeopleNotifier get _people => ref.read(peopleProvider.notifier);
   bool get _kept => ref.read(peopleProvider).byId(_draft.id) != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_editing) _snapshot();
+  }
 
   @override
   void didUpdateWidget(PersonPanel oldWidget) {
@@ -76,30 +100,34 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
       _editing = widget.startEditing;
       _draft = widget.person;
       _name.text = widget.person.name;
-      _note.text = widget.person.note;
+      if (_editing) _snapshot();
     }
   }
 
   @override
   void dispose() {
     _name.dispose();
-    _note.dispose();
+    _nameFocus.dispose();
+    _noteView.dispose();
     super.dispose();
   }
 
-  void _toast(String message, {VoidCallback? undo}) =>
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(
-          content: Text(message),
-          action: undo == null
-              ? null
-              : SnackBarAction(label: 'Undo', onPressed: undo),
-        ));
+  void _snapshot() {
+    _bookBefore = ref.read(peopleProvider);
+    _datesBefore = ref.read(datesProvider);
+    _dirty = false;
+  }
+
+  void _toast(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
 
   /// The draft changed: kept once it has a name (spec: saved as you go).
   void _change(Person next) {
-    setState(() => _draft = next);
+    setState(() {
+      _draft = next;
+      _dirty = true;
+    });
     if (next.name.trim().isEmpty) return;
     _people.save(next.copyWith(name: next.name.trim()));
     // Saving may have tied a birthday to a date.
@@ -109,6 +137,14 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     }
   }
 
+  void _startEditing(Person person) => setState(() {
+        _draft = person;
+        _name.text = person.name;
+        _editing = true;
+        _snapshot();
+      });
+
+  /// Done: the changes kept, nothing asked (Round 109).
   void _done() {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!_kept) {
@@ -124,6 +160,53 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     });
   }
 
+  /// Everyone and the dates back as they were at Edit (the board's view
+  /// stays); a new person gone again.
+  void _discard() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final before = _bookBefore, dates = _datesBefore;
+    if (before != null) {
+      _people.replaceAll(before.copyWith(view: ref.read(peopleProvider).view));
+    }
+    if (dates != null) ref.read(datesProvider.notifier).replaceAll(dates);
+    final saved = ref.read(peopleProvider).byId(_draft.id);
+    if (saved == null) {
+      widget.onClose();
+      return;
+    }
+    _name.text = saved.name;
+    setState(() {
+      _draft = saved;
+      _editing = false;
+      _dirty = false;
+    });
+  }
+
+  /// Back while editing (Round 109), as on other pages: unchanged, out
+  /// of editing; changed, Save or Discard; a tap outside stays.
+  Future<void> _back() async {
+    // Out of the name field first.
+    if (_nameFocus.hasFocus) {
+      _nameFocus.unfocus();
+      return;
+    }
+    if (!_dirty) {
+      _done();
+      return;
+    }
+    final isNew = _bookBefore?.byId(_draft.id) == null;
+    final save = await showSaveChangesDialog(
+      context,
+      title: isNew ? 'Save new person?' : 'Save changes?',
+      message: isNew
+          ? 'New people are saved automatically. Discard deletes them.'
+          : 'Your changes are saved automatically. Discard puts them back '
+              'the way they were.',
+    );
+    if (!mounted || save == null) return;
+    save ? _done() : _discard();
+  }
+
   Future<void> _delete() async {
     final name = _draft.name.trim().isEmpty ? 'this person' : _draft.name;
     final ok = await showConfirmDialog(
@@ -135,18 +218,10 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
       destructive: true,
     );
     if (!ok || !mounted) return;
-    // The panel closes: what Undo needs is kept first.
+    // Round 109: asked already, so no Undo toast after.
     final people = _people;
-    final messenger = ScaffoldMessenger.of(context);
-    final removed = people.remove(_draft.id);
     widget.onClose();
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text('$name deleted'),
-        action: SnackBarAction(
-            label: 'Undo', onPressed: () => people.undoRemove(removed)),
-      ));
+    people.remove(_draft.id);
   }
 
   Future<void> _pickBirthday() async {
@@ -167,29 +242,64 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     ));
   }
 
+  /// Round 109: asked first; with it goes their date in Dates, and its
+  /// reminders and note.
+  Future<void> _clearBirthday() async {
+    final ok = await showConfirmDialog(
+      context,
+      title: 'Remove birthday?',
+      message: _draft.dateId == null
+          ? null
+          : 'Their birthday in Dates goes too, with its reminders and note.',
+      confirmLabel: 'Remove',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    _change(_draft.copyWith(birthday: () => null));
+  }
+
   /// Spec 6: a birthday already on the Dates page, taken over.
   Future<void> _birthdayFromDates() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final free = _people.freeBirthdays();
+    if (free.isEmpty) {
+      _toast('No birthdays in Dates to take');
+      return;
+    }
     final picked = await showModalBottomSheet<String>(
       context: context,
+      // Round 109: a long list scrolls.
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text('Birthdays in Dates',
-                  style: TextStyle(color: context.colors.textSecondary)),
-            ),
-            for (final d in free)
-              ListTile(
-                key: Key('freeBirthday-${d.id}'),
-                leading: const Icon(Icons.cake_outlined),
-                title: Text(d.title),
-                subtitle: Text(formatDayMonth(d.day, d.month, d.year)),
-                onTap: () => Navigator.of(context).pop(d.id),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text('Birthdays in Dates',
+                    style: TextStyle(color: context.colors.textSecondary)),
               ),
-          ],
+              Flexible(
+                child: ListView(
+                  key: const Key('freeBirthdays'),
+                  shrinkWrap: true,
+                  children: [
+                    for (final d in free)
+                      ListTile(
+                        key: Key('freeBirthday-${d.id}'),
+                        leading: const Icon(Icons.cake_outlined),
+                        title: Text(d.title),
+                        subtitle: Text(formatDayMonth(d.day, d.month, d.year)),
+                        onTap: () => Navigator.of(context).pop(d.id),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -223,6 +333,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
 
   /// Spec 5.1: another person, then what they are to this one.
   Future<void> _addRelation() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final book = ref.read(peopleProvider);
     final others = [
       for (final p in book.people)
@@ -265,7 +376,17 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
       'sibling' => _people.relate(RelationKind.sibling, me, otherId),
       _ => _people.relate(RelationKind.other, me, otherId, label: label),
     };
-    if (why != null) _toast(why);
+    if (why != null) {
+      _toast(why);
+    } else {
+      setState(() => _dirty = true);
+    }
+  }
+
+  Future<void> _editNote() async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => PersonNotePage(personId: _draft.id),
+    ));
   }
 
   @override
@@ -275,6 +396,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     final now = ref.watch(clockProvider)();
     // As kept (after an Undo, say), unless being edited.
     final person = _editing ? _draft : (book.byId(_draft.id) ?? _draft);
+    if (_noteView.text != person.note) _noteView.text = person.note;
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 4, 0),
       child: Row(
@@ -298,23 +420,24 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                   fontWeight: FontWeight.w600),
             ),
           ),
-          if (_editing)
+          if (_editing) ...[
+            IconButton(
+              key: const Key('personDiscard'),
+              tooltip: 'Discard changes',
+              icon: const Icon(Icons.settings_backup_restore),
+              onPressed: _dirty ? _discard : null,
+            ),
             TextButton(
               key: const Key('personDone'),
               onPressed: _done,
               child: const Text('Done'),
-            )
-          else ...[
+            ),
+          ] else ...[
             IconButton(
               key: const Key('personEdit'),
               tooltip: 'Edit',
               icon: const Icon(Icons.edit_outlined),
-              onPressed: () => setState(() {
-                _draft = person;
-                _name.text = person.name;
-                _note.text = person.note;
-                _editing = true;
-              }),
+              onPressed: () => _startEditing(person),
             ),
             IconButton(
               key: const Key('personClose'),
@@ -326,23 +449,53 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
         ],
       ),
     );
-    return Column(
-      children: [
-        header,
-        Expanded(
-          child: _editing
-              ? _editFields(context, book, now)
-              : _info(context, book, person, now),
-        ),
-      ],
+    return PopScope(
+      canPop: !_editing,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _back();
+      },
+      child: Column(
+        children: [
+          // Round 109: swiped down (viewing), the panel closes.
+          GestureDetector(
+            key: const Key('personHeader'),
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragStart: _editing ? null : (_) => _swipe = 0,
+            onVerticalDragUpdate: _editing ? null : (d) => _swipe += d.delta.dy,
+            onVerticalDragEnd: _editing
+                ? null
+                : (d) {
+                    if (_swipe > 40 || d.primaryVelocity! > 300) {
+                      widget.onClose();
+                    }
+                  },
+            child: header,
+          ),
+          Expanded(
+            child: _editing
+                ? _editFields(context, book, now)
+                : _info(context, book, person, now),
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _sectionTitle(String text) => Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 4),
+        child: Text(text,
+            style: TextStyle(
+                color: context.colors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600)),
+      );
 
   Widget _info(
       BuildContext context, PeopleBook book, Person person, DateTime now) {
     final colors = context.colors;
     final age = person.ageAt(now);
     final b = person.birthday, d = person.diedOn;
+    final hideNotes = ref.watch(preferencesProvider).hidePeopleNotes;
     final lines = <String>[
       if (b != null)
         'Born ${formatDayMonth(b.day, b.month, b.year)}'
@@ -352,7 +505,11 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
             ? 'Deceased'
             : 'Died ${formatDayMonth(d.day, d.month, d.year)}'
                 '${age == null ? '' : ' · lived to $age'}',
-      '${person.gender.label}${person.highlighted ? ' · highlighted' : ''}',
+      [
+        person.gender.label,
+        if (book.mainId == person.id) 'main person',
+        if (person.highlighted) 'highlighted',
+      ].join(' · '),
     ];
     final related = [
       for (final r in book.of(person.id))
@@ -372,13 +529,6 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
             padding: const EdgeInsets.only(top: 4),
             child: Text(line, style: TextStyle(color: colors.textSecondary)),
           ),
-        if (person.note.trim().isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text(person.note,
-                key: const Key('personNote'),
-                style: TextStyle(color: colors.textPrimary)),
-          ),
         if (related.isNotEmpty) ...[
           const SizedBox(height: 8),
           for (final (r, other) in related)
@@ -387,14 +537,59 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                 key: Key('relation-${other.id}'),
                 contentPadding: EdgeInsets.zero,
                 dense: true,
+                leading: _smallAvatar(other, now),
                 title: Text(other.name),
                 subtitle: Text(relationName(r, person.id, other)),
                 onTap: () => widget.onSelect(other.id),
               ),
         ],
+        // Round 109: the note last, as Markdown; written on its own page.
+        if (!hideNotes && _kept) ...[
+          Row(
+            children: [
+              Expanded(child: _sectionTitle('NOTE')),
+              IconButton(
+                key: const Key('personNoteEdit'),
+                tooltip: 'Edit note',
+                icon: const Icon(Icons.edit_note),
+                onPressed: _editNote,
+              ),
+            ],
+          ),
+          if (person.note.trim().isEmpty)
+            Text('Nothing written yet',
+                style: TextStyle(color: colors.textMuted))
+          else
+            CheckboxBoxes(
+              controller: _noteView,
+              child: TextField(
+                key: const Key('personNote'),
+                selectionControls: lowHandles,
+                controller: _noteView,
+                readOnly: true,
+                showCursor: false,
+                enableInteractiveSelection: false,
+                maxLines: null,
+                style: TextStyle(color: colors.textPrimary, fontSize: 15),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                ),
+              ),
+            ),
+        ],
+        const SizedBox(key: Key('personInfoEnd'), height: 1),
       ],
     );
   }
+
+  Widget _smallAvatar(Person p, DateTime now) => PeopleAvatar(
+        age: p.ageGroupAt(now).index,
+        female: p.gender == Gender.female,
+        grey: p.deceased,
+        size: 32,
+      );
 
   Widget _editFields(BuildContext context, PeopleBook book, DateTime now) {
     final colors = context.colors;
@@ -402,20 +597,12 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     final b = p.birthday;
     final kept = book.byId(p.id) != null;
     final freeBirthdays = _people.freeBirthdays();
+    // Round 109: every row's text in one column, behind an icon.
+    const pad = EdgeInsets.zero;
     return ListView(
       key: const Key('personForm'),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        TextField(
-          key: const Key('personName'),
-          controller: _name,
-          selectionControls: lowHandles,
-          autofocus: !kept,
-          textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: 'Full name'),
-          onChanged: (v) => _change(_draft.copyWith(name: v)),
-        ),
-        const SizedBox(height: 12),
         SegmentedButton<Gender>(
           key: const Key('personGender'),
           segments: [
@@ -426,42 +613,56 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
           showSelectedIcon: false,
           onSelectionChanged: (s) => _change(_draft.copyWith(gender: s.first)),
         ),
-        const SizedBox(height: 4),
-        ListTile(
-          key: const Key('personBirthday'),
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.cake_outlined),
-          title: Text(b == null
-              ? 'Set birthday'
-              : formatDayMonth(b.day, b.month, b.year)),
-          subtitle: p.dateId == null
-              ? null
-              : Text('In Dates too', style: TextStyle(color: colors.textHint)),
-          onTap: _pickBirthday,
-          trailing: b == null
-              ? null
-              : IconButton(
-                  key: const Key('clearBirthday'),
-                  tooltip: 'No birthday',
-                  icon: const Icon(Icons.close),
-                  onPressed: () =>
-                      _change(_draft.copyWith(birthday: () => null)),
-                ),
+        const SizedBox(height: 12),
+        TextField(
+          key: const Key('personName'),
+          controller: _name,
+          focusNode: _nameFocus,
+          selectionControls: lowHandles,
+          autofocus: !kept,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(labelText: 'Full name'),
+          onChanged: (v) => _change(_draft.copyWith(name: v)),
         ),
-        if (b == null && freeBirthdays.isNotEmpty)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const Key('birthdayFromDates'),
-              icon: const Icon(Icons.event_outlined),
-              label: const Text('Birthday from Dates'),
-              onPressed: _birthdayFromDates,
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: ListTile(
+                key: const Key('personBirthday'),
+                contentPadding: pad,
+                leading: const Icon(Icons.cake_outlined),
+                title: Text(b == null
+                    ? 'Set birthday'
+                    : formatDayMonth(b.day, b.month, b.year)),
+                subtitle: p.dateId == null
+                    ? null
+                    : Text('In Dates too',
+                        style: TextStyle(color: colors.textHint)),
+                onTap: _pickBirthday,
+              ),
             ),
-          ),
+            if (b != null)
+              IconButton(
+                key: const Key('clearBirthday'),
+                tooltip: 'Remove birthday',
+                icon: const Icon(Icons.close),
+                onPressed: _clearBirthday,
+              )
+            else if (freeBirthdays.isNotEmpty)
+              OutlinedButton.icon(
+                key: const Key('birthdayFromDates'),
+                icon: const Icon(Icons.event_outlined, size: 18),
+                label: const Text('From Dates'),
+                onPressed: _birthdayFromDates,
+              ),
+          ],
+        ),
         if (b != null)
           SwitchListTile(
             key: const Key('personYearKnown'),
-            contentPadding: EdgeInsets.zero,
+            contentPadding: pad,
+            secondary: const Icon(Icons.event_available_outlined),
             title: const Text('Year known'),
             value: b.year != null,
             // Known: picked with its year; unknown: the year let go.
@@ -472,17 +673,9 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                   )),
           ),
         SwitchListTile(
-          key: const Key('personHighlighted'),
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Highlighted'),
-          subtitle: Text('Stands out on the board',
-              style: TextStyle(color: colors.textHint)),
-          value: p.highlighted,
-          onChanged: (v) => _change(_draft.copyWith(highlighted: v)),
-        ),
-        SwitchListTile(
           key: const Key('personDeceased'),
-          contentPadding: EdgeInsets.zero,
+          contentPadding: pad,
+          secondary: const Icon(Icons.local_florist_outlined),
           title: const Text('Deceased'),
           value: p.deceased,
           onChanged: (v) => _change(_draft.copyWith(deceased: v)),
@@ -490,7 +683,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
         if (p.deceased)
           ListTile(
             key: const Key('personDiedOn'),
-            contentPadding: EdgeInsets.zero,
+            contentPadding: pad,
             leading: const Icon(Icons.event_busy_outlined),
             title: Text(p.diedOn == null
                 ? 'Set date of death'
@@ -498,34 +691,34 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                     p.diedOn!.day, p.diedOn!.month, p.diedOn!.year)),
             onTap: _pickDeath,
           ),
-        TextField(
-          key: const Key('personNoteField'),
-          controller: _note,
-          selectionControls: lowHandles,
-          minLines: 2,
-          maxLines: 6,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(labelText: 'Note'),
-          onChanged: (v) => _change(_draft.copyWith(note: v)),
-        ),
-        const SizedBox(height: 16),
-        Text('RELATIONS',
-            style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600)),
+        _sectionTitle('RELATIONS'),
         for (final r in book.of(p.id))
           if (book.byId(r.otherThan(p.id)) case final other?)
-            ListTile(
-              key: Key('editRelation-${r.id}'),
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              title: Text(other.name),
-              subtitle: Text(relationName(r, p.id, other)),
-              trailing: IconButton(
-                tooltip: 'Remove relation',
-                icon: const Icon(Icons.close),
-                onPressed: () => _people.unrelate(r.id),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colors.divider),
+                ),
+                child: ListTile(
+                  key: Key('editRelation-${r.id}'),
+                  contentPadding: const EdgeInsets.only(left: 10, right: 2),
+                  dense: true,
+                  leading: _smallAvatar(other, now),
+                  title: Text(other.name,
+                      style: TextStyle(color: colors.textPrimary)),
+                  subtitle: Text(relationName(r, p.id, other)),
+                  trailing: IconButton(
+                    tooltip: 'Remove relation',
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      _people.unrelate(r.id);
+                      setState(() => _dirty = true);
+                    },
+                  ),
+                ),
               ),
             ),
         Align(
@@ -540,17 +733,46 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
         if (!kept)
           Text('Give them a name to add relations.',
               style: TextStyle(color: colors.textHint, fontSize: 13)),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          key: const Key('personHighlighted'),
+          contentPadding: pad,
+          secondary: const Icon(Icons.star_outline),
+          title: const Text('Highlighted'),
+          subtitle: Text('Stands out on the board',
+              style: TextStyle(color: colors.textHint)),
+          value: p.highlighted,
+          onChanged: (v) => _change(_draft.copyWith(highlighted: v)),
+        ),
+        SwitchListTile(
+          key: const Key('personMain'),
+          contentPadding: pad,
+          secondary: const Icon(Icons.center_focus_strong_outlined),
+          title: const Text('Main person'),
+          subtitle: Text(
+              'The board opens on them; their family can be '
+              'highlighted',
+              style: TextStyle(color: colors.textHint)),
+          value: book.mainId == p.id,
+          onChanged: kept
+              ? (v) {
+                  _people.setMain(v ? p.id : null);
+                  setState(() => _dirty = true);
+                }
+              : null,
+        ),
         if (kept) ...[
           const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const Key('deletePerson'),
-              style: TextButton.styleFrom(foregroundColor: colors.danger),
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Delete person'),
-              onPressed: _delete,
+          OutlinedButton.icon(
+            key: const Key('deletePerson'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colors.danger,
+              side: BorderSide(color: colors.danger),
+              minimumSize: const Size.fromHeight(44),
             ),
+            icon: const Icon(Icons.delete_outline),
+            label: const Text('Delete person'),
+            onPressed: _delete,
           ),
         ],
       ],

@@ -337,6 +337,22 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 109 — People, first fixes (2026-10-27, 1.43.1)
+
+- [x] Board: one box size for all; text grows and faces shrink zoomed
+  out; cake spacing; the pinch-then-one-finger jump (a gesture only
+  starts a drag from a fresh single finger, else pans from where it is);
+  a main person (star, opened on) and a family highlight; the options
+  menu (center on main, highlight family, Tidy); no toast after Tidy.
+- [x] Panel: the new edit layout; Discard (snapshots of People and
+  Dates at Edit; back asks, Done doesn't); asking before a birthday is
+  removed; the Dates birthdays list scrolls; the note at the end, as
+  Markdown, written on `pages/hub/person_note_page.dart`; swipe down to
+  close; no Undo toast after Delete.
+- [x] Settings: Hide People notes (the password to show them). Dates:
+  Year known locked for a People birthday; default reminders on one
+  made in People.
+
 ### Round 108 — People built (2026-10-27, 1.43.0)
 
 - [x] Avatar drafts approved; the page built from `docs/PEOPLE_SPEC.md`:

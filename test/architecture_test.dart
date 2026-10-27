@@ -109,6 +109,8 @@ const plainScrollAllowed = {
   // Recipes to pick one to export (Round 104), in a bottom sheet capped
   // in height: already at the bottom.
   'pages/hub/recipe_transfer_sheet.dart',
+  // A person's note (Round 109), on its own page like a recipe's method.
+  'pages/hub/person_note_page.dart',
   // A centred lock message, not a list.
   'app/section_gate.dart',
   // A form, used with the keyboard open.

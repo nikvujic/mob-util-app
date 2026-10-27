@@ -756,3 +756,8 @@ abstract final class PeopleColours {
   static const auburn = Color(0xFF964828);
   static const auburnLight = Color(0xFFBE6E46);
 }
+
+/// Round 109: the main person's family, highlighted on the People board.
+abstract final class PeopleFamilyColours {
+  static const ring = Color(0xFFE2A93B);
+}

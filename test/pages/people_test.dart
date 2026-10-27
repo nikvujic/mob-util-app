@@ -6,6 +6,7 @@ import 'package:the_app/models/people.dart';
 import 'package:the_app/models/people_layout.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/people_provider.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
@@ -82,7 +83,7 @@ void main() {
     expect(find.text('0 people'), findsOneWidget);
     expect(
         tester
-            .widget<IconButton>(find.byKey(const Key('peopleTidy')))
+            .widget<IconButton>(find.byKey(const Key('peopleOptions')))
             .onPressed,
         isNull);
 
@@ -284,6 +285,7 @@ void main() {
     expect(container.read(datesProvider).byId('d1')!.year, isNull);
 
     // In Dates: the People mark, the fields locked, no Delete.
+    await tapKey(tester, 'personDone');
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Dates'));
@@ -300,26 +302,33 @@ void main() {
         tester.widget<ActionChip>(find.byKey(const Key('dateDay'))).onPressed,
         isNull);
     expect(find.byKey(const Key('deleteDate')), findsNothing);
+    // Round 109: its year known is People's too.
+    expect(
+        tester
+            .widget<SwitchListTile>(find.byKey(const Key('dateYearKnown')))
+            .onChanged,
+        isNull);
   });
 
-  testWidgets('Tidy asks first, moves everyone, and can be undone',
-      (tester) async {
+  testWidgets(
+      'Tidy, from the options, asks first and moves everyone; no toast '
+      'after', (tester) async {
     await openPeople(tester, people: family);
-    await tapKey(tester, 'peopleTidy');
+    await tapKey(tester, 'peopleOptions');
+    await tapKey(tester, 'choice-tidy');
     expect(find.textContaining('your own placing is lost'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(byName('Ivan').x, 320);
 
-    await tapKey(tester, 'peopleTidy');
+    await tapKey(tester, 'peopleOptions');
+    await tapKey(tester, 'choice-tidy');
     await tester.tap(find.text('Tidy'));
     await tester.pumpAndSettle();
     final at = tidyLayout(family);
     expect((byName('Ivan').x, byName('Ivan').y), at['i']);
     expect((byName('Ana').x, byName('Ana').y), at['a']);
-    await tester.tap(find.text('Undo'));
-    await tester.pumpAndSettle();
-    expect(byName('Ivan').x, 320);
+    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets('Find: a name searched, picked, selected', (tester) async {
@@ -333,7 +342,7 @@ void main() {
         'Ivan');
   });
 
-  testWidgets('deleted, asked first; Undo brings them back', (tester) async {
+  testWidgets('deleted, asked first; no Undo toast after', (tester) async {
     await openPeople(tester, people: family);
     await tester.tap(find.byKey(const Key('person-a')));
     await tester.pumpAndSettle();
@@ -344,9 +353,245 @@ void main() {
     expect(book().byId('a'), isNull);
     expect(book().relations, hasLength(1));
     expect(find.byKey(const Key('peopleAdd')), findsOneWidget);
-    await tester.tap(find.text('Undo'));
-    await tester.pumpAndSettle();
-    expect(book().byId('a'), isNotNull);
-    expect(book().relations, hasLength(3));
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  group('Round 109', () {
+    Future<void> select(WidgetTester tester, String id) async {
+      await tester.tap(find.byKey(Key('person-$id')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('highlighted: the same size as anyone', (tester) async {
+      await openPeople(tester, people: family);
+      expect(tester.getSize(find.byKey(const Key('person-m'))),
+          tester.getSize(find.byKey(const Key('person-i'))));
+    });
+
+    testWidgets(
+        'a pinch, one finger lifted, the other moved on: no jump, and '
+        'nobody grabbed', (tester) async {
+      await openPeople(tester, people: family);
+      final board = tester.getRect(find.byKey(const Key('peopleBoard')));
+      final marko = tester.getRect(find.byKey(const Key('person-m'))).center;
+      // One finger on the empty board, the other on Marko.
+      final a =
+          await tester.startGesture(board.bottomRight - const Offset(30, 30));
+      final b = await tester.startGesture(marko, pointer: 2);
+      await tester.pump();
+      await a.moveBy(const Offset(20, 0));
+      await b.moveBy(const Offset(-20, 0));
+      await tester.pump();
+      await b.up();
+      await tester.pump();
+      final before = tester.getRect(find.byKey(const Key('person-i'))).center;
+      await a.moveBy(const Offset(0, 4));
+      await tester.pump();
+      await a.moveBy(const Offset(0, 4));
+      await tester.pump();
+      final after = tester.getRect(find.byKey(const Key('person-i'))).center;
+      expect((after - before).distance, lessThan(20),
+          reason: 'pans from where the finger is');
+      await a.up();
+      await tester.pumpAndSettle();
+      expect((byName('Marko').x, byName('Marko').y), (0.0, 0.0),
+          reason: 'not dragged');
+    });
+
+    testWidgets(
+        'the main person: set in Edit, starred; the options center on them '
+        'and highlight their family', (tester) async {
+      await openPeople(tester, people: family);
+      await tapKey(tester, 'peopleOptions');
+      await tapKey(tester, 'choice-main');
+      expect(find.text('No main person yet: set one in Edit'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+
+      await select(tester, 'a');
+      await tapKey(tester, 'personEdit');
+      await tapKey(tester, 'personMain');
+      expect(book().mainId, 'a');
+      await tapKey(tester, 'personDone');
+      expect(find.byKey(const Key('mainStar')), findsOneWidget);
+      await tapKey(tester, 'personClose');
+
+      await tapKey(tester, 'peopleOptions');
+      await tapKey(tester, 'choice-family');
+      expect(book().highlightFamily, isTrue);
+      expect(book().familyShown, {'m', 'j', 'a'});
+      await tapKey(tester, 'peopleOptions');
+      expect(find.text('Stop highlighting family'), findsOneWidget);
+      await tapKey(tester, 'choice-main');
+      final board = tester.getRect(find.byKey(const Key('peopleBoard')));
+      final box = tester.getRect(find.byKey(const Key('person-a')));
+      expect((box.center - board.center).distance, lessThan(2));
+    });
+
+    testWidgets(
+        'edit: back asks; Discard puts it all back (birthday and its date '
+        'too); Done asks nothing', (tester) async {
+      await openPeople(tester, people: family);
+      await select(tester, 'm');
+      await tapKey(tester, 'personEdit');
+      await tester.enterText(find.byKey(const Key('personName')), 'Mark');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'personBirthday');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      final dateId = byName('Mark').dateId!;
+      expect(container.read(datesProvider).byId(dateId), isNotNull);
+
+      // Out of the name field first, then asked.
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Save changes?'), findsOneWidget);
+      await tester.tap(find.text('Discard'));
+      await tester.pumpAndSettle();
+      expect(book().byId('m')!.name, 'Marko');
+      expect(book().byId('m')!.dateId, isNull);
+      expect(container.read(datesProvider).byId(dateId), isNull);
+      expect(find.byKey(const Key('personInfo')), findsOneWidget);
+
+      await tapKey(tester, 'personEdit');
+      await tester.enterText(find.byKey(const Key('personName')), 'Mark');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'personDone');
+      expect(find.text('Save changes?'), findsNothing);
+      expect(book().byId('m')!.name, 'Mark');
+    });
+
+    testWidgets('a new person discarded is gone', (tester) async {
+      await openPeople(tester, people: family);
+      await tapKey(tester, 'peopleAdd');
+      await tester.enterText(find.byKey(const Key('personName')), 'Zoe');
+      await tester.pumpAndSettle();
+      expect(book().people, hasLength(5));
+      await tapKey(tester, 'personDiscard');
+      expect(book().people, hasLength(4));
+      expect(find.byKey(const Key('peopleAdd')), findsOneWidget);
+    });
+
+    testWidgets(
+        'a birthday removed only after asking, its date with it; one made '
+        'here has the usual reminders', (tester) async {
+      await openPeople(tester, people: family);
+      await select(tester, 'i');
+      await tapKey(tester, 'personEdit');
+      await tapKey(tester, 'personBirthday');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      final dateId = byName('Ivan').dateId!;
+      expect(container.read(datesProvider).byId(dateId)!.reminders,
+          DateReminder.defaults);
+
+      await tapKey(tester, 'clearBirthday');
+      expect(find.textContaining('Their birthday in Dates goes too'),
+          findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(byName('Ivan').birthday, isNotNull);
+      await tapKey(tester, 'clearBirthday');
+      await tester.tap(find.text('Remove'));
+      await tester.pumpAndSettle();
+      expect(byName('Ivan').birthday, isNull);
+      expect(container.read(datesProvider).byId(dateId), isNull);
+    });
+
+    testWidgets('the birthdays from Dates scroll', (tester) async {
+      await openPeople(tester, people: family, dates: [
+        for (var i = 0; i < 20; i++)
+          DateEntry(
+              id: 'b$i',
+              title: 'Friend $i',
+              type: DateType.birthday,
+              day: 1 + i,
+              month: 5),
+      ]);
+      await select(tester, 'i');
+      await tapKey(tester, 'personEdit');
+      await tapKey(tester, 'birthdayFromDates');
+      final list = find.byKey(const Key('freeBirthdays'));
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('freeBirthday-b19')), 80,
+          scrollable:
+              find.descendant(of: list, matching: find.byType(Scrollable)));
+      await tester.ensureVisible(find.byKey(const Key('freeBirthday-b19')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('freeBirthday-b19')));
+      await tester.pumpAndSettle();
+      expect(byName('Ivan').birthday!.day, 20);
+    });
+
+    testWidgets(
+        'the note: last, written on its own page (Markdown); Done keeps, '
+        'back asks and Discard puts it back; hidden by the setting',
+        (tester) async {
+      await openPeople(tester, people: family);
+      await select(tester, 'm');
+      Future<void> toNote() =>
+          tester.scrollUntilVisible(find.byKey(const Key('personInfoEnd')), 80,
+              scrollable: find
+                  .descendant(
+                      of: find.byKey(const Key('personInfo')),
+                      matching: find.byType(Scrollable))
+                  .first);
+      await toNote();
+      expect(find.text('Nothing written yet'), findsOneWidget);
+      await tapKey(tester, 'personNoteEdit');
+      await tester.enterText(
+          find.byKey(const Key('personNoteField')), '**Likes** fishing');
+      await tester.pumpAndSettle();
+      expect(book().byId('m')!.note, '**Likes** fishing');
+      await tester.tap(find.byTooltip('Done'));
+      await tester.pumpAndSettle();
+      await toNote();
+      expect(find.byKey(const Key('personNote')), findsOneWidget);
+
+      await tapKey(tester, 'personNoteEdit');
+      await tester.enterText(find.byKey(const Key('personNoteField')), 'x');
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      if (find.text('Save changes?').evaluate().isEmpty) {
+        await tester.pageBack(); // out of the field first
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.text('Discard'));
+      await tester.pumpAndSettle();
+      expect(book().byId('m')!.note, '**Likes** fishing');
+
+      container.read(preferencesProvider.notifier).setHidePeopleNotes(true);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('personNote')), findsNothing);
+      expect(find.byKey(const Key('personNoteEdit')), findsNothing);
+    });
+
+    testWidgets('viewing, a swipe down on the name closes the panel',
+        (tester) async {
+      await openPeople(tester, people: family);
+      await select(tester, 'i');
+      await tester.drag(
+          find.byKey(const Key('personPanelTitle')), const Offset(0, 120));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('peopleAdd')), findsOneWidget);
+    });
+
+    testWidgets('zoomed out: names larger, faces smaller; no overflow',
+        (tester) async {
+      await openPeople(tester,
+          people:
+              family.copyWith(view: const BoardView(x: 80, y: 130, zoom: 0.3)));
+      double nameSize() => tester
+          .widget<Text>(find.descendant(
+              of: find.byKey(const Key('person-i')),
+              matching: find.text('Ivan')))
+          .style!
+          .fontSize!;
+      expect(nameSize(), greaterThan(20));
+      expect(tester.takeException(), isNull);
+    });
   });
 }

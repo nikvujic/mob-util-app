@@ -53,7 +53,11 @@ class PeopleBoardState extends State<PeopleBoard>
   final _lineIn = <String, double>{};
   late Set<String> _relations = {for (final r in widget.book.relations) r.id};
 
-  late Offset _center = Offset(widget.book.view.x, widget.book.view.y);
+  // Round 109: opened on the main person, when there is one.
+  late Offset _center = switch (widget.book.main) {
+    final m? => Offset(m.x, m.y),
+    null => Offset(widget.book.view.x, widget.book.view.y),
+  };
   late double _zoom = widget.book.view.zoom;
   Offset? _centerTo;
   Size _size = Size.zero;
@@ -67,6 +71,11 @@ class PeopleBoardState extends State<PeopleBoard>
   /// Where the last finger went down: a drag or pan starts there, not
   /// where it's noticed (past the touch slop), so nothing jumps.
   Offset _downAt = Offset.zero;
+
+  /// A finger went down with no other on the screen, and no gesture has
+  /// started from it yet.
+  bool _freshDown = false;
+  int _pointers = 0;
 
   // Panning and zooming.
   Offset _panFocal = Offset.zero;
@@ -170,12 +179,11 @@ class PeopleBoardState extends State<PeopleBoard>
   Offset _toWorld(Offset screen) =>
       (screen - _size.center(Offset.zero)) / _zoom + _center;
 
-  static double _scaleOf(Person p) => p.highlighted ? 1.1 : 1;
-
+  // Round 109: every box the same size (highlighted ones were bigger).
   Rect _rectOf(Person p) => Rect.fromCenter(
         center: _shown[p.id] ?? _target(p),
-        width: BoardSizes.boxWidth * _scaleOf(p),
-        height: BoardSizes.boxHeight * _scaleOf(p),
+        width: BoardSizes.boxWidth,
+        height: BoardSizes.boxHeight,
       );
 
   /// The person at [screen], the one drawn on top first.
@@ -189,7 +197,12 @@ class PeopleBoardState extends State<PeopleBoard>
 
   void _onScaleStart(ScaleStartDetails d) {
     _centerTo = null;
-    final one = d.pointerCount == 1;
+    // Round 109: only a gesture starting with a finger just down may drag
+    // someone, and from where it went down; a pinch's last finger left on
+    // the screen pans from where it is (it used to start at a finger's old
+    // touch-down: the board, or a person, jumped).
+    final one = d.pointerCount == 1 && _freshDown;
+    _freshDown = false;
     final id = one ? _personAt(_downAt) : null;
     if (id != null) {
       _dragId = id;
@@ -257,9 +270,15 @@ class PeopleBoardState extends State<PeopleBoard>
       _size = constraints.biggest;
       final mid = _size.center(Offset.zero);
       Offset toScreen(Offset w) => (w - _center) * _zoom + mid;
+      final family = widget.book.familyShown;
       return ClipRect(
         child: Listener(
-          onPointerDown: (e) => _downAt = e.localPosition,
+          onPointerDown: (e) {
+            _downAt = e.localPosition;
+            _freshDown = ++_pointers == 1;
+          },
+          onPointerUp: (_) => _pointers = math.max(0, _pointers - 1),
+          onPointerCancel: (_) => _pointers = math.max(0, _pointers - 1),
           child: GestureDetector(
             key: const Key('peopleBoard'),
             behavior: HitTestBehavior.opaque,
@@ -300,6 +319,9 @@ class PeopleBoardState extends State<PeopleBoard>
                             person: p,
                             now: widget.now,
                             selected: p.id == widget.selectedId,
+                            zoom: _zoom,
+                            main: p.id == widget.book.mainId,
+                            family: family.contains(p.id),
                           ),
                         ),
                       ),
@@ -322,10 +344,21 @@ class _PersonBox extends StatelessWidget {
   final DateTime now;
   final bool selected;
 
+  /// The board's zoom: zoomed out, names grow and faces shrink (Round
+  /// 109), so they stay readable.
+  final double zoom;
+
+  /// The main person (a star), and in their highlighted family (a ring).
+  final bool main;
+  final bool family;
+
   const _PersonBox({
     required this.person,
     required this.now,
     required this.selected,
+    this.zoom = 1,
+    this.main = false,
+    this.family = false,
   });
 
   @override
@@ -350,23 +383,51 @@ class _PersonBox extends StatelessWidget {
         ? colors.accent
         : p.highlighted && !p.deceased
             ? (female ? PeopleColours.female : PeopleColours.male)
-            : colors.divider;
+            : family
+                ? PeopleFamilyColours.ring
+                : colors.divider;
     final strong = p.highlighted || selected;
+    // Text in board units, so it shrinks with the zoom: grown back as the
+    // board zooms out (up to about 2.2×), the face giving way.
+    final text = (1 / zoom).clamp(1.0, 2.2);
+    final face = 78 * zoom.clamp(0.5, 1.0);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.card,
+        color: family && !selected
+            ? Color.alphaBlend(
+                PeopleFamilyColours.ring.withValues(alpha: 0.14), colors.card)
+            : colors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: border, width: strong ? 3 : 1.5),
+        border: Border.all(color: border, width: strong || family ? 3 : 1.5),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(6, 8, 6, 4),
         child: Column(
           children: [
-            PeopleAvatar(
-              age: p.ageGroupAt(now).index,
-              female: female,
-              grey: p.deceased,
-              size: 78,
+            // The face gives way to the text when room runs short.
+            Flexible(
+              child: FittedBox(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    PeopleAvatar(
+                      age: p.ageGroupAt(now).index,
+                      female: female,
+                      grey: p.deceased,
+                      size: face,
+                    ),
+                    if (main)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Icon(Icons.star,
+                            key: const Key('mainStar'),
+                            size: 22 * text.clamp(1.0, 1.6),
+                            color: PeopleFamilyColours.ring),
+                      ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -375,7 +436,7 @@ class _PersonBox extends StatelessWidget {
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 12.5 * text,
                 height: 1.15,
                 fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
                 color: p.deceased || !strong
@@ -387,11 +448,14 @@ class _PersonBox extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (birthdayToday)
-                    Icon(Icons.cake, size: 12, color: colors.accent),
+                  if (birthdayToday) ...[
+                    Icon(Icons.cake, size: 12 * text, color: colors.accent),
+                    if (line.isNotEmpty) SizedBox(width: 4 * text),
+                  ],
                   Text(
                     line,
-                    style: TextStyle(fontSize: 11, color: colors.textHint),
+                    style:
+                        TextStyle(fontSize: 11 * text, color: colors.textHint),
                   ),
                 ],
               ),
@@ -429,11 +493,10 @@ class _LinesPainter extends CustomPainter {
     final p = book.byId(id);
     final at = shown[id];
     if (p == null || at == null) return null;
-    final s = p.highlighted ? 1.1 : 1.0;
     return Rect.fromCenter(
       center: at,
-      width: BoardSizes.boxWidth * s,
-      height: BoardSizes.boxHeight * s,
+      width: BoardSizes.boxWidth,
+      height: BoardSizes.boxHeight,
     );
   }
 

@@ -119,6 +119,10 @@ class Preferences {
   /// Shop's bought list shown A–Z (Round 69); its own order is kept.
   final bool shopSorted;
 
+  /// People's notes hidden (Round 109: showing the page to others);
+  /// shown again only with the master password, if there is one.
+  final bool hidePeopleNotes;
+
   /// What the app may use the internet for (Round 70), and the weather.
   final InternetSettings internet;
 
@@ -157,6 +161,7 @@ class Preferences {
     this.autoBackupFailed = false,
     this.pipPlugged = false,
     this.shopSorted = false,
+    this.hidePeopleNotes = false,
     this.internet = const InternetSettings(),
   });
 
@@ -258,6 +263,7 @@ class Preferences {
     bool? autoBackupFailed,
     bool? pipPlugged,
     bool? shopSorted,
+    bool? hidePeopleNotes,
     InternetSettings? internet,
   }) =>
       Preferences(
@@ -314,6 +320,7 @@ class Preferences {
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
         pipPlugged: pipPlugged ?? this.pipPlugged,
         shopSorted: shopSorted ?? this.shopSorted,
+        hidePeopleNotes: hidePeopleNotes ?? this.hidePeopleNotes,
         internet: internet ?? this.internet,
       );
 
@@ -368,6 +375,7 @@ class Preferences {
         'autoBackupFailed': autoBackupFailed,
         if (pipPlugged) 'pipPlugged': true,
         if (shopSorted) 'shopSorted': true,
+        if (hidePeopleNotes) 'hidePeopleNotes': true,
         if (!internet.isEmpty) 'internet': internet.toJson(),
       };
 
@@ -435,6 +443,7 @@ class Preferences {
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
         pipPlugged: json['pipPlugged'] as bool? ?? false,
         shopSorted: json['shopSorted'] as bool? ?? false,
+        hidePeopleNotes: json['hidePeopleNotes'] as bool? ?? false,
         internet: json['internet'] == null
             ? const InternetSettings()
             : InternetSettings.fromJson(

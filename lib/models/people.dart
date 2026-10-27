@@ -277,16 +277,35 @@ class PeopleBook {
   final List<Relation> relations;
   final BoardView view;
 
-  const PeopleBook._(this.people, this.relations, this.view);
+  /// Round 109: the main person (the board can centre on them; their
+  /// family can be highlighted), if one is set.
+  final String? mainId;
+
+  /// Everyone in the main person's family highlighted on the board.
+  final bool highlightFamily;
+
+  const PeopleBook._(this.people, this.relations, this.view)
+      : mainId = null,
+        highlightFamily = false;
 
   PeopleBook({
     List<Person> people = const [],
     List<Relation> relations = const [],
     this.view = const BoardView(),
+    this.mainId,
+    this.highlightFamily = false,
   })  : people = List.unmodifiable(people),
         relations = List.unmodifiable(relations);
 
   static const empty = PeopleBook._([], [], BoardView());
+
+  /// The main person, if set and still here.
+  Person? get main => mainId == null ? null : byId(mainId!);
+
+  /// Who the family highlight shows: the main person's family (all tied
+  /// to them by family relations), when it's on.
+  Set<String> get familyShown =>
+      highlightFamily && main != null ? familyOf(mainId!) : const {};
 
   Person? byId(String id) => people.where((p) => p.id == id).firstOrNull;
 
@@ -294,11 +313,15 @@ class PeopleBook {
     List<Person>? people,
     List<Relation>? relations,
     BoardView? view,
+    String? Function()? mainId,
+    bool? highlightFamily,
   }) =>
       PeopleBook(
         people: people ?? this.people,
         relations: relations ?? this.relations,
         view: view ?? this.view,
+        mainId: mainId == null ? this.mainId : mainId(),
+        highlightFamily: highlightFamily ?? this.highlightFamily,
       );
 
   /// [id]'s relations.
@@ -362,8 +385,9 @@ class PeopleBook {
     return seen;
   }
 
-  /// Without [id], and their relations.
+  /// Without [id], and their relations (and not main any more).
   PeopleBook without(String id) => copyWith(
+        mainId: mainId == id ? () => null : null,
         people: [
           for (final p in people)
             if (p.id != id) p,
@@ -378,6 +402,8 @@ class PeopleBook {
         'people': [for (final p in people) p.toJson()],
         'relations': [for (final r in relations) r.toJson()],
         'view': view.toJson(),
+        if (mainId != null) 'main': mainId,
+        if (highlightFamily) 'highlightFamily': true,
       };
 
   /// Relations whose people aren't there are dropped.
@@ -398,6 +424,8 @@ class PeopleBook {
       view: json['view'] == null
           ? const BoardView()
           : BoardView.fromJson(json['view'] as Map<String, dynamic>),
+      mainId: ids.contains(json['main']) ? json['main'] as String : null,
+      highlightFamily: json['highlightFamily'] as bool? ?? false,
     );
   }
 }

@@ -877,6 +877,16 @@ stops when settled glides people and the view and draws new lines in.
 Faces: `widgets/people_sprites.dart` (grids) and `people_avatar.dart`
 (colours in `PeopleColours`).
 
+Round 109: `PeopleBook.mainId` / `highlightFamily` (`familyShown`). The
+board starts a person drag only from a gesture whose single finger just
+went down (a Listener counts pointers), so a pinch's remaining finger
+pans; a box's content is sized by the zoom (text up to 2.2× zoomed out,
+the face in a `FittedBox` giving way). The panel snapshots the
+`PeopleBook` and `DateBook` at Edit and puts both back on Discard (the
+view kept). The note is written on `pages/hub/person_note_page.dart` (a
+`MarkdownEditingController`, the format bar, `DiscardScope`) and shown
+read-only with `CheckboxBoxes`; `Preferences.hidePeopleNotes` hides it.
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

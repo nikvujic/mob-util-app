@@ -421,8 +421,11 @@ class _DatePageState extends ConsumerState<DatePage> {
                   _ => 'For how many years',
                 }),
                 value: date.year != null,
-                onChanged: (on) =>
-                    _change(date.copyWith(year: () => on ? today.year : null)),
+                // Round 109: a birthday from People has its year there.
+                onChanged: fromPeople
+                    ? null
+                    : (on) => _change(
+                        date.copyWith(year: () => on ? today.year : null)),
               ),
             _heading('REMINDERS'),
             for (final (i, r) in date.reminders.indexed)

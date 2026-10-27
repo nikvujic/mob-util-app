@@ -53,6 +53,8 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
               type: DateType.birthday,
               day: birthday.day,
               month: birthday.month,
+              // Round 109: reminded as a birthday made in Dates is.
+              reminders: DateReminder.defaults,
             ))
         .copyWith(
       title: person.name.trim(),
@@ -184,6 +186,12 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     move(tidyLayout(state));
     return before;
   }
+
+  /// Round 109: [id] the main person (null: none).
+  void setMain(String? id) => state = state.copyWith(mainId: () => id);
+
+  void setHighlightFamily(bool on) =>
+      state = state.copyWith(highlightFamily: on);
 
   void replaceAll(PeopleBook book) => state = book;
 }

@@ -4,6 +4,9 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/pages/settings/clear_data.dart';
 import 'package:the_app/providers/introduction_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
+import 'package:the_app/widgets/password_prompt.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
 /// Menu → Settings: small switches for how the app feels.
@@ -85,6 +88,33 @@ class SettingsPage extends ConsumerWidget {
             ),
             value: preferences.todoNote,
             onChanged: ref.read(preferencesProvider.notifier).setTodoNote,
+          ),
+          // Round 109: People's notes hidden (someone looking over a
+          // shoulder); shown again only with the password, when there is
+          // one.
+          SwitchListTile(
+            key: const Key('hidePeopleNotes'),
+            secondary: const Icon(Icons.visibility_off_outlined),
+            title: const Text('Hide People notes'),
+            subtitle: Text(
+              'Notes on People stay kept but out of sight. Showing them '
+              'again asks for the password.',
+              style: TextStyle(color: context.colors.textSecondary),
+            ),
+            value: preferences.hidePeopleNotes,
+            onChanged: (hide) async {
+              final notifier = ref.read(preferencesProvider.notifier);
+              if (!hide && ref.read(securityProvider) != null) {
+                final keys = await showPasswordPrompt<UnlockedKeys>(
+                  context,
+                  title: 'Show People notes',
+                  confirmLabel: 'Show',
+                  attempt: ref.read(sessionProvider.notifier).unlock,
+                );
+                if (keys == null) return;
+              }
+              notifier.setHidePeopleNotes(hide);
+            },
           ),
           const Divider(),
           ListTile(

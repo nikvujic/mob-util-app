@@ -6,6 +6,7 @@ import 'package:the_app/models/people.dart';
 import 'package:the_app/models/people_layout.dart';
 import 'package:the_app/pages/hub/people_board.dart';
 import 'package:the_app/pages/hub/people_panel.dart';
+import 'package:the_app/pages/hub/recipe_page.dart';
 import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
@@ -28,15 +29,9 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
 
   PeopleNotifier get _people => ref.read(peopleProvider.notifier);
 
-  void _toast(String message, {VoidCallback? undo}) =>
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(
-          content: Text(message),
-          action: undo == null
-              ? null
-              : SnackBarAction(label: 'Undo', onPressed: undo),
-        ));
+  void _toast(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
 
   void _select(String? id) {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -71,9 +66,40 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
           'placing is lost.',
       confirmLabel: 'Tidy',
     );
+    // Round 109: no toast after; the dialog already asked.
     if (!ok || !mounted) return;
-    final before = _people.tidy();
-    _toast('Everyone tidied', undo: () => _people.move(before));
+    _people.tidy();
+  }
+
+  /// The board's options (Round 109): center on the main person, their
+  /// family highlighted, Tidy.
+  Future<void> _options() async {
+    final book = ref.read(peopleProvider);
+    final choice = await showChoicesSheet(context, null, [
+      (Icons.center_focus_strong_outlined, 'Center on main person', 'main'),
+      book.highlightFamily
+          ? (Icons.highlight_off, 'Stop highlighting family', 'family')
+          : (Icons.family_restroom, 'Highlight family', 'family'),
+      (Icons.account_tree_outlined, 'Tidy', 'tidy'),
+    ]);
+    if (!mounted) return;
+    switch (choice) {
+      case 'main':
+        final main = book.main;
+        if (main == null) {
+          _toast('No main person yet: set one in Edit');
+        } else {
+          _board.currentState?.centerOn(main.id);
+        }
+      case 'family':
+        if (book.main == null && !book.highlightFamily) {
+          _toast('No main person yet: set one in Edit');
+        } else {
+          _people.setHighlightFamily(!book.highlightFamily);
+        }
+      case 'tidy':
+        await _tidy();
+    }
   }
 
   Future<void> _find() async {
@@ -180,10 +206,10 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
               onPressed: n == 0 ? null : _find,
             ),
             IconButton(
-              key: const Key('peopleTidy'),
-              tooltip: 'Tidy',
-              icon: const Icon(Icons.account_tree_outlined),
-              onPressed: n == 0 ? null : _tidy,
+              key: const Key('peopleOptions'),
+              tooltip: 'Options',
+              icon: const Icon(Icons.more_vert),
+              onPressed: n == 0 ? null : _options,
             ),
             const SizedBox(width: 4),
             FilledButton.icon(
