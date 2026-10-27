@@ -7,6 +7,7 @@ import 'package:the_app/pages/hub/dates.dart';
 import 'package:the_app/pages/hub/food.dart';
 import 'package:the_app/pages/hub/medicine.dart';
 import 'package:the_app/pages/hub/packing.dart';
+import 'package:the_app/pages/hub/people.dart';
 import 'package:the_app/pages/hub/pip_home.dart';
 import 'package:the_app/pages/hub/placard.dart';
 import 'package:the_app/pages/hub/recipes.dart';
@@ -28,6 +29,7 @@ extension HubToolPage on HubTool {
         HubTool.pip => 'assets/icons/pip.svg',
         HubTool.spotify => 'assets/icons/spotify.svg',
         HubTool.packing => 'assets/icons/packing.svg',
+        HubTool.people => 'assets/icons/people.svg',
       };
 
   Widget page() => switch (this) {
@@ -45,5 +47,6 @@ extension HubToolPage on HubTool {
         HubTool.pip => const PipHomePage(),
         HubTool.spotify => const SpotifyPage(),
         HubTool.packing => const PackingPage(),
+        HubTool.people => const PeoplePage(),
       };
 }

@@ -184,6 +184,16 @@ app still reads every version, so an update can never lose existing data.
   (Čarape ×5); "Beach" with one empty section, "Beach stuff".
 - `v31/backup-plain.json` — backup (version 31) with them (and v30's
   other data).
+- `v32/storage/people.json` — People (Round 108, people.json version 1):
+  Marko (highlighted) and Jelena partners, their daughter Ana (her
+  birthday tied to the date d3, a note), Ana's son Luka, Jelena's mother
+  Mila (deceased 2015), Ivan ("Kum", no birthday, an Other relation to
+  Marko), Stefan (Ana's former partner); one relation of a kind from a
+  newer app (dropped on reading); the board's view.
+- `v32/storage/dates.json` — v27's dates with "Ana 🎂" (d3) tied to Ana
+  (`person`: p3, renamed after her).
+- `v32/backup-plain.json` — backup (version 32) with them (and v31's
+  other data).
 - `v16/storage/notifications.json` — the notifications' history (Round
   31, notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13

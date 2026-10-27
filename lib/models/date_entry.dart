@@ -157,6 +157,12 @@ class DateEntry {
   final int backAt;
 
   static const mostTravelHours = 24;
+
+  /// Round 108: a birthday that belongs to a person on the People page;
+  /// its title, day, month, year, type and yearly come from them (edited
+  /// there), and it can't be deleted here. Null: an ordinary date.
+  final String? personId;
+
   static const leaveDefault = 6 * 60;
   static const backDefault = 11 * 60;
 
@@ -192,6 +198,7 @@ class DateEntry {
     this.travelHours = 0,
     this.leaveAt = leaveDefault,
     this.backAt = backDefault,
+    this.personId,
   });
 
   /// How many days it lasts, as its type has it: 1 unless it [DateType.lasts].
@@ -215,6 +222,7 @@ class DateEntry {
     int? travelHours,
     int? leaveAt,
     int? backAt,
+    String? Function()? personId,
   }) =>
       DateEntry(
         id: id,
@@ -232,6 +240,7 @@ class DateEntry {
             (travelHours ?? this.travelHours).clamp(0, mostTravelHours),
         leaveAt: leaveAt ?? this.leaveAt,
         backAt: backAt ?? this.backAt,
+        personId: personId == null ? this.personId : personId(),
       );
 
   /// When it falls in [inYear] (29 February on the 28th in a year without
@@ -293,6 +302,7 @@ class DateEntry {
         if (kind != null) 'kind': kind!.name,
         if (travelHours > 0)
           'travel': {'hours': travelHours, 'leave': leaveAt, 'back': backAt},
+        if (personId != null) 'person': personId,
       };
 
   factory DateEntry.fromJson(Map<String, dynamic> json) {
@@ -318,6 +328,7 @@ class DateEntry {
           ((travel?['hours'] as num?)?.toInt() ?? 0).clamp(0, mostTravelHours),
       leaveAt: minutes(travel?['leave'], leaveDefault),
       backAt: minutes(travel?['back'], backDefault),
+      personId: json['person'] as String?,
     );
   }
 }

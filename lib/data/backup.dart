@@ -12,6 +12,7 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
+import 'package:the_app/models/people.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -92,8 +93,10 @@ class Backup {
   /// item's typed amount (in `shopItems`, Round 70); 29 = subscriptions
   /// (`subscriptions`, as in `subscriptions.json`, Round 79); 30 =
   /// packing lists (`packing`, as in `packing.json`, Round 94); 31 = a
-  /// packing list's own sections (in `packing`, Round 95).
-  static const version = 31;
+  /// packing list's own sections (in `packing`, Round 95); 32 = people
+  /// (`people`, as in `people.json`, Round 108), and a date's person (in
+  /// `dates`).
+  static const version = 32;
 
   final DateTime createdAt;
   final String appVersion;
@@ -140,6 +143,10 @@ class Backup {
   PackingBook get packing => _packing ?? PackingBook.initial;
   final PackingBook? _packing;
 
+  /// People (Round 108); null in backups from before them (restoring one
+  /// leaves the People page as it is).
+  final PeopleBook? people;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -162,6 +169,7 @@ class Backup {
     this.dates = DateBook.empty,
     this.subscriptions = SubscriptionBook.empty,
     PackingBook? packing,
+    this.people,
     this.masterPassword,
   }) : _packing = packing;
 
@@ -202,6 +210,7 @@ class Backup {
             for (final s in subscriptions.subscriptions) s.toJson()
           ],
           'packing': packing.toJson(),
+          if (people != null) 'people': people!.toJson(),
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -322,6 +331,9 @@ class Backup {
         packing: data['packing'] == null
             ? null
             : PackingBook.fromJson(data['packing'] as Map<String, dynamic>),
+        people: data['people'] == null
+            ? null
+            : PeopleBook.fromJson(data['people'] as Map<String, dynamic>),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(
@@ -349,7 +361,8 @@ class Backup {
         !unique(backup.dates.dates.map((d) => d.id)) ||
         !unique(backup.subscriptions.subscriptions.map((s) => s.id)) ||
         !unique(backup.packing.lists.map((l) => l.id)) ||
-        !unique(backup.packing.sections.map((s) => s.id))) {
+        !unique(backup.packing.sections.map((s) => s.id)) ||
+        !unique((backup.people?.people ?? const []).map((p) => p.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
     return backup;

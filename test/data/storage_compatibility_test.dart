@@ -19,6 +19,7 @@ import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
+import 'package:the_app/models/people.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/todo_item.dart';
@@ -548,6 +549,74 @@ void main() {
           as Map<String, dynamic>;
       expect(PackingBook.fromJson(json).toJson(),
           {'sections': json['sections'], 'lists': json['lists']});
+    });
+  });
+
+  group('people.json v1 / v32 backup (People, Round 108)', () {
+    void expectSample(PeopleBook book, DateBook dates) {
+      expect(book.people.map((p) => p.name), [
+        'Marko Petrović',
+        'Jelena Petrović',
+        'Ana Petrović',
+        'Luka Petrović',
+        'Mila Jović',
+        'Ivan Kovač',
+        'Stefan Ilić',
+      ]);
+      final marko = book.byId('p1')!;
+      expect(marko.highlighted, isTrue);
+      expect(marko.birthday, const PersonDate(day: 12, month: 3, year: 1958));
+      expect((marko.x, marko.y), (0.0, 0.0));
+      final mila = book.byId('p5')!;
+      expect((mila.deceased, mila.diedOn?.year), (true, 2015));
+      expect(mila.ageAt(DateTime(2026, 10, 27)), 83, reason: 'at her death');
+      expect(book.byId('p6')!.birthday, isNull);
+      expect(book.byId('p3')!.note, 'Likes tulips');
+      expect(book.byId('p3')!.dateId, 'd3');
+      expect(book.relations.map((r) => r.id),
+          ['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'],
+          reason: 'a kind from a newer app dropped');
+      expect(book.parentsOf('p3'), ['p1', 'p2']);
+      expect(book.relations.last.former, isTrue);
+      expect(book.relations[5].label, 'Kum');
+      expect((book.view.x, book.view.y, book.view.zoom), (80.0, 130.0, 0.75));
+      final ana = dates.byId('d3')!;
+      expect((ana.title, ana.personId), ('Ana Petrović', 'p3'));
+      expect(dates.byId('d1')!.personId, isNull);
+    }
+
+    test('people.json version 1 loads, with its birthday in dates.json',
+        () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v32/storage'),
+      );
+      expectSample(storage.initialPeople, storage.initialDates);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v32 backup restores them', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v32/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.people!, file.backup.dates);
+      expect(file.backup.packing.lists, hasLength(2), reason: "v31's too");
+    });
+
+    test('a backup from before them has none (and leaves them be)', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v31/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expect(file.backup.people, isNull);
+    });
+
+    test('written as read (but the relation it drops)', () {
+      final json = jsonDecode(
+              File('test/fixtures/v32/storage/people.json').readAsStringSync())
+          as Map<String, dynamic>;
+      final again = PeopleBook.fromJson(json).toJson();
+      expect(again['people'], json['people']);
+      expect(again['relations'], (json['relations'] as List).take(7));
+      expect(again['view'], json['view']);
     });
   });
 
@@ -1655,6 +1724,12 @@ void main() {
           '5e70786fd57462721c9fb51b4cbfd1e736f84430dd5a70eb42144c71ff011344',
       'test/fixtures/v31/backup-plain.json':
           'c6bbfdff61670c7be366669847fbf381332ad0a88a1f925aa27ddc2da6316dbe',
+      'test/fixtures/v32/storage/people.json':
+          'ace1bea3f220124b7bfd356a6f33c54d7463fd50c512ccfc9e5e430aef05cd95',
+      'test/fixtures/v32/storage/dates.json':
+          '44652a0e4383b5d30fc9a6a31d77626667e08d2be8fdb0d690f98701d9abce04',
+      'test/fixtures/v32/backup-plain.json':
+          'd0730fce884031ba24a534acd1fae85c709dc559a0ced7aebd02aa3332cda24c',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

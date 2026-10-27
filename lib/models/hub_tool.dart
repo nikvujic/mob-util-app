@@ -34,7 +34,11 @@ enum HubTool {
   spotify('Spotify'),
 
   /// Packing lists (Round 94): lists of things to pack, by section.
-  packing('Packing');
+  packing('Packing'),
+
+  /// People (Round 108): the people you know on a board, with family
+  /// trees.
+  people('People');
 
   const HubTool(this.label);
 

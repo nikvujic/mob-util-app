@@ -17,6 +17,7 @@ import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
+import 'package:the_app/models/people.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -34,6 +35,7 @@ import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
 import 'package:the_app/providers/packing_provider.dart';
+import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
@@ -77,6 +79,7 @@ class BackupExporter {
       dates: _ref.read(datesProvider),
       subscriptions: _ref.read(subscriptionsProvider),
       packing: _ref.read(packingProvider),
+      people: _ref.read(peopleProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
@@ -154,6 +157,7 @@ class RestorableBackup {
   List<DateEntry> get dates => _backup.dates.dates;
   List<Subscription> get subscriptions => _backup.subscriptions.subscriptions;
   List<PackingList> get packingLists => _backup.packing.lists;
+  List<Person> get people => _backup.people?.people ?? const [];
 }
 
 /// The kinds of things in a backup, to restore some of them (Round 28).
@@ -175,7 +179,10 @@ enum BackupPart {
   subscriptions,
 
   /// Packing lists (Round 94).
-  packing
+  packing,
+
+  /// People (Round 108).
+  people
 }
 
 /// [book] with the ingredients [ids] from [from] it doesn't have yet,
@@ -385,6 +392,7 @@ class BackupImporter {
       source.dates,
       source.subscriptions,
       source.packing,
+      source.people,
     );
     return RestoreUndo._(
       previous,
@@ -689,6 +697,52 @@ class BackupImporter {
       _ref.read(packingProvider.notifier).replaceAll(now.copyWith(lists: all));
     }
 
+    // People (Round 108): one still here is left as is; the relations
+    // between the people there now come too, and each one's birthday is
+    // put back on the Dates page.
+    final fromPeople = source.people;
+    if (fromPeople != null) {
+      final people = _ref.read(peopleProvider.notifier);
+      final here = {for (final p in _ref.read(peopleProvider).people) p.id};
+      final back = <Person>[];
+      for (final p in fromPeople.people) {
+        if (!chosen(BackupPart.people, p.id)) continue;
+        if (here.contains(p.id)) {
+          skipped++;
+          continue;
+        }
+        added++;
+        back.add(p);
+      }
+      if (back.isNotEmpty) {
+        final now = _ref.read(peopleProvider);
+        final ids = {...here, for (final p in back) p.id};
+        final known = {for (final r in now.relations) r.id};
+        people.replaceAll(now.copyWith(
+          people: [
+            ...now.people,
+            for (final p in back) p.copyWith(dateId: () => null)
+          ],
+          relations: [
+            ...now.relations,
+            for (final r in fromPeople.relations)
+              if (ids.contains(r.from) &&
+                  ids.contains(r.to) &&
+                  !known.contains(r.id) &&
+                  !now.relations
+                      .any((o) => o.involves(r.from) && o.involves(r.to)))
+                r,
+          ],
+        ));
+        // Their birthdays: a date that's theirs already is kept, else made.
+        final dates = _ref.read(datesProvider);
+        for (final p in back) {
+          final own = dates.dates.where((d) => d.personId == p.id).firstOrNull;
+          people.save(people.byId(p.id)!.copyWith(dateId: () => own?.id));
+        }
+      }
+    }
+
     await _ref.read(appStorageProvider).flush();
     return PartRestore._(
       RestoreUndo._(
@@ -721,6 +775,7 @@ class BackupImporter {
       undo._previous.dates,
       undo._previous.subscriptions,
       undo._previous.packing,
+      undo._previous.people,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -802,6 +857,7 @@ class BackupImporter {
     DateBook dates,
     SubscriptionBook subscriptions,
     PackingBook packing,
+    PeopleBook? people,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -820,6 +876,8 @@ class BackupImporter {
     _ref.read(datesProvider.notifier).replaceAll(dates);
     _ref.read(subscriptionsProvider.notifier).replaceAll(subscriptions);
     _ref.read(packingProvider.notifier).replaceAll(packing);
+    // From before them: People stay as they are.
+    if (people != null) _ref.read(peopleProvider.notifier).replaceAll(people);
     await _ref.read(appStorageProvider).flush();
   }
 }

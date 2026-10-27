@@ -19,6 +19,7 @@ import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
+import 'package:the_app/models/people.dart';
 import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
@@ -52,6 +53,8 @@ import 'package:the_app/models/todo_item.dart';
 ///         {"version": 1, "subscriptions": [...]}
 ///     <app documents>/data/packing.json
 ///         {"version": 2, "sections": [...], "lists": [...]}
+///     <app documents>/data/people.json
+///         {"version": 1, "people": [...], "relations": [...], "view": {...}}
 ///     <app documents>/data/notifications.json
 ///         {"version": 1, "scheduled": [...], "clearedAt": …}
 ///     <app documents>/data/counters.json {"version": 3, "counters": [...]}
@@ -149,6 +152,9 @@ class AppStorage {
   /// (Round 95).
   static const packingFormatVersion = 2;
 
+  /// Version of `people.json` (Round 108). History: 1 = first format.
+  static const peopleFormatVersion = 1;
+
   final JsonFileStore? _notesStore;
   final JsonFileStore? _shopStore;
   final JsonFileStore? _securityStore;
@@ -170,6 +176,7 @@ class AppStorage {
   final JsonFileStore? _datesStore;
   final JsonFileStore? _subscriptionsStore;
   final JsonFileStore? _packingStore;
+  final JsonFileStore? _peopleStore;
 
   /// Data as loaded at startup.
   final List<Note> initialNotes;
@@ -191,6 +198,7 @@ class AppStorage {
   final DateBook initialDates;
   final SubscriptionBook initialSubscriptions;
   final PackingBook initialPacking;
+  final PeopleBook initialPeople;
 
   /// The master password's verifier, or null if none is set.
   final PasswordVerifier? initialMasterPassword;
@@ -230,7 +238,8 @@ class AppStorage {
     this._foodStore,
     this._datesStore,
     this._subscriptionsStore,
-    this._packingStore, {
+    this._packingStore,
+    this._peopleStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -250,6 +259,7 @@ class AppStorage {
     required this.initialDates,
     required this.initialSubscriptions,
     required this.initialPacking,
+    required this.initialPeople,
     required this.initialMasterPassword,
     required this.initialSectionLocks,
     required this.initialPageLocks,
@@ -277,6 +287,7 @@ class AppStorage {
     this.initialDates = DateBook.empty,
     this.initialSubscriptions = SubscriptionBook.empty,
     PackingBook? initialPacking,
+    this.initialPeople = PeopleBook.empty,
     this.initialMasterPassword,
     this.initialSectionLocks = const {},
     this.initialPageLocks = const {},
@@ -302,6 +313,7 @@ class AppStorage {
         _datesStore = null,
         _subscriptionsStore = null,
         _packingStore = null,
+        _peopleStore = null,
         initialPacking = initialPacking ?? PackingBook.initial,
         initialNotificationLog =
             initialNotificationLog ?? NotificationLog.empty,
@@ -336,6 +348,7 @@ class AppStorage {
     final subscriptionsStore =
         JsonFileStore(File('${dir.path}/subscriptions.json'));
     final packingStore = JsonFileStore(File('${dir.path}/packing.json'));
+    final peopleStore = JsonFileStore(File('${dir.path}/people.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
     final locks = await _load(
         settingsStore, (<AppSection>{}, <HubTool>{}, false), (json) {
@@ -373,6 +386,7 @@ class AppStorage {
       datesStore,
       subscriptionsStore,
       packingStore,
+      peopleStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -511,6 +525,12 @@ class AppStorage {
         PackingBook.initial,
         maxVersion: packingFormatVersion,
         PackingBook.fromJson,
+      ),
+      initialPeople: await _load(
+        peopleStore,
+        PeopleBook.empty,
+        maxVersion: peopleFormatVersion,
+        PeopleBook.fromJson,
       ),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
@@ -669,6 +689,13 @@ class AppStorage {
     });
   }
 
+  Future<void> savePeople(PeopleBook book) async {
+    await _peopleStore?.write({
+      'version': peopleFormatVersion,
+      ...book.toJson(),
+    });
+  }
+
   Future<void> savePacking(PackingBook book) async {
     await _packingStore?.write({
       'version': packingFormatVersion,
@@ -745,6 +772,7 @@ class AppStorage {
           _datesStore,
           _subscriptionsStore,
           _packingStore,
+          _peopleStore,
         ])
           if (store != null && store.unreadable)
             store.file.uri.pathSegments.last,
@@ -777,6 +805,7 @@ class AppStorage {
           _datesStore,
           _subscriptionsStore,
           _packingStore,
+          _peopleStore,
         ])
           if (store != null) store,
       ];
@@ -821,6 +850,7 @@ class AppStorage {
     await _datesStore?.flush();
     await _subscriptionsStore?.flush();
     await _packingStore?.flush();
+    await _peopleStore?.flush();
   }
 }
 

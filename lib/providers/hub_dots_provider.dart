@@ -19,6 +19,7 @@ final hubToolDotProvider = Provider.family<bool, HubTool>(
     HubTool.pip => false,
     HubTool.spotify => false,
     HubTool.packing => false,
+    HubTool.people => false,
   },
 );
 
@@ -41,7 +42,8 @@ final hubToolNewsProvider = Provider.family<bool, HubTool>(
     HubTool.subscriptions ||
     HubTool.pip ||
     HubTool.spotify ||
-    HubTool.packing =>
+    HubTool.packing ||
+    HubTool.people =>
       false,
   },
 );

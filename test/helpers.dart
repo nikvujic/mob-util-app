@@ -18,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
+import 'package:the_app/models/people.dart';
 import 'package:the_app/core/app_info.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
@@ -75,6 +76,7 @@ Future<ProviderContainer> pumpApp(
   List<PlannerTask> plannerTasks = const [],
   SubscriptionBook subscriptions = SubscriptionBook.empty,
   PackingBook? packing,
+  PeopleBook? people,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -88,6 +90,7 @@ Future<ProviderContainer> pumpApp(
         initialPlannerTasks: plannerTasks,
         initialSubscriptions: subscriptions,
         initialPacking: packing,
+        initialPeople: people ?? PeopleBook.empty,
       )),
       // Automatic backup's folder (Round 39): a fake, never Android's.
       backupFolderProvider

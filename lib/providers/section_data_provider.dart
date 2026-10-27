@@ -10,6 +10,7 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
+import 'package:the_app/models/people.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/food_provider.dart';
@@ -23,6 +24,7 @@ import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
 import 'package:the_app/providers/packing_provider.dart';
+import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
 
 /// Everything a section holds, to count or clear it as a whole: the
@@ -66,6 +68,8 @@ class SectionData {
         HubTool.pip || HubTool.spotify => 0,
         // Its lists (Round 94).
         HubTool.packing => _ref.read(packingProvider).lists.length,
+        // Round 108: everyone on the board.
+        HubTool.people => _ref.read(peopleProvider).people.length,
       };
 
   /// Empties one of the Hub's pages (saved with the next flush).
@@ -93,6 +97,13 @@ class SectionData {
       case HubTool.packing:
         // Its sections back to the usual ones too.
         _ref.read(packingProvider.notifier).replaceAll(PackingBook.initial);
+      case HubTool.people:
+        // Their birthdays on the Dates page go too (they're People's).
+        final dates = _ref.read(datesProvider.notifier);
+        for (final d in _ref.read(datesProvider).dates) {
+          if (d.personId != null) dates.delete(d.id);
+        }
+        _ref.read(peopleProvider.notifier).replaceAll(PeopleBook.empty);
       case HubTool.pip:
       case HubTool.spotify:
     }

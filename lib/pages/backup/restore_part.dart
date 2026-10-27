@@ -10,6 +10,7 @@ import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
 import 'package:the_app/providers/packing_provider.dart';
+import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
@@ -176,6 +177,16 @@ class _RestorePartPageState extends ConsumerState<RestorePartPage> {
                 l.items.length == 1 ? '1 item' : '${l.items.length} items'),
         ],
         ids(ref.watch(packingProvider).lists, (l) => l.id),
+      ),
+      (
+        BackupPart.people,
+        'People',
+        [
+          for (final p in b.people)
+            plain(p.id, p.name.trim().isEmpty ? 'Unnamed' : p.name,
+                p.deceased ? 'Deceased' : p.gender.label),
+        ],
+        ids(ref.watch(peopleProvider).people, (p) => p.id),
       ),
     ];
   }
