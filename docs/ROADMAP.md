@@ -337,6 +337,28 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 108 — People built (2026-10-27, 1.43.0)
+
+- [x] Avatar drafts approved; the page built from `docs/PEOPLE_SPEC.md`:
+  `models/people.dart` (people, relations, `whyNot`, `familyOf`),
+  `models/people_layout.dart` (`tidyLayout`, `generations`,
+  `familyPull`), `providers/people_provider.dart` (saved as changed;
+  the birthday kept in step with its date in Dates; `takeBirthday`;
+  relate, the picked one brought near; remove with Undo; Tidy),
+  `pages/hub/people_board.dart` (pan, pinch zoom, tap to centre, drag
+  with the family's pull from where the finger went down, glide, lines
+  drawing in), `pages/hub/people_panel.dart` (info, edit, relation and
+  person pickers), `widgets/people_sprites.dart` / `people_avatar.dart`
+  (the 14 faces). Dates: a linked birthday marked, its title, day, year
+  and type locked, no Delete. people.json v1, backup v32, fixtures. The
+  shared choices sheet now sizes to its choices (six overflowed a short
+  screen).
+
+### Round 107 — the People spec and avatar drafts (2026-10-27)
+
+- [x] `docs/PEOPLE_SPEC.md` written, questions answered; faces drafted
+  (`docs/people_avatar_drafts.png`) and approved.
+
 ### Round 106 — the rain radar (2026-10-27, 1.42.0)
 
 - [x] a key option in Internet Access with a note ("for more
@@ -388,7 +410,7 @@ big for Pip:
    the view's offset opens edit there, edit's comes back).
 2. [x] Recipes: export / import as text (Round 104; 1.41.0).
 3. [x] A better weather API (Round 99): the rain radar, Round 106 (1.42.0).
-4. [ ] People: an index of people, notes, a family tree (Round 100;
+4. [x] People: an index of people, notes, a family tree (Round 100;
    planned with the user first). Spec: `docs/PEOPLE_SPEC.md` (Round 107),
    waiting on his answers.
 5. [ ] Page organizer (O10, already marked v2): to talk through.

@@ -244,9 +244,24 @@ class DateCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    date.title,
-                    style: TextStyle(color: colors.textPrimary, fontSize: 15),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          date.title,
+                          style: TextStyle(
+                              color: colors.textPrimary, fontSize: 15),
+                        ),
+                      ),
+                      // Round 108: a person's birthday, from People.
+                      if (date.personId != null) ...[
+                        const SizedBox(width: 6),
+                        Icon(Icons.people_outline,
+                            key: Key('datePerson-${date.id}'),
+                            size: 15,
+                            color: colors.textSecondary),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(

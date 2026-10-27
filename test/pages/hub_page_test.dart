@@ -31,6 +31,7 @@ void main() {
       'assets/icons/subscriptions.svg', // Round 79
       'assets/icons/spotify.svg', // Round 93
       'assets/icons/packing.svg', // Round 94
+      'assets/icons/people.svg', // Round 108
       'assets/icons/pip.svg', // hatched (Round 35)
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
@@ -69,6 +70,7 @@ void main() {
       HubTool.subscriptions, // Round 79
       HubTool.spotify, // Round 93
       HubTool.packing, // Round 94
+      HubTool.people, // Round 108
     ]);
   });
 
@@ -100,6 +102,7 @@ void main() {
         HubTool.subscriptions,
         HubTool.spotify,
         HubTool.packing,
+        HubTool.people,
       ]);
       expect(
         tester.getCenter(find.byTooltip('Placard')).dx,
@@ -138,6 +141,7 @@ void main() {
         HubTool.subscriptions,
         HubTool.spotify,
         HubTool.packing,
+        HubTool.people,
       ]);
       semantics.dispose();
     });
@@ -178,6 +182,7 @@ void main() {
         HubTool.subscriptions,
         HubTool.spotify,
         HubTool.packing,
+        HubTool.people,
       ]);
       semantics.dispose();
     });

@@ -721,3 +721,38 @@ abstract final class PipColours {
   static const cloudNightShade = Color(0xFF2C3240);
   static const cloudNightLight = Color(0xFF4A5262);
 }
+
+/// People's avatars and boxes (Round 108), whatever the theme: the
+/// drafts' colours (`docs/people_avatar_drafts.png`).
+abstract final class PeopleColours {
+  static const male = Color(0xFF3F7BC8); // a highlighted box's border
+  static const female = Color(0xFFD05A8C);
+  static const maleBack = Color(0xFFA9CDF0); // behind the face
+  static const femaleBack = Color(0xFFF5B8CF);
+  static const greyBack = Color(0xFFD7D7D7); // deceased
+  static const maleShirt = Color(0xFF2F5D9E);
+  static const femaleShirt = Color(0xFFB84A72);
+  static const outline = Color(0xFF2B2630);
+  static const skin = Color(0xFFF2C9A0);
+  static const skinShade = Color(0xFFD6A078);
+  static const eye = Color(0xFF221E28);
+  static const mouth = Color(0xFFB5525C);
+  static const cheek = Color(0xFFF29696);
+  static const freckle = Color(0xFFC47850);
+  static const glasses = Color(0xFFB08C5C);
+  static const beard = Color(0xFF7A583C);
+  static const pacifier = Color(0xFF6EBEE1);
+  static const ribbon = Color(0xFFE05478);
+  static const grey = Color(0xFFAAAAB0);
+  static const greyDark = Color(0xFF808088);
+  static const white = Color(0xFFF0F0F0);
+  static const whiteShade = Color(0xFFCDCDD2);
+  static const blonde = Color(0xFFE8BE54);
+  static const blondeShade = Color(0xFFC49634);
+  static const brown = Color(0xFF6E4626);
+  static const brownLight = Color(0xFF96643A);
+  static const dark = Color(0xFF342620);
+  static const darkLight = Color(0xFF5A4236);
+  static const auburn = Color(0xFF964828);
+  static const auburnLight = Color(0xFFBE6E46);
+}

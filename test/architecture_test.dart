@@ -103,6 +103,9 @@ final _plainScroll = RegExp(
   r'(\.\w+)?\(',
 );
 const plainScrollAllowed = {
+  // People's panel and pickers (Round 108): the lower half of the
+  // screen and bottom sheets, already in thumb reach.
+  'pages/hub/people_panel.dart',
   // Recipes to pick one to export (Round 104), in a bottom sheet capped
   // in height: already at the bottom.
   'pages/hub/recipe_transfer_sheet.dart',

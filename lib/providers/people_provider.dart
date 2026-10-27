@@ -108,13 +108,15 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
   }
 
   /// Relates [from] and [to] as [kind] (for a parent: [from] is [to]'s);
-  /// returns why not, or null when done.
+  /// returns why not, or null when done. [bring] (the one just picked;
+  /// [to] by default) comes next to the other if far.
   String? relate(
     RelationKind kind,
     String from,
     String to, {
     bool former = false,
     String label = '',
+    String? bring,
   }) {
     final why = state.whyNot(kind, from, to);
     if (why != null) return why;
@@ -129,18 +131,19 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
         label: kind == RelationKind.other ? label.trim() : '',
       ),
     ]);
-    _nearEachOther(from, to);
+    final moved = bring == from ? from : to;
+    _nearEachOther(moved == from ? to : from, moved);
     return null;
   }
 
-  /// Spec 5.4: when a relation is added, the newly linked person comes
-  /// next to the other if they're far apart; nobody else moves.
+  /// Spec 5.4: when a relation is added, the newly linked person [b]
+  /// comes next to [a] if they're far apart; nobody else moves.
   void _nearEachOther(String a, String b) {
     final pa = state.byId(a), pb = state.byId(b);
     if (pa == null || pb == null) return;
     final dx = pb.x - pa.x, dy = pb.y - pa.y;
-    if (dx.abs() < PeopleBoard.columnStep * 3 &&
-        dy.abs() < PeopleBoard.rowStep * 2) {
+    if (dx.abs() < BoardSizes.columnStep * 3 &&
+        dy.abs() < BoardSizes.rowStep * 2) {
       return;
     }
     final relation = state.relations.last;
@@ -148,10 +151,10 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
       // A child goes under the parent, a parent over the child.
       RelationKind.parent when relation.to == b => (
           pa.x,
-          pa.y + PeopleBoard.rowStep
+          pa.y + BoardSizes.rowStep
         ),
-      RelationKind.parent => (pa.x, pa.y - PeopleBoard.rowStep),
-      _ => (pa.x + PeopleBoard.columnStep, pa.y),
+      RelationKind.parent => (pa.x, pa.y - BoardSizes.rowStep),
+      _ => (pa.x + BoardSizes.columnStep, pa.y),
     };
     move({b: (x, y)});
   }

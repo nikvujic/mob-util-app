@@ -81,10 +81,15 @@ void main() {
       await tester.drag(list, const Offset(0, -600));
       await tester.pumpAndSettle();
     }
-    final hub = find.widgetWithText(SwitchListTile, 'Hub');
+    // At the end, the last switch clear of the bar (Round 108: more Hub
+    // pages under it now, so not always the Hub's own).
     final screen = tester.getSize(find.byType(MaterialApp)).height;
-    expect(tester.getBottomLeft(hub).dy, lessThanOrEqualTo(screen - 48),
+    final last = find.byType(SwitchListTile).last;
+    expect(tester.getBottomLeft(last).dy, lessThanOrEqualTo(screen - 48),
         reason: 'clear of the bar');
+    final hub = find.widgetWithText(SwitchListTile, 'Hub');
+    await tester.scrollUntilVisible(hub, -100, scrollable: list);
+    expect(tester.getBottomLeft(hub).dy, lessThanOrEqualTo(screen - 48));
   });
 
   testWidgets('without a master password there are no switches',

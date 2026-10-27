@@ -84,9 +84,10 @@ void main() {
     await tester.scrollUntilVisible(
         find.byKey(const Key('clear-medicine')), 100,
         scrollable: find.byType(Scrollable).last);
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -300));
-    await tester.pumpAndSettle();
     expect(find.byKey(const Key('clear-medicine')), findsOneWidget);
+    // To the end (Round 108: People there now): no Pip anywhere.
+    await tester.scrollUntilVisible(find.byKey(const Key('clear-people')), 100,
+        scrollable: find.byType(Scrollable).last);
     expect(find.byKey(const Key('clear-pip')), findsNothing);
   });
 

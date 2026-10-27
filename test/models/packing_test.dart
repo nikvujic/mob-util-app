@@ -247,7 +247,7 @@ void main() {
   });
 
   test('in backups (version 31), the usual sections when missing', () {
-    expect(Backup.version, 31);
+    expect(Backup.version, greaterThanOrEqualTo(31));
     final backup = Backup(
       createdAt: DateTime.utc(2026, 10, 21),
       appVersion: 'test',

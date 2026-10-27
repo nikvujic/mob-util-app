@@ -6,6 +6,27 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.43.0] - 2026-10-27
+
+### Added
+- **People**, a new Hub page: the people you know as boxes on a board you
+  pan and zoom, each with a pixel face for their age (baby to 80+) in blue
+  or pink, their name and age; important people **highlighted**, the
+  **deceased** greyed with their years.
+  - Tap someone to centre on them and open their info below; **Edit** for
+    their name, gender, birthday, date of death, note and **relations**.
+  - **Relations** make family trees: parent / child, partner (or former,
+    dashed), brother or sister, or other with a word ("Kum"). A couple
+    gets one line down to their children.
+  - Drag people around: a small drag moves only them, a long one brings
+    their family. **Tidy** lays everyone out as family trees (asked
+    first, undoable); **Find** searches by name.
+  - A birthday set here is on the **Dates** page too, with a People mark:
+    there its reminders and note can be changed, the rest only here; and
+    **Birthday from Dates** takes over one already there.
+  - Lockable, in Clear data, in backups (version 32) and in *Restore part
+    of a backup*.
+
 ## [1.42.0] - 2026-10-27
 
 ### Added

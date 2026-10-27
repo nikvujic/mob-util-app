@@ -856,6 +856,27 @@ whatever had the music last, and sets the next alarm, so it runs with
 the app closed; after a restart or an update the same receiver sets it
 again.
 
+## People (Round 108)
+
+`models/people.dart`: `Person` (a `PersonDate` birthday, deceased with
+`diedOn`, highlighted, note, the box's middle `x`/`y` in board units,
+`dateId` its birthday's date), `Relation` (`parent` from → to, `partner`
+maybe `former`, `sibling`, `other` with a `label`), `PeopleBook` with the
+rules (`whyNot`, `isAncestor`, `familyOf` over family relations) and the
+`BoardView`. `models/people_layout.dart`: `BoardSizes`, `generations`
+(a bounded fix-point: a child below its parents, partners and siblings
+level, a root parent just above), `tidyLayout` and `familyPull` (the
+share of a drag the family follows). `PeopleNotifier` keeps a person's
+birthday in step with a `DateEntry` whose `personId` is theirs (Dates
+locks its title, day, year and type; Clear data of People removes
+them). `pages/hub/people_board.dart` draws boxes as positioned widgets
+over a `CustomPainter` of lines, all in board units under one view
+(centre, zoom); one `GestureDetector` hit-tests boxes itself (a tap, a
+drag from where the finger went down, pan and pinch), and a ticker that
+stops when settled glides people and the view and draws new lines in.
+Faces: `widgets/people_sprites.dart` (grids) and `people_avatar.dart`
+(colours in `PeopleColours`).
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

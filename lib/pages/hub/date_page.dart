@@ -12,6 +12,7 @@ import 'package:the_app/pages/hub/date_reminder_sheet.dart';
 import 'package:the_app/pages/hub/dates.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
+import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/discard_scope.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
@@ -187,6 +188,12 @@ class _DatePageState extends ConsumerState<DatePage> {
     final colors = context.colors;
     final today = _today;
     final next = date.nextFrom(today);
+    // Round 108: a person's birthday: its title, day, year and type are
+    // theirs (edited on the People page), and it goes with them.
+    final person = date.personId == null
+        ? null
+        : ref.watch(peopleProvider).byId(date.personId!);
+    final fromPeople = person != null;
     // Round 91: back asks Save or Discard once it's changed.
     final now = ref.watch(datesProvider).byId(_draft.id);
     return DiscardScope(
@@ -210,38 +217,48 @@ class _DatePageState extends ConsumerState<DatePage> {
                 key: const Key('dateTitle'),
                 controller: _title,
                 autofocus: widget.dateId == null,
+                readOnly: fromPeople,
+                enabled: !fromPeople,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  helperText: fromPeople ? 'From People: edit it there' : null,
+                  suffixIcon: fromPeople
+                      ? const Icon(Icons.people_outline,
+                          key: Key('dateFromPeople'))
+                      : null,
+                ),
                 onChanged: (text) => _change(_draft.copyWith(title: text)),
               ),
             ),
-            _heading('TYPE'),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  for (final type in DateType.values)
-                    ChoiceChip(
-                      key: Key('dateType-${type.name}'),
-                      avatar: Icon(type.icon, size: 18, color: type.colour),
-                      label: Text(type.label),
-                      selected: date.type == type,
-                      // A type sets every year or once (Round 61: only
-                      // Other can change it after); once needs a year.
-                      onSelected: (_) => _change(date.copyWith(
-                        type: type,
-                        yearly: type.yearly,
-                        year: () =>
-                            date.year ?? (type.yearly ? null : today.year),
-                        reminders: _remindersFor(date, date.kindNow,
-                            type == date.kind?.type ? date.kind : null),
-                      )),
-                    ),
-                ],
+            if (!fromPeople) _heading('TYPE'),
+            if (!fromPeople)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final type in DateType.values)
+                      ChoiceChip(
+                        key: Key('dateType-${type.name}'),
+                        avatar: Icon(type.icon, size: 18, color: type.colour),
+                        label: Text(type.label),
+                        selected: date.type == type,
+                        // A type sets every year or once (Round 61: only
+                        // Other can change it after); once needs a year.
+                        onSelected: (_) => _change(date.copyWith(
+                          type: type,
+                          yearly: type.yearly,
+                          year: () =>
+                              date.year ?? (type.yearly ? null : today.year),
+                          reminders: _remindersFor(date, date.kindNow,
+                              type == date.kind?.type ? date.kind : null),
+                        )),
+                      ),
+                  ],
+                ),
               ),
-            ),
             // Round 61: a holiday's or an event's kind.
             if (date.type.kinds.isNotEmpty) ...[
               _heading('KIND'),
@@ -275,7 +292,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                   key: const Key('dateDay'),
                   avatar: const Icon(Icons.calendar_today, size: 18),
                   label: Text(formatDayMonth(date.day, date.month, date.year)),
-                  onPressed: _pickDate,
+                  onPressed: fromPeople ? null : _pickDate,
                 ),
               ),
             ),
@@ -460,7 +477,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                 onChanged: (text) => _change(_draft.copyWith(note: text)),
               ),
             ),
-            if (saved)
+            if (saved && !fromPeople)
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
                 child: Align(

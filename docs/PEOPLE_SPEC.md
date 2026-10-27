@@ -1,6 +1,6 @@
 # People — spec (Round 107)
 
-Not built yet (Round 107, v2 item 4): the people you know as **floating
+Built in Round 108 (1.43.0); written in Round 107 (v2 item 4): the people you know as **floating
 boxes on a zoomable board**, with **relations** that make a **family
 tree**, laid out like Pip Home (the picture on top, the controls below).
 **Requested** marks what was asked for, **Decided** an answer to a

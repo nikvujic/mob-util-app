@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:the_app/models/people.dart';
 
 /// The board's sizes (board units): a person's box, and the room around.
-abstract final class PeopleBoard {
+abstract final class BoardSizes {
   static const boxWidth = 120.0;
   static const boxHeight = 150.0;
 
@@ -42,13 +42,13 @@ Map<String, (double, double)> tidyLayout(PeopleBook book) {
     for (final MapEntry(:key, :value) in tree.entries) {
       placed[key] = (left + value.$1 - minX, value.$2);
     }
-    left += maxX - minX + PeopleBoard.boxWidth + PeopleBoard.familyGap;
+    left += maxX - minX + BoardSizes.boxWidth + BoardSizes.familyGap;
   }
   final columns = math.max(1, math.sqrt(singles.length).ceil());
   for (final (i, p) in singles.indexed) {
     placed[p.id] = (
-      left + (i % columns) * PeopleBoard.columnStep,
-      (i ~/ columns) * PeopleBoard.rowStep,
+      left + (i % columns) * BoardSizes.columnStep,
+      (i ~/ columns) * BoardSizes.rowStep,
     );
   }
   return placed;
@@ -145,10 +145,10 @@ Map<String, (double, double)> _treeLayout(PeopleBook book, Set<String> family) {
           : order[a.first]!.compareTo(order[b.first]!);
     });
     final line = units.expand((u) => u).toList();
-    final width = (line.length - 1) * PeopleBoard.columnStep;
+    final width = (line.length - 1) * BoardSizes.columnStep;
     for (final (i, id) in line.indexed) {
-      x[id] = i * PeopleBoard.columnStep - width / 2;
-      result[id] = (x[id]!, r * PeopleBoard.rowStep);
+      x[id] = i * BoardSizes.columnStep - width / 2;
+      result[id] = (x[id]!, r * BoardSizes.rowStep);
     }
   }
   return result;
@@ -158,7 +158,7 @@ Map<String, (double, double)> _treeLayout(PeopleBook book, Set<String> family) {
 /// drag moves only them; far, the family follows): 0 under a box's width,
 /// all of the way past three; [partner]s follow sooner.
 double familyPull(double distance, {bool partner = false}) {
-  final start = partner ? PeopleBoard.boxWidth * 0.25 : PeopleBoard.boxWidth;
-  final full = partner ? PeopleBoard.boxWidth * 1.25 : PeopleBoard.boxWidth * 3;
+  final start = partner ? BoardSizes.boxWidth * 0.25 : BoardSizes.boxWidth;
+  final full = partner ? BoardSizes.boxWidth * 1.25 : BoardSizes.boxWidth * 3;
   return ((distance - start) / (full - start)).clamp(0.0, 1.0);
 }
