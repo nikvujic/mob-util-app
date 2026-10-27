@@ -341,7 +341,13 @@ fixtures for every stored format.
 
 - [x] "Export for agents", not ChatGPT; a better icon for the Import /
   export button (`Icons.sync_alt`, ⇄; it was `import_export`).
-- [ ] Weather: options compared, proposal to Nikola (v2 item 3).
+- [ ] Weather (v2 item 3), proposed to Nikola: no free API is
+  station-only; the rain-now fix is a radar nowcast. Proposal: a
+  provider seam in `data/weather_api.dart`; Open-Meteo stays for
+  temperature, wind and the day's codes, and "raining now" comes from
+  a radar-based nowcast (Tomorrow.io or Rainbow.ai, free key, his key
+  typed in Internet Access); first a week's side-by-side log in debug
+  to pick the one that matches Belgrade. Waiting on his answer.
 
 ### Round 104 — recipe import / export (2026-10-26, 1.41.0)
 
