@@ -5,7 +5,7 @@ import 'package:the_app/providers/recipes_provider.dart';
 
 /// Recipes as text, to copy and paste (Round 104, Nikola): **export for
 /// import** (a recipe someone else pastes in), **export for an agent** (a
-/// recipe as an example, with the rules, so ChatGPT writes a new one in
+/// recipe as an example, with the rules, so an AI agent writes a new one in
 /// the same shape) and **import** (pasted text: a new recipe, ingredients
 /// it names that aren't there yet added to their sections).
 
@@ -49,7 +49,7 @@ String? _sectionOf(RecipeIngredient ingredient, IngredientBook book) {
   return null;
 }
 
-/// [recipe] as an example for an agent (ChatGPT): what the text is, the
+/// [recipe] as an example for an AI agent (ChatGPT, Claude, ...): what the text is, the
 /// rules of its shape, the ingredients already there by section, and the
 /// example; the user adds what new recipe they want.
 String exportForAgent(Recipe recipe, IngredientBook book) {

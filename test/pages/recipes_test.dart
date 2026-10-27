@@ -393,13 +393,13 @@ void main() {
       expect(clipboard, isNot(contains('Rules:')));
     });
 
-    testWidgets('export for ChatGPT: the example with the rules',
+    testWidgets('export for agents: the example with the rules',
         (tester) async {
       await openRecipes(tester, start: [pancakes()], ingredients: sampleBook());
       await pick(tester, 'agent');
       await tester.tap(find.byKey(const Key('exportRecipe-r1')));
       await tester.pumpAndSettle();
-      expect(find.text('Copied for ChatGPT: Pancakes'), findsOneWidget);
+      expect(find.text('Copied for agents: Pancakes'), findsOneWidget);
       expect(clipboard, contains('Rules:'));
       expect(clipboard, contains('- Dairy: Eggs, Milk'));
     });

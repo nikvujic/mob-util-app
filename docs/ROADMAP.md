@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 105 — Nikola on 1.41.0 (2026-10-27, patch 1.41.1)
+
+- [x] "Export for agents", not ChatGPT; a better icon for the Import /
+  export button (`Icons.sync_alt`, ⇄; it was `import_export`).
+- [ ] Weather: options compared, proposal to Nikola (v2 item 3).
+
 ### Round 104 — recipe import / export (2026-10-26, 1.41.0)
 
 - [x] Nikola: "export for import and export for agent"; text only

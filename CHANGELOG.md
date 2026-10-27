@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.41.1] - 2026-10-27
+
+### Changed
+- **Recipes:** *Export for ChatGPT* is now **Export for agents** (any AI
+  agent: ChatGPT, Claude, ...), and the Import / export button has a
+  clearer icon (⇄).
+
 ## [1.41.0] - 2026-10-26
 
 ### Added

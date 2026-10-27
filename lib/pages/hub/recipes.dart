@@ -142,7 +142,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                     ),
                     // Round 104: recipes as text, copied and pasted.
                     BottomAction(
-                      icon: Icons.import_export,
+                      icon: Icons.sync_alt,
                       tooltip: 'Import / export',
                       onPressed: () => showRecipeTransfer(context, ref),
                     ),

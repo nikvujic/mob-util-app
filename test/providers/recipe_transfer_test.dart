@@ -81,7 +81,7 @@ void main() {
   });
 
   test(
-      'export for ChatGPT: what to answer, the rules, his ingredients by '
+      'export for agents: what to answer, the rules, his ingredients by '
       'section, the example', () {
     final text = exportForAgent(pancakes, sampleBook);
     expect(text, contains('only the new recipe as JSON'));

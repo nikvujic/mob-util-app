@@ -10,12 +10,12 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// Round 104 (Nikola): the Recipes page's Import / export button. Import
 /// pastes a recipe (a new one); the exports copy a picked recipe, for
-/// someone to import or for ChatGPT to write a new one like it.
+/// someone to import or for an AI agent to write a new one like it.
 Future<void> showRecipeTransfer(BuildContext context, WidgetRef ref) async {
   final choice = await showChoicesSheet(context, 'Import / export', const [
     (Icons.content_paste, 'Import (paste)', 'import'),
     (Icons.ios_share, 'Export for import', 'export'),
-    (Icons.smart_toy_outlined, 'Export for ChatGPT', 'agent'),
+    (Icons.smart_toy_outlined, 'Export for agents', 'agent'),
   ]);
   if (choice == null || !context.mounted) return;
   if (choice == 'import') return _import(context, ref);
@@ -32,7 +32,7 @@ Future<void> showRecipeTransfer(BuildContext context, WidgetRef ref) async {
     _toast(
         context,
         agent
-            ? 'Copied for ChatGPT: ${_named(recipe)}'
+            ? 'Copied for agents: ${_named(recipe)}'
             : 'Copied: ${_named(recipe)}');
   }
 }
