@@ -200,5 +200,5 @@ avatars with drafts first (4.2); the page is called **People**.
 
 Relation kinds (5.1) decided as proposed: Parent / Child, Partner (with
 "former", dashed), Sibling (only when no parents are entered) and Other
-(a thin line with an optional word). Nothing is open; next come the
-avatar drafts.
+(a thin line with an optional word). Nothing is open but the avatars: drafts in
+`docs/people_avatar_drafts.png` (Round 108).
