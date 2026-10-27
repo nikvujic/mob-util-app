@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/providers/weather_provider.dart';
 
 import '../helpers.dart';
 
@@ -29,16 +31,20 @@ void main() {
   final now = DateTime(2026, 10, 19, 10, 20);
   late ProviderContainer container;
   late FakeWeatherApi api;
+  late FakeRadarApi radar;
 
   InternetSettings internet() => container.read(preferencesProvider).internet;
 
   Future<void> openPage(WidgetTester tester,
-      {InternetSettings settings = const InternetSettings()}) async {
-    api = FakeWeatherApi(places: const [noviSad, beograd]);
+      {InternetSettings settings = const InternetSettings(),
+      int weatherCode = 61}) async {
+    api = FakeWeatherApi(places: const [noviSad, beograd], code: weatherCode);
+    radar = FakeRadarApi();
     container = await pumpApp(
       tester,
       clock: () => now,
       weather: api,
+      radar: radar,
       preferences: Preferences(internet: settings),
     );
     await openMenu(tester);
@@ -192,5 +198,139 @@ void main() {
     expect(find.byKey(const Key('weatherFailed')), findsOneWidget);
     expect(internet().report!.code, 0);
     await turnOff(tester);
+  });
+
+  group('the rain radar, with his own key (Round 106)', () {
+    final on = InternetSettings(weather: true, places: const [beograd]);
+    String? clipboard;
+    setUp(() {
+      clipboard = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          clipboard = (call.arguments as Map)['text'] as String;
+        }
+        return null;
+      });
+    });
+    tearDown(() => TestDefaultBinaryMessengerBinding
+        .instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null));
+
+    Future<void> pasteKey(WidgetTester tester, String key) async {
+      await tester.ensureVisible(find.byKey(const Key('radarKey')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('radarKey')));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, key);
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+        'no key: the radar never asked; the note, its address copied '
+        '(no link)', (tester) async {
+      await openPage(tester, settings: on, weatherCode: 3);
+      await tester.pumpAndSettle();
+      expect(api.fetches, 1);
+      expect(radar.keys, isEmpty);
+      expect(find.text('Now: Cloudy, 7°C · updated 10:20'), findsOneWidget,
+          reason: 'no source said without a key');
+      expect(find.textContaining('Rain radar (optional)'), findsOneWidget);
+      expect(find.text('Add your key'), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('copySignUp')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('copySignUp')));
+      await tester.pumpAndSettle();
+      expect(clipboard, radarSignUp);
+      expect(find.text('Address copied'), findsOneWidget);
+      await turnOff(tester);
+    });
+
+    testWidgets(
+        'a key pasted: checked once, then its rain wins over '
+        "Open-Meteo's clouds; shown by its end only; × removes it",
+        (tester) async {
+      await openPage(tester, settings: on, weatherCode: 3);
+      await tester.pumpAndSettle();
+      radar.code = 63;
+      await pasteKey(tester, '  abcdef1234wxyz ');
+      expect(internet().radarKey, 'abcdef1234wxyz');
+      expect(radar.keys, everyElement('abcdef1234wxyz'));
+      expect(radar.keys, hasLength(2), reason: 'the check, the fetch');
+      expect(find.text('The key works'), findsOneWidget);
+      expect(find.text('••••wxyz'), findsOneWidget);
+      expect(find.textContaining('abcdef'), findsNothing);
+      expect(internet().report!.code, 63);
+      expect(internet().report!.radar, isTrue);
+      expect(find.text('Now: Rain, 7°C · updated 10:20 · rain by radar'),
+          findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('removeRadarKey')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('removeRadarKey')));
+      await tester.pumpAndSettle();
+      expect(internet().radarKey, isNull);
+      expect(internet().report!.code, 3, reason: "Open-Meteo's again");
+      expect(find.text('Add your key'), findsOneWidget);
+      await turnOff(tester);
+    });
+
+    testWidgets("dry by radar: Open-Meteo's sky stands", (tester) async {
+      await openPage(tester,
+          settings: on.copyWith(radarKey: () => 'k1'), weatherCode: 2);
+      await tester.pumpAndSettle();
+      expect(radar.keys, ['k1']);
+      expect(internet().report!.code, 2);
+      expect(internet().report!.radar, isTrue);
+      await turnOff(tester);
+    });
+
+    testWidgets("the radar failing: Open-Meteo's weather, and it says why",
+        (tester) async {
+      await openPage(tester, settings: on, weatherCode: 3);
+      await tester.pumpAndSettle();
+      radar.failing = "The rain radar didn't accept the key";
+      await pasteKey(tester, 'bad');
+      expect(find.text("The rain radar didn't accept the key"), findsOneWidget,
+          reason: 'the check');
+      expect(internet().radarKey, 'bad', reason: 'kept: it may come back');
+      expect(internet().report!.code, 3);
+      expect(internet().report!.radar, isFalse);
+      expect(
+          find.text("The rain radar didn't accept the key: Open-Meteo's "
+              'weather meanwhile.'),
+          findsOneWidget);
+      expect(
+          find.text('Now: Cloudy, 7°C · updated 10:20 · rain by '
+              'Open-Meteo'),
+          findsOneWidget);
+      await turnOff(tester);
+    });
+
+    WeatherReport fifteenOld() => WeatherReport(
+          placeId: beograd.id,
+          code: 3,
+          temperature: 5,
+          fetchedAt: now.subtract(const Duration(minutes: 15)),
+        );
+
+    testWidgets('without a key, a report 15 minutes old is fresh enough',
+        (tester) async {
+      await openPage(tester, settings: on.copyWith(report: fifteenOld));
+      await tester.pumpAndSettle();
+      expect(api.fetches, 0);
+      await turnOff(tester);
+    });
+
+    testWidgets('with a key, a report 15 minutes old is fetched again',
+        (tester) async {
+      await openPage(tester,
+          settings: on.copyWith(report: fifteenOld, radarKey: () => 'k'));
+      await tester.pumpAndSettle();
+      expect(api.fetches, 1);
+      expect(radar.keys, ['k']);
+      await turnOff(tester);
+    });
   });
 }

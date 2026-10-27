@@ -11,19 +11,33 @@ export 'package:the_app/data/weather_api.dart' show WeatherFailure;
 /// The weather service (Round 70); a fake in tests.
 final weatherApiProvider = Provider<WeatherApi>((ref) => OpenMeteoApi());
 
+/// The rain radar (Round 106), used with Nikola's key; a fake in tests.
+final radarApiProvider = Provider<RadarApi>((ref) => TomorrowIoApi());
+
+/// Where to get a rain radar key (shown with a copy button).
+const radarSignUp = TomorrowIoApi.signUp;
+
 /// The weather's fetching (Round 70): whether it's under way, and why
-/// the last try failed (null: it didn't).
-typedef WeatherFetch = ({bool busy, String? failed});
+/// the last try failed (null: it didn't); Round 106: why the rain radar
+/// failed, the weather then Open-Meteo's alone.
+typedef WeatherFetch = ({bool busy, String? failed, String? radarFailed});
+
+const _idle = (busy: false, failed: null, radarFailed: null);
 
 /// Fetches the weather for Internet Access's place while it's on: when
 /// it's turned on or the place changes, then every [every] (a report
 /// older than [staleAfter] is fetched again), and on [refresh]. Nothing
 /// at all while it's off.
 class WeatherNotifier extends StateNotifier<WeatherFetch> {
-  WeatherNotifier(this._ref) : super((busy: false, failed: null)) {
+  WeatherNotifier(this._ref) : super(_idle) {
     _ref.listen(
       preferencesProvider.select((p) => (p.internet.weather, p.internet.place)),
       (_, __) => _follow(),
+    );
+    // Round 106: a key added or changed: fetched again with it.
+    _ref.listen(
+      preferencesProvider.select((p) => p.internet.radarKey),
+      (_, __) => scheduleMicrotask(() => refresh(force: true)),
     );
     _follow();
   }
@@ -34,6 +48,10 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
   static const every = Duration(minutes: 15);
   static const staleAfter = Duration(hours: 1);
 
+  /// Round 106: with the rain radar, its rain now is fetched every time
+  /// ([every]): about 100 calls a day, well in its free limit.
+  static const radarStaleAfter = Duration(minutes: 14);
+
   InternetSettings get _settings => _ref.read(preferencesProvider).internet;
 
   void _follow() {
@@ -41,7 +59,7 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
     if (!on) {
       _timer?.cancel();
       _timer = null;
-      if (mounted) state = (busy: false, failed: null);
+      if (mounted) state = _idle;
       return;
     }
     _timer ??= Timer.periodic(every, (_) => refresh());
@@ -58,16 +76,29 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
     if (!settings.weather || place == null) return;
     final now = _ref.read(clockProvider)();
     final last = settings.report;
+    final key = settings.radarKey;
     if (!force &&
         last != null &&
         last.placeId == place.id &&
-        now.difference(last.fetchedAt) < staleAfter &&
+        now.difference(last.fetchedAt) <
+            (key == null ? staleAfter : radarStaleAfter) &&
         !now.isBefore(last.fetchedAt)) {
       return;
     }
-    state = (busy: true, failed: null);
+    state = (busy: true, failed: null, radarFailed: null);
     try {
-      final report = await _ref.read(weatherApiProvider).now(place, now);
+      var report = await _ref.read(weatherApiProvider).now(place, now);
+      // Round 106: the rain radar's rain or snow now wins; dry, Open-
+      // Meteo's sky stands. Failing, the weather is Open-Meteo's alone.
+      String? radarFailed;
+      if (key != null) {
+        try {
+          report = report.withRadar(
+              await _ref.read(radarApiProvider).precipitation(place, key));
+        } on WeatherFailure catch (e) {
+          radarFailed = e.message;
+        }
+      }
       if (!mounted) return;
       // Still on, and for the same place.
       final current = _settings;
@@ -76,9 +107,22 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
             .read(preferencesProvider.notifier)
             .setInternet(current.copyWith(report: () => report));
       }
-      state = (busy: false, failed: null);
+      state = (busy: false, failed: null, radarFailed: radarFailed);
     } on WeatherFailure catch (e) {
-      if (mounted) state = (busy: false, failed: e.message);
+      if (mounted) state = (busy: false, failed: e.message, radarFailed: null);
+    }
+  }
+
+  /// Round 106: tries [key] on the rain radar once (at the picked place,
+  /// or anywhere if there's none yet): null if it works, else why not.
+  Future<String?> testRadarKey(String key) async {
+    final place = _settings.place ??
+        const WeatherPlace(id: 'test', name: 'Test', latitude: 0, longitude: 0);
+    try {
+      await _ref.read(radarApiProvider).precipitation(place, key);
+      return null;
+    } on WeatherFailure catch (e) {
+      return e.message;
     }
   }
 

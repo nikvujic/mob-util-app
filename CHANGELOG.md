@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.42.0] - 2026-10-27
+
+### Added
+- **Rain radar (optional), in Internet Access.** Forecasts can miss light
+  rain (Open-Meteo once said cloudy while it rained in Belgrade). Add your
+  own free Tomorrow.io key (a copy button copies where to sign up) and the
+  rain or snow right now comes from it, checked every 15 minutes; when
+  it's dry, Open-Meteo's sky stays. The key is checked once when pasted,
+  shown only by its last 4 characters, stays on the phone (not in
+  backups) and is sent only to Tomorrow.io. If it stops working, the
+  weather is Open-Meteo's alone and the page says why. The weather line
+  ends with "rain by radar" or "rain by Open-Meteo" while a key is set.
+
 ## [1.41.1] - 2026-10-27
 
 ### Changed

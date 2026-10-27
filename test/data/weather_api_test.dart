@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/weather.dart';
 import 'package:the_app/data/weather_api.dart';
@@ -134,5 +136,99 @@ void main() {
       expect(settings.withoutPlace('2').report, isNotNull,
           reason: 'the weather of another place stays');
     });
+  });
+
+  group("the rain radar's answer (Round 106)", () {
+    Map<String, dynamic> realtime(Object? code) => {
+          'data': {
+            'time': '2026-10-27T12:00:00Z',
+            'values': {'weatherCode': code, 'temperature': 9.1},
+          },
+        };
+
+    test('rain and snow as Open-Meteo codes; dry as null', () {
+      expect(parseRadar(realtime(4200)), 61);
+      expect(parseRadar(realtime(4001)), 63);
+      expect(parseRadar(realtime(5000)), 73);
+      expect(parseRadar(realtime(1001)), isNull, reason: 'cloudy');
+      expect(parseRadar(realtime(1000)), isNull, reason: 'clear');
+    });
+
+    test('every wet code is wet in the app, every dry one none', () {
+      const wet = {
+        4000: WeatherKind.drizzle,
+        6000: WeatherKind.drizzle,
+        4200: WeatherKind.rain,
+        4001: WeatherKind.rain,
+        4201: WeatherKind.rain,
+        6200: WeatherKind.rain,
+        6001: WeatherKind.rain,
+        6201: WeatherKind.rain,
+        5100: WeatherKind.snow,
+        5001: WeatherKind.snow,
+        5000: WeatherKind.snow,
+        5101: WeatherKind.snow,
+        7000: WeatherKind.snow,
+        7101: WeatherKind.snow,
+        7102: WeatherKind.snow,
+        8000: WeatherKind.storm,
+      };
+      for (final MapEntry(:key, :value) in wet.entries) {
+        expect(WeatherKind.fromCode(wmoFromTomorrow(key)!), value,
+            reason: '$key');
+      }
+      for (final dry in [0, 1000, 1100, 1101, 1102, 1001, 2000, 2100]) {
+        expect(wmoFromTomorrow(dry), isNull, reason: '$dry');
+      }
+    });
+
+    test('heavier is heavier', () {
+      expect(weatherStrength(wmoFromTomorrow(4200)!), 1);
+      expect(weatherStrength(wmoFromTomorrow(4001)!), 2);
+      expect(weatherStrength(wmoFromTomorrow(4201)!), 3);
+      expect(weatherStrength(wmoFromTomorrow(5100)!), 1);
+      expect(weatherStrength(wmoFromTomorrow(5101)!), 3);
+    });
+
+    test('nonsense: a failure, not a guess', () {
+      for (final bad in [
+        <String, dynamic>{},
+        {'data': 'x'},
+        {'data': <String, dynamic>{}},
+        realtime('rain'),
+      ]) {
+        expect(() => parseRadar(bad), throwsA(isA<WeatherFailure>()));
+      }
+    });
+  });
+
+  test('the key and the radar mark kept in the settings; old ones without', () {
+    final settings = InternetSettings(
+      weather: true,
+      radarKey: 'k123',
+      report: WeatherReport(
+        placeId: 'p',
+        code: 63,
+        temperature: 4,
+        fetchedAt: DateTime(2026, 10, 27, 12),
+        radar: true,
+      ),
+    );
+    final back =
+        InternetSettings.fromJson(jsonDecode(jsonEncode(settings.toJson())));
+    expect(back.radarKey, 'k123');
+    expect(back.report!.radar, isTrue);
+    expect(back.report!.code, 63);
+    final old = InternetSettings.fromJson({
+      'report': {
+        'placeId': 'p',
+        'code': 3,
+        'temperature': 4,
+        'fetchedAt': '2026-10-27T10:00:00Z',
+      },
+    });
+    expect(old.radarKey, isNull);
+    expect(old.report!.radar, isFalse);
+    expect(const InternetSettings(radarKey: 'k').isEmpty, isFalse);
   });
 }

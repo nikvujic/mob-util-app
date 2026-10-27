@@ -92,7 +92,7 @@ Extra tools, as tiles. Hold a tile and drag it to rearrange them.
 
 ## Internet Access
 - The app uses **no internet** unless you turn a service on in the menu's **Internet Access**. Nothing else leaves the phone: no accounts, no ads, no analytics.
-- **Weather** (from Open-Meteo, free, no account): search your town or city and pick it from the matches (add more to switch between them). Pip's sky then shows the weather there (rain, snow, clouds, fog, storms), fetched every hour or so while the app is open. The page shows the weather now, when it was fetched, and a button to fetch it again.
+- **Weather** (from Open-Meteo, free, no account): search your town or city and pick it from the matches (add more to switch between them). Pip's sky then shows the weather there (rain, snow, clouds, fog, storms), fetched every hour or so while the app is open. The page shows the weather now, when it was fetched, and a button to fetch it again. **Rain radar** (optional): forecasts can miss light rain, so for more accurate rain and snow right now, add your own free key from Tomorrow.io (the copy button copies where to sign up). It's checked once when you paste it; then the rain or snow now comes from it, every 15 minutes or so, and the weather line says so. The key stays on this phone (it isn't in backups) and is sent only to Tomorrow.io; if it stops working, the weather is Open-Meteo's alone and the page says why.
 
 ## Settings
 - Line numbers, the counter click and vibration, whether this introduction comes back after updates (and restoring it if deleted), the to-do note, and **Clear data**.

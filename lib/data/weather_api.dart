@@ -34,32 +34,7 @@ class OpenMeteoApi implements WeatherApi {
   /// wind, which [parseReport] reads.
   static const currentFields = 'weather_code,temperature_2m,wind_speed_10m';
 
-  Future<Map<String, dynamic>> _get(Uri uri) async {
-    final client = HttpClient()..connectionTimeout = timeout;
-    try {
-      final request = await client.getUrl(uri).timeout(timeout);
-      final response = await request.close().timeout(timeout);
-      final body =
-          await response.transform(utf8.decoder).join().timeout(timeout);
-      if (response.statusCode != HttpStatus.ok) {
-        throw WeatherFailure('The weather service said ${response.statusCode}');
-      }
-      final json = jsonDecode(body);
-      if (json is! Map<String, dynamic>) {
-        throw const WeatherFailure('The weather service made no sense');
-      }
-      return json;
-    } on WeatherFailure {
-      rethrow;
-    } on FormatException {
-      throw const WeatherFailure('The weather service made no sense');
-    } on Object {
-      // SocketException, TimeoutException, HandshakeException...
-      throw const WeatherFailure('No connection to the weather service');
-    } finally {
-      client.close(force: true);
-    }
-  }
+  Future<Map<String, dynamic>> _get(Uri uri) => getJson(uri, timeout);
 
   @override
   Future<List<WeatherPlace>> search(String name) async {
@@ -78,6 +53,105 @@ class OpenMeteoApi implements WeatherApi {
     return parseReport(json, place, at);
   }
 }
+
+/// GETs [uri] as a JSON object; [failed] says what a status other than
+/// 200 means (else "The weather service said 500"). Throws
+/// [WeatherFailure].
+Future<Map<String, dynamic>> getJson(
+  Uri uri,
+  Duration timeout, {
+  String? Function(int status)? failed,
+}) async {
+  final client = HttpClient()..connectionTimeout = timeout;
+  try {
+    final request = await client.getUrl(uri).timeout(timeout);
+    final response = await request.close().timeout(timeout);
+    final body = await response.transform(utf8.decoder).join().timeout(timeout);
+    if (response.statusCode != HttpStatus.ok) {
+      throw WeatherFailure(failed?.call(response.statusCode) ??
+          'The weather service said ${response.statusCode}');
+    }
+    final json = jsonDecode(body);
+    if (json is! Map<String, dynamic>) {
+      throw const WeatherFailure('The weather service made no sense');
+    }
+    return json;
+  } on WeatherFailure {
+    rethrow;
+  } on FormatException {
+    throw const WeatherFailure('The weather service made no sense');
+  } on Object {
+    // SocketException, TimeoutException, HandshakeException...
+    throw const WeatherFailure('No connection to the weather service');
+  } finally {
+    client.close(force: true);
+  }
+}
+
+/// Round 106 (Nikola): the rain radar, with his own key: whether it's
+/// raining or snowing now, which a forecast model (Open-Meteo's) can
+/// miss. Optional; without a key the weather is Open-Meteo's alone.
+abstract class RadarApi {
+  /// The rain or snow at [place] now as an Open-Meteo weather code
+  /// (`core/weather.dart`), or null if it's dry. Throws [WeatherFailure].
+  Future<int?> precipitation(WeatherPlace place, String key);
+}
+
+/// [RadarApi] over Tomorrow.io's realtime weather (free with a key).
+class TomorrowIoApi implements RadarApi {
+  static const timeout = Duration(seconds: 12);
+
+  /// Where to get a key (shown, with a copy button; Nikola: no links).
+  static const signUp = 'https://app.tomorrow.io/signup';
+
+  @override
+  Future<int?> precipitation(WeatherPlace place, String key) async {
+    final json = await getJson(
+      Uri.https('api.tomorrow.io', '/v4/weather/realtime', {
+        'location': '${place.latitude},${place.longitude}',
+        'apikey': key,
+        'units': 'metric',
+      }),
+      timeout,
+      failed: (status) => switch (status) {
+        401 || 403 => "The rain radar didn't accept the key",
+        429 => "The rain radar key's free limit is used up for now",
+        _ => null,
+      },
+    );
+    return parseRadar(json);
+  }
+}
+
+/// Tomorrow.io's realtime answer as an Open-Meteo code for its rain or
+/// snow now; null if it's dry.
+int? parseRadar(Map<String, dynamic> json) {
+  final data = json['data'];
+  final values = data is Map<String, dynamic> ? data['values'] : null;
+  final code = values is Map<String, dynamic> ? values['weatherCode'] : null;
+  if (code is! num) {
+    throw const WeatherFailure('The rain radar made no sense');
+  }
+  return wmoFromTomorrow(code.toInt());
+}
+
+/// A Tomorrow.io weather code as the Open-Meteo (WMO) code with the same
+/// rain or snow, null for none (clear, clouds, fog, wind).
+int? wmoFromTomorrow(int code) => switch (code) {
+      4000 => 53, // drizzle
+      6000 => 56, // freezing drizzle
+      4200 => 61, // light rain
+      4001 => 63, // rain
+      4201 => 65, // heavy rain
+      6200 => 66, // light freezing rain
+      6001 || 6201 => 67, // freezing rain
+      5100 || 5001 => 71, // light snow, flurries
+      5000 => 73, // snow
+      5101 => 75, // heavy snow
+      7000 || 7101 || 7102 => 77, // ice pellets
+      8000 => 95, // thunderstorm
+      _ => null,
+    };
 
 /// Open-Meteo's place search answer as places (none for no "results").
 List<WeatherPlace> parsePlaces(Map<String, dynamic> json) {

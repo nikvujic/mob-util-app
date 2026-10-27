@@ -417,6 +417,16 @@ it); the field's props (trees, leaves, petals, pumpkins, bats, the
 festive pine, the badnjak, fireworks, eggs, rain, snowfall, lightning, fog) are
 decided there, a grey sky hiding the sun, moon and stars.
 
+Round 106: the rain radar, optional: `RadarApi` (`TomorrowIoApi`, with
+Nikola's own key in `InternetSettings.radarKey`; settings aren't in
+backups) answers whether it's raining or snowing now, as a WMO code
+(`wmoFromTomorrow`), or null when dry. `WeatherNotifier.refresh` asks it
+after Open-Meteo: its rain or snow replaces the report's code
+(`WeatherReport.withRadar`, `radar: true`), dry leaves Open-Meteo's sky;
+failing, the report is Open-Meteo's and `WeatherFetch.radarFailed` says
+why. With a key a report is stale after 14 minutes (`radarStaleAfter`),
+so the 15-minute timer asks it every time.
+
 The weather (Round 70): `data/weather_api.dart` (the only network code,
 `dart:io`'s `HttpClient`; `OpenMeteoApi`, a fake in tests) searches
 places and fetches the weather now; `providers/weather_provider.dart`

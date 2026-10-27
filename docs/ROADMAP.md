@@ -337,11 +337,22 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 106 — the rain radar (2026-10-27, 1.42.0)
+
+- [x] Nikola: a key option in Internet Access with a note ("for more
+  advanced weather use your own"); no direct links, a copy icon; the
+  key in encrypted backups only (settings turned out not to be in
+  backups at all: it never leaves the phone); no test week. Tomorrow.io
+  realtime (`TomorrowIoApi`), checked once on paste; its rain or snow
+  wins, dry keeps Open-Meteo's sky, failing falls back with the reason
+  shown; fetched every 15 minutes with a key.
+- [ ] Watch it in the next rain (Nikola).
+
 ### Round 105 — Nikola on 1.41.0 (2026-10-27, patch 1.41.1)
 
 - [x] "Export for agents", not ChatGPT; a better icon for the Import /
   export button (`Icons.sync_alt`, ⇄; it was `import_export`).
-- [ ] Weather (v2 item 3), proposed to Nikola: no free API is
+- [x] Weather (v2 item 3), proposed to Nikola (built in Round 106): no free API is
   station-only; the rain-now fix is a radar nowcast. Proposal: a
   provider seam in `data/weather_api.dart`; Open-Meteo stays for
   temperature, wind and the day's codes, and "raining now" comes from
@@ -376,7 +387,7 @@ big for Pip:
 1. [x] Recipe edit keeps its scroll (Round 100; 1.40.5, Round 102:
    the view's offset opens edit there, edit's comes back).
 2. [x] Recipes: export / import as text (Round 104; 1.41.0).
-3. [ ] A better weather API (Round 99): candidates compared first.
+3. [x] A better weather API (Round 99): the rain radar, Round 106 (1.42.0).
 4. [ ] People: an index of people, notes, a family tree (Round 100;
    planned with Nikola first).
 5. [ ] Page organizer (O10, already marked v2): to talk through.

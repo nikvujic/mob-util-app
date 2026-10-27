@@ -71,13 +71,27 @@ class WeatherReport {
   final double? wind;
   final DateTime fetchedAt;
 
+  /// Round 106: [code]'s rain or snow now was checked by the rain radar
+  /// (Tomorrow.io, with Nikola's key); false: Open-Meteo's alone.
+  final bool radar;
+
   const WeatherReport({
     required this.placeId,
     required this.code,
     required this.temperature,
     this.wind,
     required this.fetchedAt,
+    this.radar = false,
   });
+
+  WeatherReport withRadar(int? code) => WeatherReport(
+        placeId: placeId,
+        code: code ?? this.code,
+        temperature: temperature,
+        wind: wind,
+        fetchedAt: fetchedAt,
+        radar: true,
+      );
 
   Map<String, dynamic> toJson() => {
         'placeId': placeId,
@@ -85,6 +99,7 @@ class WeatherReport {
         'temperature': temperature,
         if (wind != null) 'wind': wind,
         'fetchedAt': fetchedAt.toUtc().toIso8601String(),
+        if (radar) 'radar': true,
       };
 
   factory WeatherReport.fromJson(Map<String, dynamic> json) => WeatherReport(
@@ -93,6 +108,7 @@ class WeatherReport {
         temperature: (json['temperature'] as num).toDouble(),
         wind: (json['wind'] as num?)?.toDouble(),
         fetchedAt: DateTime.parse(json['fetchedAt'] as String).toLocal(),
+        radar: json['radar'] as bool? ?? false,
       );
 }
 
@@ -110,11 +126,17 @@ class InternetSettings {
   /// The last weather fetched, shown till the next (and after a restart).
   final WeatherReport? report;
 
+  /// Round 106: Nikola's own Tomorrow.io key for the rain radar; null:
+  /// none, the weather is Open-Meteo's alone. Settings aren't in backups,
+  /// so it never leaves the phone but to Tomorrow.io.
+  final String? radarKey;
+
   const InternetSettings({
     this.weather = false,
     this.places = const [],
     this.placeId,
     this.report,
+    this.radarKey,
   });
 
   /// The place the weather is for: [placeId]'s, else the first.
@@ -136,12 +158,14 @@ class InternetSettings {
     List<WeatherPlace>? places,
     String? Function()? placeId,
     WeatherReport? Function()? report,
+    String? Function()? radarKey,
   }) =>
       InternetSettings(
         weather: weather ?? this.weather,
         places: places ?? this.places,
         placeId: placeId == null ? this.placeId : placeId(),
         report: report == null ? this.report : report(),
+        radarKey: radarKey == null ? this.radarKey : radarKey(),
       );
 
   /// [p] added (once: a place already there is only picked) and picked.
@@ -164,13 +188,15 @@ class InternetSettings {
     );
   }
 
-  bool get isEmpty => !weather && places.isEmpty && report == null;
+  bool get isEmpty =>
+      !weather && places.isEmpty && report == null && radarKey == null;
 
   Map<String, dynamic> toJson() => {
         if (weather) 'weather': true,
         if (places.isNotEmpty) 'places': [for (final p in places) p.toJson()],
         if (placeId != null) 'placeId': placeId,
         if (report != null) 'report': report!.toJson(),
+        if (radarKey != null) 'radarKey': radarKey,
       };
 
   factory InternetSettings.fromJson(Map<String, dynamic> json) =>
@@ -184,5 +210,6 @@ class InternetSettings {
         report: json['report'] == null
             ? null
             : WeatherReport.fromJson(json['report'] as Map<String, dynamic>),
+        radarKey: json['radarKey'] as String?,
       );
 }

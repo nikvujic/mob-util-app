@@ -71,6 +71,7 @@ Future<ProviderContainer> pumpApp(
   PowerSource? power,
   FakeMorningMusicAlarm? morningMusic,
   FakeWeatherApi? weather,
+  FakeRadarApi? radar,
   List<PlannerTask> plannerTasks = const [],
   SubscriptionBook subscriptions = SubscriptionBook.empty,
   PackingBook? packing,
@@ -106,6 +107,8 @@ Future<ProviderContainer> pumpApp(
       if (clock != null) clockProvider.overrideWithValue(clock),
       // The weather (Round 70): never the real service.
       weatherApiProvider.overrideWithValue(weather ?? FakeWeatherApi()),
+      // Round 106: the rain radar, likewise.
+      radarApiProvider.overrideWithValue(radar ?? FakeRadarApi()),
       // Pip stands still (an endless animation never settles); his own
       // tests let him move.
       pipAnimatesProvider.overrideWithValue(pipMoves),
@@ -577,5 +580,22 @@ class FakeWeatherApi implements WeatherApi {
       temperature: temperature,
       fetchedAt: at,
     );
+  }
+}
+
+/// The rain radar (Round 106) as a test sets it: [code] for any place
+/// (null: dry); [failing] throws instead. Keeps the keys it was given.
+class FakeRadarApi implements RadarApi {
+  int? code;
+  String? failing;
+  final keys = <String>[];
+
+  FakeRadarApi({this.code, this.failing});
+
+  @override
+  Future<int?> precipitation(WeatherPlace place, String key) async {
+    keys.add(key);
+    if (failing case final message?) throw WeatherFailure(message);
+    return code;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -9,6 +10,7 @@ import 'package:the_app/pages/internet/place_search_sheet.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/widgets/text_input_sheet.dart';
 
 /// Menu → Internet Access (Round 70): the app uses no internet unless a
 /// service is turned on here, one section each: what it is, what it's
@@ -93,6 +95,7 @@ class InternetAccessPage extends ConsumerWidget {
               onTap: addPlace,
             ),
             if (internet.place != null) const _WeatherNow(),
+            const _RainRadar(),
           ],
           const Divider(),
           Padding(
@@ -172,8 +175,14 @@ class _WeatherNow extends ConsumerWidget {
       final kind = WeatherKind.fromCode(report.code)?.label ?? 'Weather';
       // Round 79: the wind too, when it came.
       final wind = report.wind == null ? '' : ', ${report.wind!.round()} km/h';
+      // Round 106: where its rain or snow now came from, with a key.
+      final source = internet.radarKey == null
+          ? ''
+          : report.radar
+              ? ' · rain by radar'
+              : ' · rain by Open-Meteo';
       text = 'Now: $kind, '
-          '${report.temperature.round()}°C$wind · updated $when';
+          '${report.temperature.round()}°C$wind · updated $when$source';
     } else {
       text = 'No weather yet';
     }
@@ -181,13 +190,19 @@ class _WeatherNow extends ConsumerWidget {
       key: const Key('weatherNow'),
       leading: const SizedBox(width: 24),
       title: Text(text, style: TextStyle(color: colors.textSecondary)),
-      subtitle: fetch.failed == null
-          ? null
-          : Text(
+      subtitle: fetch.failed != null
+          ? Text(
               '${fetch.failed}. It tries again later.',
               key: const Key('weatherFailed'),
               style: TextStyle(color: colors.danger),
-            ),
+            )
+          : fetch.radarFailed != null
+              ? Text(
+                  "${fetch.radarFailed}: Open-Meteo's weather meanwhile.",
+                  key: const Key('radarFailed'),
+                  style: TextStyle(color: colors.danger),
+                )
+              : null,
       trailing: IconButton(
         key: const Key('weatherRefresh'),
         tooltip: 'Fetch the weather now',
@@ -196,6 +211,101 @@ class _WeatherNow extends ConsumerWidget {
             ? null
             : () => ref.read(weatherProvider.notifier).refresh(force: true),
       ),
+    );
+  }
+}
+
+/// Round 106 (Nikola): the rain radar, optional: his own free Tomorrow.io
+/// key (where to get one copied, no link), pasted in, checked once; then
+/// the rain or snow now comes from it. Removed with ×.
+class _RainRadar extends ConsumerWidget {
+  const _RainRadar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final key =
+        ref.watch(preferencesProvider.select((p) => p.internet.radarKey));
+
+    void toast(String message) => ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+
+    void setKey(String? next) {
+      final prefs = ref.read(preferencesProvider.notifier);
+      prefs.setInternet(ref
+          .read(preferencesProvider)
+          .internet
+          .copyWith(radarKey: () => next));
+    }
+
+    Future<void> paste() async {
+      final typed = await showTextInputSheet(context,
+          hint: 'Your Tomorrow.io key', initialValue: key ?? '');
+      final next = typed ?? '';
+      if (next.isEmpty || !context.mounted) return;
+      setKey(next);
+      toast('Checking the key…');
+      final failed =
+          await ref.read(weatherProvider.notifier).testRadarKey(next);
+      if (context.mounted) toast(failed ?? 'The key works');
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          key: const Key('radarNote'),
+          padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.radar, color: colors.textSecondary),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Rain radar (optional). For more accurate rain and snow '
+                  'right now, add your own free key from Tomorrow.io '
+                  '(sign up at $radarSignUp). Without one, the '
+                  'weather comes from Open-Meteo alone. The key stays on '
+                  'this phone and is sent only to Tomorrow.io.',
+                  style: TextStyle(color: colors.textSecondary),
+                ),
+              ),
+              IconButton(
+                key: const Key('copySignUp'),
+                tooltip: 'Copy the sign-up address',
+                icon: const Icon(Icons.copy),
+                onPressed: () async {
+                  await Clipboard.setData(
+                      const ClipboardData(text: radarSignUp));
+                  toast('Address copied');
+                },
+              ),
+            ],
+          ),
+        ),
+        ListTile(
+          key: const Key('radarKey'),
+          leading: Icon(Icons.key_outlined, color: colors.accent),
+          title: Text(key == null ? 'Add your key' : 'Your key'),
+          subtitle: Text(
+            key == null
+                ? 'Paste it in; it is checked once.'
+                : '••••${key.length > 4 ? key.substring(key.length - 4) : key}',
+            style: TextStyle(color: colors.textSecondary),
+          ),
+          onTap: paste,
+          trailing: key == null
+              ? null
+              : IconButton(
+                  key: const Key('removeRadarKey'),
+                  tooltip: 'Remove the key',
+                  icon: const Icon(Icons.close),
+                  onPressed: () => setKey(null),
+                ),
+        ),
+      ],
     );
   }
 }
