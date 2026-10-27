@@ -198,8 +198,7 @@ warning first (5.4); linked birthdays edited in Dates for reminders and
 note only (6); a date of death (2); gender male or female (2); pixel-art
 avatars with drafts first (4.2); the page is called **People**.
 
-Still open:
-
-1. **Relation kinds:** Parent / Child, Partner (with "former", dashed),
-   Sibling (only when no parents are entered) and Other (a thin line with
-   an optional word, e.g. "Godfather"): the right set?
+Relation kinds (5.1) decided as proposed: Parent / Child, Partner (with
+"former", dashed), Sibling (only when no parents are entered) and Other
+(a thin line with an optional word). Nothing is open; next come the
+avatar drafts.
