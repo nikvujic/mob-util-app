@@ -49,11 +49,11 @@ void main() {
     final (r, st) = sunTimesOn(october, zone: cest, standardZone: cet);
     expect(r, closeTo(7 * 60 + 14, 4));
     expect(st, closeTo(18 * 60 + 17, 4),
-        reason: "Nikola's 18:27 in October: dusk, not day");
+        reason: "the user's 18:27 in October: dusk, not day");
     final (wr, ws) = sunTimesOn(december, zone: cet, standardZone: cet);
     expect(wr, closeTo(7 * 60 + 37, 4));
     expect(ws, closeTo(16 * 60 + 22, 4));
-    // Nikola's evening: 10 minutes past sunset in October is no longer
+    // The user's evening: 10 minutes past sunset in October is no longer
     // day (it was, by the fixed hours, till 18:30).
     final (_, set) = sunTimesOn(october);
     final evening = set + 10;

@@ -134,7 +134,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     ];
   }
 
-  /// Round 78 (Nikola): a ticked-off task on a day before [today] isn't
+  /// Round 78: a ticked-off task on a day before [today] isn't
   /// kept; they're deleted. The ones deleted.
   List<PlannerTask> dropDoneBefore(DateTime today) {
     final gone = [

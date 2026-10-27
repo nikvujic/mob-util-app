@@ -635,7 +635,7 @@ class PipBrain {
     _picking = null;
     // Round 54: to stand beside it (it by the hand he'll use), on the
     // side he comes from if there's room there.
-    // Round 97 (Nikola): a few pixels off, so the old one pulled out of
+    // Round 97: a few pixels off, so the old one pulled out of
     // his side isn't over the new one.
     final rightOf = left + batteryWidth / 2 >= x + width / 2;
     final besideLeft =
@@ -902,7 +902,7 @@ class PipBrain {
     final land = _oldBatteryLands;
     final q = (p - throwAt) / throwFlight;
     if (q < 1) {
-      // Round 97 (Nikola: never over the new one): over his head to his
+      // Round 97 (never over the new one): over his head to his
       // other side, end over end.
       return (
         out + (land - out) * q,
@@ -1489,7 +1489,7 @@ class PipBrain {
     }
   }
 
-  /// Round 58: at his station, watched, a segment this often (Nikola:
+  /// Round 58: at his station, watched, a segment this often (the user:
   /// Round 88 15 s, it was 30; Round 91 8 s).
   static const chargeEvery = 8.0;
 
@@ -1656,7 +1656,7 @@ class PipBrain {
   bool _bedtime = false;
 
   /// He'd go and plug in now: the station up, he isn't full (it's for
-  /// looks: he ignores it full, Nikola), or it's a demo; not at bedtime.
+  /// looks: he ignores it full), or it's a demo; not at bedtime.
   bool get _goesCharging =>
       _stationX != null &&
       _wantsStation &&
@@ -1984,7 +1984,7 @@ class PipBrain {
   /// The shaking fist: (x, height above the ground), or null.
   (double, double)? get fist {
     if (!angry) return null;
-    // Round 79 (Nikola: it went too far from his body): beside his
+    // Round 79 (it went too far from his body): beside his
     // head, a pixel off his casing as his other hands, shaken up and
     // down (it was over his head, shaken out sideways).
     final shake = (_t * 8).floor().isEven ? 0.0 : fistShake;

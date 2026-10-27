@@ -1,7 +1,7 @@
-/// Packing lists (Round 94, Nikola): lists like "Ski trip" or "Beach",
+/// Packing lists (Round 94): lists like "Ski trip" or "Beach",
 /// each with its own sections (Round 95: set up in edit mode, for that
 /// trip) and its things under them. A new list starts with the default
-/// sections (Documents, Clothes, …), which Nikola can change. Not tied to
+/// sections (Documents, Clothes, …), which the user can change. Not tied to
 /// Dates or anything else.
 class PackingSection {
   final String id;
@@ -93,7 +93,7 @@ class PackingItem {
 }
 
 /// A packing list: a name, its sections in order (always at least one,
-/// Nikola) and its things, in the user's order (shown grouped by
+/// The user) and its things, in the user's order (shown grouped by
 /// section).
 class PackingList {
   final String id;
@@ -159,7 +159,7 @@ class PackingList {
         .firstOrNull;
   }
 
-  /// Its things under its sections, every section (Nikola: one set up in
+  /// Its things under its sections, every section (one set up in
   /// edit mode shows in view mode too, empty or not); a thing whose
   /// section isn't there goes under the last.
   List<(PackingSection, List<PackingItem>)> grouped() {
@@ -214,7 +214,7 @@ class PackingList {
     return copyWith(sections: list);
   }
 
-  /// Section [id] gone, and its things with it (asked first, Nikola). The
+  /// Section [id] gone, and its things with it (asked first). The
   /// last one left stays: a list has at least one.
   PackingList withoutSection(String id) {
     if (sections.length <= 1) return this;
@@ -293,7 +293,7 @@ class PackingBook {
   })  : sections = List.unmodifiable(sections.isEmpty ? defaults : sections),
         lists = List.unmodifiable(lists);
 
-  /// Nikola's (Round 94): the usual sections.
+  /// The user's (Round 94): the usual sections.
   static const defaults = [
     PackingSection(id: 'documents', name: 'Documents'),
     PackingSection(id: 'clothes', name: 'Clothes'),

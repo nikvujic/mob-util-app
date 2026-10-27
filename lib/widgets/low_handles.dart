@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Every text field's selection handles (Round 92, Nikola: the notes'
+/// Every text field's selection handles (Round 92, the notes'
 /// lowered grab area everywhere): give it `selectionControls: lowHandles`.
 final lowHandles = LowHandleSelectionControls();
 

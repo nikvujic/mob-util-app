@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 
-/// Round 98 (Nikola): the phone buzzes through his animations wherever
+/// Round 98: the phone buzzes through his animations wherever
 /// something lands, hits or clicks: the battery drop, its bounce, the old
 /// one pulled out and landing, the new one clicking in, his hops, falling
 /// over, plugging in, bites, dance beats, a flower picked, the ball, the

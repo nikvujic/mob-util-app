@@ -49,7 +49,7 @@ class SubscriptionsPage extends ConsumerWidget {
     final book = ref.watch(subscriptionsProvider);
     final today = dayOf(ref.watch(clockProvider)());
     final colors = context.colors;
-    // Round 89 (Nikola): in his order, set by dragging their cards.
+    // Round 89: in his order, set by dragging their cards.
     final shown = book.subscriptions;
     final notifier = ref.read(subscriptionsProvider.notifier);
     final totals = book.monthly();
@@ -242,7 +242,7 @@ class SubscriptionCard extends StatelessWidget {
       height: _lineHeight,
       leadingDistribution: TextLeadingDistribution.even,
     );
-    // Round 85 (Nikola): each icon centred on its text's first line (it
+    // Round 85: each icon centred on its text's first line (it
     // sat high), whatever the text size.
     final firstLine = MediaQuery.textScalerOf(context).scale(12) * _lineHeight;
     Widget line(IconData icon, Widget text, {Key? key}) => Padding(
@@ -262,7 +262,7 @@ class SubscriptionCard extends StatelessWidget {
             ],
           ),
         );
-    // Round 80 (Nikola: no thick edge): a plain rounded card, lightly
+    // Round 80 (no thick edge): a plain rounded card, lightly
     // tinted, a thin outline in its state's colour.
     return SelectableCard(
       selected: false,

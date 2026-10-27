@@ -212,7 +212,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
 }
 
 /// The themes to choose from (G12), all dark. Their [name] is what's
-/// stored; the first is the default (Clay, Nikola's pick).
+/// stored; the first is the default (Clay, picked).
 enum AppThemeChoice {
   clay('Clay', AppPalette.clay),
   green('Green', AppPalette.green),
@@ -308,7 +308,7 @@ abstract final class AppTheme {
       ),
       canvasColor: palette.background,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      // No touch ripples anywhere (Nikola: they get in the way). Buttons
+      // No touch ripples anywhere (they get in the way). Buttons
       // keep their brief flat pressed shade.
       splashFactory: NoSplash.splashFactory,
       splashColor: Colors.transparent,
@@ -361,7 +361,7 @@ abstract final class AppTheme {
       ),
       // Chips (e.g. the planner's quick times and repeat days): the app's
       // own colours, so every theme keeps readable labels.
-      // Round 81 (Nikola: the tick was hard to see, on a coloured dot
+      // Round 81 (the tick was hard to see, on a coloured dot
       // worst): no tick; the one picked is plainly marked instead, filled
       // with a wash of the accent and edged in it (checked in every
       // theme).
@@ -382,7 +382,7 @@ abstract final class AppTheme {
       ),
       // No button fades between states (U8): turning on, the label took
       // its colour over 200 ms while the fill changed at once, so it showed
-      // grey on the new fill first, a flash (Nikola). Every button kind,
+      // grey on the new fill first, a flash. Every button kind,
       // so new ones can't bring it back.
       filledButtonTheme: const FilledButtonThemeData(style: _noFade),
       elevatedButtonTheme: const ElevatedButtonThemeData(style: _noFade),

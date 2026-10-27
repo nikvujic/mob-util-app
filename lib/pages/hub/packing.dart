@@ -25,7 +25,7 @@ void _open(BuildContext context, Widget page) {
   );
 }
 
-/// Packing (Round 94, Nikola): the lists, as cards with their name and
+/// Packing (Round 94): the lists, as cards with their name and
 /// how much is packed, in the user's order (the handle moves them). A tap
 /// opens one; holding one selects it (to delete several, asked first).
 /// + makes a new one (Round 95: "New list", back here when done); Default

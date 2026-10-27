@@ -47,7 +47,7 @@ class PipBus {
   double busX = 0;
   double _pipX;
 
-  // Round 72: bigger (Nikola), him a passenger behind a window.
+  // Round 72: bigger, him a passenger behind a window.
   static const width = 92;
   static const height = 36;
   static const roadSpeed = 30.0;

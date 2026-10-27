@@ -15,13 +15,13 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - Every step adds or updates tests; CI must be green before moving on.
 - Data safety first: anything touching storage, export/import or encryption
   gets round-trip tests with real files, including failure cases.
-- Commits are authored by Nikola Vujic, unsigned, pushed to `main`.
+- Commits are authored by the owner, unsigned, pushed to `main`.
 - Every step that changes the app ends with a release: version bump,
   `CHANGELOG.md` entry, then the Release workflow → GitHub Release with
   the APK ([RELEASING.md](RELEASING.md)).
 - Release signing key is set up (2026-10-08); v0.10.0 is the first
   release, installed and working on the phone.
-- **Releases are started by Nikola** (Actions → Release → Run workflow).
+- **Releases are started by the user** (Actions → Release → Run workflow).
   Steps end with the version bump and changelog pushed; Claude doesn't
   start releases unless asked.
 - After a group of steps, a **device checkpoint**: build the APK and try it on
@@ -126,7 +126,7 @@ Small fixes, not urgent; can go out together as one polish release.
       import re-seals under this phone's key (or adopts it if none).
       v2 backup fixtures frozen.
 
-- [x] ~~After 12e: **explain to Nikola in plain terms** how locked notes~~
+- [x] ~~After 12e: **explain to the user in plain terms** how locked notes~~
   Dropped (Round 30): not needed any more.
   
   work (what's encrypted, what the password protects, what backups
@@ -170,12 +170,12 @@ After locked notes, before section locks.
     unlocked; removing the master password removes the locks; backups
     need unlocking while a section is locked.
 14. [x] **Planner v1 (P1, P2)** — a to-do list per day with a day strip at
-    the bottom (Nikola's shape); included in backups (backup format 3).
+    the bottom (the user's shape); included in backups (backup format 3).
 15. [x] **Other → Counters (O1, O2).** Included in backups (format 3).
 
 ### Round 3 — feedback from using 0.12 (2026-10-09)
 
-Nikola's notes, grouped. Proposed order: small fixes first, then the
+the notes, grouped. Proposed order: small fixes first, then the
 patterns other work builds on (G11, themes), then the bigger features.
 
 **A. Quick fixes**
@@ -209,7 +209,7 @@ patterns other work builds on (G11, themes), then the bigger features.
   run on every theme.
 - [x] Menu → **Themes** page: Green (original), Black (true black for
   OLED), Clay (warm greys + clay orange, in the spirit of Claude Code).
-  No light theme (Nikola).
+  No light theme.
 
 **D. Other: tiles, sounds, a new tool**
 - [x] **O3** Tools as icon tiles from the bottom right.
@@ -261,18 +261,18 @@ patterns other work builds on (G11, themes), then the bigger features.
   shifted down so the first rows are in thumb reach; any scroll the other
   way leaves the mode and snaps fully back to the top — no half-way
   positions. A small pull springs back. The shift is half of before (20%
-  of the screen height). (Nikola, after using 0.13: the old snap felt
+  of the screen height). (after using 0.13: the old snap felt
   odd, sometimes didn't snap, and sometimes snapped instead of
   scrolling.)
 - [x] **Planner day strip: live preview** — the day in the middle is
   selected while swiping (header and timeline follow), not only on
-  letting go; a fixed frame marks the middle slot (Nikola: "fast and
+  letting go; a fixed frame marks the middle slot ("fast and
   dynamic", smoother like before).
 - [x] **Planner: 00:00 label cut off** — small inset above the timeline.
 - [x] **Theme switch flashed the old theme** on the next page: the theme
   change was animated (200 ms) and the palette switched half-way; now it
   switches at once.
-- [x] **Clay closer to the Claude app** (Nikola: too light, orange off):
+- [x] **Clay closer to the Claude app** (too light, orange off):
   Anthropic's brand colours — background #141413, accent #C96442, text
   #FAF9F5 / #B0AEA5. Tune with a screenshot if still off.
 - [x] **Reach mode everywhere it makes sense** (G14): the menu, Security,
@@ -280,7 +280,7 @@ patterns other work builds on (G11, themes), then the bigger features.
   lists in pages, with a short list of explained exceptions.
 - [x] **Swipe right along the bottom bar opens the menu** (G15).
 - [x] **Forgot master password → reset** (L7): deletes locked notes and
-  the content of locked sections (Nikola chose this, so a section lock
+  the content of locked sections (the user chose this, so a section lock
   can't be bypassed by resetting); everything else stays.
 - [x] **Notes: undo / redo while typing** (N8): ↶ / ↷ in the editor;
   typing bursts and pastes are steps; Discard can be undone too.
@@ -288,7 +288,7 @@ patterns other work builds on (G11, themes), then the bigger features.
 - [x] **Džoni: hidden reset / set of the count** — long-press the page
   title.
 
-### Goal: v1.0.0 — the version Nikola starts using for real (2026-10-12)
+### Goal: v1.0.0 — the version the user starts using for real (2026-10-12)
 
 Refreshed in Round 22 (2026-10-13). Done so far: the main pages (now
 line, reminders as marks, toasts, shop quantities, checkboxes), pages as
@@ -306,14 +306,14 @@ fixtures for every stored format.
 2. [x] **Notifications, reliability check** (E1): after a restart of the
    phone, with the app swiped away, with battery saving on, when the
    clock or time zone changes, with exact alarms not allowed. Fix what's
-   missing; a short phone test list for Nikola.
+   missing; a short phone test list for review.
 3. [x] **The app's own icon**: an 8-bit pixel character of our own,
    replacing Flutter's logo (launcher icon and the notification icon's
    look checked).
 4. [x] **Last pass before v1**: a read through everything that saves
    (D6's remaining part: updates, crashes while saving, a full disk),
    the Introduction checked against the app, the docs tidied.
-5. [x] **Release v1.0.0.** (13 Oct 2026) Then Nikola clears the test data (Settings →
+5. [x] **Release v1.0.0.** (13 Oct 2026) Then the user clears the test data (Settings →
    Clear data) and starts using it.
 
 **After v1** (v1.x / v2, roughly by size):
@@ -322,14 +322,14 @@ fixtures for every stored format.
   notification settings: sounds per kind, picked in the app (E2;
   Android's own per-channel settings work meanwhile).
 - More Markdown and a formatting bar (N17, Round 20).
-- **Automatic backup** to a folder Nikola picks (D8, second part), then
+- **Automatic backup** to a folder the user picks (D8, second part), then
   a self-hosted cloud backup (D5).
 - [x] **Food tracker** (O14): built in Round 46 (1.13.0).
-- **Bills** (Round 45, Nikola): what he pays every month. The next new
+- **Bills** (Round 45): what he pays every month. The next new
   Hub page after the food tracker.
 - **Page organizer** (O10): a quick-access menu from the right side
   with pages picked for it, maybe sections in the Hub, later pages for
-  Nikola's servers and connectors to his projects. Built on O9, so it
+  The user's servers and connectors to his projects. Built on O9, so it
   adds places to put pages, not a rework.
 - New Hub pages (see *Later / ideas*), **Recipes first** (Round 27): birthdays & yearly dates, days
   since / until, coin flip / decision helper, life percentage, recipes,
@@ -339,20 +339,20 @@ fixtures for every stored format.
 
 ### Round 106 — the rain radar (2026-10-27, 1.42.0)
 
-- [x] Nikola: a key option in Internet Access with a note ("for more
+- [x] a key option in Internet Access with a note ("for more
   advanced weather use your own"); no direct links, a copy icon; the
   key in encrypted backups only (settings turned out not to be in
   backups at all: it never leaves the phone); no test week. Tomorrow.io
   realtime (`TomorrowIoApi`), checked once on paste; its rain or snow
   wins, dry keeps Open-Meteo's sky, failing falls back with the reason
   shown; fetched every 15 minutes with a key.
-- [ ] Watch it in the next rain (Nikola).
+- [ ] Watch it in the next rain.
 
-### Round 105 — Nikola on 1.41.0 (2026-10-27, patch 1.41.1)
+### Round 105 — feedback on 1.41.0 (2026-10-27, patch 1.41.1)
 
 - [x] "Export for agents", not ChatGPT; a better icon for the Import /
   export button (`Icons.sync_alt`, ⇄; it was `import_export`).
-- [x] Weather (v2 item 3), proposed to Nikola (built in Round 106): no free API is
+- [x] Weather (v2 item 3), proposed to the user (built in Round 106): no free API is
   station-only; the rain-now fix is a radar nowcast. Proposal: a
   provider seam in `data/weather_api.dart`; Open-Meteo stays for
   temperature, wind and the day's codes, and "raining now" comes from
@@ -362,7 +362,7 @@ fixtures for every stored format.
 
 ### Round 104 — recipe import / export (2026-10-26, 1.41.0)
 
-- [x] Nikola: "export for import and export for agent"; text only
+- [x] "export for import and export for agent"; text only
   (import is paste, export is copy); an extra button on the Recipes
   page; import makes a new recipe, export picks one from a list.
   `providers/recipe_transfer.dart`: `exportRecipe` (JSON:
@@ -375,7 +375,7 @@ fixtures for every stored format.
   name, or added to its section, made if new). A confirm lists what's
   new to the ingredients first. `pages/hub/recipe_transfer_sheet.dart`.
 
-### Round 103 — Nikola on 1.40.5 (2026-10-26, patch 1.40.6)
+### Round 103 — feedback on 1.40.5 (2026-10-26, patch 1.40.6)
 
 - [x] Packing, an item's options: Count first, then Rename.
 
@@ -389,32 +389,32 @@ big for Pip:
 2. [x] Recipes: export / import as text (Round 104; 1.41.0).
 3. [x] A better weather API (Round 99): the rain radar, Round 106 (1.42.0).
 4. [ ] People: an index of people, notes, a family tree (Round 100;
-   planned with Nikola first). Spec: `docs/PEOPLE_SPEC.md` (Round 107),
+   planned with the user first). Spec: `docs/PEOPLE_SPEC.md` (Round 107),
    waiting on his answers.
 5. [ ] Page organizer (O10, already marked v2): to talk through.
-6. [ ] Other productivity ideas Nikola brings (the Hub pages ideas list).
+6. [ ] Other productivity ideas the user brings (the Hub pages ideas list).
 
 Released as **2.0.0** once these are in.
 
-**After v2: Pip's quests** (a plan, to be specced with Nikola before
+**After v2: Pip's quests** (a plan, to be specced with the user before
 building; big). Open questions: what a quest is (given by the app,
-found by him, tied to what Nikola does in the app?), how long, what it
+found by him, tied to what the user does in the app?), how long, what it
 gives (XP, items, hats), how it's shown (Pip Home card, a log), and how
 it fits his adventures and the old Godville-style items and events log
 ideas (Rounds 26 and 30).
 
-### Round 100 — Nikola's notes (2026-10-26)
+### Round 100 — the notes (2026-10-26)
 
 - [x] **Recipe edit keeps its scroll**: starting and ending edit on a
   recipe jumps back to the top; it should stay where it was.
-- [ ] **People** (new Hub page, to plan with Nikola first): a big index
+- [ ] **People** (new Hub page, to plan with the user first): a big index
   of people he knows, notes on each, and a **family tree** with a good
   visual overview.
 
-### Round 99 — Nikola on 1.40.4 (2026-10-21, noted)
+### Round 99 — feedback on 1.40.4 (2026-10-21, noted)
 
 - [ ] **Rain heard, Pip dry** (W1/O36): Belgrade raining, the app said
-  cloudy. Nikola's own Open-Meteo check (01:30): `weather_code` 3,
+  cloudy. The user's own Open-Meteo check (01:30): `weather_code` 3,
   `precipitation` 0, `rain` 0: its model saw no rain at all, so reading
   precipitation won't help. **Switch to a better weather API** (one
   that uses station / radar observations for "now", not only a model):
@@ -422,7 +422,7 @@ ideas (Rounds 26 and 30).
   and propose before building; keep `WeatherReport` and the Internet
   Access page as they are, only `data/weather_api.dart` changes.
 
-### Round 98 — Nikola on 1.40.3 (2026-10-21, patch 1.40.4)
+### Round 98 — feedback on 1.40.3 (2026-10-21, patch 1.40.4)
 
 - [x] **Buzzes through Pip's animations** (O42): "make us use vibration
   often, everywhere where it makes sense (like battery drop)". The brain
@@ -433,7 +433,7 @@ ideas (Rounds 26 and 30).
   in. The room buzzes for each segment charged, watched. The ball buzzes
   only on bounces faster than `ballBuzzSpeed`.
 
-### Round 97 — Nikola on 1.40.2 (2026-10-21, patch 1.40.3)
+### Round 97 — feedback on 1.40.2 (2026-10-21, patch 1.40.3)
 
 - [x] **Changing his battery, livelier** (O24): the new battery bounces
   on landing (`bounceHeight`) and glints while it waits
@@ -442,11 +442,11 @@ ideas (Rounds 26 and 30).
   over his head to his other side (`_oldBatteryLands`), lands with a
   puff of dust (`batteryDust`), lies, fades; a crackle of sparks at the
   slot as the new one clicks in; a shake, then a hop with sparkles
-  (`shakeEnd`, `pickEnd` 3.45). Nikola: "the batteries overlapping"
+  (`shakeEnd`, `pickEnd` 3.45). "the batteries overlapping"
   (old over new) gone. The Animations entry was there already (plays
   when full, no energy): a test now says so.
 
-### Round 96 — Nikola on 1.40.1 (2026-10-21, patch 1.40.2)
+### Round 96 — feedback on 1.40.1 (2026-10-21, patch 1.40.2)
 
 - [x] **Packing's edit mode**: sections dragged by the right of their
   heading, as Ingredients' (a line where it'd go, the list scrolled at
@@ -458,7 +458,7 @@ ideas (Rounds 26 and 30).
   other "+ Add" shares a row with the next heading, so every gap is
   where it lands.
 
-### Round 95 — Nikola on 1.40.0 (2026-10-21, patch 1.40.1)
+### Round 95 — feedback on 1.40.0 (2026-10-21, patch 1.40.1)
 
 - [x] **Packing, his changes** (O41): each list has its **own sections**
   (`PackingList.sections`, packing.json v2, backup v31; Round 94's lists
@@ -473,11 +473,11 @@ ideas (Rounds 26 and 30).
   back to the lists. Typing the name bounced the page (asked room above
   it at the list's top, as a recipe's in Round 64): `scrollPadding` top 0.
 
-### Round 94 — Nikola on 1.39.0 (2026-10-21, 1.40.0)
+### Round 94 — feedback on 1.39.0 (2026-10-21, 1.40.0)
 
 - [x] **Packing lists** (O41): a Hub page (`HubTool.packing`, lockable,
   Clear data) of lists (`models/packing.dart`, `packing.json` v1, backup
-  v30, partial restore). Nikola's answers: several lists as cards;
+  v30, partial restore). the answers: several lists as cards;
   sections shared by every list, starting as Documents, Clothes,
   Toiletries, Electronics, Medicine and Other (always last), editable on
   their own page; a count only (×2); ticked ones don't move; **Copy
@@ -485,12 +485,12 @@ ideas (Rounds 26 and 30).
   per row, a tap anywhere ticks, Reset (Undo), progress. Edit mode like a
   recipe's (saved as made, Undo, Discard changes, Done): a section's +
   adds several in a row, a tap renames / counts / deletes, the handle
-  drags into another section too. Not tied to Dates (Nikola).
+  drags into another section too. Not tied to Dates.
 - [x] **Spotify**: its page drops "may not start if Spotify was closed"
-  (Nikola tried it: it starts).
-- [ ] Next: the recipe import/export (Nikola: tomorrow).
+  (the user tried it: it starts).
+- [ ] Next: the recipe import/export (tomorrow).
 
-### Round 93 — Nikola on 1.38.2 (2026-10-20, 1.39.0)
+### Round 93 — feedback on 1.38.2 (2026-10-20, 1.39.0)
 
 - [x] **Spotify in the morning** (O40): a Hub page (`HubTool.spotify`,
   no lock, nothing to clear) with on/off, time, days and volume, kept in
@@ -499,11 +499,11 @@ ideas (Rounds 26 and 30).
   `MorningMusic.kt` keeps them, sets an exact alarm for the next time,
   and on it sets the music volume, presses play (`KEYCODE_MEDIA_PLAY`)
   and sets the next; `BOOT_COMPLETED` / `MY_PACKAGE_REPLACED` set it
-  again. No play button (Nikola).
+  again. No play button.
 - [x] Next: Packing lists came first (Round 94); then the recipe
   import/export.
 
-### Round 91 — Nikola on 1.38.0 (2026-10-20, patch 1.38.1)
+### Round 91 — feedback on 1.38.0 (2026-10-20, patch 1.38.1)
 
 - [x] **Save or Discard** on back, as a note's, for the pages saved as
   typed: Subscription, Date, Meal (`widgets/discard_scope.dart`: changed
@@ -515,7 +515,7 @@ ideas (Rounds 26 and 30).
   on) counts as not set until picked; the month picker on its year.
 - [x] **Pip's station**: a segment every **8 s** watched.
 
-### Round 90 — Nikola on 1.38.0 (2026-10-20): notes, plan (waiting for a go)
+### Round 90 — feedback on 1.38.0 (2026-10-20): notes, plan (waiting for a go)
 
 Fixes (a patch):
 - [x] **Medicine, hold to take** (1.38.2): once the hold has started (and once
@@ -552,10 +552,10 @@ key to Android's media session; or the Clock app's Spotify alarm).
   Hub's tiles (`LongPressDraggable` / `DragTarget`, taking the place of
   the card under the finger at once; Move earlier / later for screen
   readers). The page shows the list in its own order (`moveTo`; a new
-  one last); the by-state order is gone (Nikola's were already in his
+  one last); the by-state order is gone (the user's were already in his
   note's order).
 
-### Round 88 — Nikola on 1.37.4 (2026-10-20, patch 1.37.5)
+### Round 88 — feedback on 1.37.4 (2026-10-20, patch 1.37.5)
 
 - [x] **Pip's station**: a segment every **15 s** watched
   (`PipBrain.chargeEvery`, was 30).
@@ -568,21 +568,21 @@ key to Android's media session; or the Clock app's Spotify alarm).
 - [x] **Subscriptions' cards moved** by holding and dragging (Round 89,
   1.38.0).
 
-### Round 87 — Nikola on 1.37.3 (2026-10-20, patch 1.37.4)
+### Round 87 — feedback on 1.37.3 (2026-10-20, patch 1.37.4)
 
-- [x] **Calendars open on today** (Nikola: they seemed to carry on where
+- [x] **Calendars open on today** (they seemed to carry on where
   one was last, for other things): every date picker goes through
   `widgets/date_pick.dart`'s `pickDate`: today's month (or the nearest
   allowed), today marked, the set day picked only if in that month; the
   month picker opens on this year, the set month marked in its own.
 
-### Round 86 — Nikola on 1.37.2 (2026-10-20, patch 1.37.3)
+### Round 86 — feedback on 1.37.2 (2026-10-20, patch 1.37.3)
 
 - [x] **Month picker** squished (four chips across): three across, four
   rows, 44-high buttons 8 apart (the picked one washed and edged in the
   accent); checked narrow with large text.
 
-### Round 85 — Nikola on 1.37.1 (2026-10-20, patch 1.37.2)
+### Round 85 — feedback on 1.37.1 (2026-10-20, patch 1.37.2)
 
 - [x] **Subscriptions' card lines**: icons centred on their text's first
   line (they sat high), at any text size.
@@ -590,18 +590,18 @@ key to Android's media session; or the Clock app's Spotify alarm).
   ‹ ›, twelve months), "expires 10/26" kept on one line, good through
   the month's last day (stored as it; an older day reads as its month).
 
-### Round 84 — Nikola on 1.37.0 (2026-10-20, patch 1.37.1)
+### Round 84 — feedback on 1.37.0 (2026-10-20, patch 1.37.1)
 
 - [x] **Subscriptions**: a card's expiry on the card is **orange** a week
   or less ahead (the day itself included) and **red** once gone by
   (`Subscription.cardExpiryOn`, `cardExpiryLabel`); checked in the themes.
-  A notification for it was planned, then dropped (Nikola).
+  A notification for it was planned, then dropped.
 - [x] Not wanted for now: missed blocks' prompt, Shop's un-tick place,
   Pip's inventory, his events log. Cloud save: a project of its own.
 - [x] Stale boxes ticked: the angry animation's hand (Round 79), Skiing
   holidays (Round 72).
 
-### Round 83 — Nikola on 1.36.3 (2026-10-20, 1.37.0)
+### Round 83 — feedback on 1.36.3 (2026-10-20, 1.37.0)
 
 - [x] **Tavern**: Pip sits on the bench (his body on its top, his feet
   over its front; `seatHeight` 2, was 3: standing on it), centred under
@@ -617,7 +617,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
   again if it was) unless the things to do changed meanwhile (added,
   moved, done, set waiting); else the end, as before.
 
-### Round 82 — Nikola on 1.36.2 (2026-10-20, patch 1.36.3)
+### Round 82 — feedback on 1.36.2 (2026-10-20, patch 1.36.3)
 
 - [x] Notifications are private only when set Private, not because the
   page is locked (the planner's "on now" said "A block is on").
@@ -626,7 +626,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
   service's can't); it comes back when the app opens. Kept so (a
   foreground service for it isn't worth it, nor allowed for this).
 
-### Round 81 — Nikola on 1.36.1 (2026-10-19, patch 1.36.2)
+### Round 81 — feedback on 1.36.1 (2026-10-19, patch 1.36.2)
 
 - [x] A field being typed in lets go when a date or time picker opens
   (Subscriptions, Dates, the planner's sheet, Medicine, Food): the
@@ -635,7 +635,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
   picked one is a wash of the accent with an accent edge (`chipTheme`,
   checked in all eight themes).
 
-### Round 80 — Nikola on 1.36.0 (2026-10-19, patch 1.36.1)
+### Round 80 — feedback on 1.36.0 (2026-10-19, patch 1.36.1)
 
 - [x] **Subscriptions**: the card that pays it: its name stays, and its
   **expiry date** (`cardExpires`, optional in subscriptions.json v1);
@@ -648,7 +648,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
 - [x] **Patches** keep their minor version's changes in What's new (as
   since Rounds 48/70); written into `docs/RELEASING.md`.
 
-### Round 79 — Nikola's notes (2026-10-19)
+### Round 79 — the notes (2026-10-19)
 
 - [x] **Pip's trees**: sway only in the wind. Open-Meteo's wind (km/h at
   10 m, `wind_speed_10m`) comes with the weather: under 12 still, 12–30
@@ -658,13 +658,13 @@ key to Android's media session; or the Clock app's Spotify alarm).
 - [x] **Angry**: his fist went too far from his body (over his head,
   shaken out sideways): now beside his head, a pixel off his casing,
   shaken up and down.
-- [x] **Subscriptions** (Nikola's note): a Hub page
+- [x] **Subscriptions** (the note): a Hub page
   (`docs/SUBSCRIPTIONS_SPEC.md`): two-column cards tinted by state
   (active, to cancel, cancelled, inactive), price (~), card, note, a
   reminder before shown on the card; notifications on its day at 09:00
   and before; a month's total; a red dot when one's to be cancelled soon.
 
-### Round 78 — Nikola on the planner (2026-10-19, 1.35.0)
+### Round 78 — feedback on the planner (2026-10-19, 1.35.0)
 
 - [x] **Routines**: no confirm/check any more (no box, no Done on their
   notification); they're just there, and not shown on past days.
@@ -680,10 +680,10 @@ key to Android's media session; or the Clock app's Spotify alarm).
   pip.json v3); one eye opens first (`PipActivity.stirring`, face
   `peek`), then the usual wake; drowsy (face and pace as at one segment)
   till he falls asleep again. Batteries and his station work while up.
-- [x] **Early wake-up** (Nikola: from 07:00): three taps then wake him
+- [x] **Early wake-up** (from 07:00): three taps then wake him
   for the day (not drowsy). His energy goes as asleep either way.
 
-### Round 76 — Nikola on 1.34.0 (2026-10-19, patch 1.34.1)
+### Round 76 — feedback on 1.34.0 (2026-10-19, patch 1.34.1)
 
 - [x] Out, knocked over: the trees stand with the ground (they kept
   going by his time out); they catch up as he runs on (up to half as
@@ -691,7 +691,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
 - [x] His sword flying off: an arc, two turns and a quarter, landing flat
   and never into the ground (`PipRun.swordBelow`).
 
-### Round 75 — Nikola on 1.33.0 (2026-10-19, 1.34.0)
+### Round 75 — feedback on 1.33.0 (2026-10-19, 1.34.0)
 
 - [x] **Trees**: the pine (green all year) rare, about 5%, but 60% in
   winter; both trees the same kind but now and then (10%); the same
@@ -706,7 +706,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
   snow; slower in fog, foes looming; splashes in the rain.
 - [x] All in Pip Home's **Animations** (each trying its weather on).
 
-### Round 74 — Nikola on 1.32.0 (2026-10-19, 1.33.0)
+### Round 74 — feedback on 1.32.0 (2026-10-19, 1.33.0)
 
 - [x] **Handles** (notes): the grab area from the icon outwards; on the
   text's side of it a sliver (2 px).
@@ -718,7 +718,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
 - [x] The menu's Pip and Pip Home's **out of step** at the break (trees
   elsewhere): the trees go by his time out, from his life.
 
-### Round 73 — Nikola on adventures (2026-10-19, 1.32.0)
+### Round 73 — feedback on adventures (2026-10-19, 1.32.0)
 
 - [x] Watched, his **XP goes up as he strikes bugs** (each collects
   what's gained since; "+N XP" rises). XP is now ten a minute, so most
@@ -729,7 +729,7 @@ key to Android's media session; or the Clock app's Spotify alarm).
 - [x] **Foes**: beetles (2 strikes), spiders (3); a **boss** (6) once a
   day out if he's watched, worth 50 XP; a Boss preview.
 
-### Round 72 — Nikola on 1.28.1 (2026-10-19)
+### Round 72 — feedback on 1.28.1 (2026-10-19)
 
 Now: the planner's notification that stays (done), small fixes (Dates'
 sections and bell). Pip (done in 1.31.0):
@@ -753,24 +753,24 @@ sections and bell). Pip (done in 1.31.0):
   1.18.0; still open: **Night wake-up** (three taps at night wake
   him for 15 minutes) and **Early wake-up** (from 08:00).
 
-### Round 71 — Nikola on 1.28 (2026-10-19, patch 1.29.1)
+### Round 71 — feedback on 1.28 (2026-10-19, patch 1.29.1)
 
 - [x] **Shop search** button beside **+** (G11), not in the top bar; it
   filters **only the bought list** (as asked in Round 64); its icon and
-  text aligned. Nikola asked whether this was sloppy: it was, both rules
+  text aligned. The user asked whether this was sloppy: it was, both rules
   were written down (G11, and the ask itself). The architecture test now
   fails on any top-bar action, so it can't slip through again.
 - [x] **Notes, Select all**: the copy/paste menu didn't come back in a
   long note (left at its start, scrolled away).
 
-### Round 65 — Nikola on 1.25.0 (2026-10-18)
+### Round 65 — feedback on 1.25.0 (2026-10-18)
 
 - [x] **Batteries while he's out**: a tap gives one; it flies to him and
   he catches it running. Registering fills his energy (as built).
 - [x] **Skiing**: spec in `docs/ADVENTURES_SPEC.md` section 8; built
   in Round 67.
 
-### Round 67 — Nikola's answers on skiing (2026-10-18)
+### Round 67 — the answers on skiing (2026-10-18)
 
 - [x] Skiing as in `docs/ADVENTURES_SPEC.md` section 8: slope B; travel
   hours and leaving times in Dates (there 06:00 on the first day, back
@@ -780,7 +780,7 @@ sections and bell). Pip (done in 1.31.0):
 - [x] Pip Home: an **ADVENTURES** previews list (Adventure, Skiing, Bus
   trip), no XP, stops when swiped back.
 
-### Round 66 — Nikola on the skiing spec (2026-10-18)
+### Round 66 — feedback on the skiing spec (2026-10-18)
 
 - [x] **Break only on a fresh look**: not while he's watched (setting
   off, or back on with a battery); after five minutes unseen.
@@ -792,13 +792,13 @@ sections and bell). Pip (done in 1.31.0):
   a **bus trip** there and back (travel time in Dates), the slope to
   pick from drafts (`docs/pip_ski_slope_drafts.png`).
 
-### Round 64 — Nikola's notes from using the app (2026-10-18)
+### Round 64 — the notes from using the app (2026-10-18)
 
 Noted; adventures first (go given), the rest after.
 
 - [x] **Medicine history** (Round 62, not done yet): changing a take
   time rewrites the history's times.
-  Not a bug (Round 68, Nikola): the time shown is the dose's daily slot.
+  Not a bug (Round 68): the time shown is the dose's daily slot.
 - [x] **Adventure break** (`docs/ADVENTURES_SPEC.md`): half an hour off
   during the adventure, only for looks (XP goes on). If the app is
   opened between 14:00 and 16:00 and he hasn't had it, it starts then,
@@ -829,7 +829,7 @@ Noted; adventures first (go given), the rest after.
 
 ### Round 63 — Pip's adventures, the spec (2026-10-17)
 
-- [x] Spec written: `docs/ADVENTURES_SPEC.md` (Nikola's notes: the
+- [x] Spec written: `docs/ADVENTURES_SPEC.md` (the notes: the
   Adventures button and card, register 13:00–15:00 with a sword-up
   fanfare, adventuring **12:00–18:00** as a daily activity, running and
   fighting bugs, XP from time, ~90 at a year, 160, 230, 280, then 50 a
@@ -844,21 +844,21 @@ Noted; adventures first (go given), the rest after.
   down, falling now and then and fetching a lost ski.
 - [x] Built (v1.25.0), with the break (Round 64). Skiing next.
 
-### Round 62 — Nikola's notes after 1.24.0 (2026-10-17)
+### Round 62 — the notes after 1.24.0 (2026-10-17)
 
 Noted only; not started (out of tokens).
 
 Medicine:
 - [x] **Bug**: changing a medicine's take time also changes the times
   already in its history. History must keep the time it was taken at.
-  Not a bug (Round 68, Nikola): the time shown is the dose's daily slot.
+  Not a bug (Round 68): the time shown is the dose's daily slot.
 
 Pip:
 - [x] (Round 77) **Night wake-up**: tapping Pip three times at night wakes him for
   **15 minutes**, once per night (so he can be charged). Special wake-up
   animation: he looks with one eye open first. During the 15 minutes he
   looks tired, like at 1 battery tick, then goes back to sleep.
-- [x] (Round 77; Nikola: from 07:00) **Early wake-up**: from 08:00 on, waking him before his usual time
+- [x] (Round 77; from 07:00) **Early wake-up**: from 08:00 on, waking him before his usual time
   is allowed.
 - [x] **Angry animation** (Round 79): his hand goes too far from his body; keep it
   closer.
@@ -869,7 +869,7 @@ Pip:
   Zs, clouds drifting). No location permission.
   Answer given: real weather needs a network weather API plus a
   location; without location permission the only options are a city
-  the user types once (geocoded, then a free no-key API such as
+  The user types once (geocoded, then a free no-key API such as
   Open-Meteo, needs INTERNET permission) or no real weather at all.
   Seasons, events, day/night and all the animation need nothing.
 
@@ -897,7 +897,7 @@ Dates:
   end for one-off dates (anything but Birthday and Anniversary), kept
   so the date isn't lost.
 - [x] **Cards**: a small bell icon next to the reminders text.
-### Round 61 — Nikola's notes on 1.21.0 (2026-10-16)
+### Round 61 — the notes on 1.21.0 (2026-10-16)
 
 Pip:
 - [x] **Hats**: everyday hats at random: some days he wears one, a
@@ -985,7 +985,7 @@ seeded with his birthday so each Pip has his own days. `PipLink.hatToday`
 → `PipBrain.dayHat`; the party hat (birthday) wins, a tried-on one over
 both. New sprites: santa, witch, bunny, heart (centred, antenna covered).
 
-### Round 60 — Nikola (2026-10-15)
+### Round 60 — the user (2026-10-15)
 
 - [x] Dates: a day's dates shown **around the date** (its circle in
   their colours, like Food's rated days) instead of dots under it;
@@ -995,7 +995,7 @@ Done (1.21.0): `DateMarkPainter` (one colour a filled circle, several
 in slices from the top, several of one colour a border, the picked day
 ringed outside).
 
-### Round 59 — Nikola's notes on 1.19.0 (2026-10-15)
+### Round 59 — the notes on 1.19.0 (2026-10-15)
 
 - [x] Dates: a **Holiday** (and an **Event**) has a **length**: pick how
   many days it lasts.
@@ -1015,7 +1015,7 @@ he unplugs (the station stays while plugged in). The sky: `sunTimesOn`
 later in summer time); dawn 45 min before sunrise to 20 after, dusk
 20 before sunset to 35 after.
 
-### Round 58 — Nikola's notes on 1.18.0 (2026-10-15)
+### Round 58 — the notes on 1.18.0 (2026-10-15)
 
 - [x] Pip's **hats** sit on one side of his head: centre them, as hats
   are (they were kept right of his antenna; the angry #! moves aside
@@ -1047,23 +1047,23 @@ now shows what he has. Energy: 1/4 a segment an hour awake, 1/18 asleep
 off and plugged in, he went straight to charging (empty, he now
 doesn't; the drone comes).
 
-### Round 57 — Nikola: the next pages (2026-10-15)
+### Round 57 — the next pages (2026-10-15)
 
 Bills not now. The order: **Birthdays & dates**, **Packing lists**,
 **Days since / until**, **Life percentage**, **Coin flip**, then the
-**planner notification that stays**. (2026-10-16, Nikola: **Life
+**planner notification that stays**. (2026-10-16, **Life
 percentage**, **Coin flip** and **Days since / until** are scrapped.)
 
 - [x] **Birthdays & dates** (spec `docs/DATES_SPEC.md`): a calendar of
   important dates; a date has a title, a note, a type, and up to 3
   reminders (days before, time); the usual patterns (Notifications page
   settings, lock, backup, Clear data). Pip wears a **party hat** on a
-  birthday. Nikola's answers: named **Dates**; a new date reminds **1
+  birthday. the answers: named **Dates**; a new date reminds **1
   day before**; a **green dot** on birthdays, gone once the page is
   opened; the hat on **Pip's own birthday** too (not the day he
   hatched); asleep, the hat **beside him**; and a **Hats** list on Pip
   Home to try hats on (not kept once you leave it).
-- [x] Go (Nikola). Pip Home's **Animations, Backgrounds and Hats** are
+- [x] Go. Pip Home's **Animations, Backgrounds and Hats** are
   all previews that combine (a hat and a background, an animation in
   them); swiping back to his info card or leaving Pip Home resets them.
 - [x] Pip: **waking up** is still too quick when you happen to see it:
@@ -1072,14 +1072,14 @@ percentage**, **Coin flip** and **Days since / until** are scrapped.)
   reads IH, the lightning bolt faces the wrong way): find them all and
   fix them.
 
-### Round 56 — Nikola: the index's scroll on (2026-10-15; patch 1.17.2)
+### Round 56 — the index's scroll on (2026-10-15; patch 1.17.2)
 
 - [x] Food, the index under the field: scrolled to its end, a drag kept
   trying to scroll it (it stretched) instead of the page. Now the drag
   goes on as the page's own (a flick flings the page on), and the index
   doesn't stretch.
 
-### Round 55 — Nikola's notes on 1.17.0 (2026-10-15; patch 1.17.1)
+### Round 55 — the notes on 1.17.0 (2026-10-15; patch 1.17.1)
 
 - [x] Pip's **medicine reminder stays** as long as the red dot is on:
   whenever he's up and about it's the first thing he does, before
@@ -1088,7 +1088,7 @@ percentage**, **Coin flip** and **Days since / until** are scrapped.)
   asleep (and later, not on an adventure).
 - [x] The Medicine page's **notifications button** (top corner) goes.
 
-### Round 54 — Nikola's notes on 1.16.0 (2026-10-15; 1.17.0)
+### Round 54 — the notes on 1.16.0 (2026-10-15; 1.17.0)
 
 - [x] Pip's **battery**, done by hand: he walks up beside it, a hand
   pulls his old battery out of his side and throws it away, picks the
@@ -1102,7 +1102,7 @@ percentage**, **Coin flip** and **Days since / until** are scrapped.)
 - [x] The index scrolled to its end, scrolling on scrolls the page.
 - [x] The meal page's **Same as** section goes.
 
-### Round 53 — Nikola's notes on 1.15.0 (2026-10-15; patch 1.15.1, then 1.16.0)
+### Round 53 — the notes on 1.15.0 (2026-10-15; patch 1.15.1, then 1.16.0)
 
 **Patch (1.15.1)**
 - [x] Food, the index under the field: an **X** in the field closes it;
@@ -1130,7 +1130,7 @@ percentage**, **Coin flip** and **Days since / until** are scrapped.)
 
 ### Round 52 — Pip: entrances, random events, richer skies (2026-10-15, 1.15.0)
 
-Nikola, going to sleep: "start pip work without waiting for me … make
+The user, going to sleep: "start pip work without waiting for me … make
 it a bigger change". Decisions Claude's.
 
 **Entrances** (all three)
@@ -1161,7 +1161,7 @@ it a bigger change". Decisions Claude's.
 Pictures: `docs/pip_round52_events.png`, `…_screens.png`,
 `…_skies.png`.
 
-**Backgrounds** (Nikola's note)
+**Backgrounds** (the note)
 - [x] Richer skies: more colours in the bands (the evening's tinted
   lines, but with more hues), more detail on **clouds**, the **sun** and
   the **moon**. The ground stays as it is.
@@ -1177,7 +1177,7 @@ Pictures: `docs/pip_round52_events.png`, `…_screens.png`,
 
 ### Round 50 — a sweep of the food tracker (2026-10-15, patch 1.14.3)
 
-Nikola: the page was someone's request; sweep it so it holds up for
+the page was someone's request; sweep it so it holds up for
 whoever needs it, decisions Claude's. His question: ingredients have no
 tags. (They needn't: an ingredient added to a meal becomes a food, in
 Foods, and is tagged there.)
@@ -1190,12 +1190,12 @@ Foods, and is tagged there.)
 - [x] A meal's **day** can be changed too, not only its time.
 - [x] Statistics: how many meals aren't rated yet (they don't count).
 
-**Later, much later** (Nikola): partial restore for Food. Proposal in
+**Later, much later**: partial restore for Food. Proposal in
 Round 49's answer: pick the backup's days; each meal brings the foods
 the list is missing, existing ones untouched, meals already there
-skipped. Nikola mentioned notes as what he needs partial restore for.
+skipped. The user mentioned notes as what he needs partial restore for.
 
-### Round 49 — Nikola's questions on the food tracker (2026-10-15, patch 1.14.2)
+### Round 49 — Questions on the food tracker (2026-10-15, patch 1.14.2)
 
 - [x] Statistics: a row's verdict ("Not enough data yet" and the rest)
   centred on its food's lines, not at their top.
@@ -1213,9 +1213,9 @@ skipped. Nikola mentioned notes as what he needs partial restore for.
 - [x] Statistics **by symptom**: for each symptom logged, the foods it
   follows clearly more often than without them (the same fair
   comparison and minimums as the verdicts). Symptoms stay **separate**
-  from the verdicts (Nikola): those still come from the faces alone.
+  from the verdicts: those still come from the faces alone.
 - [x] The Hub's **default order**: Counters, Medicine, Placard, Pip,
-  Recipes, Food (Nikola wrote "ingredients" for the last: the Food
+  Recipes, Food (the user wrote "ingredients" for the last: the Food
   page). An order already arranged by hand stays.
 - [x] The food index gets a **Recipes** section: a tap on a recipe opens
   its ingredients, ticked, to choose which to add (each becomes a food,
@@ -1223,7 +1223,7 @@ skipped. Nikola mentioned notes as what he needs partial restore for.
 - [x] A patch, 1.14.1: the Introduction's *What's new* shows 1.14.0 and
   1.14.1 (a patch shows its whole minor version's changes).
 
-### Round 47 — Nikola's notes on the food tracker (1.13.0, 2026-10-14)
+### Round 47 — the notes on the food tracker (1.13.0, 2026-10-14)
 
 - [x] Adding a food that's already in the meal: its chip **flashes**
   (it's there already).
@@ -1236,7 +1236,7 @@ skipped. Nikola mentioned notes as what he needs partial restore for.
   (ones already used) and *Ingredients* (from Recipes' list, not foods
   yet), narrowed as you type; so the same names get reused and the
   statistics track them. No separate *From ingredients* button.
-- [x] **Statistics, more of it** (Nikola wants it extensive): a tap on a
+- [x] **Statistics, more of it** (the user wants it extensive): a tap on a
   food (or kind) opens its page: the verdict and numbers, how its meals
   were rated (a bar per face), with it vs without it, the symptoms after
   it, and **its meals' history** with dates, the other foods eaten with
@@ -1244,7 +1244,7 @@ skipped. Nikola mentioned notes as what he needs partial restore for.
 
 ### Round 46 — the food tracker, built from the proposal (2026-10-14)
 
-Nikola, busy: "whip out the page without my input" from the Round 15
+The user, busy: "whip out the page without my input" from the Round 15
 proposal (O14); 1.12.0 checked and fine. His two answers: foods can be
 **added from the ingredients list**; **no reminders, no notifications**.
 The rest are Claude's calls, to change after he's tried it.
@@ -1272,9 +1272,9 @@ The rest are Claude's calls, to change after he's tried it.
   data. Not in partial restore yet (a backup restores it whole).
 - Later: a whole-day "how I felt", a month calendar, partial restore.
 
-### Round 45 — Nikola's notes on 1.10.1 and the charging station (2026-10-14)
+### Round 45 — the notes on 1.10.1 and the charging station (2026-10-14)
 
-Built after Nikola tried 1.11.0 ("do it, except the segment drop time").
+Built after the user tried 1.11.0 ("do it, except the segment drop time").
 
 **Charging station, changes**
 - [x] No lit antenna while charging.
@@ -1294,13 +1294,13 @@ Built after Nikola tried 1.11.0 ("do it, except the segment drop time").
   things dragged between them; a tap still moves one to *Completed*.
   Off, waiting things show with the rest (kept marked, back when it's
   on again).
-- [x] **Lock**: just a password (Nikola): the list closed behind the
+- [x] **Lock**: just a password: the list closed behind the
   master password while the app is locked, like a locked Hub page (not
   encrypted).
 - [x] The to-do note's switch in Settings only shows or hides its card:
   the list, its Waiting and its lock stay as they are.
 
-**Pip's batteries and energy, a better system** (Nikola: no batteries
+**Pip's batteries and energy, a better system** (no batteries
 all day, no drain seen, with the app in his recent apps)
 - [x] A battery every **5 hours on the clock** (no random spread),
   piling up while he's away, up to 3: time away counts, open or not.
@@ -1308,7 +1308,7 @@ all day, no drain seen, with the app in his recent apps)
 - [x] Plugged in: he uses energy as ever, but his battery icon keeps its
   segments until unplugged (so it doesn't drop while he charges), and he
   can't run out. For fun more than to save him.
-- [x] Not done (Nikola): a "a segment less in X h" line in his Status.
+- [x] Not done: a "a segment less in X h" line in his Status.
 
 **Pip patches**
 - [x] Pip Home's *Charging* said "busy" when he wasn't: it refused
@@ -1320,7 +1320,7 @@ all day, no drain seen, with the app in his recent apps)
 - [x] (Round 52) Flying in from the side, only in the side menu: as if the menu's
   swing threw him in. Then he's **angry** for a bit, shaking a hand.
 
-### Round 44 — Nikola's notes on 1.10.0; Pip's charging station (2026-10-14)
+### Round 44 — the notes on 1.10.0; Pip's charging station (2026-10-14)
 
 **Patches**
 - [x] Recipes list: a card's prep time and type as **chips**.
@@ -1338,8 +1338,8 @@ all day, no drain seen, with the app in his recent apps)
 - [x] Busy (asleep, adventuring, off…): the station appears, but he
   doesn't use it.
 - [x] Order: **hands** first (specs and sprites, he grabs a cable), then
-  the station, then the animation; Nikola sees drafts at each step.
-- [x] Hands (Nikola's pick, drafts `docs/pip_hands_drafts.png`):
+  the station, then the animation; the user sees drafts at each step.
+- [x] Hands (picked, drafts `docs/pip_hands_drafts.png`):
   **floating mitts**, no arms. He has none until he needs them; then
   they **pop in** (and pop away after), so his other animations stay as
   they are. Later used for adventuring too.
@@ -1350,7 +1350,7 @@ all day, no drain seen, with the app in his recent apps)
 - [x] While charging his screen changes now and then, at random:
   happy ^-^, a battery filling up, static.
 - [x] **Ignores the station when his energy is full.** It's only for
-  looks: it doesn't fill his battery (Nikola: else he'd always be full,
+  looks: it doesn't fill his battery (else he'd always be full,
   and running out would hardly ever be seen).
 - [x] While plugged in he **can't lose power** (his energy stays).
 - [x] The station looks like a **power station**, bigger, more detail
@@ -1377,7 +1377,7 @@ all day, no drain seen, with the app in his recent apps)
   recipe, a Complete button sends the draft to an agent, which returns
   it filled in, in a form the app turns into the recipe.
 
-### Round 43 — Nikola's notes on 1.9.0 (2026-10-14)
+### Round 43 — the notes on 1.9.0 (2026-10-14)
 
 **Recipes patches**
 - [x] Editing jumps: after changing the type, a quantity, or closing a
@@ -1396,7 +1396,7 @@ all day, no drain seen, with the app in his recent apps)
 - [x] Quantity: pickers like Shop's (count, weight), plus **teaspoon**
   and **tablespoon** (small and big spoons).
 
-**Idea: Pip's adventures** (later; Nikola's)
+**Idea: Pip's adventures** (later)
 - [ ] Two modes: **normal** (the pet, as now) and **adventure**. From
   Pip Home's first card (under his info): first time, a **Register as
   adventurer** button, only between **13:00 and 15:00** (so it isn't
@@ -1408,7 +1408,7 @@ all day, no drain seen, with the app in his recent apps)
   his own (an idle RPG). It fits the energy system: batteries still fly
   to him, and he can power down.
 
-### Round 42 — Nikola's notes on 1.8.0, and Recipes (2026-10-14)
+### Round 42 — the notes on 1.8.0, and Recipes (2026-10-14)
 
 **Patches**
 - [x] Code blocks: the room above and below the text don't match.
@@ -1422,13 +1422,13 @@ all day, no drain seen, with the app in his recent apps)
 - [x] Build it (the spec's five chunks), then release (v1.9.0).
   Later: type filters on the list, search by ingredient.
 
-**Idea: a planner notification that stays** (later; Nikola's)
+**Idea: a planner notification that stays** (later)
 - [x] While a planner **block** or **routine** is on, a notification
   that can't be swiped away shows what it is ("what I should be doing
   now"). It goes when the task is ticked, perhaps with a **Done** button
   on the notification itself. Planner blocks and routines only.
 
-### Round 41 — Nikola's notes on 1.7.0, and his answers on Recipes (2026-10-14)
+### Round 41 — the notes on 1.7.0, and his answers on Recipes (2026-10-14)
 
 **Patches**
 - [x] Medicine: the hold-to-take button's circle doesn't fill to 100%
@@ -1443,7 +1443,7 @@ all day, no drain seen, with the app in his recent apps)
   Quiet: quieter copies of the app's sounds; the phone's own sound can't
   be turned down by the app).
 
-**Recipes, Nikola's answers** (the spec updated)
+**Recipes, the answers** (the spec updated)
 - No servings, no ticking ingredients, no timer.
 - Duplicate yes; share = **copy to the clipboard** only.
 - Search by ingredient: later.
@@ -1456,7 +1456,7 @@ all day, no drain seen, with the app in his recent apps)
 
 - [x] **Medicine: pick weekdays** (supplements taken some days only).
 - [x] **Tidy the ROADMAP**: done items still marked open.
-- [x] **Recipes: a spec for Nikola** (no building yet; `docs/RECIPES_SPEC.md`,
+- [x] **Recipes: a spec for review** (no building yet; `docs/RECIPES_SPEC.md`,
   drafts `docs/recipes_drafts.png`), from his notes:
   - The page lists recipes as items that can be **reordered**: name and
     prep time. An **Ingredients** button opens the ingredients list.
@@ -1484,11 +1484,11 @@ all day, no drain seen, with the app in his recent apps)
     like selection, and a button to accept; Edit is a button there too,
     and back returns to picking) and **edit** (the default when opened
     from Recipes' button).
-  - Nikola asked what's missing for a page like this.
+  - The user asked what's missing for a page like this.
 
 ### Round 39 — the night shift (2026-10-14, for v1.7.0)
 
-Nikola's notes from earlier rounds, done overnight while he sleeps; not
+the notes from earlier rounds, done overnight while he sleeps; not
 released (v1.7.0 waits for the morning).
 
 - [x] **8-bit notification sounds**: Chime, Bell and Soft go; several
@@ -1497,7 +1497,7 @@ released (v1.7.0 waits for the morning).
   the UI conventions (e.g. Medicine's grey +) (Round 33).
 - [x] **Multi-line code blocks** in notes with their own button on the
   format bar; strikethrough's button goes to make room (Round 32).
-- [x] **Automatic backup** to a folder Nikola picks (Round 33, D8's
+- [x] **Automatic backup** to a folder the user picks (Round 33, D8's
   second part).
 
 ### Round 38 — a quick run before Round 37 (2026-10-14)
@@ -1511,7 +1511,7 @@ released (v1.7.0 waits for the morning).
 
 ### Round 37 — Pip's energy, batteries and sleep (2026-10-14)
 
-Plan proposed to Nikola first; then Pip, then the small notes (8-bit
+Plan proposed to the user first; then Pip, then the small notes (8-bit
 sounds, the consistency sweep, multi-line code blocks).
 
 - [x] **Energy indicator**: a battery with **three segments**: 3 green,
@@ -1535,17 +1535,17 @@ sounds, the consistency sweep, multi-line code blocks).
 - [x] Everything about him (energy, batteries, times, what was seen) is
   in **backups**, and a restore carries on from there.
 
-### Round 36 — Nikola's review of Pip Home (1.5.0, 2026-10-14)
+### Round 36 — Review of Pip Home (1.5.0, 2026-10-14)
 
 - [x] Pip Home's scene takes **half the screen**.
 - [x] **Background is a choice, not on/off**: a list of backgrounds to
   pick from (one for now, Field); day and night are the same background.
 - [x] The menu's room **at least twice as high** (there's room on
-  Nikola's phone; on smaller ones the menu items scroll above it).
-- The Android home-screen widget: dropped from the plan (Nikola, after
+  The user's phone; on smaller ones the menu items scroll above it).
+- The Android home-screen widget: dropped from the plan (after
   hearing it can't animate smoothly).
 
-### Round 33 — Nikola's review of 1.4.0 (2026-10-13)
+### Round 33 — Review of 1.4.0 (2026-10-13)
 
 Then the patch release, then Pip's first round (hatching), with drafts
 first.
@@ -1556,19 +1556,19 @@ first.
 - [x] To-do: deleting completed ones said "cannot be undone" and then
   offered Undo: no Undo now.
 - [x] To-do: done ones can't be edited by holding them.
-- [x] Why it happened (Nikola asked): the page wasn't checked against
+- [x] Why it happened (the user asked): the page wasn't checked against
   others, and the rules weren't written down. Now they are
   (ARCHITECTURE, "UI conventions").
 - [x] Later (done in Round 39): a **consistency sweep** across pages: buttons (e.g. Medicine's
   grey +), toasts (when, and with Undo or not), against the conventions.
 - [x] (Round 39) **new notification sounds**: the current three (Chime,
   Bell, Soft) go; instead **hacky 8-bit sounds**, several to try, then
-  Nikola picks which stay.
+  The user picks which stay.
 - [x] (Round 39) Automatic backup to a folder: not simple (Android needs a folder
   picked with lasting permission, written through native code, and
-  something to run it): later (Nikola).
+  something to run it): later.
 
-### Round 32 — Nikola's review of 1.3.1 (2026-10-13)
+### Round 32 — Review of 1.3.1 (2026-10-13)
 
 **1. Formats**
 - [x] Bold, italic and strikethrough **toggle**: pressing one again on
@@ -1587,13 +1587,13 @@ first.
 - [x] Medicine: the **number of doses** can't be changed once added (it
   confused the history); their times still can.
 
-### Pip, a virtual pet (Nikola's plan, Round 32) — bit by bit, between other features
+### Pip, a virtual pet (the user's plan, Round 32) — bit by bit, between other features
 
-Nikola wants more say on sprites and visuals: show him drafts first.
+The user wants more say on sprites and visuals: show him drafts first.
 
 **Phase 1: hatching, name, age, his home**
 
-Nikola's picks (Round 34):
+pickeds (Round 34):
 - The **spotted egg**. 7 taps: the first starts the crack, 2 more widen
   it, 2 more again, and 2 pop him out. A light buzz on each tap, a
   slightly longer one for the pop.
@@ -1607,12 +1607,12 @@ Nikola's picks (Round 34):
   birthday, later his inventory) is in backups; his **age** comes from
   his birthday, so restored from a backup he's as old as he really is.
 - **Pip Home** isn't another plain page: more like a game. Its look
-  drafted first, for Nikola to pick.
+  drafted first, for review to pick.
 
 - [x] Until he's hatched, the menu's room shows an **egg**; a few taps
   crack it, and Pip jumps out. His **birthday** is that moment.
 - [x] Above the room, his **name and age** in tiny pixel text.
-- [x] **Pip Home, Nikola's pick (Round 35)**: draft B. A big animated
+- [x] **Pip Home, picked (Round 35)**: draft B. A big animated
   scene on top (a tall version of his field's background; the menu's
   room gets the short version, both following the time of day), and
   under it a **card that swipes**:
@@ -1659,7 +1659,7 @@ Nikola's picks (Round 34):
 - [ ] Much later: Godville-style items and phrases made to fit him,
   items and levelling up.
 
-### Round 30 — Nikola's review of 1.3.0 (2026-10-13)
+### Round 30 — Review of 1.3.0 (2026-10-13)
 
 Then the notifications page (Round 28, part 3).
 
@@ -1671,7 +1671,7 @@ Then the notifications page (Round 28, part 3).
   one line, over the round button's sides).
 - [x] Restored copies get **(Copy)** in their titles.
 
-### Round 29 — Nikola's notes on 1.2.0 and 1.2.1 (2026-10-13)
+### Round 29 — the notes on 1.2.0 and 1.2.1 (2026-10-13)
 
 After the to-do note and partial restore are released; before the
 notifications page. (1.2.1: Pip is good.)
@@ -1697,7 +1697,7 @@ notifications page. (1.2.1: Pip is good.)
 
 ### Round 28 — to-do note, partial restore; the notifications page planned (2026-10-13)
 
-Nikola, after 1.2.1: the to-do note and partial restore now; the
+The user, after 1.2.1: the to-do note and partial restore now; the
 notifications page later (it is bigger than it looked).
 
 **1. To-do note** (Round 26, part 3) — [x] done (N18): above the
@@ -1742,7 +1742,7 @@ How it's built (Round 31), in chunks:
 
 ### Round 27 — polish and note formatting (2026-10-13)
 
-Nikola is importing his notes: the extra formats and their buttons now
+The user is importing his notes: the extra formats and their buttons now
 (Round 20, part 3, brought forward), with the small fixes from Round 26.
 
 **1. Small fixes** (Round 26, part 2 and 3)
@@ -1761,7 +1761,7 @@ Nikola is importing his notes: the extra formats and their buttons now
 - [x] A Format button (in place of Checkbox) opening a row of format
   buttons above the keyboard, without leaving or covering the text.
 
-**4. Pip's head** (concepts, Nikola choosing)
+**4. Pip's head** (concepts, the user choosing)
 - [x] The screen a little taller (now 14 x 8 looks flat; 14 x 11 too
   tall: try one row more), kept simple: no bezel line, solid eyes as
   now. A finer grid is fine, but the pixel look stays (the grass as it
@@ -1777,7 +1777,7 @@ Nikola is importing his notes: the extra formats and their buttons now
   turns to look the other way now and then.
 - [x] The menu header's Pip and the app icon: the room's idle frame,
   the same grid (the face a little to one side, as in the room: goofy,
-  and Nikola likes it), not a centred face.
+  and the user likes it), not a centred face.
 
 **3. Hub pages: Recipes next** — of the new Hub pages (not the food
   tracker or Pip's page, which have their own places), Recipes is the
@@ -1819,7 +1819,7 @@ Nikola is importing his notes: the extra formats and their buttons now
   backup and pick what to bring back (e.g. one note), added to what's
   there instead of replacing everything.
 
-### Round 25 — Nikola's notes on 0.28.0, then v1 (2026-10-13)
+### Round 25 — the notes on 0.28.0, then v1 (2026-10-13)
 
 - [x] Hub tiles: the page lock at the bottom left (outside the icon),
   not centred.
@@ -1831,11 +1831,11 @@ Nikola is importing his notes: the extra formats and their buttons now
   the same height (the Lock button made it taller, shifting the menu).
 - [x] Placard: the pop's volume as before (only the inflate louder).
 - Pip's room in the menu: the first thing after v1.
-- Then release v1.0.0 (Nikola: yes, after these).
+- Then release v1.0.0 (yes, after these).
 
-### Round 24 — Nikola's notes before v1 (2026-10-13)
+### Round 24 — the notes before v1 (2026-10-13)
 
-Nikola meant the notification tests and a final review to come before
+The user meant the notification tests and a final review to come before
 v1, with a stop for his go-ahead; v1 waits for these. (The icon was
 done without him: kept for now, but he picks the real one, see 6.)
 
@@ -1869,9 +1869,9 @@ done without him: kept for now, but he picks the real one, see 6.)
 **4. After v1 (v2)**
 - [x] Medicine: pick weekdays (supplements taken some days only; Round 40).
 
-**5. Install problem** — solved: a bad download (Nikola installed it).
+**5. Install problem** — solved: a bad download (the user installed it).
 
-**8. Pip, a virtual pet** (idea; Nikola decides after seeing the cost)
+**8. Pip, a virtual pet** (idea; the user decides after seeing the cost)
 - [x] Before v1 maybe: a small **room** at the bottom of the menu (a
   field); the first time the menu opens, Pip pops out of the ground,
   then stands and walks about. Drawn at a finer pixel scale than the
@@ -1880,22 +1880,22 @@ done without him: kept for now, but he picks the real one, see 6.)
   himself: sleeping at night, something on his screen, waking up after
   the app was away.
 - [x] (Round 35) On his page, a section that **plays each of his animations** on
-  demand (pop out, hop, walk, blink, …) (Nikola, Round 26).
+  demand (pop out, hop, walk, blink, …) (Round 26).
 - [ ] On his page, besides the pet side: **Godville-style random
-  events** (Nikola, Round 26): little things happening to him by
+  events** (Round 26): little things happening to him by
   themselves, told as a log.
 
-**7. Order to v1** — 0.28.0 is a test build of all this; Nikola tests,
+**7. Order to v1** — 0.28.0 is a test build of all this; the user tests,
   sends small fixes and his icon pick; then v1.0.0.
 
-**6. The icon** — [x] **Pip** (Nikola's pick, a 16 × 16 grid) drawn by
-  `tool/make_icon.py`. (Prompt given in chat, Round 24:) a prompt for Nikola to ask Claude for icon ideas
+**6. The icon** — [x] **Pip** (picked, a 16 × 16 grid) drawn by
+  `tool/make_icon.py`. (Prompt given in chat, Round 24:) a prompt for review to ask Claude for icon ideas
   (from the theme and what the app is), and how to send the chosen one
   back (a screenshot, a file, or instructions to draw the same).
 
 ### Round 23 — order to v1 (2026-10-13)
 
-Nikola: the backup reminder, then release (0.27.0); then the icon, the
+the backup reminder, then release (0.27.0); then the icon, the
 notification checks and the last pass.
 - [x] Backup reminder (D9).
 - [x] Released 0.27.0; the next is 1.0.0.
@@ -1913,7 +1913,7 @@ notification checks and the last pass.
   works. The Introduction checked against the app (Settings' list,
   medicine notifications).
 
-**Phone test list (E1)** — for Nikola, on 1.0.0:
+**Phone test list (E1)** — for review, on 1.0.0:
 1. Two medicines at the same time: one notification naming both.
 2. Restart the phone: the next reminder still comes.
 3. Swipe the app away from recent apps: reminders still come.
@@ -1938,7 +1938,7 @@ A note for after v1:
 
 ### Round 22 — towards v1 (2026-10-13)
 
-Nikola: Round 20's extra Markdown and the formatting bar wait (v2
+Round 20's extra Markdown and the formatting bar wait (v2
 maybe); per-page Hub locks first; then get v1 working so he can start
 using the app: a list of what's in v1 and what's later.
 - [x] Per-page Hub locks (Round 21, part 3).
@@ -1974,7 +1974,7 @@ using the app: a list of what's in v1 and what's later.
   pages lock independently: a locked Hub with some pages free (for the
   quick-access menu, later), or a free Hub with some pages locked.
 
-### Round 20 — Nikola's review of 0.26.0 (2026-10-13)
+### Round 20 — Review of 0.26.0 (2026-10-13)
 
 **1. Quick fixes**
 - [x] Medicine: the card's total a bit higher, level with the drag
@@ -1997,7 +1997,7 @@ using the app: a list of what's in v1 and what's later.
   above the keyboard, without leaving the text or covering it; tapping
   one applies it to the selection or the line.
 
-### Round 19 — Nikola's notes before the night (2026-10-13)
+### Round 19 — the notes before the night (2026-10-13)
 
 **1. Reminder marks on the timeline**
 - [x] The bell marks a little **bigger**, keeping the circle the same
@@ -2015,7 +2015,7 @@ using the app: a list of what's in v1 and what's later.
   unlocked then, the "go to" waits and happens on the next visit to the
   page once unlocked.
 
-### Round 18 — Nikola's review of 0.25.0 (2026-10-13)
+### Round 18 — Review of 0.25.0 (2026-10-13)
 
 **1. Quick fixes**
 - [x] Planner: hour labels a touch further right (6 → 7).
@@ -2046,11 +2046,11 @@ using the app: a list of what's in v1 and what's later.
 - [x] Ready for years of doses (thousands of marks): lookups by an
   index, lists built lazily.
 
-### Round 17 — Nikola's review of 0.24.0 (2026-10-13)
+### Round 17 — Review of 0.24.0 (2026-10-13)
 
 **1. Quick fixes**
 - [x] Medicine dot: at 00:50 it showed for yesterday's 11:00–22:00
-  doses. Only yesterday's doses at **22:00 or later** (Nikola changed it from 23:00) keep it until
+  doses. Only yesterday's doses at **22:00 or later** (the user changed it from 23:00) keep it until
   02:00.
 - [x] Planner: the hour labels' margin smaller (about 6).
 - [x] Medicine: the vibration on ticking follows the gulp (two soft
@@ -2077,7 +2077,7 @@ using the app: a list of what's in v1 and what's later.
 (The medicine **month calendar** with marks is Round 16's chunk 3, next
 after these.)
 
-### Round 16 — Nikola's review of 0.23.0 (2026-10-12)
+### Round 16 — Review of 0.23.0 (2026-10-12)
 
 Before Round 15's chunks 2–3 (fixes first):
 
@@ -2107,7 +2107,7 @@ Before Round 15's chunks 2–3 (fixes first):
 - [x] The calendar in a medicine's history **taller**: a month grid
   (weeks as rows), swiped left for older months, not a single strip.
 
-### Round 15 — Nikola's notes on 0.23.0 (2026-10-12)
+### Round 15 — the notes on 0.23.0 (2026-10-12)
 
 Chunks, in order (each its own commit; release when a few are in):
 
@@ -2176,7 +2176,7 @@ Chunks, in order (each its own commit; release when a few are in):
     other pages; a Hub tile (and a settings page for the reminder to
     rate).
 
-### Round 14 — Nikola's notes on 0.21–0.22 (2026-10-12)
+### Round 14 — the notes on 0.21–0.22 (2026-10-12)
 
 Chunks, in order (each its own commit; release when a few are in):
 
@@ -2203,7 +2203,7 @@ Chunks, in order (each its own commit; release when a few are in):
 - [x] Tapping free time starts the new block **near where it was tapped**
   (to :00 / :30); tapping the **left edge** (by the hour labels) adds a
   reminder there (to 15 minutes).
-- [x] ~~(Nikola's note on tapping a stacked reminder was cut off: ask.)~~
+- [x] ~~(the user's note on tapping a stacked reminder was cut off: ask.)~~
   Dropped (Round 30): too long ago to recall.
 
 **3. Medicine, how it handles**
@@ -2239,7 +2239,7 @@ Chunks, in order (each its own commit; release when a few are in):
   is missed (seen even when the Hub is locked). Done as: due and not
   marked today; marking it missed or not sure clears the dot too.
 
-### Round 13 — Nikola's notes on 0.20.0 (2026-10-12)
+### Round 13 — the notes on 0.20.0 (2026-10-12)
 
 - [x] **Checkbox button** in notes: a small button next to *Edit title*,
   shown only while typing (keyboard up), instead of in the main row.
@@ -2264,7 +2264,7 @@ Chunks, in order (each its own commit; release when a few are in):
   for when Other isn't locked. The quick-access menu, when it comes,
   locks the same way Other does.
 
-### Round 12 — Nikola's notes on 0.19.0 (2026-10-12)
+### Round 12 — the notes on 0.19.0 (2026-10-12)
 - [x] **No button flashes when it turns on, anywhere, now and later**
   (seen on the planner sheet's Add): one rule in the app's theme for
   every button kind, checked by a test.
@@ -2277,7 +2277,7 @@ Chunks, in order (each its own commit; release when a few are in):
   with a master password set, entering it. For clearing test data.
 - [x] Later: **lock each Other page on its own** (like section locks).
 - [x] (Rounds 31, 39: per page) Later (with E2): **default notification sounds** for tasks,
-  routines and reminders separately, and for medicine (Nikola, Round
+  routines and reminders separately, and for medicine (Round
   17: a sound per kind, picked in the app; each kind already has its own
   Android channel, so Android's per-channel sound works meanwhile).
 - [x] (Round 39: automatic backup to a folder) Later (with D6): **what if the app is deleted?** Uninstalling
@@ -2285,7 +2285,7 @@ Chunks, in order (each its own commit; release when a few are in):
   ARCHITECTURE), exports, an automatic export to a folder the user picks
   (outside the app, so it stays), cloud save (D5).
 
-### Round 11 — Nikola's notes, evening of 2026-10-11
+### Round 11 — the notes, evening of 2026-10-11
 
 Sorted from one long message. Order of work is at the end.
 
@@ -2302,7 +2302,7 @@ Sorted from one long message. Order of work is at the end.
 - [x] **More colours** in the palette.
 - [x] **Defaults:** new tasks are **blue**, new routines **purple**.
 
-**A2. Planner: descriptions** ✅ (Nikola, after chunk 2) — tasks and
+**A2. Planner: descriptions** ✅ (after chunk 2) — tasks and
   routines get an optional description; it shows on the block when
   there's room, and in the block's menu. (P20)
 - [x] Model and storage (planner.json v5, routines.json v2, backup v7,
@@ -2361,7 +2361,7 @@ Sorted from one long message. Order of work is at the end.
 
 **K. Džoni back, configurable** (O4, instead of removed) ✅ as **Placard**
 - [x] **Five taps in the top-right corner** open its settings: the text
-  (default **"Add text here!"**, Nikola sets his own on the phone) and
+  (default **"Add text here!"**, the user sets his own on the phone) and
   the count.
 - [x] **Better count animation**: while holding (a bit longer than now)
   the page **inflates and shakes**, then **pops** when it counts.
@@ -2369,7 +2369,7 @@ Sorted from one long message. Order of work is at the end.
 - [x] Fix: on back the page **disappears before the screen turns back
   upright**; turn first, then close.
 
-**L. New page: medicine tracker** (O6) ✅ — Nikola takes a pill every
+**L. New page: medicine tracker** (O6) ✅ — the user takes a pill every
   morning and notes it in a sheet; make that one tap. Agreed shape (all
   of it combined):
   - Add medicines, each with **how many** (doses a day), **when** (times),
@@ -2388,7 +2388,7 @@ Sorted from one long message. Order of work is at the end.
 **N. Ideas for more Other pages** — listed under *Later / ideas*.
 
 **Process**
-- [x] After a release Nikola confirmed, Claude runs it and gives a
+- [x] After a release the user confirmed, Claude runs it and gives a
   **checklist of what to test** (docs/RELEASING.md).
 
 **Chunks** (small, one at a time; each can be released on its own):
@@ -2407,7 +2407,7 @@ Sorted from one long message. Order of work is at the end.
 12. [ ] New Other pages, one per chunk (see *Later / ideas*).
 M (data-safety sweep, cloud) later.
 
-### Round 10 — Nikola's notes on 0.18.0 (2026-10-11)
+### Round 10 — the notes on 0.18.0 (2026-10-11)
 - [x] **Remove the timeline zoom** (P13): a 5-minute block looked bad and
   zooming didn't help.
 - [x] **Blocks have a minimum height** (one touch target, like a
@@ -2425,7 +2425,7 @@ M (data-safety sweep, cloud) later.
   passwords or personal details (the signing key is only in GitHub
   secrets).
 
-### Round 9 — Nikola's notes after using 0.17 (2026-10-11)
+### Round 9 — the notes after using 0.17 (2026-10-11)
 
 Confirmed working on the phone: **fingerprint unlock**.
 
@@ -2489,7 +2489,7 @@ task)
     tallest piece (zoom, E, makes short pieces readable).
 
 **E. Visuals**
-- [x] **Timeline zoom** (Nikola's pick for short blocks, which cut off
+- [x] **Timeline zoom** (picked for short blocks, which cut off
   the checkbox): one bottom button cycling Normal (30 min = one touch
   target) → Large (15 min) → Extra large (5 min), remembered. No pinch
   (two fingers, against the one-hand rule). Blocks are at least 5 min
@@ -2504,7 +2504,7 @@ task)
   once).
 
 **F. Later**
-- [x] **Point items** (Nikola, after E; he meant reminders, not routines):
+- [x] **Point items** (after E; he meant reminders, not routines):
   something like a one-off reminder or to-do on the timeline — a time but
   **no end**, a small block that "hovers" there as a temporary reminder,
   not a long-running task. Agreed (P14): a short see-through block over
@@ -2512,12 +2512,12 @@ task)
   ticking it off deletes it; unticked, it stays on its day.
   - [x] Model, storage (`pins.json` v1), backups (v6, `plannerPins`)
   - [x] Timeline, adding / editing, ticking off, notifications
-- [x] Unclear note "(This is just so markdown)": Nikola doesn't recall;
+- [x] Unclear note "(This is just so markdown)": the user doesn't recall;
   only the set-password part was meant, and it's done.
 
 ### Round 8 — reminders (2026-10-11)
 
-- [x] **Planner reminders** (P10), choices made while Nikola couldn't
+- [x] **Planner reminders** (P10), choices made while the user couldn't
   build (adjustable): per block Off / at start / 5–60 min before;
   titles hidden while the Planner is locked; planned two weeks ahead.
   Android build moved to AGP 8.6 / Gradle 8.7 / Java 11 with desugaring
@@ -2528,9 +2528,9 @@ task)
 - [x] **Menu stays open behind its pages** (G16): back from a page opened
   from the menu returns to the menu; back again closes it.
 - [x] **Counters: no ✕ in selection mode** — back already leaves it.
-- [x] **Notes: ↶ ↷ keep their order on the left side too** (Nikola);
+- [x] **Notes: ↶ ↷ keep their order on the left side too**;
   only their place (outermost) follows the hand.
-- [x] **Planner routines** (P8), designed with Nikola: a routine is its
+- [x] **Planner routines** (P8), designed with a routine is its
   own item (not copies), shown on its days; per-day change / skip / tick;
   a Routines screen with a Mon–Sun strip; Repeat + Until in the add sheet;
   the one-off wins a clash; editing a routine changes past days too.
@@ -2540,16 +2540,16 @@ task)
 ### Round 6 — after 0.15 (2026-10-10)
 
 - [x] **Markdown: hide the symbols except where you're editing** (N9) —
-  Nikola expected the `##` to disappear once formatted. Live preview: the
+  The user expected the `##` to disappear once formatted. Live preview: the
   line with the cursor shows its symbols; other lines don't.
-- [x] **Line numbers in notes** (N12) — Nikola liked the code-editor
+- [x] **Line numbers in notes** (N12) — the user liked the code-editor
   idea; one number per paragraph, switch in Settings.
 
 ### Round 5 — after 0.14 (2026-10-10)
 
-- [x] **Notes: edit the title from the bottom** (N11) — Nikola: the title
+- [x] **Notes: edit the title from the bottom** (N11) — the title
   is high and hard to reach. A smaller *Edit title* button above the
-  editor's buttons (Nikola's choice) opens a sheet at the bottom.
+  editor's buttons (the user's choice) opens a sheet at the bottom.
 - [x] **Reach mode reaches further** (U4): 28% instead of 20% (about one
   row more), Counters a bit more again.
 - [x] **Reach mode snapped back late:** a small scroll the other way only
@@ -2561,16 +2561,16 @@ task)
 - [x] **Planner: free time as a block** (P7): transparent, dotted border.
 - [x] **Džoni: no top bar**; setting the count is a triple tap in the
   top-right corner instead of a long-press on the title.
-- [x] **Markdown in notes** (N9) — Nikola: dynamic, basics only, lists
+- [x] **Markdown in notes** (N9) — dynamic, basics only, lists
   most important, no checkboxes. Styled live in the editor; symbols stay,
   faint.
 - [x] **Fingerprint unlock** (L6) — via `biometric_storage` (Android
   keystore, fingerprint-bound key). Not tried on a phone before release:
-  Nikola to check on 0.15.
+  The user to check on 0.15.
 
 ## Later / ideas
 
-- **Other pages Nikola picked** (Round 11; each starts empty, no
+- **Other pages the user picked** (Round 11; each starts empty, no
   sample data):
   - **Birthdays & yearly dates**, with a reminder before.
   - **Coin flip**.

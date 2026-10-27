@@ -57,7 +57,7 @@ void main() {
         reason: 'next, leftwards');
   });
 
-  test("the default order (Round 48, Nikola's)", () {
+  test("the default order (Round 48, the user's)", () {
     expect(PageLayout.initial.hub, [
       HubTool.counters,
       HubTool.medicine,

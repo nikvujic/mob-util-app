@@ -58,7 +58,7 @@ void main() {
         p.step(1 / 60);
         if (p.batterySlot case final s?) slots.add(s);
         if (p.oldBattery case final o?) olds.add(o);
-        // Round 97 (Nikola): the old one never over the new one.
+        // Round 97: the old one never over the new one.
         if ((p.oldBattery, p.battery) case ((final o?, final b?))) {
           final apart = o.$1 + PipBrain.batteryWidth <= b.$1 ||
               b.$1 + PipBrain.batteryWidth <= o.$1 ||

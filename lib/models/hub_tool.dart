@@ -7,7 +7,7 @@
 /// `pages/hub/tools.dart` and `providers/section_data_provider.dart`):
 /// those switches don't compile until a new page is in all of them.
 enum HubTool {
-  // Their order is the Hub's default (Round 48: Nikola's), for a Hub not
+  // Their order is the Hub's default (Round 48: the user's), for a Hub not
   // arranged by hand.
   counters('Counters'),
   medicine('Medicine'),

@@ -4,7 +4,7 @@ import 'package:the_app/models/subscription.dart';
 
 import '../helpers.dart';
 
-/// Round 88 (Nikola): a tap on nothing lets the field being typed in go
+/// Round 88: a tap on nothing lets the field being typed in go
 /// (the keyboard goes), on every page; a tap in a field, or on a button,
 /// is as ever.
 void main() {

@@ -6,7 +6,7 @@ import 'package:the_app/providers/packing_provider.dart';
 
 import '../helpers.dart';
 
-/// Hub → Packing (Round 94, Nikola; Round 95: his changes): lists, a
+/// Hub → Packing (Round 94; Round 95: his changes): lists, a
 /// list's view mode (rows of a normal size, a tap ticks, Reset asked),
 /// edit mode (its own sections, + Add under each, hold to select and
 /// delete, Save or Discard on back), Copy list, the default sections.
@@ -182,7 +182,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('choice-delete')), findsNothing,
         reason: 'deleting is by holding');
-    // Round 103 (Nikola): Count above Rename.
+    // Round 103: Count above Rename.
     expect(tester.getTopLeft(find.byKey(const Key('choice-count'))).dy,
         lessThan(tester.getTopLeft(find.byKey(const Key('choice-rename'))).dy));
     await choose(tester, 'count');

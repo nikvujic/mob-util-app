@@ -5,7 +5,7 @@ import 'package:the_app/data/weather_api.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/widgets/pip_room.dart';
 
-/// Round 79 (Nikola): his trees sway only in the wind.
+/// Round 79: his trees sway only in the wind.
 void main() {
   final at = DateTime(2026, 10, 19, 12);
   const place = WeatherPlace(
@@ -24,7 +24,7 @@ void main() {
     expect(PipWind.of(29.9, null), PipWind.breeze);
     expect(PipWind.of(30, WeatherKind.clear), PipWind.windy);
     expect(PipWind.of(3, WeatherKind.storm), PipWind.windy);
-    // Round 80 (Nikola): the weather off (not known), still.
+    // Round 80: the weather off (not known), still.
     expect(PipWind.of(null, WeatherKind.clear), PipWind.calm);
     expect(PipWind.of(null, null), PipWind.calm);
   });

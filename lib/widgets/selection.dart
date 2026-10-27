@@ -283,7 +283,7 @@ class SelectableCard extends StatelessWidget {
         ),
         // Drawn on top so the highlight never changes the row's size.
         foregroundDecoration: ShapeDecoration(
-          // Clearly marked (Nikola): a thick accent outline.
+          // Clearly marked: a thick accent outline.
           shape: shape.copyWith(
             side: BorderSide(
               color: selected ? context.colors.accent : Colors.transparent,

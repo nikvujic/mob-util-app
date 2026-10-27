@@ -29,7 +29,7 @@ String? sectionTaken(PackingBook book, String name, {String? except}) =>
         ? null
         : '${name.trim()} is already a section';
 
-/// The default sections (Round 95, Nikola): what a new packing list starts
+/// The default sections (Round 95): what a new packing list starts
 /// with; each list then has its own, changed in its edit mode. In order,
 /// the handle moves them; a tap renames or deletes one. At least one
 /// stays. Changing them doesn't touch the lists there are.

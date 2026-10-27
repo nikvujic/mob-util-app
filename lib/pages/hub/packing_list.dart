@@ -18,7 +18,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// One packing list (Round 94; Round 95: Nikola's changes). It opens in
+/// One packing list (Round 94; Round 95: the user's changes). It opens in
 /// **view mode**: its sections, each thing a row with a box; a tap
 /// anywhere on a row ticks it (or unticks it), in place. **Reset**
 /// unticks them all, asked first. **Edit**: its name, its own sections
@@ -136,7 +136,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
         _editing = true;
       });
 
-  /// Done: saved; a new one goes to the lists page (Nikola: not to its
+  /// Done: saved; a new one goes to the lists page (not to its
   /// view), dropped if nothing's in it; one being edited back to view.
   void _done() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -183,7 +183,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
   }
 
   /// Back in edit mode: the selection, then the name's keyboard, then
-  /// Save or Discard if anything changed (Nikola, as a note).
+  /// Save or Discard if anything changed (as a note).
   Future<void> _onBack() async {
     if (_selected.isNotEmpty) {
       setState(_selected.clear);
@@ -230,7 +230,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     _notifier.toggle(_id, item.id);
   }
 
-  /// Asked first (Nikola), no Undo after.
+  /// Asked first, no Undo after.
   Future<void> _reset() async {
     final confirmed = await showConfirmDialog(
       context,
@@ -366,7 +366,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     }
   }
 
-  /// With its things, asked first if it has any (Nikola); the last one
+  /// With its things, asked first if it has any; the last one
   /// stays.
   Future<void> _deleteSection(PackingSection section) async {
     if (_list.sections.length <= 1) {
@@ -395,7 +395,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
   Future<void> _itemOptions(PackingItem item) async {
     _leaveFields();
     final choice = await showChoicesSheet(context, item.name, const [
-      // Count first (Nikola, Round 103): the one used most.
+      // Count first (Round 103): the one used most.
       (Icons.numbers, 'Count', 'count'),
       (Icons.edit_outlined, 'Rename', 'rename'),
     ]);
@@ -472,7 +472,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
                       onPressed: _deleteSelected,
                     )
                   else ...[
-                    // Round 96 (Nikola): by Done, not at the list's end.
+                    // Round 96: by Done, not at the list's end.
                     BottomAction(
                       icon: Icons.playlist_add,
                       tooltip: 'Add section',
@@ -605,7 +605,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     );
   }
 
-  // Round 96 (Nikola, as Ingredients'): a section dragged by the right
+  // Round 96 (as Ingredients'): a section dragged by the right
   // of its heading; a line shows where it'd go; the list scrolls at its
   // edges.
 

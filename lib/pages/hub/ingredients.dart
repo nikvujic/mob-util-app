@@ -298,7 +298,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       onTap: () => _sectionMenu(section),
       child: header,
     );
-    // Round 92 (Nikola): dragged only from the right, where an
+    // Round 92: dragged only from the right, where an
     // ingredient's handle is (no handle drawn, Round 45); a tap anywhere
     // gives its options. The first stays on top.
     final row = IntrinsicHeight(

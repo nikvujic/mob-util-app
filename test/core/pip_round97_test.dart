@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 97 (Nikola): changing his battery, livelier: the new one bounces
+/// Round 97: changing his battery, livelier: the new one bounces
 /// as it lands and glints while it waits; the old one has no red bit, is
 /// thrown over his head to his other side (never over the new one), lands
 /// with a puff of dust; a crackle as the new one clicks in; a shake, then

@@ -7,7 +7,7 @@ import 'package:the_app/widgets/month_picker.dart';
 
 import '../helpers.dart';
 
-/// Round 91 (Nikola): a calendar opens on the day set; with none set, on
+/// Round 91: a calendar opens on the day set; with none set, on
 /// today (a new subscription's didn't). (Round 87 had opened every one
 /// on today's month.)
 void main() {

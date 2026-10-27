@@ -127,7 +127,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
-    // Round 85 (Nikola): a month and year, as on the card.
+    // Round 85: a month and year, as on the card.
     final picked = await showMonthPicker(
       context,
       title: 'Card expires',
@@ -186,7 +186,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     final colors = context.colors;
     final today = _today;
     final at = s.dateOn(today);
-    // Round 91 (Nikola): back asks Save or Discard once it's changed.
+    // Round 91: back asks Save or Discard once it's changed.
     final now = ref.watch(subscriptionsProvider).byId(_draft.id);
     return DiscardScope(
       changed: now != _original,
@@ -356,7 +356,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                     _change(_draft.copyWith(card: text.trim())),
               ),
             ),
-            // Round 80 (Nikola): when the card paying it expires.
+            // Round 80: when the card paying it expires.
             ListTile(
               key: const Key('subscriptionCardExpires'),
               leading: const Icon(Icons.credit_card_off_outlined),

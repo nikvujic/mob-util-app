@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:the_app/core/weather.dart';
 
-/// Round 75: what the weather makes of Pip's days (Nikola: "a bunch of
+/// Round 75: what the weather makes of Pip's days ("a bunch of
 /// events that can entertain"). This is the one place that says what
 /// each weather does while he's doing what; his brain follows it.
 ///

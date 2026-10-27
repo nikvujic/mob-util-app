@@ -10,7 +10,7 @@ import 'package:the_app/providers/shop_provider.dart';
 import '../helpers.dart';
 
 /// Leaving the app while it's unlocked covers it, so coming back after
-/// the auto-lock never shows a protected page for a moment (L4, Nikola).
+/// the auto-lock never shows a protected page for a moment (L4).
 void main() {
   const password = 'master password';
 

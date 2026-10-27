@@ -169,7 +169,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                       _selection.selectAll(counters.map((c) => c.id)),
                   onDeselectAll: _selection.clear,
                   onDelete: _deleteSelected,
-                  // No ✕: back leaves selection mode (Nikola).
+                  // No ✕: back leaves selection mode.
                   extra: [
                     if (_selection.count == 1)
                       SelectionAction(
@@ -214,7 +214,7 @@ class _CounterCard extends StatelessWidget {
     required this.onLongPress,
   });
 
-  /// Every counter's row is this high, limits or not (Nikola).
+  /// Every counter's row is this high, limits or not.
   static const _rowHeight = 64.0;
 
   /// Rounder than list rows (O5).
@@ -251,7 +251,7 @@ class _CounterCard extends StatelessWidget {
       child: ReorderableRow(
         content: Padding(
           padding: const EdgeInsets.fromLTRB(10, 8, 0, 8),
-          // One fixed height for every counter (Nikola).
+          // One fixed height for every counter.
           child: SizedBox(
             height: _rowHeight,
             child: Row(
@@ -274,7 +274,7 @@ class _CounterCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Its limits beside the name, so every card is the
-                      // same height (Nikola).
+                      // same height.
                       Text.rich(
                         TextSpan(children: [
                           TextSpan(text: counter.name),

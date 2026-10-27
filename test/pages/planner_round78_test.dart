@@ -8,7 +8,7 @@ import 'package:the_app/providers/routines_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 78 (Nikola): routines are just there (nothing to tick off, not
+/// Round 78: routines are just there (nothing to tick off, not
 /// on past days); a past day's ticked-off blocks are deleted.
 void main() {
   late ProviderContainer container;

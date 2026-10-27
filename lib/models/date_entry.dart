@@ -71,17 +71,17 @@ class DateReminder {
 
   const DateReminder({required this.daysBefore, required this.minutes});
 
-  /// A new date's (Round 57, Nikola): the day before, at 09:00.
+  /// A new date's (Round 57): the day before, at 09:00.
   static const standard = DateReminder(daysBefore: 1, minutes: 9 * 60);
 
-  /// A new date's reminders (Round 61, Nikola): the day before and a
+  /// A new date's reminders (Round 61): the day before and a
   /// week before, at 09:00.
   static const defaults = [
     standard,
     DateReminder(daysBefore: 7, minutes: 9 * 60),
   ];
 
-  /// A wedding's (Round 61, Nikola): a week and a month before.
+  /// A wedding's (Round 61): a week and a month before.
   static const weddingDefaults = [
     DateReminder(daysBefore: 7, minutes: 9 * 60),
     DateReminder(daysBefore: 30, minutes: 9 * 60),

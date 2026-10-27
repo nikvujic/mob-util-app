@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
-/// A page saved as it's typed (Round 91, Nikola: as a note): with
+/// A page saved as it's typed (Round 91, as a note): with
 /// [changed], back asks **Discard** or **Save**. Save (or Back on the
 /// dialog) keeps it as it is; Discard calls [onDiscard] (it puts back how
 /// it was, or removes a new one) and leaves; a tap outside stays.

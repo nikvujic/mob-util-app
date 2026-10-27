@@ -8,7 +8,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 93 (Nikola): Spotify in the morning, a Hub page of settings: on
+/// Round 93: Spotify in the morning, a Hub page of settings: on
 /// or off, a time, the days and a volume; the phone's alarm follows them.
 void main() {
   /// Tuesday, 20 October 2026, 12:00.

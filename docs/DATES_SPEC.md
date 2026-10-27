@@ -2,9 +2,9 @@
 
 Built in Round 57 (v1.18.0).
 
-From Nikola's notes (ROADMAP, Round 57): a calendar of important dates,
+From the notes (ROADMAP, Round 57): a calendar of important dates,
 each with a title, a note, a type and up to three reminders; Pip in a
-party hat on a birthday. Built from the app's usual patterns. Nikola's
+party hat on a birthday. Built from the app's usual patterns. The user's
 answers are in (Round 57); **Decided** marks them.
 
 ## 1. The page (a Hub page, "Dates")

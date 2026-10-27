@@ -20,7 +20,7 @@ void main() {
 
   SubscriptionBook book() => container.read(subscriptionsProvider);
 
-  /// Nikola's list.
+  /// a real list.
   final nikolas = SubscriptionBook([
     Subscription(
         id: 'claude',

@@ -207,8 +207,7 @@ void main() {
       expect(find.text('Discard changes?'), findsOneWidget);
     });
 
-    testWidgets('back asks; back again counts as Discard (Nikola)',
-        (tester) async {
+    testWidgets('back asks; back again counts as Discard', (tester) async {
       await openAddSheet(tester);
       await edit(tester);
 

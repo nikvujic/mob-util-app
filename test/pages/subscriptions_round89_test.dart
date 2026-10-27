@@ -9,7 +9,7 @@ import 'package:the_app/providers/subscriptions_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 89 (Nikola): subscriptions' cards held and dragged to a new
+/// Round 89: subscriptions' cards held and dragged to a new
 /// place, as the Hub's tiles; their order is kept.
 void main() {
   Subscription sub(String id) =>

@@ -19,7 +19,7 @@ void main() {
 
   Future<void> open(WidgetTester tester,
       {int hour = 12, FakePipLink? link, bool real = false}) async {
-    // A phone's size (Nikola's): half of it is his field.
+    // A phone's size : half of it is his field.
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);

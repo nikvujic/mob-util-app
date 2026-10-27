@@ -72,7 +72,7 @@ class WeatherReport {
   final DateTime fetchedAt;
 
   /// Round 106: [code]'s rain or snow now was checked by the rain radar
-  /// (Tomorrow.io, with Nikola's key); false: Open-Meteo's alone.
+  /// (Tomorrow.io, with the user's key); false: Open-Meteo's alone.
   final bool radar;
 
   const WeatherReport({
@@ -126,7 +126,7 @@ class InternetSettings {
   /// The last weather fetched, shown till the next (and after a restart).
   final WeatherReport? report;
 
-  /// Round 106: Nikola's own Tomorrow.io key for the rain radar; null:
+  /// Round 106: the user's own Tomorrow.io key for the rain radar; null:
   /// none, the weather is Open-Meteo's alone. Settings aren't in backups,
   /// so it never leaves the phone but to Tomorrow.io.
   final String? radarKey;

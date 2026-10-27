@@ -178,7 +178,7 @@ void main() {
     await tapText(tester, 'Edit routine');
     await tapIn(tester, find.widgetWithText(FilterChip, 'Thu'));
     await tester.pump();
-    // Not moved by itself (Nikola): red, Save off, a button to fit it.
+    // Not moved by itself: red, Save off, a button to fit it.
     expect(find.widgetWithText(OutlinedButton, '08:30'), findsOneWidget);
     expect(find.byKey(const Key('timeClash')), findsOneWidget);
     final save = find.widgetWithText(FilledButton, 'Save');
@@ -201,7 +201,7 @@ void main() {
     expect(run.weekdays, {DateTime.thursday, DateTime.friday});
   });
 
-  // Nikola's case (Mon/Wed/Fri 23:30–23:59, a Tuesday one at the same
+  // The user's case (Mon/Wed/Fri 23:30–23:59, a Tuesday one at the same
   // time, then Wednesday ticked), on days the strip shows: Thursday today,
   // Friday tomorrow.
   testWidgets('ticking a day another routine has there: time stays, Save off',
@@ -272,7 +272,7 @@ void main() {
     await tester.pump(); // and the form makes up for it
     expect(find.byKey(const Key('timeClash')), findsOneWidget);
     expect(tester.getCenter(fri).dy, moreOrLessEquals(before.dy, epsilon: 1),
-        reason: 'still under the finger (Nikola)');
+        reason: 'still under the finger');
 
     // The line: red, with its icon; the button at the form's left.
     expect(find.byIcon(Icons.error_outline), findsOneWidget);

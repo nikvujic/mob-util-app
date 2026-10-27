@@ -184,7 +184,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     _saveNow();
   }
 
-  /// Round 102 (Nikola): switching between view and edit keeps the
+  /// Round 102: switching between view and edit keeps the
   /// scroll: the view list's controller, and a context inside the edit
   /// list to ask how far down it is.
   ScrollController _viewScroll = ScrollController();
@@ -734,7 +734,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
   Widget _viewBody(BuildContext context) {
     final colors = context.colors;
     final ingredients = _recipe.ingredients;
-    // No pull-down reach here (Nikola): only in edit mode.
+    // No pull-down reach here: only in edit mode.
     return ListView(
       key: const Key('recipeView'),
       controller: _viewScroll,

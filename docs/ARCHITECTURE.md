@@ -165,7 +165,7 @@ it was before. The page picking them is `pages/backup/restore_part.dart`.
 
 ## Android's own backup
 
-The app keeps Android's Auto Backup on (the default, decided with Nikola):
+The app keeps Android's Auto Backup on (the default, decided with the user):
 if Google backup is on in the phone's settings, Android copies the app's
 files to a hidden area of the Google account, end-to-end encrypted with
 the phone's screen lock (Android 9+), and puts them back when the app is
@@ -199,7 +199,7 @@ it, so nothing hides behind them.
 
 ## UI conventions (Round 33)
 
-Written down after the to-do page broke several (Nikola's review of
+Written down after the to-do page broke several (Review of
 1.4.0). Check a new page against these, and against a page like it
 (Shop for lists), before building it.
 
@@ -208,7 +208,7 @@ Written down after the to-do page broke several (Nikola's review of
   main tabs, `BottomAction(primary: true)` elsewhere), at the bottom.
   Not a grey button.
 - **Buttons at the bottom** follow the hand (`BottomActions`), except
-  where Nikola fixed them to the right (Medicine).
+  where the user fixed them to the right (Medicine).
 - **Deleting several** (selection, "completed" lists): ask with
   `showDeleteConfirmDialog` ("This cannot be undone."), and then **no
   Undo** after it (the dialog said there's none). Deleting **one** thing
@@ -418,7 +418,7 @@ festive pine, the badnjak, fireworks, eggs, rain, snowfall, lightning, fog) are
 decided there, a grey sky hiding the sun, moon and stars.
 
 Round 106: the rain radar, optional: `RadarApi` (`TomorrowIoApi`, with
-Nikola's own key in `InternetSettings.radarKey`; settings aren't in
+The user's own key in `InternetSettings.radarKey`; settings aren't in
 backups) answers whether it's raining or snowing now, as a WMO code
 (`wmoFromTomorrow`), or null when dry. `WeatherNotifier.refresh` asks it
 after Open-Meteo: its rain or snow replaces the report's code
@@ -677,7 +677,7 @@ medicine and medicine-setting changes. Each `Reminder` has a kind, and
 each kind its own Android channel (`planner-reminders`,
 `medicine-reminders`). A page's reminders leave out titles and names
 only when its notifications are set private (Round 82: a lock no longer
-does, Nikola).
+does).
 
 ## Years of medicine history (Round 18)
 

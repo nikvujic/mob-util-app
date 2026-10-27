@@ -1,7 +1,7 @@
 # Recipes — spec (Round 40; settled in Rounds 41–42)
 
-Built in Round 42 (v1.9.0); type filters and search are for later. From Nikola's notes (ROADMAP, Round 40); the drafts are
-in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
+Built in Round 42 (v1.9.0); type filters and search are for later. From the notes (ROADMAP, Round 40); the drafts are
+in `docs/recipes_drafts.png`. Marked **Q** where the user decides.
 
 ## 1. The Recipes page (a Hub page)
 
@@ -31,13 +31,13 @@ in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
   each ingredient's name on the left and its quantity on the right, no
   handles, no adding; then the **method**, the recipe's text shown as a
   note shows it (Markdown rendered, nothing editable).
-- No pull-down reach mode here (Nikola): only in edit mode.
+- No pull-down reach mode here: only in edit mode.
 - Bottom buttons: **Edit** (outermost) and **To Shop**.
 
 ### To Shop
 
 - Puts the recipe's ingredients on the Shop list, with their quantities.
-- All of them go on the **to-buy** list (Nikola moves what he has).
+- All of them go on the **to-buy** list (the user moves what he has).
 - An item already in Shop with the same name (ignoring case) and the
   same quantity is just put back on the to-buy list; with another
   quantity, a **copy** is added (two items, two quantities: easier than
@@ -63,7 +63,7 @@ in `docs/recipes_drafts.png`. Marked **Q** where Nikola decides.
   with no quantity yet (tap to set).
 - **Method**: works like a note: it shows as text, a tap puts the cursor
   there and the keyboard up, with the format bar (Markdown). (So edit
-  mode has its own view/edit for this text, as Nikola said.)
+  mode has its own view/edit for this text, as the user said.)
 - Pull down for reach (reach mode) here, as on other editing pages.
 - Saving like a note: as you go (autosave); bottom buttons **Done**
   (outermost; back to view mode), **Undo**, **Discard changes** (back to

@@ -233,7 +233,7 @@ class ReminderPlanner {
   Future<void> _plan() async {
     final now = _ref.read(clockProvider)();
     final preferences = _ref.read(preferencesProvider);
-    // Round 82 (Nikola): names are left out only when a page's
+    // Round 82: names are left out only when a page's
     // notifications are set private, not because the page is locked.
     bool private(NotifyPage page) => preferences.styleOf(page).private;
     final reminders = [

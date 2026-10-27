@@ -215,7 +215,7 @@ class _WeatherNow extends ConsumerWidget {
   }
 }
 
-/// Round 106 (Nikola): the rain radar, optional: his own free Tomorrow.io
+/// Round 106: the rain radar, optional: his own free Tomorrow.io
 /// key (where to get one copied, no link), pasted in, checked once; then
 /// the rain or snow now comes from it. Removed with ×.
 class _RainRadar extends ConsumerWidget {

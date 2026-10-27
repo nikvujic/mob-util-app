@@ -92,7 +92,7 @@ Future<bool> showDeleteConfirmDialog(
 /// Asks whether to keep changes when leaving an editor: **Discard** or
 /// **Save**. Resolves to `true` for Save and for back (only an explicit
 /// Discard throws changes away), `false` for Discard, and `null` for a tap
-/// outside: that just closes the dialog, staying in the editor (Nikola).
+/// outside: that just closes the dialog, staying in the editor.
 Future<bool?> showSaveChangesDialog(
   BuildContext context, {
   String title = 'Save changes?',

@@ -1,4 +1,4 @@
-/// Spotify in the morning (Round 93, Nikola): at [minutes] on the
+/// Spotify in the morning (Round 93): at [minutes] on the
 /// [weekdays] picked, while [on], the phone's music volume is set to
 /// [volume] percent and play is pressed for it, so Spotify (or whatever
 /// played last) carries on. Kept in the preferences.

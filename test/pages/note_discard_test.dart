@@ -57,8 +57,7 @@ void main() {
       expect(noteById(id).content, 'milk, eggs');
     });
 
-    testWidgets('tapping outside the dialog stays in the note (Nikola)',
-        (tester) async {
+    testWidgets('tapping outside the dialog stays in the note', (tester) async {
       await openExistingNote(tester);
       await tester.enterText(contentField, 'milk, eggs');
 

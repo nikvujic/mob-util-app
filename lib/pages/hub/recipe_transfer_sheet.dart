@@ -8,7 +8,7 @@ import 'package:the_app/providers/recipe_transfer.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
-/// Round 104 (Nikola): the Recipes page's Import / export button. Import
+/// Round 104: the Recipes page's Import / export button. Import
 /// pastes a recipe (a new one); the exports copy a picked recipe, for
 /// someone to import or for an AI agent to write a new one like it.
 Future<void> showRecipeTransfer(BuildContext context, WidgetRef ref) async {

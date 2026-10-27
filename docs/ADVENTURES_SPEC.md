@@ -1,6 +1,6 @@
 # Pip's adventures — spec (Round 63)
 
-Built in Rounds 63–64 (v1.25.0); skiing (section 8) and the inventory still to come. From Nikola's notes (ROADMAP,
+Built in Rounds 63–64 (v1.25.0); skiing (section 8) and the inventory still to come. From the notes (ROADMAP,
 Rounds 41 and 63); his answers are in, and **Decided** marks them.
 
 ## 1. What it is
@@ -52,7 +52,7 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   events** (flower, butterfly, ball, bug fights, screens) (decided).
 - He **keeps his hat of the day** (decided).
 
-## 3b. Round 73 (Nikola: "it feels like he gains XP when killing bugs")
+## 3b. Round 73 ("it feels like he gains XP when killing bugs")
 
 - **XP by the bug, watched**: XP is still earned by the time out (ten a
   minute, an XP every six seconds), but while you watch him fight, the
@@ -192,7 +192,7 @@ these names):
 
 Skiing is **a different look for his adventure**, not a separate thing:
 the same days out (12:00–18:00), the same XP, break and rules; only
-what's drawn changes. **Decided** marks Nikola's answers.
+what's drawn changes. **Decided** marks the answers.
 
 ### 8.1 Ski days
 
@@ -225,7 +225,7 @@ Three ways to draw going downhill, him always in the middle:
 - **A, tilted slope**: the ground slopes down to the right; trees,
   flags and bumps slide up and to the left past him. Reads most like
   "down a hill".
-- **B, raised snowfield** (Nikola's idea): the snow fills more of the
+- **B, raised snowfield** (the user's idea): the snow fills more of the
   room; he stays put and the trees and flags **rise past him**, so he
   seems to go down.
 - **C, flat glide**: like running, the snow moving left.
@@ -271,10 +271,10 @@ weapon box still shows it).
 
 - In the **Adventures** list (8.9).
 
-### 8.8 Nikola's answers (Round 67)
+### 8.8 the answers (Round 67)
 
 1. **Slope: B**, the raised snowfield: trees, flags and bumps rise past
-   him. Round 72 (Nikola: he looked like he walked on a layer of
+   him. Round 72 (he looked like he walked on a layer of
    ground): **downhill**, seen from behind: the slope goes up to
    mountains on the horizon, he sways gently side to side in the
    middle, and what he passes comes up from below him and shrinks away

@@ -57,11 +57,11 @@ class MyApp extends ConsumerWidget {
       title: 'The App',
       theme: AppTheme.of(theme.palette),
       // Switch themes at once: an animated switch showed the old colours
-      // for a moment (Nikola saw the old theme flash on the next page).
+      // for a moment (the user saw the old theme flash on the next page).
       themeAnimationDuration: Duration.zero,
       // Tracks which side the user touches, for G11 bottom actions; the
       // curtain hides what's unlocked as the app leaves. Round 88
-      // (Nikola): a tap on nothing (not a field, button or the like) lets
+      //: a tap on nothing (not a field, button or the like) lets
       // a field being typed in go, on every page, sheet and dialog.
       builder: (context, child) => PrivacyCurtain(
         child: HandTracker(

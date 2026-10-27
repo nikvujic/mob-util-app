@@ -173,7 +173,7 @@ void main() {
     expect(find.byKey(const Key('placardText')), findsNothing);
   });
 
-  test('the hold is long (Nikola: two to three times the first 0.9 s)', () {
+  test('the hold is long (two to three times the first 0.9 s)', () {
     expect(PlacardPage.holdTime,
         greaterThanOrEqualTo(const Duration(milliseconds: 1800)));
   });

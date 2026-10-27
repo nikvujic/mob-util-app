@@ -123,7 +123,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     });
   }
 
-  /// The select button cycles (Nikola): all of the section where selecting
+  /// The select button cycles: all of the section where selecting
   /// started → everything (both sections) → nothing.
   SelectionAction _selectStep(List<ShopItem> toBuy, List<ShopItem> stock) {
     final selected = _selection.selected;
@@ -785,7 +785,7 @@ class _AmountSheet extends ConsumerWidget {
                   step(Icons.remove, 'Less', down),
                   Expanded(
                     child: weight
-                        // Tap to type an exact weight (Nikola).
+                        // Tap to type an exact weight.
                         ? TextButton(
                             key: const Key('typeWeight'),
                             onPressed: typeExact,

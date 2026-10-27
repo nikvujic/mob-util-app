@@ -1,4 +1,4 @@
-"""Draws the app's launcher icon: **Pip** (Round 24, Nikola's pick), an
+"""Draws the app's launcher icon: **Pip** (Round 24, picked), an
 8-bit pixel robot, in the Clay theme's colours on its dark ground. Since
 Round 27 he is his room's idle frame (`lib/widgets/pip_sprites.dart`,
 the screen 14 x 9): the same 20-wide grid, the face a pixel right of the

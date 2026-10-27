@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 
-/// Recipes as text, to copy and paste (Round 104, Nikola): **export for
+/// Recipes as text, to copy and paste (Round 104): **export for
 /// import** (a recipe someone else pastes in), **export for an agent** (a
 /// recipe as an example, with the rules, so an AI agent writes a new one in
 /// the same shape) and **import** (pasted text: a new recipe, ingredients

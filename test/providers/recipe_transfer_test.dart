@@ -8,7 +8,7 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/providers/recipe_transfer.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 
-/// Round 104 (Nikola): recipes as text: export for import, export for
+/// Round 104: recipes as text: export for import, export for
 /// ChatGPT, import (paste).
 void main() {
   late ProviderContainer container;

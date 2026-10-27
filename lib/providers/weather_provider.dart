@@ -11,7 +11,7 @@ export 'package:the_app/data/weather_api.dart' show WeatherFailure;
 /// The weather service (Round 70); a fake in tests.
 final weatherApiProvider = Provider<WeatherApi>((ref) => OpenMeteoApi());
 
-/// The rain radar (Round 106), used with Nikola's key; a fake in tests.
+/// The rain radar (Round 106), used with the user's key; a fake in tests.
 final radarApiProvider = Provider<RadarApi>((ref) => TomorrowIoApi());
 
 /// Where to get a rain radar key (shown with a copy button).

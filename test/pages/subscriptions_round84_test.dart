@@ -7,7 +7,7 @@ import 'package:the_app/providers/subscriptions_alerts_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 84 (Nikola): a card's expiry coloured on its subscription's
+/// Round 84: a card's expiry coloured on its subscription's
 /// card: orange a week or less ahead, red once gone by. No notification.
 /// Round 85: an expiry is a month (good through its last day).
 void main() {

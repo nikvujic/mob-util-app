@@ -8,7 +8,7 @@ import 'package:the_app/providers/routines_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 83 (Nikola): new blocks and routines remind at their start; a
+/// Round 83: new blocks and routines remind at their start; a
 /// block can be moved to another day (its time changed to fit, after
 /// saying so, if it's taken there).
 void main() {

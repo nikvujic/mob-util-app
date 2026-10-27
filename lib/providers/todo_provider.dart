@@ -37,7 +37,7 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
 
   /// Done, or not done again: to the top of *Completed* (done most
   /// recently), or back to the end of the things to do. As Shop's toggle.
-  /// Done, it's no longer waiting. Round 83 (Nikola): not done again,
+  /// Done, it's no longer waiting. Round 83: not done again,
   /// it goes back where it was (waiting again, if it was), unless the
   /// things to do changed since.
   void toggle(String id) {

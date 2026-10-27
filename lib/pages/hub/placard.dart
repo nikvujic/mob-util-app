@@ -21,7 +21,7 @@ class PlacardPage extends ConsumerStatefulWidget {
   const PlacardPage({super.key});
 
   /// How long a hold takes to count.
-  /// About 3 seconds, the inflating sound's length (Nikola: longer in
+  /// About 3 seconds, the inflating sound's length (longer in
   /// Round 16; Round 20's 4 seconds went back in Round 24).
   static const holdTime = Duration(milliseconds: 3200);
 
@@ -108,7 +108,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    // Nothing but the placard: no status bar (Nikola).
+    // Nothing but the placard: no status bar.
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 

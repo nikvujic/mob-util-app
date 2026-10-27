@@ -8,7 +8,7 @@ import 'package:the_app/models/morning_music.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
-/// Spotify in the morning (Round 93, Nikola: a page with no list, just
+/// Spotify in the morning (Round 93, a page with no list, just
 /// its settings): on or off, the time, the days, and the volume. At that
 /// time the phone sets the music volume and presses play, so Spotify
 /// carries on with what it last played. Saved as it's changed.

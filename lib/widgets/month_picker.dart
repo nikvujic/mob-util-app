@@ -47,7 +47,7 @@ class _MonthPicker extends StatefulWidget {
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
-  // Round 91 (Nikola): opens on the set month's year; none set, this one.
+  // Round 91: opens on the set month's year; none set, this one.
   late int _year = (widget.initial ?? widget.today)
       .year
       .clamp(widget.firstYear, widget.lastYear);
@@ -89,7 +89,7 @@ class _MonthPickerState extends State<_MonthPicker> {
             ],
           ),
           const SizedBox(height: 8),
-          // Round 86 (Nikola: four across were squished): three across,
+          // Round 86 (four across were squished): three across,
           // four rows, spaced, each a full-width button.
           for (var row = 0; row < 4; row++)
             Padding(

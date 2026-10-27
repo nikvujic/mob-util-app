@@ -238,7 +238,7 @@ void main() {
     });
 
     test("only yesterday's from 22:00 (Round 17)", () {
-      // Nikola at 00:50: doses from 11:00 to 21:00 kept the dot.
+      // The user at 00:50: doses from 11:00 to 21:00 kept the dot.
       final day = Medicine(
         id: 'd',
         name: 'Day',

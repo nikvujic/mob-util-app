@@ -7,7 +7,7 @@ import 'package:the_app/providers/session_provider.dart';
 /// frame Android keeps (shown in recent apps, and for a moment on coming
 /// back) has nothing protected in it. Without this, coming back after the
 /// auto-lock showed the unlocked page for a moment before it locked
-/// (Nikola). The cover goes once the app is back in front, after the
+///. The cover goes once the app is back in front, after the
 /// session has decided whether to lock.
 class PrivacyCurtain extends ConsumerStatefulWidget {
   final Widget child;

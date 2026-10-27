@@ -339,7 +339,7 @@ class _TaskSheetState extends State<TaskSheet> {
   /// Runs [change] (picking days below the times), keeping what's below
   /// the line under the times where it is: the line can appear or go with
   /// the days, and would otherwise push the chip just tapped out of view
-  /// (Nikola). The form scrolls by however much the line changed.
+  ///. The form scrolls by however much the line changed.
   void _keepBelow(VoidCallback change) {
     final before = _noticeKey.currentContext?.size?.height ?? 0;
     setState(change);
@@ -372,7 +372,7 @@ class _TaskSheetState extends State<TaskSheet> {
 
   /// Whether the times run into something (they're outside [_room], which
   /// changes with the weekdays and end date). They're kept as picked —
-  /// never moved by themselves (Nikola) — shown in red, with Save off and
+  /// never moved by themselves — shown in red, with Save off and
   /// a button to [_fit] them.
   bool get _clashes {
     if (widget.point) return false;
@@ -495,7 +495,7 @@ class _TaskSheetState extends State<TaskSheet> {
       a.length == b.length && a.containsAll(b);
 
   /// Closes, asking first if something was changed. In that question,
-  /// back counts as "Discard" (Nikola), unlike a note's "Save changes?".
+  /// back counts as "Discard", unlike a note's "Save changes?".
   Future<void> _close() async {
     if (!_changed) {
       Navigator.of(context).pop();
@@ -860,7 +860,7 @@ class _TaskSheetState extends State<TaskSheet> {
                     // changed). Delete, when editing, sits on the left.
                     children: [
                       // Not Flexible: that kept half the free space for
-                      // it, so Save stopped short of the edge (Nikola).
+                      // it, so Save stopped short of the edge.
                       if (widget.onDelete != null)
                         TextButton.icon(
                           icon: const Icon(Icons.delete_outline),

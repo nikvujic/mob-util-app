@@ -17,7 +17,7 @@ const holdToTakeEnd = Duration(milliseconds: 900);
 /// [time]. A big round button has to be held for [holdToTakeTime]: it
 /// fills up like a glass, with a sound and small ticks while held, and
 /// drains if let go early. True once held to the end; false if cancelled.
-/// Round 92 (Nikola: a take was lost): while it's held, and once full,
+/// Round 92 (a take was lost): while it's held, and once full,
 /// it can't be closed (no Cancel, no tap outside, no Back), and a full
 /// one counts however the dialog goes.
 Future<bool> showHoldToTake(

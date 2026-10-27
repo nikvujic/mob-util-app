@@ -161,7 +161,7 @@ app still reads every version, so an update can never lose existing data.
 - `v28/backup-plain.json` — backup (version 28) with those items (and
   v27's dates and Pip).
 - `v29/storage/subscriptions.json` — subscriptions (Round 79,
-  subscriptions.json version 1, Nikola's list): Claude 20€ active
+  subscriptions.json version 1, a real list): Claude 20€ active
   renewing 3 Nov 2026 (card "Revolut 4421"), Claude 2 20€ active 12 Nov
   (no card), ChatGPT 23€ **cancelled** till 13 Nov (note "Cancelled"),
   Grok 16€ **to cancel** by 17 Nov (note "real ~30€", no card, a

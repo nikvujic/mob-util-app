@@ -25,7 +25,7 @@ PipHat? pipHatOn(DateTime day, {int seed = 0}) {
   return everyday[(roll ~/ 10000) % everyday.length];
 }
 
-/// About this many hat days a month (Nikola: 6 or 7).
+/// About this many hat days a month (6 or 7).
 const hatDaysAMonth = 6.5;
 
 /// A day's chance of a hat.

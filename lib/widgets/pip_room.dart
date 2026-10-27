@@ -897,7 +897,7 @@ class _RoomPainter extends CustomPainter {
       canvas.restore();
     }
 
-    // Round 72 (Nikola: he should ski *down*): seen from below, the slope
+    // Round 72 (he should ski *down*): seen from below, the slope
     // runs up to a horizon with mountains; what he passes comes up from
     // the bottom of the screen and shrinks away to it, his tracks too.
     if (downhill) {
@@ -1963,7 +1963,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
     if (props.contains(PipProp.rain)) {
-      // Round 72 (Nikola didn't like the dashes): long thin streaks, slanted
+      // Round 72 (the user didn't like the dashes): long thin streaks, slanted
       // with the wind, in two layers (far ones fainter and slower), and
       // little splashes where they hit the ground.
       final drizzle = scene?.weather == WeatherKind.drizzle;

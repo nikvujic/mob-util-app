@@ -281,7 +281,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     }
   }
 
-  /// Round 83 (Nikola): moves [task] to a picked day (the next one first:
+  /// Round 83: moves [task] to a picked day (the next one first:
   /// tomorrow for a missed one), at its time if that's free there, else
   /// the nearest free time as long, after saying so. Undo moves it back.
   Future<void> _move(PlannerTask task) async {
@@ -609,7 +609,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
       );
   }
 
-  /// Ticking a reminder off deletes it (Nikola), with undo.
+  /// Ticking a reminder off deletes it, with undo.
   void _pinDone(PlannerPin pin) => _removePin(pin, 'done');
 
   void _removePin(PlannerPin pin, String what) {
@@ -708,7 +708,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           color: BlockColor.fromName(o.routine.color),
           reminds: o.routine.remind != null,
           description: o.routine.description,
-          // Round 78: no box to tick (Nikola: they're just there).
+          // Round 78: no box to tick (they're just there).
           onTap: selecting ? () {} : () => _routineTapped(o),
         ),
     ];

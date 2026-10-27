@@ -88,7 +88,7 @@ Future<Map<String, dynamic>> getJson(
   }
 }
 
-/// Round 106 (Nikola): the rain radar, with his own key: whether it's
+/// Round 106: the rain radar, with his own key: whether it's
 /// raining or snowing now, which a forecast model (Open-Meteo's) can
 /// miss. Optional; without a key the weather is Open-Meteo's alone.
 abstract class RadarApi {
@@ -101,7 +101,7 @@ abstract class RadarApi {
 class TomorrowIoApi implements RadarApi {
   static const timeout = Duration(seconds: 12);
 
-  /// Where to get a key (shown, with a copy button; Nikola: no links).
+  /// Where to get a key (shown, with a copy button; no links).
   static const signUp = 'https://app.tomorrow.io/signup';
 
   @override

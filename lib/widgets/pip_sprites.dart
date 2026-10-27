@@ -248,7 +248,7 @@ abstract final class PipSprites {
   ];
 
   /// His old battery (Round 54), thrown away: dark inside (Round 97,
-  /// Nikola: no red bit left in it).
+  /// no red bit left in it).
   static const batteryEmpty = [
     '.hh.',
     'gXXg',
@@ -929,7 +929,7 @@ abstract final class PipSprites {
       '.bbbbbbbb.',
       'wbwbwbwbwb',
     ],
-    // Round 67: his ski days'. Round 72 (Nikola: better): pulled down
+    // Round 67: his ski days'. Round 72 (better): pulled down
     // over his head ([hatDrop]), a ribbed cuff, a Nordic pattern, a
     // shaded pompom.
     PipHat.skiBeanie: [
@@ -1192,7 +1192,7 @@ abstract final class PipSprites {
     'r': PipColours.snowShade,
   };
 
-  /// Round 72: his ski trip's bus, 92 x 36, bigger (Nikola): yellow, a
+  /// Round 72: his ski trip's bus, 92 x 36, bigger: yellow, a
   /// red stripe, the windscreen and door at the front (left), three
   /// passenger windows; his own ('.') clear, him in it behind the glass,
   /// seats in the others.
@@ -1264,7 +1264,7 @@ abstract final class PipSprites {
   /// A little z rising while he sleeps, 3 x 4.
   static const z = ['zzz', '..z', '.z.', 'zzz'];
 
-  /// His egg (Round 34, Nikola's pick: spotted), 16 x 19: the shell, a
+  /// His egg (Round 34, picked: spotted), 16 x 19: the shell, a
   /// shade down its right and bottom edges, spots in his casing colour.
   static const egg = [
     '......WWWW......',
@@ -1343,7 +1343,7 @@ abstract final class PipSprites {
 
   // Round 70: his field through the year.
 
-  /// A tree, 30 x 36 (Round 72: bigger and more detailed, Nikola): its
+  /// A tree, 30 x 36 (Round 72: bigger and more detailed): its
   /// crown in [treeColours] for the season ('L' leaves, 'H' lit, 'D' in
   /// shade, 'B' blossom or a bright leaf), 'T' and 'U' its trunk, lit and
   /// shaded. The crown is its first [treeCrown] rows (they sway).

@@ -5,7 +5,7 @@ import 'package:the_app/models/subscription.dart';
 
 /// Subscriptions (Round 79), saved to `subscriptions.json`. One is saved
 /// as it's edited (upserted); a new one goes last. Round 89: their order
-/// is Nikola's, set by dragging their cards.
+/// is the user's, set by dragging their cards.
 class SubscriptionsNotifier extends StateNotifier<SubscriptionBook> {
   SubscriptionsNotifier(AppStorage storage)
       : super(storage.initialSubscriptions) {
@@ -32,7 +32,7 @@ class SubscriptionsNotifier extends StateNotifier<SubscriptionBook> {
     return before;
   }
 
-  /// Round 89 (Nikola): [id] moved to [to]'s place (held and dragged
+  /// Round 89: [id] moved to [to]'s place (held and dragged
   /// over it), the others shifting; the page shows them in this order.
   void moveTo(String id, int to) {
     final list = [...state.subscriptions];

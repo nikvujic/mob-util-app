@@ -195,7 +195,7 @@ void main() {
           tester.widget<TextField>(find.byKey(const Key('recipeMethodView')));
       expect(method.readOnly, isTrue);
       expect(method.controller!.text, '1. Mix\n2. Fry');
-      // No reach mode here (Nikola).
+      // No reach mode here.
       expect(find.byKey(const Key('recipeView')), findsOneWidget);
 
       await pressBack(tester);

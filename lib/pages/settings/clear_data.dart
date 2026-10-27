@@ -201,7 +201,7 @@ class _ClearDataPageState extends ConsumerState<ClearDataPage> {
   }
 }
 
-/// What the user types to confirm clearing (Nikola: DELETE here).
+/// What the user types to confirm clearing (DELETE here).
 const clearConfirmWord = 'DELETE';
 
 /// Lists what goes; the user types [clearConfirmWord] to confirm.

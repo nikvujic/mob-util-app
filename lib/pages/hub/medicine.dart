@@ -267,7 +267,7 @@ class MedicinePage extends ConsumerWidget {
                             );
                             if (!held || !context.mounted) return;
                           }
-                          // Taken: a gulp and a buzz (Nikola).
+                          // Taken: a gulp and a buzz.
                           AppSound.doneBuzz();
                           AppSound.done();
                         } else {
@@ -313,7 +313,7 @@ class MedicinePage extends ConsumerWidget {
               ],
             ),
       // Always on the right: the hand can't be told from the touches
-      // here (Nikola).
+      // here.
       floatingActionButton: BottomActions(
         side: HandSide.right,
         actions: [
@@ -343,7 +343,7 @@ class MedicinePage extends ConsumerWidget {
 /// Wed Fri" when on some days only).
 String _schedule(Medicine m, DateTime today) {
   final times = m.times.map(formatMinutes).join(', ');
-  // No end date: nothing said about one (Nikola).
+  // No end date: nothing said about one.
   final until =
       m.until == null ? '' : ', until ${formatDay(m.until!, today: today)}';
   final again =
@@ -362,7 +362,7 @@ class _MedicineCard extends StatelessWidget {
   final MedicineBook book;
   final DateTime day;
 
-  /// Its menu: a tap anywhere on the card but a dose (Nikola).
+  /// Its menu: a tap anywhere on the card but a dose.
   final VoidCallback onOpen;
   final ValueChanged<int> onDose;
 
@@ -421,7 +421,7 @@ class _MedicineCard extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                  // Drag here to move it (Nikola).
+                  // Drag here to move it.
                   ReorderableDragStartListener(
                     index: index,
                     child: Semantics(
@@ -440,7 +440,7 @@ class _MedicineCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                 // Two per row, always the same width; one dose takes the
-                // first column, not the whole row (Nikola).
+                // first column, not the whole row.
                 child: LayoutBuilder(
                   builder: (context, box) {
                     const gap = 8.0;

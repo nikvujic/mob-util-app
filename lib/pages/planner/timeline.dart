@@ -110,7 +110,7 @@ List<BlockPiece> blockPieces(
 
 /// Where each minute of the day goes on a [PlannerTimeline] (Round 10): an
 /// hour is [PlannerTimeline.hourHeight] tall, but a block too short for a
-/// touch target stretches the timeline where it is (Nikola: that hour is a
+/// touch target stretches the timeline where it is (that hour is a
 /// bit taller than the others), so no block is squeezed. It's a picture of
 /// the day, not to scale everywhere.
 class TimeScale {

@@ -48,7 +48,7 @@ void openFoodPage(BuildContext context, Widget page) {
 /// on top (Round 47; each day coloured by its worst rated meal, a tap
 /// picks one), the day's meals in order (a tap opens one to rate
 /// or change it), and + logs a meal. Statistics and the foods list are
-/// beside +. No reminders (Nikola).
+/// beside +. No reminders.
 class FoodPage extends ConsumerStatefulWidget {
   const FoodPage({super.key});
 

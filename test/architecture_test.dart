@@ -141,7 +141,7 @@ const plainScrollAllowed = {
   // Pip Home's card (Round 35): short lists inside a card at the bottom,
   // already in reach; a pull would fight the card's swipe.
   'pages/hub/pip_home.dart',
-  // A recipe in view mode (Round 42): Nikola wants no reach mode there,
+  // A recipe in view mode (Round 42): the user wants no reach mode there,
   // only in edit mode (which has it).
   'pages/hub/recipe_page.dart',
   // Copy list's sheet (Round 94): a name and a few sections to tick, in
@@ -169,7 +169,7 @@ List<String> toastViolations(String path, String source) {
 /// Top bars with action buttons (G11: actions are at the bottom, on the
 /// hand's side; only the menu ☰ and back go at the top). 1.29.1: Shop's
 /// search went into the top bar unasked. A file listed in
-/// [appBarActionsAllowed] may, only where Nikola asked for it.
+/// [appBarActionsAllowed] may, only where the user asked for it.
 const appBarActionsAllowed = <String>{};
 final _appBar = RegExp(r'(?<![A-Za-z_])AppBar\(');
 
@@ -191,7 +191,7 @@ List<String> appBarActionViolations(String path, String source) {
     if (args.toString().split(',').any((a) => a.startsWith('actions:'))) {
       final line = '\n'.allMatches(source.substring(0, m.start)).length + 1;
       violations.add('$path:$line: actions in a top bar — put them at the '
-          'bottom (G11), unless Nikola asked for it');
+          'bottom (G11), unless the user asked for it');
     }
   }
   return violations;

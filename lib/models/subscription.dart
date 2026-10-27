@@ -64,7 +64,7 @@ class Subscription {
   /// The card it's paid with; empty: not known.
   final String card;
 
-  /// Round 80 (Nikola): when that card expires (a virtual card runs out);
+  /// Round 80: when that card expires (a virtual card runs out);
   /// null: not set. Round 85: the last day of its month (cards have no
   /// day).
   final DateTime? cardExpires;
@@ -98,7 +98,7 @@ class Subscription {
     this.note = '',
     this.remindBefore,
   })  : date = date == null ? null : DateTime(date.year, date.month, date.day),
-        // Round 85 (Nikola): a card expires with its month (it has no
+        // Round 85: a card expires with its month (it has no
         // day): kept as that month's last day, whatever day is given.
         cardExpires = cardExpires == null
             ? null
@@ -200,7 +200,7 @@ class Subscription {
         expires.isBefore(at);
   }
 
-  /// Round 84 (Nikola): how its card stands on [today]: expired (gone
+  /// Round 84: how its card stands on [today]: expired (gone
   /// by), soon (a week or less away, the day itself included), or fine
   /// (later, or no expiry set).
   CardExpiry cardExpiryOn(DateTime today) {

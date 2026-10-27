@@ -3,7 +3,7 @@
 enum Quantity { count, weight, text }
 
 class ShopItem {
-  /// A count starts at 1, a weight at 200 g (Nikola).
+  /// A count starts at 1, a weight at 200 g.
   static const defaultCount = 1;
   static const defaultGrams = 200.0;
 

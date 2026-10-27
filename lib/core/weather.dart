@@ -38,7 +38,7 @@ enum WeatherKind {
       values.where((k) => k.name == name).firstOrNull;
 }
 
-/// How windy it is (Round 79, Nikola: trees sway only in the wind).
+/// How windy it is (Round 79, trees sway only in the wind).
 enum PipWind {
   /// Still: the trees don't sway (Round 80: also when the wind isn't
   /// known, the weather off).

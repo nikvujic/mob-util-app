@@ -3,7 +3,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/widgets/low_handles.dart';
 
-/// Copy list (Nikola): a name for the copy (" (Copy)" offered) and which
+/// Copy list: a name for the copy (" (Copy)" offered) and which
 /// of the list's sections come along, all at first (e.g. Documents and
 /// Clothes, not the ski gear). Resolves to them, or null if closed.
 Future<({String name, Set<String> sectionIds})?> showCopyListSheet(

@@ -227,7 +227,7 @@ class PipRun {
     }
   }
 
-  // Round 67: skiing down. Round 72 (Nikola: he should go *down*): the
+  // Round 67: skiing down. Round 72 (he should go *down*): the
   // room becomes the slope, seen from below; what he passes comes up
   // from the bottom of the screen and shrinks away to the horizon.
 

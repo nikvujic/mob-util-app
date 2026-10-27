@@ -14,7 +14,7 @@ import 'package:the_app/providers/packing_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 94 (Nikola): packing lists, things under sections, a count,
+/// Round 94: packing lists, things under sections, a count,
 /// ticks. Round 95: each list has its own sections (at least one; Other
 /// is like any other), the defaults are what a new one starts with.
 void main() {
@@ -93,7 +93,7 @@ void main() {
       ]);
       final empty = trip.copyWith(items: [trip.items.first]);
       expect(shown(empty), ['documents: passport', 'clothes: ', 'gear: '],
-          reason: 'set up in edit mode, shown in view mode (Nikola)');
+          reason: 'set up in edit mode, shown in view mode');
     });
 
     test('ticked, unticked in place; Reset unticks all', () {
