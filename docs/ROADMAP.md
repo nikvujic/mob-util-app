@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 110 — People: zoom handle, soft movement (2026-10-27, 1.43.2)
+
+- [x] A zoom handle in the board's corner (down out, up in, tap 100%).
+- [x] People on damped springs (one soft overshoot) with a squash along
+  their speed; a dropped person held where left until the book catches
+  up. The note stays out of Edit (view only), as built in Round 109.
+
 ### Round 109 — People, first fixes (2026-10-27, 1.43.1)
 
 - [x] Board: one box size for all; text grows and faces shrink zoomed

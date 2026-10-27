@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.43.2] - 2026-10-27
+
+### Added
+- **People: a zoom handle** in the board's corner, for one thumb: pull
+  it down to zoom out, up to zoom in; a tap goes back to 100%. It shows
+  the zoom.
+
+### Changed
+- **People feel soft:** they move on springs, going a little past their
+  spot and settling back, and squash slightly the way they move (when
+  dragged, when the family follows, when a new relation brings someone
+  over, on Tidy).
+
 ## [1.43.1] - 2026-10-27
 
 ### Changed

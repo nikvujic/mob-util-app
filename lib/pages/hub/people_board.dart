@@ -49,6 +49,23 @@ class PeopleBoardState extends State<PeopleBoard>
   /// Where each person is drawn (board units), gliding to where they are.
   final _shown = <String, Offset>{};
 
+  /// Round 109: people move on springs (a little past, then back) and
+  /// squash a little the way they go, as if soft: each one's speed
+  /// (board units a second), and that speed smoothed for the squash.
+  final _vel = <String, Offset>{};
+  final _jelly = <String, Offset>{};
+  final _prev = <String, Offset>{};
+
+  /// Just dropped: where they were left, until the book says so (else the
+  /// first frame springs them back towards where they were).
+  final _landing = <String, Offset>{};
+
+  static const _stiffness = 170.0;
+  static const _damping = 15.0; // a little under critical: one soft overshoot
+
+  /// The zoom gliding back to 100% (a tap on the zoom handle).
+  double? _zoomTo;
+
   /// New relations' lines, drawing in (0 → 1).
   final _lineIn = <String, double>{};
   late Set<String> _relations = {for (final r in widget.book.relations) r.id};
@@ -107,6 +124,7 @@ class PeopleBoardState extends State<PeopleBoard>
       _lineIn[id] = 0;
     }
     _relations = relations;
+    _landing.clear();
     _wake();
   }
 
@@ -116,7 +134,7 @@ class PeopleBoardState extends State<PeopleBoard>
     super.dispose();
   }
 
-  Offset _target(Person p) => Offset(p.x, p.y);
+  Offset _target(Person p) => _landing[p.id] ?? Offset(p.x, p.y);
 
   void _wake() {
     if (_ticker.isActive) return;
@@ -130,14 +148,53 @@ class PeopleBoardState extends State<PeopleBoard>
         : ((elapsed - _last).inMicroseconds / 1e6).clamp(0.0, 0.1);
     _last = elapsed;
     final k = 1 - math.exp(-_glide * dt);
-    var moving = false;
+    var moving = _dragId != null;
+    final soften = 1 - math.exp(-18 * dt);
     for (final p in widget.book.people) {
-      if (p.id == _dragId || _dragFrom.containsKey(p.id)) continue;
-      final at = _shown[p.id]!, to = _target(p);
-      if ((to - at).distance < 0.2) {
-        _shown[p.id] = to;
+      final at = _shown[p.id]!;
+      var v = Offset.zero;
+      if (p.id == _dragId || _dragFrom.containsKey(p.id)) {
+        // Held: their speed is how the finger moves them.
+        v = (at - (_prev[p.id] ?? at)) / dt;
+        _vel[p.id] = v;
       } else {
-        _shown[p.id] = Offset.lerp(at, to, k)!;
+        final to = _target(p);
+        var vel = _vel[p.id] ?? Offset.zero;
+        if ((to - at).distance < 0.2 && vel.distance < 4) {
+          _shown[p.id] = to;
+          _vel.remove(p.id);
+        } else {
+          // A damped spring, in small steps so a long frame stays steady.
+          var x = at;
+          const steps = 4;
+          final h = dt / steps;
+          for (var i = 0; i < steps; i++) {
+            vel += ((to - x) * _stiffness - vel * _damping) * h;
+            x += vel * h;
+          }
+          _shown[p.id] = x;
+          _vel[p.id] = vel;
+          v = vel;
+          moving = true;
+        }
+      }
+      _prev[p.id] = _shown[p.id]!;
+      final j = Offset.lerp(_jelly[p.id] ?? Offset.zero, v, soften)!;
+      if (j.distance < 2 && v == Offset.zero) {
+        _jelly.remove(p.id);
+      } else {
+        _jelly[p.id] = j;
+        moving = true;
+      }
+    }
+    final zoomTo = _zoomTo;
+    if (zoomTo != null) {
+      if ((zoomTo - _zoom).abs() < 0.002) {
+        _zoom = zoomTo;
+        _zoomTo = null;
+        _reportView();
+      } else {
+        _zoom += (zoomTo - _zoom) * k;
         moving = true;
       }
     }
@@ -197,6 +254,7 @@ class PeopleBoardState extends State<PeopleBoard>
 
   void _onScaleStart(ScaleStartDetails d) {
     _centerTo = null;
+    _zoomTo = null;
     // Round 109: only a gesture starting with a finger just down may drag
     // someone, and from where it went down; a pinch's last finger left on
     // the screen pans from where it is (it used to start at a finger's old
@@ -224,6 +282,7 @@ class PeopleBoardState extends State<PeopleBoard>
     final id = _dragId;
     if (id != null) {
       final moved = _toWorld(d.localFocalPoint) - _dragStart;
+      _wake();
       setState(() {
         for (final MapEntry(key: f, value: from) in _dragFrom.entries) {
           final pull = f == id
@@ -254,6 +313,10 @@ class PeopleBoardState extends State<PeopleBoard>
     };
     _dragId = null;
     _dragFrom.clear();
+    for (final MapEntry(:key, value: (x, y)) in moved.entries) {
+      _landing[key] = Offset(x, y);
+    }
+    _wake();
     if (moved.isNotEmpty) widget.onMoved(moved);
   }
 
@@ -271,7 +334,7 @@ class PeopleBoardState extends State<PeopleBoard>
       final mid = _size.center(Offset.zero);
       Offset toScreen(Offset w) => (w - _center) * _zoom + mid;
       final family = widget.book.familyShown;
-      return ClipRect(
+      final board = ClipRect(
         child: Listener(
           onPointerDown: (e) {
             _downAt = e.localPosition;
@@ -311,17 +374,21 @@ class PeopleBoardState extends State<PeopleBoard>
                       top: at.dy,
                       width: r.width * _zoom,
                       height: r.height * _zoom,
-                      child: FittedBox(
-                        child: SizedBox(
-                          width: r.width,
-                          height: r.height,
-                          child: _PersonBox(
-                            person: p,
-                            now: widget.now,
-                            selected: p.id == widget.selectedId,
-                            zoom: _zoom,
-                            main: p.id == widget.book.mainId,
-                            family: family.contains(p.id),
+                      child: Transform(
+                        alignment: Alignment.center,
+                        transform: _squash(_jelly[p.id]),
+                        child: FittedBox(
+                          child: SizedBox(
+                            width: r.width,
+                            height: r.height,
+                            child: _PersonBox(
+                              person: p,
+                              now: widget.now,
+                              selected: p.id == widget.selectedId,
+                              zoom: _zoom,
+                              main: p.id == widget.book.mainId,
+                              family: family.contains(p.id),
+                            ),
                           ),
                         ),
                       ),
@@ -332,8 +399,62 @@ class PeopleBoardState extends State<PeopleBoard>
           ),
         ),
       );
+      return Stack(
+        children: [
+          Positioned.fill(child: board),
+          Positioned(right: 12, bottom: 12, child: _zoomHandle(colors)),
+        ],
+      );
     });
   }
+
+  /// Stretched the way they move, a little (up to 14%), as if soft.
+  static Matrix4 _squash(Offset? velocity) {
+    if (velocity == null) return Matrix4.identity();
+    final s = (velocity.distance / 2000).clamp(0.0, 0.14);
+    final a = velocity.direction;
+    return Matrix4.identity()
+      ..rotateZ(a)
+      ..scale(1 + s, 1 / (1 + s))
+      ..rotateZ(-a);
+  }
+
+  /// Round 109: zoom with one thumb. Pulled down, out; up, in; a tap
+  /// goes back to 100%.
+  Widget _zoomHandle(AppPalette colors) => GestureDetector(
+        key: const Key('peopleZoom'),
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          _centerTo = null;
+          _zoomTo = 1;
+          _wake();
+        },
+        onVerticalDragStart: (_) => _zoomTo = null,
+        onVerticalDragUpdate: (d) => setState(() {
+          _zoom = (_zoom * math.exp(-d.delta.dy / 120))
+              .clamp(BoardView.minZoom, BoardView.maxZoom);
+        }),
+        onVerticalDragEnd: (_) => _reportView(),
+        child: Container(
+          width: 44,
+          height: 72,
+          decoration: BoxDecoration(
+            color: colors.card,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: colors.divider),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.expand_less, size: 18, color: colors.textSecondary),
+              Text('${(_zoom * 100).round()}%',
+                  key: const Key('peopleZoomLevel'),
+                  style: TextStyle(fontSize: 11, color: colors.textSecondary)),
+              Icon(Icons.expand_more, size: 18, color: colors.textSecondary),
+            ],
+          ),
+        ),
+      );
 }
 
 /// A person's box (spec 4.2): face, name, age; a plain grey border, or

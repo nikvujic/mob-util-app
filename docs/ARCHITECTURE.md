@@ -887,6 +887,15 @@ view kept). The note is written on `pages/hub/person_note_page.dart` (a
 `MarkdownEditingController`, the format bar, `DiscardScope`) and shown
 read-only with `CheckboxBoxes`; `Preferences.hidePeopleNotes` hides it.
 
+Round 110: the ticker moves each person on a damped spring (stiffness
+170, damping 15, four sub-steps a frame) instead of an exponential
+glide; held people's speed is measured from frame to frame, and a
+smoothed speed squashes the box (`_squash`, a `Transform` stretching up
+to 14% along the motion). Dropped positions are held in `_landing`
+until the new `PeopleBook` arrives. The zoom handle sits over the
+board, outside its gesture detector, so it never competes with pan and
+pinch.
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -184,7 +186,7 @@ void main() {
     final before = tester.getRect(find.byKey(const Key('person-i'))).center;
     final board = tester.getRect(find.byKey(const Key('peopleBoard')));
     await tester.dragFrom(
-        board.bottomRight - const Offset(20, 20), const Offset(-100, -50));
+        board.bottomRight - const Offset(90, 20), const Offset(-100, -50));
     await tester.pumpAndSettle();
     final after = tester.getRect(find.byKey(const Key('person-i'))).center;
     expect(after.dx, closeTo(before.dx - 100, 25));
@@ -592,6 +594,55 @@ void main() {
           .fontSize!;
       expect(nameSize(), greaterThan(20));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'the zoom handle: pulled down zooms out, up zooms in; a tap goes '
+        'back to 100%; the view kept', (tester) async {
+      await openPeople(tester, people: family);
+      final handle = find.byKey(const Key('peopleZoom'));
+      await tester.drag(handle, const Offset(0, 120));
+      await tester.pumpAndSettle();
+      expect(book().view.zoom, lessThan(0.5));
+      await tester.drag(handle, const Offset(0, -200));
+      await tester.pumpAndSettle();
+      expect(book().view.zoom, greaterThan(1));
+      await tester.tap(handle);
+      await tester.pumpAndSettle();
+      expect(book().view.zoom, 1);
+      expect(find.text('100%'), findsOneWidget);
+    });
+
+    testWidgets(
+        'moved, they spring: a little past the spot, then back; squashed '
+        'the way they go, round again once still', (tester) async {
+      await openPeople(tester, people: family);
+      Rect ivan() => tester.getRect(find.byKey(const Key('person-i')));
+      final start = ivan().center.dx;
+      container.read(peopleProvider.notifier).move({'i': (420, 0)});
+      var furthest = start;
+      var squashed = false;
+      for (var i = 0; i < 60; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        furthest = math.max(furthest, ivan().center.dx);
+        final t = tester.widget<Transform>(find
+            .descendant(
+                of: find.byKey(const Key('person-i')),
+                matching: find.byType(Transform))
+            .first);
+        if (t.transform != Matrix4.identity()) squashed = true;
+      }
+      await tester.pumpAndSettle();
+      final end = ivan().center.dx;
+      expect(end - start, closeTo(100, 1));
+      expect(furthest, greaterThan(end + 3), reason: 'past it, then back');
+      expect(squashed, isTrue);
+      final t = tester.widget<Transform>(find
+          .descendant(
+              of: find.byKey(const Key('person-i')),
+              matching: find.byType(Transform))
+          .first);
+      expect(t.transform, Matrix4.identity());
     });
   });
 }
