@@ -389,7 +389,8 @@ big for Pip:
 2. [x] Recipes: export / import as text (Round 104; 1.41.0).
 3. [x] A better weather API (Round 99): the rain radar, Round 106 (1.42.0).
 4. [ ] People: an index of people, notes, a family tree (Round 100;
-   planned with Nikola first).
+   planned with Nikola first). Spec: `docs/PEOPLE_SPEC.md` (Round 107),
+   waiting on his answers.
 5. [ ] Page organizer (O10, already marked v2): to talk through.
 6. [ ] Other productivity ideas Nikola brings (the Hub pages ideas list).
 
