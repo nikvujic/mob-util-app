@@ -1,16 +1,17 @@
 # People — spec (Round 107)
 
-Not built yet. From Nikola's notes (Round 107, v2 item 4): the people he
-knows as **floating boxes on a zoomable board**, with **relations** that
-make a **family tree**, laid out like Pip Home (the picture on top, the
-controls below). **Nikola** marks what he asked for; **Proposed** marks
-what I filled in; the open questions are in section 9.
+Not built yet (Round 107, v2 item 4): the people you know as **floating
+boxes on a zoomable board**, with **relations** that make a **family
+tree**, laid out like Pip Home (the picture on top, the controls below).
+**Requested** marks what was asked for, **Decided** an answer to a
+question, **Proposed** what was filled in; what's still open is in
+section 9.
 
 ## 1. The page (a Hub page, "People")
 
-- **Nikola:** like Pip Home: the **board** fills the top half of the
+- **Requested:** like Pip Home: the **board** fills the top half of the
   screen, the **panel** sits below it.
-- **Nikola:** with nobody selected, the panel is hidden but for **a small
+- **Requested:** with nobody selected, the panel is hidden but for **a small
   bar with Add**. Selecting a person opens the panel with their info.
 - **Proposed:** the bar shows how many people there are ("23 people") and,
   beside Add, **Find** (a search by name that centres on the match) and
@@ -25,23 +26,23 @@ what I filled in; the open questions are in section 9.
 
 | Field | Notes |
 |---|---|
-| **Name** (needed) | **Nikola:** the full name. |
-| **Birthday** | **Nikola:** day, month, and the year if known. Tied to Dates (section 6). |
-| **Gender** | **Nikola:** shown as blue or pink. **Proposed:** male, female, or not set (grey). |
-| **Deceased** | **Nikola:** a person can be marked deceased. **Proposed:** an optional date of death too; the age then stops there ("lived to 84"). |
-| **Highlighted** | **Nikola:** important people stand out (section 4.2). |
-| **Note** | **Nikola:** free text; shown in the panel, never on the board. |
-| **Relations** | **Nikola:** to other people (section 5). |
-| **Position** | **Nikola:** where the box sits on the board, remembered. |
+| **Name** (needed) | **Requested:** the full name. |
+| **Birthday** | **Requested:** day, month, and the year if known. Tied to Dates (section 6). |
+| **Gender** | **Requested:** shown as blue or pink. **Decided:** male or female, picked when adding. |
+| **Deceased** | **Requested:** a person can be marked deceased. **Decided:** with the date of death (the year at least); the age stops there ("lived to 84"). |
+| **Highlighted** | **Requested:** important people stand out (section 4.2). |
+| **Note** | **Requested:** free text; shown in the panel, never on the board. |
+| **Relations** | **Requested:** to other people (section 5). |
+| **Position** | **Requested:** where the box sits on the board, remembered. |
 
 - **Proposed:** a new person is placed at the middle of what the board
   shows, nudged so it doesn't cover anyone.
 
 ## 3. The panel (below the board)
 
-- **Nikola:** selecting a person shows their **info**: name, birthday and
+- **Requested:** selecting a person shows their **info**: name, birthday and
   age, gender, deceased, highlighted, relations, note.
-- **Nikola:** an **Edit** button turns it into fields to change them.
+- **Requested:** an **Edit** button turns it into fields to change them.
 - **Proposed:** in view, each relation is a row ("Mother: Ana Petrović");
   tapping it selects and centres that person. **Edit** shows the fields,
   **Add relation**, each relation with × to remove it, and **Delete
@@ -55,19 +56,19 @@ what I filled in; the open questions are in section 9.
 
 ### 4.1 Moving around
 
-- **Nikola:** **zoomable**: pinch to zoom, drag the empty board to pan.
-- **Nikola:** **touch and drag a person** to move them; the new position is
+- **Requested:** **zoomable**: pinch to zoom, drag the empty board to pan.
+- **Requested:** **touch and drag a person** to move them; the new position is
   remembered.
-- **Nikola:** **tapping a person centres on them** (animated) and opens the
+- **Requested:** **tapping a person centres on them** (animated) and opens the
   panel.
-- **Nikola:** **animated**: people glide to their new places when rearranged,
+- **Requested:** **animated**: people glide to their new places when rearranged,
   and a new relation's line draws itself in.
 - **Proposed:** zoom from about a quarter of the size to twice the size;
   the view (where you were and how close) is remembered between visits.
 
 ### 4.2 A person's box
 
-- **Nikola:** an **avatar by age** (worked out from the birthday, so it
+- **Requested:** an **avatar by age** (worked out from the birthday, so it
   changes by itself):
 
   | Avatar | Age |
@@ -81,14 +82,14 @@ what I filled in; the open questions are in section 9.
   | Old | 80+ |
 
   **Proposed:** pixel-art faces in Pip's style, one per age and gender (7 ×
-  2, plus a plain one for gender not set); no birth year: the adult face.
-  Drafts first, for Nikola to pick from, as with Pip.
-- **Nikola:** the box shows the person's info **except the note**.
+  2); no birth year: the adult face.
+  **Decided:** drafts first, to pick from, as with Pip.
+- **Requested:** the box shows the person's info **except the note**.
   **Proposed:** the name, and under it the age or "b. 1958", plus a small
   cake on their birthday.
-- **Nikola:** **gender as blue or pink** (proposed: the border and the
-  avatar's backdrop; grey when not set).
-- **Nikola:** **highlighted** people stand out; the others have a plain
+- **Requested:** **gender as blue or pink** (proposed: the border and the
+  avatar's backdrop).
+- **Requested:** **highlighted** people stand out; the others have a plain
   greyish border and muted text. **Proposed:** highlighted people get a
   thicker border in their colour, full-strength text and a slightly bigger
   box.
@@ -100,7 +101,7 @@ what I filled in; the open questions are in section 9.
 
 ### 5.1 Adding one
 
-- **Nikola:** **Add relation**, then **pick another person**; the two get
+- **Requested:** **Add relation**, then **pick another person**; the two get
   connected on the board, with the line drawing in.
 - **Proposed:** the picker is a searchable list of the others, then the
   kind:
@@ -114,7 +115,7 @@ what I filled in; the open questions are in section 9.
 - **Proposed:** a relation that makes no sense is refused with a reason
   (someone their own parent, more than two parents, a loop of parents).
 
-### 5.2 How lines are drawn (Nikola: one line for both parents)
+### 5.2 How lines are drawn (requested: one line for both parents)
 
 - **Partners**: a short horizontal line between them, side by side.
 - **Children of a couple**: **one** line drops from the middle of the
@@ -127,23 +128,28 @@ what I filled in; the open questions are in section 9.
 - **Proposed:** lines are drawn at right angles (down, across, down), so a
   family reads like a classic tree.
 
-### 5.3 Sticking together (Nikola: "when moved they stick together")
+### 5.3 Sticking together (requested: "when moved they stick together")
 
-- **Proposed:** **partners move as a pair**: dragging one brings the other
-  along, side by side. A **parent drags their descendants** with them,
-  keeping their places relative to the parent. Children can still be
-  dragged on their own, and only their own descendants follow. Other
-  relations never pull anyone.
+- **Decided:** connected people stick together **elastically**: a small
+  drag moves only the person dragged (their relatives barely shift), so
+  you can fine-tune; drag them far and their family follows, keeping
+  its shape around them. **Proposed:** a pull that grows with the
+  distance (nothing under about one box width, the whole family past
+  about three); partners are pulled hardest, so they stay side by side.
+  Other relations never pull anyone.
 - **Proposed:** while you drag, the lines follow live, so you can see the
   tree hold together.
 
-### 5.4 Keeping it readable (Nikola: "stable", "a good overview")
+### 5.4 Keeping it readable (requested: "stable", "a good overview")
 
-- **Proposed:** a **Tidy** button lays the family out as a tree:
+- **Decided:** a **Tidy** button, which first **warns** that it will
+  move everyone ("Tidy moves everyone into a default layout; your own
+  placing is lost." Tidy / Cancel). It lays everyone out as a tree:
   generations in rows (parents above children), partners side by side,
   children in birth order under their parents' line, spaced so no lines
   cross where that can be helped. Everyone glides to their new place
-  (animated), and Tidy can be undone (a toast with Undo).
+  (animated), and Tidy can be undone (a toast with Undo). People with
+  no family relations are set in a grid beside the trees.
 - **Proposed:** nothing moves by itself except during Tidy or a drag;
   people you placed stay where you put them. When a relation is added,
   only the newly linked person is moved next to the other, if they're far
@@ -151,18 +157,20 @@ what I filled in; the open questions are in section 9.
 
 ## 6. Birthdays and Dates
 
-- **Nikola:** when **creating** a person, a button lets you **pick a birthday
+- **Requested:** when **creating** a person, a button lets you **pick a birthday
   from the Dates page**: the person takes it over, so the original date
   isn't left as a separate entry ("we kill the original").
-- **Nikola:** a birthday typed in **by hand is added to Dates** as a birthday.
-- **Nikola:** in Dates, **those dates show a small icon** saying they come
-  from People; **they can be edited there but not deleted** (they go when
-  the person is deleted, or when their birthday is cleared).
-- **Proposed:** the linked date's **title follows the person's name**, and a
-  change to the day in Dates changes the person's birthday too: one
-  birthday, two ways in. Its reminders, note and type stay Dates' own.
-- **Proposed:** a deceased person's birthday stays in Dates (renamed
-  nothing; the person's icon greyed), unless it's removed from the person.
+- **Requested:** a birthday typed in **by hand is added to Dates** as a birthday.
+- **Requested:** in Dates, **those dates show a small People icon**, and
+  **can't be deleted there** (they go when the person is deleted, or when
+  their birthday is cleared).
+- **Decided:** in Dates, a linked birthday's **reminders and note** can be
+  edited, as with any date; its **title, day, month, year, type and
+  yearly** can't: they come from the person (the title is their name) and
+  show a line saying "From People: edit it there". So there's one
+  birthday, and People is where it's changed.
+- **Proposed:** a deceased person's birthday stays in Dates (the icon
+  greyed), unless it's removed from the person.
 
 ## 7. Data
 
@@ -183,19 +191,15 @@ what I filled in; the open questions are in section 9.
   people up.
 - Pip on the board.
 
-## 9. Open questions for Nikola
+## 9. Decided, and still open
 
-1. **Relation kinds:** are Parent, Child, Partner (with "former"), Sibling
-   and Other the right set? Should Other have a free word on its line?
-2. **Sticking together:** is "partners move together, parents bring their
-   descendants" right, or should dragging anyone move their whole family?
-3. **Tidy:** do you want the Tidy button (auto-arrange the tree), or only
-   your own placing?
-4. **"Like with notifications":** which existing items did you mean,
-   ones that can be edited but not deleted? I've assumed the linked
-   birthday is edited in Dates but only removed from People.
-5. **Deceased:** just a mark, or a date of death too (so the age stops
-   there)?
-6. **Gender:** male, female and "not set": anything else?
-7. **Avatars:** pixel art like Pip, with drafts first?
-8. **The Hub's name:** "People", or something else ("Family", "Contacts")?
+Decided (Round 107): sticking together is elastic (5.3); Tidy, with a
+warning first (5.4); linked birthdays edited in Dates for reminders and
+note only (6); a date of death (2); gender male or female (2); pixel-art
+avatars with drafts first (4.2); the page is called **People**.
+
+Still open:
+
+1. **Relation kinds:** Parent / Child, Partner (with "former", dashed),
+   Sibling (only when no parents are entered) and Other (a thin line with
+   an optional word, e.g. "Godfather"): the right set?
