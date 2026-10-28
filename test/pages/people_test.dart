@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/date_entry.dart';
@@ -593,25 +594,30 @@ void main() {
           people: family.copyWith(
             people: [
               for (final p in family.people)
-                p.id == 'i' ? p.copyWith(name: 'Ivan Aleksandar Petrovic') : p,
+                p.id == 'i' ? p.copyWith(name: 'Ivan Petrovic') : p,
             ],
             view: const BoardView(x: 80, y: 130, zoom: 0.3),
           ));
       double nameSize() => tester
           .widget<Text>(find.descendant(
               of: find.byKey(const Key('person-i')),
-              matching: find.text('Ivan Aleksandar Petrovic')))
+              matching: find.text('Ivan Petrovic')))
           .style!
           .fontSize!;
-      expect(nameSize(), greaterThan(19));
+      expect(nameSize(), greaterThan(12.5),
+          reason: "larger than at 100%, its longest word still fitting");
       expect(tester.takeException(), isNull);
-      // Round 111: the face not dwarfed by the name (near its full 78
-      // board units), a long name on one line.
+      // Round 111: the face not dwarfed by the name (most of its 78 board
+      // units); Round 112: a first and last name shown whole.
       final box = tester.getRect(find.byKey(const Key('person-i')));
       final face = tester.getRect(find.descendant(
           of: find.byKey(const Key('person-i')),
           matching: find.byType(PeopleAvatar)));
-      expect(face.width / box.width * BoardSizes.boxWidth, greaterThan(72));
+      expect(face.width / box.width * BoardSizes.boxWidth, greaterThan(60));
+      final name = tester.renderObject<RenderParagraph>(find.descendant(
+          of: find.byKey(const Key('person-i')),
+          matching: find.text('Ivan Petrovic')));
+      expect(name.didExceedMaxLines, isFalse);
     });
 
     testWidgets(
@@ -661,6 +667,44 @@ void main() {
               matching: find.byType(Transform))
           .first);
       expect(t.transform, Matrix4.identity());
+    });
+
+    testWidgets(
+        'a double tap held and moved zooms: down in, up out; two taps far '
+        'apart in time a pan; nobody moved', (tester) async {
+      await openPeople(tester, people: family);
+      final board = tester.getRect(find.byKey(const Key('peopleBoard')));
+      final spot = board.topLeft + const Offset(30, 30);
+      var t = const Duration(seconds: 10);
+      // A tap, then [gap] later a finger held and moved [by] in steps.
+      Future<void> tapThenDrag(Duration gap, Offset by) async {
+        final first = await tester.createGesture();
+        await first.down(spot, timeStamp: t);
+        await first.up(timeStamp: t += const Duration(milliseconds: 60));
+        await tester.pump(gap);
+        final g = await tester.createGesture();
+        await g.down(spot, timeStamp: t += gap);
+        for (var i = 0; i < 10; i++) {
+          await g.moveBy(by / 10,
+              timeStamp: t += const Duration(milliseconds: 16));
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        await g.up(timeStamp: t += const Duration(milliseconds: 16));
+        await tester.pumpAndSettle();
+        t += const Duration(seconds: 2);
+      }
+
+      await tapThenDrag(
+          const Duration(milliseconds: 100), const Offset(0, 100));
+      expect(book().view.zoom, greaterThan(1.5));
+      expect(byName('Ivan').x, 320);
+      await tapThenDrag(
+          const Duration(milliseconds: 100), const Offset(0, -200));
+      expect(book().view.zoom, lessThan(1));
+      final zoom = book().view.zoom;
+      await tapThenDrag(
+          const Duration(milliseconds: 600), const Offset(0, 100));
+      expect(book().view.zoom, zoom, reason: 'too slow: a pan');
     });
   });
 }

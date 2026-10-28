@@ -95,6 +95,15 @@ class PeopleBoardState extends State<PeopleBoard>
   int _pointers = 0;
 
   // Panning and zooming.
+  /// Round 112: a double tap held and moved zooms (as in maps): down in,
+  /// up out, about where it was tapped. The last quick tap (when, where),
+  /// and whether this finger is such a second tap.
+  Duration? _tapAt;
+  Offset _tapPos = Offset.zero;
+  Duration _downTime = Duration.zero;
+  bool _quickZoom = false;
+  static const _doubleTapGap = Duration(milliseconds: 300);
+
   Offset _panFocal = Offset.zero;
   Offset _panCenter = Offset.zero;
   double _panZoom = 1;
@@ -261,6 +270,13 @@ class PeopleBoardState extends State<PeopleBoard>
     // touch-down: the board, or a person, jumped).
     final one = d.pointerCount == 1 && _freshDown;
     _freshDown = false;
+    if (_quickZoom && d.pointerCount == 1) {
+      _dragId = null;
+      _panFocal = _downAt;
+      _panCenter = _center;
+      _panZoom = _zoom;
+      return;
+    }
     final id = one ? _personAt(_downAt) : null;
     if (id != null) {
       _dragId = id;
@@ -290,6 +306,18 @@ class PeopleBoardState extends State<PeopleBoard>
               : familyPull(moved.distance, partner: _partners.contains(f));
           _shown[f] = from + moved * pull;
         }
+      });
+      return;
+    }
+    if (_quickZoom) {
+      setState(() {
+        final mid = _size.center(Offset.zero);
+        final held = (_panFocal - mid) / _panZoom + _panCenter;
+        final dy = d.localFocalPoint.dy - _panFocal.dy;
+        _zoom = (_panZoom * math.exp(dy / 150))
+            .clamp(BoardView.minZoom, BoardView.maxZoom);
+        // The tapped spot stays put.
+        _center = held - (_panFocal - mid) / _zoom;
       });
       return;
     }
@@ -338,9 +366,24 @@ class PeopleBoardState extends State<PeopleBoard>
         child: Listener(
           onPointerDown: (e) {
             _downAt = e.localPosition;
+            _downTime = e.timeStamp;
             _freshDown = ++_pointers == 1;
+            final tapAt = _tapAt;
+            _quickZoom = _freshDown &&
+                tapAt != null &&
+                e.timeStamp - tapAt < _doubleTapGap &&
+                (e.localPosition - _tapPos).distance < 40;
           },
-          onPointerUp: (_) => _pointers = math.max(0, _pointers - 1),
+          onPointerUp: (e) {
+            _pointers = math.max(0, _pointers - 1);
+            // A quick tap (short, not moved) may start a double tap.
+            final tap = !_quickZoom &&
+                e.timeStamp - _downTime < _doubleTapGap &&
+                (e.localPosition - _downAt).distance < 18;
+            _tapAt = tap ? e.timeStamp : null;
+            _tapPos = e.localPosition;
+            _quickZoom = false;
+          },
           onPointerCancel: (_) => _pointers = math.max(0, _pointers - 1),
           child: GestureDetector(
             key: const Key('peopleBoard'),
@@ -510,10 +553,17 @@ class _PersonBox extends StatelessWidget {
     final strong = p.highlighted || selected;
     // Text in board units, so it shrinks with the zoom: grown back as the
     // board zooms out (up to about 2.2×), the face giving way.
-    // Round 111: gentler (up to 1.6×), and zoomed out the name keeps to
-    // one line, so the face stays near its size rather than dwarfed.
+    // Round 111: gentler (up to 1.6×), so the face stays near its size
+    // rather than dwarfed; Round 112: the name still on two lines, so a
+    // first and last name are shown whole (only a long one cut short).
     final text = (1 / zoom).clamp(1.0, 1.6);
-    final oneLine = text > 1.3;
+    final name = p.deceased ? '† ${p.name}' : p.name;
+    final nameStyle = TextStyle(
+      fontSize: 12.5 * text,
+      height: 1.15,
+      fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
+      color: p.deceased || !strong ? colors.textSecondary : colors.textPrimary,
+    );
     final box = DecoratedBox(
       decoration: BoxDecoration(
         color: family && !selected
@@ -540,18 +590,11 @@ class _PersonBox extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              p.deceased ? '† ${p.name}' : p.name,
-              maxLines: oneLine ? 1 : 2,
+              name,
+              maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12.5 * text,
-                height: 1.15,
-                fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
-                color: p.deceased || !strong
-                    ? colors.textSecondary
-                    : colors.textPrimary,
-              ),
+              style: _fitWords(name, nameStyle, BoardSizes.boxWidth - 12),
             ),
             if (line.isNotEmpty || birthdayToday)
               Row(
@@ -592,6 +635,25 @@ class _PersonBox extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Round 112: [style] made smaller, if need be, until the longest word
+/// of [text] fits [width], so a name breaks between words, never inside
+/// one or cut short (only past two lines).
+TextStyle _fitWords(String text, TextStyle style, double width) {
+  var widest = 0.0;
+  for (final word in text.split(RegExp(r'\s+'))) {
+    if (word.isEmpty) continue;
+    final painter = TextPainter(
+      text: TextSpan(text: word, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    widest = math.max(widest, painter.width);
+    painter.dispose();
+  }
+  if (widest <= width) return style;
+  return style.copyWith(fontSize: style.fontSize! * width / widest * 0.98);
 }
 
 /// The relations' lines (spec 5.2), in board units: partners joined side

@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 112 — People: whole names zoomed out, double tap to zoom (2026-10-28, 1.43.4)
+
+- [x] Names on two lines again at every zoom; a font shrunk until the
+  longest word fits the box (`_fitWords`), so names break between words.
+- [x] Double tap, hold and move to zoom (down in, up out, about the
+  tapped spot); the second tap within 300 ms and 40 px of a quick first.
+
 ### Round 111 — People: face size zoomed out, star on the corner (2026-10-28, 1.43.3)
 
 - [x] Zoomed out the text grows up to 1.6× (was 2.2×), the name on one

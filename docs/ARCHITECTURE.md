@@ -901,6 +901,13 @@ past 1.3; the face is a fixed 78 in a `Flexible` `FittedBox`, so it
 gives way only when the text needs the room; the star is stacked on the
 box, not the face.
 
+Round 112: names keep two lines, their style shrunk by `_fitWords`
+(a `TextPainter` measuring the longest word) to fit the box's width. A
+double tap held and moved zooms: the board's `Listener` remembers the
+last quick tap (its event time and place); a finger down within 300 ms
+and 40 px of it marks a quick zoom, which the scale handlers turn into
+zoom by the vertical move, the tapped spot held still.
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

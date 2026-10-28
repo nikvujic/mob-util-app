@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.43.4] - 2026-10-28
+
+### Added
+- **People: double tap and drag to zoom**, as in maps: tap, then touch
+  again and move down to zoom in, up to zoom out, about that spot.
+
+### Fixed
+- Zoomed out, names were cut short after a few letters. A name now shows
+  whole on up to two lines, the text a little smaller if a word wouldn't
+  fit; only a really long name is cut.
+
 ## [1.43.3] - 2026-10-28
 
 ### Changed
