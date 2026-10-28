@@ -908,6 +908,11 @@ last quick tap (its event time and place); a finger down within 300 ms
 and 40 px of it marks a quick zoom, which the scale handlers turn into
 zoom by the vertical move, the tapped spot held still.
 
+Round 113: `Person.inDates` (JSON `inDates`, written only when false):
+`_syncDate` keeps a date in Dates only for a birthday shown there.
+`takeBirthday` copies a Dates birthday's day, month and year into the
+person (the original untouched); their own date follows from `save`.
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

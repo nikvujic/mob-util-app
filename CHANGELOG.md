@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.44.0] - 2026-10-28
+
+### Changed
+- **People and Dates kept separate.** *From Dates* now only copies a
+  birthday's day, month and year: the original stays in Dates as it was
+  (delete it there if you like), and the person gets their own birthday
+  date beside it.
+- **Show in Dates**, a switch under a person's birthday (on by default):
+  their birthday is shown in Dates, for the overview and its reminders.
+  Turned off (asked first), it leaves Dates, with its reminders and
+  note, and stays in People; on again, it's back with the usual
+  reminders.
+
 ## [1.43.4] - 2026-10-28
 
 ### Added

@@ -160,6 +160,11 @@ section 9.
 - **Requested:** when **creating** a person, a button lets you **pick a birthday
   from the Dates page**: the person takes it over, so the original date
   isn't left as a separate entry ("we kill the original").
+  **Changed (Round 113):** the pages stay separate: picking one only copies
+  its day, month and year; the original stays in Dates, and the person's
+  birthday is projected as its own date.
+- **Requested (Round 113):** a per-person switch, **Show in Dates**, on by
+  default: off, the birthday stays in People only (no date, no reminders).
 - **Requested:** a birthday typed in **by hand is added to Dates** as a birthday.
 - **Requested:** in Dates, **those dates show a small People icon**, and
   **can't be deleted there** (they go when the person is deleted, or when

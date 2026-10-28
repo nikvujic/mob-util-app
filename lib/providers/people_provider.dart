@@ -42,7 +42,8 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     final dateId = person.dateId;
     final existing =
         dateId == null ? null : _ref.read(datesProvider).byId(dateId);
-    if (birthday == null) {
+    // None, or kept out of Dates (Round 113): no date for it there.
+    if (birthday == null || !person.inDates) {
       if (existing != null) _dates.delete(existing.id);
       return dateId == null ? person : person.copyWith(dateId: () => null);
     }
@@ -75,20 +76,17 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
           if (d.type == DateType.birthday && d.personId == null) d,
       ];
 
-  /// [person] takes over the birthday [dateId] from the Dates page (spec
-  /// 6: "we kill the original": it's theirs now, named after them).
+  /// [person]'s birthday set from the birthday [dateId] on the Dates
+  /// page (Round 113: only its day, month and year are taken; the
+  /// original stays as it was, theirs to delete if they like). Shown in
+  /// Dates, it's their own date there, as one set by hand.
   Person takeBirthday(Person person, String dateId) {
     final date = _ref.read(datesProvider).byId(dateId);
     if (date == null) return person;
-    // A birthday they had is replaced.
-    final old = person.dateId;
-    if (old != null && old != dateId) _dates.delete(old);
-    final taken = person.copyWith(
+    save(person.copyWith(
       birthday: () =>
           PersonDate(day: date.day, month: date.month, year: date.year),
-      dateId: () => dateId,
-    );
-    save(taken);
+    ));
     return state.byId(person.id)!;
   }
 

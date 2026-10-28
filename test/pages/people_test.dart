@@ -256,8 +256,9 @@ void main() {
   });
 
   testWidgets(
-      'a birthday from Dates: taken over, renamed, no longer offered; '
-      "there, it's locked and can't be deleted", (tester) async {
+      'a birthday from Dates: its day copied, the original left; their own '
+      "date there, locked, can't be deleted; kept out of Dates by a switch",
+      (tester) async {
     await openPeople(tester, people: family, dates: const [
       DateEntry(
         id: 'd1',
@@ -279,14 +280,17 @@ void main() {
     await tapKey(tester, 'freeBirthday-d1');
     expect(byName('Ivan').birthday,
         const PersonDate(day: 9, month: 4, year: 1990));
-    final date = container.read(datesProvider).byId('d1')!;
-    expect((date.title, date.personId), ('Ivan', 'i'));
+    final original = container.read(datesProvider).byId('d1')!;
+    expect((original.title, original.personId), ('Ivan 🎂', null),
+        reason: 'left as it was');
+    final ownId = byName('Ivan').dateId!;
+    expect(container.read(datesProvider).byId(ownId)!.personId, 'i');
     expect(find.byKey(const Key('birthdayFromDates')), findsNothing);
 
     // The year let go.
     await tapKey(tester, 'personYearKnown');
     expect(byName('Ivan').birthday!.year, isNull);
-    expect(container.read(datesProvider).byId('d1')!.year, isNull);
+    expect(container.read(datesProvider).byId(ownId)!.year, isNull);
 
     // In Dates: the People mark, the fields locked, no Delete.
     await tapKey(tester, 'personDone');
@@ -294,8 +298,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Dates'));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('datePerson-d1')), findsOneWidget);
-    expect(find.byKey(const Key('datePerson-d2')), findsNothing);
+    expect(find.byKey(Key('datePerson-$ownId')), findsOneWidget);
+    expect(find.byKey(const Key('datePerson-d1')), findsNothing);
+    expect(find.text('Ivan 🎂'), findsOneWidget, reason: 'still there');
     await tester.tap(find.text('Ivan'));
     await tester.pumpAndSettle();
     expect(tester.widget<TextField>(find.byKey(const Key('dateTitle'))).enabled,
@@ -312,6 +317,40 @@ void main() {
             .widget<SwitchListTile>(find.byKey(const Key('dateYearKnown')))
             .onChanged,
         isNull);
+  });
+
+  testWidgets(
+      'Round 113: Show in Dates off (asked) takes the birthday out of '
+      'Dates, kept here; on again puts it back', (tester) async {
+    await openPeople(tester, people: family);
+    await tester.tap(find.byKey(const Key('person-i')));
+    await tester.pumpAndSettle();
+    await tapKey(tester, 'personEdit');
+    await tapKey(tester, 'personBirthday');
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final own = byName('Ivan').dateId!;
+    expect(
+        tester
+            .widget<SwitchListTile>(find.byKey(const Key('personInDates')))
+            .value,
+        isTrue);
+
+    await tapKey(tester, 'personInDates');
+    expect(find.text('Remove from Dates?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(container.read(datesProvider).byId(own), isNotNull);
+
+    await tapKey(tester, 'personInDates');
+    await tester.tap(find.text('Remove'));
+    await tester.pumpAndSettle();
+    expect(container.read(datesProvider).byId(own), isNull);
+    expect(byName('Ivan').birthday, isNotNull);
+    expect(byName('Ivan').inDates, isFalse);
+
+    await tapKey(tester, 'personInDates');
+    expect(container.read(datesProvider).dates.single.personId, 'i');
   });
 
   testWidgets(

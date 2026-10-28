@@ -258,7 +258,25 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     _change(_draft.copyWith(birthday: () => null));
   }
 
-  /// Spec 6: a birthday already on the Dates page, taken over.
+  /// Round 113: off, the birthday leaves Dates (asked first: its
+  /// reminders and note there go with it); on, it's shown there again.
+  Future<void> _setInDates(bool on) async {
+    if (!on && _draft.dateId != null) {
+      final ok = await showConfirmDialog(
+        context,
+        title: 'Remove from Dates?',
+        message: 'Their birthday leaves the Dates page, with its reminders '
+            'and note. It stays here.',
+        confirmLabel: 'Remove',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    _change(_draft.copyWith(inDates: on));
+  }
+
+  /// Spec 6, Round 113: a birthday on the Dates page, its day copied (the
+  /// original stays there).
   Future<void> _birthdayFromDates() async {
     FocusManager.instance.primaryFocus?.unfocus();
     final free = _people.freeBirthdays();
@@ -671,6 +689,19 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                 : _change(_draft.copyWith(
                     birthday: () => PersonDate(day: b.day, month: b.month),
                   )),
+          ),
+        // Round 113: their birthday shown in Dates (its overview and
+        // reminders), or kept to People.
+        if (b != null)
+          SwitchListTile(
+            key: const Key('personInDates'),
+            contentPadding: pad,
+            secondary: const Icon(Icons.event_note_outlined),
+            title: const Text('Show in Dates'),
+            subtitle: Text('With its reminders',
+                style: TextStyle(color: colors.textHint)),
+            value: p.inDates,
+            onChanged: _setInDates,
           ),
         SwitchListTile(
           key: const Key('personDeceased'),

@@ -101,6 +101,10 @@ class Person {
   /// The birthday's date on the Dates page (spec 6), if it has one.
   final String? dateId;
 
+  /// Round 113: their birthday shown in Dates (a projection, for the
+  /// overview and its reminders); off, People keeps it to itself.
+  final bool inDates;
+
   const Person({
     required this.id,
     required this.name,
@@ -113,6 +117,7 @@ class Person {
     this.x = 0,
     this.y = 0,
     this.dateId,
+    this.inDates = true,
   });
 
   /// Their age now (or when they died), in years; null if their birth
@@ -139,6 +144,7 @@ class Person {
     double? x,
     double? y,
     String? Function()? dateId,
+    bool? inDates,
   }) =>
       Person(
         id: id,
@@ -152,6 +158,7 @@ class Person {
         x: x ?? this.x,
         y: y ?? this.y,
         dateId: dateId == null ? this.dateId : dateId(),
+        inDates: inDates ?? this.inDates,
       );
 
   Map<String, dynamic> toJson() => {
@@ -166,6 +173,7 @@ class Person {
         'x': x,
         'y': y,
         if (dateId != null) 'dateId': dateId,
+        if (!inDates) 'inDates': false,
       };
 
   factory Person.fromJson(Map<String, dynamic> json) => Person(
@@ -184,6 +192,7 @@ class Person {
         x: (json['x'] as num?)?.toDouble() ?? 0,
         y: (json['y'] as num?)?.toDouble() ?? 0,
         dateId: json['dateId'] as String?,
+        inDates: json['inDates'] as bool? ?? true,
       );
 }
 

@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 113 — People project birthdays into Dates (2026-10-28, 1.44.0)
+
+- [x] *From Dates* copies the day only, the original left (it was taken
+  over and renamed); `Person.inDates` (on by default, stored only when
+  off): off removes the projected date, on makes it again.
+
 ### Round 112 — People: whole names zoomed out, double tap to zoom (2026-10-28, 1.43.4)
 
 - [x] Names on two lines again at every zoom; a font shrunk until the

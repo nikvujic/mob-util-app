@@ -87,8 +87,8 @@ void main() {
     });
 
     test(
-        "a birthday from Dates taken over: it's theirs, named after them, "
-        'no longer free', () {
+        'a birthday from Dates (Round 113): its day copied; the original '
+        'left as it was; their own date beside it', () {
       container.read(datesProvider.notifier).save(const DateEntry(
             id: 'd1',
             title: 'Ana 🎂',
@@ -108,21 +108,38 @@ void main() {
       final ana = add('Ana Petrović');
       final taken = people().takeBirthday(ana, 'd1');
       expect(taken.birthday, const PersonDate(day: 24, month: 10, year: 1995));
-      expect(taken.dateId, 'd1');
-      expect(dates().dates, hasLength(2), reason: 'no second date made');
-      expect(dates().byId('d1')!.title, 'Ana Petrović');
-      expect(dates().byId('d1')!.personId, ana.id);
-      expect(people().freeBirthdays(), isEmpty);
+      expect(taken.dateId, isNot('d1'));
+      final own = dates().byId(taken.dateId!)!;
+      expect((own.title, own.personId, own.day, own.month, own.year),
+          ('Ana Petrović', ana.id, 24, 10, 1995));
+      final original = dates().byId('d1')!;
+      expect((original.title, original.personId), ('Ana 🎂', null));
+      expect(dates().dates, hasLength(3));
     });
 
-    test('taking one over drops the one they had', () {
+    test('taken again: their own date changed, not another made', () {
       final ana = add('Ana', birthday: const PersonDate(day: 1, month: 1));
       final own = ana.dateId!;
       container.read(datesProvider.notifier).save(const DateEntry(
           id: 'd1', title: 'Ana', type: DateType.birthday, day: 24, month: 10));
-      people().takeBirthday(ana, 'd1');
+      final taken = people().takeBirthday(ana, 'd1');
+      expect(taken.dateId, own);
+      expect(dates().byId(own)!.day, 24);
+      expect(dates().dates.map((d) => d.id).toSet(), {own, 'd1'});
+    });
+
+    test('not shown in Dates: no date there; shown again, a new one', () {
+      final ana = add('Ana', birthday: const PersonDate(day: 1, month: 1));
+      final own = ana.dateId!;
+      people().save(people().byId(ana.id)!.copyWith(inDates: false));
+      expect(people().byId(ana.id)!.dateId, isNull);
       expect(dates().byId(own), isNull);
-      expect(dates().dates.map((d) => d.id), ['d1']);
+      expect(people().byId(ana.id)!.birthday, isNotNull, reason: 'kept here');
+      expect(Person.fromJson(people().byId(ana.id)!.toJson()).inDates, isFalse);
+      people().save(people().byId(ana.id)!.copyWith(inDates: true));
+      final again = people().byId(ana.id)!.dateId;
+      expect(again, isNotNull);
+      expect(dates().byId(again!)!.personId, ana.id);
     });
   });
 
