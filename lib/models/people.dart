@@ -316,6 +316,13 @@ class PeopleBook {
   Set<String> get familyShown =>
       highlightFamily && main != null ? familyOf(mainId!) : const {};
 
+  /// Whether a sibling relation [r] gets its own line on the board
+  /// (Round 115): not with a parent in common, whose line to their
+  /// children already joins them.
+  bool drawsSiblingBar(Relation r) =>
+      r.kind == RelationKind.sibling &&
+      !parentsOf(r.from).any(parentsOf(r.to).contains);
+
   Person? byId(String id) => people.where((p) => p.id == id).firstOrNull;
 
   PeopleBook copyWith({

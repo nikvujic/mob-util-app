@@ -787,9 +787,10 @@ class _LinesPainter extends CustomPainter {
       _draw(canvas, path, paint, progress: progress);
     }
 
-    // Siblings (with no parents entered): a bar over them.
+    // Siblings (with no parent in common entered): a bar over them.
     for (final r in book.relations) {
       if (r.kind != RelationKind.sibling) continue;
+      if (!book.drawsSiblingBar(r)) continue;
       final a = _rect(r.from), b = _rect(r.to);
       if (a == null || b == null) continue;
       final barY = math.min(a.top, b.top) - BoardSizes.gap / 2;

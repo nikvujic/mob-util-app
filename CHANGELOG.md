@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.45.1] - 2026-10-28
+
+### Fixed
+- **People:** a brother and sister with their parents had two lines
+  between them (the parents' line to their children, and a sibling
+  line). Now just the parents' line; the sibling line shows only for
+  siblings with no parent in common entered.
+
 ## [1.45.0] - 2026-10-28
 
 ### Changed

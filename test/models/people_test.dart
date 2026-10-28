@@ -259,4 +259,21 @@ void main() {
     expect(on.without('b').familyShown, isEmpty);
     expect(on.without('c').mainId, 'b');
   });
+
+  test(
+      'a brother and sister with their parents: one line (the parents\'), '
+      'no sibling bar too (Round 115)', () {
+    final book = PeopleBook(
+      people: [person('m'), person('d'), person('b'), person('s')],
+      relations: [
+        rel('1', RelationKind.parent, 'm', 'b'),
+        rel('2', RelationKind.parent, 'm', 's'),
+        rel('3', RelationKind.sibling, 'b', 's'),
+      ],
+    );
+    expect(book.drawsSiblingBar(book.relations[2]), isFalse);
+    final noParents = book.copyWith(relations: [book.relations[2]]);
+    expect(noParents.drawsSiblingBar(noParents.relations.single), isTrue);
+    expect(book.drawsSiblingBar(book.relations[0]), isFalse);
+  });
 }

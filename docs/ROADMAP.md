@@ -337,6 +337,11 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 115 — People: one line between siblings (2026-10-28, 1.45.1)
+
+- [x] `PeopleBook.drawsSiblingBar`: no sibling bar when they share a
+  parent (the parents' line already joins them).
+
 ### Round 114 — People: drag alone, relations follow (2026-10-28, 1.45.0)
 
 - [x] A drag moves only the one dragged (`familyPull` removed).
