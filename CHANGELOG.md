@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.43.3] - 2026-10-28
+
+### Changed
+- **People, zoomed out:** faces stay close to their size instead of
+  shrinking far below the name; names grow less (up to 1.6×) and keep to
+  one line.
+- The main person's **star** sits on the box's corner, not on the face.
+
 ## [1.43.2] - 2026-10-27
 
 ### Added

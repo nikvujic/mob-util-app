@@ -510,9 +510,11 @@ class _PersonBox extends StatelessWidget {
     final strong = p.highlighted || selected;
     // Text in board units, so it shrinks with the zoom: grown back as the
     // board zooms out (up to about 2.2×), the face giving way.
-    final text = (1 / zoom).clamp(1.0, 2.2);
-    final face = 78 * zoom.clamp(0.5, 1.0);
-    return DecoratedBox(
+    // Round 111: gentler (up to 1.6×), and zoomed out the name keeps to
+    // one line, so the face stays near its size rather than dwarfed.
+    final text = (1 / zoom).clamp(1.0, 1.6);
+    final oneLine = text > 1.3;
+    final box = DecoratedBox(
       decoration: BoxDecoration(
         color: family && !selected
             ? Color.alphaBlend(
@@ -525,35 +527,21 @@ class _PersonBox extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(6, 8, 6, 4),
         child: Column(
           children: [
-            // The face gives way to the text when room runs short.
+            // The face gives way to the text only when room runs short.
             Flexible(
               child: FittedBox(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    PeopleAvatar(
-                      age: p.ageGroupAt(now).index,
-                      female: female,
-                      grey: p.deceased,
-                      size: face,
-                    ),
-                    if (main)
-                      Positioned(
-                        right: -4,
-                        top: -4,
-                        child: Icon(Icons.star,
-                            key: const Key('mainStar'),
-                            size: 22 * text.clamp(1.0, 1.6),
-                            color: PeopleFamilyColours.ring),
-                      ),
-                  ],
+                child: PeopleAvatar(
+                  age: p.ageGroupAt(now).index,
+                  female: female,
+                  grey: p.deceased,
+                  size: 78,
                 ),
               ),
             ),
             const SizedBox(height: 6),
             Text(
               p.deceased ? '† ${p.name}' : p.name,
-              maxLines: 2,
+              maxLines: oneLine ? 1 : 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -583,6 +571,25 @@ class _PersonBox extends StatelessWidget {
           ],
         ),
       ),
+    );
+    if (!main) return box;
+    // Round 111: the main person's star on the box's corner.
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned.fill(child: box),
+        Positioned(
+          right: -8,
+          top: -8,
+          child: Icon(Icons.star,
+              key: const Key('mainStar'),
+              size: 24 * text,
+              color: PeopleFamilyColours.ring,
+              shadows: const [
+                Shadow(blurRadius: 2, color: PeopleFamilyColours.starShadow)
+              ]),
+        ),
+      ],
     );
   }
 }

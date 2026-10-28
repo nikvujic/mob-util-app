@@ -896,6 +896,11 @@ until the new `PeopleBook` arrives. The zoom handle sits over the
 board, outside its gesture detector, so it never competes with pan and
 pinch.
 
+Round 111: the box's text scales by `clamp(1/zoom, 1, 1.6)`, one line
+past 1.3; the face is a fixed 78 in a `Flexible` `FittedBox`, so it
+gives way only when the text needs the room; the star is stacked on the
+box, not the face.
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

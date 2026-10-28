@@ -760,4 +760,5 @@ abstract final class PeopleColours {
 /// Round 109: the main person's family, highlighted on the People board.
 abstract final class PeopleFamilyColours {
   static const ring = Color(0xFFE2A93B);
+  static const starShadow = Color(0x55000000);
 }

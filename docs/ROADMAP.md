@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 111 — People: face size zoomed out, star on the corner (2026-10-28, 1.43.3)
+
+- [x] Zoomed out the text grows up to 1.6× (was 2.2×), the name on one
+  line past 1.3×, and the face stays 78 unless room runs short; the
+  main person's star on the box's top-right corner.
+
 ### Round 110 — People: zoom handle, soft movement (2026-10-27, 1.43.2)
 
 - [x] A zoom handle in the board's corner (down out, up in, tap 100%).

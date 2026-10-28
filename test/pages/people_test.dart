@@ -9,6 +9,7 @@ import 'package:the_app/models/people_layout.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/widgets/people_avatar.dart';
 
 import '../helpers.dart';
 
@@ -416,6 +417,11 @@ void main() {
       expect(book().mainId, 'a');
       await tapKey(tester, 'personDone');
       expect(find.byKey(const Key('mainStar')), findsOneWidget);
+      // Round 111: on the box's corner, not the face's.
+      final star = tester.getRect(find.byKey(const Key('mainStar')));
+      final mainBox = tester.getRect(find.byKey(const Key('person-a')));
+      expect(star.center.dx, greaterThan(mainBox.right - 12));
+      expect(star.center.dy, lessThan(mainBox.top + 12));
       await tapKey(tester, 'personClose');
 
       await tapKey(tester, 'peopleOptions');
@@ -584,16 +590,28 @@ void main() {
     testWidgets('zoomed out: names larger, faces smaller; no overflow',
         (tester) async {
       await openPeople(tester,
-          people:
-              family.copyWith(view: const BoardView(x: 80, y: 130, zoom: 0.3)));
+          people: family.copyWith(
+            people: [
+              for (final p in family.people)
+                p.id == 'i' ? p.copyWith(name: 'Ivan Aleksandar Petrovic') : p,
+            ],
+            view: const BoardView(x: 80, y: 130, zoom: 0.3),
+          ));
       double nameSize() => tester
           .widget<Text>(find.descendant(
               of: find.byKey(const Key('person-i')),
-              matching: find.text('Ivan')))
+              matching: find.text('Ivan Aleksandar Petrovic')))
           .style!
           .fontSize!;
-      expect(nameSize(), greaterThan(20));
+      expect(nameSize(), greaterThan(19));
       expect(tester.takeException(), isNull);
+      // Round 111: the face not dwarfed by the name (near its full 78
+      // board units), a long name on one line.
+      final box = tester.getRect(find.byKey(const Key('person-i')));
+      final face = tester.getRect(find.descendant(
+          of: find.byKey(const Key('person-i')),
+          matching: find.byType(PeopleAvatar)));
+      expect(face.width / box.width * BoardSizes.boxWidth, greaterThan(72));
     });
 
     testWidgets(
