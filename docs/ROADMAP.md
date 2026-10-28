@@ -473,7 +473,9 @@ big for Pip:
 4. [x] People: an index of people, notes, a family tree (Round 100;
    planned with the user first). Spec: `docs/PEOPLE_SPEC.md` (Round 107),
    waiting on his answers.
-5. [ ] Page organizer (O10, already marked v2): to talk through.
+5. [-] Page organizer (O10): not in v2 (Round 117). The right-side
+   panel isn't wanted; it comes back once the user's own services are
+   linked, as the place for their special pages.
 6. [ ] Other productivity ideas the user brings (the Hub pages ideas list).
 
 Released as **2.0.0** once these are in.
