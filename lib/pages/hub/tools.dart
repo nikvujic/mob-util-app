@@ -2,6 +2,7 @@ import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/pages/hub/clears_shown.dart';
 import 'package:flutter/widgets.dart';
 import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/pages/hub/converter.dart';
 import 'package:the_app/pages/hub/counters.dart';
 import 'package:the_app/pages/hub/dates.dart';
 import 'package:the_app/pages/hub/food.dart';
@@ -30,6 +31,7 @@ extension HubToolPage on HubTool {
         HubTool.spotify => 'assets/icons/spotify.svg',
         HubTool.packing => 'assets/icons/packing.svg',
         HubTool.people => 'assets/icons/people.svg',
+        HubTool.converter => 'assets/icons/converter.svg',
       };
 
   Widget page() => switch (this) {
@@ -48,5 +50,6 @@ extension HubToolPage on HubTool {
         HubTool.spotify => const SpotifyPage(),
         HubTool.packing => const PackingPage(),
         HubTool.people => const PeoplePage(),
+        HubTool.converter => const ConverterPage(),
       };
 }

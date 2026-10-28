@@ -913,6 +913,15 @@ Round 113: `Person.inDates` (JSON `inDates`, written only when false):
 `takeBirthday` copies a Dates birthday's day, month and year into the
 person (the original untouched); their own date follows from `save`.
 
+## Converter (Round 118)
+
+`core/units.dart`: `UnitPair` (two units and a conversion each way;
+`scaled` for a plain factor), `unitGroups`, `parseAmount` (comma or
+point) and `formatAmount` (three decimals at most). The page
+(`pages/hub/converter.dart`) holds two controllers per pair in its
+state, nothing in a provider or storage, so leaving it forgets them;
+`HubTool.converter` is neither lockable nor clearable.
+
 ## Packing lists (Round 94)
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what

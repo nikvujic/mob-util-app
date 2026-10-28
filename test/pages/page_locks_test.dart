@@ -82,7 +82,7 @@ void main() {
       expect(tester.getTopLeft(tile).dy, greaterThan(hub.dy));
     }
     expect(HubTool.values.where((p) => !p.lockable),
-        [HubTool.pip, HubTool.spotify],
+        [HubTool.pip, HubTool.spotify, HubTool.converter],
         reason: 'Round 93: Spotify has nothing to hide');
     container.read(pageLocksProvider.notifier).lock(HubTool.pip);
     expect(pageLocks(), isEmpty, reason: "Pip can't be locked");

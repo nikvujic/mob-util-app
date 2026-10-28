@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 118 — the unit converter (2026-10-28, 1.46.0)
+
+- [x] Picked from the leftover ideas (the rest deferred: days since /
+  until, timer, workout log, weight log, expenses, decision helper, life
+  percentage; no habits; UI polish and cloud backup later). A Hub page
+  of unit pairs, two boxes each, either filling the other; nothing
+  stored. `core/units.dart`, `pages/hub/converter.dart`.
+
 ### Round 116 — notes from using the patches (2026-10-28, noted)
 
 - [ ] Delete on a date (the Dates page) as a full button, like Delete

@@ -38,15 +38,19 @@ enum HubTool {
 
   /// People (Round 108): the people you know on a board, with family
   /// trees.
-  people('People');
+  people('People'),
+
+  /// A unit converter (Round 118): nothing kept, so nothing to lock or
+  /// clear.
+  converter('Converter');
 
   const HubTool(this.label);
 
   /// Whether it can have a lock of its own (O7).
-  bool get lockable => this != pip && this != spotify;
+  bool get lockable => this != pip && this != spotify && this != converter;
 
   /// Whether Clear data lists it.
-  bool get clearable => this != pip && this != spotify;
+  bool get clearable => this != pip && this != spotify && this != converter;
 
   /// Shown to the user (and said by screen readers).
   final String label;

@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.46.0] - 2026-10-28
+
+### Added
+- **Converter**, a new Hub page: unit pairs in two boxes each; type in
+  either box and the other shows the converted value. Cooking (g ↔ oz,
+  ml ↔ cups, fl oz, tablespoons, teaspoons), temperature (°C ↔ °F),
+  weight (kg ↔ lb), volume (l ↔ gal), length (cm ↔ in, m ↔ ft,
+  km ↔ mi) and speed (km/h ↔ mph). US cups, spoons and gallons. Nothing
+  is kept once you leave the page.
+
 ## [1.45.1] - 2026-10-28
 
 ### Fixed

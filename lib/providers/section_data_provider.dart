@@ -65,7 +65,7 @@ class SectionData {
           _ref.read(subscriptionsProvider).subscriptions.length,
         // His life isn't cleared with the Hub's pages; Spotify's morning
         // is a setting (Round 93).
-        HubTool.pip || HubTool.spotify => 0,
+        HubTool.pip || HubTool.spotify || HubTool.converter => 0,
         // Its lists (Round 94).
         HubTool.packing => _ref.read(packingProvider).lists.length,
         // Round 108: everyone on the board.
@@ -106,6 +106,7 @@ class SectionData {
         _ref.read(peopleProvider.notifier).replaceAll(PeopleBook.empty);
       case HubTool.pip:
       case HubTool.spotify:
+      case HubTool.converter:
     }
   }
 

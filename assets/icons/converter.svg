@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Two arrows, one each way: a value turned into another unit. -->
+  <path d="M8 16h30"/>
+  <path d="M31 9l7 7-7 7"/>
+  <path d="M40 32H10"/>
+  <path d="M17 25l-7 7 7 7"/>
+</svg>
