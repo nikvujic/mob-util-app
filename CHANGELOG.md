@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.45.0] - 2026-10-28
+
+### Changed
+- **People: a drag moves only the person dragged.** Their family no
+  longer follows.
+- **Relations fill in what follows.** Make someone a parent, and the
+  child's brothers and sisters (by a sibling relation or a shared
+  parent) become their children too; add a brother or sister, and they
+  share the other's parents. Only where it makes sense (two parents at
+  most); a toast says who else was related.
+
 ## [1.44.0] - 2026-10-28
 
 ### Changed

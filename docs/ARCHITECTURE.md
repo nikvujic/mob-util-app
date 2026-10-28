@@ -865,8 +865,8 @@ maybe `former`, `sibling`, `other` with a `label`), `PeopleBook` with the
 rules (`whyNot`, `isAncestor`, `familyOf` over family relations) and the
 `BoardView`. `models/people_layout.dart`: `BoardSizes`, `generations`
 (a bounded fix-point: a child below its parents, partners and siblings
-level, a root parent just above), `tidyLayout` and `familyPull` (the
-share of a drag the family follows). `PeopleNotifier` keeps a person's
+level, a root parent just above), `tidyLayout` (Round 114: a drag moves
+only the one dragged; `familyPull` is gone). `PeopleNotifier` keeps a person's
 birthday in step with a `DateEntry` whose `personId` is theirs (Dates
 locks its title, day, year and type; Clear data of People removes
 them). `pages/hub/people_board.dart` draws boxes as positioned widgets

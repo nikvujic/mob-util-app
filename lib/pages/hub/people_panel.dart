@@ -396,9 +396,18 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     };
     if (why != null) {
       _toast(why);
-    } else {
-      setState(() => _dirty = true);
+      return;
     }
+    setState(() => _dirty = true);
+    // Round 114: what followed from it, said.
+    final also = [
+      for (final id in _people.lastAlso)
+        ref.read(peopleProvider).byId(id)?.name ?? '',
+    ];
+    if (also.isEmpty) return;
+    _toast(kind == 'sibling'
+        ? 'Their parents too: ${also.join(', ')}'
+        : 'Their brothers and sisters too: ${also.join(', ')}');
   }
 
   Future<void> _editNote() async {

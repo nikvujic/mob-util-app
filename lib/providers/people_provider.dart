@@ -118,6 +118,7 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     String label = '',
     String? bring,
   }) {
+    lastAlso = const [];
     final why = state.whyNot(kind, from, to);
     if (why != null) return why;
     state = state.copyWith(relations: [
@@ -133,8 +134,50 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     ]);
     final moved = bring == from ? from : to;
     _nearEachOther(moved == from ? to : from, moved);
+    _alsoRelate(kind, from, to);
     return null;
   }
+
+  /// Who [relate] related as well, the last time (Round 114), to say so.
+  List<String> lastAlso = const [];
+
+  /// Round 114: what follows from it. A parent's child's brothers and
+  /// sisters are their children too; a new brother or sister shares the
+  /// other's parents. Each only where it makes sense (two parents at
+  /// most, nobody their own ancestor); nobody moves.
+  void _alsoRelate(RelationKind kind, String from, String to) {
+    final pairs = <(String, String)>[
+      if (kind == RelationKind.parent)
+        for (final s in _siblingsOf(to)) (from, s),
+      if (kind == RelationKind.sibling) ...[
+        for (final p in state.parentsOf(from)) (p, to),
+        for (final p in state.parentsOf(to)) (p, from),
+      ],
+    ];
+    final also = <String>[];
+    for (final (parent, child) in pairs) {
+      if (state.whyNot(RelationKind.parent, parent, child) != null) continue;
+      state = state.copyWith(relations: [
+        ...state.relations,
+        Relation(
+            id: generateId(),
+            kind: RelationKind.parent,
+            from: parent,
+            to: child),
+      ]);
+      also.add(kind == RelationKind.parent ? child : parent);
+    }
+    lastAlso = also;
+  }
+
+  /// Brothers and sisters: by a sibling relation, or a shared parent.
+  Set<String> _siblingsOf(String id) => {
+        for (final r in state.relations)
+          if (r.kind == RelationKind.sibling && r.involves(id)) r.otherThan(id),
+        for (final p in state.parentsOf(id))
+          for (final c in state.childrenOf(p))
+            if (c != id) c,
+      };
 
   /// Spec 5.4: when a relation is added, the newly linked person [b]
   /// comes next to [a] if they're far apart; nobody else moves.

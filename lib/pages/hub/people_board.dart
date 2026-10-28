@@ -79,11 +79,11 @@ class PeopleBoardState extends State<PeopleBoard>
   Offset? _centerTo;
   Size _size = Size.zero;
 
-  // Dragging a person: who, where from, and their family as it was.
+  // Dragging a person (Round 114: only them, nobody follows): who, and
+  // where from.
   String? _dragId;
   Offset _dragStart = Offset.zero;
   final _dragFrom = <String, Offset>{};
-  Set<String> _partners = const {};
 
   /// Where the last finger went down: a drag or pan starts there, not
   /// where it's noticed (past the touch slop), so nothing jumps.
@@ -281,11 +281,9 @@ class PeopleBoardState extends State<PeopleBoard>
     if (id != null) {
       _dragId = id;
       _dragStart = _toWorld(_downAt);
-      _dragFrom.clear();
-      for (final f in widget.book.familyOf(id)) {
-        _dragFrom[f] = _shown[f]!;
-      }
-      _partners = widget.book.partnersOf(id).toSet();
+      _dragFrom
+        ..clear()
+        ..[id] = _shown[id]!;
       return;
     }
     _dragId = null;
@@ -299,14 +297,7 @@ class PeopleBoardState extends State<PeopleBoard>
     if (id != null) {
       final moved = _toWorld(d.localFocalPoint) - _dragStart;
       _wake();
-      setState(() {
-        for (final MapEntry(key: f, value: from) in _dragFrom.entries) {
-          final pull = f == id
-              ? 1.0
-              : familyPull(moved.distance, partner: _partners.contains(f));
-          _shown[f] = from + moved * pull;
-        }
-      });
+      setState(() => _shown[id] = _dragFrom[id]! + moved);
       return;
     }
     if (_quickZoom) {

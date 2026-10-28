@@ -153,12 +153,3 @@ Map<String, (double, double)> _treeLayout(PeopleBook book, Set<String> family) {
   }
   return result;
 }
-
-/// How strongly a dragged person's family follows them (spec 5.3: a small
-/// drag moves only them; far, the family follows): 0 under a box's width,
-/// all of the way past three; [partner]s follow sooner.
-double familyPull(double distance, {bool partner = false}) {
-  final start = partner ? BoardSizes.boxWidth * 0.25 : BoardSizes.boxWidth;
-  final full = partner ? BoardSizes.boxWidth * 1.25 : BoardSizes.boxWidth * 3;
-  return ((distance - start) / (full - start)).clamp(0.0, 1.0);
-}

@@ -187,6 +187,41 @@ void main() {
       expect((moved.x, moved.y), (0.0, 1000 - BoardSizes.rowStep));
     });
 
+    test(
+        "Round 114: a parent's child's brothers and sisters are their "
+        'children too; only where it makes sense; said', () {
+      final mum = add('Mum'), dad = add('Dad'), step = add('Step');
+      final a = add('A'), b = add('B'), c = add('C');
+      expect(people().relate(RelationKind.parent, mum.id, a.id), isNull);
+      expect(people().relate(RelationKind.sibling, a.id, b.id), isNull);
+      expect(book().parentsOf(b.id), [mum.id], reason: 'shares her');
+      expect(people().lastAlso, [mum.id]);
+      expect(people().relate(RelationKind.parent, mum.id, c.id), isNull);
+      expect(book().childrenOf(mum.id).toSet(), {a.id, b.id, c.id});
+
+      // Dad for A: B (a sibling) and C (by Mum) too.
+      expect(people().relate(RelationKind.parent, dad.id, a.id), isNull);
+      expect(people().lastAlso.toSet(), {b.id, c.id});
+      expect(book().parentsOf(c.id).toSet(), {mum.id, dad.id});
+
+      // A brother added from his side: he gets A's parents.
+      final d = add('D');
+      expect(people().relate(RelationKind.sibling, d.id, a.id), isNull);
+      expect(book().parentsOf(d.id).toSet(), {mum.id, dad.id});
+
+      // Two parents each now: a third is refused.
+      expect(people().relate(RelationKind.parent, step.id, a.id),
+          'They already have two parents');
+      expect(people().lastAlso, isEmpty);
+    });
+
+    test('a child made with their own parent: no one is their own parent', () {
+      final p = add('P'), k = add('K');
+      people().relate(RelationKind.parent, p.id, k.id);
+      people().relate(RelationKind.sibling, k.id, p.id);
+      expect(book().parentsOf(p.id), isEmpty);
+    });
+
     test('a relation removed', () {
       final a = add('A'), b = add('B');
       people().relate(RelationKind.partner, a.id, b.id);

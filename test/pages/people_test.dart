@@ -156,30 +156,18 @@ void main() {
     expect(find.byKey(const Key('peopleAdd')), findsOneWidget);
   });
 
-  testWidgets(
-      'a small drag moves only them; far, the family follows (the partner '
-      'all the way); others never', (tester) async {
+  testWidgets('a drag moves only them (Round 114), near or far',
+      (tester) async {
     await openPeople(tester, people: family);
     Offset at(String id) => Offset(byName(id).x, byName(id).y);
     final ivan = at('Ivan'), jelena = at('Jelena'), ana = at('Ana');
-
-    await tester.drag(find.byKey(const Key('person-m')), const Offset(40, 0),
-        touchSlopX: 0);
-    await tester.pumpAndSettle();
-    expect(at('Marko').dx, closeTo(40, 1));
-    expect((at('Jelena') - jelena).distance, lessThan(5),
-        reason: 'a small drag: barely'); // a partner follows soonest
-    expect(at('Ana'), ana);
-
     await tester.drag(find.byKey(const Key('person-m')), const Offset(0, 500),
         touchSlopY: 0);
     await tester.pumpAndSettle();
     expect(at('Marko').dy, closeTo(500, 1));
-    expect(at('Jelena').dy, closeTo(jelena.dy + 500, 1),
-        reason: 'his partner, all the way');
-    expect(at('Ana').dy, greaterThan(ana.dy + 100),
-        reason: 'his daughter follows');
-    expect(at('Ivan'), ivan, reason: 'not family');
+    expect(at('Jelena'), jelena, reason: 'his partner stays');
+    expect(at('Ana'), ana, reason: 'his daughter stays');
+    expect(at('Ivan'), ivan);
   });
 
   testWidgets('dragging the empty board pans it; the view is kept',

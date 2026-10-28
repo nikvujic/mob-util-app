@@ -241,17 +241,6 @@ void main() {
     });
   });
 
-  test('the pull: nothing for a small drag, all of it far', () {
-    expect(familyPull(BoardSizes.boxWidth * 0.9), 0);
-    expect(familyPull(BoardSizes.boxWidth * 2), closeTo(0.5, 1e-9));
-    expect(familyPull(BoardSizes.boxWidth * 3), 1);
-    expect(familyPull(BoardSizes.boxWidth * 10), 1);
-    expect(familyPull(BoardSizes.boxWidth * 0.75, partner: true),
-        closeTo(0.5, 1e-9));
-    expect(familyPull(BoardSizes.boxWidth * 0.2, partner: true), 0,
-        reason: 'fine-tuning');
-  });
-
   test(
       'the main person (Round 109): kept, read back; their family shown '
       'only when on; gone with them', () {

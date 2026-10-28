@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 114 — People: drag alone, relations follow (2026-10-28, 1.45.0)
+
+- [x] A drag moves only the one dragged (`familyPull` removed).
+- [x] `relate` adds what follows: a parent for a child's siblings, a
+  new sibling's parents; refused ones skipped; `lastAlso` for the toast.
+
 ### Round 113 — People project birthdays into Dates (2026-10-28, 1.44.0)
 
 - [x] *From Dates* copies the day only, the original left (it was taken
