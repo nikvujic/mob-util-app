@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 116 — notes from using the patches (2026-10-28, noted)
+
+- [ ] Delete on a date (the Dates page) as a full button, like Delete
+  person, not a text button.
+- [ ] Pip Home: drop the hint text about three taps waking him and
+  tapping the screen to feed him.
+
 ### Round 115 — People: one line between siblings (2026-10-28, 1.45.1)
 
 - [x] `PeopleBook.drawsSiblingBar`: no sibling bar when they share a
