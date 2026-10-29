@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [1.46.1] - 2026-10-28
+
+### Changed
+- **Converter:** each box shows its unit with its name ("Pounds (lb)")
+  all the time, not only while typing in it. The groups in a new
+  order: temperature, length, weight, volume, speed, then cooking.
+
 ## [1.46.0] - 2026-10-28
 
 ### Added

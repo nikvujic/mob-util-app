@@ -54,9 +54,14 @@ class _ConverterPageState extends State<ConverterPage> {
           FilteringTextInputFormatter.allow(
               RegExp(pair.signed ? r'[-0-9.,]' : r'[0-9.,]')),
         ],
+        // Round 119: the unit always shown (a suffix only shows while
+        // typing), with its name.
         decoration: InputDecoration(
           isDense: true,
-          suffixText: left ? pair.left : pair.right,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          labelText: left
+              ? '${pair.leftName} (${pair.left})'
+              : '${pair.rightName} (${pair.right})',
         ),
         onChanged: (_) => _typed(i, left: left),
       ),

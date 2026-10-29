@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 119 — converter feedback (2026-10-28, 1.46.1)
+
+- [x] Units always shown (a label, not a suffix that only shows while
+  typing), with their names; groups ordered temperature, length,
+  weight, volume, speed, cooking.
+
 ### Round 118 — the unit converter (2026-10-28, 1.46.0)
 
 - [x] Picked from the leftover ideas (the rest deferred: days since /
