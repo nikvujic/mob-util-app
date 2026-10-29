@@ -262,10 +262,11 @@ void main() {
               .segments,
           2);
       expect(words(), containsAll(['BATTERIES 2/3', 'NEXT IN 2H 15M']));
-      expect(words(), contains('TAP THE FIELD TO GIVE HIM ONE'));
+      expect(words(), isNot(contains('TAP THE FIELD TO GIVE HIM ONE')),
+          reason: 'Round 116: no how-to');
     });
 
-    testWidgets('Round 77: asleep, how to wake him (if he may be)',
+    testWidgets('Round 77: asleep (Round 116: no how-to wake him)',
         (tester) async {
       final now = DateTime(2026, 10, 15, 2);
       await start(
@@ -274,7 +275,8 @@ void main() {
           pipWith(energy: 2, at: now, batteries: 1)
               .copyWith(sleepSeen: () => '2026-10-14'));
       await openHome(tester);
-      expect(words(), contains('TAP HIM 3 TIMES TO WAKE HIM'));
+      expect(words(), contains("HE'S ASLEEP"));
+      expect(words(), isNot(contains('TAP HIM 3 TIMES TO WAKE HIM')));
       expect(tester.widget<PipPortrait>(find.byType(PipPortrait)).face,
           PipFace.asleep);
     });

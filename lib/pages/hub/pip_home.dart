@@ -359,12 +359,12 @@ class _StatusState extends ConsumerState<_Status> {
     };
     if (widget.adventure) return _adventureCard(pip, life, now, face);
     final next = pip.nextBatteryAt;
-    // What a tap on his field would do (Round 37).
+    // Why a battery can't go to him now (Round 37); Round 116: no how-to
+    // (tap the field, tap him three times), only how he is.
     final hint = switch (life.refusalAt(now)) {
-      null => 'TAP THE FIELD TO GIVE HIM ONE',
+      null => null,
       PipRefusal.full => "HE'S FULL",
-      PipRefusal.asleep =>
-        life.mayWakeAt(now) ? 'TAP HIM 3 TIMES TO WAKE HIM' : "HE'S ASLEEP",
+      PipRefusal.asleep => "HE'S ASLEEP",
       PipRefusal.charging => "HE'S CHARGING",
       PipRefusal.travelling => "HE'S ON HIS TRIP",
       PipRefusal.noBatteries || PipRefusal.egg => null,

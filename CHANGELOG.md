@@ -6,6 +6,18 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-29
+
+**Version 2**: the productivity round. Since 1.40: a recipe keeps its
+place between viewing and editing; recipes as text (import, export for
+agents); the rain radar; **People**, with family trees, birthdays shown
+in Dates and notes; and the **Converter**.
+
+### Changed
+- **Dates:** Delete on a date is a full button, as Delete person.
+- **Pip Home:** the status no longer explains how to give him a battery
+  or wake him; it only says how he is (full, asleep, charging, away).
+
 ## [1.46.1] - 2026-10-28
 
 ### Changed

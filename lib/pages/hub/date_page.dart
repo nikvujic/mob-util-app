@@ -483,15 +483,17 @@ class _DatePageState extends ConsumerState<DatePage> {
             if (saved && !fromPeople)
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    key: const Key('deleteDate'),
-                    style: TextButton.styleFrom(foregroundColor: colors.danger),
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text('Delete date'),
-                    onPressed: _delete,
+                // Round 116: a full button, as Delete person.
+                child: OutlinedButton.icon(
+                  key: const Key('deleteDate'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.danger,
+                    side: BorderSide(color: colors.danger),
+                    minimumSize: const Size.fromHeight(44),
                   ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete date'),
+                  onPressed: _delete,
                 ),
               ),
           ],

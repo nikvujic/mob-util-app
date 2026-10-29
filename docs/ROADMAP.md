@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 120 — v2.0.0 (2026-10-29, 2.0.0)
+
+- [x] Round 116's notes: Delete on a date a full button; Pip Home without
+  the how-to hints (tap the field, tap him three times).
+- [x] The v2 list checked: all in, the page organizer moved to later;
+  older open items that were done since ticked off. **2.0.0** released.
+  Next: Pip's quests, specced with the user first.
+
 ### Round 119 — converter feedback (2026-10-28, 1.46.1)
 
 - [x] Units always shown (a label, not a suffix that only shows while
@@ -353,9 +361,9 @@ fixtures for every stored format.
 
 ### Round 116 — notes from using the patches (2026-10-28, noted)
 
-- [ ] Delete on a date (the Dates page) as a full button, like Delete
+- [x] Delete on a date (the Dates page) as a full button, like Delete
   person, not a text button.
-- [ ] Pip Home: drop the hint text about three taps waking him and
+- [x] Pip Home: drop the hint text about three taps waking him and
   tapping the screen to feed him.
 
 ### Round 115 — People: one line between siblings (2026-10-28, 1.45.1)
@@ -490,9 +498,11 @@ big for Pip:
 5. [-] Page organizer (O10): not in v2 (Round 117). The right-side
    panel isn't wanted; it comes back once the user's own services are
    linked, as the place for their special pages.
-6. [ ] Other productivity ideas the user brings (the Hub pages ideas list).
+6. [x] Other productivity ideas the user brings: the unit converter
+   (Round 118); the rest of the ideas list deferred (Round 118).
 
-Released as **2.0.0** once these are in.
+Released as **2.0.0** once these are in: **released 2026-10-29
+(Round 120).**
 
 **After v2: Pip's quests** (a plan, to be specced with the user before
 building; big). Open questions: what a quest is (given by the app,
@@ -505,13 +515,14 @@ ideas (Rounds 26 and 30).
 
 - [x] **Recipe edit keeps its scroll**: starting and ending edit on a
   recipe jumps back to the top; it should stay where it was.
-- [ ] **People** (new Hub page, to plan with the user first): a big index
+- [x] **People** (new Hub page, to plan with the user first; built in
+  Round 108): a big index
   of people he knows, notes on each, and a **family tree** with a good
   visual overview.
 
 ### Round 99 — feedback on 1.40.4 (2026-10-21, noted)
 
-- [ ] **Rain heard, Pip dry** (W1/O36): Belgrade raining, the app said
+- [x] **Rain heard, Pip dry** (W1/O36; the rain radar, Round 106): Belgrade raining, the app said
   cloudy. The user's own Open-Meteo check (01:30): `weather_code` 3,
   `precipitation` 0, `rain` 0: its model saw no rain at all, so reading
   precipitation won't help. **Switch to a better weather API** (one
@@ -586,7 +597,7 @@ ideas (Rounds 26 and 30).
   drags into another section too. Not tied to Dates.
 - [x] **Spotify**: its page drops "may not start if Spotify was closed"
   (the user tried it: it starts).
-- [ ] Next: the recipe import/export (tomorrow).
+- [x] Next: the recipe import/export (done in Round 104).
 
 ### Round 93 — feedback on 1.38.2 (2026-10-20, 1.39.0)
 
