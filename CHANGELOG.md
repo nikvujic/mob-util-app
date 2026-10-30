@@ -6,6 +6,11 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+### Added
+- Pip's quests, under the hood (not shown yet): quest hours, the house's
+  build plan, and his progress counted from the clock. Pip Home's Quests
+  card and the scenes come next.
+
 ## [2.0.0] - 2026-10-29
 
 **Version 2**: the productivity round. Since 1.40: a recipe keeps its

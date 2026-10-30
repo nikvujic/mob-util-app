@@ -913,6 +913,24 @@ Round 113: `Person.inDates` (JSON `inDates`, written only when false):
 `takeBirthday` copies a Dates birthday's day, month and year into the
 person (the original untouched); their own date follows from `save`.
 
+## Pip's quests (Round 125)
+
+`core/pip_quest.dart` holds the rules: `PipQuest` (the quest hours,
+`windowsBetween`, `finishAt`) and `Quests.house`, a `QuestScript` built
+once from `housePieces`: for each piece, trips to gather what all of it
+needs (out, gather up to a load, back), glass smelted first where it's
+needed, then the piece built one at a time. A step has minutes, what it
+takes when it starts and what it gives when done; `QuestScript.at`
+finds the step for a number of work minutes by binary search over the
+steps' start minutes and derives the inventory and what's built from the
+steps before it. Nothing else is stored: `PipLife` keeps the quest's id,
+its start, its work minutes and the moment they're counted to, and the
+finished quests (`pip.json` v4). `PipLifeNotifier._settleQuest` runs at
+the start of `_settle` (so before any energy change): over each quest
+window since the last count it finds, by binary search, the first
+minute he's out of energy (his level only falls between changes), and
+leaves out five-minute chunks spent away on a ski trip.
+
 ## Converter (Round 118)
 
 `core/units.dart`: `UnitPair` (two units and a conversion each way;

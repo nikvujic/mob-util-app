@@ -95,8 +95,8 @@ class Backup {
   /// packing lists (`packing`, as in `packing.json`, Round 94); 31 = a
   /// packing list's own sections (in `packing`, Round 95); 32 = people
   /// (`people`, as in `people.json`, Round 108), and a date's person (in
-  /// `dates`).
-  static const version = 32;
+  /// `dates`); 33 = Pip's quests (in `pip`, Round 125).
+  static const version = 33;
 
   final DateTime createdAt;
   final String appVersion;

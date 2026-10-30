@@ -7,6 +7,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_hats.dart';
+import 'package:the_app/core/pip_quest.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/power.dart';
@@ -226,6 +227,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// 17:00 (a battery). Run before anything that changes his energy, so
   /// his energy at 12:00 is still known.
   void _settle(DateTime now) {
+    _settleQuest(now);
     if (!state.adventurer) return;
     final from = state.outFrom;
     if (from != null && !now.isBefore(PipAdventure.endOf(from))) {
@@ -440,6 +442,128 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     _settle(now);
     return true;
   }
+
+  // ---- Quests (Round 125, docs/QUESTS_SPEC.md) ----
+
+  /// The quest under way, or null.
+  QuestScript? get quest => Quests.byId(state.questId);
+
+  /// The quest offered now: the next in the chain, when none is under
+  /// way (an egg has none).
+  QuestScript? get questOffered => !state.hatched || state.questId != null
+      ? null
+      : Quests.nextAfter(state.questsDone.map((d) => d.id));
+
+  /// Away on a ski trip at [t] (on the bus or at the resort): no quest
+  /// work then.
+  bool _awayAt(DateTime t) {
+    final trip = PipTrip.at(_dates(), t);
+    return trip.leg != null || trip.snowy;
+  }
+
+  /// Whether the offered quest can be started at [now]: in quest hours,
+  /// not away.
+  bool canStartQuestAt(DateTime now) =>
+      questOffered != null && PipQuest.canStartAt(now) && !_awayAt(now);
+
+  /// Starts the offered quest at [now] (spec 2: only in quest hours; it
+  /// can't be stopped). True if it was.
+  bool startQuest(DateTime now) {
+    _settle(now);
+    final next = questOffered;
+    if (next == null || !canStartQuestAt(now)) return false;
+    final at = _minuteOf(now);
+    state = state.copyWith(
+      questId: () => next.id,
+      questFrom: () => at,
+      questMinutes: 0,
+      questCountedTo: () => at,
+    );
+    return true;
+  }
+
+  /// The work minutes from [from] to [to] (spec 4): quest hours, less
+  /// those he was powered down or away. His energy only drains between
+  /// the moments it changes (each settles first), so within a window he's
+  /// on until he empties, then off to its end. Also returns when the
+  /// [cap]th minute was worked, if it was.
+  (int, DateTime?) _workedBetween(DateTime from, DateTime to, {int? cap}) {
+    var worked = 0;
+    for (final (a, b) in PipQuest.windowsBetween(from, to)) {
+      final length = b.difference(a).inMinutes;
+      if (length <= 0) continue;
+      // The first minute he's off in it (binary search: his level only
+      // falls), or the window's end.
+      var lo = 0, hi = length;
+      while (lo < hi) {
+        final mid = (lo + hi) ~/ 2;
+        if (levelAt(a.add(Duration(minutes: mid))) <= 0) {
+          hi = mid;
+        } else {
+          lo = mid + 1;
+        }
+      }
+      // Away is checked a few minutes at a time (trips change by hours).
+      for (var m = 0; m < lo; m += 5) {
+        final t = a.add(Duration(minutes: m));
+        if (_awayAt(t)) continue;
+        final chunk = math.min(5, lo - m);
+        if (cap != null && worked + chunk >= cap) {
+          return (cap, t.add(Duration(minutes: cap - worked)));
+        }
+        worked += chunk;
+      }
+    }
+    return (worked, null);
+  }
+
+  /// His quest's work brought up to [now]; done, it's finished (with the
+  /// moment its last minute was worked) and the next can be offered.
+  void _settleQuest(DateTime now) {
+    final script = quest;
+    if (script == null) return;
+    final from = state.questCountedTo ?? state.questFrom ?? now;
+    if (!now.isAfter(from)) return; // the clock went back: nothing
+    final left = script.totalMinutes - state.questMinutes;
+    final (worked, doneAt) = _workedBetween(from, now, cap: left);
+    if (doneAt != null) {
+      state = state.copyWith(
+        questId: () => null,
+        questFrom: () => null,
+        questMinutes: 0,
+        questCountedTo: () => null,
+        questsDone: [...state.questsDone, PipQuestDone(script.id, doneAt)],
+      );
+      return;
+    }
+    state = state.copyWith(
+      questMinutes: state.questMinutes + worked,
+      questCountedTo: () => now,
+    );
+  }
+
+  /// His quest's work at [now] (what's stored and what's come since),
+  /// without changing anything: where it is, or null if none is under
+  /// way.
+  QuestAt? questAt(DateTime now) {
+    final script = quest;
+    if (script == null) return null;
+    final from = state.questCountedTo ?? state.questFrom ?? now;
+    final (since, _) =
+        now.isAfter(from) ? _workedBetween(from, now) : (0, null);
+    return script.at(state.questMinutes + since);
+  }
+
+  /// Whether he's at his quest's work at [now]: one under way, quest
+  /// hours, on, not away.
+  bool questWorkingAt(DateTime now) =>
+      quest != null &&
+      PipQuest.inHoursAt(now) &&
+      levelAt(now) > 0 &&
+      !_awayAt(now);
+
+  /// Brings his quest up to [now] (the app looking in).
+  void settleQuest(DateTime now) => _settleQuest(now);
 
   /// Replaces him (restoring a backup): one from before Round 37 starts
   /// full from now.

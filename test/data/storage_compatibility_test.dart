@@ -1435,6 +1435,53 @@ void main() {
     });
   });
 
+  group('pip.json v4 / v33 backup (his quests, Round 125)', () {
+    void expectSample(PipLife? pip) {
+      expect(pip!.name, 'Bip 5');
+      expect(pip.minutesOut, 4200);
+      expect(pip.questId, 'house');
+      expect(pip.questFrom!.toUtc(), DateTime.utc(2026, 11, 1, 9, 5));
+      expect(pip.questMinutes, 245);
+      expect(pip.questCountedTo!.toUtc(), DateTime.utc(2026, 11, 2, 9, 30));
+      expect(pip.questsDone.single.id, 'well');
+      expect(
+          pip.questsDone.single.at.toUtc(), DateTime.utc(2026, 10, 30, 19, 10));
+    }
+
+    test('pip.json version 4 loads', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v33/storage'),
+      );
+      expectSample(storage.initialPip);
+      expect(storage.unreadable, isEmpty);
+    });
+
+    test('v33 backup restores his quest where it was', () {
+      final file = BackupFile.parse(
+        File('test/fixtures/v33/backup-plain.json').readAsStringSync(),
+      ) as PlainBackupFile;
+      expectSample(file.backup.pip);
+    });
+
+    test('written back as read', () {
+      final json = jsonDecode(
+              File('test/fixtures/v33/storage/pip.json').readAsStringSync())
+          as Map<String, dynamic>;
+      final again = PipLife.fromJson(json).toJson();
+      expect(again['quest'], json['quest']);
+      expect(again['questsDone'], json['questsDone']);
+    });
+
+    test('older Pips have no quests', () async {
+      final storage = await AppStorage.open(
+        directory: copyOf('test/fixtures/v26/storage'),
+      );
+      expect(storage.initialPip.questId, isNull);
+      expect(storage.initialPip.questMinutes, 0);
+      expect(storage.initialPip.questsDone, isEmpty);
+    });
+  });
+
   group('medicine.json v5 / v19 backup (weekdays, Round 40)', () {
     void expectSample(MedicineBook book) {
       final vitamin = book.medicines.firstWhere((m) => m.id == 'm1');
@@ -1730,6 +1777,10 @@ void main() {
           '44652a0e4383b5d30fc9a6a31d77626667e08d2be8fdb0d690f98701d9abce04',
       'test/fixtures/v32/backup-plain.json':
           'd0730fce884031ba24a534acd1fae85c709dc559a0ced7aebd02aa3332cda24c',
+      'test/fixtures/v33/storage/pip.json':
+          '1216f57cb8b6c82704e8ccc2021fff07cedab537d89192d09e5cc0d21c3ed56a',
+      'test/fixtures/v33/backup-plain.json':
+          '2bc6e63f3c454bec436e28e395eb301e75f431b5be8a1954c881e2c0a6a9e389',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

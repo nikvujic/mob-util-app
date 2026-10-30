@@ -1,0 +1,441 @@
+{
+  "format": "the-app-backup",
+  "version": 33,
+  "createdAt": "2026-10-27T14:00:00.000Z",
+  "appVersion": "1.43.0 (106)",
+  "data": {
+    "notes": [],
+    "shopItems": [
+      {
+        "id": "s1",
+        "name": "Jaja 🥚",
+        "toBuy": true,
+        "quantity": "text",
+        "text": "1-2 kutije"
+      },
+      {
+        "id": "s2",
+        "name": "Peršun",
+        "toBuy": true,
+        "quantity": "text",
+        "count": 3,
+        "text": "a bunch"
+      },
+      {
+        "id": "s3",
+        "name": "Milk",
+        "toBuy": true,
+        "quantity": "count",
+        "count": 2,
+        "text": "1 l"
+      },
+      {
+        "id": "s4",
+        "name": "Bread",
+        "toBuy": false,
+        "text": "pola"
+      }
+    ],
+    "plannerTasks": [],
+    "routines": {
+      "routines": [],
+      "days": []
+    },
+    "plannerPins": [],
+    "counters": [],
+    "placard": {
+      "text": "Add text here!",
+      "count": 1
+    },
+    "medicine": {
+      "medicines": [],
+      "taken": []
+    },
+    "todo": [],
+    "recipes": [],
+    "ingredients": {
+      "sections": []
+    },
+    "food": {
+      "foods": [],
+      "meals": []
+    },
+    "dates": [
+      {
+        "id": "d1",
+        "title": "Jahorina ⛷",
+        "type": "holiday",
+        "day": 20,
+        "month": 1,
+        "year": 2027,
+        "yearly": false,
+        "note": "Ski pass",
+        "reminders": [
+          {
+            "daysBefore": 7,
+            "minutes": 540
+          }
+        ],
+        "days": 5,
+        "kind": "skiing",
+        "travel": {
+          "hours": 5,
+          "leave": 420,
+          "back": 600
+        }
+      },
+      {
+        "id": "d2",
+        "title": "Venčanje Ane i Marka",
+        "type": "event",
+        "day": 12,
+        "month": 6,
+        "year": 2027,
+        "yearly": false,
+        "note": "",
+        "reminders": [
+          {
+            "daysBefore": 7,
+            "minutes": 540
+          },
+          {
+            "daysBefore": 30,
+            "minutes": 540
+          }
+        ],
+        "kind": "wedding"
+      },
+      {
+        "id": "d3",
+        "title": "Ana Petrović",
+        "type": "birthday",
+        "day": 24,
+        "month": 10,
+        "year": 1995,
+        "yearly": true,
+        "note": "",
+        "reminders": [
+          {
+            "daysBefore": 1,
+            "minutes": 540
+          },
+          {
+            "daysBefore": 7,
+            "minutes": 540
+          }
+        ],
+        "person": "p3"
+      }
+    ],
+    "pip": {
+      "born": "2026-10-10T07:00:00.000Z",
+      "name": "Bip 5",
+      "energy": 2.0,
+      "energyAt": "2026-11-02T09:00:00.000Z",
+      "batteries": 1,
+      "nextBatteryAt": "2026-11-02T12:00:00.000Z",
+      "offSeen": false,
+      "adventure": {
+        "registeredAt": "2026-10-17T11:30:00.000Z",
+        "xp": 4200
+      },
+      "quest": {
+        "id": "house",
+        "from": "2026-11-01T09:05:00.000Z",
+        "minutes": 245,
+        "countedTo": "2026-11-02T09:30:00.000Z"
+      },
+      "questsDone": [
+        {
+          "id": "well",
+          "at": "2026-10-30T19:10:00.000Z"
+        }
+      ]
+    },
+    "subscriptions": [
+      {
+        "id": "sub1",
+        "name": "Claude",
+        "price": 20,
+        "currency": "€",
+        "every": "month",
+        "state": "active",
+        "date": "2026-11-03",
+        "card": "Revolut 4421"
+      },
+      {
+        "id": "sub2",
+        "name": "Claude 2",
+        "price": 20,
+        "currency": "€",
+        "every": "month",
+        "state": "active",
+        "date": "2026-11-12"
+      },
+      {
+        "id": "sub3",
+        "name": "ChatGPT",
+        "price": 23,
+        "currency": "€",
+        "every": "month",
+        "state": "cancelled",
+        "date": "2026-11-13",
+        "note": "Cancelled"
+      },
+      {
+        "id": "sub4",
+        "name": "Grok",
+        "price": 16,
+        "currency": "€",
+        "every": "month",
+        "state": "toCancel",
+        "date": "2026-11-17",
+        "note": "real ~30€",
+        "remindBefore": 2
+      },
+      {
+        "id": "sub5",
+        "name": "AWS",
+        "price": 5,
+        "currency": "€",
+        "about": true,
+        "every": "month",
+        "state": "active",
+        "date": "2026-11-01",
+        "card": "Virtual 7731"
+      },
+      {
+        "id": "sub6",
+        "name": "Spotify",
+        "price": 6,
+        "currency": "€",
+        "about": true,
+        "every": "month",
+        "state": "inactive",
+        "card": "Virtual 0912",
+        "note": "payment failed"
+      }
+    ],
+    "packing": {
+      "sections": [
+        {
+          "id": "documents",
+          "name": "Documents"
+        },
+        {
+          "id": "clothes",
+          "name": "Clothes"
+        },
+        {
+          "id": "toiletries",
+          "name": "Toiletries"
+        },
+        {
+          "id": "other",
+          "name": "Other"
+        }
+      ],
+      "lists": [
+        {
+          "id": "p1",
+          "name": "Jahorina ⛷",
+          "sections": [
+            {
+              "id": "documents",
+              "name": "Dokumenta"
+            },
+            {
+              "id": "k1",
+              "name": "Ski oprema"
+            },
+            {
+              "id": "clothes",
+              "name": "Odeća"
+            }
+          ],
+          "items": [
+            {
+              "id": "i1",
+              "name": "Pasoš",
+              "section": "documents",
+              "packed": true
+            },
+            {
+              "id": "i2",
+              "name": "Naočare",
+              "section": "k1"
+            },
+            {
+              "id": "i3",
+              "name": "Kaciga",
+              "section": "k1",
+              "packed": true
+            },
+            {
+              "id": "i4",
+              "name": "Čarape",
+              "section": "clothes",
+              "count": 5
+            }
+          ]
+        },
+        {
+          "id": "p2",
+          "name": "Beach",
+          "sections": [
+            {
+              "id": "b1",
+              "name": "Beach stuff"
+            }
+          ],
+          "items": []
+        }
+      ]
+    },
+    "people": {
+      "people": [
+        {
+          "id": "p1",
+          "name": "Marko Petrović",
+          "gender": "male",
+          "birthday": {
+            "day": 12,
+            "month": 3,
+            "year": 1958
+          },
+          "highlighted": true,
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "id": "p2",
+          "name": "Jelena Petrović",
+          "gender": "female",
+          "birthday": {
+            "day": 3,
+            "month": 7,
+            "year": 1961
+          },
+          "x": 160.0,
+          "y": 0.0
+        },
+        {
+          "id": "p3",
+          "name": "Ana Petrović",
+          "gender": "female",
+          "birthday": {
+            "day": 24,
+            "month": 10,
+            "year": 1995
+          },
+          "note": "Likes tulips",
+          "x": 80.0,
+          "y": 260.0,
+          "dateId": "d3"
+        },
+        {
+          "id": "p4",
+          "name": "Luka Petrović",
+          "gender": "male",
+          "birthday": {
+            "day": 5,
+            "month": 2,
+            "year": 2019
+          },
+          "x": 80.0,
+          "y": 520.0
+        },
+        {
+          "id": "p5",
+          "name": "Mila Jović",
+          "gender": "female",
+          "birthday": {
+            "day": 1,
+            "month": 9,
+            "year": 1931
+          },
+          "deceased": true,
+          "diedOn": {
+            "day": 20,
+            "month": 5,
+            "year": 2015
+          },
+          "x": -200.0,
+          "y": -260.0
+        },
+        {
+          "id": "p6",
+          "name": "Ivan Kovač",
+          "gender": "male",
+          "note": "Kum",
+          "x": 420.0,
+          "y": 0.0
+        },
+        {
+          "id": "p7",
+          "name": "Stefan Ilić",
+          "gender": "male",
+          "x": 240.0,
+          "y": 260.0
+        }
+      ],
+      "relations": [
+        {
+          "id": "r1",
+          "kind": "partner",
+          "from": "p1",
+          "to": "p2"
+        },
+        {
+          "id": "r2",
+          "kind": "parent",
+          "from": "p1",
+          "to": "p3"
+        },
+        {
+          "id": "r3",
+          "kind": "parent",
+          "from": "p2",
+          "to": "p3"
+        },
+        {
+          "id": "r4",
+          "kind": "parent",
+          "from": "p3",
+          "to": "p4"
+        },
+        {
+          "id": "r5",
+          "kind": "parent",
+          "from": "p5",
+          "to": "p2"
+        },
+        {
+          "id": "r6",
+          "kind": "other",
+          "from": "p6",
+          "to": "p1",
+          "label": "Kum"
+        },
+        {
+          "id": "r7",
+          "kind": "partner",
+          "from": "p3",
+          "to": "p7",
+          "former": true
+        },
+        {
+          "id": "r8",
+          "kind": "bogus",
+          "from": "p6",
+          "to": "p7"
+        }
+      ],
+      "view": {
+        "x": 80.0,
+        "y": 130.0,
+        "zoom": 0.75
+      }
+    }
+  }
+}

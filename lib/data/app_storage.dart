@@ -122,8 +122,9 @@ class AppStorage {
   /// Version of `pip.json` (Round 34): Pip, the pet. History: 1 = first
   /// format; 2 = his energy, batteries and what was shown (Round 37);
   /// 3 = his adventures (`adventure`, Round 63). Round 77 added an
-  /// optional `wokenAt` within 3 (without it he simply wasn't woken).
-  static const pipFormatVersion = 3;
+  /// optional `wokenAt` within 3 (without it he simply wasn't woken);
+  /// 4 = his quests (`quest`, `questsDone`, Round 125).
+  static const pipFormatVersion = 4;
 
   /// Version of `recipes.json` (Round 42). History: 1 = first format.
   static const recipesFormatVersion = 1;

@@ -1,0 +1,26 @@
+{
+  "version": 4,
+  "born": "2026-10-10T07:00:00.000Z",
+  "name": "Bip 5",
+  "energy": 2.0,
+  "energyAt": "2026-11-02T09:00:00.000Z",
+  "batteries": 1,
+  "nextBatteryAt": "2026-11-02T12:00:00.000Z",
+  "offSeen": false,
+  "adventure": {
+    "registeredAt": "2026-10-17T11:30:00.000Z",
+    "xp": 4200
+  },
+  "quest": {
+    "id": "house",
+    "from": "2026-11-01T09:05:00.000Z",
+    "minutes": 245,
+    "countedTo": "2026-11-02T09:30:00.000Z"
+  },
+  "questsDone": [
+    {
+      "id": "well",
+      "at": "2026-10-30T19:10:00.000Z"
+    }
+  ]
+}

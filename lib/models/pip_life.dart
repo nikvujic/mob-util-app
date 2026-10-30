@@ -51,6 +51,15 @@ class PipLife {
   final DateTime? outFrom;
   final DateTime? breakAt;
 
+  /// His quests (Round 125, `docs/QUESTS_SPEC.md`): the one under way
+  /// (its id, null: none; when it began; the work minutes done, counted
+  /// up to [questCountedTo]), and those finished, with when.
+  final String? questId;
+  final DateTime? questFrom;
+  final int questMinutes;
+  final DateTime? questCountedTo;
+  final List<PipQuestDone> questsDone;
+
   const PipLife({
     this.born,
     this.name = defaultName,
@@ -67,6 +76,11 @@ class PipLife {
     this.outDay,
     this.outFrom,
     this.breakAt,
+    this.questId,
+    this.questFrom,
+    this.questMinutes = 0,
+    this.questCountedTo,
+    this.questsDone = const [],
   });
 
   static const defaultName = 'Pip';
@@ -125,6 +139,11 @@ class PipLife {
     String? Function()? outDay,
     DateTime? Function()? outFrom,
     DateTime? Function()? breakAt,
+    String? Function()? questId,
+    DateTime? Function()? questFrom,
+    int? questMinutes,
+    DateTime? Function()? questCountedTo,
+    List<PipQuestDone>? questsDone,
   }) =>
       PipLife(
         born: born ?? this.born,
@@ -143,6 +162,12 @@ class PipLife {
         outDay: outDay == null ? this.outDay : outDay(),
         outFrom: outFrom == null ? this.outFrom : outFrom(),
         breakAt: breakAt == null ? this.breakAt : breakAt(),
+        questId: questId == null ? this.questId : questId(),
+        questFrom: questFrom == null ? this.questFrom : questFrom(),
+        questMinutes: questMinutes ?? this.questMinutes,
+        questCountedTo:
+            questCountedTo == null ? this.questCountedTo : questCountedTo(),
+        questsDone: questsDone ?? this.questsDone,
       );
 
   static String _time(DateTime t) => t.toUtc().toIso8601String();
@@ -168,12 +193,24 @@ class PipLife {
             if (outFrom != null) 'outFrom': _time(outFrom!),
             if (breakAt != null) 'breakAt': _time(breakAt!),
           },
+        if (questId != null)
+          'quest': {
+            'id': questId,
+            if (questFrom != null) 'from': _time(questFrom!),
+            'minutes': questMinutes,
+            if (questCountedTo != null) 'countedTo': _time(questCountedTo!),
+          },
+        if (questsDone.isNotEmpty)
+          'questsDone': [
+            for (final d in questsDone) {'id': d.id, 'at': _time(d.at)},
+          ],
       };
 
-  /// Also reads version 1 (no energy yet: full, no batteries) and 2 (not
-  /// an adventurer).
+  /// Also reads version 1 (no energy yet: full, no batteries), 2 (not
+  /// an adventurer) and 3 (no quests).
   factory PipLife.fromJson(Map<String, dynamic> json) {
     final out = json['adventure'] as Map<String, dynamic>?;
+    final quest = json['quest'] as Map<String, dynamic>?;
     return PipLife(
       born: _parse(json['born']),
       name: json['name'] as String? ?? defaultName,
@@ -191,6 +228,17 @@ class PipLife {
       outDay: out?['outDay'] as String?,
       outFrom: _parse(out?['outFrom']),
       breakAt: _parse(out?['breakAt']),
+      questId: quest?['id'] as String?,
+      questFrom: _parse(quest?['from']),
+      questMinutes: math.max(0, (quest?['minutes'] as num?)?.toInt() ?? 0),
+      questCountedTo: _parse(quest?['countedTo']),
+      questsDone: [
+        for (final d in (json['questsDone'] as List<dynamic>?) ?? const [])
+          if (d is Map<String, dynamic> &&
+              d['id'] is String &&
+              d['at'] is String)
+            PipQuestDone(d['id'] as String, _parse(d['at'])!),
+      ],
     );
   }
 
@@ -211,7 +259,20 @@ class PipLife {
       other.minutesOut == minutesOut &&
       other.outDay == outDay &&
       other.outFrom == outFrom &&
-      other.breakAt == breakAt;
+      other.breakAt == breakAt &&
+      other.questId == questId &&
+      other.questFrom == questFrom &&
+      other.questMinutes == questMinutes &&
+      other.questCountedTo == questCountedTo &&
+      _sameDone(other.questsDone, questsDone);
+
+  static bool _sameDone(List<PipQuestDone> a, List<PipQuestDone> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 
   @override
   int get hashCode => Object.hash(
@@ -229,5 +290,23 @@ class PipLife {
       minutesOut,
       outDay,
       outFrom,
-      breakAt);
+      breakAt,
+      questId,
+      questMinutes,
+      Object.hashAll(questsDone));
+}
+
+/// A quest finished (Round 125): which, and when.
+class PipQuestDone {
+  final String id;
+  final DateTime at;
+
+  const PipQuestDone(this.id, this.at);
+
+  @override
+  bool operator ==(Object other) =>
+      other is PipQuestDone && other.id == id && other.at == at;
+
+  @override
+  int get hashCode => Object.hash(id, at);
 }

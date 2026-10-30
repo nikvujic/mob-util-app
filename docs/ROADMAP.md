@@ -337,6 +337,26 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 125 — Pip's quests: the rules (2026-10-30, not released yet)
+
+- [x] `core/pip_quest.dart`: quest hours (10:00–11:30, 19:00–20:30),
+  the windows between two moments, the finish estimate; the **house's
+  script**: 25 pieces in the decided order, each gathered for first
+  (trips: out, gather up to a load, back), glass smelted in the
+  fireplace before the windows; about 61 days of quest hours (a test
+  holds it to 55–65); where it is after some work minutes (step,
+  minutes into it, inventory, what's built, the card's line).
+- [x] `PipLife` v4 (`quest`, `questsDone`), `pip.json` v4, backup v33,
+  fixtures `v33`.
+- [x] `PipLifeNotifier`: offered, started in quest hours only (not away),
+  work minutes counted from the clock (powered down and away left out;
+  settled before any energy change, as adventures are), finished with
+  the moment of its last minute; `questAt` and `questWorkingAt` for the
+  UI rounds. Charging keeps its energy rule; only his trip to the
+  station is left out in quest hours (the scenes round).
+- [ ] Next: Pip Home (the Quests button and card, Start, the inventory
+  card, the swipe order), then the scenes.
+
 ### Round 121 — Pip's quests: the spec (2026-10-30)
 
 - [x] The user's notes on quests turned into `docs/QUESTS_SPEC.md`
@@ -356,7 +376,7 @@ fixtures for every stored format.
 - [x] Round 124: the house area's own tall tree, by season; wooden
   stairs and porch posts (no stone slab); a denser forest; the mine in
   a mountain on the right.
-- [ ] The spec and drafts approved; then the rules round.
+- [x] The spec and drafts approved (Round 124).
 
 ### Round 120 — v2.0.0 (2026-10-29, 2.0.0)
 
