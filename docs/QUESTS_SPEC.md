@@ -1,6 +1,6 @@
 # Pip's quests — spec (Round 121)
 
-Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating. The first quest is **Build a house**:
+Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating; Round 123: the fireplace inside, a larger porch, his field's tree, the forest, the mine and the beach. The first quest is **Build a house**:
 Pip gathers wood, stone and sand, makes glass, and builds a house piece by
 piece over about two months, during two set hours a day. The house then
 becomes where he lives. **Requested** marks what was asked for,
@@ -88,13 +88,14 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 | Material | Where | How (animation) |
 |---|---|---|
-| **Wood** | A tree out in the field | He walks out, the ground scrolling, until a tree comes in from the right. He strikes it with his sword until it creaks and falls; it breaks into logs that fly to him and drop into his inventory. A tree gives 4 wood. |
-| **Stone** | A rock outcrop out in the field | The same walk; he strikes the rock until a block cracks off, chips flying; the block flies to him. |
-| **Sand** | A sand patch out in the field | He digs; sand flies to him in little heaps. |
-| **Glass** | His **furnace**, by the house | Two sand and a wood (the fire) go in; the furnace glows and smokes; a pane comes out. |
+| **Wood** | **The forest** (Round 123): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
+| **Stone** | **The mine** (Round 123): a rocky hillside with ore glints, a timber-framed mouth with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine until a block cracks off, chips flying; the block flies to him. |
+| **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs; sand flies to him in little heaps. |
+| **Glass** | His **fireplace**, in the house | Two sand and a wood (the fire) go into a crucible in the fire; it glows; a pane comes out. |
 
-- **Proposed:** the furnace is the first thing he builds from stone,
-  outside the house on its right. It stays, as part of his place.
+- **Requested (Round 123):** no furnace outside: a **stone fireplace in
+  the house**, against the back wall on the left, is where he smelts
+  sand into glass (and later, warmth and light).
 - **Proposed:** a trip out gathers until he carries a load (about a
   dozen of a thing), then he walks back. Times are set so a tree takes a
   good while to fell (he's small, it's big). They're tuned in the rules
@@ -103,7 +104,9 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 ## 6. The house, built piece by piece
 
 - **Requested:** the house is on **its own screen**, his **house area**
-  (the background always the same, **one tree**), the house **big**, on
+  (the background always the same, **one tree**: **Requested (Round
+  123):** one of his field's own trees, drawn as they are, with the
+  seasons), the house **big**, on
   the **left** of it. **Requested:** he leaves the house area by its
   **right edge** and appears on the field (section 7).
 - **Requested:** so big that the **menu's strip can't show it all**:
@@ -121,13 +124,16 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   house**: textured stone bricks (mortar, shades), plank grain, dark
   log beams, multi-pane windows with sills, a banded door under a stone
   lintel, a porch with a railing, eaves with trim, a gable with a round
-  attic window, flower boxes, a stone chimney from the ground up.
+  attic window, flower boxes. **Round 123:** no stone along the outside
+  wall: the chimney is the fireplace's flue, inside, up through the
+  roof; and **a larger porch** (a deck on stone footings, its own roof
+  on two posts, a railing, a bench, the lantern).
 - **The order (decided, Round 122):**
   1. **Stone foundation**, block by block, the bottom row first.
-  2. **Stone steps** up to the door, and the **porch** boards.
-  3. **The furnace** (stone), outside on the right, its own chimney.
-  4. **The chimney's base**, stone, from the ground beside the left wall.
-  5. **Wooden floor**, plank by plank.
+  2. **Stone steps**, the **porch's stone footings** and its **deck**.
+  3. **Wooden floor**, plank by plank.
+  4. **The fireplace's hearth** (stone), on the foundation.
+  5. (the hearth is ready: from here glass can be smelted)
   6. **Posts** (log beams): the corners and the middle.
   7. **Walls**: the back wall and the side walls, row by row from the
      floor up, leaving the window openings and the doorway.
@@ -135,12 +141,13 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
      (frames, four panes each, stone sills).
   9. **The door** (planks, iron bands, a handle) under a **stone lintel**;
      the porch **railing** and post, the **lantern** hung on it.
-  10. **The ceiling beam** across the posts; the **chimney** raised
-      alongside, block on block.
+  10. **The ceiling beam** across the posts; the fireplace's **flue**
+      raised on it, block on block, the porch's posts and beam.
   11. **Scaffold** (wood) put up, to reach the top.
   12. **Rafters**, then the **gable** (planks, the round attic window).
   13. **Shingles**, row by row from the eaves up to the ridge.
-  14. **Eave trim**, the chimney's cap, **flower boxes** under the windows.
+  14. The **porch roof** and **bench**; **eave trim**, the flue's cap,
+      **flower boxes** under the windows.
   15. **Scaffold taken down**; done.
 - **Requested:** building is shown: he **walks to the piece**, its
   materials **fly from him into it**, and it **smokes / puffs** while he

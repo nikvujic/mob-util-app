@@ -349,6 +349,10 @@ fixtures for every stored format.
 - [x] Round 122: nothing floats (built bottom-up, each block on one
   below); the house redrawn, Terraria-like and detailed; adventures as
   they are (the house only when he doesn't go).
+- [x] Round 123: no outside stone or furnace: a fireplace inside smelts
+  the glass, its flue through the roof; a larger porch (deck, roof,
+  bench); the house area's tree is his field's own; wood from a forest,
+  stone from a mine, sand from a beach.
 - [ ] The spec and drafts approved; then the rules round.
 
 ### Round 120 — v2.0.0 (2026-10-29, 2.0.0)
