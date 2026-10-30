@@ -337,6 +337,20 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 131 — import / export for pages (2026-10-30, 2.2.0)
+
+- [x] `widgets/transfer_sheet.dart`: the shared Import / export menu and
+  sheets (`TransferKit`), for any page; Recipes first, its button in
+  the top bar (asked for; G11 exception).
+- [x] Export several recipes at once (a list to tick); import lists
+  what's in the pasted text first (new ingredients named; same name as
+  one there starts unticked); format v2 (`the-app/recipes`, a list),
+  v1 still read.
+- [x] Agent instructions instead of *Export for agents*: no recipe
+  picked; the rules, the method's shape (optional extras, numbered
+  stages of short bullets, tips) and a detailed general example.
+- [ ] Later: People and other pages.
+
 ### Round 130 — fix: no way in during quest work (2026-10-30, 2.1.2)
 
 - [x] Pip Home opened in quest hours played his way in (from the sky)

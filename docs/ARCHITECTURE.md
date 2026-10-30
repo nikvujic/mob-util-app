@@ -320,6 +320,17 @@ export / parse functions over `Recipe` and `IngredientBook`, and
 widgets); the page side (`pages/hub/recipe_transfer_sheet.dart`) only
 copies, pastes and asks.
 
+Round 131: import / export for any page. `widgets/transfer_sheet.dart`
+holds the menu (Import, Export, Agent instructions) and the sheets (a
+list to tick: what to export, what's in pasted text before importing),
+driven by a `TransferKit<T, I>` a page fills in (its things, export,
+agent instructions, parse, an imported one's name and detail, whether
+one like it is there, import). Recipes' format is version 2
+(`the-app/recipes`, a list); version 1's one recipe and a bare list or
+recipe are still read. `agentInstructions` gives the rules and a general
+example (`exampleRecipe`), not one of the user's recipes. A page using
+it puts its button in its top bar (`appBarActionsAllowed`).
+
 `models/recipe.dart`: `Recipe` (name, prep minutes, `RecipeType`, its
 `RecipeIngredient`s, the method as Markdown) and the ingredients list
 (`IngredientBook` → `IngredientSection` → `Ingredient`), in

@@ -8,8 +8,8 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/providers/recipe_transfer.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 
-/// Round 104: recipes as text: export for import, export for
-/// ChatGPT, import (paste).
+/// Round 104: recipes as text (Round 131: several at once; agent
+/// instructions with a general example): export, import (paste).
 void main() {
   late ProviderContainer container;
 
@@ -49,12 +49,20 @@ void main() {
     method: '1. Mix\n2. Fry',
     createdAt: DateTime(2026, 10, 14),
   );
+  final soup = Recipe(
+    id: 'r2',
+    name: 'Soup',
+    method: '1. Boil',
+    createdAt: DateTime(2026, 10, 15),
+  );
 
-  test('export for import: the recipe, each ingredient with its section', () {
-    final json = jsonDecode(exportRecipe(pancakes, sampleBook));
-    expect(json['format'], recipeFormat);
+  test('export: the recipes, each ingredient with its section', () {
+    final json = jsonDecode(exportRecipes([pancakes, soup], sampleBook));
+    expect(json['format'], recipesFormat);
     expect(json['version'], recipeFormatVersion);
-    expect(json['recipe'], {
+    expect(
+        (json['recipes'] as List).map((r) => r['name']), ['Pancakes', 'Soup']);
+    expect(json['recipes'][0], {
       'name': 'Pancakes',
       'prepMinutes': 25,
       'type': 'breakfast',
@@ -67,8 +75,10 @@ void main() {
     });
   });
 
-  test('and back: the same recipe', () {
-    final back = parseRecipe(exportRecipe(pancakes, sampleBook));
+  test('and back: the same recipes', () {
+    final both = parseRecipes(exportRecipes([pancakes, soup], sampleBook));
+    expect(both.map((r) => r.name), ['Pancakes', 'Soup']);
+    final back = both.first;
     expect(back.name, 'Pancakes');
     expect(back.prepMinutes, 25);
     expect(back.type, RecipeType.breakfast);
@@ -81,30 +91,41 @@ void main() {
   });
 
   test(
-      'export for agents: what to answer, the rules, his ingredients by '
-      'section, the example', () {
-    final text = exportForAgent(pancakes, sampleBook);
-    expect(text, contains('only the new recipe as JSON'));
-    expect(text, contains('"format" is "$recipeFormat"'));
+      'agent instructions: what to answer, the rules, his ingredients by '
+      'section, how a method is written, the general example', () {
+    final text = agentInstructions(sampleBook);
+    expect(text, contains('only the recipes as JSON'));
+    expect(text, contains('"format" is "$recipesFormat"'));
+    expect(text, contains('language I ask you in'));
     for (final t in RecipeType.values) {
       expect(text, contains(t.name));
     }
     expect(text, contains('- Ingredients: Flour'));
     expect(text, contains('- Dairy: Eggs, Milk'));
-    expect(text, contains(exportRecipe(pancakes, sampleBook)));
-    // The example in it reads back as the recipe.
-    expect(
-        parseRecipe(text.substring(text.indexOf('Example:'))).name, 'Pancakes');
+    for (final part in ['### Optional', '### Method', '### Tips']) {
+      expect(text, contains(part));
+    }
+    expect(text, isNot(contains('Pancakes')), reason: 'none of his recipes');
+    // The example in it reads back as the example recipe, method and all.
+    final example =
+        parseRecipes(text.substring(text.indexOf('Example:'))).single;
+    expect(example.name, exampleRecipe.name);
+    expect(example.method, exampleMethod);
+    expect(example.ingredients.map((i) => i.section).toSet(),
+        {'Meat', 'Vegetables', 'Spices', 'Other'});
   });
 
   group('import reads', () {
-    test("an agent's answer: words and a code fence around it", () {
-      final r = parseRecipe('Sure! Here it is:\n```json\n'
-          '{"format": "$recipeFormat", "version": 1, "recipe": '
-          '{"name": " Crepes ", "prepMinutes": 20.4, "type": "snack", '
-          '"ingredients": [{"name": "Flour", "quantity": 150, '
-          '"section": "Ingredients"}, {"name": " "}, "junk"], '
-          '"method": "1. Mix"}}\n```\nEnjoy!');
+    test(
+        "an agent's answer (Round 104's one recipe): words and a code fence "
+        'around it', () {
+      final r = parseRecipes('Sure! Here it is:\n```json\n'
+              '{"format": "$recipeFormat", "version": 1, "recipe": '
+              '{"name": " Crepes ", "prepMinutes": 20.4, "type": "snack", '
+              '"ingredients": [{"name": "Flour", "quantity": 150, '
+              '"section": "Ingredients"}, {"name": " "}, "junk"], '
+              '"method": "1. Mix"}}\n```\nEnjoy!')
+          .single;
       expect(r.name, 'Crepes');
       expect(r.prepMinutes, 20);
       expect(r.type, RecipeType.snack);
@@ -113,8 +134,9 @@ void main() {
     });
 
     test('the recipe on its own; an unknown type and time left out', () {
-      final r = parseRecipe('{"name": "Tea", "type": "brunch", '
-          '"prepMinutes": "soon"}');
+      final r = parseRecipes('{"name": "Tea", "type": "brunch", '
+              '"prepMinutes": "soon"}')
+          .single;
       expect(r.name, 'Tea');
       expect(r.type, isNull);
       expect(r.prepMinutes, isNull);
@@ -122,36 +144,50 @@ void main() {
       expect(r.method, '');
     });
 
+    test('a list on its own, or in "recipes"; ones with no name left out', () {
+      expect(
+          parseRecipes('Here: [{"name": "A"}, {"name": " "}, 3, '
+                  '{"name": "B"}]')
+              .map((r) => r.name),
+          ['A', 'B']);
+      expect(parseRecipes('{"recipes": [{"name": "C"}]}').map((r) => r.name),
+          ['C']);
+    });
+
     test('says why it can\'t', () {
       String why(String text) {
         try {
-          parseRecipe(text);
+          parseRecipes(text);
         } on FormatException catch (e) {
           return e.message;
         }
         return 'read';
       }
 
-      expect(why('hello'), 'No recipe in the copied text.');
-      expect(why('{"name": "x",'), 'No recipe in the copied text.');
-      expect(why('{not json}'), "The copied text isn't a readable recipe.");
+      expect(why('hello'), 'No recipes in the copied text.');
+      expect(why('{"name": "x",'), 'No recipes in the copied text.');
+      expect(why('{not json}'), "The copied text isn't readable recipes.");
       expect(why('{"format": "other", "name": "x"}'),
-          "The copied text isn't a recipe.");
-      expect(why('{"format": "$recipeFormat", "version": 2, "recipe": {}}'),
+          "The copied text isn't recipes.");
+      expect(why('{"format": "$recipesFormat", "version": 3, "recipes": []}'),
           contains('newer version'));
-      expect(why('{"recipe": {"name": "  "}}'), 'The recipe has no name.');
-      expect(why('{"recipe": [1]}'), 'No recipe in the copied text.');
+      expect(why('{"recipe": {"name": "  "}}'),
+          'No recipes with a name in the copied text.');
+      expect(
+          why('{"recipes": []}'), 'No recipes with a name in the copied text.');
+      expect(why('{"recipes": 1}'), 'No recipes in the copied text.');
     });
   });
 
   test(
       'what it adds: new ingredients, to their section (new or not); the '
       'ones there (any case) not again', () {
-    final r = parseRecipe('{"name": "Cake", "ingredients": ['
-        '{"name": "flour"}, {"name": "Butter", "section": "dairy"}, '
-        '{"name": "Vanilla", "section": "Baking"}, '
-        '{"name": "Cocoa", "section": "Baking"}, {"name": "Water"}, '
-        '{"name": "butter"}]}');
+    final r = parseRecipes('{"name": "Cake", "ingredients": ['
+            '{"name": "flour"}, {"name": "Butter", "section": "dairy"}, '
+            '{"name": "Vanilla", "section": "Baking"}, '
+            '{"name": "Cocoa", "section": "Baking"}, {"name": "Water"}, '
+            '{"name": "butter"}]}')
+        .single;
     expect(newIngredients(r, sampleBook), [
       (name: 'Butter', section: 'dairy', newSection: false),
       (name: 'Vanilla', section: 'Baking', newSection: true),
@@ -165,11 +201,12 @@ void main() {
       'added to their sections', () {
     ingredients().replaceAll(sampleBook);
     recipes().replaceAll([pancakes]);
-    final r = parseRecipe('{"name": "Cake", "prepMinutes": 50, '
-        '"type": "cake", "method": "Bake", "ingredients": ['
-        '{"name": "flour", "quantity": "300 g"}, '
-        '{"name": "Butter", "quantity": "100 g", "section": "Dairy"}, '
-        '{"name": "Vanilla", "section": "Baking"}, {"name": "Water"}]}');
+    final r = parseRecipes('{"name": "Cake", "prepMinutes": 50, '
+            '"type": "cake", "method": "Bake", "ingredients": ['
+            '{"name": "flour", "quantity": "300 g"}, '
+            '{"name": "Butter", "quantity": "100 g", "section": "Dairy"}, '
+            '{"name": "Vanilla", "section": "Baking"}, {"name": "Water"}]}')
+        .single;
     final id = importRecipe(r, recipes: recipes(), ingredients: ingredients());
 
     final all = container.read(recipesProvider);

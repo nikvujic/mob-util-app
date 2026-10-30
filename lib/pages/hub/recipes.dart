@@ -77,7 +77,18 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
         builder: (context, _) => Scaffold(
           appBar: _selection.isActive
               ? SelectionAppBar(count: _selection.count)
-              : AppBar(title: Text(HubTool.recipes.label)),
+              : AppBar(
+                  title: Text(HubTool.recipes.label),
+                  actions: [
+                    // Round 104: recipes as text, copied and pasted (Round
+                    // 131: up here, the same on every page that has it).
+                    IconButton(
+                      icon: const Icon(Icons.sync_alt),
+                      tooltip: 'Import / export',
+                      onPressed: () => showRecipeTransfer(context, ref),
+                    ),
+                  ],
+                ),
           body: recipes.isEmpty
               ? const EmptyState(
                   icon: Icons.menu_book_outlined,
@@ -139,12 +150,6 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                       icon: Icons.kitchen_outlined,
                       tooltip: 'Ingredients',
                       onPressed: () => openIngredients(context),
-                    ),
-                    // Round 104: recipes as text, copied and pasted.
-                    BottomAction(
-                      icon: Icons.sync_alt,
-                      tooltip: 'Import / export',
-                      onPressed: () => showRecipeTransfer(context, ref),
                     ),
                     // Outermost, under the thumb.
                     BottomAction(

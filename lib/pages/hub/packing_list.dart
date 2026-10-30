@@ -8,7 +8,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/pages/hub/packing.dart';
 import 'package:the_app/pages/hub/packing_copy_sheet.dart';
-import 'package:the_app/pages/hub/recipe_page.dart' show showChoicesSheet;
+import 'package:the_app/widgets/choices_sheet.dart';
 import 'package:the_app/providers/packing_provider.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';

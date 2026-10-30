@@ -6,6 +6,24 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-30
+
+### Changed
+- **Recipes' Import / export** is now at the top of the page, and works
+  with several recipes at once:
+  - **Export**: tick the recipes to copy (all are ticked to start).
+  - **Import**: the pasted recipes are listed first, each with how many
+    ingredients it has and which are new to you. Tick the ones to add.
+    One with the same name as a recipe you already have starts
+    unticked.
+  - **Agent instructions** (was *Export for agents*) no longer asks for
+    a recipe. It copies the rules (the format, your ingredients by
+    section, how to write the method: optional extras, numbered stages
+    of short steps, tips) with a detailed example, for ChatGPT and
+    others to write recipes in the language you ask in.
+  - Built to be reused, so other pages (People later) can get the same
+    import and export.
+
 ## [2.1.2] - 2026-10-30
 
 ### Fixed

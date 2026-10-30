@@ -6,8 +6,8 @@ import 'package:the_app/models/people.dart';
 import 'package:the_app/models/people_layout.dart';
 import 'package:the_app/pages/hub/people_board.dart';
 import 'package:the_app/pages/hub/people_panel.dart';
-import 'package:the_app/pages/hub/recipe_page.dart';
 import 'package:the_app/providers/people_provider.dart';
+import 'package:the_app/widgets/choices_sheet.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// People (Round 108, spec `docs/PEOPLE_SPEC.md`): the board on top, and

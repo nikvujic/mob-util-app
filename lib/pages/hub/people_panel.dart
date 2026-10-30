@@ -6,7 +6,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/people.dart';
 import 'package:the_app/pages/hub/person_note_page.dart';
-import 'package:the_app/pages/hub/recipe_page.dart' show showChoicesSheet;
+import 'package:the_app/widgets/choices_sheet.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';

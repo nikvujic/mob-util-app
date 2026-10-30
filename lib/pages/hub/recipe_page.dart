@@ -8,6 +8,7 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/markdown.dart';
 import 'package:the_app/core/screen.dart';
 import 'package:the_app/core/theme.dart';
+import 'package:the_app/widgets/choices_sheet.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/pages/hub/ingredients.dart';
@@ -1002,49 +1003,6 @@ class _IngredientRow extends StatelessWidget {
     );
   }
 }
-
-/// A small sheet of choices at the bottom (one-handed); the value picked,
-/// or null.
-Future<String?> showChoicesSheet(
-  BuildContext context,
-  String? title,
-  List<(IconData, String, String)> choices,
-) =>
-    showModalBottomSheet<String>(
-      context: context,
-      // Round 108: as tall as its choices (six relation kinds overflowed
-      // the default nine-sixteenths on a short screen).
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: context.colors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-              )
-            else
-              const SizedBox(height: 8),
-            for (final (icon, label, value) in choices)
-              ListTile(
-                key: Key('choice-$value'),
-                leading: Icon(icon),
-                title: Text(label),
-                onTap: () => Navigator.of(context).pop(value),
-              ),
-          ],
-        ),
-      ),
-    );
 
 /// The quantity picker (Round 43): Shop's kinds (a count, a weight)
 /// and spoons, small and big; big − / + at the bottom, a weight typed

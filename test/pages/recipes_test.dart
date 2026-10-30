@@ -380,28 +380,59 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('export for import: a recipe picked, copied', (tester) async {
+    testWidgets(
+        'in the app bar (not at the bottom); export: all picked to start, '
+        'some unpicked, copied', (tester) async {
       await openRecipes(tester,
-          start: [pancakes(), pancakes().copyWith(id: 'r2', name: 'Soup')],
+          start: [
+            pancakes(),
+            pancakes().copyWith(id: 'r2', name: 'Soup'),
+            pancakes().copyWith(id: 'r3', name: 'Stew'),
+          ],
           ingredients: sampleBook());
+      expect(
+          find.descendant(
+              of: find.byType(AppBar),
+              matching: find.byTooltip('Import / export')),
+          findsOneWidget);
       await pick(tester, 'export');
-      expect(find.text('Export which recipe?'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('exportRecipe-r2')));
+      expect(find.text('Export which recipes?'), findsOneWidget);
+      expect(find.text('Copy 3 recipes'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('transferItem-0')));
+      await tester.pump();
+      expect(find.text('Copy 2 recipes'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('transferGo')));
       await tester.pumpAndSettle();
-      expect(find.text('Copied: Soup'), findsOneWidget);
-      expect(parseRecipe(clipboard!).name, 'Soup');
+      expect(find.text('Copied 2 recipes'), findsOneWidget);
+      expect(parseRecipes(clipboard!).map((r) => r.name), ['Soup', 'Stew']);
       expect(clipboard, isNot(contains('Rules:')));
     });
 
-    testWidgets('export for agents: the example with the rules',
+    testWidgets('export: None leaves nothing to copy; All again',
+        (tester) async {
+      await openRecipes(tester,
+          start: [pancakes(), pancakes().copyWith(id: 'r2', name: 'Soup')]);
+      await pick(tester, 'export');
+      await tester.tap(find.byKey(const Key('transferAll')));
+      await tester.pump();
+      expect(
+          tester
+              .widget<FilledButton>(find.byKey(const Key('transferGo')))
+              .onPressed,
+          isNull);
+      await tester.tap(find.byKey(const Key('transferAll')));
+      await tester.pump();
+      expect(find.text('Copy 2 recipes'), findsOneWidget);
+    });
+
+    testWidgets('agent instructions: copied at once, no recipe asked for',
         (tester) async {
       await openRecipes(tester, start: [pancakes()], ingredients: sampleBook());
       await pick(tester, 'agent');
-      await tester.tap(find.byKey(const Key('exportRecipe-r1')));
-      await tester.pumpAndSettle();
-      expect(find.text('Copied for agents: Pancakes'), findsOneWidget);
+      expect(find.text('Copied: instructions for an agent'), findsOneWidget);
       expect(clipboard, contains('Rules:'));
       expect(clipboard, contains('- Dairy: Eggs, Milk'));
+      expect(clipboard, contains('### Tips'));
     });
 
     testWidgets('no recipes: nothing to export', (tester) async {
@@ -411,44 +442,58 @@ void main() {
     });
 
     testWidgets(
-        'import: what it adds asked first, then a new recipe on top; '
-        'Cancel adds nothing', (tester) async {
+        'import: the pasted recipes listed first (what each adds; one by '
+        'a name already here unpicked); closing adds nothing; then the '
+        'picked ones, in order, on top', (tester) async {
       await openRecipes(tester, start: [pancakes()], ingredients: sampleBook());
-      clipboard = '```json\n{"format": "the-app/recipe", "version": 1, '
-          '"recipe": {"name": "Cake", "ingredients": ['
+      clipboard = '```json\n{"format": "the-app/recipes", "version": 2, '
+          '"recipes": [{"name": "Cake", "ingredients": ['
           '{"name": "Flour", "quantity": "300 g", "section": "Baking"}, '
           '{"name": "Butter", "section": "Dairy"}, '
           '{"name": "Vanilla", "section": "Flavours"}], '
-          '"method": "1. Bake"}}\n```';
+          '"method": "1. Bake"}, {"name": "Pie"}, {"name": "pancakes"}]}'
+          '\n```';
       await pick(tester, 'import');
-      expect(find.text('Import "Cake"?'), findsOneWidget);
-      expect(find.textContaining('3 ingredients.'), findsOneWidget);
-      expect(find.textContaining('• Butter (Dairy)'), findsOneWidget);
-      expect(find.textContaining('• Vanilla (new section Flavours)'),
+      expect(find.text('Import which recipes?'), findsOneWidget);
+      expect(
+          find.textContaining('3 ingredients · New: Butter (Dairy), '
+              'Vanilla (new section Flavours)'),
           findsOneWidget);
-      expect(find.textContaining('Flour ('), findsNothing,
-          reason: 'already there');
-      await tester.tap(find.text('Cancel'));
+      expect(find.textContaining('You have one by this name'), findsOneWidget);
+      expect(find.text('Import 2 recipes'), findsOneWidget);
+      await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
       expect(recipes(), hasLength(1));
       expect(book().size, 4);
 
       await pick(tester, 'import');
-      await tester.tap(find.text('Import'));
+      await tester.tap(find.byKey(const Key('transferGo')));
       await tester.pumpAndSettle();
-      expect(find.text('Imported: Cake'), findsOneWidget);
-      expect(recipes().map((r) => r.name), ['Cake', 'Pancakes']);
+      expect(find.text('Imported 2 recipes'), findsOneWidget);
+      expect(recipes().map((r) => r.name), ['Cake', 'Pie', 'Pancakes']);
       expect(book().size, 6);
-      expect(find.text('Cake'), findsOneWidget, reason: 'in the list');
     });
 
-    testWidgets('import: says why when the text is no recipe', (tester) async {
+    testWidgets('import: one recipe (Round 104\'s shape) asked about as one',
+        (tester) async {
+      await openRecipes(tester);
+      clipboard = '{"format": "the-app/recipe", "version": 1, '
+          '"recipe": {"name": "Cake"}}';
+      await pick(tester, 'import');
+      expect(find.text('Import this recipe?'), findsOneWidget);
+      await tester.tap(find.text('Import 1 recipe'));
+      await tester.pumpAndSettle();
+      expect(find.text('Imported 1 recipe'), findsOneWidget);
+      expect(recipes().map((r) => r.name), ['Cake']);
+    });
+
+    testWidgets('import: says why when the text is no recipes', (tester) async {
       await openRecipes(tester);
       await pick(tester, 'import');
-      expect(find.text('Copy a recipe first, then import'), findsOneWidget);
+      expect(find.text('Copy some recipes first, then import'), findsOneWidget);
       clipboard = 'a shopping list';
       await pick(tester, 'import');
-      expect(find.text('No recipe in the copied text.'), findsOneWidget);
+      expect(find.text('No recipes in the copied text.'), findsOneWidget);
       expect(recipes(), isEmpty);
     });
   });

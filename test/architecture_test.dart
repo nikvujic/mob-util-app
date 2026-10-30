@@ -106,9 +106,9 @@ const plainScrollAllowed = {
   // People's panel and pickers (Round 108): the lower half of the
   // screen and bottom sheets, already in thumb reach.
   'pages/hub/people_panel.dart',
-  // Recipes to pick one to export (Round 104), in a bottom sheet capped
-  // in height: already at the bottom.
-  'pages/hub/recipe_transfer_sheet.dart',
+  // Things to pick to export or import (Round 104; Round 131 for every
+  // page), in a bottom sheet capped in height: already at the bottom.
+  'widgets/transfer_sheet.dart',
   // A person's note (Round 109), on its own page like a recipe's method.
   'pages/hub/person_note_page.dart',
   // A centred lock message, not a list.
@@ -175,7 +175,11 @@ List<String> toastViolations(String path, String source) {
 /// hand's side; only the menu ☰ and back go at the top). 1.29.1: Shop's
 /// search went into the top bar unasked. A file listed in
 /// [appBarActionsAllowed] may, only where the user asked for it.
-const appBarActionsAllowed = <String>{};
+const appBarActionsAllowed = <String>{
+  // Round 131: Import / export, asked for in the top bar (the same on
+  // every page that gets it).
+  'pages/hub/recipes.dart',
+};
 final _appBar = RegExp(r'(?<![A-Za-z_])AppBar\(');
 
 List<String> appBarActionViolations(String path, String source) {
