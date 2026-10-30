@@ -127,6 +127,8 @@ void main() {
     expect(pip.state.questMinutes, 0);
     expect(pip.state.questsDone.single.id, 'house');
     expect(pip.state.questsDone.single.at, at(2, 11, 1));
+    // Round 128: his home now.
+    expect(pip.houseBuilt, isTrue);
     expect(pip.questOffered, isNull);
     expect(pip.questAt(at(2, 12)), isNull);
   });

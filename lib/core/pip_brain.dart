@@ -386,7 +386,7 @@ class PipBrain {
     if (pixels == _roomWidth) return;
     final first = _roomWidth == 0;
     _roomWidth = pixels;
-    x = first ? _maxX / 2 : x.clamp(0, _maxX);
+    x = first ? _maxX / 2 : x.clamp(_minX, _maxX);
   }
 
   /// Pip's size, in pixels (Round 27: 19 tall, his screen a row taller).
@@ -473,6 +473,8 @@ class PipBrain {
   /// back on its own.
   bool play(PipAnimation animation, {bool demo = false}) {
     if (!mayStart(activity, animation)) return false;
+    // Round 128: his field's things don't happen in his house.
+    if (atHome && fieldOnly.contains(animation)) return false;
     switch (animation) {
       case PipAnimation.spawn:
         activity = PipActivity.spawning;
@@ -563,6 +565,8 @@ class PipBrain {
   }
 
   void _start(PipActivity next) {
+    // Round 128: out, on his trip, at work: not in his house then.
+    if (_awayFromHome.contains(next)) atHome = false;
     activity = next;
     _t = 0;
     _demo = false;
@@ -624,7 +628,11 @@ class PipBrain {
   /// and picks it up, or, off, it flies to him and he comes back on.
   bool takeBattery(double at) {
     if (!canTakeBattery) return false;
-    final left = at.clamp(0, math.max(0, roomWidth - batteryWidth)).toDouble();
+    // Round 128: at home, on his house's floor.
+    final left = (atHome
+            ? at.clamp(_minX, _maxX + width - batteryWidth)
+            : at.clamp(0, math.max(0, roomWidth - batteryWidth)))
+        .toDouble();
     if (activity == PipActivity.adventuring) {
       _run!.catchBattery(left);
       return true;
@@ -653,12 +661,12 @@ class PipBrain {
         left - (width - bodyInset + 1 + batteryGap); // it on his right
     final besideRight =
         left + batteryWidth + 1 + batteryGap - bodyInset; // his left
-    bool fits(double at) => at >= 0 && at <= _maxX;
+    bool fits(double at) => at >= _minX && at <= _maxX;
     final take = rightOf
         ? (fits(besideLeft) || !fits(besideRight))
         : !fits(besideRight) && fits(besideLeft);
     _batteryOnRight = take;
-    _target = (take ? besideLeft : besideRight).clamp(0, _maxX).toDouble();
+    _target = (take ? besideLeft : besideRight).clamp(_minX, _maxX).toDouble();
     facingRight = _target >= x;
     return true;
   }
@@ -1117,7 +1125,16 @@ class PipBrain {
       activity != PipActivity.egg &&
       !(activity == PipActivity.hatching && _t < popEnd);
 
-  double get _maxX => math.max(0, roomWidth - width).toDouble();
+  /// How far left and right he goes: his room, or (Round 128) his
+  /// house's floor between its walls.
+  double get _minX => atHome ? homeLeft : 0;
+  double get _maxX =>
+      atHome ? homeRight - width : math.max(0, roomWidth - width).toDouble();
+
+  /// His house's floor, inside its walls (the house area's x, from its
+  /// left, as his room's at home: [questCamera] is 0 then).
+  static const homeLeft = PipHouse.left + 6.0;
+  static const homeRight = PipHouse.right - 6.0;
 
   /// Moves on by [dt] seconds.
   void step(double dt) {
@@ -1160,6 +1177,7 @@ class PipBrain {
         if ((_target - x).abs() <= distance) {
           x = _target;
           _stand();
+          _arrive();
         } else {
           x += _target > x ? distance : -distance;
         }
@@ -1355,7 +1373,7 @@ class PipBrain {
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
-    if (activity != PipActivity.thrown) x = x.clamp(0, _maxX);
+    if (activity != PipActivity.thrown) x = x.clamp(_minX, _maxX);
   }
 
   // Round 44: his charging station.
@@ -1420,6 +1438,15 @@ class PipBrain {
   bool get stationOnRight => _stationRight;
 
   /// Room for the station and him beside it, with some to spare.
+  /// The station's spot: on the side of him with more room, at his
+  /// room's edge (Round 128: or his house's wall).
+  void _placeStation() {
+    final low = atHome ? homeLeft : 0.0;
+    final high = atHome ? homeRight : roomWidth.toDouble();
+    _stationRight = x + width / 2 <= (low + high) / 2;
+    _stationX = _stationRight ? high - stationWidth - 4 : low + 4;
+  }
+
   bool get _stationFits =>
       roomWidth >= 2 * width + stationWidth + stationGap + 8;
 
@@ -1446,9 +1473,7 @@ class PipBrain {
       if (!_stationFits) return;
       if (_stationX == null) {
         // The side with more room: never on top of him.
-        _stationRight = x + width / 2 <= roomWidth / 2;
-        _stationX =
-            _stationRight ? (roomWidth - stationWidth - 4).toDouble() : 4;
+        _placeStation();
         _stationUp = animate ? 0 : 1;
         _stationDir = animate ? 1 : 0;
       } else if (_stationDir < 0) {
@@ -1915,6 +1940,9 @@ class PipBrain {
   /// Comes into his field by [entrance] now (from wherever he is).
   void enter(PipEntrance entrance) {
     _landed = false;
+    // Round 128: in his house, up through its floor (not through its roof
+    // or walls).
+    if (atHome) entrance = PipEntrance.ground;
     switch (entrance) {
       case PipEntrance.ground:
         _start(PipActivity.spawning);
@@ -1925,7 +1953,7 @@ class PipBrain {
         // From beyond the left edge (the menu swings in from the left),
         // landing a third of the way in.
         _throwFrom = -width - 4.0;
-        _target = (roomWidth * 0.3).clamp(0, _maxX).toDouble();
+        _target = (roomWidth * 0.3).clamp(_minX, _maxX).toDouble();
         _throwHigh = math.min(18, math.max(4, skyRows - height - 6)).toDouble();
         x = _throwFrom;
         facingRight = true;
@@ -2021,6 +2049,8 @@ class PipBrain {
   bool _maybeEvent() {
     if (!_eventRoom || _wantsStation || _bedtime) return false;
     if (random.nextDouble() >= eventChance) return false;
+    // Round 128: in his house, its own.
+    if (atHome) return _maybeHomeEvent();
     // Round 75: mostly the weather's, while it's doing something.
     if (_maybeWeatherEvent()) return true;
     // At dusk or night, now and then a shooting star (Round 70: not
@@ -2327,7 +2357,7 @@ class PipBrain {
           _phaseT = 0;
         } else if ((b - x).abs() > width) {
           // Up to it, but not off his field.
-          x = (x + towards * hurry * dt).clamp(0, _maxX).toDouble();
+          x = (x + towards * hurry * dt).clamp(_minX, _maxX).toDouble();
         }
       case 2: // the swing
         if (_phaseT >= swingTime) {
@@ -2748,7 +2778,7 @@ class PipBrain {
     if (now == null) {
       if (activity == PipActivity.questing) {
         _questNow = null;
-        x = x.clamp(0, _maxX).toDouble();
+        x = x.clamp(_minX, _maxX).toDouble();
         _stand();
       }
       return;
@@ -2781,6 +2811,124 @@ class PipBrain {
     } else {
       questCamera = 0;
       x = centre - width / 2;
+    }
+  }
+
+  // Round 128: his house, once it's built (spec section 10).
+
+  /// In his finished house (his room says, from his life: not his
+  /// field's times, not out, on his trip or at work): he idles on its
+  /// floor, sleeps there, his station comes up there.
+  bool atHome = false;
+
+  static const _awayFromHome = {
+    PipActivity.adventuring,
+    PipActivity.riding,
+    PipActivity.questing,
+  };
+
+  /// What doesn't happen in his house (his field's things); Pip Home's
+  /// list says so.
+  static const fieldOnly = {
+    PipAnimation.fromSky,
+    PipAnimation.fromSide,
+    PipAnimation.bugs,
+    PipAnimation.flower,
+    PipAnimation.butterfly,
+    PipAnimation.ball,
+    PipAnimation.shootingStar,
+    PipAnimation.puddle,
+    PipAnimation.twirl,
+    PipAnimation.handOut,
+    PipAnimation.flakes,
+    PipAnimation.snowman,
+    PipAnimation.snowball,
+    PipAnimation.lost,
+  };
+
+  /// In his house or on his field, as his life says ([wanted]; his room
+  /// checks every second). He goes when he's free to (not in the middle
+  /// of something: asleep or off where he is, he stays till he's up);
+  /// he's simply there.
+  void home(bool wanted) {
+    if (wanted == atHome) return;
+    final free = _canGoOut ||
+        activity == PipActivity.lookingUp ||
+        activity == PipActivity.dancing ||
+        activity == PipActivity.sheltering;
+    if (!free) return;
+    atHome = wanted;
+    questCamera = 0;
+    _visit = null;
+    // His tent's not needed in (or taken along).
+    _wx.tent = null;
+    _wx.flyFrom = null;
+    _wx.snowman = null;
+    if (activity != PipActivity.showing) _stand();
+    x = wanted
+        ? homeLeft + random.nextDouble() * (homeRight - width - homeLeft)
+        : x.clamp(_minX, _maxX).toDouble();
+    // His station where he is now.
+    if (_stationX != null) _placeStation();
+  }
+
+  /// His house drawn round him at home (the house area, as at work).
+  QuestView? get homeView {
+    if (!atHome || _awayFromHome.contains(activity)) return null;
+    return QuestView(
+      place: QuestScenePlace.house,
+      house: PipHouse.finished,
+      offset: x + width / 2,
+      pose: QuestPose.standing,
+      t: sceneClock,
+    );
+  }
+
+  /// Where he's going in his house to look (a window, the fire), and
+  /// which way he faces there; null: just a walk.
+  (double, bool)? _visit;
+
+  /// At home now and then: a little dance, a look out of a window at the
+  /// weather, a warm by the fire.
+  bool _maybeHomeEvent() {
+    switch (random.nextInt(3)) {
+      case 0:
+        _start(PipActivity.dancing);
+      case 1:
+        final (wx, _) = PipHouse.windows[random.nextInt(2)];
+        _goVisit(wx + 9 - width / 2, true);
+      default:
+        _goVisit(PipHouse.fireplaceRight + 2.0, false);
+    }
+    return true;
+  }
+
+  void _goVisit(double at, bool faceRight) {
+    final to = at.clamp(_minX, _maxX).toDouble();
+    if ((to - x).abs() < 2) {
+      _visit = (to, faceRight);
+      _arrive();
+      return;
+    }
+    _visit = (to, faceRight);
+    _target = to;
+    facingRight = to > x;
+    _start(PipActivity.walking);
+  }
+
+  /// Arrived somewhere ([_stand] just done): at a window he looks out,
+  /// at the fire he stands warming a while.
+  void _arrive() {
+    final visit = _visit;
+    _visit = null;
+    if (visit == null || !atHome) return;
+    final (_, faceRight) = visit;
+    facingRight = faceRight;
+    if (faceRight) {
+      _start(PipActivity.lookingUp);
+    } else {
+      _standFor = 5 + random.nextDouble() * 3;
+      _turnAt = null;
     }
   }
 
@@ -3084,14 +3232,15 @@ class PipBrain {
   }
 
   void _walk() {
+    _visit = null;
     // Somewhere at least a few steps away, inside the room.
     final max = _maxX;
-    if (max < 8) {
+    if (max - _minX < 8) {
       _stand();
       return;
     }
     // Round 44: not into his station, if it's up.
-    var low = 0.0, high = max;
+    var low = _minX, high = max;
     if (_stationX != null) {
       if (_stationRight) {
         high = math.min(high, _plugX);

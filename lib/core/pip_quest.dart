@@ -17,6 +17,20 @@ abstract final class PipQuest {
     return windows.any((w) => m >= w.$1 && m < w.$2);
   }
 
+  /// Round 128: once his house is built he lives in it, but for his
+  /// field's times (local, minutes of the day): 11:30–12:00 and
+  /// 18:00–19:00, round his adventures.
+  static const fieldTimes = [
+    (11 * 60 + 30, 12 * 60),
+    (18 * 60, 19 * 60),
+  ];
+
+  /// Whether [t] is in his field's times.
+  static bool fieldTimeAt(DateTime t) {
+    final m = _minuteOfDay(t);
+    return fieldTimes.any((w) => m >= w.$1 && m < w.$2);
+  }
+
   /// A quest can be started only in quest hours (as an adventure is
   /// registered only in its own).
   static bool canStartAt(DateTime t) => inHoursAt(t);

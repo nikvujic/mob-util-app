@@ -42,7 +42,10 @@ void paintQuestPlace(
       };
       art.tree(season, PipHouse.treeLeft.toDouble(), g, sway: sway);
       art.house(view.house,
-          fire: view.house.has('hearth'), raining: raining, snowy: snowy);
+          fire: view.house.has('hearth'),
+          raining: raining,
+          snowy: snowy,
+          dark: dark);
       if (view.house.has('flueCap')) art.chimneySmoke(view.t);
       if (view.smelting) {
         // The fireplace roaring: its glow.

@@ -956,7 +956,9 @@ class _AnimationsState extends State<_Animations> {
   void _play(PipAnimation animation) {
     final brain = widget.brain;
     // Round 75: the weather's in its weather (tried on, as Background's).
-    if (PipBrainWeather.eventOf(animation) case final event?) {
+    // Round 128: his field's things, not in his house.
+    final indoors = brain.atHome && PipBrain.fieldOnly.contains(animation);
+    if (PipBrainWeather.eventOf(animation) case final event? when !indoors) {
       widget.tryWeather(weatherFor(event));
     }
     if (brain.play(animation, demo: true)) {
@@ -965,6 +967,7 @@ class _AnimationsState extends State<_Animations> {
     }
     _hide?.cancel();
     setState(() => _why = switch (brain.activity) {
+          _ when indoors => 'NOT IN HIS HOUSE',
           PipActivity.asleep => "HE'S ASLEEP",
           PipActivity.off => "HE'S OFF",
           // Round 45: at his station (the phone plugged in).

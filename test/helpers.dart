@@ -462,6 +462,11 @@ class FakePipLink implements PipLink {
   @override
   PipQuestNow? questNow() => questing;
 
+  bool home = false;
+
+  @override
+  bool homeNow() => home;
+
   @override
   int level = 1;
 

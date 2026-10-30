@@ -807,6 +807,10 @@ abstract final class PipHouseColours {
   static const glass = Color(0xFFA0D2EC);
   static const glassLight = Color(0xFFE8F8FF);
   static const glassDark = Color(0xFF78B0D2);
+  // Round 128: the night through them.
+  static const nightGlass = Color(0xFF2C3C62);
+  static const nightGlassLight = Color(0xFF52648E);
+  static const nightGlassDark = Color(0xFF1E2A48);
   static const frame = Color(0xFFF0E8D6);
   static const frameDark = Color(0xFFBEB4A0);
 

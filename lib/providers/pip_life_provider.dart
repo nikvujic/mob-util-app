@@ -454,6 +454,9 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       ? null
       : Quests.nextAfter(state.questsDone.map((d) => d.id));
 
+  /// Round 128: his house is built (he lives in it).
+  bool get houseBuilt => state.questsDone.any((d) => d.id == Quests.house.id);
+
   /// Away on a ski trip at [t] (on the bus or at the resort): no quest
   /// work then.
   bool _awayAt(DateTime t) {
@@ -648,6 +651,12 @@ class _Link implements PipLink {
       at: at,
       seconds: at.into * 60 + now.second + now.millisecond / 1000,
     );
+  }
+
+  @override
+  bool homeNow() {
+    final now = _now;
+    return _pip.houseBuilt && !PipQuest.fieldTimeAt(now);
   }
 
   @override

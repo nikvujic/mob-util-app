@@ -136,12 +136,12 @@ extension PipBrainWeather on PipBrain {
       activity == PipActivity.weatherEvent ? _wx.event : null;
 
   /// Rain's puddles in his field (their middles), for him to jump in.
-  List<double> get puddles =>
-      _wx.weather == WeatherKind.rain || _wx.weather == WeatherKind.storm
-          ? [
-              for (final at in const [0.16, 0.5, 0.84]) roomWidth * at
-            ]
-          : const [];
+  List<double> get puddles => !atHome &&
+          (_wx.weather == WeatherKind.rain || _wx.weather == WeatherKind.storm)
+      ? [
+          for (final at in const [0.16, 0.5, 0.84]) roomWidth * at
+        ]
+      : const [];
 
   /// A puddle's splash: (its middle, 0 → 1); null: none.
   (double, double)? get splash {
@@ -363,7 +363,8 @@ extension PipBrainWeather on PipBrain {
     final wx = _wx;
     wx.since += dt;
     final home = !_awayOrArriving.contains(activity);
-    final storm = wx.weather == WeatherKind.storm && home;
+    // Round 128: in his house he needs no tent or umbrella.
+    final storm = wx.weather == WeatherKind.storm && home && !atHome;
 
     // His tent: up round him when he's free, over him asleep or off;
     // anything going on (an event, his station) finishes first.
@@ -415,6 +416,7 @@ extension PipBrainWeather on PipBrain {
     // His umbrella, open in the rain while his hands are free for it.
     wx.umbrella.step(dt,
         wanted: home &&
+            !atHome &&
             wx.weather == WeatherKind.rain &&
             _umbrellaWhile.contains(activity) &&
             !(activity == PipActivity.weatherEvent &&

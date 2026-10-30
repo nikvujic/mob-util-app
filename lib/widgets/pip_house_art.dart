@@ -99,7 +99,11 @@ class PipHouseArt {
   /// under it. [fire]: the fireplace lit. [raining], [snowy]: the
   /// weather on it while it's open.
   void house(PipHouse house,
-      {bool fire = true, bool raining = false, bool snowy = false}) {
+      {bool fire = true,
+      bool raining = false,
+      bool snowy = false,
+      bool dark = false}) {
+    _dark = dark;
     final s = house.share;
     // The foundation, the porch's posts and deck, the stairs.
     stones(_hx0 - 2, _fy0, _hx1 + 2, _g - 1, share: s('foundation'));
@@ -276,6 +280,15 @@ class PipHouseArt {
     }
   }
 
+  /// Round 128: after dark, the night through the windows.
+  bool _dark = false;
+  Color get _glass =>
+      _dark ? PipHouseColours.nightGlass : PipHouseColours.glass;
+  Color get _glassLight =>
+      _dark ? PipHouseColours.nightGlassLight : PipHouseColours.glassLight;
+  Color get _glassDark =>
+      _dark ? PipHouseColours.nightGlassDark : PipHouseColours.glassDark;
+
   void _window(int x, int y, {required bool glass}) {
     rect(x - 1, y - 1, x + 18, y + 16, PipHouseColours.frameDark);
     rect(x, y, x + 17, y + 15, PipHouseColours.frame);
@@ -286,11 +299,11 @@ class PipHouseArt {
         (x + 1, y + 8),
         (x + 9, y + 8)
       ]) {
-        rect(gx, gy, gx + 7, gy + 6, PipHouseColours.glass);
-        rect(gx, gy + 5, gx + 7, gy + 6, PipHouseColours.glassDark);
-        put(gx + 1, gy + 1, PipHouseColours.glassLight);
-        put(gx + 2, gy + 1, PipHouseColours.glassLight);
-        put(gx + 1, gy + 2, PipHouseColours.glassLight);
+        rect(gx, gy, gx + 7, gy + 6, _glass);
+        rect(gx, gy + 5, gx + 7, gy + 6, _glassDark);
+        put(gx + 1, gy + 1, _glassLight);
+        put(gx + 2, gy + 1, _glassLight);
+        put(gx + 1, gy + 2, _glassLight);
       }
     } else {
       rect(x + 1, y + 1, x + 16, y + 14, PipHouseColours.backWallDark);
@@ -429,8 +442,8 @@ class PipHouseArt {
                 : !attic
                     ? PipHouseColours.backWallDark
                     : (x - cx < -1 && y - cy < -1)
-                        ? PipHouseColours.glassLight
-                        : PipHouseColours.glass);
+                        ? _glassLight
+                        : _glass);
       }
     }
     rect(cx, cy - 5, cx, cy + 5, PipHouseColours.frame);

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_house.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/pip_scene.dart';
@@ -227,6 +228,13 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 127: at his quest's work in quest hours (not while he's out, or
     // on his trip's bus).
     final questNow = out == null && trip.leg == null ? link.questNow() : null;
+    // Round 128: his house built, he lives in it (but for his field's
+    // times, and while he's out, away on his trip, or at work).
+    brain.home(out == null &&
+        trip.leg == null &&
+        !trip.snowy &&
+        questNow == null &&
+        link.homeNow());
     // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
     // Round 64: not till Android has said (the first time, simply so).
     if (link.plugged case final plugged?) {
@@ -641,7 +649,10 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    final groundTop = (height - PipRoom.ground).toDouble();
+    // Round 128: at home, what's his (his station, a battery, his words)
+    // stands on his house's floor: [groundTop] is moved up to it for them.
+    var groundTop = (height - PipRoom.ground).toDouble();
+    final fieldTop = groundTop;
 
     // His sky (Round 35): bands of colour from top to bottom (stepped,
     // pixel style), then what's in it now. Round 52: through more hues
@@ -864,7 +875,8 @@ class _RoomPainter extends CustomPainter {
     // now and then shows it).
     final run = brain.run;
     // Round 127: walking out to gather or home, the ground moves too.
-    final questView = brain.questView;
+    // Round 128: at home, his house's the same.
+    final questView = brain.questView ?? brain.homeView;
     final questPlace = questView?.place;
     final atPlace = questPlace != null && questPlace != QuestScenePlace.field;
     final shift = run?.shift.floor() ??
@@ -1444,6 +1456,10 @@ class _RoomPainter extends CustomPainter {
       return;
     }
 
+    // Round 128: his own things from here on his house's floor.
+    final indoors = brain.homeView != null;
+    if (indoors) groundTop = fieldTop - PipHouse.onFloor;
+
     // Round 44: his charging station, rising out of the ground (clipped
     // there), its socket facing him; the cable from it to the plug.
     if (brain.station case (final sx, final up, final right)) {
@@ -1957,6 +1973,13 @@ class _RoomPainter extends CustomPainter {
     for (final (dx, up, fade) in brain.zs) {
       sprite(PipSprites.z, centre + dx, groundTop - 18 - up, alpha: 1 - fade);
     }
+    groundTop = fieldTop;
+    // Round 128: in his house, the weather's outside it.
+    if (indoors) {
+      canvas.save();
+      canvas.clipPath(Path.combine(PathOperation.difference,
+          Path()..addRect(Offset.zero & size), _houseShape(groundTop, pixel)));
+    }
     // Round 67: snowing on a ski day, drifting down (rising past him as
     // he skis down).
     if (brain.snowing) {
@@ -2051,12 +2074,36 @@ class _RoomPainter extends CustomPainter {
       canvas.drawRect(Offset.zero & size,
           paint..color = PipColours.lightning.withValues(alpha: 0.3));
     }
+    if (indoors) canvas.restore();
     // Round 75: a snowball thrown at you, and its splat on the glass.
     if (brain.splat case final splat?) drawSplat(splat);
     // The egg's bottom half in front of him, as he jumps out of it.
     if (hatching) {
       sprite(PipSprites.eggBottom, eggLeft, groundTop, alpha: shell);
     }
+  }
+
+  /// Round 128: his finished house's outline (its roof, walls and porch
+  /// roof) in the room, [groundTop] its ground's top row; the weather
+  /// keeps out of it.
+  static Path _houseShape(double groundTop, double pixel) {
+    Offset at(num x, num y) =>
+        Offset(x * pixel, (groundTop + (y - PipHouse.ground)) * pixel);
+    final roof = Path()
+      ..moveTo(at(PipHouse.eaveLeft - 1, PipHouse.beamTop).dx,
+          at(PipHouse.eaveLeft - 1, PipHouse.beamTop).dy)
+      ..lineTo(at(PipHouse.apex, 48).dx, at(PipHouse.apex, 48).dy)
+      ..lineTo(at(PipHouse.eaveRight + 2, PipHouse.beamTop).dx,
+          at(PipHouse.eaveRight + 2, PipHouse.beamTop).dy)
+      ..close();
+    final walls = Path()
+      ..addRect(Rect.fromPoints(at(PipHouse.eaveLeft - 1, PipHouse.beamTop),
+          at(PipHouse.eaveRight + 2, PipHouse.ground)));
+    final porch = Path()
+      ..addRect(Rect.fromPoints(at(PipHouse.porchLeft - 2, 87),
+          at(PipHouse.porchRight + 5, PipHouse.ground)));
+    return Path.combine(PathOperation.union,
+        Path.combine(PathOperation.union, roof, walls), porch);
   }
 
   /// Round 70: a storm's bolt and flash, every [_stormEvery] seconds for

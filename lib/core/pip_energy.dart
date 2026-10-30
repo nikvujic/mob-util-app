@@ -317,6 +317,10 @@ abstract class PipLink {
   /// Round 127: at his quest's work now (quest hours, on, not away):
   /// where the quest is and the seconds into its step; else null.
   PipQuestNow? questNow();
+
+  /// Round 128: his house built, and not his field's times: he's in it
+  /// (his room checks he isn't out, on his trip, or at work).
+  bool homeNow();
 }
 
 /// His quest's work at a moment (Round 127).
