@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 130 — fix: no way in during quest work (2026-10-30, 2.1.2)
+
+- [x] Pip Home opened in quest hours played his way in (from the sky)
+  before his work, which only starts once he's free. Now, as on his
+  adventure, no way in: he's simply at his work. Test in
+  `pip_room_quest_test.dart`.
+
 ### Round 129 — fix: the menu's room picking up a stale doing (2026-10-30, 2.1.1)
 
 - [x] A battery given in the menu, then quest hours' work started from

@@ -193,9 +193,15 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     // Round 63: out on his adventure (looked at: his break may start).
     final out = link.outing();
+    // Round 67: his ski trip: snow, skiing for his day out.
+    final trip = link.trip();
+    // Round 127: at his quest's work in quest hours (not while he's out, or
+    // on his trip's bus).
+    final questNow = out == null && trip.leg == null ? link.questNow() : null;
     // Round 52: his way in, the first time or back after a while (not
-    // while he's out: he's simply there, running).
-    if (out != null) _entered = true;
+    // while he's out: he's simply there, running; Round 130: nor at his
+    // quest's work, simply there working).
+    if (out != null || questNow != null) _entered = true;
     if (_moving && show == PipShow.awake && !_entered) {
       _entered = true;
       final left = brain.leftAt;
@@ -216,8 +222,6 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     brain.birthday = link.partyHat;
     // Round 61: otherwise today's (a day of the year's, or a random one).
     brain.dayHat = link.hatToday;
-    // Round 67: his ski trip: snow, skiing for his day out.
-    final trip = link.trip();
     brain.snowy = trip.snowy;
     brain.skiing = trip.skiing;
     final read = link.recipeReadAt;
@@ -232,9 +236,6 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 44: plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
     final seen = _shown != null && _moving;
-    // Round 127: at his quest's work in quest hours (not while he's out, or
-    // on his trip's bus).
-    final questNow = out == null && trip.leg == null ? link.questNow() : null;
     // Round 128: his house built, he lives in it (but for his field's
     // times, and while he's out, away on his trip, or at work).
     brain.home(out == null &&

@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-10-30
+
+### Fixed
+- **Pip:** opening his page (or the menu after a while) during quest
+  work no longer plays his way in first (dropping from the sky, out of
+  the ground). He's simply there at his work, as on his adventures.
+
 ## [2.1.1] - 2026-10-30
 
 ### Fixed

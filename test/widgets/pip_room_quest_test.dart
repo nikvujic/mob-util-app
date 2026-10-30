@@ -122,4 +122,36 @@ void main() {
     expect(brain.activity, PipActivity.questing);
     expect(brain.battery, isNull);
   });
+
+  testWidgets(
+      'opened fresh in quest hours: no way in (from the sky): straight at '
+      'his work (Round 130)', (tester) async {
+    final brain = PipBrain();
+    final link = FakePipLink()
+      ..questing = (at: q.at(0), seconds: 100)
+      ..at = DateTime(2026, 11, 2, 10, 30);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: PipRoom(
+              brain: brain,
+              animate: true,
+              link: link,
+              height: 140,
+              entrances: const {PipEntrance.sky},
+              scene: PipScene.at(PipPlace.home, link.at!),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(brain.activity, PipActivity.questing);
+  });
 }
