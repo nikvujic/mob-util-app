@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 121 — Pip's quests: the spec (2026-10-30)
+
+- [x] The user's notes on quests turned into `docs/QUESTS_SPEC.md`
+  (Build a house: quest hours 10:00–11:30 and 19:00–20:30, a script
+  worked out from the clock, materials, the house piece by piece,
+  weather and seasons, the finished house as his home) and drafts
+  (`docs/pip_house_drafts.png`). Answers: no charging in quest hours;
+  a lantern at night; a rain hat in rain, snow and storms; a drawn
+  framed picture; the charging station where he is.
+- [ ] The spec and drafts approved; then the rules round.
+
 ### Round 120 — v2.0.0 (2026-10-29, 2.0.0)
 
 - [x] Round 116's notes: Delete on a date a full button; Pip Home without
