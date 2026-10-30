@@ -931,6 +931,33 @@ window since the last count it finds, by binary search, the first
 minute he's out of energy (his level only falls between changes), and
 leaves out five-minute chunks spent away on a ski trip.
 
+Round 126: `core/pip_house.dart` (`PipHouse.of(QuestAt)`: each piece's
+amount up, the house's measures in its own pixels, where he stands to
+work on a piece) and `widgets/pip_house_art.dart` (`PipHouseArt`, drawn
+through a `dot` callback so the room and the framed picture share it).
+Pip Home's quest card and inventory read `PipLifeNotifier.questAt`.
+
+Round 127: `core/pip_quest_scene.dart` turns a `QuestAt` and the seconds
+into its step into a `QuestView` (the place, his spot and lift, pose,
+flying materials, puffs, the tree's fall), a pure function of the clock.
+`PipLink.questNow()` hands it to his room each second; `PipBrain.quest`
+puts him in `PipActivity.questing` and `_placeQuest` keeps him at the
+view's spot (a camera, `questCamera`, for a room narrower than the house
+area). `widgets/pip_quest_paint.dart` draws the place before his props.
+`PipBrain.hat` gives the rain hat at work in the wet.
+
+Round 128: his home. `PipLink.homeNow()` (his house built, not
+`PipQuest.fieldTimeAt`); the room passes `brain.home(...)` only when
+he's not out, on his trip or at work. At home `PipBrain` keeps his x
+between `homeLeft` and `homeRight` (`_minX`/`_maxX`), picks
+`_maybeHomeEvent` instead of his field's events, refuses `fieldOnly`
+animations, enters through the floor, and places the station by a wall
+(`_placeStation`). `homeView` is a standing `QuestView` of the finished
+house, so the room draws it as it does at work; after the house the
+room moves `groundTop` up by `PipHouse.onFloor` for his own things (the
+station, a battery, his words, him), back down after, and clips the
+weather to outside `_houseShape`.
+
 ## Converter (Round 118)
 
 `core/units.dart`: `UnitPair` (two units and a conversion each way;

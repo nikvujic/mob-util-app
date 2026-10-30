@@ -337,7 +337,47 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
-### Round 125 — Pip's quests: the rules (2026-10-30, not released yet)
+### Round 128 — Pip's quests: his house his home (2026-10-30, 2.1.0)
+
+- [x] Once the house is built (`PipLifeNotifier.houseBuilt`) he lives
+  in it but for his field's times (`PipQuest.fieldTimes`, 11:30–12:00
+  and 18:00–19:00), his adventure, a ski trip and quest work
+  (`PipLink.homeNow`, checked by his room every second).
+- [x] `PipBrain.home`: in or out when he's free; on the floor between
+  the walls (`homeLeft`/`homeRight`); his own events there (a dance, a
+  window, the fire); his field's things held off (`fieldOnly`, Pip Home
+  says *Not in his house*); in up through the floor; his station by a
+  wall; no tent, umbrella or puddles. The room draws his own things on
+  the floor and the weather outside the house's outline; windows dark at
+  night.
+- [x] Docs, intro, full suite, release 2.1.0. Decisions and
+  simplifications in `docs/QUESTS_SPEC.md` section 15.
+
+### Round 127 — Pip's quests: the scenes and quest hours' rules (2026-10-30, 2.1.0)
+
+- [x] `core/pip_quest_scene.dart`: `QuestView.of` — where he is and what
+  he's doing from the step and the seconds into it (walking out and
+  home across the field, felling, breaking stone, digging, building
+  with materials flying in and dust, the scaffold, smelting).
+- [x] `PipActivity.questing` (only sleep or running out start during
+  it), `PipLink.questNow`, `widgets/pip_quest_paint.dart` (the house
+  area, forest, mine and beach; a lantern after dark; the fireplace's
+  glow); the menu's narrow room follows him across the house area.
+- [x] Quest hours' rules: no station, no events, the medicine pill
+  while he works, a **rain hat** in the wet, no umbrella, tent,
+  puddles or snowman; Pip Home says *He's at work*.
+
+### Round 126 — Pip's quests: Pip Home (2026-10-30, 2.1.0)
+
+- [x] The Quests row and card (Start in quest hours, the bar, what he's
+  doing, done about, the finished quests with the framed picture), the
+  inventory card between the status and the settings; Pip Home opens on
+  the quest card while he works.
+- [x] `core/pip_house.dart` and `widgets/pip_house_art.dart`: the house
+  drawn piece by piece from the script's progress (nothing floats), its
+  tall tree by season, the places he gathers in.
+
+### Round 125 — Pip's quests: the rules (2026-10-30, 2.1.0)
 
 - [x] `core/pip_quest.dart`: quest hours (10:00–11:30, 19:00–20:30),
   the windows between two moments, the finish estimate; the **house's
@@ -354,8 +394,7 @@ fixtures for every stored format.
   the moment of its last minute; `questAt` and `questWorkingAt` for the
   UI rounds. Charging keeps its energy rule; only his trip to the
   station is left out in quest hours (the scenes round).
-- [ ] Next: Pip Home (the Quests button and card, Start, the inventory
-  card, the swipe order), then the scenes.
+- [x] Pip Home and the scenes: Rounds 126–128.
 
 ### Round 121 — Pip's quests: the spec (2026-10-30)
 

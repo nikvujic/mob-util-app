@@ -6,10 +6,40 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-30
+
+**Pip's quests.** His first quest, **Build a house**, takes about two
+months of quest hours.
+
 ### Added
-- Pip's quests, under the hood (not shown yet): quest hours, the house's
-  build plan, and his progress counted from the clock. Pip Home's Quests
-  card and the scenes come next.
+- **Quests** on Pip's page, under Adventures: start a quest between
+  10:00 and 11:30 or 19:00 and 20:30. Every day in those hours he works
+  on it, even with the app closed. Once started it can't be stopped. The
+  quest card shows what he's doing, how far along he is and when it
+  should be done. Finished quests show with a framed picture.
+- **Inventory**: a card between his status and his settings, with the
+  wood, stone, sand and glass he's carrying.
+- **The work itself**, in the menu and on his page. He walks out across
+  his field to the forest (felling trees), the mine (breaking stone) and
+  the beach (digging sand) and carries it home. In his house area he
+  builds the house piece by piece, from the foundation to the flower
+  boxes, with the materials flying in. He smelts glass in the fireplace
+  and climbs a scaffold for the roof. The house has its own tall tree
+  that follows the seasons. Rain leaks in until the roof is closed and
+  snow settles on the unfinished house. After dark he works by a
+  lantern.
+- **Quest hours' rules**: nothing else happens while he works. He
+  doesn't go to his charging station, and no bugs, balls or weather
+  games come up. His medicine reminder shows on his screen while he
+  carries on. In drizzle, rain, snow or a storm he wears a yellow **rain
+  hat**.
+- **His house as his home**: once it's built he lives in it. He's out on
+  his field only 11:30–12:00 and 18:00–19:00, on his adventure, or on a
+  ski trip. Inside he walks about the floor, dances, looks out of the
+  windows and warms himself by the fire. He sleeps there, his charging
+  station comes up through the floor, and the rain and snow stay
+  outside. His field's things (bugs, flowers, the ball, puddles, the
+  snowman) don't happen indoors.
 
 ## [2.0.0] - 2026-10-29
 

@@ -285,3 +285,46 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 6. **The finished house:** his idling area, sleeping inside, the
    station where he is, which events stay; the next quest offered (to
    be specced).
+
+## 15. As built (Rounds 125–128, 2.1.0)
+
+Built as specced, with these decisions and simplifications (to revisit
+from use):
+
+- **Quest hours' end:** at 11:30 and 20:30 he's simply back on his
+  field (no walk home); next window he's simply where the script is.
+- **Powered down in quest hours:** he lies on his field, not where the
+  script had him; his minutes stop as specced, and a battery brings him
+  back to the same point.
+- **Medicine:** the pill shows on his screen while he keeps working
+  (he doesn't stop); the minutes don't pause.
+- **Charging in quest hours:** he isn't sent to his station, and it
+  doesn't come up; the plugged-in energy rule (he can't run out while
+  plugged in) still holds.
+- **Rain hat** in drizzle, rain, snow and storms at work, over any other
+  hat; no umbrella, tent, puddles or snowman while he works.
+- **Occasions** (a jack-o'-lantern by the steps, lights on the eaves,
+  the badnjak, eggs in the grass) aren't in the house area yet; his
+  field's are as before.
+- **His home:** once the house is built he's in it except 11:30–12:00
+  and 18:00–19:00, out on his adventure, on a ski trip, or (later) at a
+  quest's work. He goes in or out when he's free (not in the middle of
+  something; asleep or off he stays where he is till he's up), and is
+  simply there, somewhere on its floor.
+- **In it:** he walks between its walls on its floor; his events there
+  are a little dance, a look out of a window, and a warm by the fire;
+  notifications, the medicine pill, hats, eating, sleeping and his
+  battery all as on his field. His field's things (bugs, flowers,
+  butterflies, the ball, shooting stars, puddles, the snowman, the
+  weather's events, coming from the sky or the side) don't happen
+  there, and Pip Home's Animations says *Not in his house* for them. He
+  comes in up through his floor.
+- **His station** comes up through the floor, by the wall on the side
+  with more room. **The weather** falls outside the house (not through
+  its roof or porch roof); after dark the windows show the night and the
+  porch lantern is lit.
+- **The menu's strip** shows the house's floor and walls (the roof only
+  in Pip Home's taller scene), as specced.
+- **The next quest** isn't offered yet: after the house, the Quests card
+  shows it done with its picture.
+
