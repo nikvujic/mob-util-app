@@ -1,6 +1,6 @@
 # Pip's quests — spec (Round 121)
 
-Written in Round 121, after v2.0.0. The first quest is **Build a house**:
+Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating. The first quest is **Build a house**:
 Pip gathers wood, stone and sand, makes glass, and builds a house piece by
 piece over about two months, during two set hours a day. The house then
 becomes where he lives. **Requested** marks what was asked for,
@@ -113,27 +113,43 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   interior. **Requested:** stone, wood and glass; **detailed and
   sound**, since it becomes where he lives.
 - Seen from the side, cut away at the front, so he's seen inside.
-- **The order (proposed):**
-  1. **Stone foundation**, block by block.
-  2. **Stone steps** up to the door.
-  3. **The furnace** (stone), outside on the right.
-  4. **Wooden floor**, plank by plank.
-  5. **Corner posts** (wood).
-  6. **The back wall**, planks, leaving two window openings.
-  7. **The side walls**, the right one with the **doorway**.
+- **Requested (Round 122): nothing floats.** Every block rests on what's
+  under it: built bottom-up, row by row, each on the ground or on a
+  block already in place. Only materials flying to him or into a piece
+  are in the air.
+- **Requested (Round 122):** detailed, like **a good-looking Terraria
+  house**: textured stone bricks (mortar, shades), plank grain, dark
+  log beams, multi-pane windows with sills, a banded door under a stone
+  lintel, a porch with a railing, eaves with trim, a gable with a round
+  attic window, flower boxes, a stone chimney from the ground up.
+- **The order (decided, Round 122):**
+  1. **Stone foundation**, block by block, the bottom row first.
+  2. **Stone steps** up to the door, and the **porch** boards.
+  3. **The furnace** (stone), outside on the right, its own chimney.
+  4. **The chimney's base**, stone, from the ground beside the left wall.
+  5. **Wooden floor**, plank by plank.
+  6. **Posts** (log beams): the corners and the middle.
+  7. **Walls**: the back wall and the side walls, row by row from the
+     floor up, leaving the window openings and the doorway.
   8. **Glass**: smelted in the furnace, then the **two windows** set in
-     (frames and panes).
-  9. **The door** (wood, with a handle).
-  10. **Scaffold** (wood) put up, to reach the top.
-  11. **Ceiling**, plank by plank.
-  12. **Roof rafters**, then **shingles**, row by row.
-  13. **Chimney** (stone).
-  14. **Scaffold taken down**; done.
+     (frames, four panes each, stone sills).
+  9. **The door** (planks, iron bands, a handle) under a **stone lintel**;
+     the porch **railing** and post, the **lantern** hung on it.
+  10. **The ceiling beam** across the posts; the **chimney** raised
+      alongside, block on block.
+  11. **Scaffold** (wood) put up, to reach the top.
+  12. **Rafters**, then the **gable** (planks, the round attic window).
+  13. **Shingles**, row by row from the eaves up to the ridge.
+  14. **Eave trim**, the chimney's cap, **flower boxes** under the windows.
+  15. **Scaffold taken down**; done.
 - **Requested:** building is shown: he **walks to the piece**, its
   materials **fly from him into it**, and it **smokes / puffs** while he
   works until it's in place. For high parts he climbs the scaffold.
-- **Proposed:** a piece being built shows as an outline that fills in as
-  he works.
+- **Proposed:** a piece being built shows as a dotted outline that fills
+  in as he works.
+- **Proposed:** the tree, rock and sand drawn as in the drafts or better:
+  a layered canopy with branches, bark and roots; boulders with cracks,
+  light and moss; a dune with ripples. A felled tree leaves a stump.
 
 ## 7. Moving between places
 
@@ -212,6 +228,10 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   bugs, butterflies, flowers, the ball, puddles, the snowman, snowballs.
 - **Proposed:** with no quest active, quest hours are ordinary house
   time.
+- **Decided (Round 122): adventures stay as they are**: once registered
+  he's out every day 12:00–18:00. He isn't only when powered down at
+  12:00 with no battery until 17:00 (he lies where he fell, then idles
+  in the house), or on a ski trip (he's skiing).
 
 ## 11. Data and backup
 
@@ -231,9 +251,6 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 13. Open
 
-- Whether, after the house, he's in the house or on the field from 12:00
-  to 18:00 on days he isn't on an adventure (the notes name only
-  11:30–12:00 and 18:00–19:00 for the field). **Proposed:** the house.
 - The drafts (`docs/pip_house_drafts.png`): the house at its stages, the
   materials, the furnace, the scaffold, the rain hat, the lantern.
 

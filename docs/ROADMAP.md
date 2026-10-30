@@ -346,6 +346,9 @@ fixtures for every stored format.
   (`docs/pip_house_drafts.png`). Answers: no charging in quest hours;
   a lantern at night; a rain hat in rain, snow and storms; a drawn
   framed picture; the charging station where he is.
+- [x] Round 122: nothing floats (built bottom-up, each block on one
+  below); the house redrawn, Terraria-like and detailed; adventures as
+  they are (the house only when he doesn't go).
 - [ ] The spec and drafts approved; then the rules round.
 
 ### Round 120 — v2.0.0 (2026-10-29, 2.0.0)
