@@ -3,6 +3,7 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_house.dart';
 import 'package:the_app/core/pip_quest.dart';
 import 'package:the_app/core/pip_quest_scene.dart';
+import 'package:the_app/core/weather.dart';
 
 /// What his quest's work looks like (Round 127): where he is and what
 /// he's doing, from the step and the seconds into it.
@@ -134,6 +135,46 @@ void main() {
           s.action == QuestAction.gather && s.place == QuestPlace.forest);
       brain.quest((at: q.at(q.startOf(tree) + 1), seconds: 61.2));
       expect(brain.sword, isNotNull);
+    });
+
+    for (final wet in [
+      WeatherKind.drizzle,
+      WeatherKind.rain,
+      WeatherKind.snow,
+      WeatherKind.storm,
+    ]) {
+      test('at his work in ${wet.label}: his rain hat, no umbrella or tent',
+          () {
+        final brain = PipBrain(roomWidth: 160)..weather = wet;
+        brain.quest((at: q.at(0), seconds: 100));
+        for (var i = 0; i < 40; i++) {
+          brain.step(0.1);
+        }
+        expect(brain.activity, PipActivity.questing);
+        expect(brain.hat, PipHat.rainHat);
+        expect(brain.umbrella, 0);
+        expect(brain.tent, isNull);
+      });
+    }
+
+    test('the weather changing at his work: not looked up at after', () {
+      final brain = PipBrain(roomWidth: 160)..weather = WeatherKind.cloudy;
+      brain.step(0.1);
+      brain.quest((at: q.at(0), seconds: 100));
+      brain.weather = WeatherKind.rain;
+      brain.step(0.1);
+      brain.quest(null);
+      brain.step(0.1);
+      expect(brain.activity, isNot(PipActivity.lookingUp));
+    });
+
+    test('dry, or off his work: not his rain hat', () {
+      final brain = PipBrain(roomWidth: 160)..weather = WeatherKind.cloudy;
+      brain.quest((at: q.at(0), seconds: 100));
+      expect(brain.hat, isNot(PipHat.rainHat));
+      brain.weather = WeatherKind.rain;
+      brain.quest(null);
+      expect(brain.hat, isNot(PipHat.rainHat));
     });
   });
 }

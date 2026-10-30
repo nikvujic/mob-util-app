@@ -1602,8 +1602,9 @@ class _RoomPainter extends CustomPainter {
             groundTop - 1 - kick % 2, PipColours.puddleLight);
       }
     }
-    // Round 75: rain's puddles (a splash in one), and his snowman.
-    for (final middle in brain.puddles) {
+    // Round 75: rain's puddles (a splash in one), and his snowman (Round
+    // 128: not while his quest's scenes go by).
+    for (final middle in questView != null ? const <double>[] : brain.puddles) {
       sprite(PipSprites.puddle, (middle - 6).floorToDouble(), groundTop + 1,
           colours: PipSprites.puddleColours, alpha: brain.weatherIn);
     }
@@ -1616,7 +1617,7 @@ class _RoomPainter extends CustomPainter {
             (groundTop - 1 - up).floorToDouble(), PipColours.puddleLight);
       }
     }
-    if (brain.snowman case final man?) {
+    if (brain.snowman case final man? when questView == null) {
       drawSnowman(man);
     }
 

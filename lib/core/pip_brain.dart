@@ -147,7 +147,10 @@ enum PipHat {
   heart('Heart band', everyday: false),
 
   /// Round 67: all his ski days.
-  skiBeanie('Ski beanie', everyday: false);
+  skiBeanie('Ski beanie', everyday: false),
+
+  /// Round 128: at his quest's work in rain, snow or a storm.
+  rainHat('Rain hat', everyday: false);
 
   final String label;
 
@@ -2108,6 +2111,8 @@ class PipBrain {
     // Round 67: no hat on the bus.
     if (activity == PipActivity.riding) return null;
     if (birthday) return PipHat.party;
+    // Round 128: working his quest in the wet, his rain hat.
+    if (activity == PipActivity.questing && wetOut) return PipHat.rainHat;
     // Round 67: a ski beanie all his ski days.
     return snowing ? PipHat.skiBeanie : dayHat;
   }
@@ -2683,6 +2688,18 @@ class PipBrain {
 
   /// Snowing: a ski day, or a ski preview.
   bool get snowing => snowy || _previewSki;
+
+  /// Rain, drizzle, snow or a storm out (Round 128).
+  bool get wetOut =>
+      snowing ||
+      switch (_wx.weather) {
+        WeatherKind.drizzle ||
+        WeatherKind.rain ||
+        WeatherKind.snow ||
+        WeatherKind.storm =>
+          true,
+        _ => false,
+      };
 
   /// Back on his info card (or leaving): a preview going on stops.
   void stopPreviews() {

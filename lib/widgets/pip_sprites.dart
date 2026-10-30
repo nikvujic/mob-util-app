@@ -978,6 +978,15 @@ abstract final class PipSprites {
       '...rr...',
       'pppppppp',
     ],
+    // Round 128: a sou'wester, for his quest's work in the wet.
+    PipHat.rainHat: [
+      '.....yyyy.....',
+      '....yyyyyy....',
+      '...yyyyyyyy...',
+      '...yyyyyyyy...',
+      'gyyyyyyyyyyyyg',
+      '.gggggggggggg.',
+    ],
   };
 
   /// The middle of his head on his frame: between columns 9 and 10.

@@ -70,6 +70,8 @@ const _awayOrArriving = {
   PipActivity.thrown,
   PipActivity.adventuring,
   PipActivity.riding,
+  // Round 128: at his quest's work (his rain hat's for the wet).
+  PipActivity.questing,
 };
 
 /// While these, his umbrella's up in the rain (his hands free for it).

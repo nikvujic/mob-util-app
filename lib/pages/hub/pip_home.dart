@@ -973,6 +973,8 @@ class _AnimationsState extends State<_Animations> {
           PipActivity.charging ||
           PipActivity.unplugging =>
             "HE'S CHARGING",
+          // Round 128: at his quest's work.
+          PipActivity.questing => "HE'S AT WORK",
           _ => "HE'S BUSY, A MOMENT",
         });
     _hide = Timer(const Duration(milliseconds: 1200), () {
@@ -1061,6 +1063,7 @@ class _AdventuresState extends State<_Adventures> {
           PipActivity.off => "HE'S OFF",
           PipActivity.adventuring => "HE'S OUT",
           PipActivity.riding => "HE'S ON HIS TRIP",
+          PipActivity.questing => "HE'S AT WORK",
           _ => "HE'S BUSY, A MOMENT",
         });
     _hide = Timer(const Duration(milliseconds: 1200), () {
