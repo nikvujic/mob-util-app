@@ -643,9 +643,12 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));
         await t.pumpAndSettle();
-        await t.fling(
-            find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
-        await t.pumpAndSettle();
+        // Round 126: past his inventory to the settings.
+        for (var i = 0; i < 2; i++) {
+          await t.fling(
+              find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+          await t.pumpAndSettle();
+        }
         await t.tap(find.byKey(const Key('pipRename')));
         await t.pumpAndSettle();
       },
@@ -653,9 +656,12 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));
         await t.pumpAndSettle();
-        await t.fling(
-            find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
-        await t.pumpAndSettle();
+        // Round 126: past his inventory to the settings.
+        for (var i = 0; i < 2; i++) {
+          await t.fling(
+              find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+          await t.pumpAndSettle();
+        }
         await t.tap(find.byKey(const Key('pipBackground')));
         await t.pumpAndSettle();
       },
@@ -663,9 +669,12 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));
         await t.pumpAndSettle();
-        await t.fling(
-            find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
-        await t.pumpAndSettle();
+        // Round 126: past his inventory to the settings.
+        for (var i = 0; i < 2; i++) {
+          await t.fling(
+              find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+          await t.pumpAndSettle();
+        }
         await t.tap(find.byKey(const Key('pipAnimations')));
         await t.pumpAndSettle();
       },

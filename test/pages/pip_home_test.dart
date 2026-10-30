@@ -46,10 +46,13 @@ void main() {
 
   PipRoom room(WidgetTester tester) => tester.widget(find.byType(PipRoom));
 
+  // Round 126: his inventory comes first, then the settings.
   Future<void> toSettings(WidgetTester tester) async {
-    await tester.fling(
-        find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
-    await tester.pumpAndSettle();
+    for (var i = 0; i < 2; i++) {
+      await tester.fling(
+          find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
+      await tester.pumpAndSettle();
+    }
   }
 
   Future<void> key(WidgetTester tester, String said) async {
@@ -556,13 +559,14 @@ void main() {
       await tester.tap(find.byKey(const Key('pipInfo')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('pipStatus')), findsOneWidget);
-      await tester.fling(
-          find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
-      await tester.pumpAndSettle();
+      // Round 126: his inventory, then the settings.
+      await toSettings(tester);
       expect(find.byKey(const Key('pipAnimations')), findsOneWidget);
-      await tester.fling(
-          find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
-      await tester.pumpAndSettle();
+      for (var i = 0; i < 2; i++) {
+        await tester.fling(
+            find.byKey(const Key('pipCard')), const Offset(400, 0), 1000);
+        await tester.pumpAndSettle();
+      }
 
       await tester.ensureVisible(find.byKey(const Key('pipAdventures')));
       await tester.tap(find.byKey(const Key('pipAdventures')));
@@ -574,7 +578,8 @@ void main() {
     testWidgets('not out: it opens on his info', (tester) async {
       await open(tester, hour: 13);
       expect(find.byKey(const Key('pipStatus')), findsOneWidget);
-      expect(find.bySemanticsLabel(RegExp('Card 1 of 2')), findsOneWidget);
+      // Round 126: his info, his inventory, his settings.
+      expect(find.bySemanticsLabel(RegExp('Card 1 of 3')), findsOneWidget);
     });
 
     testWidgets(

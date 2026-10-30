@@ -11,6 +11,7 @@ import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_quest.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/pip_weather.dart';
 import 'package:the_app/core/theme.dart';
@@ -20,6 +21,7 @@ import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/providers/pip_trip.dart';
 import 'package:the_app/providers/pip_provider.dart';
 import 'package:the_app/widgets/pip_energy_bar.dart';
+import 'package:the_app/widgets/pip_house_picture.dart';
 import 'package:the_app/widgets/pip_portrait.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
@@ -42,6 +44,10 @@ class PipHomePage extends ConsumerStatefulWidget {
 /// What the settings side of the card shows.
 enum _Settings { menu, rename, animations, adventures, backgrounds, hats }
 
+/// Which card the first page shows (Round 73: info or adventures; Round
+/// 126: or his quests).
+enum _View { info, adventure, quest }
+
 class _PipHomePageState extends ConsumerState<PipHomePage> {
   /// His own, here: the menu's Pip stays where he was.
   final _brain = PipBrain();
@@ -50,18 +56,26 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   _Settings _settings = _Settings.menu;
 
   /// Round 73: the adventure view (his adventure card, no settings), or
-  /// his info; it opens in the adventure view while he's out.
-  late bool _adventureView = _outNow();
+  /// his info; it opens in the adventure view while he's out. Round 126:
+  /// or the quest view, opened in while he's at his quest's work.
+  late _View _view = _openIn();
 
-  bool _outNow() {
+  _View _openIn() {
     final now = ref.read(clockProvider)();
-    return ref.read(pipLifeProvider.notifier).outAt(now) &&
+    final life = ref.read(pipLifeProvider.notifier);
+    if (life.outAt(now) &&
         // On his ski trip's bus there's no adventure to see.
-        !PipTrip.busDay(ref.read(datesProvider), now);
+        !PipTrip.busDay(ref.read(datesProvider), now)) {
+      return _View.adventure;
+    }
+    if (life.questWorkingAt(now)) return _View.quest;
+    return _View.info;
   }
 
-  void _switchView() => setState(() {
-        _adventureView = !_adventureView;
+  bool get _infoView => _view == _View.info;
+
+  void _showView(_View view) => setState(() {
+        _view = view;
         _settings = _Settings.menu;
       });
 
@@ -143,17 +157,21 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                 : const NeverScrollableScrollPhysics(),
                             onPageChanged: (page) => setState(() {
                               _page = page;
-                              if (page == 0) _endPreviews();
+                              // Round 126: off the settings, previews end.
+                              if (page != 2) _endPreviews();
                             }),
                             children: [
                               _Status(
-                                adventure: _adventureView,
-                                switchView: _switchView,
+                                view: _view,
+                                showView: _showView,
                                 cheer: () => setState(_brain.cheer),
                               ),
+                              // Round 126: his inventory, between his info
+                              // and his settings.
+                              if (_infoView) const _Inventory(),
                               // Round 73: the settings (animations and
                               // the rest) are his info's.
-                              if (!_adventureView)
+                              if (_infoView)
                                 switch (_settings) {
                                   _Settings.menu => _SettingsMenu(
                                       background: background,
@@ -197,7 +215,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                             ],
                           ),
                         ),
-                        if (!_adventureView) _Dots(count: 2, current: _page),
+                        if (_infoView) _Dots(count: 3, current: _page),
                       ],
                     ),
                   ),
@@ -265,17 +283,17 @@ Widget _words(String text, {Color colour = PipColours.screen, double? pixel}) =>
 
 /// His status: how he looks, his name, age and birthday.
 class _Status extends ConsumerStatefulWidget {
-  /// Round 73: his adventure card (the adventure view) or his info card,
-  /// and the row on it that switches between them.
-  final bool adventure;
-  final VoidCallback switchView;
+  /// Round 73: his adventure card (the adventure view) or his info card;
+  /// Round 126: or his quest card. The rows on them switch.
+  final _View view;
+  final ValueChanged<_View> showView;
 
   /// Just registered as an adventurer (Round 63): his sword up high.
   final VoidCallback cheer;
 
   const _Status({
-    required this.adventure,
-    required this.switchView,
+    required this.view,
+    required this.showView,
     required this.cheer,
   });
 
@@ -316,9 +334,9 @@ class _StatusState extends ConsumerState<_Status> {
   /// hours (Round 63).
   String? _message;
 
-  void _toggle() {
+  void _open(_View view) {
     setState(() => _message = null);
-    widget.switchView();
+    widget.showView(view);
   }
 
   /// Registers him (Round 63): from 13:00 to 17:00; else come back then.
@@ -357,7 +375,10 @@ class _StatusState extends ConsumerState<_Status> {
           _ => PipFace.veryTired,
         },
     };
-    if (widget.adventure) return _adventureCard(pip, life, now, face);
+    if (widget.view == _View.adventure) {
+      return _adventureCard(pip, life, now, face);
+    }
+    if (widget.view == _View.quest) return _questCard(pip, life, now, face);
     final next = pip.nextBatteryAt;
     // Why a battery can't go to him now (Round 37); Round 116: no how-to
     // (tap the field, tap him three times), only how he is.
@@ -422,7 +443,14 @@ class _StatusState extends ConsumerState<_Status> {
             key: const Key('pipAdventures'),
             label: 'ADVENTURES',
             value: '>',
-            onTap: _toggle,
+            onTap: () => _open(_View.adventure),
+          ),
+          // Round 126: his quests, under it.
+          _CardRow(
+            key: const Key('pipQuests'),
+            label: 'QUESTS',
+            value: '>',
+            onTap: () => _open(_View.quest),
           ),
         ],
       ),
@@ -513,7 +541,152 @@ class _StatusState extends ConsumerState<_Status> {
             key: const Key('pipInfo'),
             label: 'INFO',
             value: '<',
-            onTap: _toggle,
+            onTap: () => _open(_View.info),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Starts the offered quest (Round 126): only in quest hours; else when
+  /// to come back.
+  void _startQuest() {
+    final now = ref.read(clockProvider)();
+    final life = ref.read(pipLifeProvider.notifier);
+    if (!PipQuest.canStartAt(now)) {
+      HapticFeedback.selectionClick();
+      setState(() => _message = 'START BETWEEN 10:00 AND 11:30, '
+          'OR 19:00 AND 20:30');
+      return;
+    }
+    if (!life.startQuest(now)) {
+      HapticFeedback.selectionClick();
+      setState(() => _message = "HE'S AWAY. NOT NOW");
+      return;
+    }
+    setState(() => _message = null);
+    HapticFeedback.heavyImpact();
+    AppSound.fanfare();
+  }
+
+  /// His quest card (Round 126, spec 3): the quest under way (how far, what
+  /// he's on, about when it's done), or the one offered with Start; then
+  /// the finished ones, each its framed picture.
+  Widget _questCard(
+      PipLife pip, PipLifeNotifier life, DateTime now, PipFace face) {
+    final quest = life.quest;
+    final at = life.questAt(now);
+    final offered = life.questOffered;
+    final message = _message;
+    return SingleChildScrollView(
+      key: const Key('pipQuest'),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PipPortrait(face: face),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _words(pip.name, colour: PipColours.light, pixel: 5),
+                    const SizedBox(height: 16),
+                    PixelParagraph(
+                        (quest ?? offered)?.name.toUpperCase() ??
+                            'NO QUESTS FOR NOW',
+                        colour: quest == null && offered == null
+                            ? PipColours.dim
+                            : PipColours.light,
+                        pixel: 3),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (quest != null && at != null) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _XpBar(
+                    key: const Key('pipQuestBar'),
+                    progress: at.fraction,
+                    label: 'Quest',
+                  ),
+                ),
+                _words('  ${(at.fraction * 100).floor()}%',
+                    colour: PipColours.dim),
+              ],
+            ),
+            const SizedBox(height: 14),
+            PixelParagraph(at.doing.toUpperCase(),
+                key: const Key('pipQuestDoing'),
+                colour: PipColours.screen,
+                pixel: 3),
+            const SizedBox(height: 14),
+            _line(
+                'DONE ABOUT',
+                _date(PipQuest.finishAt(now,
+                    quest.totalMinutes - quest.startOf(at.step) - at.into))),
+            const SizedBox(height: 10),
+            const PixelParagraph('WORKS 10:00-11:30 AND 19:00-20:30',
+                colour: PipColours.dim, pixel: 2),
+          ] else if (offered != null) ...[
+            PixelParagraph(offered.about.toUpperCase(),
+                colour: PipColours.dim, pixel: 2),
+            const SizedBox(height: 12),
+            _CardRow(
+              key: const Key('pipStartQuest'),
+              label: 'START QUEST',
+              onTap: _startQuest,
+            ),
+          ],
+          if (message != null) ...[
+            const SizedBox(height: 12),
+            PixelParagraph(message, colour: PipColours.light, pixel: 3),
+          ],
+          if (pip.questsDone.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _words('DONE', colour: PipColours.dim),
+            for (final done in pip.questsDone)
+              Padding(
+                key: Key('pipQuestDone-${done.id}'),
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (done.id == Quests.house.id)
+                      const PipHousePicture(pixel: 0.75),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          PixelParagraph(
+                              (Quests.byId(done.id)?.name ?? done.id)
+                                  .toUpperCase(),
+                              colour: PipColours.light,
+                              pixel: 2),
+                          const SizedBox(height: 6),
+                          _words(_date(done.at.toLocal()),
+                              colour: PipColours.dim, pixel: 2),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          const SizedBox(height: 12),
+          _CardRow(
+            key: const Key('pipQuestInfo'),
+            label: 'INFO',
+            value: '<',
+            onTap: () => _open(_View.info),
           ),
         ],
       ),
@@ -1131,12 +1304,17 @@ class _Key extends StatelessWidget {
 class _XpBar extends StatelessWidget {
   final double progress;
 
-  const _XpBar({super.key, required this.progress});
+  /// Round 126: a quest's bar too.
+  final String? label;
+
+  const _XpBar({super.key, required this.progress, this.label});
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'XP ${(progress * 100).round()}% to the next level',
+      label: label == null
+          ? 'XP ${(progress * 100).round()}% to the next level'
+          : '$label ${(progress * 100).floor()}% done',
       child: Container(
         height: 12,
         decoration: BoxDecoration(
@@ -1148,6 +1326,90 @@ class _XpBar extends StatelessWidget {
           heightFactor: 1,
           child: const ColoredBox(color: PipColours.light),
         ),
+      ),
+    );
+  }
+}
+
+/// His inventory (Round 126, spec 3): what he carries for his quest,
+/// each with its count; nothing, says so.
+class _Inventory extends ConsumerStatefulWidget {
+  const _Inventory();
+
+  @override
+  ConsumerState<_Inventory> createState() => _InventoryState();
+}
+
+class _InventoryState extends ConsumerState<_Inventory> {
+  /// Kept current while he works.
+  late final Timer _tick =
+      Timer.periodic(const Duration(seconds: 30), (_) => setState(() {}));
+
+  @override
+  void initState() {
+    super.initState();
+    _tick;
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(pipLifeProvider);
+    final now = ref.watch(clockProvider)();
+    final at = ref.read(pipLifeProvider.notifier).questAt(now);
+    final held = [
+      for (final item in QuestItem.values)
+        if ((at?.inventory[item] ?? 0) > 0) (item, at!.inventory[item]!),
+    ];
+    return SingleChildScrollView(
+      key: const Key('pipInventory'),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _words('INVENTORY', colour: PipColours.light, pixel: 4),
+          const SizedBox(height: 20),
+          if (held.isEmpty)
+            _words('NOTHING YET', colour: PipColours.dim)
+          else
+            Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                for (final (item, count) in held)
+                  Semantics(
+                    key: Key('pipItem-${item.name}'),
+                    label: '${item.label}: $count',
+                    child: ExcludeSemantics(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: PipColours.panelEdge, width: 3),
+                            ),
+                            alignment: Alignment.center,
+                            child: PipItemIcon(item.name, pixel: 3.5),
+                          ),
+                          const SizedBox(height: 6),
+                          _words('$count', colour: PipColours.screen),
+                          const SizedBox(height: 4),
+                          _words(item.label.toUpperCase(),
+                              colour: PipColours.dim, pixel: 2),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }

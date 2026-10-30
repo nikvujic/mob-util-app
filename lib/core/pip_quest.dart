@@ -206,6 +206,9 @@ class QuestAt {
 class QuestScript {
   final String id;
   final String name;
+
+  /// A line about it, for the quest card.
+  final String about;
   final List<QuestStep> steps;
   late final List<int> _starts;
   late final int totalMinutes;
@@ -215,7 +218,7 @@ class QuestScript {
   late final Map<QuestItem, int> gathers;
   late final Map<QuestItem, int> needs;
 
-  QuestScript(this.id, this.name, this.steps) {
+  QuestScript(this.id, this.name, this.steps, {this.about = ''}) {
     var at = 0;
     _starts = [
       for (final s in steps) (at += s.minutes) - s.minutes,
@@ -412,6 +415,8 @@ abstract final class Quests {
         piece.cost.forEach((k, v) => inv[k] = inv[k]! - v);
       }
     }
-    return QuestScript('house', 'Build a house', steps);
+    return QuestScript('house', 'Build a house', steps,
+        about: 'Wood from the forest, stone from the mine, sand from the '
+            'beach for glass: a house, piece by piece. About two months.');
   }
 }

@@ -762,3 +762,113 @@ abstract final class PeopleFamilyColours {
   static const ring = Color(0xFFE2A93B);
   static const starShadow = Color(0x55000000);
 }
+
+/// Round 126: Pip's house (his quest, `docs/QUESTS_SPEC.md`) and the
+/// places he gathers in: the forest, the mine, the beach.
+abstract final class PipHouseColours {
+  // Stone: four shades, mortar, a lit edge.
+  static const stone = [
+    Color(0xFF84827C),
+    Color(0xFF94928C),
+    Color(0xFFA2A098),
+    Color(0xFF76746E),
+  ];
+  static const mortar = Color(0xFF5C5A56);
+  static const stoneLight = Color(0xFFBEBCB4);
+
+  // Planks, their dark edge and grain; the back wall's darker boards.
+  static const plank = [
+    Color(0xFFB8824E),
+    Color(0xFFC48E58),
+    Color(0xFFAC7846)
+  ];
+  static const plankDark = Color(0xFF8C5C34);
+  static const grain = Color(0xFFA06C3E);
+  static const backWall = [
+    Color(0xFF7A5230),
+    Color(0xFF704A2A),
+    Color(0xFF845A36),
+  ];
+  static const backWallDark = Color(0xFF5C3C22);
+
+  // Log beams.
+  static const beam = Color(0xFF563820);
+  static const beamLight = Color(0xFF6E4A2C);
+  static const beamDark = Color(0xFF3E2818);
+
+  // Roof shingles and the trim along the eaves.
+  static const roof = [Color(0xFF9C3A2E), Color(0xFFAA4636), Color(0xFF8E3228)];
+  static const roofLight = Color(0xFFC66048);
+  static const roofDark = Color(0xFF68261E);
+  static const trim = Color(0xFFDECEB4);
+  static const trimDark = Color(0xFFB4A48C);
+
+  // Glass and the window frames.
+  static const glass = Color(0xFFA0D2EC);
+  static const glassLight = Color(0xFFE8F8FF);
+  static const glassDark = Color(0xFF78B0D2);
+  static const frame = Color(0xFFF0E8D6);
+  static const frameDark = Color(0xFFBEB4A0);
+
+  static const iron = Color(0xFF46464C);
+  static const handle = Color(0xFFE2BA5A);
+
+  // The fireplace's fire, its dark box, smoke.
+  static const fire = Color(0xFFFF8C3C);
+  static const fireLight = Color(0xFFFFDE82);
+  static const firebox = Color(0xFF281E1A);
+  static const ember = Color(0xFF784828);
+  static const smoke = Color(0xFFD6D6DA);
+  static const smokeDark = Color(0xFFB4B4BA);
+
+  // His rain hat and lantern; the lantern's warm light.
+  static const hat = Color(0xFFF4C634);
+  static const hatDark = Color(0xFFC6941C);
+  static const hatLight = Color(0xFFFFE278);
+  static const lantern = Color(0xFFFFE082);
+
+  // Rain inside an unfinished house, snow on it.
+  static const drip = Color(0xFF82AAE2);
+  static const snow = Color(0xFFFAFCFF);
+
+  static const flowers = [
+    Color(0xFFEC6060),
+    Color(0xFFFAD650),
+    Color(0xFFB48CE6)
+  ];
+
+  // The mine: its dark mouth, rails, cart, ore glints; far peaks.
+  static const tunnel = Color(0xFF181414);
+  static const tunnelEdge = Color(0xFF28221E);
+  static const rail = Color(0xFF82828A);
+  static const cart = Color(0xFF606068);
+  static const cartLight = Color(0xFF8C8C96);
+  static const wheel = Color(0xFF323238);
+  static const ore = Color(0xFFCEA054);
+  static const farPeak = Color(0xFF96A6B8);
+  static const farPeakEdge = Color(0xFFB0BECE);
+  static const gravel = Color(0xFF6E6052);
+  static const gravelDark = Color(0xFF5A4E40);
+
+  // The beach: sand, wet sand, the sea, foam; a shell, a starfish, the
+  // bucket.
+  static const sand = [Color(0xFFE2C886), Color(0xFFD6BA76), Color(0xFFECD69A)];
+  static const sandDark = Color(0xFFB4965C);
+  static const wetSand = Color(0xFFC4B080);
+  static const seaDeep = Color(0xFF24649F);
+  static const seaShallow = Color(0xFF6AB4D2);
+  static const seaGlint = Color(0xFFDCF0FA);
+  static const seaLine = Color(0xFF96C8E6);
+  static const foam = Color(0xFFF4FAFC);
+  static const foamShade = Color(0xFFD2EAF4);
+  static const shell = Color(0xFFFAE6DC);
+  static const shellShade = Color(0xFFE6B4AA);
+  static const starfish = Color(0xFFF08C5A);
+  static const bucket = Color(0xFFDC5A46);
+  static const bucketRim = Color(0xFFF0785A);
+
+  // The forest's haze over far trees.
+  static const haze = Color(0xFFC4D6E2);
+  static const mushroom = Color(0xFFC83C32);
+  static const mushroomStalk = Color(0xFFE6E0D2);
+}
