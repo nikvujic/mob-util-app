@@ -1,6 +1,6 @@
 # Pip's quests — spec (Round 121)
 
-Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating; Round 123: the fireplace inside, a larger porch, his field's tree, the forest, the mine and the beach. The first quest is **Build a house**:
+Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating; Round 123: the fireplace inside, a larger porch, the forest, the mine and the beach; Round 124: the house area's own tall tree, wooden stairs, a denser forest, the mine in a mountain. The first quest is **Build a house**:
 Pip gathers wood, stone and sand, makes glass, and builds a house piece by
 piece over about two months, during two set hours a day. The house then
 becomes where he lives. **Requested** marks what was asked for,
@@ -88,8 +88,8 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 | Material | Where | How (animation) |
 |---|---|---|
-| **Wood** | **The forest** (Round 123): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
-| **Stone** | **The mine** (Round 123): a rocky hillside with ore glints, a timber-framed mouth with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine until a block cracks off, chips flying; the block flies to him. |
+| **Wood** | **The forest** (Round 123; Round 124: denser, three layers of trees, the far ones hazy): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
+| **Stone** | **The mine** (Round 124): **a mountain** rising up the right of the screen and off its top (rock in bands, ore glints, ledges, pines on its slope, snow up high, hazy peaks behind), a timber-framed mouth at its foot with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine until a block cracks off, chips flying; the block flies to him. |
 | **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs; sand flies to him in little heaps. |
 | **Glass** | His **fireplace**, in the house | Two sand and a wood (the fire) go into a crucible in the fire; it glows; a pane comes out. |
 
@@ -105,8 +105,10 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 - **Requested:** the house is on **its own screen**, his **house area**
   (the background always the same, **one tree**: **Requested (Round
-  123):** one of his field's own trees, drawn as they are, with the
-  seasons), the house **big**, on
+  124):** a **tree of its own**, taller than the field's (the house is
+  big), in the field trees' style and colours, **following the
+  seasons**: blossom in spring, green in summer, orange in autumn, bare
+  with snow on its branches in winter), the house **big**, on
   the **left** of it. **Requested:** he leaves the house area by its
   **right edge** and appears on the field (section 7).
 - **Requested:** so big that the **menu's strip can't show it all**:
@@ -126,11 +128,14 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   lintel, a porch with a railing, eaves with trim, a gable with a round
   attic window, flower boxes. **Round 123:** no stone along the outside
   wall: the chimney is the fireplace's flue, inside, up through the
-  roof; and **a larger porch** (a deck on stone footings, its own roof
-  on two posts, a railing, a bench, the lantern).
+  roof; and **a larger porch** (a deck, its own roof on two posts, a
+  railing, a bench, the lantern). **Round 124:** the deck stands on
+  wooden posts on small stone pads, and **wooden stairs** (treads, a
+  stringer, a handrail) go down from it, no stone slab.
 - **The order (decided, Round 122):**
   1. **Stone foundation**, block by block, the bottom row first.
-  2. **Stone steps**, the **porch's stone footings** and its **deck**.
+  2. The **porch's posts** (on stone pads), its **deck** and the **wooden
+     stairs** down from it.
   3. **Wooden floor**, plank by plank.
   4. **The fireplace's hearth** (stone), on the foundation.
   5. (the hearth is ready: from here glass can be smelted)

@@ -353,6 +353,9 @@ fixtures for every stored format.
   the glass, its flue through the roof; a larger porch (deck, roof,
   bench); the house area's tree is his field's own; wood from a forest,
   stone from a mine, sand from a beach.
+- [x] Round 124: the house area's own tall tree, by season; wooden
+  stairs and porch posts (no stone slab); a denser forest; the mine in
+  a mountain on the right.
 - [ ] The spec and drafts approved; then the rules round.
 
 ### Round 120 — v2.0.0 (2026-10-29, 2.0.0)
