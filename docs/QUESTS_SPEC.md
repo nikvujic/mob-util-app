@@ -137,7 +137,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   6. **Posts** (log beams): the corners and the middle.
   7. **Walls**: the back wall and the side walls, row by row from the
      floor up, leaving the window openings and the doorway.
-  8. **Glass**: smelted in the furnace, then the **two windows** set in
+  8. **Glass**: smelted in the fireplace, then the **two windows** set in
      (frames, four panes each, stone sills).
   9. **The door** (planks, iron bands, a handle) under a **stone lintel**;
      the porch **railing** and post, the **lantern** hung on it.
@@ -259,7 +259,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 ## 13. Open
 
 - The drafts (`docs/pip_house_drafts.png`): the house at its stages, the
-  materials, the furnace, the scaffold, the rain hat, the lantern.
+  materials, the fireplace, the porch, the scaffold, the rain hat, the lantern.
 
 ## 14. Order of work
 
@@ -271,7 +271,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 3. **Pip Home:** the Quests button and card, Start in quest hours,
    completed quests' pictures, the inventory card and the swipe order.
 4. **Scenes:** the house area, walking between places, gathering
-   (tree, rock, sand), the furnace, building with flying materials and
+   (forest, mine, beach), the fireplace, building with flying materials and
    smoke, the scaffold, the house drawn from the script's progress (the
    strip's view and Pip Home's).
 5. **Weather, seasons, night and occasions** in the house area and out
