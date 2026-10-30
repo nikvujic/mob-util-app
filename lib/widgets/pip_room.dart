@@ -7,10 +7,12 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_run.dart';
+import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/pip_weather.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/weather.dart';
+import 'package:the_app/widgets/pip_quest_paint.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
 /// Pip's room (Round 26): a strip of field at the bottom of the menu where
@@ -222,16 +224,23 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 44: plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
     final seen = _shown != null && _moving;
+    // Round 127: at his quest's work in quest hours (not while he's out, or
+    // on his trip's bus).
+    final questNow = out == null && trip.leg == null ? link.questNow() : null;
     // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
     // Round 64: not till Android has said (the first time, simply so).
     if (link.plugged case final plugged?) {
-      brain.setPlugged(plugged && out == null && trip.leg == null,
+      // Round 127: nor at his quest's work (he's moving between places).
+      brain.setPlugged(
+          plugged && out == null && trip.leg == null && questNow == null,
           animate: seen && _pluggedKnown);
       _pluggedKnown = true;
     }
     // Round 67: on his ski trip's bus.
     brain.ride(trip, animate: seen);
     brain.adventure(out, animate: seen);
+    // Round 127: simply there, at the step and moment it's at.
+    brain.quest(questNow);
     // Round 74: his field's trees go by with his time out, alike here and
     // in the other room.
     brain.syncOutRun(out == null ? null : link.outRun(),
@@ -854,7 +863,12 @@ class _RoomPainter extends CustomPainter {
     // Round 63: out on his adventure, it moves under him (and a pebble
     // now and then shows it).
     final run = brain.run;
-    final shift = run?.shift.floor() ?? 0;
+    // Round 127: walking out to gather or home, the ground moves too.
+    final questView = brain.questView;
+    final questPlace = questView?.place;
+    final atPlace = questPlace != null && questPlace != QuestScenePlace.field;
+    final shift = run?.shift.floor() ??
+        (questPlace == QuestScenePlace.field ? questView!.scroll.floor() : 0);
     // Round 67: a ski day's snow instead of grass; Round 70: or while it
     // snows. The grass in its season's colours.
     final skiSnow = brain.snowing;
@@ -993,7 +1007,10 @@ class _RoomPainter extends CustomPainter {
         dot(px - 1.0, groundTop - 9, PipColours.flagRed, 3, 1);
       }
     }
-    for (var x = 0; x < columns && !downhill; x++) {
+    // Round 127: the mine and the beach have their own ground.
+    final ownGround = questPlace == QuestScenePlace.mine ||
+        questPlace == QuestScenePlace.beach;
+    for (var x = 0; x < columns && !downhill && !ownGround; x++) {
       if (bus != null) {
         dot(x.toDouble(), groundTop, PipColours.road, 1,
             PipRoom.ground.toDouble());
@@ -1031,6 +1048,14 @@ class _RoomPainter extends CustomPainter {
     // Round 70: his field's things through the year, behind him: a tree
     // or two swaying (scrolling by as he runs, or rides), Christmas's
     // pine, Halloween's lanterns, Easter's eggs.
+    // Round 127: at his quest's work in his house area or a place he
+    // gathers in: it's drawn instead of his field's things (its sky stays).
+    if (atPlace) {
+      canvas.save();
+      canvas.clipRect(Offset.zero & size);
+      paintQuestPlace(dot, groundTop, columns, brain, questView!, scene);
+      canvas.restore();
+    }
     final props = scene?.props ?? const <PipProp>{};
     final home = groundTop > 40;
     final passing = fieldPassing(brain);
@@ -1039,7 +1064,7 @@ class _RoomPainter extends CustomPainter {
       return ((columns * at - by) % wide + wide) % wide - width;
     }
 
-    if (!skiSnow) {
+    if (!skiSnow && !atPlace) {
       // Round 79: by the wind (it was the rain): still when calm.
       final wind = scene?.wind ?? PipWind.calm;
       if (props.contains(PipProp.trees)) {
@@ -2055,7 +2080,10 @@ double fieldPassing(PipBrain brain) {
   }
   final shift = brain.run?.shift.floor() ?? 0;
   final road = brain.bus?.road.floor() ?? 0;
-  return shift * 0.5 + road * 0.6;
+  // Round 127: walking out to gather or home along his field.
+  final view = brain.questView;
+  final walk = view?.place == QuestScenePlace.field ? view!.scroll : 0.0;
+  return shift * 0.5 + road * 0.6 + walk * 0.5;
 }
 
 /// Round 72: where his field's trees stand for this time the app's open

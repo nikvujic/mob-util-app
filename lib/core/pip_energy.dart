@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_quest.dart';
 
 /// Pip's energy and sleep (Round 37): plain rules, worked out from the
 /// clock, so nothing runs in the background. His energy is kept as a
@@ -312,7 +313,14 @@ abstract class PipLink {
 
   /// His ski trip now (Round 67): on its bus, snowy, skiing today.
   PipTripNow trip();
+
+  /// Round 127: at his quest's work now (quest hours, on, not away):
+  /// where the quest is and the seconds into its step; else null.
+  PipQuestNow? questNow();
 }
+
+/// His quest's work at a moment (Round 127).
+typedef PipQuestNow = ({QuestAt at, double seconds});
 
 /// Out on his adventure (Round 63): on his break or not, and how far
 /// through it (0 to 1).

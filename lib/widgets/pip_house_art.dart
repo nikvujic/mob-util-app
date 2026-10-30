@@ -733,17 +733,23 @@ class PipHouseArt {
       sprite(rows, colours, x, ground);
       return;
     }
-    // Leaning: each row pushed over by its height; then gone, a stump.
-    final lean = fall.clamp(0.0, 1.0);
+    // Falling: turned about its foot, a quarter turn by the end; a stump
+    // left.
+    final a = fall.clamp(0.0, 1.0) * math.pi / 2;
+    final ca = math.cos(a), sa = math.sin(a);
+    final foot = x + 14.5;
     for (var y = 0; y < rows.length; y++) {
       final up = rows.length - 1 - y;
-      final dx = (up * up / rows.length * lean * 1.6).round();
-      final dy = (up * lean * lean * 0.9).round();
+      if (up < 3) continue;
       for (var i = 0; i < rows[y].length; i++) {
         final c = colours[rows[y][i]];
         if (rows[y][i] == '.' || c == null) continue;
-        if (up < 3 && lean > 0.2) continue;
-        put(x + i + dx, ground - up + dy, c);
+        final dx = i + x - foot;
+        final nx = foot + dx * ca + up * sa;
+        final nup = -dx * sa + up * ca;
+        if (nup < 0) continue;
+        rect(nx.floorToDouble(), (ground - nup).floorToDouble(),
+            nx.floorToDouble() + 1, (ground - nup).floorToDouble() + 1, c);
       }
     }
     rect(x + 13, ground - 2, x + 16, ground, PipColours.bark);

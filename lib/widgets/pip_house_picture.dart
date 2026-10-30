@@ -48,7 +48,7 @@ class _PicturePainter extends CustomPainter {
       canvas.drawRect(Rect.fromLTWH(0, y * pixel, size.width, pixel),
           paint..color = Color.lerp(sky[0], sky[1], y / rows)!);
     }
-    final art = PipHouseArt((x, y, c, [w = 1, h = 1]) {
+    final art = PipHouseArt((x, y, c, [double w = 1.0, double h = 1.0]) {
       canvas.drawRect(
           Rect.fromLTWH((x - PipHousePicture._left) * pixel,
               (y - PipHousePicture._top) * pixel, w * pixel, h * pixel),
@@ -92,7 +92,7 @@ class _IconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..isAntiAlias = false;
-    PipHouseArt((x, y, c, [w = 1, h = 1]) {
+    PipHouseArt((x, y, c, [double w = 1.0, double h = 1.0]) {
       canvas.drawRect(Rect.fromLTWH(x * pixel, y * pixel, w * pixel, h * pixel),
           paint..color = c);
     }).icon(kind, 0, 0);

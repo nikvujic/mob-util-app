@@ -523,9 +523,12 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     final script = quest;
     if (script == null) return;
     final from = state.questCountedTo ?? state.questFrom ?? now;
-    if (!now.isAfter(from)) return; // the clock went back: nothing
+    // Counted in whole minutes (quest hours start on the minute), so the
+    // file's written at most once a minute, and only for work done.
+    final to = _minuteOf(now);
+    if (!to.isAfter(from)) return; // the clock went back: nothing
     final left = script.totalMinutes - state.questMinutes;
-    final (worked, doneAt) = _workedBetween(from, now, cap: left);
+    final (worked, doneAt) = _workedBetween(from, to, cap: left);
     if (doneAt != null) {
       state = state.copyWith(
         questId: () => null,
@@ -536,9 +539,14 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       );
       return;
     }
+    // Nothing worked and no quest hours passed: nothing to keep (outside
+    // them, so the file isn't written each minute). Quest hours passed
+    // with nothing worked (powered down) are kept counted: a battery later
+    // mustn't make them work.
+    if (worked == 0 && PipQuest.windowsBetween(from, to).isEmpty) return;
     state = state.copyWith(
       questMinutes: state.questMinutes + worked,
-      questCountedTo: () => now,
+      questCountedTo: () => to,
     );
   }
 
@@ -629,6 +637,18 @@ class _Link implements PipLink {
 
   @override
   PipTripNow trip() => PipTrip.at(_ref.read(datesProvider), _now);
+
+  @override
+  PipQuestNow? questNow() {
+    final now = _now;
+    if (!_pip.questWorkingAt(now)) return null;
+    final at = _pip.questAt(now);
+    if (at == null) return null;
+    return (
+      at: at,
+      seconds: at.into * 60 + now.second + now.millisecond / 1000,
+    );
+  }
 
   @override
   PipOut? outing() {

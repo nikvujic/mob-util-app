@@ -7,6 +7,8 @@ import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_weather.dart';
+import 'package:the_app/core/pip_house.dart';
+import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/weather.dart';
 
 part 'pip_brain_weather.dart';
@@ -122,6 +124,10 @@ enum PipActivity {
 
   /// The weather's changed: he stops and looks up.
   lookingUp,
+
+  /// Round 127: at his quest's work (`core/pip_quest_scene.dart`): in his
+  /// house area, out gathering, or walking between.
+  questing,
 }
 
 /// A hat on his head (Round 57): the party hat on a birthday, or one
@@ -323,8 +329,10 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
           next == PipAnimation.nightWake ||
           next == PipAnimation.powerOff,
       // Round 75: in his tent in a storm, he keeps still: nothing starts
-      // but sleep, or running out (a battery flies into it).
-      PipActivity.sheltering =>
+      // but sleep, or running out (a battery flies into it). Round 127: at
+      // his quest's work, the same (spec 8: only a power down stops it).
+      PipActivity.sheltering ||
+      PipActivity.questing =>
         next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
       PipActivity.off => next == PipAnimation.powerOn,
       PipActivity.standing ||
@@ -757,7 +765,10 @@ class PipBrain {
     if (fresh && show != PipShow.awake) _stand();
     switch (show) {
       case PipShow.awake:
-        if (activity == PipActivity.adventuring) return true;
+        if (activity == PipActivity.adventuring ||
+            activity == PipActivity.questing) {
+          return true;
+        }
         return switch (activity) {
           PipActivity.asleep => play(PipAnimation.wakeUp),
           PipActivity.off => play(PipAnimation.powerOn),
@@ -1324,6 +1335,8 @@ class PipBrain {
         _stepRun(dt);
       case PipActivity.riding:
         _stepBus(dt);
+      case PipActivity.questing:
+        _stepQuest(dt);
       case PipActivity.sheltering:
         break;
       case PipActivity.weatherEvent:
@@ -2234,6 +2247,8 @@ class PipBrain {
             _t - eatenAt
           ),
         PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
+        // Round 127: at his quest's work, his medicine on his screen.
+        PipActivity.questing when medicineDue => (PipScreen.pill, _questT),
         PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
         _ => null,
       };
@@ -2356,6 +2371,14 @@ class PipBrain {
   /// away.
   (double, double, double, double)? get sword {
     if (activity == PipActivity.adventuring) return _run?.sword;
+    // Round 127: felling a tree, breaking stone: swing after swing.
+    if (questView?.swing case final swing?) {
+      final forward = facingRight ? 1.0 : -1.0;
+      final angle = swing < 0.5
+          ? forward * (0.3 + 1.5 * _ease(swing * 2))
+          : forward * (1.8 - 1.5 * _ease((swing - 0.5) * 2));
+      return (handBeside(right: facingRight), 7, angle, 1);
+    }
     if (activity != PipActivity.bugHunt) return null;
     // Round 53: held out in front, pointing up and away from him.
     // Round 54: a little closer to him.
@@ -2681,6 +2704,85 @@ class PipBrain {
 
   double? _busPreview;
   static const busPreviewRide = 4.0;
+
+  // Round 127: his quests.
+
+  /// His quest's work, as his life last said (the room asks every
+  /// second), and the seconds since.
+  PipQuestNow? _questNow;
+  double _questT = 0;
+
+  /// What his quest's work looks like now (the room draws it); null when
+  /// he isn't at it.
+  QuestView? get questView {
+    final now = _questNow;
+    if (activity != PipActivity.questing || now == null) return null;
+    return QuestView.of(now.at, now.seconds + _questT);
+  }
+
+  /// How far the house area's moved left to keep him in view (a room
+  /// narrower than it, e.g. the menu's).
+  double questCamera = 0;
+
+  /// At his quest's work, or not, as his life says ([now]; his room
+  /// checks every second): he's simply there, at the step and the moment
+  /// it's at.
+  void quest(PipQuestNow? now) {
+    if (now == null) {
+      if (activity == PipActivity.questing) {
+        _questNow = null;
+        x = x.clamp(0, _maxX).toDouble();
+        _stand();
+      }
+      return;
+    }
+    if (activity != PipActivity.questing) {
+      if (!_canGoOut) return;
+      _start(PipActivity.questing);
+    }
+    _questNow = now;
+    _questT = 0;
+    _placeQuest();
+  }
+
+  void _stepQuest(double dt) {
+    _questT += dt;
+    _placeQuest();
+  }
+
+  /// Where he is in his room for what his quest's work looks like now:
+  /// in the house area, as far along as its camera lets the room show.
+  void _placeQuest() {
+    final view = questView;
+    if (view == null) return;
+    facingRight = view.facingRight;
+    final centre = view.pipCentre(roomWidth);
+    if (view.place == QuestScenePlace.house) {
+      final most = math.max(0, PipHouse.areaWidth - roomWidth).toDouble();
+      questCamera = (centre - roomWidth / 2).clamp(0, most).toDouble();
+      x = centre - questCamera - width / 2;
+    } else {
+      questCamera = 0;
+      x = centre - width / 2;
+    }
+  }
+
+  /// His frame at his quest's work: walking, or a beat of effort.
+  PipFrame get _questFrame {
+    final view = questView;
+    if (view == null) return PipFrame.idle;
+    return switch (view.pose) {
+      QuestPose.walking => const [
+          PipFrame.step1,
+          PipFrame.step2,
+          PipFrame.step3,
+          PipFrame.step4,
+        ][(view.t / stepTime).floor() % 4],
+      QuestPose.working when view.swing == null =>
+        (view.t / 0.6).floor().isEven ? PipFrame.idle : PipFrame.oh,
+      _ => PipFrame.idle,
+    };
+  }
 
   // Round 63: his adventures.
 
@@ -3055,6 +3157,7 @@ class PipBrain {
         PipActivity.weatherEvent ||
         PipActivity.lookingUp =>
           _weatherFrame,
+        PipActivity.questing => _questFrame,
       };
 
   /// Hurrying, his steps come quicker too (Round 44).
@@ -3102,6 +3205,14 @@ class PipBrain {
     }
     // Round 75: a puddle jump, hops in the snow.
     if (_weatherLift case final weather?) return weather;
+    // Round 127: at his quest's work: the floor, the scaffold, a bob.
+    if (questView case final view?) {
+      final bob = view.pose == QuestPose.walking &&
+              (frame == PipFrame.step1 || frame == PipFrame.step3)
+          ? 1.0
+          : 0.0;
+      return view.lift + bob;
+    }
     // Round 52: dropping from the sky, or thrown in on an arc.
     if (activity == PipActivity.falling && _t < _fallTime) {
       final left = _fallTime - _t;

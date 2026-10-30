@@ -456,6 +456,12 @@ class FakePipLink implements PipLink {
   @override
   PipTripNow trip() => ride;
 
+  /// Round 127: at his quest's work, set by a test.
+  PipQuestNow? questing;
+
+  @override
+  PipQuestNow? questNow() => questing;
+
   @override
   int level = 1;
 
