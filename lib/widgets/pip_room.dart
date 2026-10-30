@@ -184,6 +184,13 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 77: woken at night, drowsy.
     brain.drowsy = link.drowsy;
     final now = link.now;
+    // Round 129: opened again on him left in the middle of something (a
+    // battery being changed): that's done by now, not picked up where it
+    // was left (he'd finish it, then snap to his quest's work).
+    if (_lastLook == null && brain.leftAt != null) {
+      _finish();
+      brain.takeBuzzes();
+    }
     // Round 63: out on his adventure (looked at: his break may start).
     final out = link.outing();
     // Round 52: his way in, the first time or back after a while (not

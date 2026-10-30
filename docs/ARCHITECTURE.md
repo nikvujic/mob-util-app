@@ -958,6 +958,11 @@ room moves `groundTop` up by `PipHouse.onFloor` for his own things (the
 station, a battery, his words, him), back down after, and clips the
 weather to outside `_houseShape`.
 
+Round 129: the menu's `PipRoom` is disposed with the menu while its
+brain lives on (a provider), frozen mid-doing. A room's first check on a
+brain it had left (`leftAt` set) runs `_finish()` (as a still room does)
+before the quest, adventure or trip is asked about.
+
 ## Converter (Round 118)
 
 `core/units.dart`: `UnitPair` (two units and a conversion each way;

@@ -86,4 +86,40 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     expect(brain.activity, isNot(PipActivity.questing));
   });
+
+  testWidgets(
+      'opened again on him left mid-battery in quest hours: straight at his '
+      'work (Round 129)', (tester) async {
+    final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
+    expect(brain.takeBattery(120), isTrue);
+    brain.step(0.3);
+    expect(brain.activity, PipActivity.fetching);
+    brain.leftAt = DateTime(2026, 11, 2, 10, 29);
+    final link = FakePipLink()
+      ..questing = (at: q.at(0), seconds: 100)
+      ..at = DateTime(2026, 11, 2, 10, 30);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: PipRoom(
+              brain: brain,
+              animate: true,
+              link: link,
+              height: 140,
+              scene: PipScene.at(PipPlace.home, link.at!),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(brain.activity, PipActivity.questing);
+    expect(brain.battery, isNull);
+  });
 }

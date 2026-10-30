@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 129 — fix: the menu's room picking up a stale doing (2026-10-30, 2.1.1)
+
+- [x] A battery given in the menu, then quest hours' work started from
+  Pip Home before it was done: back in the menu he finished the battery,
+  then snapped to his work. A room opened again on him left mid-doing
+  now finishes it first (as a still room does), so he's straight at his
+  work. Test in `pip_room_quest_test.dart`.
+
 ### Round 128 — Pip's quests: his house his home (2026-10-30, 2.1.0)
 
 - [x] Once the house is built (`PipLifeNotifier.houseBuilt`) he lives

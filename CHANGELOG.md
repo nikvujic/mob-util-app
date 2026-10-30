@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-10-30
+
+### Fixed
+- **Pip:** opening the menu again on Pip left in the middle of something
+  (a battery being changed) no longer picks it up where it was left.
+  It's done by then, so in quest hours he's straight at his work instead
+  of finishing the battery and then jumping to it.
+
 ## [2.1.0] - 2026-10-30
 
 **Pip's quests.** His first quest, **Build a house**, takes about two
