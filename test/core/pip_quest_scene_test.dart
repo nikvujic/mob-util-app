@@ -129,6 +129,23 @@ void main() {
       }
     });
 
+    test(
+        'checked every second, his moment carries on smoothly (no hitch in '
+        'a swing or his screen); off by a lot, put right (Round 132)', () {
+      final brain = PipBrain(roomWidth: 160)..medicineDue = true;
+      final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+      brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
+      brain.step(0.37);
+      final (_, shown) = brain.screenShow!;
+      brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100.4));
+      expect(brain.questView!.t, closeTo(100.37, 0.001));
+      expect(brain.screenShow!.$2, closeTo(shown, 0.001));
+      brain.step(0.1);
+      expect(brain.screenShow!.$2, closeTo(shown + 0.1, 0.001));
+      brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 130));
+      expect(brain.questView!.t, closeTo(130, 0.001));
+    });
+
     test('swinging his sword at a tree', () {
       final brain = PipBrain(roomWidth: 160);
       final tree = q.steps.indexWhere((s) =>

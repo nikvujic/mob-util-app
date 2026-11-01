@@ -187,7 +187,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 129: opened again on him left in the middle of something (a
     // battery being changed): that's done by now, not picked up where it
     // was left (he'd finish it, then snap to his quest's work).
-    if (_lastLook == null && brain.leftAt != null) {
+    final left = brain.leftAt;
+    if (_lastLook == null && left != null) {
+      // Round 132: out, a while since: his run taken up afresh.
+      if (now.difference(left) >= PipBrain.outStale) brain.freshOut();
       _finish();
       brain.takeBuzzes();
     }
@@ -204,7 +207,6 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     if (out != null || questNow != null) _entered = true;
     if (_moving && show == PipShow.awake && !_entered) {
       _entered = true;
-      final left = brain.leftAt;
       final back = left != null &&
           now.difference(left) >= PipBrain.awayFor &&
           (brain.activity == PipActivity.standing ||

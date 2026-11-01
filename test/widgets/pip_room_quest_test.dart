@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_quest.dart';
 import 'package:the_app/core/pip_quest_scene.dart';
+import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/widgets/pip_room.dart';
 
@@ -153,5 +154,41 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(brain.activity, PipActivity.questing);
+  });
+
+  testWidgets(
+      'opened again out on his break, long after: at the table, not his '
+      'old run carried on into the tavern (Round 132)', (tester) async {
+    final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
+    brain.adventure((onBreak: false, breakDone: 0), animate: false);
+    brain.step(1);
+    expect(brain.run!.phase, isNot(RunPhase.sitting));
+    brain.leftAt = DateTime(2026, 11, 2, 13, 50);
+    final link = FakePipLink()
+      ..out = (onBreak: true, breakDone: 0.5)
+      ..at = DateTime(2026, 11, 2, 14, 20);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: PipRoom(
+              brain: brain,
+              animate: true,
+              link: link,
+              height: 140,
+              scene: PipScene.at(PipPlace.home, link.at!),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(brain.activity, PipActivity.adventuring);
+    expect(brain.run!.phase, RunPhase.sitting);
   });
 }

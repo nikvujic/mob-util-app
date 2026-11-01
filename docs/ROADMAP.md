@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 132 — fixes: quest loops, adventure on reopening, Select all + Cut (2026-11-01, 2.2.1)
+
+- [x] Quest scenes: the room's check every second no longer restarts
+  his moment in the step (only a real drift puts him right); his
+  screen's pill on its own clock.
+- [x] The menu opened again during his adventure (10 s or more after it
+  was left): his run taken up afresh from his life (`freshOut`), not
+  the old one carried on.
+- [x] Notes: Select all kept for a moment against the keyboard's echo
+  of the word held (a hold that first started editing).
+
 ### Round 131 — import / export for pages (2026-10-30, 2.2.0)
 
 - [x] `widgets/transfer_sheet.dart`: the shared Import / export menu and

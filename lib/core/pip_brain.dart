@@ -2283,7 +2283,7 @@ class PipBrain {
           ),
         PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
         // Round 127: at his quest's work, his medicine on his screen.
-        PipActivity.questing when medicineDue => (PipScreen.pill, _questT),
+        PipActivity.questing when medicineDue => (PipScreen.pill, _questClock),
         PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
         _ => null,
       };
@@ -2759,6 +2759,10 @@ class PipBrain {
   PipQuestNow? _questNow;
   double _questT = 0;
 
+  /// Seconds at his quest's work since he started this time (his
+  /// screen's pill runs on it, Round 132).
+  double _questClock = 0;
+
   /// What his quest's work looks like now (the room draws it); null when
   /// he isn't at it.
   QuestView? get questView {
@@ -2783,17 +2787,31 @@ class PipBrain {
       }
       return;
     }
+    final before = _questNow;
     if (activity != PipActivity.questing) {
       if (!_canGoOut) return;
       _start(PipActivity.questing);
+      _questClock = 0;
     }
     _questNow = now;
-    _questT = 0;
+    // Round 132: in the same step, his own smooth clock carries on (the
+    // room's check every second only says where he is): loops (a swing,
+    // a scoop, his screen) don't hitch. Off by more than a moment, he's
+    // put right.
+    final went = before == null ? null : before.seconds + _questT;
+    final drift = went == null ? double.infinity : went - now.seconds;
+    _questT = before != null &&
+            before.at.script == now.at.script &&
+            before.at.step == now.at.step &&
+            drift.abs() < 1.5
+        ? drift
+        : 0;
     _placeQuest();
   }
 
   void _stepQuest(double dt) {
     _questT += dt;
+    _questClock += dt;
     _placeQuest();
   }
 
@@ -2995,9 +3013,21 @@ class PipBrain {
     _run!.want(onBreak: out.onBreak, done: out.breakDone);
   }
 
+  /// Round 132: his room opened again on him out a while after it was
+  /// left: what he was doing out there then is long past, so his run is
+  /// taken up afresh from his life (at the table on his break, else
+  /// simply running), not carried on from where it was left.
+  void freshOut() {
+    if (activity != PipActivity.adventuring || _runPreview != null) return;
+    _endRun();
+  }
+
   /// How far into his break counts as just starting (about a minute and
   /// a half of the half hour).
   static const breakJustStarted = 0.05;
+
+  /// Round 132: away this long, his run is taken up afresh ([freshOut]).
+  static const outStale = Duration(seconds: 10);
 
   /// Just registered as an adventurer (Pip Home): his sword held up high,
   /// then off he goes. True if he could (up and about).

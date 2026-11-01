@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -127,6 +128,51 @@ void main() {
     final copy = tester.getRect(find.text('Copy'));
     expect(copy.top, greaterThanOrEqualTo(view.top));
     expect(copy.bottom, lessThanOrEqualTo(view.bottom));
+  });
+
+  testWidgets(
+      'held without editing first, Select all, then Cut: all of it, even '
+      'if the keyboard sends back the word held (Round 132)', (tester) async {
+    String? clipboard;
+    tester.binding.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        clipboard = (call.arguments as Map)['text'] as String;
+      }
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null));
+    container = await pumpApp(tester);
+    final text = [for (var i = 1; i <= 30; i++) 'Line number $i'].join('\n');
+    container
+        .read(notesProvider.notifier)
+        .addNote(title: 'Long', content: text);
+    await tester.pump();
+    await tester.tap(find.text('Long'));
+    await tester.pumpAndSettle();
+    final scroll = find.byKey(const Key('noteContentScroll'));
+    await tester.longPressAt(tester.getTopLeft(scroll) + const Offset(60, 30));
+    await tester.pumpAndSettle();
+    final word = content(tester).selection;
+    await tester.tap(find.text('Select all'));
+    await tester.pump();
+    // The keyboard, just connected, echoes the word held.
+    content(tester).selection = word;
+    await tester.pump();
+    expect(content(tester).selection,
+        TextSelection(baseOffset: 0, extentOffset: text.length));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cut'));
+    await tester.pumpAndSettle();
+    expect(clipboard, text);
+    expect(content(tester).text, isEmpty);
+    // A while later, a selection picked is the user's own: kept.
+    content(tester).text = 'Fresh text';
+    await tester.pump(const Duration(seconds: 1));
+    content(tester).selection = const TextSelection.collapsed(offset: 3);
+    await tester.pump();
+    expect(content(tester).selection, const TextSelection.collapsed(offset: 3));
   });
 
   void select(WidgetTester tester, int start, int end) =>

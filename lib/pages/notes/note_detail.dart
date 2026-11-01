@@ -191,6 +191,33 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       ),
       SelectionChangedCause.toolbar,
     );
+    // Round 132: kept so for a moment (see [_keepAll]).
+    if (field.widget.controller == _contentController) {
+      _allOf = value.text;
+      _allTimer?.cancel();
+      _allTimer = Timer(_keepAllFor, () => _allOf = null);
+    }
+  }
+
+  /// Round 132: Select all just pressed, the text it was for. A hold that
+  /// first started editing also connects the keyboard, which can send
+  /// back its own selection (the word held) a moment later; for
+  /// [_keepAllFor], with the text unchanged, all of it is selected again
+  /// (else Cut cut only the word).
+  String? _allOf;
+  Timer? _allTimer;
+  static const _keepAllFor = Duration(milliseconds: 800);
+
+  void _keepAll() {
+    final all = _allOf;
+    if (all == null) return;
+    final value = _contentController.value;
+    if (value.text != all) {
+      _allOf = null;
+      return;
+    }
+    final full = TextSelection(baseOffset: 0, extentOffset: all.length);
+    if (value.selection != full) _contentController.selection = full;
   }
 
   /// The text field, for the line numbers (N12) to follow.
@@ -241,6 +268,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleController.addListener(_scheduleAutosave);
     _contentController.addListener(_scheduleAutosave);
     _contentController.addListener(_checkHandles);
+    _contentController.addListener(_keepAll);
     _contentScroll.addListener(_checkHandles);
     _edgeScroll.start();
     _lifecycleListener = AppLifecycleListener(onHide: _autosave);
@@ -249,6 +277,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   @override
   void dispose() {
     _autosaveTimer?.cancel();
+    _allTimer?.cancel();
     _lifecycleListener.dispose();
     _titleController.dispose();
     _contentController.dispose();

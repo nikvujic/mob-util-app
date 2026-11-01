@@ -6,6 +6,21 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-11-01
+
+### Fixed
+- **Pip at quest work:** his swings, digging and the medicine pill on
+  his screen loop smoothly. They used to hitch every second, when his
+  work was checked against the clock.
+- **Pip out on his adventure:** opening the menu again a while later
+  shows him as he is now (at the tavern's table on his break), instead
+  of carrying on from where he was when you last looked and then
+  walking into the tavern.
+- **Notes:** holding a word to select it in a note you weren't editing,
+  then *Select all* and *Cut*, cuts the whole note. Before, it could
+  cut only the word, because the keyboard, just opened by the hold, sent
+  its old selection back.
+
 ## [2.2.0] - 2026-10-30
 
 ### Changed
