@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 134 — sweep: no scene cuts (2026-11-05, 2.2.3)
+
+- [x] Every switch between his places checked: run out at work (falls
+  there, gets up there, `_downView`; no station there), work over
+  (walks in from his field's edge), his house (out by one, in by the
+  other, `_homeTo`), reopened mid-walk (`freshScenes`). Adventures,
+  the bus, sleep and the station were already animated when seen.
+- [x] A fall up the scaffold turns about his feet there.
+
 ### Round 133 — fixes: back to work, batteries at work (2026-11-05, 2.2.2)
 
 - [x] Seen setting off to quest work (back on after a battery, his

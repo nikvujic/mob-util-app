@@ -565,6 +565,7 @@ class PipBrain {
   }
 
   void _start(PipActivity next) {
+    _pastEdge = false;
     // Round 128: out, on his trip, at work: not in his house then.
     if (_awayFromHome.contains(next)) atHome = false;
     activity = next;
@@ -805,7 +806,11 @@ class PipBrain {
         return play(PipAnimation.wakeUp);
       case PipShow.off:
         if (activity == PipActivity.off) return true;
-        if (_busy && activity != PipActivity.asleep) return false;
+        if (_busy &&
+            activity != PipActivity.asleep &&
+            activity != PipActivity.questing) {
+          return false;
+        }
         _fallRight = x + width + height <= roomWidth;
         _start(PipActivity.off);
         return true;
@@ -1219,7 +1224,10 @@ class PipBrain {
         _buzzOn(flyEnd, dt, PipBuzz.medium); // the battery reaches him
         _buzzOn(onEnd, dt, PipBuzz.light); // down from his hop
         if (_t >= flyEnd) _battery = null;
-        if (_t >= onEnd) _stand();
+        if (_t >= onEnd) {
+          // Round 134: back on at his work: at it again.
+          _downView != null ? _backToWork() : _stand();
+        }
       case PipActivity.fetching:
         if (_batteryHeight == 0) {
           _batteryLanded = (_batteryLanded ?? 0) + dt;
@@ -1377,7 +1385,9 @@ class PipBrain {
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
-    if (activity != PipActivity.thrown) x = x.clamp(_minX, _maxX);
+    if (activity != PipActivity.thrown && !_pastEdge) {
+      x = x.clamp(_minX, _maxX);
+    }
   }
 
   // Round 44: his charging station.
@@ -2770,6 +2780,10 @@ class PipBrain {
   /// What his quest's work looks like now (the room draws it); null when
   /// he isn't at it.
   QuestView? get questView {
+    // Round 134: run out at his work, he lies there (and gets up there).
+    if (_downView case final view? when _downActs.contains(activity)) {
+      return view;
+    }
     final now = _questNow;
     if (activity != PipActivity.questing || now == null) return null;
     // Round 133: seen going to his work, first off his field's right
@@ -2786,6 +2800,81 @@ class PipBrain {
     return QuestView.of(now.at, now.seconds + _questT);
   }
 
+  // Round 134: no cuts between his places while he's watched.
+
+  /// What his work looked like when he ran out at it: he lies there
+  /// (falling over, off, back on), then carries on from there.
+  QuestView? _downView;
+  static const _downActs = {
+    PipActivity.poweringOff,
+    PipActivity.off,
+    PipActivity.poweringOn,
+  };
+
+  /// Down where he ran out at his work (his room keeps his station away:
+  /// he's not on his field).
+  bool get downAtWork => _downView != null && _downActs.contains(activity);
+
+  /// [view] held still: no swing, nothing flying.
+  static QuestView? _still(QuestView? view) => view == null
+      ? null
+      : QuestView(
+          place: view.place,
+          house: view.house,
+          anchor: view.anchor,
+          offset: view.offset,
+          lift: view.lift,
+          facingRight: view.facingRight,
+          pose: QuestPose.standing,
+          scroll: view.scroll,
+          fall: view.fall,
+          dug: view.dug,
+          rock: view.rock,
+          t: view.t,
+        );
+
+  /// Back on where he ran out at his work: at it again.
+  void _backToWork() {
+    _downView = null;
+    _start(PipActivity.questing);
+    _questClock = 0;
+    _joinFrom = null;
+    _placeQuest();
+  }
+
+  /// Walking past his room's edge (off it, or in from it): not held in
+  /// it meanwhile.
+  bool _pastEdge = false;
+
+  /// In from his field's right edge, to a little left of its middle.
+  void _walkIn() {
+    _stand();
+    x = roomWidth + 2.0;
+    _pastEdge = true;
+    facingRight = false;
+    _target = (roomWidth * 0.6 - width / 2).clamp(_minX, _maxX).toDouble();
+    activity = PipActivity.walking;
+  }
+
+  /// Going into (true) or out of (false) his house, seen: walking to his
+  /// door, or off his field's right edge, first.
+  bool? _homeTo;
+
+  /// Round 134: his room opened again: a walk between his places that
+  /// was under way when it was left is done by now.
+  void freshScenes() {
+    _joinFrom = null;
+    if (_homeTo case final going?) {
+      _homeTo = null;
+      _switchHome(going);
+    }
+    if (_pastEdge) {
+      _pastEdge = false;
+      x = x.clamp(_minX, _maxX).toDouble();
+      if (activity == PipActivity.walking) _stand();
+    }
+  }
+
   /// Round 133: seen setting off to his work (back on, a battery given;
   /// his field's time over), where he started walking off his field from,
   /// and for how long; null: simply at it.
@@ -2800,16 +2889,28 @@ class PipBrain {
   /// checks every second): he's simply there, at the step and the moment
   /// it's at. Round 133: [animate] (seen happening, e.g. back on after a
   /// battery): he walks off his field to it first.
-  void quest(PipQuestNow? now, {bool animate = false}) {
+  void quest(PipQuestNow? now, {bool animate = false, bool down = false}) {
     if (now == null) {
       if (activity == PipActivity.questing) {
+        // Round 134: run out at it ([down]): he falls there, as he is.
+        if (down) {
+          _downView = _still(questView);
+          return;
+        }
         _questNow = null;
         _joinFrom = null;
-        x = x.clamp(_minX, _maxX).toDouble();
-        _stand();
+        // Round 134: seen, his work over, he walks back onto his field
+        // (from its right edge, as he went).
+        if (animate) {
+          _walkIn();
+        } else {
+          x = x.clamp(_minX, _maxX).toDouble();
+          _stand();
+        }
       }
       return;
     }
+    _downView = null;
     final before = _questNow;
     if (activity != PipActivity.questing) {
       if (!_canGoOut) return;
@@ -2901,13 +3002,34 @@ class PipBrain {
   /// checks every second). He goes when he's free to (not in the middle
   /// of something: asleep or off where he is, he stays till he's up);
   /// he's simply there.
-  void home(bool wanted) {
-    if (wanted == atHome) return;
+  void home(bool wanted, {bool animate = false}) {
+    if (wanted == atHome) {
+      _homeTo = null;
+      return;
+    }
     final free = _canGoOut ||
         activity == PipActivity.lookingUp ||
         activity == PipActivity.dancing ||
         activity == PipActivity.sheltering;
     if (!free) return;
+    // Round 134: seen, he walks out first: to his door, or off his field.
+    if (animate) {
+      if (_homeTo == wanted && activity == PipActivity.walking) return;
+      _homeTo = wanted;
+      _visit = null;
+      _wx.tent = null;
+      final to = atHome ? homeRight - width : roomWidth + 2.0;
+      _stand();
+      _pastEdge = !atHome;
+      _target = to;
+      facingRight = to > x;
+      activity = PipActivity.walking;
+      return;
+    }
+    _switchHome(wanted);
+  }
+
+  void _switchHome(bool wanted) {
     atHome = wanted;
     questCamera = 0;
     _visit = null;
@@ -2970,6 +3092,21 @@ class PipBrain {
   /// Arrived somewhere ([_stand] just done): at a window he looks out,
   /// at the fire he stands warming a while.
   void _arrive() {
+    // Round 134: out of one place, in through the other.
+    if (_homeTo case final going?) {
+      _homeTo = null;
+      _switchHome(going);
+      if (going) {
+        x = homeRight - width;
+        facingRight = false;
+        _target = homeLeft +
+            random.nextDouble() * (homeRight - width - homeLeft - 12);
+        activity = PipActivity.walking;
+      } else {
+        _walkIn();
+      }
+      return;
+    }
     final visit = _visit;
     _visit = null;
     if (visit == null || !atHome) return;
@@ -3285,6 +3422,7 @@ class PipBrain {
   }
 
   void _stand() {
+    _pastEdge = false;
     activity = PipActivity.standing;
     _t = 0;
     _standFor = 1.5 + random.nextDouble() * 3.5;
@@ -3416,7 +3554,17 @@ class PipBrain {
   }
 
   /// How high above the ground (a hop, or a step's bob), in pixels.
+  /// Round 134: down at his work (off, back on), where he fell: up on
+  /// the floor or the scaffold.
   double get lift {
+    final own = _ownLift;
+    if (_downView case final view? when _downActs.contains(activity)) {
+      return view.lift + own;
+    }
+    return own;
+  }
+
+  double get _ownLift {
     // Round 67: in his seat on the bus, his feet hidden.
     if (_bus case final bus? when activity == PipActivity.riding) {
       return bus.inside ? PipBus.seatLift : 0;
@@ -3435,7 +3583,7 @@ class PipBrain {
     // Round 75: a puddle jump, hops in the snow.
     if (_weatherLift case final weather?) return weather;
     // Round 127: at his quest's work: the floor, the scaffold, a bob.
-    if (questView case final view?) {
+    if (questView case final view? when activity == PipActivity.questing) {
       final bob = view.pose == QuestPose.walking &&
               (frame == PipFrame.step1 || frame == PipFrame.step3)
           ? 1.0

@@ -293,10 +293,15 @@ from use):
 
 - **Quest hours' end:** at 11:30 and 20:30 he's simply back on his
   field (no walk home); next window he's simply where the script is.
+  Round 134: watched, he walks back onto his field from its right edge
+  (and, from 2.2.2, off it to his work).
 - **Powered down in quest hours:** he lies on his field, not where the
   script had him; his minutes stop as specced, and a battery brings him
   back to the same point. Round 133: seen getting up, he walks off his
-  field's right edge to his work first (no cut).
+  field's right edge to his work first (no cut). Round 134: he falls
+  **where he works** (the mine, up the scaffold) and lies there; a
+  battery gets him up there and he carries on (his station stays down
+  meanwhile). Opened while he's off, he's lying there too.
 - **Batteries at work** (Round 133): given in quest hours, one flies to
   him wherever he works (the floor, the scaffold, out gathering), as
   into his tent in a storm.
@@ -314,7 +319,9 @@ from use):
   and 18:00–19:00, out on his adventure, on a ski trip, or (later) at a
   quest's work. He goes in or out when he's free (not in the middle of
   something; asleep or off he stays where he is till he's up), and is
-  simply there, somewhere on its floor.
+  simply there, somewhere on its floor. Round 134: watched, he walks
+  out first (to his door, or off his field's right edge) and in through
+  the other (in at his door, or in from his field's edge).
 - **In it:** he walks between its walls on its floor; his events there
   are a little dance, a look out of a window, and a warm by the fire;
   notifications, the medicine pill, hats, eating, sleeping and his

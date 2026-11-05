@@ -6,6 +6,22 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.3] - 2026-11-05
+
+### Fixed
+A sweep for scene cuts in Pip's quests and house:
+- **Running out at work:** he falls over where he's working (at the
+  mine, up the scaffold) and lies there, instead of jumping to his
+  field first. A battery gets him up there and he carries on. His
+  charging station doesn't come up there meanwhile.
+- **Quest hours ending while you watch:** he walks back onto his field
+  from its right edge instead of appearing there.
+- **His finished house:** going in or out while you watch, he walks to
+  his door or off his field and comes in through the other, instead
+  of appearing there.
+- **Opening the menu again** in the middle of one of these walks: it's
+  done by then, not picked up halfway.
+
 ## [2.2.2] - 2026-11-05
 
 ### Fixed

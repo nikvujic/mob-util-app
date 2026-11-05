@@ -191,6 +191,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     if (_lastLook == null && left != null) {
       // Round 132: out, a while since: his run taken up afresh.
       if (now.difference(left) >= PipBrain.outStale) brain.freshOut();
+      // Round 134: a walk between his places done by now.
+      brain.freshScenes();
       _finish();
       brain.takeBuzzes();
     }
@@ -240,17 +242,27 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     final seen = _shown != null && _moving;
     // Round 128: his house built, he lives in it (but for his field's
     // times, and while he's out, away on his trip, or at work).
-    brain.home(out == null &&
-        trip.leg == null &&
-        !trip.snowy &&
-        questNow == null &&
-        link.homeNow());
+    // Round 134: seen, he walks out of one into the other.
+    brain.home(
+        out == null &&
+            trip.leg == null &&
+            !trip.snowy &&
+            questNow == null &&
+            link.homeNow(),
+        animate: seen);
     // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
     // Round 64: not till Android has said (the first time, simply so).
     if (link.plugged case final plugged?) {
       // Round 127: nor at his quest's work (he's moving between places).
       brain.setPlugged(
-          plugged && out == null && trip.leg == null && questNow == null,
+          plugged &&
+              out == null &&
+              trip.leg == null &&
+              questNow == null &&
+              // Round 134: nor lying where he ran out at it (or about to:
+              // his work's over this check).
+              !brain.downAtWork &&
+              brain.activity != PipActivity.questing,
           animate: seen && _pluggedKnown);
       _pluggedKnown = true;
     }
@@ -259,7 +271,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     brain.adventure(out, animate: seen);
     // Round 127: simply there, at the step and moment it's at (Round 133:
     // seen setting off, he walks off his field to it first).
-    brain.quest(questNow, animate: seen);
+    // Round 134: run out at it, he falls there; his work over, seen, he
+    // walks back onto his field.
+    brain.quest(questNow,
+        animate: seen, down: show == PipShow.powerOff || show == PipShow.off);
     // Round 74: his field's trees go by with his time out, alike here and
     // in the other room.
     brain.syncOutRun(out == null ? null : link.outRun(),
@@ -1660,9 +1675,10 @@ class _RoomPainter extends CustomPainter {
     // casing on the side he falls to.
     if (brain.tilt > 0) {
       final right = brain.fallRight;
+      // Round 134: where he stands (up on a scaffold, too).
       final pivot = Offset(
         (brain.x + (right ? 18 : 2)) * pixel,
-        groundTop * pixel,
+        (groundTop - brain.lift) * pixel,
       );
       canvas.translate(pivot.dx, pivot.dy);
       canvas.rotate((right ? 1 : -1) * brain.tilt * math.pi / 2);
