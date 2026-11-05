@@ -146,6 +146,59 @@ void main() {
       expect(brain.questView!.t, closeTo(130, 0.001));
     });
 
+    test(
+        'seen going to his work (back on after a battery): off his field\'s '
+        'right edge first, then at it; not seen, simply at it (Round 133)', () {
+      final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+      final now = (at: q.at(q.startOf(mine) + 1), seconds: 100.0);
+      final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
+      brain.x = 40;
+      brain.quest(now, animate: true);
+      expect(brain.activity, PipActivity.questing);
+      expect(brain.questView!.place, QuestScenePlace.field);
+      expect(brain.questView!.pose, QuestPose.walking);
+      expect(brain.x, closeTo(40, 0.01), reason: 'from where he stood');
+      var last = brain.x;
+      for (var i = 0;
+          i < 400 && brain.questView!.place == QuestScenePlace.field;
+          i++) {
+        brain.step(0.05);
+        if (brain.questView!.place != QuestScenePlace.field) break;
+        expect(brain.x, greaterThanOrEqualTo(last), reason: 'walking right');
+        last = brain.x;
+        brain.quest(now, animate: true);
+      }
+      expect(brain.questView!.place, QuestScenePlace.mine);
+
+      final unseen = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
+      unseen.quest(now);
+      expect(unseen.questView!.place, QuestScenePlace.mine);
+    });
+
+    test(
+        'a battery at his work flies to him (on the scaffold too), one at a '
+        'time (Round 133)', () {
+      final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
+      final high = q.steps.indexWhere((s) => s.piece?.id == 'rafters');
+      brain.quest((at: q.at(q.startOf(high) + 2), seconds: 150));
+      expect(brain.canTakeBattery, isTrue);
+      expect(brain.takeBattery(5), isTrue);
+      expect(brain.canTakeBattery, isFalse, reason: 'one at a time');
+      expect(brain.battery!.$1, closeTo(5, 0.01));
+      brain.takeBuzzes();
+      for (var i = 0; i < 6; i++) {
+        brain.step(0.1);
+      }
+      final (bx, up) = brain.battery!;
+      expect(bx, closeTo(brain.x + PipBrain.width / 2 - 2, 3));
+      expect(up, greaterThan(brain.lift), reason: 'up where he is');
+      brain.step(0.2);
+      expect(brain.battery, isNull);
+      expect(brain.takeBuzzes(), contains(PipBuzz.light));
+      expect(brain.activity, PipActivity.questing);
+      expect(brain.canTakeBattery, isTrue);
+    });
+
     test('swinging his sword at a tree', () {
       final brain = PipBrain(roomWidth: 160);
       final tree = q.steps.indexWhere((s) =>

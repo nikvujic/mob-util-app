@@ -257,8 +257,9 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 67: on his ski trip's bus.
     brain.ride(trip, animate: seen);
     brain.adventure(out, animate: seen);
-    // Round 127: simply there, at the step and moment it's at.
-    brain.quest(questNow);
+    // Round 127: simply there, at the step and moment it's at (Round 133:
+    // seen setting off, he walks off his field to it first).
+    brain.quest(questNow, animate: seen);
     // Round 74: his field's trees go by with his time out, alike here and
     // in the other room.
     brain.syncOutRun(out == null ? null : link.outRun(),

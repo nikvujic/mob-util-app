@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-11-05
+
+### Fixed
+- **Pip in quest hours:** given a battery after powering down, he gets
+  up and walks off his field to his work, instead of the scene jumping
+  straight to it.
+- **Pip at quest work:** you can give him batteries while he works. One
+  flies to him wherever he is: on the floor, up the scaffold, or out
+  gathering.
+
 ## [2.2.1] - 2026-11-01
 
 ### Fixed

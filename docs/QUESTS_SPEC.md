@@ -295,7 +295,11 @@ from use):
   field (no walk home); next window he's simply where the script is.
 - **Powered down in quest hours:** he lies on his field, not where the
   script had him; his minutes stop as specced, and a battery brings him
-  back to the same point.
+  back to the same point. Round 133: seen getting up, he walks off his
+  field's right edge to his work first (no cut).
+- **Batteries at work** (Round 133): given in quest hours, one flies to
+  him wherever he works (the floor, the scaffold, out gathering), as
+  into his tent in a storm.
 - **Medicine:** the pill shows on his screen while he keeps working
   (he doesn't stop); the minutes don't pause.
 - **Charging in quest hours:** he isn't sent to his station, and it

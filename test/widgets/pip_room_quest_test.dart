@@ -191,4 +191,26 @@ void main() {
     expect(brain.activity, PipActivity.adventuring);
     expect(brain.run!.phase, RunPhase.sitting);
   });
+
+  testWidgets(
+      'watched as his work begins (back on, a battery given): he walks off '
+      'his field first (Round 133)', (tester) async {
+    final link = FakePipLink();
+    final brain = await room(tester, link, animate: true);
+    for (var i = 0; i < 40; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(brain.activity, isNot(PipActivity.questing));
+    final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+    link.questing = (at: q.at(q.startOf(mine) + 1), seconds: 100);
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(brain.activity, PipActivity.questing);
+    expect(brain.questView!.place, QuestScenePlace.field);
+    for (var i = 0; i < 300; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(brain.questView!.place, QuestScenePlace.mine);
+  });
 }

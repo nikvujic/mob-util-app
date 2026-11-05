@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 133 — fixes: back to work, batteries at work (2026-11-05, 2.2.2)
+
+- [x] Seen setting off to quest work (back on after a battery, his
+  field's time over): he walks off his field's right edge first
+  (`PipBrain.quest(animate:)`), then the work scene.
+- [x] A battery given at quest work flies to him where he is (the
+  tent's flight, to his lift).
+
 ### Round 132 — fixes: quest loops, adventure on reopening, Select all + Cut (2026-11-01, 2.2.1)
 
 - [x] Quest scenes: the room's check every second no longer restarts

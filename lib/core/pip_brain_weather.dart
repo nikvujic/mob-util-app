@@ -162,6 +162,20 @@ extension PipBrainWeather on PipBrain {
     );
   }
 
+  /// Round 133: a battery flying to him at his quest's work (on the
+  /// floor, the scaffold): (left edge, height), or null.
+  (double, double)? get _questBattery {
+    final from = _wx.flyFrom;
+    if (from == null) return null;
+    final p = math.min(1.0, _wx.flyT / _flyInTime);
+    final to = x + PipBrain.width / 2 - PipBrain.batteryWidth / 2;
+    final up = lift + PipBrain.height / 2;
+    return (
+      from + (to - from) * p,
+      PipBrain.dropHeight * (1 - p) + up * p + 12 * math.sin(math.pi * p),
+    );
+  }
+
   /// His hand held out (drizzle), or scooping, winding up, throwing (a
   /// snowball): (x, height above the ground); null: none.
   (double, double)? get weatherHand {

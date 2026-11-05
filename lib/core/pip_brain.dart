@@ -622,7 +622,9 @@ class PipBrain {
       // Round 65: out on his adventure, it flies to him as he runs.
       (activity == PipActivity.adventuring && _run?.canCatch == true) ||
       // Round 75: in his tent, it flies in (one at a time).
-      (activity == PipActivity.sheltering && _wx.flyFrom == null);
+      (activity == PipActivity.sheltering && _wx.flyFrom == null) ||
+      // Round 133: at his quest's work, it flies to him there.
+      (activity == PipActivity.questing && _wx.flyFrom == null);
 
   /// A battery dropped at [at] (room pixels from the left): he walks over
   /// and picks it up, or, off, it flies to him and he comes back on.
@@ -637,7 +639,8 @@ class PipBrain {
       _run!.catchBattery(left);
       return true;
     }
-    if (activity == PipActivity.sheltering) {
+    if (activity == PipActivity.sheltering ||
+        activity == PipActivity.questing) {
       _wx.flyFrom = left;
       _wx.flyT = 0;
       return true;
@@ -707,6 +710,7 @@ class PipBrain {
   (double, double)? get battery {
     if (activity == PipActivity.adventuring) return _run?.battery;
     if (activity == PipActivity.sheltering) return _tentBattery;
+    if (activity == PipActivity.questing) return _questBattery;
     final b = _battery;
     if (b == null) return null;
     if (activity == PipActivity.poweringOn) {
@@ -2768,8 +2772,25 @@ class PipBrain {
   QuestView? get questView {
     final now = _questNow;
     if (activity != PipActivity.questing || now == null) return null;
+    // Round 133: seen going to his work, first off his field's right
+    // edge.
+    if (_joinFrom case final from?) {
+      return QuestView(
+        place: QuestScenePlace.field,
+        house: PipHouse.of(now.at),
+        offset: from + width / 2 + QuestView.walkSpeed * _joinT,
+        pose: QuestPose.walking,
+        t: _joinT,
+      );
+    }
     return QuestView.of(now.at, now.seconds + _questT);
   }
+
+  /// Round 133: seen setting off to his work (back on, a battery given;
+  /// his field's time over), where he started walking off his field from,
+  /// and for how long; null: simply at it.
+  double? _joinFrom;
+  double _joinT = 0;
 
   /// How far the house area's moved left to keep him in view (a room
   /// narrower than it, e.g. the menu's).
@@ -2777,11 +2798,13 @@ class PipBrain {
 
   /// At his quest's work, or not, as his life says ([now]; his room
   /// checks every second): he's simply there, at the step and the moment
-  /// it's at.
-  void quest(PipQuestNow? now) {
+  /// it's at. Round 133: [animate] (seen happening, e.g. back on after a
+  /// battery): he walks off his field to it first.
+  void quest(PipQuestNow? now, {bool animate = false}) {
     if (now == null) {
       if (activity == PipActivity.questing) {
         _questNow = null;
+        _joinFrom = null;
         x = x.clamp(_minX, _maxX).toDouble();
         _stand();
       }
@@ -2790,8 +2813,11 @@ class PipBrain {
     final before = _questNow;
     if (activity != PipActivity.questing) {
       if (!_canGoOut) return;
+      final from = x;
       _start(PipActivity.questing);
       _questClock = 0;
+      _joinFrom = animate && !freshSpawn ? from : null;
+      _joinT = 0;
     }
     _questNow = now;
     // Round 132: in the same step, his own smooth clock carries on (the
@@ -2812,6 +2838,13 @@ class PipBrain {
   void _stepQuest(double dt) {
     _questT += dt;
     _questClock += dt;
+    if (_joinFrom case final from?) {
+      _joinT += dt;
+      // Off his field: at his work.
+      if (from + QuestView.walkSpeed * _joinT > roomWidth + 2) {
+        _joinFrom = null;
+      }
+    }
     _placeQuest();
   }
 
