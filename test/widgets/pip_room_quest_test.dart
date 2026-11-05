@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
@@ -13,8 +15,8 @@ import '../helpers.dart';
 /// it; plugged in, he doesn't go to his station meanwhile (spec 8).
 void main() {
   Future<PipBrain> room(WidgetTester tester, FakePipLink link,
-      {DateTime? at, bool animate = false}) async {
-    final brain = PipBrain();
+      {DateTime? at, bool animate = false, PipBrain? given}) async {
+    final brain = given ?? PipBrain();
     final when = at ?? DateTime(2026, 11, 2, 10, 30);
     link.at = when;
     await tester.pumpWidget(Directionality(
@@ -196,14 +198,26 @@ void main() {
       'watched as his work begins (back on, a battery given): he walks off '
       'his field first (Round 133)', (tester) async {
     final link = FakePipLink();
-    final brain = await room(tester, link, animate: true);
-    for (var i = 0; i < 40; i++) {
+    // Seeded, and nothing else going on when his work comes (a dance
+    // first was a flaky CI run).
+    final brain = await room(tester, link,
+        animate: true, given: PipBrain(random: math.Random(1)));
+    // A while watched (his room has looked at him), then free.
+    for (var i = 0; i < 30; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    for (var i = 0;
+        i < 100 &&
+            !(brain.activity == PipActivity.standing ||
+                brain.activity == PipActivity.walking);
+        i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(brain.activity, isNot(PipActivity.questing));
+    brain.x = 10;
     final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
     link.questing = (at: q.at(q.startOf(mine) + 1), seconds: 100);
-    for (var i = 0; i < 12; i++) {
+    for (var i = 0; i < 60 && brain.activity != PipActivity.questing; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(brain.activity, PipActivity.questing);
