@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Pip's quests (Round 125, `docs/QUESTS_SPEC.md`): plain rules, worked
 /// out from the clock as his energy and adventures are. A quest is a
 /// fixed **script** of steps, each taking a set number of **work
@@ -325,6 +327,10 @@ abstract final class Quests {
   static const stoneMinutes = 16;
   static const sandMinutes = 8;
   static const smeltMinutes = 25;
+
+  /// Panes smelted at a time (Round 135), between building.
+  static const glassAtOnce = 3;
+
   static const carry = {
     QuestItem.wood: 12,
     QuestItem.stone: 8,
@@ -414,16 +420,25 @@ abstract final class Quests {
     }
 
     for (final piece in housePieces) {
-      // Gather what all of this piece needs, then build them one by one.
-      for (final MapEntry(key: item, value: each) in piece.cost.entries) {
-        final needed = each * piece.count;
-        if (item == QuestItem.glass) {
-          glass(needed);
-        } else {
-          trip(item, needed);
-        }
-      }
+      // Round 135: a load at a time: what one trip brings home (or a
+      // few panes smelted), then as many of the piece as it covers, then
+      // off again (it was all of a piece's gathering first: days at the
+      // mine before a block was laid).
       for (var i = 0; i < piece.count; i++) {
+        // Again till all of it's there (smelting takes wood too).
+        for (var short = true; short;) {
+          short = false;
+          for (final MapEntry(key: item, value: each) in piece.cost.entries) {
+            if (inv[item]! >= each) continue;
+            short = true;
+            final rest = each * (piece.count - i);
+            if (item == QuestItem.glass) {
+              glass(math.min(rest, inv[item]! + glassAtOnce));
+            } else {
+              trip(item, math.min(rest, inv[item]! + carry[item]!));
+            }
+          }
+        }
         steps.add(QuestStep(QuestAction.build, QuestPlace.house, piece.minutes,
             takes: piece.cost, piece: piece, index: i));
         piece.cost.forEach((k, v) => inv[k] = inv[k]! - v);

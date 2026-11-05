@@ -46,7 +46,10 @@ void main() {
   final q = Quests.house;
 
   for (final (name, step) in [
-    ('the house area', q.steps.indexWhere((s) => s.piece?.id == 'walls') + 3),
+    (
+      'the house area',
+      q.steps.indexWhere((s) => s.piece?.id == 'walls' && s.index == 3)
+    ),
     (
       'the forest',
       q.steps.indexWhere(

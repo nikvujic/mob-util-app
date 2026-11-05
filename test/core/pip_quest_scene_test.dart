@@ -68,7 +68,7 @@ void main() {
   test(
       'building: walks over from the last piece (up the scaffold if it\'s '
       'higher), materials fly in, then works in puffs of dust', () {
-    final second = first((s) => s.piece?.id == 'foundation') + 1;
+    final second = first((s) => s.piece?.id == 'foundation' && s.index == 1);
     final start = view(second, 0.5);
     expect(start.place, QuestScenePlace.house);
     final work = view(second, 60);
@@ -77,7 +77,7 @@ void main() {
         work.puffs.isNotEmpty || view(second, 61.2).puffs.isNotEmpty, isTrue);
     final flying = view(second, start.pose == QuestPose.walking ? 4 : 1);
     expect(flying.flyers.map((f) => f.item), contains('stone'));
-    final roof = first((s) => s.piece?.id == 'shingles') + 5;
+    final roof = first((s) => s.piece?.id == 'shingles' && s.index == 5);
     expect(view(roof, 300).lift, PipHouse.onScaffold);
     final floor = first((s) => s.piece?.id == 'walls');
     expect(view(floor, 300).lift, PipHouse.onFloor);

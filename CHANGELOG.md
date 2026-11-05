@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.4] - 2026-11-05
+
+### Changed
+- **Pip's house quest** mixes up his work: he brings home one load
+  (stone from the mine, wood from the forest, sand from the beach),
+  builds what it covers, then goes out again. Before, he gathered
+  everything a piece needed first, which meant about six days at the
+  mine before the first foundation block. It takes the same time
+  overall. A house under way carries on in the new order, so some of
+  it may already be standing.
+
 ## [2.2.3] - 2026-11-05
 
 ### Fixed

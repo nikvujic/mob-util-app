@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_quest.dart';
 
@@ -83,6 +85,30 @@ void main() {
       for (final p in Quests.housePieces) {
         expect(counts[p.id], p.count, reason: p.id);
       }
+    });
+
+    test(
+        'a load at a time (Round 135): never long away from building (it was '
+        'days at the mine before the first block)', () {
+      var away = 0, longest = 0, builds = 0;
+      for (final s in q.steps) {
+        if (s.action == QuestAction.build) {
+          builds++;
+          away = 0;
+        } else {
+          away += s.minutes;
+          longest = math.max(longest, away);
+        }
+      }
+      expect(builds, greaterThan(100));
+      // At most two trips (a piece of two materials), or a load of sand,
+      // wood and a few panes smelted: about two hours of quest work (it
+      // was 1035 minutes, about six days).
+      expect(longest, lessThanOrEqualTo(360));
+      final firstBlock =
+          q.steps.indexWhere((s) => s.action == QuestAction.build);
+      expect(
+          q.startOf(firstBlock), lessThanOrEqualTo(Quests.walk * 2 + 8 * 16));
     });
 
     test('a trip: out, gathering at one place, back', () {

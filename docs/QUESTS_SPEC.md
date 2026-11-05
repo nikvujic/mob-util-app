@@ -336,6 +336,11 @@ from use):
   porch lantern is lit.
 - **The menu's strip** shows the house's floor and walls (the roof only
   in Pip Home's taller scene), as specced.
+- **A load at a time** (Round 135, asked for): one trip's load (or a
+  few panes smelted), then building what it covers, then off again; it
+  was all of a piece's gathering first (about six days at the mine
+  before the first block). The total time is the same; a quest under way
+  carries on from its minutes in the new order.
 - **The next quest** isn't offered yet: after the house, the Quests card
   shows it done with its picture.
 

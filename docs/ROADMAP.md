@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 135 — the house a load at a time (2026-11-05, 2.2.4)
+
+- [x] The script interleaves: a load (or a few panes) when the next one
+  is short, then build what it covers (it was days of gathering first);
+  a test holds the longest time away from building to about two hours.
+
 ### Round 134 — sweep: no scene cuts (2026-11-05, 2.2.3)
 
 - [x] Every switch between his places checked: run out at work (falls
