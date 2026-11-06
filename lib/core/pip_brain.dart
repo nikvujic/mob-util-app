@@ -2856,6 +2856,16 @@ class PipBrain {
     activity = PipActivity.walking;
   }
 
+  /// In at his house's door, walking in to somewhere on its floor.
+  void _inAtDoor() {
+    x = homeRight - width;
+    facingRight = false;
+    _target =
+        homeLeft + random.nextDouble() * (homeRight - width - homeLeft - 12);
+    activity = PipActivity.walking;
+    _t = 0;
+  }
+
   /// Going into (true) or out of (false) his house, seen: walking to his
   /// door, or off his field's right edge, first.
   bool? _homeTo;
@@ -2889,7 +2899,8 @@ class PipBrain {
   /// checks every second): he's simply there, at the step and the moment
   /// it's at. Round 133: [animate] (seen happening, e.g. back on after a
   /// battery): he walks off his field to it first.
-  void quest(PipQuestNow? now, {bool animate = false, bool down = false}) {
+  void quest(PipQuestNow? now,
+      {bool animate = false, bool down = false, bool toHome = false}) {
     if (now == null) {
       if (activity == PipActivity.questing) {
         // Round 134: run out at it ([down]): he falls there, as he is.
@@ -2900,8 +2911,13 @@ class PipBrain {
         _questNow = null;
         _joinFrom = null;
         // Round 134: seen, his work over, he walks back onto his field
-        // (from its right edge, as he went).
-        if (animate) {
+        // (from its right edge, as he went); Round 136: or, his house
+        // next ([toHome]), in at its door (not onto his field, then
+        // round and off it again).
+        if (animate && toHome) {
+          _switchHome(true);
+          _inAtDoor();
+        } else if (animate) {
           _walkIn();
         } else {
           x = x.clamp(_minX, _maxX).toDouble();
@@ -3097,11 +3113,7 @@ class PipBrain {
       _homeTo = null;
       _switchHome(going);
       if (going) {
-        x = homeRight - width;
-        facingRight = false;
-        _target = homeLeft +
-            random.nextDouble() * (homeRight - width - homeLeft - 12);
-        activity = PipActivity.walking;
+        _inAtDoor();
       } else {
         _walkIn();
       }

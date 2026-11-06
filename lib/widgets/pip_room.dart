@@ -243,13 +243,12 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // Round 128: his house built, he lives in it (but for his field's
     // times, and while he's out, away on his trip, or at work).
     // Round 134: seen, he walks out of one into the other.
-    brain.home(
-        out == null &&
-            trip.leg == null &&
-            !trip.snowy &&
-            questNow == null &&
-            link.homeNow(),
-        animate: seen);
+    final home = out == null &&
+        trip.leg == null &&
+        !trip.snowy &&
+        questNow == null &&
+        link.homeNow();
+    brain.home(home, animate: seen);
     // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
     // Round 64: not till Android has said (the first time, simply so).
     if (link.plugged case final plugged?) {
@@ -273,8 +272,11 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // seen setting off, he walks off his field to it first).
     // Round 134: run out at it, he falls there; his work over, seen, he
     // walks back onto his field.
+    // Round 136: his work over and home next, he comes in at his door.
     brain.quest(questNow,
-        animate: seen, down: show == PipShow.powerOff || show == PipShow.off);
+        animate: seen,
+        down: show == PipShow.powerOff || show == PipShow.off,
+        toHome: home);
     // Round 74: his field's trees go by with his time out, alike here and
     // in the other room.
     brain.syncOutRun(out == null ? null : link.outRun(),

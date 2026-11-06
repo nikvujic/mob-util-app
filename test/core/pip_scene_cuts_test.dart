@@ -91,6 +91,23 @@ void main() {
   });
 
   test(
+      'his work over with his house next (20:30, it built), seen: in at '
+      'its door, not onto his field and round again (Round 136)', () {
+    final brain = up();
+    final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+    brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
+    brain.quest(null, animate: true, toHome: true);
+    expect(brain.atHome, isTrue);
+    expect(brain.activity, PipActivity.walking);
+    expect(brain.x, closeTo(PipBrain.homeRight - PipBrain.width, 0.01));
+    expect(brain.facingRight, isFalse);
+    // Asked again (his room, a second later): already home, nothing more.
+    brain.home(true, animate: true);
+    expect(brain.atHome, isTrue);
+    expect(brain.activity, PipActivity.walking);
+  });
+
+  test(
       'into his house, seen: off his field first, then in at his door; out '
       'again: to his door, then in from his field\'s edge', () {
     final brain = up();
