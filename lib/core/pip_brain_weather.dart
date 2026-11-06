@@ -111,11 +111,11 @@ extension PipBrainWeather on PipBrain {
   /// His tent, if it's up (or going up or down): at home, or by the
   /// path on his day out.
   PipTent? get tent =>
-      activity == PipActivity.adventuring ? _run?.tent : _wx.tent;
+      activity == PipActivity.adventuring ? _out.run?.tent : _wx.tent;
 
   /// Hidden in his tent (it's up enough, him in it).
   bool get inTent => activity == PipActivity.adventuring
-      ? _run?.inTent ?? false
+      ? _out.run?.inTent ?? false
       : (_wx.tent?.hides ?? false) && _inTent.contains(activity);
 
   /// Peeking out of his tent's door now and then, awake in it.

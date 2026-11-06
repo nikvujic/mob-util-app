@@ -164,7 +164,7 @@ extension PipBrainEvents on PipBrain {
   /// The bug: its left edge and whether its legs are up (they step);
   /// null when there's none (or it's gone in a poof).
   (double, bool, bool)? get bug {
-    if (activity == PipActivity.adventuring) return _run?.bug;
+    if (activity == PipActivity.adventuring) return _out.run?.bug;
     final b = _ev.bugX;
     if (activity != PipActivity.bugHunt || b == null || _ev.bugPhase == 3) {
       return null;
@@ -179,7 +179,7 @@ extension PipBrainEvents on PipBrain {
 
   /// The poof where a bug was struck: its middle and 0 → 1.
   (double, double)? get poof {
-    if (activity == PipActivity.adventuring) return _run?.poof;
+    if (activity == PipActivity.adventuring) return _out.run?.poof;
     if (activity != PipActivity.bugHunt || _ev.bugPhase != 3) return null;
     return (
       (_ev.bugX ?? x) + PipBrain.bugWidth / 2,
@@ -192,7 +192,7 @@ extension PipBrainEvents on PipBrain {
   /// forward as it grows) and size (popping in and away); null when put
   /// away.
   (double, double, double, double)? get sword {
-    if (activity == PipActivity.adventuring) return _run?.sword;
+    if (activity == PipActivity.adventuring) return _out.run?.sword;
     // Round 127: felling a tree, breaking stone: swing after swing.
     if (questView?.swing case final swing?) {
       final forward = facingRight ? 1.0 : -1.0;
