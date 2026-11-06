@@ -11,356 +11,9 @@ import 'package:the_app/core/pip_house.dart';
 import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/weather.dart';
 
+part 'pip_brain_places.dart';
+part 'pip_brain_types.dart';
 part 'pip_brain_weather.dart';
-
-/// What Pip is doing (Round 26).
-enum PipActivity {
-  /// Not hatched yet (Round 34): an egg in the middle of the room, cracked
-  /// a little more by taps.
-  egg,
-
-  /// Out of the egg: its top pops off, he jumps out and lands, the shell
-  /// fades.
-  hatching,
-
-  /// The first time the menu opens: the ground cracks, he comes up out
-  /// of it, hops and lands.
-  spawning,
-
-  /// Standing about (blinking now and then).
-  standing,
-
-  /// Walking to a spot.
-  walking,
-
-  /// Round 37: eyes closing, he settles down to sleep.
-  fallingAsleep,
-
-  /// Asleep, settled down, little z's rising.
-  asleep,
-
-  /// Round 77: woken by taps, still lying there: one eye opens and looks
-  /// about a moment, shuts, then he wakes ([wakingUp]).
-  stirring,
-
-  /// Waking: eyes open, he gets up with a little hop.
-  wakingUp,
-
-  /// Out of energy: his screen flickers out and he falls over.
-  poweringOff,
-
-  /// Lying there, his screen dark.
-  off,
-
-  /// A battery flies to him (if one was given), his screen comes back on
-  /// and he gets up.
-  poweringOn,
-
-  /// A battery dropped in his room: he walks over and picks it up.
-  fetching,
-
-  /// Round 44: the phone plugged in, he hurries to his charging station.
-  toStation,
-
-  /// At the station: his hands pop in, he takes the plug off its hook,
-  /// plugs it into his side, and the hands pop away.
-  plugging,
-
-  /// Plugged in, his antenna lit, his screen changing now and then.
-  charging,
-
-  /// Unplugging: the same as plugging in, backwards.
-  unplugging,
-
-  // Round 52: more ways in, and things happening in his field.
-
-  /// Dropping in from the sky: he falls, lands with a squash and dust.
-  falling,
-
-  /// Thrown in from the side (the menu's swing): tumbling through the
-  /// air, landing with a thump.
-  thrown,
-
-  /// After being thrown in: a scowl, a fist shaken, cross words.
-  angry,
-
-  /// Bugs crawl in; he pops out a sword and fights them off.
-  bugHunt,
-
-  /// Something on his screen for a while (a notification, or his medicine).
-  showing,
-
-  /// A flower comes up; he walks over, picks it, holds it a while.
-  flower,
-
-  /// A butterfly flutters by; he watches it.
-  butterfly,
-
-  /// A ball rolls in; he walks up and kicks it away.
-  ball,
-
-  /// At dusk or night: a shooting star streaks over; he looks up at it.
-  stargazing,
-
-  /// A little dance: hops, turning to the beat, music on his screen.
-  dancing,
-
-  /// Round 53: eating from a plate in his hands, a few bites, crumbs.
-  eating,
-
-  /// Round 63: out on his adventure (12:00 to 18:00): running, the
-  /// ground moving under him, striking bugs ([PipRun]).
-  adventuring,
-
-  /// Round 67: on his ski trip's bus ([PipBus]).
-  riding,
-
-  /// Round 75: in his tent in a storm, awake (`core/pip_weather.dart`):
-  /// keeping still till it's over.
-  sheltering,
-
-  /// One of the weather's events ([PipWeatherEvent]).
-  weatherEvent,
-
-  /// The weather's changed: he stops and looks up.
-  lookingUp,
-
-  /// Round 127: at his quest's work (`core/pip_quest_scene.dart`): in his
-  /// house area, out gathering, or walking between.
-  questing,
-}
-
-/// A hat on his head (Round 57): the party hat on a birthday, or one
-/// tried on in Pip Home's Hats.
-enum PipHat {
-  party('Party hat'),
-  crown('Crown'),
-  topHat('Top hat'),
-  wizard('Wizard hat'),
-  cap('Cap'),
-  beanie('Beanie'),
-
-  /// Round 61: for days of the year (see `pip_hats.dart`).
-  santa('Santa hat', everyday: false),
-  witch('Witch hat', everyday: false),
-  bunny('Bunny ears', everyday: false),
-  heart('Heart band', everyday: false),
-
-  /// Round 67: all his ski days.
-  skiBeanie('Ski beanie', everyday: false),
-
-  /// Round 128: at his quest's work in rain, snow or a storm.
-  rainHat('Rain hat', everyday: false);
-
-  final String label;
-
-  /// Worn on a random day (Round 61); the others are for their days.
-  final bool everyday;
-
-  const PipHat(this.label, {this.everyday = true});
-}
-
-/// A buzz of the phone, how strong (Round 53).
-enum PipBuzz { light, medium, heavy }
-
-/// How he comes into his field (Round 52): out of the ground, from the
-/// sky, or thrown in from the side (only in the menu, by its swing).
-enum PipEntrance { ground, sky, side }
-
-/// What his screen can show for a while (Round 52): notifications (when
-/// one comes), and with some events (Round 53: not for fun on its own).
-enum PipScreen {
-  envelope(notification: true),
-  bell(notification: true),
-  alert(notification: true),
-
-  /// Round 53: a pill, reminding of a medicine (the medicine red dot).
-  pill,
-
-  /// Dancing.
-  music,
-
-  /// Proud (after the bugs) or glad (holding a flower).
-  happy;
-
-  /// Shown when a notification comes (Round 53: no more pictures for fun:
-  /// the others go with an event).
-  final bool notification;
-
-  /// Shown with a hop: a notification, or his medicine reminder.
-  bool get hops => notification || this == PipScreen.pill;
-
-  const PipScreen({this.notification = false});
-}
-
-/// What his screen shows while he charges (Round 44), now and then
-/// another, at random.
-enum ChargeScreen {
-  happy,
-  battery,
-  static,
-  bolt,
-  content,
-  sparks,
-  humming,
-  blinking,
-}
-
-/// How his face looks (Round 37): by his energy, asleep, or off.
-enum PipFace {
-  normal,
-  tired,
-  veryTired,
-  asleep,
-  off,
-
-  /// Round 52: thrown in, and cross about it.
-  angry,
-
-  /// Round 57: waking up, a big yawn (eyes shut, mouth wide).
-  yawn,
-
-  /// Round 77: woken at night, one eye open (the other shut).
-  peek,
-}
-
-/// His animations that can be played on request (Round 35: Pip Home's
-/// Animations): each one he has, by name.
-enum PipAnimation {
-  spawn('Out of the ground'),
-  hatch('Out of his egg'),
-  walk('A walk'),
-  blink('A blink'),
-  turn('A look round'),
-  // Round 37: in the list they come back on their own (asleep, then up
-  // again; off, then on again).
-  fallAsleep('Falling asleep'),
-  powerOff('Running out'),
-  wakeUp('Waking up', listed: false),
-  // Round 77: three taps at night; in the list, he falls asleep first.
-  nightWake('Woken at night'),
-  powerOn('Back on', listed: false),
-  // Round 54: in the list too, as a preview (no battery used).
-  fetch('Changing his battery'),
-  // Round 44: the station rises, he plugs in, charges a while, unplugs.
-  charge('Charging'),
-  // Round 52: more entrances, and things that happen now and then.
-  fromSky('Falling from the sky'),
-  fromSide('Thrown in from the side'),
-  bugs('Fighting bugs'),
-  notified('A notification'),
-  flower('Picking a flower'),
-  butterfly('Watching a butterfly'),
-  ball('Kicking a ball'),
-  shootingStar('A shooting star'),
-  dance('A little dance'),
-  // Round 53: a medicine due (the red dot), and after a recipe.
-  medicine('A medicine reminder'),
-  eat('Eating'),
-  // Round 75: the weather's (Pip Home's list tries the weather on too).
-  puddle('Jumping in a puddle'),
-  twirl('A twirl under his umbrella'),
-  handOut('A hand out in the drizzle'),
-  flakes('Snowflakes on his tongue'),
-  snowman('Building a snowman'),
-  snowball('A snowball at you'),
-  lost('Lost in the fog');
-
-  final String label;
-
-  /// In Pip Home's Animations list (the others only happen for real).
-  final bool listed;
-
-  const PipAnimation(this.label, {this.listed = true});
-}
-
-/// What may start while he's doing something (Round 35): the one table
-/// that keeps things from clashing. Mid-entrance (out of the ground or
-/// his egg) nothing interrupts; an egg only hatches by its taps. New
-/// activities and events (batteries, bugs...) get their row and column
-/// here, and the table is tested whole.
-///
-/// Round 37: in the middle of falling asleep, waking, turning off or on,
-/// or picking up a battery, nothing starts either. Asleep, he can only
-/// wake (or run out); off, only come back on (a battery). Up and about,
-/// anything but waking or coming back on.
-///
-/// Round 44: hurrying to his station, plugging in or out, or charging,
-/// nothing starts (asleep at night, he first unplugs: [PipBrain.show]).
-///
-/// Round 52: an entrance (from the sky, thrown in, angry after) or an
-/// event (bugs, his screen, a flower, a butterfly, a ball) runs its
-/// course; they start only while he's up and about.
-bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
-      PipActivity.egg ||
-      PipActivity.hatching ||
-      PipActivity.spawning ||
-      PipActivity.fallingAsleep ||
-      PipActivity.stirring ||
-      PipActivity.wakingUp ||
-      PipActivity.poweringOff ||
-      PipActivity.poweringOn ||
-      PipActivity.fetching ||
-      PipActivity.toStation ||
-      PipActivity.plugging ||
-      PipActivity.charging ||
-      PipActivity.unplugging ||
-      // Round 52: an entrance, or an event, runs its course.
-      PipActivity.falling ||
-      PipActivity.thrown ||
-      PipActivity.angry ||
-      PipActivity.bugHunt ||
-      PipActivity.flower ||
-      PipActivity.butterfly ||
-      PipActivity.ball ||
-      PipActivity.stargazing ||
-      PipActivity.dancing ||
-      PipActivity.eating ||
-      // Round 75: the weather's events, and looking up at it, too.
-      PipActivity.weatherEvent ||
-      PipActivity.lookingUp ||
-      // Round 63: out, nothing else happens till he's back; Round 67: on
-      // the bus, nor then.
-      PipActivity.adventuring ||
-      PipActivity.riding =>
-        false,
-      // Round 55: something on his screen (his medicine reminder, which
-      // keeps on) gives way to bedtime, or running out.
-      PipActivity.showing =>
-        next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
-      PipActivity.asleep => next == PipAnimation.wakeUp ||
-          next == PipAnimation.nightWake ||
-          next == PipAnimation.powerOff,
-      // Round 75: in his tent in a storm, he keeps still: nothing starts
-      // but sleep, or running out (a battery flies into it). Round 127: at
-      // his quest's work, the same (spec 8: only a power down stops it).
-      PipActivity.sheltering ||
-      PipActivity.questing =>
-        next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
-      PipActivity.off => next == PipAnimation.powerOn,
-      PipActivity.standing ||
-      PipActivity.walking =>
-        next != PipAnimation.wakeUp && next != PipAnimation.powerOn,
-    };
-
-/// The station's drone's trip (Round 58).
-enum DronePhase { rising, out, beaming, back, sinking }
-
-/// Pip's frames, by name; drawn by `widgets/pip_room.dart`.
-enum PipFrame {
-  idle,
-  blink,
-  step1,
-  step2,
-  step3,
-  step4,
-  oh,
-  tuck,
-
-  /// Round 74: sitting (legs tucked, as he looks), and chewing so.
-  sit,
-  chew,
-}
 
 /// Pip in his room (Round 26): where he is, which way he faces, what he's
 /// doing and how he looks this moment. Advanced by [step] with the time
@@ -565,7 +218,7 @@ class PipBrain {
   }
 
   void _start(PipActivity next) {
-    _pastEdge = false;
+    _pl.pastEdge = false;
     // Round 128: out, on his trip, at work: not in his house then.
     if (_awayFromHome.contains(next)) atHome = false;
     activity = next;
@@ -1226,7 +879,7 @@ class PipBrain {
         if (_t >= flyEnd) _battery = null;
         if (_t >= onEnd) {
           // Round 134: back on at his work: at it again.
-          _downView != null ? _backToWork() : _stand();
+          _pl.downView != null ? _backToWork() : _stand();
         }
       case PipActivity.fetching:
         if (_batteryHeight == 0) {
@@ -1385,7 +1038,7 @@ class PipBrain {
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
-    if (activity != PipActivity.thrown && !_pastEdge) {
+    if (activity != PipActivity.thrown && !_pl.pastEdge) {
       x = x.clamp(_minX, _maxX);
     }
   }
@@ -2297,7 +1950,10 @@ class PipBrain {
           ),
         PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
         // Round 127: at his quest's work, his medicine on his screen.
-        PipActivity.questing when medicineDue => (PipScreen.pill, _questClock),
+        PipActivity.questing when medicineDue => (
+            PipScreen.pill,
+            _pl.questClock
+          ),
         PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
         _ => null,
       };
@@ -2766,228 +2422,14 @@ class PipBrain {
   double? _busPreview;
   static const busPreviewRide = 4.0;
 
-  // Round 127: his quests.
+  // Round 127–136: his places (`pip_brain_places.dart`).
+  final _pl = _PipPlacesState();
 
-  /// His quest's work, as his life last said (the room asks every
-  /// second), and the seconds since.
-  PipQuestNow? _questNow;
-  double _questT = 0;
-
-  /// Seconds at his quest's work since he started this time (his
-  /// screen's pill runs on it, Round 132).
-  double _questClock = 0;
-
-  /// What his quest's work looks like now (the room draws it); null when
-  /// he isn't at it.
-  QuestView? get questView {
-    // Round 134: run out at his work, he lies there (and gets up there).
-    if (_downView case final view? when _downActs.contains(activity)) {
-      return view;
-    }
-    final now = _questNow;
-    if (activity != PipActivity.questing || now == null) return null;
-    // Round 133: seen going to his work, first off his field's right
-    // edge.
-    if (_joinFrom case final from?) {
-      return QuestView(
-        place: QuestScenePlace.field,
-        house: PipHouse.of(now.at),
-        offset: from + width / 2 + QuestView.walkSpeed * _joinT,
-        pose: QuestPose.walking,
-        t: _joinT,
-      );
-    }
-    return QuestView.of(now.at, now.seconds + _questT);
-  }
-
-  // Round 134: no cuts between his places while he's watched.
-
-  /// What his work looked like when he ran out at it: he lies there
-  /// (falling over, off, back on), then carries on from there.
-  QuestView? _downView;
   static const _downActs = {
     PipActivity.poweringOff,
     PipActivity.off,
     PipActivity.poweringOn,
   };
-
-  /// Down where he ran out at his work (his room keeps his station away:
-  /// he's not on his field).
-  bool get downAtWork => _downView != null && _downActs.contains(activity);
-
-  /// [view] held still: no swing, nothing flying.
-  static QuestView? _still(QuestView? view) => view == null
-      ? null
-      : QuestView(
-          place: view.place,
-          house: view.house,
-          anchor: view.anchor,
-          offset: view.offset,
-          lift: view.lift,
-          facingRight: view.facingRight,
-          pose: QuestPose.standing,
-          scroll: view.scroll,
-          fall: view.fall,
-          dug: view.dug,
-          rock: view.rock,
-          t: view.t,
-        );
-
-  /// Back on where he ran out at his work: at it again.
-  void _backToWork() {
-    _downView = null;
-    _start(PipActivity.questing);
-    _questClock = 0;
-    _joinFrom = null;
-    _placeQuest();
-  }
-
-  /// Walking past his room's edge (off it, or in from it): not held in
-  /// it meanwhile.
-  bool _pastEdge = false;
-
-  /// In from his field's right edge, to a little left of its middle.
-  void _walkIn() {
-    _stand();
-    x = roomWidth + 2.0;
-    _pastEdge = true;
-    facingRight = false;
-    _target = (roomWidth * 0.6 - width / 2).clamp(_minX, _maxX).toDouble();
-    activity = PipActivity.walking;
-  }
-
-  /// In at his house's door, walking in to somewhere on its floor.
-  void _inAtDoor() {
-    x = homeRight - width;
-    facingRight = false;
-    _target =
-        homeLeft + random.nextDouble() * (homeRight - width - homeLeft - 12);
-    activity = PipActivity.walking;
-    _t = 0;
-  }
-
-  /// Going into (true) or out of (false) his house, seen: walking to his
-  /// door, or off his field's right edge, first.
-  bool? _homeTo;
-
-  /// Round 134: his room opened again: a walk between his places that
-  /// was under way when it was left is done by now.
-  void freshScenes() {
-    _joinFrom = null;
-    if (_homeTo case final going?) {
-      _homeTo = null;
-      _switchHome(going);
-    }
-    if (_pastEdge) {
-      _pastEdge = false;
-      x = x.clamp(_minX, _maxX).toDouble();
-      if (activity == PipActivity.walking) _stand();
-    }
-  }
-
-  /// Round 133: seen setting off to his work (back on, a battery given;
-  /// his field's time over), where he started walking off his field from,
-  /// and for how long; null: simply at it.
-  double? _joinFrom;
-  double _joinT = 0;
-
-  /// How far the house area's moved left to keep him in view (a room
-  /// narrower than it, e.g. the menu's).
-  double questCamera = 0;
-
-  /// At his quest's work, or not, as his life says ([now]; his room
-  /// checks every second): he's simply there, at the step and the moment
-  /// it's at. Round 133: [animate] (seen happening, e.g. back on after a
-  /// battery): he walks off his field to it first.
-  void quest(PipQuestNow? now,
-      {bool animate = false, bool down = false, bool toHome = false}) {
-    if (now == null) {
-      if (activity == PipActivity.questing) {
-        // Round 134: run out at it ([down]): he falls there, as he is.
-        if (down) {
-          _downView = _still(questView);
-          return;
-        }
-        _questNow = null;
-        _joinFrom = null;
-        // Round 134: seen, his work over, he walks back onto his field
-        // (from its right edge, as he went); Round 136: or, his house
-        // next ([toHome]), in at its door (not onto his field, then
-        // round and off it again).
-        if (animate && toHome) {
-          _switchHome(true);
-          _inAtDoor();
-        } else if (animate) {
-          _walkIn();
-        } else {
-          x = x.clamp(_minX, _maxX).toDouble();
-          _stand();
-        }
-      }
-      return;
-    }
-    _downView = null;
-    final before = _questNow;
-    if (activity != PipActivity.questing) {
-      if (!_canGoOut) return;
-      final from = x;
-      _start(PipActivity.questing);
-      _questClock = 0;
-      _joinFrom = animate && !freshSpawn ? from : null;
-      _joinT = 0;
-    }
-    _questNow = now;
-    // Round 132: in the same step, his own smooth clock carries on (the
-    // room's check every second only says where he is): loops (a swing,
-    // a scoop, his screen) don't hitch. Off by more than a moment, he's
-    // put right.
-    final went = before == null ? null : before.seconds + _questT;
-    final drift = went == null ? double.infinity : went - now.seconds;
-    _questT = before != null &&
-            before.at.script == now.at.script &&
-            before.at.step == now.at.step &&
-            drift.abs() < 1.5
-        ? drift
-        : 0;
-    _placeQuest();
-  }
-
-  void _stepQuest(double dt) {
-    _questT += dt;
-    _questClock += dt;
-    if (_joinFrom case final from?) {
-      _joinT += dt;
-      // Off his field: at his work.
-      if (from + QuestView.walkSpeed * _joinT > roomWidth + 2) {
-        _joinFrom = null;
-      }
-    }
-    _placeQuest();
-  }
-
-  /// Where he is in his room for what his quest's work looks like now:
-  /// in the house area, as far along as its camera lets the room show.
-  void _placeQuest() {
-    final view = questView;
-    if (view == null) return;
-    facingRight = view.facingRight;
-    final centre = view.pipCentre(roomWidth);
-    if (view.place == QuestScenePlace.house) {
-      final most = math.max(0, PipHouse.areaWidth - roomWidth).toDouble();
-      questCamera = (centre - roomWidth / 2).clamp(0, most).toDouble();
-      x = centre - questCamera - width / 2;
-    } else {
-      questCamera = 0;
-      x = centre - width / 2;
-    }
-  }
-
-  // Round 128: his house, once it's built (spec section 10).
-
-  /// In his finished house (his room says, from his life: not his
-  /// field's times, not out, on his trip or at work): he idles on its
-  /// floor, sleeps there, his station comes up there.
-  bool atHome = false;
 
   static const _awayFromHome = {
     PipActivity.adventuring,
@@ -3013,141 +2455,6 @@ class PipBrain {
     PipAnimation.snowball,
     PipAnimation.lost,
   };
-
-  /// In his house or on his field, as his life says ([wanted]; his room
-  /// checks every second). He goes when he's free to (not in the middle
-  /// of something: asleep or off where he is, he stays till he's up);
-  /// he's simply there.
-  void home(bool wanted, {bool animate = false}) {
-    if (wanted == atHome) {
-      _homeTo = null;
-      return;
-    }
-    final free = _canGoOut ||
-        activity == PipActivity.lookingUp ||
-        activity == PipActivity.dancing ||
-        activity == PipActivity.sheltering;
-    if (!free) return;
-    // Round 134: seen, he walks out first: to his door, or off his field.
-    if (animate) {
-      if (_homeTo == wanted && activity == PipActivity.walking) return;
-      _homeTo = wanted;
-      _visit = null;
-      _wx.tent = null;
-      final to = atHome ? homeRight - width : roomWidth + 2.0;
-      _stand();
-      _pastEdge = !atHome;
-      _target = to;
-      facingRight = to > x;
-      activity = PipActivity.walking;
-      return;
-    }
-    _switchHome(wanted);
-  }
-
-  void _switchHome(bool wanted) {
-    atHome = wanted;
-    questCamera = 0;
-    _visit = null;
-    // His tent's not needed in (or taken along).
-    _wx.tent = null;
-    _wx.flyFrom = null;
-    _wx.snowman = null;
-    if (activity != PipActivity.showing) _stand();
-    x = wanted
-        ? homeLeft + random.nextDouble() * (homeRight - width - homeLeft)
-        : x.clamp(_minX, _maxX).toDouble();
-    // His station where he is now.
-    if (_stationX != null) _placeStation();
-  }
-
-  /// His house drawn round him at home (the house area, as at work).
-  QuestView? get homeView {
-    if (!atHome || _awayFromHome.contains(activity)) return null;
-    return QuestView(
-      place: QuestScenePlace.house,
-      house: PipHouse.finished,
-      offset: x + width / 2,
-      pose: QuestPose.standing,
-      t: sceneClock,
-    );
-  }
-
-  /// Where he's going in his house to look (a window, the fire), and
-  /// which way he faces there; null: just a walk.
-  (double, bool)? _visit;
-
-  /// At home now and then: a little dance, a look out of a window at the
-  /// weather, a warm by the fire.
-  bool _maybeHomeEvent() {
-    switch (random.nextInt(3)) {
-      case 0:
-        _start(PipActivity.dancing);
-      case 1:
-        final (wx, _) = PipHouse.windows[random.nextInt(2)];
-        _goVisit(wx + 9 - width / 2, true);
-      default:
-        _goVisit(PipHouse.fireplaceRight + 2.0, false);
-    }
-    return true;
-  }
-
-  void _goVisit(double at, bool faceRight) {
-    final to = at.clamp(_minX, _maxX).toDouble();
-    if ((to - x).abs() < 2) {
-      _visit = (to, faceRight);
-      _arrive();
-      return;
-    }
-    _visit = (to, faceRight);
-    _target = to;
-    facingRight = to > x;
-    _start(PipActivity.walking);
-  }
-
-  /// Arrived somewhere ([_stand] just done): at a window he looks out,
-  /// at the fire he stands warming a while.
-  void _arrive() {
-    // Round 134: out of one place, in through the other.
-    if (_homeTo case final going?) {
-      _homeTo = null;
-      _switchHome(going);
-      if (going) {
-        _inAtDoor();
-      } else {
-        _walkIn();
-      }
-      return;
-    }
-    final visit = _visit;
-    _visit = null;
-    if (visit == null || !atHome) return;
-    final (_, faceRight) = visit;
-    facingRight = faceRight;
-    if (faceRight) {
-      _start(PipActivity.lookingUp);
-    } else {
-      _standFor = 5 + random.nextDouble() * 3;
-      _turnAt = null;
-    }
-  }
-
-  /// His frame at his quest's work: walking, or a beat of effort.
-  PipFrame get _questFrame {
-    final view = questView;
-    if (view == null) return PipFrame.idle;
-    return switch (view.pose) {
-      QuestPose.walking => const [
-          PipFrame.step1,
-          PipFrame.step2,
-          PipFrame.step3,
-          PipFrame.step4,
-        ][(view.t / stepTime).floor() % 4],
-      QuestPose.working when view.swing == null =>
-        (view.t / 0.6).floor().isEven ? PipFrame.idle : PipFrame.oh,
-      _ => PipFrame.idle,
-    };
-  }
 
   // Round 63: his adventures.
 
@@ -3434,7 +2741,7 @@ class PipBrain {
   }
 
   void _stand() {
-    _pastEdge = false;
+    _pl.pastEdge = false;
     activity = PipActivity.standing;
     _t = 0;
     _standFor = 1.5 + random.nextDouble() * 3.5;
@@ -3445,7 +2752,7 @@ class PipBrain {
   }
 
   void _walk() {
-    _visit = null;
+    _pl.visit = null;
     // Somewhere at least a few steps away, inside the room.
     final max = _maxX;
     if (max - _minX < 8) {
@@ -3570,7 +2877,7 @@ class PipBrain {
   /// the floor or the scaffold.
   double get lift {
     final own = _ownLift;
-    if (_downView case final view? when _downActs.contains(activity)) {
+    if (_pl.downView case final view? when _downActs.contains(activity)) {
       return view.lift + own;
     }
     return own;
