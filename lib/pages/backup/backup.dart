@@ -391,7 +391,8 @@ class _BackupPageState extends ConsumerState<BackupPage> {
 
   /// "today", "yesterday", "8 days ago".
   static String _ago(DateTime at, DateTime now) {
-    final days = dayOf(now).difference(dayOf(at)).inDays;
+    // Round 137: calendar days, right across a clock change.
+    final days = daysBetween(at, now);
     return switch (days) {
       <= 0 => 'today',
       1 => 'yesterday',

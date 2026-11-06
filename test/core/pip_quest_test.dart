@@ -38,6 +38,23 @@ void main() {
       expect(total, 10 * PipQuest.minutesPerDay);
     });
 
+    test(
+        'on the days the clocks change, still 10:00–11:30 and 19:00–20:30 '
+        'on the clock (Round 137)', () {
+      for (final day in [DateTime(2026, 3, 29), DateTime(2026, 10, 25)]) {
+        final spans = PipQuest.windowsBetween(
+            day, DateTime(day.year, day.month, day.day + 1));
+        expect([
+          for (final (s, e) in spans) (s.hour, s.minute, e.hour, e.minute)
+        ], [
+          (10, 0, 11, 30),
+          (19, 0, 20, 30)
+        ], reason: '$day');
+      }
+      final done = PipQuest.finishAt(DateTime(2026, 10, 25, 9), 30);
+      expect((done.hour, done.minute), (10, 30));
+    });
+
     test('when the work left is done, if no hours are lost', () {
       expect(PipQuest.finishAt(at(11), 30), at(11, 30));
       expect(PipQuest.finishAt(at(11), 31), at(19, 1));

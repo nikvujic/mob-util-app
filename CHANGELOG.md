@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.5] - 2026-11-06
+
+### Fixed
+- **Pip's quest hours on the days the clocks change** (the last Sunday
+  of March and of October): his work was counted an hour off on those
+  days (09:00–10:30 or 11:00–12:30 instead of 10:00–11:30). They're now
+  10:00–11:30 and 19:00–20:30 on the clock every day.
+- **Backup:** "last backup N days ago" no longer counts a day short
+  across the spring clock change.
+- **Pip, once his house is built:** at 20:30, when his work ends while
+  you watch, he goes straight in at his door instead of walking onto
+  his field and then turning back to the house.
+
 ## [2.2.4] - 2026-11-05
 
 ### Changed

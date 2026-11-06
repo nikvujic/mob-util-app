@@ -337,6 +337,22 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 136–137 — 20:30 home; a sweep of the app (2026-11-06, 2.2.5)
+
+- [x] Work over with his house next: in at his door (`quest(toHome:)`),
+  not onto his field and round again.
+- [x] Sweep: the analyzer with strict casts and extra rules (futures,
+  catches, dynamic calls); lifecycles (timers, controllers,
+  subscriptions: all cancelled); time arithmetic: quest windows were
+  midnight plus minutes, an hour out on the days the clocks change
+  (now built from the clock; a test in Belgrade time), and Backup's
+  "days ago" counted local days; the whole suite run in Belgrade time;
+  the Pip tests run three times for flakes (none); the encryption
+  checked (Argon2id, AES-GCM, a wrapped data key: sound).
+- [ ] Noted, not changed: `PipBrain` (3.7k lines) and the room's painter
+  (2.3k) are the largest files; a few places read `DateTime.now()`
+  instead of the clock provider (notes' timestamps, some forms).
+
 ### Round 135 — the house a load at a time (2026-11-05, 2.2.4)
 
 - [x] The script interleaves: a load (or a few panes) when the next one

@@ -37,6 +37,12 @@ abstract final class PipQuest {
   /// registered only in its own).
   static bool canStartAt(DateTime t) => inHoursAt(t);
 
+  /// [day] at [minutes] past midnight on the clock (Round 137: not
+  /// midnight plus that many minutes, an hour out on the days the clocks
+  /// change).
+  static DateTime _on(DateTime day, int minutes) =>
+      DateTime(day.year, day.month, day.day, minutes ~/ 60, minutes % 60);
+
   /// The quest hours between [from] and [to], in order, each cut to that
   /// span (none if the clock went back).
   static List<(DateTime, DateTime)> windowsBetween(DateTime from, DateTime to) {
@@ -46,8 +52,7 @@ abstract final class PipQuest {
     // Bounded: years away are counted, but not forever.
     for (var i = 0; i < 2000 && day.isBefore(to); i++) {
       for (final (a, b) in windows) {
-        final start = day.add(Duration(minutes: a));
-        final end = day.add(Duration(minutes: b));
+        final start = _on(day, a), end = _on(day, b);
         final s = start.isBefore(from) ? from : start;
         final e = end.isAfter(to) ? to : end;
         if (e.isAfter(s)) spans.add((s, e));
@@ -65,8 +70,7 @@ abstract final class PipQuest {
     var day = DateTime(now.year, now.month, now.day);
     for (var i = 0; i < 4000; i++) {
       for (final (a, b) in windows) {
-        final start = day.add(Duration(minutes: a));
-        final end = day.add(Duration(minutes: b));
+        final start = _on(day, a), end = _on(day, b);
         final s = start.isBefore(now) ? now : start;
         if (!end.isAfter(s)) continue;
         final room = end.difference(s).inMinutes;

@@ -358,7 +358,8 @@ class NotificationReminderScheduler implements ReminderScheduler {
       // longer on (ticked, moved, deleted); one on and not shown, shows.
       final nowChannel = _channels[ReminderKind.plannerNow]!.channelId;
       final shown = <int>{};
-      for (final n in await _android?.getActiveNotifications() ?? const []) {
+      for (final n in await _android?.getActiveNotifications() ??
+          const <ActiveNotification>[]) {
         final id = n.id;
         if (id == null || n.channelId != nowChannel) continue;
         if (keep.contains(id)) {
