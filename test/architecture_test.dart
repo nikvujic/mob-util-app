@@ -299,6 +299,41 @@ void main() {
         isEmpty);
   });
 
+  test(
+      "Pip's brain (Round 138): a part touches only its own state; the "
+      'core none (it calls the parts)', () {
+    const holders = {
+      'core/pip_brain_battery.dart': '_bt',
+      'core/pip_brain_station.dart': '_st',
+      'core/pip_brain_events.dart': '_ev',
+      'core/pip_brain_looks.dart': '_lk',
+      'core/pip_brain_outings.dart': '_out',
+      'core/pip_brain_places.dart': '_pl',
+      'core/pip_brain_weather.dart': '_wx',
+      'core/pip_brain.dart': null,
+    };
+    final violations = <String>[];
+    for (final MapEntry(key: path, value: own) in holders.entries) {
+      final source = File('lib/$path').readAsStringSync();
+      for (final other in holders.values) {
+        if (other == null || other == own) continue;
+        final uses = RegExp('(?<![\\w.])${RegExp.escape(other)}\\.')
+            .allMatches(source)
+            .length;
+        if (uses > 0) violations.add('$path: $other. ×$uses');
+      }
+    }
+    expect(violations, isEmpty, reason: violations.join('\n'));
+    // Every part of the brain is known here.
+    final parts = Directory('lib/core')
+        .listSync()
+        .map((f) => f.path.split('/').last)
+        .where((n) => n.startsWith('pip_brain_') && n != 'pip_brain_types.dart')
+        .map((n) => 'core/$n')
+        .toSet();
+    expect(parts, holders.keys.toSet()..remove('core/pip_brain.dart'));
+  });
+
   test('no raw colors outside the theme, no print(), lists have reach mode',
       () {
     final violations = [

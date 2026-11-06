@@ -337,6 +337,16 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 138 — Pip's brain split by concern (2026-11-06, 2.2.6)
+
+- [x] `pip_brain.dart` (3.75k lines) in parts: types; battery; station;
+  events; looks; outings; places; weather (as before). Each part: a
+  state holder on the class and an extension; statics stay on the
+  class. The core: his place and activity, play/show/step, walking,
+  frame, face, lift, entrances (1.5k lines, with section headers).
+  No behaviour changed: the 500 Pip tests after every step, the full
+  suite at the end.
+
 ### Round 136–137 — 20:30 home; a sweep of the app (2026-11-06, 2.2.5)
 
 - [x] Work over with his house next: in at his door (`quest(toHome:)`),
@@ -349,8 +359,8 @@ fixtures for every stored format.
   "days ago" counted local days; the whole suite run in Belgrade time;
   the Pip tests run three times for flakes (none); the encryption
   checked (Argon2id, AES-GCM, a wrapped data key: sound).
-- [ ] Noted, not changed: `PipBrain` (3.7k lines) and the room's painter
-  (2.3k) are the largest files; a few places read `DateTime.now()`
+- [x] Round 138: `PipBrain` split by concern. Noted still: the room's
+  painter (2.3k lines) is the largest file; a few places read `DateTime.now()`
   instead of the clock provider (notes' timestamps, some forms).
 
 ### Round 135 — the house a load at a time (2026-11-05, 2.2.4)

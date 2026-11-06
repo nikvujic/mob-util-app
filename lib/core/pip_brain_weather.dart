@@ -111,11 +111,11 @@ extension PipBrainWeather on PipBrain {
   /// His tent, if it's up (or going up or down): at home, or by the
   /// path on his day out.
   PipTent? get tent =>
-      activity == PipActivity.adventuring ? _out.run?.tent : _wx.tent;
+      activity == PipActivity.adventuring ? run?.tent : _wx.tent;
 
   /// Hidden in his tent (it's up enough, him in it).
   bool get inTent => activity == PipActivity.adventuring
-      ? _out.run?.inTent ?? false
+      ? run?.inTent ?? false
       : (_wx.tent?.hides ?? false) && _inTent.contains(activity);
 
   /// Peeking out of his tent's door now and then, awake in it.
@@ -519,5 +519,25 @@ extension PipBrainWeather on PipBrain {
         },
       _ => 0,
     };
+  }
+
+  /// A battery flying in (into his tent, or to him at his work).
+  bool get _batteryFlying => _wx.flyFrom != null;
+
+  /// A battery flying in from [from] (its left edge).
+  void _flyBatteryIn(double from) {
+    _wx.flyFrom = from;
+    _wx.flyT = 0;
+  }
+
+  /// His tent packed away at once.
+  void _packTent() => _wx.tent = null;
+
+  /// His tent, a battery flying in and his snowman gone (he's gone in or
+  /// out of his house).
+  void _packWeatherAway() {
+    _wx.tent = null;
+    _wx.flyFrom = null;
+    _wx.snowman = null;
   }
 }

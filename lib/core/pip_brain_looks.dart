@@ -171,20 +171,40 @@ extension PipBrainLooks on PipBrain {
             PipScreen.happy,
             _t - PipBrain.eatenAt
           ),
-        PipActivity.bugHunt when _ev.bugsLeft == 0 => (
-            PipScreen.happy,
-            _ev.phaseT
-          ),
+        PipActivity.bugHunt when _bugsAllGone => (PipScreen.happy, _bugPhaseT),
         // Round 127: at his quest's work, his medicine on his screen.
         PipActivity.questing when medicineDue => (
             PipScreen.pill,
-            _pl.questClock
+            _questClockNow
           ),
-        PipActivity.flower when _ev.flowerPhase == 3 => (PipScreen.happy, _t),
+        PipActivity.flower when _flowerStage == 3 => (PipScreen.happy, _t),
         _ => null,
       };
 
   /// Shows [screen] now (for tests and pictures).
   @visibleForTesting
   void debugShow(PipScreen screen) => _startShowing(screen);
+
+  /// What his screen shows now (while [PipActivity.showing]).
+  PipScreen get _shownNow => _lk.screenShow;
+
+  /// Pip Home's Medicine: the pill shown, as if one were due.
+  void _previewPill() {
+    _startShowing(PipScreen.pill);
+    _lk.previewing = !medicineDue;
+  }
+
+  /// Something on his screen, each step: a hop's landing; his medicine
+  /// marked, or its time up, it's done.
+  void _stepShowing(double dt) {
+    // Round 98: down from his hop.
+    if (_lk.screenShow.hops) _buzzOn(PipBrain.showHop, dt, PipBuzz.light);
+    if (_lk.screenShow == PipScreen.pill) _buzzOn(0.9, dt, PipBuzz.light);
+    // Round 55: his medicine reminder, marked, stops at once; still
+    // due, it starts over ([_stepMedicine]), a hop each time.
+    if ((_lk.screenShow == PipScreen.pill && !medicineDue && !_lk.previewing) ||
+        _t >= _lk.showFor) {
+      _stand();
+    }
+  }
 }

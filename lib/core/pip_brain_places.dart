@@ -259,7 +259,7 @@ extension PipBrainPlaces on PipBrain {
       if (_pl.homeTo == wanted && activity == PipActivity.walking) return;
       _pl.homeTo = wanted;
       _pl.visit = null;
-      _wx.tent = null;
+      _packTent();
       final to = atHome ? PipBrain.homeRight - PipBrain.width : roomWidth + 2.0;
       _stand();
       _pl.pastEdge = !atHome;
@@ -276,9 +276,7 @@ extension PipBrainPlaces on PipBrain {
     questCamera = 0;
     _pl.visit = null;
     // His tent's not needed in (or taken along).
-    _wx.tent = null;
-    _wx.flyFrom = null;
-    _wx.snowman = null;
+    _packWeatherAway();
     if (activity != PipActivity.showing) _stand();
     x = wanted
         ? PipBrain.homeLeft +
@@ -286,7 +284,7 @@ extension PipBrainPlaces on PipBrain {
                 (PipBrain.homeRight - PipBrain.width - PipBrain.homeLeft)
         : x.clamp(_minX, _maxX).toDouble();
     // His station where he is now.
-    if (_st.x != null) _placeStation();
+    if (_stationUp) _placeStation();
   }
 
   /// His house drawn round him at home (the house area, as at work).
@@ -372,4 +370,19 @@ extension PipBrainPlaces on PipBrain {
       _ => PipFrame.idle,
     };
   }
+
+  /// Walking past his room's edge now (not held in it).
+  bool get _offEdge => _pl.pastEdge;
+
+  /// Held in his room again (a walk past its edge over, or cut short).
+  void _holdIn() => _pl.pastEdge = false;
+
+  /// No visit in his house under way (a plain walk now).
+  void _forgetVisit() => _pl.visit = null;
+
+  /// Down where he ran out at his work: how high that was; null: not.
+  double? get _downLift => downAtWork ? _pl.downView!.lift : null;
+
+  /// Seconds at his quest's work this time (his screen's pill).
+  double get _questClockNow => _pl.questClock;
 }

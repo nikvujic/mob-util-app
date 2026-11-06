@@ -12,6 +12,7 @@ import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/weather.dart';
 
 part 'pip_brain_places.dart';
+part 'pip_brain_battery.dart';
 part 'pip_brain_outings.dart';
 part 'pip_brain_events.dart';
 part 'pip_brain_looks.dart';
@@ -64,7 +65,24 @@ class PipBrain {
 
   /// Round 75: the weather in his field and what it makes of his day
   /// (`pip_brain_weather.dart`).
+  // Round 138: what he does is in parts of this library, each with its
+  // state here and its doings in an extension on him:
+  // `pip_brain_weather.dart` (the weather as he lives it),
+  // `pip_brain_battery.dart` (a battery given him, changed),
+  // `pip_brain_station.dart` (his charging station and its drone),
+  // `pip_brain_events.dart` (bugs, a flower, a butterfly, a ball, a
+  // shooting star), `pip_brain_looks.dart` (hats, his medicine reminder,
+  // meals, his screen), `pip_brain_outings.dart` (adventures, the ski
+  // bus, Pip Home's previews), `pip_brain_places.dart` (his quests' work,
+  // his house, the walks between); `pip_brain_types.dart` holds the
+  // types and the one table of what may start when ([mayStart]).
   final _wx = _PipWeatherState();
+  final _st = _PipStationState();
+  final _ev = _PipEventsState();
+  final _lk = _PipLooksState();
+  final _out = _PipOutingsState();
+  final _pl = _PipPlacesState();
+  final _bt = _PipBatteryState();
 
   /// Walking speed, in pixels a second.
   static const speed = 14.0;
@@ -125,6 +143,9 @@ class PipBrain {
   static const hatchLandEnd = 0.9;
   static const fadeEnd = 1.8;
 
+  // Pip Home's Animations: one played now ([play]); every activity
+  // starts through [_start].
+
   /// Plays [animation] now, if [mayStart] lets it (false if not). A
   /// [demo] (Pip Home's list) of falling asleep or running out comes
   /// back on its own.
@@ -171,7 +192,7 @@ class PipBrain {
       case PipAnimation.powerOn:
         _start(PipActivity.poweringOn);
         // No battery given (a demo): straight to the screen coming on.
-        if (_battery == null) _t = flyEnd;
+        if (!_hasBattery) _t = flyEnd;
       case PipAnimation.fetch:
         // Round 54: a preview (no battery used): one dropped near him.
         return takeBattery(_batterySpot);
@@ -179,8 +200,7 @@ class PipBrain {
         // Only where there's room for the station. The phone plugged in
         // and him not at it (full, say): it plays all the same (Round 45).
         if (!_stationFits) return false;
-        _st.demoCharge = 0;
-        _setStation(true, animate: true);
+        _startDemoCharge();
       case PipAnimation.fromSky:
         enter(PipEntrance.sky);
       case PipAnimation.fromSide:
@@ -199,13 +219,11 @@ class PipBrain {
         if (!_eventRoom) return false;
         _startBall();
       case PipAnimation.shootingStar:
-        _start(PipActivity.stargazing);
-        _ev.starFromLeft = random.nextBool();
+        _startStar();
       case PipAnimation.dance:
         _start(PipActivity.dancing);
       case PipAnimation.medicine:
-        _startShowing(PipScreen.pill);
-        _lk.previewing = !medicineDue;
+        _previewPill();
       case PipAnimation.eat:
         _start(PipActivity.eating);
       case PipAnimation.puddle ||
@@ -222,7 +240,7 @@ class PipBrain {
   }
 
   void _start(PipActivity next) {
-    _pl.pastEdge = false;
+    _holdIn();
     // Round 128: out, on his trip, at work: not in his house then.
     if (_awayFromHome.contains(next)) atHome = false;
     activity = next;
@@ -238,6 +256,8 @@ class PipBrain {
   /// Round 77: the list's night wake: after his demo sleep, stirring.
   bool _demoStir = false;
 
+  // His energy (Round 37): drowsy, his segments, his pace.
+
   /// Round 77: woken at night (his life says): drowsy, his face and pace
   /// as at one segment.
   bool drowsy = false;
@@ -251,172 +271,86 @@ class PipBrain {
       speed *
       switch (drowsy ? 1 : segments) { 3 => 1.0, 2 => 0.7, _ => 0.45 } *
       // Round 75: slower in the fog.
-      paceIn(_wx.weather);
+      paceIn(weather);
 
   /// Hurrying (Round 44: to a battery, or his station), whatever his
   /// energy: quicker than his best walk.
   static const hurry = speed * 1.6;
 
-  /// The battery dropped in his room: its left edge, and how high above
-  /// the ground it still is (it falls); null when there's none.
-  double? _battery;
-  double _batteryHeight = 0;
-
-  /// Where the battery was dropped (a flying one starts there).
-  double _batteryFrom = 0;
-
-  /// Which way he fell (off): to the right, or the left (no room there).
-  bool _fallRight = true;
-  bool get fallRight => _fallRight;
-
-  /// Seconds into picking it up, once he's there.
-  double? _picking;
-
-  /// Whether a battery dropped now would be taken (up and about, or
-  /// off: it flies to him).
-  bool get canTakeBattery =>
-      mayStart(activity, PipAnimation.fetch) ||
-      mayStart(activity, PipAnimation.powerOn) ||
-      // Round 65: out on his adventure, it flies to him as he runs.
-      (activity == PipActivity.adventuring && _out.run?.canCatch == true) ||
-      // Round 75: in his tent, it flies in (one at a time).
-      (activity == PipActivity.sheltering && _wx.flyFrom == null) ||
-      // Round 133: at his quest's work, it flies to him there.
-      (activity == PipActivity.questing && _wx.flyFrom == null);
-
-  /// A battery dropped at [at] (room pixels from the left): he walks over
-  /// and picks it up, or, off, it flies to him and he comes back on.
-  bool takeBattery(double at) {
-    if (!canTakeBattery) return false;
-    // Round 128: at home, on his house's floor.
-    final left = (atHome
-            ? at.clamp(_minX, _maxX + width - batteryWidth)
-            : at.clamp(0, math.max(0, roomWidth - batteryWidth)))
-        .toDouble();
-    if (activity == PipActivity.adventuring) {
-      _out.run!.catchBattery(left);
-      return true;
-    }
-    if (activity == PipActivity.sheltering ||
-        activity == PipActivity.questing) {
-      _wx.flyFrom = left;
-      _wx.flyT = 0;
-      return true;
-    }
-    _battery = left;
-    _batteryFrom = left;
-    _batteryHeight = dropHeight;
-    _batteryLanded = null;
-    if (activity == PipActivity.off) {
-      _start(PipActivity.poweringOn);
-      return true;
-    }
-    _start(PipActivity.fetching);
-    _picking = null;
-    // Round 54: to stand beside it (it by the hand he'll use), on the
-    // side he comes from if there's room there.
-    // Round 97: a few pixels off, so the old one pulled out of
-    // his side isn't over the new one.
-    final rightOf = left + batteryWidth / 2 >= x + width / 2;
-    final besideLeft =
-        left - (width - bodyInset + 1 + batteryGap); // it on his right
-    final besideRight =
-        left + batteryWidth + 1 + batteryGap - bodyInset; // his left
-    bool fits(double at) => at >= _minX && at <= _maxX;
-    final take = rightOf
-        ? (fits(besideLeft) || !fits(besideRight))
-        : !fits(besideRight) && fits(besideLeft);
-    _batteryOnRight = take;
-    _target = (take ? besideLeft : besideRight).clamp(_minX, _maxX).toDouble();
-    facingRight = _target >= x;
-    return true;
-  }
-
-  /// Which side of him the dropped battery is (Round 54).
-  bool _batteryOnRight = true;
-
-  /// Seconds since the dropped battery hit the ground (Round 97: it
-  /// bounces once), or null while it falls.
-  double? _batteryLanded;
+  // Round 37–97: a battery's measures and timings (what it does:
+  // `pip_brain_battery.dart`).
 
   /// How far off his casing he stands from a new battery (Round 97).
   static const batteryGap = 4;
 
   /// Its bounce on landing: how long, how high.
   static const bounceTime = 0.3;
-  static const bounceHeight = 2.0;
 
-  /// A spot a few steps off for a battery to drop at (Round 54: the
-  /// preview), on whichever side has room.
-  double get _batterySpot {
-    final right = x + width - bodyInset + 1 + 20;
-    if (right + batteryWidth <= roomWidth) return right;
-    final left = x + bodyInset - 1 - batteryWidth - 20;
-    return left >= 0
-        ? left
-        : right.clamp(0, roomWidth - batteryWidth).toDouble();
-  }
+  static const bounceHeight = 2.0;
 
   /// The battery's size, how high it's dropped from, how fast it falls.
   static const batteryWidth = 4;
+
   static const batteryHeight = 7;
+
   static const dropHeight = 24.0;
+
   static const fallSpeed = 60.0;
-
-  /// The battery to draw: its left edge and how high above the ground
-  /// (flying to him while he's off), or null.
-  (double, double)? get battery {
-    if (activity == PipActivity.adventuring) return _out.run?.battery;
-    if (activity == PipActivity.sheltering) return _tentBattery;
-    if (activity == PipActivity.questing) return _questBattery;
-    final b = _battery;
-    if (b == null) return null;
-    if (activity == PipActivity.poweringOn) {
-      if (_t >= flyEnd) return null;
-      // An arc from where it was dropped to his middle.
-      final p = _t / flyEnd;
-      final to = _fallRight ? x + width + height / 2 : x - height / 2;
-      return (
-        _batteryFrom + (to - batteryWidth / 2 - _batteryFrom) * p,
-        _batteryHeight * (1 - p) + 18 * math.sin(math.pi * p),
-      );
-    }
-    // Round 54: taken by the hand, carried to his slot, pushed in.
-    final p = _picking;
-    if (activity == PipActivity.fetching && p != null && p >= grabbed) {
-      final out = _slotLeft(out: true);
-      if (p < atSlotAgain) {
-        final q = _ease((p - grabbed) / (atSlotAgain - grabbed));
-        return _lerp((b, 0), (out, slotUp), q);
-      }
-      final q =
-          _ease(((p - atSlotAgain) / (pushedIn - atSlotAgain)).clamp(0.0, 1.0));
-      return _lerp((out, slotUp), (_slotLeft(out: false), slotUp), q);
-    }
-    final landed = _batteryLanded;
-    final bounce = landed != null && landed < bounceTime
-        ? bounceHeight * math.sin(math.pi * landed / bounceTime)
-        : 0.0;
-    return (b, _batteryHeight + bounce);
-  }
-
-  /// Round 97: a glint on the new battery now and then while it waits on
-  /// the ground ((x, height above the ground) of its middle), or null.
-  (double, double)? get batteryGlint {
-    final b = _battery;
-    final landed = _batteryLanded;
-    if (activity != PipActivity.fetching || b == null || landed == null) {
-      return null;
-    }
-    final p = _picking;
-    if (p != null && p >= grabbed) return null;
-    if (landed % glintEvery >= glintFor) return null;
-    return (b + batteryWidth - 1, batteryHeight - 1);
-  }
 
   /// How often it glints, and for how long.
   static const glintEvery = 0.8;
+
   static const glintFor = 0.2;
+
+  /// Changing his battery (Round 54), seconds once he's beside it: a
+  /// hand pops in, goes to the slot in his side and pulls the old one
+  /// out, lifts it and throws it away; he crouches, the hand takes the
+  /// new one, carries it to the slot and pushes it in, pops away; a hop
+  /// of joy.
+  static const handIn = 0.25;
+
+  static const atSlot = 0.5;
+
+  static const pulledOut = 0.85;
+
+  static const throwAt = 1.1;
+
+  static const throwFlight = 0.9;
+
+  static const atBattery = 1.5;
+
+  static const grabbed = 1.65;
+
+  static const atSlotAgain = 2.05;
+
+  static const pushedIn = 2.4;
+
+  static const handOut = 2.6;
+
+  /// Round 97: a happy little shake, then a hop with sparkles.
+  static const shakeEnd = 3.0;
+
+  static const pickEnd = 3.45;
+
+  /// Round 97: the old one thrown over his head, landing on his other
+  /// side (a clunk, a puff of dust), lying there a moment, fading.
+  static const landedLies = 0.5;
+
+  static const landedFades = 0.4;
+
+  static const sparkFor = 0.35;
+
+  /// The slot's bottom (height above the ground) and its height.
+  static const slotUp = 6.0;
+
+  static const slotRows = 7;
+
+  /// Which way he fell (off): to the right, or the left (no room there).
+  bool _fallRight = true;
+  bool get fallRight => _fallRight;
+
+  // His life shown (Round 37): awake, asleep, off; and how long each
+  // takes.
 
   /// What to show, from his life (Round 37), made so: straight away if
   /// he's just appeared (instead of coming out of the ground), or with
@@ -424,7 +358,7 @@ class PipBrain {
   bool show(PipShow show) {
     // Round 67: on the bus, he dozes in his seat at night; nothing else.
     if (activity == PipActivity.riding) {
-      _out.busAsleep = show == PipShow.asleep || show == PipShow.fallAsleep;
+      _busDozes(show == PipShow.asleep || show == PipShow.fallAsleep);
       return true;
     }
     // Round 44: plugged in at bedtime, he unplugs first (then sleeps;
@@ -490,7 +424,7 @@ class PipBrain {
   /// Reminding of his medicine (Round 55): he keeps at it, but it's no
   /// reason to put off what his life says (asleep, off).
   bool get reminding =>
-      activity == PipActivity.showing && _lk.screenShow == PipScreen.pill;
+      activity == PipActivity.showing && _shownNow == PipScreen.pill;
 
   /// Falling asleep's parts: eyes closing, then settling down.
   static const eyesCloseAt = 0.8;
@@ -525,162 +459,7 @@ class PipBrain {
   static const riseUpEnd = 1.6;
   static const onEnd = 1.9;
 
-  /// Changing his battery (Round 54), seconds once he's beside it: a
-  /// hand pops in, goes to the slot in his side and pulls the old one
-  /// out, lifts it and throws it away; he crouches, the hand takes the
-  /// new one, carries it to the slot and pushes it in, pops away; a hop
-  /// of joy.
-  static const handIn = 0.25;
-  static const atSlot = 0.5;
-  static const pulledOut = 0.85;
-  static const throwAt = 1.1;
-  static const throwFlight = 0.9;
-  static const atBattery = 1.5;
-  static const grabbed = 1.65;
-  static const atSlotAgain = 2.05;
-  static const pushedIn = 2.4;
-  static const handOut = 2.6;
-
-  /// Round 97: a happy little shake, then a hop with sparkles.
-  static const shakeEnd = 3.0;
-  static const pickEnd = 3.45;
-
-  /// Round 97: the old one thrown over his head, landing on his other
-  /// side (a clunk, a puff of dust), lying there a moment, fading.
-  static const landedLies = 0.5;
-  static const landedFades = 0.4;
-  static const sparkFor = 0.35;
-
-  /// The slot's bottom (height above the ground) and its height.
-  static const slotUp = 6.0;
-  static const slotRows = 7;
-
-  /// A battery's left edge by his slot: all in (behind his casing) or
-  /// out (a pixel off it).
-  double _slotLeft({required bool out}) => _batteryOnRight
-      ? (out ? x + width - bodyInset + 1 : x + width - bodyInset - batteryWidth)
-      : (out ? x + bodyInset - 1 - batteryWidth : x + bodyInset.toDouble());
-
-  /// Where the hand is holding a battery at [left], [up]: at its outer
-  /// side ((x, height) of the hand's middle).
-  (double, double) _holding(double left, double up) => (
-        _batteryOnRight ? left + batteryWidth + 1 : left - 1,
-        up + batteryHeight / 2,
-      );
-
-  /// The old battery, out of his side: its left edge, height above the
-  /// ground, how faded (0–1) and turned (flying, end over end); null
-  /// while it's in him, and gone.
-  (double, double, double, bool)? get oldBattery {
-    final p = _picking;
-    if (activity != PipActivity.fetching || p == null || p < atSlot) {
-      return null;
-    }
-    final inside = _slotLeft(out: false);
-    final out = _slotLeft(out: true);
-    if (p < pulledOut) {
-      final q = _ease((p - atSlot) / (pulledOut - atSlot));
-      return (inside + (out - inside) * q, slotUp, 0, false);
-    }
-    if (p < throwAt) {
-      // Lifted, ready to throw.
-      final q = _ease((p - pulledOut) / (throwAt - pulledOut));
-      return (out, slotUp + 4 * q, 0, false);
-    }
-    final land = _oldBatteryLands;
-    final q = (p - throwAt) / throwFlight;
-    if (q < 1) {
-      // Round 97 (never over the new one): over his head to his
-      // other side, end over end.
-      return (
-        out + (land - out) * q,
-        (slotUp + 4) * (1 - q) + (height + 6) * math.sin(math.pi * q),
-        0,
-        (q * 8).floor().isOdd,
-      );
-    }
-    final on = p - throwAt - throwFlight;
-    if (on >= landedLies + landedFades) return null;
-    // A small hop as it lands, then still, then fading.
-    final bounce = on < 0.12 ? 1.0 * math.sin(math.pi * on / 0.12) : 0.0;
-    final fade =
-        on < landedLies ? 0.0 : ((on - landedLies) / landedFades).clamp(0, 1);
-    return (land, bounce, fade.toDouble(), false);
-  }
-
-  /// Where the old battery lands: his other side, a little off.
-  double get _oldBatteryLands {
-    final at = _batteryOnRight
-        ? x + bodyInset - 1 - batteryWidth - 8
-        : x + width - bodyInset + 1 + 8;
-    return at.clamp(0, math.max(0, roomWidth - batteryWidth)).toDouble();
-  }
-
-  /// Round 97: the old battery's landing, a puff of dust: (x, height
-  /// above the ground, how faded) for each speck.
-  List<(double, double, double)> get batteryDust {
-    final p = _picking;
-    if (activity != PipActivity.fetching || p == null) return const [];
-    final on = p - throwAt - throwFlight;
-    if (on < 0 || on >= 0.4) return const [];
-    final q = on / 0.4;
-    final mid = _oldBatteryLands + batteryWidth / 2;
-    return [
-      for (final (dx, rise) in const [
-        (-1.0, 0.6),
-        (1.0, 0.6),
-        (-0.6, 1.0),
-        (0.6, 1.0)
-      ])
-        (mid + dx * (3 + 4 * q), rise * 3 * math.sin(math.pi * q), q),
-    ];
-  }
-
-  /// The slot in his side, open while the batteries go in and out: the
-  /// column of his casing it's in, or null.
-  double? get batterySlot {
-    final p = _picking;
-    if (activity != PipActivity.fetching || p == null) return null;
-    if (p < handIn || p >= pushedIn + 0.1) return null;
-    return _batteryOnRight ? x + width - bodyInset - 1 : x + bodyInset;
-  }
-
-  /// The hand changing his battery: (x, height of its middle, size).
-  (double, double, double)? get _batteryHand {
-    final p = _picking;
-    if (activity != PipActivity.fetching || p == null || p >= handOut) {
-      return null;
-    }
-    final rest = (handBeside(right: _batteryOnRight), 9.0);
-    final atOld = _holding(_slotLeft(out: false), slotUp);
-    final b = _battery;
-    final onGround = b == null ? rest : _holding(b, 0);
-    if (p < handIn) return (rest.$1, rest.$2, p / handIn);
-    if (p < atSlot) {
-      final (hx, hy) =
-          _lerp(rest, atOld, _ease((p - handIn) / (atSlot - handIn)));
-      return (hx, hy, 1);
-    }
-    if (p < throwAt) {
-      final (left, up, _, _) = oldBattery!;
-      final (hx, hy) = _holding(left, up);
-      return (hx, hy, 1);
-    }
-    if (p < atBattery) {
-      final from = _holding(_slotLeft(out: true), slotUp + 4);
-      final (hx, hy) =
-          _lerp(from, onGround, _ease((p - throwAt) / (atBattery - throwAt)));
-      return (hx, hy, 1);
-    }
-    if (p < pushedIn) {
-      final (left, up) = battery!;
-      final (hx, hy) = _holding(left, up);
-      return (hx, hy, 1);
-    }
-    final size = 1 - (p - pushedIn) / (handOut - pushedIn);
-    final (hx, hy) = _holding(_slotLeft(out: false), slotUp);
-    return (hx, hy, size.clamp(0.0, 1.0));
-  }
+  // How he looks this moment: over on his side, his face, the z's.
 
   /// How far over he is (0 standing, 1 lying on his side).
   double get tilt {
@@ -713,7 +492,7 @@ class PipBrain {
     switch (activity) {
       case PipActivity.asleep:
         return PipFace.asleep;
-      case PipActivity.riding when _out.busAsleep:
+      case PipActivity.riding when _busAsleep:
         return PipFace.asleep;
       case PipActivity.angry:
         return PipFace.angry;
@@ -747,9 +526,7 @@ class PipBrain {
   /// above his head, how faded 0–1), in room pixels.
   List<(double, double, double)> get zs {
     if (activity != PipActivity.asleep &&
-        !(activity == PipActivity.riding &&
-            _out.busAsleep &&
-            _out.bus!.inside)) {
+        !(activity == PipActivity.riding && _busAsleep && bus!.inside)) {
       return const [];
     }
     return [
@@ -758,6 +535,8 @@ class PipBrain {
           (4 + 5 * p + i, 2 + 12 * p, p),
     ];
   }
+
+  // His egg (Round 34): taps, hatching.
 
   /// A tap on the egg: one more crack. True when it's the one that hatches
   /// him (the hatching starts).
@@ -793,6 +572,8 @@ class PipBrain {
       activity != PipActivity.egg &&
       !(activity == PipActivity.hatching && _t < popEnd);
 
+  // How far he goes: his room, or (Round 128) his house's floor.
+
   /// How far left and right he goes: his room, or (Round 128) his
   /// house's floor between its walls.
   double get _minX => atHome ? homeLeft : 0;
@@ -804,9 +585,11 @@ class PipBrain {
   static const homeLeft = PipHouse.left + 6.0;
   static const homeRight = PipHouse.right - 6.0;
 
+  // Each step: the time gone by, whatever he's doing carried on.
+
   /// Moves on by [dt] seconds.
   void step(double dt) {
-    _out.outRunSince += dt;
+    _tickOutRun(dt);
     _stepTrees(dt);
     _t += dt;
     _stepStation(dt);
@@ -876,56 +659,19 @@ class PipBrain {
         }
       case PipActivity.off:
         if (_demo && _t >= demoHold) {
-          _battery = null;
+          _dropBattery();
           play(PipAnimation.powerOn);
         }
       case PipActivity.poweringOn:
         _buzzOn(flyEnd, dt, PipBuzz.medium); // the battery reaches him
         _buzzOn(onEnd, dt, PipBuzz.light); // down from his hop
-        if (_t >= flyEnd) _battery = null;
+        if (_t >= flyEnd) _dropBattery();
         if (_t >= onEnd) {
           // Round 134: back on at his work: at it again.
-          _pl.downView != null ? _backToWork() : _stand();
+          downAtWork ? _backToWork() : _stand();
         }
       case PipActivity.fetching:
-        if (_batteryHeight == 0) {
-          _batteryLanded = (_batteryLanded ?? 0) + dt;
-          // Round 98: down again after its bounce.
-          if (_passed(bounceTime, _batteryLanded!, dt)) {
-            _buzzes.add(PipBuzz.light);
-          }
-        }
-        final falling = _batteryHeight > 0;
-        _batteryHeight = math.max(0, _batteryHeight - fallSpeed * dt);
-        // Round 98: the battery drop.
-        if (falling && _batteryHeight == 0) _buzzes.add(PipBuzz.medium);
-        final picking = _picking;
-        if (picking == null) {
-          final distance = hurry * dt;
-          if ((_target - x).abs() <= distance) {
-            x = _target;
-            if (_batteryHeight == 0) {
-              _picking = 0;
-              facingRight = _batteryOnRight;
-            }
-          } else {
-            x += _target > x ? distance : -distance;
-          }
-        } else {
-          final p = _picking = picking + dt;
-          // Round 98: the old one pulled out, landing with its clunk; the
-          // new one clicking in; down from his hop of joy.
-          for (final (at, buzz) in const [
-            (pulledOut, PipBuzz.light),
-            (throwAt + throwFlight, PipBuzz.medium),
-            (pushedIn, PipBuzz.heavy),
-            (pickEnd, PipBuzz.light),
-          ]) {
-            if (_passed(at, p, dt)) _buzzes.add(buzz);
-          }
-          if (_picking! >= pushedIn) _battery = null;
-          if (_picking! >= pickEnd) _stand();
-        }
+        _stepFetching(dt);
       case PipActivity.toStation:
         final distance = hurry * dt;
         if ((_target - x).abs() <= distance) {
@@ -943,25 +689,7 @@ class PipBrain {
           _nextScreen();
         }
       case PipActivity.charging:
-        _st.screenT += dt;
-        _st.screenFor -= dt;
-        if (_st.screenFor <= 0) _nextScreen();
-        final demo = _st.demoCharge;
-        if (demo != null) {
-          _st.demoCharge = demo + dt;
-          if (_st.demoCharge! >= demoChargeHold) {
-            _st.demoCharge = null;
-            // The phone plugged in: he stays plugged in if he'd be anyway
-            // (not full); else he unplugs (the station stays while the
-            // phone's plugged in, else it sinks).
-            if (!phonePlugged || segments >= 3) _startUnplugging();
-          }
-        } else if (segments >= 3) {
-          // Round 59: full, he's done: he unplugs and goes about (the
-          // station stays while the phone's plugged in; he's back once a
-          // segment's gone).
-          _startUnplugging();
-        }
+        _stepCharging(dt);
       case PipActivity.unplugging:
         _buzzOn(pullEnd, dt, PipBuzz.medium); // pulled out
         if (_t >= unplugEnd) {
@@ -988,17 +716,7 @@ class PipBrain {
       case PipActivity.bugHunt:
         _stepBugs(dt);
       case PipActivity.showing:
-        // Round 98: down from his hop.
-        if (_lk.screenShow.hops) _buzzOn(showHop, dt, PipBuzz.light);
-        if (_lk.screenShow == PipScreen.pill) _buzzOn(0.9, dt, PipBuzz.light);
-        // Round 55: his medicine reminder, marked, stops at once; still
-        // due, it starts over ([_stepMedicine]), a hop each time.
-        if ((_lk.screenShow == PipScreen.pill &&
-                !medicineDue &&
-                !_lk.previewing) ||
-            _t >= _lk.showFor) {
-          _stand();
-        }
+        _stepShowing(dt);
       case PipActivity.flower:
         _stepFlower(dt);
       case PipActivity.butterfly:
@@ -1046,48 +764,369 @@ class PipBrain {
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
     // Thrown in, he's still coming in from beyond the edge.
-    if (activity != PipActivity.thrown && !_pl.pastEdge) {
+    if (activity != PipActivity.thrown && !_offEdge) {
       x = x.clamp(_minX, _maxX);
     }
   }
 
-  final _st = _PipStationState();
+  // Standing about and walking; how he looks each moment: his frame,
+  // how high, how stretched (Round 26–98).
+
+  /// Snowing: a ski day, or a ski preview.
+  bool get snowing => snowy || _skiPreview;
+
+  /// Rain, drizzle, snow or a storm out (Round 128).
+  bool get wetOut =>
+      snowing ||
+      switch (weather) {
+        WeatherKind.drizzle ||
+        WeatherKind.rain ||
+        WeatherKind.snow ||
+        WeatherKind.storm =>
+          true,
+        _ => false,
+      };
+
+  /// Whether he can set off now: up and about, or just made (opened
+  /// while he's out: he's simply there, out).
+  bool get _canGoOut =>
+      activity == PipActivity.standing ||
+      activity == PipActivity.walking ||
+      activity == PipActivity.showing ||
+      freshSpawn;
+
+  void _stand() {
+    _holdIn();
+    activity = PipActivity.standing;
+    _t = 0;
+    _standFor = 1.5 + random.nextDouble() * 3.5;
+    // Now and then he looks round the other way for a bit.
+    _turnAt = random.nextDouble() < 0.4
+        ? _standFor * (0.3 + 0.4 * random.nextDouble())
+        : null;
+  }
+
+  void _walk() {
+    _forgetVisit();
+    // Somewhere at least a few steps away, inside the room.
+    final max = _maxX;
+    if (max - _minX < 8) {
+      _stand();
+      return;
+    }
+    // Round 44: not into his station, if it's up.
+    final (low, high) = _clearOfStation(_minX, max);
+    var target = x;
+    for (var i = 0; i < 10 && (target - x).abs() < 6; i++) {
+      target = low + random.nextDouble() * math.max(0, high - low);
+    }
+    if ((target - x).abs() < 6) {
+      _stand();
+      return;
+    }
+    _target = target;
+    facingRight = target > x;
+    activity = PipActivity.walking;
+    _t = 0;
+  }
+
+  /// The frame to draw now.
+  PipFrame get frame => switch (activity) {
+        PipActivity.egg => PipFrame.idle,
+        PipActivity.hatching => _t < jumpEnd
+            ? PipFrame.oh
+            : (_t < hatchLandEnd ? PipFrame.tuck : PipFrame.idle),
+        PipActivity.spawning => _t < hopEnd ? PipFrame.oh : PipFrame.tuck,
+        PipActivity.standing => _blinking > 0 ? PipFrame.blink : PipFrame.idle,
+        PipActivity.walking => _stepFrame,
+        PipActivity.fallingAsleep =>
+          _t < settleAt ? PipFrame.idle : PipFrame.tuck,
+        PipActivity.asleep || PipActivity.stirring => PipFrame.tuck,
+        PipActivity.wakingUp => _t < legsOutAt
+            ? PipFrame.tuck
+            // Eyes still shut, before the yawn and after it.
+            : _t < yawnAt || (_t >= yawnEnd && _t < eyesOpenAt)
+                ? PipFrame.blink
+                : PipFrame.idle,
+        PipActivity.poweringOff ||
+        PipActivity.off ||
+        PipActivity.poweringOn =>
+          PipFrame.idle,
+        PipActivity.fetching => _picking == null
+            ? (_atTarget ? PipFrame.idle : _stepFrame)
+            : PipFrame.idle, // Round 53: a crouch ([stretch]), not tucked
+        PipActivity.toStation => _stepFrame,
+        PipActivity.plugging ||
+        PipActivity.charging ||
+        PipActivity.unplugging =>
+          PipFrame.idle,
+        // Round 52.
+        PipActivity.falling || PipActivity.thrown => PipFrame.oh,
+        PipActivity.angry || PipActivity.showing => PipFrame.idle,
+        PipActivity.bugHunt => _bugWalking ? _stepFrame : PipFrame.idle,
+        PipActivity.flower => _flowerStage == 1 ? _stepFrame : PipFrame.idle,
+        PipActivity.butterfly => _butterflyClose ? PipFrame.oh : PipFrame.idle,
+        PipActivity.stargazing => PipFrame.oh,
+        PipActivity.dancing =>
+          (_t / beatTime * 2).floor().isEven ? PipFrame.step1 : PipFrame.step3,
+        PipActivity.ball => switch (_ballStage) {
+            1 => _stepFrame,
+            2 => PipFrame.step1,
+            _ => PipFrame.idle,
+          },
+        // Round 53: his mouth open for each bite.
+        PipActivity.eating => bites.any((b) => _t >= b && _t < b + biteTime)
+            ? PipFrame.oh
+            : PipFrame.idle,
+        PipActivity.adventuring => _runFrame,
+        PipActivity.riding => bus?.walking == true
+            ? const [
+                PipFrame.step1,
+                PipFrame.step2,
+                PipFrame.step3,
+                PipFrame.step4,
+              ][(_t / stepTime).floor() % 4]
+            : PipFrame.idle,
+        PipActivity.sheltering ||
+        PipActivity.weatherEvent ||
+        PipActivity.lookingUp =>
+          _weatherFrame,
+        PipActivity.questing => _questFrame,
+      };
+
+  /// Hurrying, his steps come quicker too (Round 44).
+  PipFrame get _stepFrame => const [
+        PipFrame.step1,
+        PipFrame.step2,
+        PipFrame.step3,
+        PipFrame.step4,
+      ][(_t / (_hurrying ? stepTime * speed / hurry : stepTime)).floor() % 4];
+
+  bool get _hurrying =>
+      activity == PipActivity.toStation ||
+      activity == PipActivity.fetching ||
+      activity == PipActivity.bugHunt;
+
+  bool get _atTarget => (_target - x).abs() < 0.01;
+
+  /// How far below the ground he still is (0: fully up), in pixels.
+  double get sunk {
+    if (activity != PipActivity.spawning) return 0;
+    if (_t < crackEnd) return height.toDouble();
+    if (_t < riseEnd) {
+      final p = (_t - crackEnd) / (riseEnd - crackEnd);
+      return height * (1 - _easeOut(p));
+    }
+    return 0;
+  }
+
+  /// How high above the ground (a hop, or a step's bob), in pixels.
+  /// Round 134: down at his work (off, back on), where he fell: up on
+  /// the floor or the scaffold.
+  double get lift {
+    final own = _ownLift;
+    if (_downLift case final down?) return down + own;
+    return own;
+  }
+
+  double get _ownLift {
+    // Round 67: in his seat on the bus, his feet hidden.
+    if (bus case final bus?) {
+      return bus.inside ? PipBus.seatLift : 0;
+    }
+    // Round 63: out, as his run says (a knock, his seat), and a bob.
+    if (run case final run?) {
+      final bob =
+          run.stepping && (frame == PipFrame.step1 || frame == PipFrame.step3)
+              ? 1.0
+              : 0.0;
+      final tucked = frame == PipFrame.tuck ||
+          frame == PipFrame.sit ||
+          frame == PipFrame.chew;
+      return run.lift + bob - (tucked ? 2 : 0);
+    }
+    // Round 75: a puddle jump, hops in the snow.
+    if (_weatherLift case final weather?) return weather;
+    // Round 127: at his quest's work: the floor, the scaffold, a bob.
+    if (questView case final view? when activity == PipActivity.questing) {
+      final bob = view.pose == QuestPose.walking &&
+              (frame == PipFrame.step1 || frame == PipFrame.step3)
+          ? 1.0
+          : 0.0;
+      return view.lift + bob;
+    }
+    // Round 52: dropping from the sky, or thrown in on an arc.
+    if (activity == PipActivity.falling && _t < _fallTime) {
+      final left = _fallTime - _t;
+      return 0.5 * gravity * left * left;
+    }
+    if (activity == PipActivity.thrown && _t < throwTime) {
+      return _throwHigh * math.sin(math.pi * _t / throwTime);
+    }
+    if (activity == PipActivity.dancing) {
+      // A hop on every beat.
+      return 3 * math.sin(math.pi * ((_t / beatTime) % 1)).abs();
+    }
+    if (activity == PipActivity.showing && _shownNow.hops && _t < showHop) {
+      return 3 * math.sin(math.pi * _t / showHop); // a hop: something came
+    }
+    // Round 53: the pill twice (a second hop).
+    if (activity == PipActivity.showing &&
+        _shownNow == PipScreen.pill &&
+        _t >= 0.5 &&
+        _t < 0.9) {
+      return 3 * math.sin(math.pi * (_t - 0.5) / 0.4);
+    }
+    if (activity == PipActivity.hatching && _t >= popEnd && _t < jumpEnd) {
+      final p = (_t - popEnd) / (jumpEnd - popEnd);
+      // A little higher than the spawn's hop, still in the room.
+      return 7 * math.sin(math.pi * p);
+    }
+    if (activity == PipActivity.spawning && _t >= riseEnd && _t < hopEnd) {
+      final p = (_t - riseEnd) / (hopEnd - riseEnd);
+      return 6 * math.sin(math.pi * p);
+    }
+    // Round 37: up from sleep, back on, or a battery picked up: a hop.
+    double hop(double from, double to, double high) {
+      if (_t < from || _t >= to) return 0;
+      return high * math.sin(math.pi * (_t - from) / (to - from));
+    }
+
+    // Settled down asleep (legs tucked): down on the ground.
+    if (frame == PipFrame.tuck &&
+        (activity == PipActivity.asleep ||
+            activity == PipActivity.fallingAsleep ||
+            activity == PipActivity.stirring ||
+            activity == PipActivity.wakingUp)) {
+      return -2;
+    }
+    switch (activity) {
+      case PipActivity.wakingUp:
+        return hop(wakeHopStart, wakeHopEnd, 3);
+      case PipActivity.poweringOn:
+        return hop(riseUpEnd, onEnd, 3);
+      case PipActivity.fetching when _picking != null:
+        final p = _picking!;
+        if (p < shakeEnd || p >= pickEnd) return 0;
+        // Round 97: after his shake, a hop.
+        return 4 * math.sin(math.pi * (p - shakeEnd) / (pickEnd - shakeEnd));
+      default:
+    }
+    if (frame == PipFrame.step1 || frame == PipFrame.step3) return 1;
+    return 0;
+  }
+
+  /// Squash and stretch: (width, height) scale.
+  (double, double) get stretch {
+    // Round 53: waking, a stretch up; picking something up, a crouch (his
+    // feet stay on the ground, his legs don't float).
+    if (activity == PipActivity.wakingUp && _t >= yawnAt && _t < yawnEnd) {
+      final s = 0.12 * math.sin(math.pi * (_t - yawnAt) / (yawnEnd - yawnAt));
+      return (1 - s / 2, 1 + s);
+    }
+    // Round 97: a happy little shake once the new battery's in.
+    if (activity == PipActivity.fetching &&
+        _picking != null &&
+        _picking! >= handOut &&
+        _picking! < shakeEnd) {
+      final s = 0.07 *
+          math.sin(math.pi * 8 * (_picking! - handOut) / (shakeEnd - handOut));
+      return (1 + s, 1 - s);
+    }
+    final crouch = switch (activity) {
+      PipActivity.adventuring => run?.crouch,
+      PipActivity.flower when _flowerStage == 2 => _t / flowerPick,
+      // Round 54: down for the new battery, and up again with it.
+      PipActivity.fetching
+          when _picking != null &&
+              _picking! >= throwAt &&
+              _picking! < atSlotAgain =>
+        (_picking! - throwAt) / (atSlotAgain - throwAt),
+      _ => null,
+    };
+    if (crouch != null) {
+      final s = 0.18 * math.sin(math.pi * crouch.clamp(0.0, 1.0));
+      return (1 + s / 2, 1 - s);
+    }
+    // Round 52: landing from the sky or a throw, squashed and springing
+    // back.
+    final landed = switch (activity) {
+      PipActivity.falling => _t - _fallTime,
+      PipActivity.thrown => _t - throwTime,
+      _ => null,
+    };
+    if (landed != null) {
+      if (landed < 0) {
+        return activity == PipActivity.falling ? (0.9, 1.15) : (1, 1);
+      }
+      if (landed < landHold) {
+        final s = 0.28 * math.sin(math.pi * landed / landHold);
+        return (1 + s / 2, 1 - s);
+      }
+      return (1, 1);
+    }
+    if (activity == PipActivity.hatching) {
+      if (_t >= popEnd && _t < jumpEnd) {
+        final p = (_t - popEnd) / (jumpEnd - popEnd);
+        final s = 0.18 * math.cos(math.pi * p).clamp(0, 1);
+        return (1 - s / 2, 1 + s);
+      }
+      if (_t >= jumpEnd && _t < hatchLandEnd) {
+        final p = (_t - jumpEnd) / (hatchLandEnd - jumpEnd);
+        final s = 0.2 * math.sin(math.pi * p);
+        return (1 + s / 2, 1 - s);
+      }
+      return (1, 1);
+    }
+    if (activity != PipActivity.spawning) return (1, 1);
+    if (_t >= riseEnd && _t < hopEnd) {
+      // Stretched going up, back to size at the top.
+      final p = (_t - riseEnd) / (hopEnd - riseEnd);
+      final s = 0.18 * math.cos(math.pi * p).clamp(0, 1);
+      return (1 - s / 2, 1 + s);
+    }
+    if (_t >= hopEnd && _t < landEnd) {
+      // Squashed on landing, springing back.
+      final p = (_t - hopEnd) / (landEnd - hopEnd);
+      final s = 0.2 * math.sin(math.pi * p);
+      return (1 + s / 2, 1 - s);
+    }
+    return (1, 1);
+  }
+
+  /// The cracked ground's dirt, flying up while he comes out: 0 none,
+  /// then 0 → 1 over the crack and the rise.
+  double get dirt {
+    if (activity != PipActivity.spawning || _t >= riseEnd) return 0;
+    return _t / riseEnd;
+  }
+
+  // Round 44: his charging station's measures and timings (what it does:
+  // `pip_brain_station.dart`).
 
   /// The station's size, in pixels; how far from it he stands to plug
   /// in; how long it takes to rise out of the ground (or sink back).
   static const stationWidth = 14;
-
   static const stationHeight = 27;
-
   static const stationGap = 6;
-
   static const stationRise = 0.9;
 
   /// Plugging in, in seconds: his hands pop in, the near one flies to
   /// the hook, takes the plug, carries it to his side, pushes it in, and
   /// the hands pop away.
   static const mittsInEnd = 0.25;
-
   static const toHookEnd = 0.75;
-
   static const grabEnd = 0.95;
-
   static const carryEnd = 1.55;
-
   static const pushEnd = 1.75;
-
   static const plugEnd = 2.0;
 
   /// Unplugging: the hands pop in, the near one takes the plug out,
   /// carries it back to the hook, and they pop away.
   static const toPortEnd = 0.6;
-
   static const pullEnd = 0.8;
-
   static const backEnd = 1.4;
-
   static const hangEnd = 1.6;
-
   static const unplugEnd = 1.85;
 
   /// Played from Pip Home's list: how long he charges before unplugging.
@@ -1099,31 +1138,22 @@ class PipBrain {
 
   /// The drone's size, in pixels.
   static const droneWidth = 10;
-
   static const droneHeight = 5;
 
   /// Its trip's parts, in seconds: up out of the station's top, over to
   /// him, beaming down on him, back over the station, down into it.
   static const droneRise = 0.5;
-
   static const droneOut = 1.2;
-
   static const droneBeam = 1.6;
-
   static const droneBack = 1.2;
-
   static const droneSink = 0.5;
 
   /// How high above the ground it hovers over him lying there (its
   /// bottom), and where its beam ends (his side).
   static const droneHover = 30.0;
-
   static const beamTo = 17.0;
-
   static const portUp = 9.0;
-
   static const hookUp = 5.0;
-
   static const socketUp = 8.0;
 
   static (double, double) _lerp(
@@ -1221,7 +1251,7 @@ class PipBrain {
   double get spin => activity == PipActivity.thrown && _t < throwTime
       ? 2 * math.pi * _ease(_t / throwTime)
       : activity == PipActivity.adventuring
-          ? _out.run?.spin ?? 0
+          ? run?.spin ?? 0
           : 0;
 
   /// Dust puffing up where he landed (from the sky or a throw): 0 → 1,
@@ -1258,24 +1288,42 @@ class PipBrain {
     return (side, fistUp + shake);
   }
 
-  final _ev = _PipEventsState();
+  // Round 52: his field's events' chances and timings (`pip_brain_events.dart`).
 
   /// The chance, each time he'd walk off, that something happens instead.
   static const eventChance = 0.09;
-
   static const starTime = 1.1;
+
+  /// A little dance: its length and beat, in seconds.
+  static const danceTime = 4.0;
+  static const beatTime = 0.5;
+  static const bugWidth = 8;
+  static const bugSpeed = 9.0;
+  static const swordIn = 0.35;
+  static const swingTime = 0.3;
+  static const poofTime = 0.35;
+
+  /// How far his sword reaches past his side.
+  static const reach = 7.0;
+  static const sproutTime = 1.2;
+  static const flowerPick = 0.45;
+  static const flowerHold = 3.0;
+  static const flowerFade = 0.6;
+  static const butterflySpeed = 11.0;
+  static const ballSize = 4;
+  static const kickTime = 0.25;
+
+  /// Round 98: how fast the ball must come down for its bounce to buzz.
+  static const ballBuzzSpeed = 15.0;
+
+  // Round 53: a meal's and his screen's timings (`pip_brain_looks.dart`).
 
   /// How long he eats; when each bite is (seconds in).
   static const eatTime = 6.5;
-
   static const plateIn = 0.4;
-
   static const bites = [1.4, 2.6, 3.8];
-
   static const biteTime = 0.35;
-
   static const eatenAt = 4.6;
-
   static const plateWidth = 10;
 
   /// The plate's height held (below his mouth; up to it for a bite).
@@ -1283,11 +1331,6 @@ class PipBrain {
 
   /// How long after a recipe was read he eats, when seen.
   static const eatsWithin = Duration(hours: 1);
-
-  /// A little dance: its length and beat, in seconds.
-  static const danceTime = 4.0;
-
-  static const beatTime = 0.5;
 
   static final _notifyScreens = [
     for (final s in PipScreen.values)
@@ -1297,57 +1340,29 @@ class PipBrain {
   /// How long his hop is when something comes (it lands with a buzz).
   static const showHop = 0.4;
 
-  static const bugWidth = 8;
-
-  static const bugSpeed = 9.0;
-
-  static const swordIn = 0.35;
-
-  static const swingTime = 0.3;
-
-  static const poofTime = 0.35;
-
-  /// How far his sword reaches past his side.
-  static const reach = 7.0;
-
-  static const sproutTime = 1.2;
-
-  static const flowerPick = 0.45;
-
-  static const flowerHold = 3.0;
-
-  static const flowerFade = 0.6;
-
-  static const butterflySpeed = 11.0;
-
-  static const ballSize = 4;
-
-  static const kickTime = 0.25;
-
-  /// Round 98: how fast the ball must come down for its bounce to buzz.
-  static const ballBuzzSpeed = 15.0;
-
-  /// Dusk or night in his sky (the room says): shooting stars then.
-  bool dark = false;
-
-  /// Round 70 (the room says): a grey sky (no shooting stars), and rain,
-  /// snow or winter (no flowers or butterflies).
-  bool overcast = false;
-  bool bleak = false;
-
-  /// Round 70: seconds going by for his field's moving things (trees
-  /// swaying, rain, leaves, lights), always.
-  double sceneClock = 0;
-
-  final _lk = _PipLooksState();
-
-  final _out = _PipOutingsState();
+  // Round 63–76: his days out's timings (`pip_brain_outings.dart`).
 
   static const previewEventAt = 6.0;
-
   static const previewLength = 17.0;
-
   static const busPreviewRide = 4.0;
+
+  /// How far into his break counts as just starting (about a minute and
+  /// a half of the half hour).
+  static const breakJustStarted = 0.05;
+
+  /// Round 132: away this long, his run is taken up afresh ([freshOut]).
+  static const outStale = Duration(seconds: 10);
+
+  /// The most the trees hurry or hold back to keep to [outRun].
+  static const treeCatchUp = 0.5;
+
+  /// How far off before they're simply put there.
+  static const treeJump = 20.0;
+  static const levelFlashTime = 1.8;
+
+  static double _easeOut(double p) => 1 - math.pow(1 - p, 3).toDouble();
+
+  // Round 128–134: his places' sets of activities (`pip_brain_places.dart`).
 
   static const _downActs = {
     PipActivity.poweringOff,
@@ -1380,25 +1395,20 @@ class PipBrain {
     PipAnimation.lost,
   };
 
-  /// How far into his break counts as just starting (about a minute and
-  /// a half of the half hour).
-  static const breakJustStarted = 0.05;
+  // His field, as his room says (each check): dusk or night, the sky,
+  // a ski day; and the clocks for what moves in it.
 
-  /// Round 132: away this long, his run is taken up afresh ([freshOut]).
-  static const outStale = Duration(seconds: 10);
+  /// Dusk or night in his sky (the room says): shooting stars then.
+  bool dark = false;
 
-  /// The most the trees hurry or hold back to keep to [outRun].
-  static const treeCatchUp = 0.5;
+  /// Round 70 (the room says): a grey sky (no shooting stars), and rain,
+  /// snow or winter (no flowers or butterflies).
+  bool overcast = false;
+  bool bleak = false;
 
-  /// How far off before they're simply put there.
-  static const treeJump = 20.0;
-
-  static const levelFlashTime = 1.8;
-
-  static double _easeOut(double p) => 1 - math.pow(1 - p, 3).toDouble();
-
-  // Round 127–136: his places (`pip_brain_places.dart`).
-  final _pl = _PipPlacesState();
+  /// Round 70: seconds going by for his field's moving things (trees
+  /// swaying, rain, leaves, lights), always.
+  double sceneClock = 0;
 
   /// Round 67: a ski day (his room says): his day out is skiing, it
   /// snows, his gear stands in a snowbank, a ski beanie.

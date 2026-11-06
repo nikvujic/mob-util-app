@@ -517,4 +517,46 @@ extension PipBrainStation on PipBrain {
           ((i.isEven ? 5 : -7) + 3 * p, 2 + 10 * p, p),
     ];
   }
+
+  /// His station up (or rising, or sinking).
+  bool get _stationUp => _st.x != null;
+
+  /// [low] to [high] (where he could walk) cut short of his station, if
+  /// it's up: not into it.
+  (double, double) _clearOfStation(double low, double high) {
+    if (_st.x == null) return (low, high);
+    return _st.right
+        ? (low, math.min(high, _plugX))
+        : (math.max(low, _plugX), high);
+  }
+
+  /// Pip Home's Charging: the station up, him charging a while.
+  void _startDemoCharge() {
+    _st.demoCharge = 0;
+    _setStation(true, animate: true);
+  }
+
+  /// Charging, each step: his screen changing now and then; a demo's
+  /// time up, or him full, he unplugs.
+  void _stepCharging(double dt) {
+    _st.screenT += dt;
+    _st.screenFor -= dt;
+    if (_st.screenFor <= 0) _nextScreen();
+    final demo = _st.demoCharge;
+    if (demo != null) {
+      _st.demoCharge = demo + dt;
+      if (_st.demoCharge! >= PipBrain.demoChargeHold) {
+        _st.demoCharge = null;
+        // The phone plugged in: he stays plugged in if he'd be anyway
+        // (not full); else he unplugs (the station stays while the
+        // phone's plugged in, else it sinks).
+        if (!phonePlugged || segments >= 3) _startUnplugging();
+      }
+    } else if (segments >= 3) {
+      // Round 59: full, he's done: he unplugs and goes about (the
+      // station stays while the phone's plugged in; he's back once a
+      // segment's gone).
+      _startUnplugging();
+    }
+  }
 }

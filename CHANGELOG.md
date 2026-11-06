@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.6] - 2026-11-06
+
+### Changed
+- Under the hood: Pip's brain (what he does each moment) is split by
+  concern (batteries, his charging station, field events, hats and his
+  screen, days out, quests and his house, weather), each in its own
+  file. Nothing he does changes.
+
 ## [2.2.5] - 2026-11-06
 
 ### Fixed

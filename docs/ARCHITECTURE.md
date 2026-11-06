@@ -380,6 +380,28 @@ to pick from.
 
 ## Pip, the pet (Round 34)
 
+His brain (Round 138): `core/pip_brain.dart` is one library in parts.
+`PipBrain` (the class, in `pip_brain.dart`) keeps what he is and does
+every moment: his place, his activity and its clock, [play] and
+[_start] (every activity starts there), [show] (his life: awake,
+asleep, off), the step loop, standing and walking, his frame, face,
+lift and stretch, entrances, and the constants each part uses (static,
+so the room and tests read `PipBrain.stationWidth` and the like). Each
+concern is a part with a small state holder (a field on the class,
+e.g. `_st`) and an extension holding its doings:
+`pip_brain_battery.dart` (`_bt`: a battery given, changed),
+`pip_brain_station.dart` (`_st`: the charging station and its drone),
+`pip_brain_events.dart` (`_ev`: bugs, a flower, a butterfly, a ball, a
+shooting star), `pip_brain_looks.dart` (`_lk`: hats, the medicine
+reminder, meals, his screen), `pip_brain_outings.dart` (`_out`:
+adventures, the ski bus, Pip Home's previews), `pip_brain_places.dart`
+(`_pl`: quest work, his house, the walks between), and
+`pip_brain_weather.dart` (`_wx`). `pip_brain_types.dart` holds the
+enums and [mayStart], the one table of what may start during what. A
+part reaches another only through its extension's members (e.g.
+`_stepFetching`, `_clearOfStation`, `run`); its state holder is only
+its own, and the core touches none: the architecture test holds it.
+
 Charging station (Round 44): `data/power.dart` asks `MainActivity` over
 `the_app/power` (the sticky battery state: plugged in or not) and hears
 `the_app/power_changes` (power connected / disconnected, a receiver

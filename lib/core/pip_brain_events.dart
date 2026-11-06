@@ -164,7 +164,7 @@ extension PipBrainEvents on PipBrain {
   /// The bug: its left edge and whether its legs are up (they step);
   /// null when there's none (or it's gone in a poof).
   (double, bool, bool)? get bug {
-    if (activity == PipActivity.adventuring) return _out.run?.bug;
+    if (activity == PipActivity.adventuring) return run?.bug;
     final b = _ev.bugX;
     if (activity != PipActivity.bugHunt || b == null || _ev.bugPhase == 3) {
       return null;
@@ -179,7 +179,7 @@ extension PipBrainEvents on PipBrain {
 
   /// The poof where a bug was struck: its middle and 0 → 1.
   (double, double)? get poof {
-    if (activity == PipActivity.adventuring) return _out.run?.poof;
+    if (activity == PipActivity.adventuring) return run?.poof;
     if (activity != PipActivity.bugHunt || _ev.bugPhase != 3) return null;
     return (
       (_ev.bugX ?? x) + PipBrain.bugWidth / 2,
@@ -192,7 +192,7 @@ extension PipBrainEvents on PipBrain {
   /// forward as it grows) and size (popping in and away); null when put
   /// away.
   (double, double, double, double)? get sword {
-    if (activity == PipActivity.adventuring) return _out.run?.sword;
+    if (activity == PipActivity.adventuring) return run?.sword;
     // Round 127: felling a tree, breaking stone: swing after swing.
     if (questView?.swing case final swing?) {
       final forward = facingRight ? 1.0 : -1.0;
@@ -394,4 +394,22 @@ extension PipBrainEvents on PipBrain {
     if (activity != PipActivity.ball) return null;
     return (_ev.ballX, _ev.ballUp, (_ev.ballX / 2).floor() % 4);
   }
+
+  /// A shooting star going over, him watching it.
+  void _startStar() {
+    _start(PipActivity.stargazing);
+    _ev.starFromLeft = random.nextBool();
+  }
+
+  /// The bugs all struck down (his screen's happy then).
+  bool get _bugsAllGone => _ev.bugsLeft == 0;
+
+  /// Seconds into the bug fight's part now.
+  double get _bugPhaseT => _ev.phaseT;
+
+  /// Where a flower's at (1 walking to it, 2 picking it, 3 holding it).
+  int get _flowerStage => _ev.flowerPhase;
+
+  /// Where a ball's at (1 walking to it, 2 the kick).
+  int get _ballStage => _ev.ballPhase;
 }
