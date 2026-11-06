@@ -12,6 +12,8 @@ import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/weather.dart';
 
 part 'pip_brain_places.dart';
+part 'pip_brain_events.dart';
+part 'pip_brain_looks.dart';
 part 'pip_brain_station.dart';
 part 'pip_brain_types.dart';
 part 'pip_brain_weather.dart';
@@ -197,12 +199,12 @@ class PipBrain {
         _startBall();
       case PipAnimation.shootingStar:
         _start(PipActivity.stargazing);
-        _starFromLeft = random.nextBool();
+        _ev.starFromLeft = random.nextBool();
       case PipAnimation.dance:
         _start(PipActivity.dancing);
       case PipAnimation.medicine:
         _startShowing(PipScreen.pill);
-        _previewing = !medicineDue;
+        _lk.previewing = !medicineDue;
       case PipAnimation.eat:
         _start(PipActivity.eating);
       case PipAnimation.puddle ||
@@ -487,7 +489,7 @@ class PipBrain {
   /// Reminding of his medicine (Round 55): he keeps at it, but it's no
   /// reason to put off what his life says (asleep, off).
   bool get reminding =>
-      activity == PipActivity.showing && _screenShow == PipScreen.pill;
+      activity == PipActivity.showing && _lk.screenShow == PipScreen.pill;
 
   /// Falling asleep's parts: eyes closing, then settling down.
   static const eyesCloseAt = 0.8;
@@ -984,12 +986,14 @@ class PipBrain {
         _stepBugs(dt);
       case PipActivity.showing:
         // Round 98: down from his hop.
-        if (_screenShow.hops) _buzzOn(showHop, dt, PipBuzz.light);
-        if (_screenShow == PipScreen.pill) _buzzOn(0.9, dt, PipBuzz.light);
+        if (_lk.screenShow.hops) _buzzOn(showHop, dt, PipBuzz.light);
+        if (_lk.screenShow == PipScreen.pill) _buzzOn(0.9, dt, PipBuzz.light);
         // Round 55: his medicine reminder, marked, stops at once; still
         // due, it starts over ([_stepMedicine]), a hop each time.
-        if ((_screenShow == PipScreen.pill && !medicineDue && !_previewing) ||
-            _t >= _showFor) {
+        if ((_lk.screenShow == PipScreen.pill &&
+                !medicineDue &&
+                !_lk.previewing) ||
+            _t >= _lk.showFor) {
           _stand();
         }
       case PipActivity.flower:
@@ -1251,47 +1255,74 @@ class PipBrain {
     return (side, fistUp + shake);
   }
 
-  // Round 52: events, now and then while he stands about.
+  final _ev = _PipEventsState();
 
   /// The chance, each time he'd walk off, that something happens instead.
   static const eventChance = 0.09;
 
-  /// Room enough for an event (something coming in, him going to it).
-  bool get _eventRoom => roomWidth >= 3 * width + 10;
+  static const starTime = 1.1;
 
-  /// Something happens instead of a walk, sometimes: not with the
-  /// station up, and not at bedtime. True if it did.
-  bool _maybeEvent() {
-    if (!_eventRoom || _wantsStation || _bedtime) return false;
-    if (random.nextDouble() >= eventChance) return false;
-    // Round 128: in his house, its own.
-    if (atHome) return _maybeHomeEvent();
-    // Round 75: mostly the weather's, while it's doing something.
-    if (_maybeWeatherEvent()) return true;
-    // At dusk or night, now and then a shooting star (Round 70: not
-    // under a grey sky).
-    if (dark && !overcast && random.nextInt(4) == 0) {
-      play(PipAnimation.shootingStar);
-      return true;
-    }
-    final pick = random.nextInt(9);
-    switch (pick) {
-      case 0 || 1:
-        _startBugs();
-      // Round 70: no flowers or butterflies in rain, snow or winter.
-      case 2 || 3 when !bleak:
-        _startFlower();
-      case 4 || 5 when !bleak:
-        _startButterfly();
-      case 2 || 3 || 4 || 5:
-        _startBugs();
-      case 6 || 7:
-        _startBall();
-      default:
-        _start(PipActivity.dancing);
-    }
-    return true;
-  }
+  /// How long he eats; when each bite is (seconds in).
+  static const eatTime = 6.5;
+
+  static const plateIn = 0.4;
+
+  static const bites = [1.4, 2.6, 3.8];
+
+  static const biteTime = 0.35;
+
+  static const eatenAt = 4.6;
+
+  static const plateWidth = 10;
+
+  /// The plate's height held (below his mouth; up to it for a bite).
+  static const plateRest = 3.0;
+
+  /// How long after a recipe was read he eats, when seen.
+  static const eatsWithin = Duration(hours: 1);
+
+  /// A little dance: its length and beat, in seconds.
+  static const danceTime = 4.0;
+
+  static const beatTime = 0.5;
+
+  static final _notifyScreens = [
+    for (final s in PipScreen.values)
+      if (s.notification) s,
+  ];
+
+  /// How long his hop is when something comes (it lands with a buzz).
+  static const showHop = 0.4;
+
+  static const bugWidth = 8;
+
+  static const bugSpeed = 9.0;
+
+  static const swordIn = 0.35;
+
+  static const swingTime = 0.3;
+
+  static const poofTime = 0.35;
+
+  /// How far his sword reaches past his side.
+  static const reach = 7.0;
+
+  static const sproutTime = 1.2;
+
+  static const flowerPick = 0.45;
+
+  static const flowerHold = 3.0;
+
+  static const flowerFade = 0.6;
+
+  static const butterflySpeed = 11.0;
+
+  static const ballSize = 4;
+
+  static const kickTime = 0.25;
+
+  /// Round 98: how fast the ball must come down for its bounce to buzz.
+  static const ballBuzzSpeed = 15.0;
 
   /// Dusk or night in his sky (the room says): shooting stars then.
   bool dark = false;
@@ -1305,546 +1336,7 @@ class PipBrain {
   /// swaying, rain, leaves, lights), always.
   double sceneClock = 0;
 
-  // A shooting star.
-  bool _starFromLeft = true;
-  bool get shootingStarFromLeft => _starFromLeft;
-  static const starTime = 1.1;
-
-  /// The shooting star: (x, rows down from the top of the sky, how far
-  /// across 0–1); null when there's none.
-  (double, double, double)? get shootingStar {
-    if (activity != PipActivity.stargazing || _t >= starTime) return null;
-    final p = _t / starTime;
-    final from = _starFromLeft ? roomWidth * 0.1 : roomWidth * 0.9;
-    final to = _starFromLeft ? roomWidth * 0.75 : roomWidth * 0.25;
-    return (from + (to - from) * p, 4 + skyRows * 0.25 * p, p);
-  }
-
-  // Round 57: his hats.
-
-  /// Someone's birthday today, or his own (the room says): the party hat.
-  bool birthday = false;
-
-  /// Today's hat otherwise (Round 61, the room says): a day of the year's
-  /// (a Santa hat at New Year...) or a random day's; null: none.
-  PipHat? dayHat;
-
-  /// A hat tried on (Pip Home's Hats; null: none, even on a birthday),
-  /// while [_tryingOn].
-  PipHat? _triedOn;
-  bool _tryingOn = false;
-
-  /// Tries [hat] on (none: null), instead of what he'd wear.
-  void tryOn(PipHat? hat) {
-    _tryingOn = true;
-    _triedOn = hat;
-  }
-
-  /// Back to what he wears himself (a party hat on a birthday).
-  void stopTryingOn() {
-    _tryingOn = false;
-    _triedOn = null;
-  }
-
-  /// The hat he has: tried on, or the party hat on a birthday; none in
-  /// his egg or while he hatches.
-  PipHat? get hat {
-    if (activity == PipActivity.egg || activity == PipActivity.hatching) {
-      return null;
-    }
-    if (_tryingOn) return _triedOn;
-    // Round 67: no hat on the bus.
-    if (activity == PipActivity.riding) return null;
-    if (birthday) return PipHat.party;
-    // Round 128: working his quest in the wet, his rain hat.
-    if (activity == PipActivity.questing && wetOut) return PipHat.rainHat;
-    // Round 67: a ski beanie all his ski days.
-    return snowing ? PipHat.skiBeanie : dayHat;
-  }
-
-  /// Asleep (settled, legs tucked): his hat on the ground beside him.
-  bool get hatBeside =>
-      hat != null &&
-      frame == PipFrame.tuck &&
-      (activity == PipActivity.asleep ||
-          activity == PipActivity.fallingAsleep ||
-          activity == PipActivity.stirring ||
-          activity == PipActivity.wakingUp);
-
-  // Round 53: his medicine reminder.
-
-  /// A medicine due and not marked (the room says, from the red dot).
-  bool medicineDue = false;
-
-  /// The reminder played from Pip Home's list, not for real: once.
-  bool _previewing = false;
-
-  /// Round 55: due, the first thing he does whenever he's up and about
-  /// (before going to charge, or a battery), and he keeps at it.
-  void _stepMedicine() {
-    if (!medicineDue) return;
-    if (activity != PipActivity.standing && activity != PipActivity.walking) {
-      return;
-    }
-    _previewing = false;
-    _startShowing(PipScreen.pill);
-  }
-
-  // Round 53: eating, after a recipe was looked at a while.
-
-  /// How long he eats; when each bite is (seconds in).
-  static const eatTime = 6.5;
-  static const plateIn = 0.4;
-  static const bites = [1.4, 2.6, 3.8];
-  static const biteTime = 0.35;
-  static const eatenAt = 4.6;
-  static const plateWidth = 10;
-
-  /// The plate's height held (below his mouth; up to it for a bite).
-  static const plateRest = 3.0;
-
-  /// How long after a recipe was read he eats, when seen.
-  static const eatsWithin = Duration(hours: 1);
-
-  /// The recipe reading he last ate for (the room: once for each).
-  DateTime? ateFor;
-
-  /// Eating, if he's up and about: true if he started.
-  bool eat() {
-    if (activity != PipActivity.standing && activity != PipActivity.walking) {
-      return false;
-    }
-    _start(PipActivity.eating);
-    return true;
-  }
-
-  /// The plate: (its left, height above the ground, bites taken 0–3,
-  /// size 0–1 popping in and away); null when he isn't eating. Held up
-  /// to his face for each bite.
-  (double, double, int, double)? get plate {
-    if (activity != PipActivity.eating) return null;
-    final taken = bites.where((b) => _t >= b + biteTime / 2).length;
-    final double size = _t < plateIn
-        ? _t / plateIn
-        : _t > eatTime - plateIn
-            ? ((eatTime - _t) / plateIn).clamp(0.0, 1.0)
-            : 1;
-    var up = 0.0;
-    for (final b in bites) {
-      if (_t >= b && _t < b + biteTime) {
-        up = 3 * math.sin(math.pi * (_t - b) / biteTime);
-      }
-    }
-    final left = x + (width - plateWidth) / 2;
-    return (left, plateRest + up, taken, size);
-  }
-
-  /// Crumbs falling from the plate after each bite: (x, height).
-  List<(double, double)> get crumbs {
-    if (activity != PipActivity.eating) return const [];
-    final out = <(double, double)>[];
-    for (final (i, b) in bites.indexed) {
-      final since = _t - b - biteTime / 2;
-      if (since < 0 || since >= 0.6) continue;
-      final fall = 0.5 * 40 * since * since;
-      for (final dx in const [-2.0, 3.0]) {
-        final h = plateRest + 2 - fall;
-        if (h > 0) out.add((x + width / 2 + dx + i, h));
-      }
-    }
-    return out;
-  }
-
-  /// A little dance: its length and beat, in seconds.
-  static const danceTime = 4.0;
-  static const beatTime = 0.5;
-
-  /// A notification came (his room heard): his screen shows one, with a
-  /// hop, if he's up and about; else nothing (asleep, busy, charging).
-  bool notify() {
-    if (activity != PipActivity.standing && activity != PipActivity.walking) {
-      return false;
-    }
-    _startShowing(_notifyScreens[random.nextInt(_notifyScreens.length)]);
-    return true;
-  }
-
-  static final _notifyScreens = [
-    for (final s in PipScreen.values)
-      if (s.notification) s,
-  ];
-
-  // His screen showing something.
-  PipScreen _screenShow = PipScreen.happy;
-  double _showFor = 3;
-
-  /// How long his hop is when something comes (it lands with a buzz).
-  static const showHop = 0.4;
-
-  void _startShowing(PipScreen screen) {
-    _screenShow = screen;
-    _showFor = screen.hops ? 4.0 : 3.2;
-    _start(PipActivity.showing);
-  }
-
-  /// What his screen shows and how far into it: while [PipActivity.
-  /// showing], and after a bug fight (proud) or holding a flower (happy).
-  (PipScreen, double)? get screenShow => switch (activity) {
-        PipActivity.showing => (_screenShow, _t),
-        PipActivity.dancing => (PipScreen.music, _t),
-        PipActivity.eating when _t >= eatenAt => (
-            PipScreen.happy,
-            _t - eatenAt
-          ),
-        PipActivity.bugHunt when _bugsLeft == 0 => (PipScreen.happy, _phaseT),
-        // Round 127: at his quest's work, his medicine on his screen.
-        PipActivity.questing when medicineDue => (
-            PipScreen.pill,
-            _pl.questClock
-          ),
-        PipActivity.flower when _flowerPhase == 3 => (PipScreen.happy, _t),
-        _ => null,
-      };
-
-  /// Shows [screen] now (for tests and pictures).
-  @visibleForTesting
-  void debugShow(PipScreen screen) => _startShowing(screen);
-
-  // Bugs.
-
-  int _bugsLeft = 0;
-  double? _bugX;
-  bool _bugFromRight = true;
-
-  /// 0 the sword pops in, 1 the bug crawls (he goes for it), 2 the
-  /// swing, 3 the poof; [_phaseT] seconds into it.
-  int _bugPhase = 0;
-  double _phaseT = 0;
-
-  static const bugWidth = 8;
-  static const bugSpeed = 9.0;
-  static const swordIn = 0.35;
-  static const swingTime = 0.3;
-  static const poofTime = 0.35;
-
-  /// How far his sword reaches past his side.
-  static const reach = 7.0;
-
-  void _startBugs() {
-    _bugsLeft = 1 + random.nextInt(3);
-    _start(PipActivity.bugHunt);
-    _nextBug();
-    _bugPhase = 0;
-  }
-
-  void _nextBug() {
-    _bugFromRight = random.nextBool();
-    _bugX = _bugFromRight ? roomWidth.toDouble() : -bugWidth.toDouble();
-    _bugPhase = 1;
-    _phaseT = 0;
-  }
-
-  /// Where he swings from: his side facing the bug.
-  double get _swordSide => facingRight ? x + width : x;
-
-  bool get _bugWalking => _bugPhase == 1 && !_bugInReach && _bugX != null;
-
-  bool get _bugInReach {
-    final b = _bugX;
-    if (b == null) return false;
-    final near = facingRight ? b : b + bugWidth;
-    return (near - _swordSide).abs() <= reach && (facingRight == (b > x));
-  }
-
-  void _stepBugs(double dt) {
-    _phaseT += dt;
-    final b = _bugX;
-    switch (_bugPhase) {
-      case 0: // the sword pops in
-        if (_phaseT >= swordIn) {
-          _bugPhase = 1;
-          _phaseT = 0;
-        }
-      case 1: // the bug crawls in; he hurries at it
-        if (b == null) return;
-        final towards = b + bugWidth / 2 > x + width / 2 ? 1 : -1;
-        _bugX = b - towards * bugSpeed * dt;
-        facingRight = towards > 0;
-        if (_bugInReach) {
-          _bugPhase = 2;
-          _phaseT = 0;
-        } else if ((b - x).abs() > width) {
-          // Up to it, but not off his field.
-          x = (x + towards * hurry * dt).clamp(_minX, _maxX).toDouble();
-        }
-      case 2: // the swing
-        if (_phaseT >= swingTime) {
-          _bugPhase = 3;
-          _phaseT = 0;
-          _buzzes.add(PipBuzz.light); // struck
-        }
-      case 3: // the poof
-        if (_phaseT >= poofTime) {
-          _bugsLeft--;
-          if (_bugsLeft > 0) {
-            _nextBug();
-          } else {
-            _bugX = null;
-            _bugPhase = 4;
-            _phaseT = 0;
-          }
-        }
-      default: // all gone: proud a moment, the sword away
-        if (_phaseT >= 1.6) _stand();
-    }
-  }
-
-  /// The bug: its left edge and whether its legs are up (they step);
-  /// null when there's none (or it's gone in a poof).
-  (double, bool, bool)? get bug {
-    if (activity == PipActivity.adventuring) return _run?.bug;
-    final b = _bugX;
-    if (activity != PipActivity.bugHunt || b == null || _bugPhase == 3) {
-      return null;
-    }
-    // Mirrored going right (it comes from his left).
-    return (b, (_t * 8).floor().isEven, b + bugWidth / 2 < x + width / 2);
-  }
-
-  /// The poof where a bug was struck: its middle and 0 → 1.
-  (double, double)? get poof {
-    if (activity == PipActivity.adventuring) return _run?.poof;
-    if (activity != PipActivity.bugHunt || _bugPhase != 3) return null;
-    return ((_bugX ?? x) + bugWidth / 2, _phaseT / poofTime);
-  }
-
-  /// His sword (Round 52, for the adventures later): held in a floating
-  /// hand at (x, height above the ground), its angle (0 up, pointing
-  /// forward as it grows) and size (popping in and away); null when put
-  /// away.
-  (double, double, double, double)? get sword {
-    if (activity == PipActivity.adventuring) return _run?.sword;
-    // Round 127: felling a tree, breaking stone: swing after swing.
-    if (questView?.swing case final swing?) {
-      final forward = facingRight ? 1.0 : -1.0;
-      final angle = swing < 0.5
-          ? forward * (0.3 + 1.5 * _ease(swing * 2))
-          : forward * (1.8 - 1.5 * _ease((swing - 0.5) * 2));
-      return (handBeside(right: facingRight), 7, angle, 1);
-    }
-    if (activity != PipActivity.bugHunt) return null;
-    // Round 53: held out in front, pointing up and away from him.
-    // Round 54: a little closer to him.
-    final hand = handBeside(right: facingRight);
-    final double size = switch (_bugPhase) {
-      0 => (_phaseT / swordIn).clamp(0.0, 1.0),
-      4 => (1 - (_phaseT - 1.0) / 0.4).clamp(0.0, 1.0),
-      _ => 1,
-    };
-    final forward = facingRight ? 1.0 : -1.0;
-    final double angle = switch (_bugPhase) {
-      2 => forward * (0.3 + 1.5 * _ease(_phaseT / swingTime)),
-      3 => forward * 1.8,
-      _ => forward * 0.3, // raised, ready, leaning forward
-    };
-    return (hand, 7, angle, size);
-  }
-
-  // A flower.
-
-  double _flowerX = 0;
-
-  /// 0 it comes up, 1 he walks over, 2 he picks it, 3 he holds it, 4 it
-  /// fades.
-  int _flowerPhase = 0;
-  static const sproutTime = 1.2;
-  static const flowerPick = 0.45;
-  static const flowerHold = 3.0;
-  static const flowerFade = 0.6;
-
-  void _startFlower() {
-    // Somewhere a few steps away, inside his field.
-    final max = _maxX;
-    var at = x;
-    for (var i = 0; i < 12 && (at - x).abs() < 12; i++) {
-      at = random.nextDouble() * max;
-    }
-    if ((at - x).abs() < 12) at = x < max / 2 ? max : 0;
-    _flowerX = at + width / 2 - 1;
-    _target = at;
-    _flowerPhase = 0;
-    _start(PipActivity.flower);
-  }
-
-  void _stepFlower(double dt) {
-    switch (_flowerPhase) {
-      case 0:
-        if (_t >= sproutTime) {
-          _flowerPhase = 1;
-          facingRight = _target > x;
-          _t = 0;
-        }
-      case 1:
-        final distance = pace * dt;
-        if ((_target - x).abs() <= distance) {
-          x = _target;
-          _flowerPhase = 2;
-          _t = 0;
-        } else {
-          x += _target > x ? distance : -distance;
-        }
-      case 2:
-        if (_t >= flowerPick) {
-          _buzzes.add(PipBuzz.light); // Round 98: picked
-          _flowerPhase = 3;
-          _t = 0;
-        }
-      case 3:
-        if (_t >= flowerHold) {
-          _flowerPhase = 4;
-          _t = 0;
-        }
-      default:
-        if (_t >= flowerFade) _stand();
-    }
-  }
-
-  /// The flower: (x, height above the ground of its stem's foot, grown
-  /// 0–1, faded 0–1); in the ground until picked, then in his hand.
-  (double, double, double, double)? get flower {
-    if (activity != PipActivity.flower) return null;
-    return switch (_flowerPhase) {
-      0 => (_flowerX, 0, (_t / sproutTime).clamp(0.0, 1.0), 0),
-      1 || 2 => (_flowerX, 0, 1, 0),
-      _ => (
-          // Round 53: its stem down in his hand.
-          handBeside(right: facingRight) - 2,
-          4,
-          1,
-          _flowerPhase == 4 ? (_t / flowerFade).clamp(0.0, 1.0) : 0,
-        ),
-    };
-  }
-
-  /// The hand holding the flower: (x, height), or null.
-  (double, double)? get flowerHand {
-    if (activity != PipActivity.flower || _flowerPhase < 3) return null;
-    return (handBeside(right: facingRight) - 1, 5);
-  }
-
-  // A butterfly.
-
-  double _flyX = 0;
-  double _flyFrom = 0;
-  bool _flyRight = true;
-  static const butterflySpeed = 11.0;
-
-  void _startButterfly() {
-    _flyRight = random.nextBool();
-    _flyFrom = _flyRight ? -6.0 : roomWidth + 1.0;
-    _flyX = _flyFrom;
-    _start(PipActivity.butterfly);
-  }
-
-  void _stepButterfly(double dt) {
-    _flyX += (_flyRight ? 1 : -1) * butterflySpeed * dt;
-    // He watches it: turned towards it.
-    facingRight = _flyX + 2 > x + width / 2;
-    if (_flyRight ? _flyX > roomWidth + 2 : _flyX < -8) _stand();
-  }
-
-  bool get _butterflyClose =>
-      activity == PipActivity.butterfly &&
-      (_flyX + 2 - (x + width / 2)).abs() < width;
-
-  /// The butterfly: (x, height above the ground, wings up); null when
-  /// there's none. It bobs as it goes.
-  (double, double, bool)? get butterfly {
-    if (activity != PipActivity.butterfly) return null;
-    final up = 24 + 4 * math.sin(_t * 3) + 2 * math.sin(_t * 7.3);
-    return (_flyX, up, (_t * 6).floor().isEven);
-  }
-
-  // A ball.
-
-  double _ballX = 0;
-  double _ballUp = 0;
-  double _ballSpeed = 0;
-  double _ballVy = 0;
-
-  /// 0 it rolls in, 1 he walks up to it, 2 the kick, 3 it flies off.
-  int _ballPhase = 0;
-  static const ballSize = 4;
-  static const kickTime = 0.25;
-
-  /// Round 98: how fast the ball must come down for its bounce to buzz.
-  static const ballBuzzSpeed = 15.0;
-
-  void _startBall() {
-    final fromRight = random.nextBool();
-    _ballX = fromRight ? roomWidth.toDouble() : -ballSize.toDouble();
-    _ballSpeed = fromRight ? -26 : 26;
-    _ballUp = 0;
-    _ballVy = 0;
-    _ballPhase = 0;
-    _start(PipActivity.ball);
-  }
-
-  void _stepBall(double dt) {
-    switch (_ballPhase) {
-      case 0:
-        // Slowing as it rolls; it stops on its own.
-        _ballX += _ballSpeed * dt;
-        _ballSpeed *= math.pow(0.45, dt).toDouble();
-        if (_ballSpeed.abs() < 3) {
-          _ballSpeed = 0;
-          _ballPhase = 1;
-          // Beside it, the side it came from... facing it.
-          final behind = _ballX + ballSize / 2 > x + width / 2;
-          _target = (behind ? _ballX - width + 1 : _ballX + ballSize - 1)
-              .clamp(0, _maxX)
-              .toDouble();
-          facingRight = _target < _ballX;
-          if ((_target - x).abs() > 0.5) facingRight = _target > x;
-        }
-      case 1:
-        final distance = pace * dt;
-        if ((_target - x).abs() <= distance) {
-          x = _target;
-          facingRight = _ballX + ballSize / 2 > x + width / 2;
-          _ballPhase = 2;
-          _t = 0;
-        } else {
-          x += _target > x ? distance : -distance;
-        }
-      case 2:
-        if (_t >= kickTime) {
-          _buzzes.add(PipBuzz.medium); // the kick
-          _ballPhase = 3;
-          _ballSpeed = facingRight ? 55 : -55;
-          _ballVy = 45;
-          _t = 0;
-        }
-      default:
-        _ballX += _ballSpeed * dt;
-        _ballVy -= gravity * dt;
-        _ballUp += _ballVy * dt;
-        if (_ballUp < 0) {
-          _ballUp = 0;
-          // Round 98: a buzz on each bounce that's still a bounce.
-          if (_ballVy < -ballBuzzSpeed) _buzzes.add(PipBuzz.light);
-          _ballVy = -_ballVy * 0.5; // a bounce
-        }
-        if (_ballX > roomWidth + 2 || _ballX < -ballSize - 2) _stand();
-    }
-  }
-
-  /// The ball: (left edge, height above the ground, which way it's
-  /// turned 0–3); null when there's none.
-  (double, double, int)? get ball {
-    if (activity != PipActivity.ball) return null;
-    return (_ballX, _ballUp, (_ballX / 2).floor() % 4);
-  }
+  final _lk = _PipLooksState();
 
   // Round 67: his ski trip's bus.
 
@@ -2364,12 +1856,12 @@ class PipBrain {
         PipActivity.falling || PipActivity.thrown => PipFrame.oh,
         PipActivity.angry || PipActivity.showing => PipFrame.idle,
         PipActivity.bugHunt => _bugWalking ? _stepFrame : PipFrame.idle,
-        PipActivity.flower => _flowerPhase == 1 ? _stepFrame : PipFrame.idle,
+        PipActivity.flower => _ev.flowerPhase == 1 ? _stepFrame : PipFrame.idle,
         PipActivity.butterfly => _butterflyClose ? PipFrame.oh : PipFrame.idle,
         PipActivity.stargazing => PipFrame.oh,
         PipActivity.dancing =>
           (_t / beatTime * 2).floor().isEven ? PipFrame.step1 : PipFrame.step3,
-        PipActivity.ball => switch (_ballPhase) {
+        PipActivity.ball => switch (_ev.ballPhase) {
             1 => _stepFrame,
             2 => PipFrame.step1,
             _ => PipFrame.idle,
@@ -2469,12 +1961,14 @@ class PipBrain {
       // A hop on every beat.
       return 3 * math.sin(math.pi * ((_t / beatTime) % 1)).abs();
     }
-    if (activity == PipActivity.showing && _screenShow.hops && _t < showHop) {
+    if (activity == PipActivity.showing &&
+        _lk.screenShow.hops &&
+        _t < showHop) {
       return 3 * math.sin(math.pi * _t / showHop); // a hop: something came
     }
     // Round 53: the pill twice (a second hop).
     if (activity == PipActivity.showing &&
-        _screenShow == PipScreen.pill &&
+        _lk.screenShow == PipScreen.pill &&
         _t >= 0.5 &&
         _t < 0.9) {
       return 3 * math.sin(math.pi * (_t - 0.5) / 0.4);
@@ -2537,7 +2031,7 @@ class PipBrain {
     }
     final crouch = switch (activity) {
       PipActivity.adventuring => _run?.crouch,
-      PipActivity.flower when _flowerPhase == 2 => _t / flowerPick,
+      PipActivity.flower when _ev.flowerPhase == 2 => _t / flowerPick,
       // Round 54: down for the new battery, and up again with it.
       PipActivity.fetching
           when _picking != null &&
