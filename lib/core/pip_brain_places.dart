@@ -286,7 +286,7 @@ extension PipBrainPlaces on PipBrain {
                 (PipBrain.homeRight - PipBrain.width - PipBrain.homeLeft)
         : x.clamp(_minX, _maxX).toDouble();
     // His station where he is now.
-    if (_stationX != null) _placeStation();
+    if (_st.x != null) _placeStation();
   }
 
   /// His house drawn round him at home (the house area, as at work).

@@ -12,6 +12,7 @@ import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/weather.dart';
 
 part 'pip_brain_places.dart';
+part 'pip_brain_station.dart';
 part 'pip_brain_types.dart';
 part 'pip_brain_weather.dart';
 
@@ -175,7 +176,7 @@ class PipBrain {
         // Only where there's room for the station. The phone plugged in
         // and him not at it (full, say): it plays all the same (Round 45).
         if (!_stationFits) return false;
-        _demoCharge = 0;
+        _st.demoCharge = 0;
         _setStation(true, animate: true);
       case PipAnimation.fromSky:
         enter(PipEntrance.sky);
@@ -937,14 +938,14 @@ class PipBrain {
           _nextScreen();
         }
       case PipActivity.charging:
-        _screenT += dt;
-        _screenFor -= dt;
-        if (_screenFor <= 0) _nextScreen();
-        final demo = _demoCharge;
+        _st.screenT += dt;
+        _st.screenFor -= dt;
+        if (_st.screenFor <= 0) _nextScreen();
+        final demo = _st.demoCharge;
         if (demo != null) {
-          _demoCharge = demo + dt;
-          if (_demoCharge! >= demoChargeHold) {
-            _demoCharge = null;
+          _st.demoCharge = demo + dt;
+          if (_st.demoCharge! >= demoChargeHold) {
+            _st.demoCharge = null;
             // The phone plugged in: he stays plugged in if he'd be anyway
             // (not full); else he unplugs (the station stays while the
             // phone's plugged in, else it sinks).
@@ -1043,536 +1044,80 @@ class PipBrain {
     }
   }
 
-  // Round 44: his charging station.
+  final _st = _PipStationState();
 
   /// The station's size, in pixels; how far from it he stands to plug
   /// in; how long it takes to rise out of the ground (or sink back).
   static const stationWidth = 14;
+
   static const stationHeight = 27;
+
   static const stationGap = 6;
+
   static const stationRise = 0.9;
 
   /// Plugging in, in seconds: his hands pop in, the near one flies to
   /// the hook, takes the plug, carries it to his side, pushes it in, and
   /// the hands pop away.
   static const mittsInEnd = 0.25;
+
   static const toHookEnd = 0.75;
+
   static const grabEnd = 0.95;
+
   static const carryEnd = 1.55;
+
   static const pushEnd = 1.75;
+
   static const plugEnd = 2.0;
 
   /// Unplugging: the hands pop in, the near one takes the plug out,
   /// carries it back to the hook, and they pop away.
   static const toPortEnd = 0.6;
+
   static const pullEnd = 0.8;
+
   static const backEnd = 1.4;
+
   static const hangEnd = 1.6;
+
   static const unplugEnd = 1.85;
 
   /// Played from Pip Home's list: how long he charges before unplugging.
   static const demoChargeHold = 6.0;
 
-  /// The phone plugged in (from his room, checked every second).
-  bool phonePlugged = false;
-
-  /// The demo (Pip Home's list): seconds charging so far, or null.
-  double? _demoCharge;
-
-  /// Whether the station should be up: the phone plugged in, or a demo.
-  bool get _wantsStation => phonePlugged || _demoCharge != null;
-
-  /// The station's left edge (null: none), how far up it is (0 in the
-  /// ground, 1 up), and which way it's going (1 rising, −1 sinking).
-  double? _stationX;
-  double _stationUp = 0;
-  int _stationDir = 0;
-  bool _stationRight = true;
-
-  /// The station: its left edge, how far up (0 to 1), and whether its
-  /// socket faces left (it's on his right); null when there's none.
-  (double, double, bool)? get station {
-    final sx = _stationX;
-    if (sx == null) return null;
-    return (sx, _stationUp, _stationRight);
-  }
-
-  /// The station rising or sinking now.
-  bool get stationMoving => _stationDir != 0;
-
-  /// Which side of him the station is on (it rises on the side with more
-  /// room, so never on top of him).
-  bool get stationOnRight => _stationRight;
-
-  /// Room for the station and him beside it, with some to spare.
-  /// The station's spot: on the side of him with more room, at his
-  /// room's edge (Round 128: or his house's wall).
-  void _placeStation() {
-    final low = atHome ? homeLeft : 0.0;
-    final high = atHome ? homeRight : roomWidth.toDouble();
-    _stationRight = x + width / 2 <= (low + high) / 2;
-    _stationX = _stationRight ? high - stationWidth - 4 : low + 4;
-  }
-
-  bool get _stationFits =>
-      roomWidth >= 2 * width + stationWidth + stationGap + 8;
-
-  /// Where he stands to plug in.
-  double get _plugX => _stationRight
-      ? _stationX! - stationGap - width
-      : _stationX! + stationWidth + stationGap;
-
-  /// The phone plugged in or not, as now known; [animate]: seen happening
-  /// (the station rises or sinks, he plugs in or out), else made so at
-  /// once (the app opened while charging: he's simply there, charging).
-  void setPlugged(bool plugged, {bool animate = true}) {
-    if (plugged == phonePlugged && (_stationX != null) == _wantsStation) {
-      return;
-    }
-    phonePlugged = plugged;
-    // A demo going on: it ends on its own.
-    if (_demoCharge != null) return;
-    _setStation(plugged, animate: animate);
-  }
-
-  void _setStation(bool up, {required bool animate}) {
-    if (up) {
-      if (!_stationFits) return;
-      if (_stationX == null) {
-        // The side with more room: never on top of him.
-        _placeStation();
-        _stationUp = animate ? 0 : 1;
-        _stationDir = animate ? 1 : 0;
-      } else if (_stationDir < 0) {
-        _stationDir = 1; // sinking: back up
-      }
-      // Round 55: a medicine due, he reminds first (and goes after).
-      if (!animate && _goesCharging && !medicineDue) {
-        // Simply there, charging.
-        x = _plugX;
-        facingRight = _stationRight;
-        _start(PipActivity.charging);
-        _nextScreen();
-      }
-      return;
-    }
-    switch (activity) {
-      case PipActivity.charging || PipActivity.plugging:
-        if (animate) {
-          _startUnplugging();
-          return; // the station sinks once he's done
-        }
-        _stand();
-      case PipActivity.toStation:
-        _stand();
-      case PipActivity.unplugging when animate:
-        return;
-      default:
-    }
-    if (activity == PipActivity.unplugging) _stand();
-    animate ? _sinkStation() : _stationX = null;
-  }
-
-  void _sinkStation() {
-    if (_stationX == null) return;
-    _stationDir = -1;
-  }
-
-  void _startUnplugging() {
-    _start(PipActivity.unplugging);
-    facingRight = _stationRight;
-  }
-
-  void _stepStation(double dt) {
-    _stationClock += dt;
-    if (_stationX == null || _stationDir == 0) return;
-    _stationUp += _stationDir * dt / stationRise;
-    if (_stationUp >= 1) {
-      _stationUp = 1;
-      _stationDir = 0;
-    } else if (_stationUp <= 0) {
-      _stationX = null;
-      _stationUp = 0;
-      _stationDir = 0;
-    }
-  }
-
   /// Round 58: at his station, watched, a segment this often (the user:
   /// Round 88 15 s, it was 30; Round 91 8 s).
   static const chargeEvery = 8.0;
 
-  // Round 58: off with the phone plugged in, the station's drone flies
-  // over and charges him a segment; then he's up and walks over to plug
-  // in as ever.
-
   /// The drone's size, in pixels.
   static const droneWidth = 10;
+
   static const droneHeight = 5;
 
   /// Its trip's parts, in seconds: up out of the station's top, over to
   /// him, beaming down on him, back over the station, down into it.
   static const droneRise = 0.5;
+
   static const droneOut = 1.2;
+
   static const droneBeam = 1.6;
+
   static const droneBack = 1.2;
+
   static const droneSink = 0.5;
 
   /// How high above the ground it hovers over him lying there (its
   /// bottom), and where its beam ends (his side).
   static const droneHover = 30.0;
+
   static const beamTo = 17.0;
 
-  DronePhase? _dronePhase;
-  double _droneT = 0;
-
-  /// Where its leg of the trip began (its left, its bottom's height).
-  (double, double) _droneFrom = (0, 0);
-
-  /// It charged him: taken once by the room, which tells his life.
-  bool _droneCharged = false;
-
-  /// Where it starts and ends: in the station's top.
-  (double, double) get _droneHome => (
-        _stationX! + (stationWidth - droneWidth) / 2,
-        stationHeight - droneHeight.toDouble(),
-      );
-
-  /// Over the station, before going down into it (or after coming up).
-  (double, double) get _droneAbove => (_droneHome.$1, stationHeight + 4.0);
-
-  /// Over his middle, lying there.
-  (double, double) get _droneOver {
-    final middle = _fallRight ? x + width + height / 2 : x - height / 2;
-    return (
-      (middle - droneWidth / 2)
-          .clamp(0, math.max(0, roomWidth - droneWidth))
-          .toDouble(),
-      droneHover,
-    );
-  }
-
-  /// Whether it would set off now: he's off (for real, not a demo), the
-  /// phone plugged in, the station up and still (at night too: off, his
-  /// life says off whatever the hour; charged, he then goes to sleep).
-  bool get droneDue =>
-      _dronePhase == null &&
-      activity == PipActivity.off &&
-      !_demo &&
-      // Up only while the phone's plugged in (or a demo, never while
-      // he's off).
-      _stationX != null &&
-      _stationDir == 0;
-
-  /// The drone to draw: its left, its bottom's height, and whether it
-  /// beams down on him; null when it's in the station.
-  (double, double, bool)? get drone {
-    final phase = _dronePhase;
-    if (phase == null || _stationX == null) return null;
-    final (from, to, length) = switch (phase) {
-      DronePhase.rising => (_droneHome, _droneAbove, droneRise),
-      DronePhase.out => (_droneFrom, _droneOver, droneOut),
-      DronePhase.beaming => (_droneOver, _droneOver, droneBeam),
-      DronePhase.back => (_droneFrom, _droneAbove, droneBack),
-      DronePhase.sinking => (_droneAbove, _droneHome, droneSink),
-    };
-    final p = _ease((_droneT / length).clamp(0.0, 1.0));
-    // An arc on the long legs; a little bob while beaming.
-    final arc = phase == DronePhase.out || phase == DronePhase.back
-        ? 8 * math.sin(math.pi * p)
-        : phase == DronePhase.beaming
-            ? math.sin(_droneT * 9)
-            : 0.0;
-    return (
-      from.$1 + (to.$1 - from.$1) * p,
-      from.$2 + (to.$2 - from.$2) * p + arc,
-      phase == DronePhase.beaming,
-    );
-  }
-
-  /// Its rotors' turn: two ways, quickly in turn.
-  bool get droneSpin => (_droneT * 12).floor().isEven;
-
-  /// The drone's charge, once: true if it charged him since last asked.
-  bool takeDroneCharge() {
-    final charged = _droneCharged;
-    _droneCharged = false;
-    return charged;
-  }
-
-  /// Sets it off at once, if it's due (also with his room not moving:
-  /// then simply done, him back on).
-  bool sendDrone({bool animate = true}) {
-    if (!droneDue) return false;
-    if (!animate) {
-      _droneCharge();
-      return true;
-    }
-    _dronePhase = DronePhase.rising;
-    _droneT = 0;
-    return true;
-  }
-
-  /// It charged him a segment: he comes back on (no battery to fly in).
-  void _droneCharge() {
-    _droneCharged = true;
-    _start(PipActivity.poweringOn);
-    _t = flyEnd;
-  }
-
-  void _droneLeg(DronePhase next) {
-    final at = drone;
-    _droneFrom = at == null ? _droneAbove : (at.$1, at.$2);
-    _dronePhase = next;
-    _droneT = 0;
-  }
-
-  void _stepDrone(double dt) {
-    if (_dronePhase == null && droneDue) sendDrone();
-    final phase = _dronePhase;
-    if (phase == null) return;
-    // The station gone (unplugged): so is the drone.
-    if (_stationX == null || _stationDir < 0) {
-      _dronePhase = null;
-      return;
-    }
-    _droneT += dt;
-    // On by other means meanwhile (a battery): it goes home.
-    final waiting = phase == DronePhase.rising ||
-        phase == DronePhase.out ||
-        phase == DronePhase.beaming;
-    if (waiting && activity != PipActivity.off) {
-      _droneLeg(DronePhase.back);
-      return;
-    }
-    switch (phase) {
-      case DronePhase.rising when _droneT >= droneRise:
-        _droneLeg(DronePhase.out);
-      case DronePhase.out when _droneT >= droneOut:
-        _droneLeg(DronePhase.beaming);
-      case DronePhase.beaming when _droneT >= droneBeam:
-        _droneCharge();
-        _droneLeg(DronePhase.back);
-      case DronePhase.back when _droneT >= droneBack:
-        _droneLeg(DronePhase.sinking);
-      case DronePhase.sinking when _droneT >= droneSink:
-        _dronePhase = null;
-      default:
-    }
-  }
-
-  /// Bedtime (his life says asleep): he doesn't go and plug in.
-  bool _bedtime = false;
-
-  /// He'd go and plug in now: the station up, he isn't full (it's for
-  /// looks: he ignores it full), or it's a demo; not at bedtime.
-  bool get _goesCharging =>
-      _stationX != null &&
-      _wantsStation &&
-      !_bedtime &&
-      // Round 58: empty, he's off: the drone sees to him first.
-      segments > 0 &&
-      (segments < 3 || _demoCharge != null) &&
-      (activity == PipActivity.standing ||
-          activity == PipActivity.walking ||
-          activity == PipActivity.spawning);
-
-  /// Standing about with the station up and wanted: off he hurries.
-  void _maybeCharge() {
-    if (_stationDir != 0 || !_goesCharging) return;
-    _target = _plugX;
-    if ((_target - x).abs() < 0.5) {
-      x = _target;
-      facingRight = _stationRight;
-      _start(PipActivity.plugging);
-      return;
-    }
-    facingRight = _target > x;
-    _start(PipActivity.toStation);
-  }
-
-  /// What his screen shows while he charges, and seconds into it.
-  ChargeScreen _screen = ChargeScreen.happy;
-  double _screenT = 0;
-  double _screenFor = 0;
-
-  void _nextScreen() {
-    final others = [
-      for (final s in ChargeScreen.values)
-        if (s != _screen) s,
-    ];
-    _screen = others[random.nextInt(others.length)];
-    _screenT = 0;
-    // A demo shows more of them.
-    _screenFor = _demoCharge != null ? 1.5 : 4 + random.nextDouble() * 3;
-  }
-
-  /// Shows [screen], [t] seconds in (for tests and pictures).
-  @visibleForTesting
-  void debugScreen(ChargeScreen screen, double t) {
-    _screen = screen;
-    _screenT = t;
-    _screenFor = 100;
-  }
-
-  /// While charging: what his screen shows, and how far into it.
-  (ChargeScreen, double)? get chargeScreen =>
-      activity == PipActivity.charging ? (_screen, _screenT) : null;
-
-  /// The station's lamp: blinking slowly while it's up.
-  bool get stationLamp => _stationClock % 1.2 < 0.6;
-  double _stationClock = 0;
-
-  /// His port (where the plug goes) and the station's hook and socket, as
-  /// (x, height above the ground) in room pixels.
-  (double, double) get _port => (_stationRight ? x + width - 2 : x, portUp);
-  (double, double) get _hook => (
-        _stationRight ? _stationX! - 3 : _stationX! + stationWidth + 1,
-        hookUp,
-      );
-  (double, double) get socket => (
-        _stationRight ? _stationX! - 1 : _stationX! + stationWidth,
-        socketUp,
-      );
   static const portUp = 9.0;
+
   static const hookUp = 5.0;
+
   static const socketUp = 8.0;
-
-  /// His floating hand (Round 44: it pops in when he needs it, and away
-  /// after): each (x, height above the ground, size 0–1); Round 54: only
-  /// the one he uses (two holding his plate); none when not needed.
-  List<(double, double, double)> get mitts {
-    // Round 54: changing his battery.
-    if (_batteryHand case (final hx, final hy, final size)) {
-      return [(hx - 1, hy - 1.5, size)];
-    }
-    // Round 53: holding his plate, one each side.
-    if (plate case (final px, final py, _, final size)) {
-      return [(px - 1, py - 0.5, size), (px + plateWidth - 1, py - 0.5, size)];
-    }
-    final plugging = activity == PipActivity.plugging;
-    if (!plugging && activity != PipActivity.unplugging) return const [];
-    // Round 54: close by his side (a pixel off it), only the one he uses.
-    final near = handBeside(right: _stationRight) - 1;
-    const rest = 8.0;
-    final double size;
-    if (_t < mittsInEnd) {
-      size = _t / mittsInEnd;
-    } else {
-      final out = plugging ? pushEnd : hangEnd;
-      final end = plugging ? plugEnd : unplugEnd;
-      size = _t < out ? 1 : 1 - ((_t - out) / (end - out)).clamp(0.0, 1.0);
-    }
-    final hand = _plugPoint ?? (near, rest);
-    // Before it takes the plug, and after it lets go: on its way.
-    final (hx, hy) = switch (plugging) {
-      true when _t < toHookEnd => _lerp(
-          (near, rest),
-          (_hook.$1, _hook.$2 - 1),
-          _ease((_t - mittsInEnd) / (toHookEnd - mittsInEnd)),
-        ),
-      false when _t < toPortEnd => _lerp(
-          (near, rest),
-          (_port.$1, _port.$2 - 2),
-          _ease((_t - mittsInEnd) / (toPortEnd - mittsInEnd)),
-        ),
-      _ when _plugPoint != null => (hand.$1, hand.$2 - 2),
-      _ => (near, rest),
-    };
-    return [(hx, hy, size)];
-  }
-
-  /// Where the plug is (x, height above the ground) while a hand carries
-  /// it; null when it's on the hook or in his side ([plug] says).
-  (double, double)? get _plugPoint {
-    if (activity == PipActivity.plugging && _t >= toHookEnd && _t < carryEnd) {
-      final p = _t < grabEnd ? 0.0 : (_t - grabEnd) / (carryEnd - grabEnd);
-      return _lerp(_hook, _port, _ease(p));
-    }
-    if (activity == PipActivity.unplugging && _t >= pullEnd && _t < backEnd) {
-      return _lerp(_port, _hook, _ease((_t - pullEnd) / (backEnd - pullEnd)));
-    }
-    return null;
-  }
-
-  /// The plug (x, height above the ground): on the hook, carried, or in
-  /// his side; null without a station.
-  (double, double)? get plug {
-    if (_stationX == null) return null;
-    final carried = _plugPoint;
-    if (carried != null) return carried;
-    final inPort = switch (activity) {
-      PipActivity.charging => true,
-      PipActivity.plugging => _t >= carryEnd,
-      PipActivity.unplugging => _t < pullEnd,
-      _ => false,
-    };
-    return inPort ? _port : _hook;
-  }
-
-  /// Sparks at the plug: pushed in, and the charging screen that has
-  /// them; each (x, height above the ground).
-  List<(double, double)> get sparks {
-    final pushing =
-        activity == PipActivity.plugging && _t >= carryEnd && _t < pushEnd;
-    final screen = activity == PipActivity.charging &&
-        _screen == ChargeScreen.sparks &&
-        (_screenT * 6).floor().isEven;
-    final p = _picking;
-    if (activity == PipActivity.fetching && p != null) {
-      // Round 97: a crackle at his slot as the new one clicks in.
-      if (p >= pushedIn && p < pushedIn + sparkFor) {
-        final q = (p - pushedIn) / sparkFor;
-        final side = _batteryOnRight ? 1.0 : -1.0;
-        final sx = _batteryOnRight ? x + width - bodyInset : x + bodyInset - 1;
-        final sy = slotUp + slotRows / 2;
-        return [
-          for (final (dx, dy) in const [
-            (1.0, 1.0),
-            (1.0, -1.0),
-            (1.4, 0.0),
-            (0.4, 1.6),
-            (0.4, -1.6)
-          ])
-            (sx + side * dx * (1 + 4 * q), sy + dy * (1 + 3 * q)),
-        ];
-      }
-      // Round 97: sparkles round him as he hops for joy.
-      if (p >= shakeEnd && p < pickEnd) {
-        final q = (p - shakeEnd) / (pickEnd - shakeEnd);
-        final mid = x + width / 2;
-        return [
-          for (final (dx, up) in const [
-            (-1.0, 0.3),
-            (1.0, 0.3),
-            (-0.7, 1.0),
-            (0.7, 1.0)
-          ])
-            (mid + dx * (width / 2 + 2 + 4 * q), 6 + up * (height - 4) + 4 * q),
-        ];
-      }
-    }
-    if (!pushing && !screen) return const [];
-    final (px, py) = _port;
-    final out = _stationRight ? 1.0 : -1.0;
-    final t = (_t * 10).floor();
-    return [
-      for (var i = 0; i < 4; i++)
-        (px + out * (2 + (t + i * 3) % 4), py + (i.isEven ? 2 : -1) + i % 2),
-    ];
-  }
-
-  /// Humming (a charging screen): little notes floating up, each (x from
-  /// his middle, y above his head, how faded 0–1).
-  List<(double, double, double)> get notes {
-    if (activity != PipActivity.charging || _screen != ChargeScreen.humming) {
-      return const [];
-    }
-    return [
-      for (var i = 0; i < 2; i++)
-        if (((_screenT / 2.2 + i / 2) % 1) case final p)
-          ((i.isEven ? 5 : -7) + 3 * p, 2 + 10 * p, p),
-    ];
-  }
 
   static (double, double) _lerp(
           (double, double) a, (double, double) b, double p) =>
@@ -1582,6 +1127,9 @@ class PipBrain {
     final c = p.clamp(0.0, 1.0);
     return c * c * (3 - 2 * c);
   }
+
+  /// Bedtime (his life says asleep): he doesn't go and plug in.
+  bool _bedtime = false;
 
   // Round 52: entrances.
 
@@ -2761,8 +2309,8 @@ class PipBrain {
     }
     // Round 44: not into his station, if it's up.
     var low = _minX, high = max;
-    if (_stationX != null) {
-      if (_stationRight) {
+    if (_st.x != null) {
+      if (_st.right) {
         high = math.min(high, _plugX);
       } else {
         low = math.max(low, _plugX);
