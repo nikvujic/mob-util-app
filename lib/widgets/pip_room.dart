@@ -158,6 +158,12 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// What was last made so from his life; null: nothing yet.
   PipShow? _shown;
 
+  /// Round 139: he's been looked at in this room (shown once): what
+  /// happens now is seen. Not undone when [_shown] is cleared to look
+  /// again (a battery given, him woken): those he's watched through, and
+  /// what follows (back at his work) he walks to, not a cut.
+  bool _lookedAt = false;
+
   /// His adventure level when last looked at (Round 63).
   int? _level;
 
@@ -239,7 +245,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     }
     // Round 44: plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
-    final seen = _shown != null && _moving;
+    final seen = _lookedAt && _moving;
     // Round 128: his house built, he lives in it (but for his field's
     // times, and while he's out, away on his trip, or at work).
     // Round 134: seen, he walks out of one into the other.
@@ -294,6 +300,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     _level = level;
     if (show != _shown && brain.show(show)) {
       _shown = show;
+      _lookedAt = true;
       link.shown(show);
     }
     if (!_moving) {

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_quest.dart';
 import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/pip_run.dart';
@@ -230,4 +231,39 @@ void main() {
     }
     expect(brain.questView!.place, QuestScenePlace.mine);
   });
+
+  for (final medicine in [false, true]) {
+    testWidgets(
+        'off on his field, watched: a battery tapped in, he gets up and walks '
+        'off to his work, not cut to it (Round 139: the tap no longer counted '
+        'as not watched)${medicine ? ', a medicine due' : ''}', (tester) async {
+      final link = FakePipLink(batteries: 1)..medicineDue = medicine;
+      final brain = await room(tester, link,
+          animate: true, given: PipBrain(random: math.Random(1)));
+      Future<void> run(int tenths) async {
+        for (var i = 0; i < tenths; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+      }
+
+      await run(30);
+      // Run out on his field.
+      link.show = PipShow.off;
+      await run(30);
+      expect(brain.activity, PipActivity.off);
+      brain.x = 10;
+      // A battery given (a tap); back on, and his work's due now.
+      await tester.tap(find.byKey(const Key('pipRoom')));
+      expect(brain.activity, PipActivity.poweringOn);
+      link.show = PipShow.awake;
+      final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+      link.questing = (at: q.at(q.startOf(mine) + 1), seconds: 100);
+      for (var i = 0; i < 80 && brain.activity != PipActivity.questing; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(brain.activity, PipActivity.questing);
+      expect(brain.questView!.place, QuestScenePlace.field,
+          reason: 'walking off his field to it');
+    });
+  }
 }
