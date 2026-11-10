@@ -6,6 +6,23 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.7] - 2026-11-09
+
+### Fixed
+- **Pip back on in quest hours:** after you give him a battery while
+  watching, he walks off his field to his work. Before, the battery tap
+  made his room treat him as not watched, so the scene cut straight to
+  his work.
+
+### Changed
+- **Pip's house:** he fetches small loads (4 stones or one tree), then
+  builds a few blocks and moves on to the next piece that's ready. The
+  foundation, the porch and the floor go up together instead of one
+  piece at a time. Nothing floats: each block rests on what's built,
+  so the floor follows the foundation along. Gathering is quicker, so
+  you'll see him building about half the time. About two months in
+  all, as before. A house under way carries on in the new order.
+
 ## [2.2.6] - 2026-11-06
 
 ### Changed

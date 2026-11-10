@@ -326,19 +326,58 @@ abstract final class Quests {
   // block of stone broken off; a heap of sand dug; a pane smelted (two
   // sand and a wood). What he carries home at most, of each.
   static const walk = 5;
-  static const treeMinutes = 32;
+  static const treeMinutes = 24;
   static const woodPerTree = 4;
-  static const stoneMinutes = 16;
-  static const sandMinutes = 8;
+  static const stoneMinutes = 12;
+  static const sandMinutes = 6;
   static const smeltMinutes = 25;
 
-  /// Panes smelted at a time (Round 135), between building.
+  /// Panes smelted at a time (Round 135), between building; blocks of a
+  /// piece built at a time before he moves on (Round 140).
   static const glassAtOnce = 3;
+  static const blocksAtOnce = 3;
+
+  /// Round 140: what [id]'s [index]th (of [count]) rests on: each piece
+  /// under it, and how much of that must be up first (nothing floats).
+  /// One laid left to right on another goes as far as that one has.
+  static Map<String, double> supportsOf(String id, int index, int count) {
+    final along = (index + 1) / count;
+    return switch (id) {
+      'foundation' || 'porchPosts' => const {},
+      'deck' => const {'porchPosts': 1},
+      'stairs' || 'railing' || 'porchRoofPosts' || 'bench' => const {'deck': 1},
+      // Its planks on the foundation's top row (the second, laid left to
+      // right after the bottom one): only as far as that's got.
+      'floor' => {'foundation': 0.5 + 0.5 * along},
+      // The fireplace stands on the floor's left part.
+      'hearth' => const {'floor': 0.4},
+      'posts' => const {'floor': 1},
+      'walls' => const {'floor': 1, 'posts': 1},
+      'windows' || 'door' || 'beam' => const {'walls': 1},
+      'flue' => const {'hearth': 1},
+      'scaffold' => const {'beam': 1},
+      'rafters' => const {'beam': 1, 'scaffold': 1},
+      'gable' || 'shingles' => const {'rafters': 1},
+      'atticWindow' => const {'gable': 1},
+      'porchRoof' => const {'porchRoofPosts': 1, 'walls': 1},
+      'trim' => const {'shingles': 1},
+      'flueCap' => const {'flue': 1, 'rafters': 1},
+      'flowerBoxes' => const {'windows': 1},
+      'scaffoldDown' => const {
+          'gable': 1,
+          'atticWindow': 1,
+          'shingles': 1,
+          'trim': 1,
+          'flueCap': 1,
+        },
+      _ => throw ArgumentError('no supports for $id'),
+    };
+  }
 
   static const carry = {
-    QuestItem.wood: 12,
-    QuestItem.stone: 8,
-    QuestItem.sand: 12
+    QuestItem.wood: 4,
+    QuestItem.stone: 4,
+    QuestItem.sand: 6
   };
 
   /// The house's pieces (spec 6, the order decided in Round 123–124),
@@ -423,29 +462,58 @@ abstract final class Quests {
       }
     }
 
-    for (final piece in housePieces) {
-      // Round 135: a load at a time: what one trip brings home (or a
-      // few panes smelted), then as many of the piece as it covers, then
-      // off again (it was all of a piece's gathering first: days at the
-      // mine before a block was laid).
-      for (var i = 0; i < piece.count; i++) {
-        // Again till all of it's there (smelting takes wood too).
-        for (var short = true; short;) {
-          short = false;
-          for (final MapEntry(key: item, value: each) in piece.cost.entries) {
-            if (inv[item]! >= each) continue;
-            short = true;
-            final rest = each * (piece.count - i);
-            if (item == QuestItem.glass) {
-              glass(math.min(rest, inv[item]! + glassAtOnce));
-            } else {
-              trip(item, math.min(rest, inv[item]! + carry[item]!));
-            }
+    // Round 140: a small load at a time, then a few blocks of whichever
+    // piece is next and ready (resting on what's built, [supportsOf]):
+    // the pieces taken in turn, so the foundation, the porch and the
+    // floor go up together, not one piece till it's done (Round 135 still
+    // finished each piece before the next).
+    final built = {for (final p in housePieces) p.id: 0};
+    final count = {for (final p in housePieces) p.id: p.count};
+    double share(String id) => built[id]! / count[id]!;
+    bool ready(QuestPiece p) =>
+        built[p.id]! < p.count &&
+        supportsOf(p.id, built[p.id]!, p.count)
+            .entries
+            .every((e) => share(e.key) >= e.value - 1e-9);
+    bool covered(QuestPiece p) =>
+        p.cost.entries.every((e) => inv[e.key]! >= e.value);
+    var last = -1;
+    while (housePieces.any((p) => built[p.id]! < p.count)) {
+      // The next piece that's ready, after the one worked on last.
+      var at = -1;
+      for (var k = 1; k <= housePieces.length; k++) {
+        final i = (last + k) % housePieces.length;
+        if (ready(housePieces[i])) {
+          at = i;
+          break;
+        }
+      }
+      assert(at >= 0, 'nothing ready: a piece with no support built');
+      last = at;
+      final piece = housePieces[at];
+      // Its materials: a load of what's short (or a few panes), again till
+      // all of one's there (smelting takes wood too).
+      for (var short = true; short;) {
+        short = false;
+        for (final MapEntry(key: item, value: each) in piece.cost.entries) {
+          if (inv[item]! >= each) continue;
+          short = true;
+          final rest = each * (piece.count - built[piece.id]!);
+          if (item == QuestItem.glass) {
+            glass(math.min(rest, inv[item]! + glassAtOnce));
+          } else {
+            trip(item, math.min(rest, inv[item]! + carry[item]!));
           }
         }
+      }
+      // A few of it, as far as that covers (and it stays supported).
+      for (var made = 0;
+          made < blocksAtOnce && ready(piece) && covered(piece);
+          made++) {
         steps.add(QuestStep(QuestAction.build, QuestPlace.house, piece.minutes,
-            takes: piece.cost, piece: piece, index: i));
+            takes: piece.cost, piece: piece, index: built[piece.id]!));
         piece.cost.forEach((k, v) => inv[k] = inv[k]! - v);
+        built[piece.id] = built[piece.id]! + 1;
       }
     }
     return QuestScript('house', 'Build a house', steps,

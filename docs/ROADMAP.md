@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 139–140 — back to work after a battery; the house in turns (2026-11-09, 2.2.7)
+
+- [x] A battery tap cleared what his room had shown (to look again),
+  and "seen" was read from it: back on, his work began unseen (a cut).
+  `_lookedAt` keeps "seen" once he's been looked at; a test taps a
+  battery in, a medicine due or not.
+- [x] The house script: small loads, then up to three blocks of the
+  next ready piece, the pieces in turn; `Quests.supportsOf` says what
+  each block rests on (the floor as far as the foundation's top row).
+  Renders checked: nothing floats.
+
 ### Round 138 — Pip's brain split by concern (2026-11-06, 2.2.6)
 
 - [x] `pip_brain.dart` (3.75k lines) in parts: types; battery; station;

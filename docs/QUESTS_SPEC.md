@@ -341,6 +341,15 @@ from use):
   was all of a piece's gathering first (about six days at the mine
   before the first block). The total time is the same; a quest under way
   carries on from its minutes in the new order.
+- **Round 140 (asked for): small loads, pieces in turn.** A trip brings
+  4 stones or one tree (sand: 6); then a few blocks (up to 3) of the
+  next piece that's ready, the pieces taken in turn, so the foundation,
+  the porch and the floor go up together. Each block rests on what's
+  built ([Quests.supportsOf]): the floor only as far as the
+  foundation's top row has got, walls on the whole floor and the
+  posts, the roof on the beam and scaffold. Gathering is quicker (a
+  tree 24 min, a stone 12, sand 6), so building is about half his
+  time from the start. About 58 days in all.
 - **The next quest** isn't offered yet: after the house, the Quests card
   shows it done with its picture.
 

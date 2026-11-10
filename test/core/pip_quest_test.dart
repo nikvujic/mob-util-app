@@ -73,11 +73,12 @@ void main() {
 
     test(
         'never builds without the materials, never carries more than a load '
-        'home, every piece built, its count, in order', () {
+        'home, every piece built, its count; each block on what it rests on '
+        '(Round 140: nothing floats, pieces in turn)', () {
       final inv = {for (final i in QuestItem.values) i: 0};
       var load = 0;
-      final order = <String>[];
-      final counts = <String, int>{};
+      final built = {for (final p in Quests.housePieces) p.id: 0};
+      final count = {for (final p in Quests.housePieces) p.id: p.count};
       for (final s in q.steps) {
         s.takes.forEach((k, v) => inv[k] = inv[k]! - v);
         expect(inv.values.every((v) => v >= 0), isTrue,
@@ -91,17 +92,53 @@ void main() {
             final item = s.gives.keys.single;
             expect(load, lessThanOrEqualTo(Quests.carry[item]!));
           case QuestAction.build:
-            final id = s.piece!.id;
-            if (order.isEmpty || order.last != id) order.add(id);
-            counts[id] = (counts[id] ?? 0) + 1;
+            final p = s.piece!;
+            expect(s.index, built[p.id], reason: '${p.id} in order');
+            for (final MapEntry(key: under, value: needed)
+                in Quests.supportsOf(p.id, s.index, p.count).entries) {
+              expect(built[under]! / count[under]!,
+                  greaterThanOrEqualTo(needed - 1e-9),
+                  reason: '${p.id} #${s.index} on $under');
+            }
+            built[p.id] = built[p.id]! + 1;
           case QuestAction.walkBack || QuestAction.smelt:
         }
       }
-      expect(order, [for (final p in Quests.housePieces) p.id],
-          reason: 'each piece once, in the order given');
       for (final p in Quests.housePieces) {
-        expect(counts[p.id], p.count, reason: p.id);
+        expect(built[p.id], p.count, reason: p.id);
       }
+    });
+
+    test(
+        'what rests on what: the floor only as far as the foundation\'s top '
+        'row; walls on the whole floor and posts; the roof on the beam', () {
+      expect(Quests.supportsOf('foundation', 0, 30), isEmpty);
+      expect(Quests.supportsOf('floor', 0, 17)['foundation'],
+          closeTo(0.5 + 0.5 / 17, 1e-9));
+      expect(Quests.supportsOf('floor', 16, 17)['foundation'], 1);
+      expect(Quests.supportsOf('walls', 0, 40), {'floor': 1, 'posts': 1});
+      expect(Quests.supportsOf('rafters', 0, 8), {'beam': 1, 'scaffold': 1});
+      for (final p in Quests.housePieces) {
+        expect(() => Quests.supportsOf(p.id, 0, p.count), returnsNormally,
+            reason: p.id);
+      }
+    });
+
+    test(
+        'pieces in turn (Round 140): stone and wood work mixed from the '
+        'start; the floor begun before the foundation\'s done', () {
+      final firstDay = <String>{};
+      var t = 0;
+      for (final s in q.steps) {
+        if (t >= PipQuest.minutesPerDay) break;
+        if (s.action == QuestAction.build) firstDay.add(s.piece!.id);
+        t += s.minutes;
+      }
+      expect(firstDay, containsAll(['foundation', 'porchPosts']));
+      final floorStarts = q.steps.indexWhere((s) => s.piece?.id == 'floor');
+      final foundationEnds =
+          q.steps.lastIndexWhere((s) => s.piece?.id == 'foundation');
+      expect(floorStarts, lessThan(foundationEnds));
     });
 
     test(
@@ -109,8 +146,9 @@ void main() {
         'days at the mine before the first block)', () {
       var away = 0, longest = 0, builds = 0;
       for (final s in q.steps) {
-        if (s.action == QuestAction.build) {
-          builds++;
+        // At the house (building, or smelting at its fireplace): not away.
+        if (s.action == QuestAction.build || s.action == QuestAction.smelt) {
+          if (s.action == QuestAction.build) builds++;
           away = 0;
         } else {
           away += s.minutes;
@@ -118,10 +156,10 @@ void main() {
         }
       }
       expect(builds, greaterThan(100));
-      // At most two trips (a piece of two materials), or a load of sand,
-      // wood and a few panes smelted: about two hours of quest work (it
-      // was 1035 minutes, about six days).
-      expect(longest, lessThanOrEqualTo(360));
+      // Round 140: at most a couple of small trips (a piece of two
+      // materials), or sand, wood and a few panes smelted (it was 1035
+      // minutes, about six days, then two hours).
+      expect(longest, lessThanOrEqualTo(200));
       final firstBlock =
           q.steps.indexWhere((s) => s.action == QuestAction.build);
       expect(

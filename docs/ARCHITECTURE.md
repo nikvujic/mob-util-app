@@ -950,10 +950,10 @@ person (the original untouched); their own date follows from `save`.
 
 `core/pip_quest.dart` holds the rules: `PipQuest` (the quest hours,
 `windowsBetween`, `finishAt`) and `Quests.house`, a `QuestScript` built
-once from `housePieces`: for each piece, a load at a time (Round 135):
-a trip (out, gather up to a load, back) or a few panes smelted
-(`glassAtOnce`) when the next one's materials are short, then as many
-of the piece as that covers. A step has minutes, what it
+once from `housePieces` (Round 140): the pieces taken in turn, the next
+one that's ready (each block resting on what `supportsOf` says it needs
+built); a small load (`carry`) or a few panes (`glassAtOnce`) when its
+materials are short, then up to `blocksAtOnce` of it. A step has minutes, what it
 takes when it starts and what it gives when done; `QuestScript.at`
 finds the step for a number of work minutes by binary search over the
 steps' start minutes and derives the inventory and what's built from the
