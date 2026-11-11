@@ -14,13 +14,14 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     addListener(storage.saveTodo, fireImmediately: false);
   }
 
-  /// Adds [text] at the end of the things to do and returns its id; blank
-  /// text is ignored (null).
+  /// Adds [text] at the top of the things to do (Round 143, asked for:
+  /// the newest first, as Shop) and returns its id; blank text is
+  /// ignored (null).
   String? add(String text) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return null;
     final item = TodoItem(id: generateId(), text: trimmed);
-    state = [...state, item];
+    state = [item, ...state];
     return item.id;
   }
 

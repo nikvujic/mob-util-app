@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-11
+
+### Changed
+- **To-do note:** new things go to the top of *To do*, the newest
+  first, as in Shop.
+
 ## [2.2.9] - 2026-11-11
 
 ### Fixed

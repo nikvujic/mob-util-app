@@ -97,11 +97,14 @@ void main() {
     expect(find.text('No notes'), findsNothing);
   });
 
-  testWidgets('adding things puts them at the end, in order', (tester) async {
+  testWidgets('adding things puts them on top, the newest first (Round 143)',
+      (tester) async {
     await start(tester);
     await open(tester);
     await add(tester, ['Milk the cat', 'Feed the cow']);
-    expect(texts(), ['Milk the cat', 'Feed the cow']);
+    expect(texts(), ['Feed the cow', 'Milk the cat']);
+    expect(tester.getTopLeft(find.text('Feed the cow')).dy,
+        lessThan(tester.getTopLeft(find.text('Milk the cat')).dy));
     expect(find.text('Milk the cat'), findsOneWidget);
     expect(find.text('Feed the cow'), findsOneWidget);
   });

@@ -337,6 +337,11 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 143 — To-do adds on top (2026-11-11, 2.3.0)
+
+- [x] The To-do note's + puts the new thing on top of *To do* (asked
+  for, as Shop); scrolled to, as before.
+
 ### Round 142 — the deep no-cuts check (2026-11-11, 2.2.9)
 
 - [x] A fuzz test (`pip_no_cuts_test.dart`) runs his room through

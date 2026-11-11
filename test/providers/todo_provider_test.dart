@@ -17,12 +17,20 @@ void main() {
   List<String> texts() => todo.state.map((i) => i.text).toList();
   String idOf(String text) => todo.state.firstWhere((i) => i.text == text).id;
 
-  test('adds trimmed text at the end and ignores blanks', () {
+  /// Adds [texts] so they're listed in that order (each one added goes on
+  /// top, Round 143).
+  void addInOrder(List<String> texts) {
+    for (final text in texts.reversed) {
+      todo.add(text);
+    }
+  }
+
+  test('adds trimmed text on top (Round 143) and ignores blanks', () {
     todo
       ..add('Call mum')
       ..add('  Pay rent ')
       ..add('   ');
-    expect(texts(), ['Call mum', 'Pay rent']);
+    expect(texts(), ['Pay rent', 'Call mum']);
     expect(todo.state.map((i) => i.id).toSet(), hasLength(2));
   });
 
@@ -38,10 +46,7 @@ void main() {
   test(
       'done goes to the top of Completed; back, to the end of To do '
       '(Round 30)', () {
-    todo
-      ..add('A')
-      ..add('B')
-      ..add('C');
+    addInOrder(['A', 'B', 'C']);
     todo.toggle(idOf('B'));
     todo.toggle(idOf('A'));
     expect(open(), ['C']);
@@ -49,18 +54,14 @@ void main() {
     todo.toggle(idOf('B'));
     expect(open(), ['C', 'B']);
     todo.add('D');
-    expect(open(), ['C', 'B', 'D'], reason: 'added to To do');
+    expect(open(), ['D', 'C', 'B'], reason: 'added on top of To do');
     todo.toggle('nope'); // nothing
     expect(todo.state, hasLength(4));
   });
 
   group('Round 83: back from Completed', () {
     setUp(() {
-      todo
-        ..add('A')
-        ..add('B')
-        ..add('C')
-        ..add('D');
+      addInOrder(['A', 'B', 'C', 'D']);
     });
 
     test('goes back where it was (first, middle, last)', () {
@@ -85,12 +86,12 @@ void main() {
       todo.toggle(idOf('B'));
       todo.add('E');
       todo.toggle(idOf('B'));
-      expect(open(), ['A', 'C', 'D', 'E', 'B'], reason: 'one added');
+      expect(open(), ['E', 'A', 'C', 'D', 'B'], reason: 'one added');
 
       todo.toggle(idOf('A'));
       todo.reorder(done: false, oldIndex: 0, newIndex: 2);
       todo.toggle(idOf('A'));
-      expect(open(), ['D', 'C', 'E', 'B', 'A'], reason: 'reordered');
+      expect(open(), ['C', 'E', 'D', 'B', 'A'], reason: 'reordered');
 
       todo.toggle(idOf('C'));
       todo.toggle(idOf('D'));
@@ -115,10 +116,7 @@ void main() {
   });
 
   test('Delete completed takes only the done ones', () {
-    todo
-      ..add('A')
-      ..add('B')
-      ..add('C');
+    addInOrder(['A', 'B', 'C']);
     todo
       ..toggle(idOf('A'))
       ..toggle(idOf('C'));
@@ -129,11 +127,7 @@ void main() {
   });
 
   test('edits text (blank leaves it); reorders within one list', () {
-    todo
-      ..add('A')
-      ..add('B')
-      ..add('C')
-      ..add('X');
+    addInOrder(['A', 'B', 'C', 'X']);
     todo.toggle(idOf('X'));
     todo.edit(idOf('B'), ' Bee ');
     todo.edit(idOf('Bee'), '  ');
@@ -150,8 +144,8 @@ void main() {
     addTearDown(() => dir.deleteSync(recursive: true));
     final storage = await AppStorage.open(directory: dir);
     TodoNotifier(storage)
-      ..add('One')
-      ..add('Two');
+      ..add('Two')
+      ..add('One');
     await storage.flush();
     final again = await AppStorage.open(directory: dir);
     expect(again.initialTodo.map((i) => i.text), ['One', 'Two']);
@@ -181,11 +175,7 @@ void main() {
         ];
 
     test('placed between To do and Waiting, in the order given', () {
-      todo
-        ..add('A')
-        ..add('B')
-        ..add('C')
-        ..add('Done');
+      addInOrder(['A', 'B', 'C', 'Done']);
       todo.toggle(idOf('Done'));
       todo.place(toDo: [idOf('C'), idOf('A')], waiting: [idOf('B')]);
       expect(toDo(), ['C', 'A']);
@@ -198,10 +188,7 @@ void main() {
     });
 
     test('ones not given (or done) are kept, not lost or moved', () {
-      todo
-        ..add('A')
-        ..add('B')
-        ..add('Done');
+      addInOrder(['A', 'B', 'Done']);
       todo.toggle(idOf('Done'));
       todo.place(toDo: [idOf('Done')], waiting: [idOf('A')]);
       expect(texts(), containsAll(['A', 'B', 'Done']));
@@ -213,9 +200,7 @@ void main() {
     test(
         'done, it is no longer waiting; back, waiting again (Round 83), '
         'or to do once the list changed', () {
-      todo
-        ..add('A')
-        ..add('B');
+      addInOrder(['A', 'B']);
       todo.place(toDo: [idOf('B')], waiting: [idOf('A')]);
       todo.toggle(idOf('A'));
       expect(todo.state.firstWhere((i) => i.text == 'A').waiting, isFalse);
@@ -225,7 +210,7 @@ void main() {
       todo.add('C');
       todo.toggle(idOf('A'));
       expect(waiting(), isEmpty);
-      expect(toDo(), ['B', 'C', 'A']);
+      expect(toDo(), ['C', 'B', 'A']);
     });
 
     test('kept in todo.json (only when waiting)', () async {
@@ -233,8 +218,8 @@ void main() {
       addTearDown(() => dir.deleteSync(recursive: true));
       final storage = await AppStorage.open(directory: dir);
       final notifier = TodoNotifier(storage)
-        ..add('One')
-        ..add('Two');
+        ..add('Two')
+        ..add('One');
       notifier.place(toDo: [
         notifier.state.first.id
       ], waiting: [
