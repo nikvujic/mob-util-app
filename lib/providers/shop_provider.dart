@@ -11,8 +11,8 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     addListener(storage.saveShopItems, fireImmediately: false);
   }
 
-  /// Adds an item at the end of "To buy" (S5), so the list keeps the order
-  /// things were added in, and returns its id. Blank names are ignored
+  /// Adds an item at the top of "To buy" (S5, Round 141: the newest
+  /// first, where it's seen), and returns its id. Blank names are ignored
   /// (null). One already there by that name (Round 58, any case) isn't
   /// added twice: it's moved there instead, as if new. [copy]: a new one
   /// all the same (a recipe's To Shop, for another quantity).
@@ -22,11 +22,11 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     final existing = copy ? null : named(trimmed);
     if (existing != null) {
       final others = state.where((i) => i.id != existing.id);
-      state = [...others, existing.copyWith(toBuy: true)];
+      state = [existing.copyWith(toBuy: true), ...others];
       return existing.id;
     }
     final item = ShopItem(id: generateId(), name: trimmed);
-    state = [...state, item];
+    state = [item, ...state];
     return item.id;
   }
 
@@ -60,14 +60,14 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     return true;
   }
 
-  /// Moves the item to the other section: back to "To buy" at its end
+  /// Moves the item to the other section: back to "To buy" at its top
   /// (like a new item), or to "Items" at its top (bought most recently).
   void toggle(String id) {
     final index = state.indexWhere((item) => item.id == id);
     if (index == -1) return;
     final moved = state[index].copyWith(toBuy: !state[index].toBuy);
     final others = [...state.take(index), ...state.skip(index + 1)];
-    state = moved.toBuy ? [...others, moved] : [moved, ...others];
+    state = [moved, ...others];
   }
 
   /// The quantity button (S7): none → count → weight → none; a typed

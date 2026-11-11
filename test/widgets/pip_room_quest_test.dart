@@ -266,4 +266,50 @@ void main() {
           reason: 'walking off his field to it');
     });
   }
+
+  for (final medicine in [false, true]) {
+    testWidgets(
+        'Round 141: off at the mine, his work over, watched: a battery tapped '
+        'in, he gets up there and walks off it, not cut to his field'
+        '${medicine ? ', a medicine due' : ''}', (tester) async {
+      final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+      final link = FakePipLink(batteries: 1)
+        ..medicineDue = medicine
+        ..questing = (at: q.at(q.startOf(mine) + 1), seconds: 100);
+      final brain = await room(tester, link,
+          animate: true, given: PipBrain(random: math.Random(1)));
+      Future<void> run(int tenths) async {
+        for (var i = 0; i < tenths; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+      }
+
+      await run(10);
+      expect(brain.questView!.place, QuestScenePlace.mine);
+      // Run out at it (his life: not at work, down); his work's over
+      // meanwhile.
+      link
+        ..show = PipShow.powerOff
+        ..questing = null;
+      await run(30);
+      link.show = PipShow.off;
+      await run(10);
+      expect(brain.activity, PipActivity.off);
+      expect(brain.questView!.place, QuestScenePlace.mine);
+      await tester.tap(find.byKey(const Key('pipRoom')));
+      expect(brain.activity, PipActivity.poweringOn);
+      link.show = PipShow.awake;
+      // Every moment till he's on his field: at the mine, walking off it.
+      var i = 0;
+      for (; i < 400 && brain.questView != null; i++) {
+        expect(brain.questView!.place, QuestScenePlace.mine,
+            reason: 'not cut to his field');
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(brain.questView, isNull);
+      expect(i, greaterThan(30), reason: 'a walk off it');
+      expect(brain.activity, PipActivity.walking,
+          reason: 'in from his field\'s edge');
+    });
+  }
 }

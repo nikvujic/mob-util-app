@@ -55,7 +55,7 @@ void main() {
 
     expect(
       reopened.initialShopItems.map((i) => '${i.name}:${i.toBuy}'),
-      ['Eggs:false', 'Milk:true', 'Bread:true'],
+      ['Eggs:false', 'Bread:true', 'Milk:true'],
     );
   });
 

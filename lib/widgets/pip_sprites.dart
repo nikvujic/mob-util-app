@@ -810,6 +810,25 @@ abstract final class PipSprites {
   /// The sword's grip row the hand holds (the middle of the grip).
   static const swordGrip = 10;
 
+  /// Round 141: his pickaxe (at the mine), 9 x 13 like the sword, held
+  /// the same way: a steel head curving down to its points, on a wooden
+  /// handle.
+  static const pickaxe = [
+    '..hhsss..',
+    '.hs.t.se.',
+    'hs..t..se',
+    'e...t...e',
+    '....t....',
+    '....t....',
+    '....t....',
+    '....t....',
+    '....t....',
+    '....t....',
+    '....t....',
+    '....t....',
+    '....t....',
+  ];
+
   /// A flower, 5 x 7: petals, its heart, a stem with a leaf.
   static const flower = [
     '.pp..',

@@ -6,6 +6,24 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.8] - 2026-11-11
+
+### Fixed
+- **Pip's hat:** falling asleep and waking up, it hops off his head to
+  the ground and back on, instead of jumping there.
+- **Pip back on after his work's over:** given a battery where he ran
+  out at the mine (or the forest, the beach, the house), he gets up
+  there and walks off it before he's back on his field or in at his
+  door. The same whenever his work ends while you're watching.
+- **Pip's medicine reminder** waits till he's walked into his room,
+  not shown off its edge.
+- **Rain on his adventure:** the puddles go by with the ground instead
+  of running along with him.
+
+### Changed
+- **Pip at the mine** breaks stone with a pickaxe.
+- **Shop:** new items, and items put back, go to the top of *To buy*.
+
 ## [2.2.7] - 2026-11-09
 
 ### Fixed

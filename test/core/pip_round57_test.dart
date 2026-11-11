@@ -65,6 +65,37 @@ void main() {
     });
 
     test(
+        'Round 141: off to sleep and waking, it hops between his head and '
+        'the ground, never simply there', () {
+      final p = up()..birthday = true;
+      // Where it is: 1 on his head, 0 on the ground, or in between.
+      double where() => p.hatHop ?? (p.hatBeside ? 0 : 1);
+      var last = where();
+      final seen = <double>{};
+      void watch(double seconds) {
+        for (var t = 0.0; t < seconds; t += 1 / 60) {
+          p.step(1 / 60);
+          final now = where();
+          expect((now - last).abs(), lessThan(0.1),
+              reason: '${p.activity} at ${p.hatHop}: no jump');
+          if (p.hatHop != null) seen.add(now);
+          last = now;
+        }
+      }
+
+      p.show(PipShow.fallAsleep);
+      watch(3);
+      expect(p.activity, PipActivity.asleep);
+      expect(where(), 0);
+      expect(seen, isNotEmpty, reason: 'it hopped off');
+      seen.clear();
+      p.show(PipShow.wakeUp);
+      watch(PipBrain.wakeHopEnd + 0.5);
+      expect(where(), 1);
+      expect(seen, isNotEmpty, reason: 'it hopped back on');
+    });
+
+    test(
         'each hat (Round 58): centred on his head, over his antenna, '
         'above his casing', () {
       final frame = PipSprites.frameOf(PipFrame.idle, PipFace.normal);

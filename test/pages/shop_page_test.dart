@@ -27,8 +27,8 @@ void main() {
     await tester.tap(find.text('Add'));
     await tester.pump();
 
-    // In the order they were added (S5).
-    expect(container.read(shopProvider).map((i) => i.name), ['Milk', 'Bread']);
+    // The newest on top (S5, Round 141).
+    expect(container.read(shopProvider).map((i) => i.name), ['Bread', 'Milk']);
     expect(find.byType(TextField), findsOneWidget, reason: 'sheet stays open');
   });
 
@@ -59,11 +59,11 @@ void main() {
     await tester.tap(find.byKey(const Key('shopState')).last);
     await tester.pump();
     expect(find.text('TO BUY  ·  2'), findsOneWidget);
-    // Back at the end of "To buy" (S5).
-    expect(container.read(shopProvider).map((i) => i.name), ['Bread', 'Milk']);
+    // Back on top of "To buy" (S5, Round 141).
+    expect(container.read(shopProvider).map((i) => i.name), ['Milk', 'Bread']);
     expect(
-      tester.getTopLeft(find.text('Milk')).dy,
-      greaterThan(tester.getTopLeft(find.text('Bread')).dy),
+      tester.getTopLeft(find.text('Bread')).dy,
+      greaterThan(tester.getTopLeft(find.text('Milk')).dy),
     );
   });
 
@@ -210,7 +210,8 @@ void main() {
       final before = tester.getTopLeft(find.text('Milk'));
 
       await addFromSheet(tester, 'Bread');
-      expect(tester.getTopLeft(find.text('Milk')), before);
+      // Round 141: on top, where Milk was; the list not scrolled.
+      expect(tester.getTopLeft(find.text('Bread')), before);
       expectInView(tester, 'Bread');
     });
   });
@@ -224,8 +225,8 @@ void main() {
       shop.addItem(name);
     }
     shop
-      ..toggle(container.read(shopProvider)[2].id) // Salt bought
-      ..toggle(container.read(shopProvider)[3].id); // Tea bought
+      ..toggle(shop.named('Salt')!.id) // bought
+      ..toggle(shop.named('Tea')!.id);
     await tester.pump();
     Set<String> selected() => {
           for (final i in container.read(shopProvider))
@@ -263,8 +264,8 @@ void main() {
       ..addItem('Salt')
       ..addItem('Tea');
     shop
-      ..toggle(container.read(shopProvider)[1].id)
-      ..toggle(container.read(shopProvider)[2].id);
+      ..toggle(shop.named('Salt')!.id)
+      ..toggle(shop.named('Tea')!.id);
     await tester.pump();
 
     await tester.longPress(find.text('Tea'));
@@ -298,7 +299,7 @@ void main() {
       await tester.tap(find.byKey(const Key('suggestion-Milk')));
       await tester.pump();
       expect(container.read(shopProvider).map((i) => (i.name, i.toBuy)),
-          [('Bread', true), ('Milk', true)]);
+          [('Milk', true), ('Bread', true)]);
       expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
           isEmpty);
       expect(find.byKey(const Key('textSuggestions')), findsNothing);
@@ -309,8 +310,8 @@ void main() {
         'taken is refused', (tester) async {
       await pumpShop(tester);
       container.read(shopProvider.notifier)
-        ..addItem('Milk')
-        ..addItem('Bread');
+        ..addItem('Bread')
+        ..addItem('Milk');
       await tester.pump();
       await tester.longPress(find.text('Milk'));
       await tester.pump();

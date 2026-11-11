@@ -31,6 +31,12 @@ class _PipPlacesState {
   double? joinFrom;
   double joinT = 0;
 
+  /// Round 141: seen, his work over while he's at one of its places (the
+  /// mine, the house area...): how it looked as it ended, how long he's
+  /// been walking off it since, and whether he goes into his house next
+  /// (else onto his field); null: not leaving.
+  ({QuestView from, double t, bool toHome})? leaving;
+
   /// In his finished house (his room says, from his life: not his
   /// field's times, not out, on his trip or at work): he idles on its
   /// floor, sleeps there, his station comes up there.
@@ -66,6 +72,8 @@ extension PipBrainPlaces on PipBrain {
     }
     final now = _pl.questNow;
     if (activity != PipActivity.questing || now == null) return null;
+    // Round 141: his work over, walking off where he was.
+    if (_pl.leaving case final leaving?) return _leaveView(leaving);
     // Round 133: seen going to his work, first off his field's right
     // edge.
     if (_pl.joinFrom case final from?) {
@@ -105,6 +113,59 @@ extension PipBrainPlaces on PipBrain {
           t: view.t,
         );
 
+  /// His work over: off it (onto his field, or in at his house's door).
+  void _leftWork({required bool animate, required bool toHome}) {
+    _pl.questNow = null;
+    _pl.joinFrom = null;
+    _pl.leaving = null;
+    // Round 134: seen, his work over, he walks back onto his field
+    // (from its right edge, as he went); Round 136: or, his house
+    // next ([toHome]), in at its door (not onto his field, then
+    // round and off it again).
+    if (animate && toHome) {
+      _switchHome(true);
+      _inAtDoor();
+    } else if (animate) {
+      _walkIn();
+    } else {
+      x = x.clamp(_minX, _maxX).toDouble();
+      _stand();
+    }
+  }
+
+  /// Round 141: walking off where his work ended: off a place's left
+  /// edge (the way home); in the house area, down off what he stood on
+  /// and off its right edge, or to the foot of its stairs (his house
+  /// next). Null once he's off it.
+  QuestView? _leaveView(({QuestView from, double t, bool toHome}) leaving) {
+    final from = leaving.from;
+    final t = leaving.t;
+    final start = from.pipCentre(roomWidth);
+    final house = from.place == QuestScenePlace.house;
+    final end = !house
+        ? -12.0
+        : leaving.toHome
+            ? QuestView.home
+            : QuestView.edge;
+    final way = (end - start).sign;
+    // A moment to get down off the floor or the scaffold first.
+    const down = 0.5;
+    final walked = math.max(0.0, t - down) * QuestView.walkSpeed;
+    if (walked >= (end - start).abs()) return null;
+    return QuestView(
+      place: from.place,
+      house: from.house,
+      offset: start + way * walked,
+      lift: from.lift * (1 - (t / down).clamp(0.0, 1.0)),
+      facingRight: way > 0,
+      pose: t < down ? QuestPose.standing : QuestPose.walking,
+      fall: from.fall,
+      dug: from.dug,
+      rock: from.rock,
+      t: t,
+    );
+  }
+
   /// Back on where he ran out at his work: at it again.
   void _backToWork() {
     _pl.downView = null;
@@ -140,6 +201,11 @@ extension PipBrainPlaces on PipBrain {
   /// was under way when it was left is done by now.
   void freshScenes() {
     _pl.joinFrom = null;
+    // Round 141: a walk off his work's place done by now.
+    if (_pl.leaving case final leaving?) {
+      _leftWork(animate: false, toHome: leaving.toHome);
+      if (leaving.toHome) _switchHome(true);
+    }
     if (_pl.homeTo case final going?) {
       _pl.homeTo = null;
       _switchHome(going);
@@ -164,25 +230,27 @@ extension PipBrainPlaces on PipBrain {
           _pl.downView = _still(questView);
           return;
         }
-        _pl.questNow = null;
-        _pl.joinFrom = null;
-        // Round 134: seen, his work over, he walks back onto his field
-        // (from its right edge, as he went); Round 136: or, his house
-        // next ([toHome]), in at its door (not onto his field, then
-        // round and off it again).
-        if (animate && toHome) {
-          _switchHome(true);
-          _inAtDoor();
-        } else if (animate) {
-          _walkIn();
-        } else {
-          x = x.clamp(_minX, _maxX).toDouble();
-          _stand();
+        // Round 141: seen, off where he is first (the mine, the house
+        // area...), not cut away from it.
+        if (_pl.leaving case final leaving?) {
+          // Not watched any more: simply off it.
+          if (!animate) _leftWork(animate: false, toHome: leaving.toHome);
+          return;
         }
+        final view = questView;
+        if (animate &&
+            _pl.joinFrom == null &&
+            view != null &&
+            view.place != QuestScenePlace.field) {
+          _pl.leaving = (from: _still(view)!, t: 0, toHome: toHome);
+          return;
+        }
+        _leftWork(animate: animate, toHome: toHome);
       }
       return;
     }
     _pl.downView = null;
+    _pl.leaving = null;
     final before = _pl.questNow;
     if (activity != PipActivity.questing) {
       if (!_canGoOut) return;
@@ -211,6 +279,16 @@ extension PipBrainPlaces on PipBrain {
   void _stepQuest(double dt) {
     _pl.questT += dt;
     _pl.questClock += dt;
+    if (_pl.leaving case final leaving?) {
+      final on =
+          (from: leaving.from, t: leaving.t + dt, toHome: leaving.toHome);
+      _pl.leaving = on;
+      if (_leaveView(on) == null) {
+        _pl.leaving = null;
+        _leftWork(animate: true, toHome: on.toHome);
+        return;
+      }
+    }
     if (_pl.joinFrom case final from?) {
       _pl.joinT += dt;
       // Off his field: at his work.

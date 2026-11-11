@@ -337,6 +337,19 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 141 — no jumps: his hat, off his work; a pickaxe; puddles; Shop on top (2026-11-11, 2.2.8)
+
+- [x] His hat hops between his head and the ground as he settles and
+  wakes (`hatHop`); a test watches every frame for a jump.
+- [x] His work over while he's watched (after a battery at the mine,
+  too): he walks off its place (`leaving`) before his field or his
+  door; unwatched or opened again, simply done. His medicine reminder
+  waits till he's in from his room's edge.
+- [x] A pickaxe at the mine (the sword elsewhere).
+- [x] Rain's puddles go by with the ground on his adventure
+  (`puddleLefts`).
+- [x] Shop: new and put-back items on top of To buy.
+
 ### Round 139–140 — back to work after a battery; the house in turns (2026-11-09, 2.2.7)
 
 - [x] A battery tap cleared what his room had shown (to look again),

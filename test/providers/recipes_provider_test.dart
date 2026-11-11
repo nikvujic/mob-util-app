@@ -313,11 +313,11 @@ void main() {
       expect(items.firstWhere((i) => i.id == 'a').toBuy, isTrue);
       final eggs = items.where((i) => i.name == 'Eggs').toList();
       expect(eggs, hasLength(2));
-      expect(eggs.last.toBuy, isTrue);
-      expect((eggs.last.quantity, eggs.last.count), (Quantity.count, 2));
+      final newEggs = eggs.firstWhere((i) => i.id != 'b');
+      expect(newEggs.toBuy, isTrue);
+      expect((newEggs.quantity, newEggs.count), (Quantity.count, 2));
       expect(items.where((i) => i.name == 'Salt'), hasLength(1));
-      final milk = items.lastWhere((i) => i.name == 'Milk');
-      expect(milk.id, isNot('d'));
+      final milk = items.firstWhere((i) => i.name == 'Milk' && i.id != 'd');
       expect((milk.toBuy, milk.quantity, milk.text),
           (true, Quantity.text, '300 ml'));
       // Undo: Shop as it was.

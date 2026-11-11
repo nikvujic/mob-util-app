@@ -5,6 +5,7 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_weather.dart';
 import 'package:the_app/core/weather.dart';
+import 'package:the_app/widgets/pip_room.dart';
 
 /// Round 75: the weather in his field: his tent in a storm (over
 /// everything else he might be doing), his umbrella in the rain, the
@@ -221,6 +222,24 @@ void main() {
       final dry = up(weather: WeatherKind.clear);
       steps(dry, 1);
       expect(dry.umbrella, 0);
+    });
+
+    test(
+        'Round 141: out on his adventure, the puddles go by with the ground '
+        '(not following him); on his field, where they lie', () {
+      final b = up(weather: WeatherKind.rain);
+      final columns = b.roomWidth;
+      final still = puddleLefts(b, columns, null);
+      expect(still, [for (final m in b.puddles) (m - 6).floorToDouble()]);
+      expect(puddleLefts(b, columns, 0), still);
+      final on = puddleLefts(b, columns, 10);
+      for (var i = 0; i < on.length; i++) {
+        expect(on[i], still[i] - 10, reason: 'gone by as far as the ground');
+      }
+      // Round again: off the left, back in from the right.
+      for (final left in puddleLefts(b, columns, 500)) {
+        expect(left, inInclusiveRange(-12, columns + 12));
+      }
     });
 
     test('puddles in the rain; he jumps in the nearest: a splash', () {

@@ -74,9 +74,29 @@ extension PipBrainLooks on PipBrain {
     return snowing ? PipHat.skiBeanie : dayHat;
   }
 
+  /// Round 141: his hat hopping off his head to the ground beside him as
+  /// he settles to sleep, and back on as he puts his legs out waking, so
+  /// it's never simply there: 0 on the ground → 1 on his head; null when
+  /// it isn't hopping.
+  double? get hatHop {
+    if (hat == null) return null;
+    // From the moment his legs tuck (off) or come out (on), a while.
+    final from = switch (activity) {
+      PipActivity.fallingAsleep => PipBrain.settleAt,
+      PipActivity.wakingUp => PipBrain.legsOutAt,
+      _ => null,
+    };
+    if (from == null || _t < from || _t >= from + hatHopFor) return null;
+    final p = (_t - from) / hatHopFor;
+    return activity == PipActivity.wakingUp ? p : 1 - p;
+  }
+
+  static const hatHopFor = 0.4;
+
   /// Asleep (settled, legs tucked): his hat on the ground beside him.
   bool get hatBeside =>
       hat != null &&
+      hatHop == null &&
       frame == PipFrame.tuck &&
       (activity == PipActivity.asleep ||
           activity == PipActivity.fallingAsleep ||
@@ -92,6 +112,8 @@ extension PipBrainLooks on PipBrain {
     if (activity != PipActivity.standing && activity != PipActivity.walking) {
       return;
     }
+    // Round 141: not while he's walking in from (or off) his room's edge.
+    if (_offEdge) return;
     _lk.previewing = false;
     _startShowing(PipScreen.pill);
   }

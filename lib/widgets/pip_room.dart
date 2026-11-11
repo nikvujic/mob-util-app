@@ -1232,13 +1232,16 @@ class _RoomPainter extends CustomPainter {
     }
 
     /// His sword, its grip's middle at [hand] (screen), turned by [angle]
-    /// (0: pointing up) and scaled by [size].
+    /// (0: pointing up) and scaled by [size]. Round 141: at the mine,
+    /// his pickaxe.
     void blade(Offset hand, double angle, double size) {
       canvas.save();
       canvas.translate(hand.dx, hand.dy);
       canvas.rotate(angle);
       canvas.scale(size);
-      final art = PipSprites.sword;
+      final art = brain.questView?.place == QuestScenePlace.mine
+          ? PipSprites.pickaxe
+          : PipSprites.sword;
       for (var y = 0; y < art.length; y++) {
         for (var x = 0; x < art[y].length; x++) {
           final colour = PipSprites.fieldColours[art[y][x]];
@@ -1655,8 +1658,12 @@ class _RoomPainter extends CustomPainter {
     }
     // Round 75: rain's puddles (a splash in one), and his snowman (Round
     // 128: not while his quest's scenes go by).
-    for (final middle in questView != null ? const <double>[] : brain.puddles) {
-      sprite(PipSprites.puddle, (middle - 6).floorToDouble(), groundTop + 1,
+    // Round 141: out on his adventure, in the ground going by (not
+    // following him).
+    for (final left in questView != null
+        ? const <double>[]
+        : puddleLefts(brain, columns, run == null ? null : shift)) {
+      sprite(PipSprites.puddle, left, groundTop + 1,
           colours: PipSprites.puddleColours, alpha: brain.weatherIn);
     }
     if (brain.splash case (final middle, final p)) {
@@ -1722,7 +1729,8 @@ class _RoomPainter extends CustomPainter {
       }
     }
     // Round 57: his hat, on his head: moved with him whatever he does.
-    if (brain.hat case final hat? when !brain.hatBeside && !hidden) {
+    if (brain.hat case final hat?
+        when !brain.hatBeside && brain.hatHop == null && !hidden) {
       final art = PipSprites.hats[hat]!;
       final top = PipSprites.hatBottom -
           art.length +
@@ -1744,15 +1752,32 @@ class _RoomPainter extends CustomPainter {
     // head, his tent round him, his hand out, a question mark in the fog.
     drawWeatherWithHim(centre, bottom);
     // Asleep, it's on the ground beside him (on the side with room).
-    if (brain.hat case final hat? when brain.hatBeside) {
+    // Round 141: settling or waking, it hops between there and his head.
+    if (brain.hat case final hat?
+        when brain.hatBeside || brain.hatHop != null) {
       final art = PipSprites.hats[hat]!;
       final right = brain.x + PipBrain.width + 1;
+      final groundLeft = right + art.first.length <= size.width / pixel
+          ? right
+          : brain.x - art.first.length - 1;
+      final hop = brain.hatHop ?? 0;
+      final len = art.first.length;
+      final at = PipSprites.hatLeftOf(art);
+      final headLeft = centre +
+          ((brain.facingRight ? at : PipBrain.width - at - len) -
+                  PipBrain.width / 2) *
+              sx;
+      final topRow = PipSprites.hatBottom -
+          art.length +
+          1 +
+          (PipSprites.hatDrop[hat] ?? 0);
+      final headBottom = bottom - (rows - topRow - art.length) * sy;
+      final up = 6 * math.sin(math.pi * hop);
       sprite(
         art,
-        right + art.first.length <= size.width / pixel
-            ? right
-            : brain.x - art.first.length - 1,
-        groundTop,
+        (groundLeft + (headLeft - groundLeft) * hop).roundToDouble(),
+        (groundTop + (headBottom - groundTop) * hop - up).roundToDouble(),
+        mirror: !brain.facingRight && hop >= 0.5,
         colours: PipSprites.hatColours,
       );
     }
@@ -2262,12 +2287,28 @@ List<String> pipFrameOf(PipBrain brain) {
   return brain.facingRight ? picture : PipSprites.screenTurned(picture);
 }
 
+/// Rain's puddles' left edges in a room [columns] wide. Round 141: out on
+/// his adventure, the ground going by [shift]: they go by with it (round
+/// again), not following him.
+List<double> puddleLefts(PipBrain brain, int columns, int? shift) => [
+      for (final middle in brain.puddles)
+        if (shift == null)
+          (middle - 6).floorToDouble()
+        else
+          (((middle + 6 - shift) % (columns + 24) + columns + 24) %
+                      (columns + 24) -
+                  12)
+              .floorToDouble(),
+    ];
+
 /// Where his cross words start (their left column) with his frame's
 /// middle at [centre]. Round 53: low, just over his head beside his
 /// antenna, away from the fist. Round 58: in a hat (centred, over his
 /// antenna), further out, clear of it.
 double crossWordsLeft(PipBrain brain, double centre) {
-  final hat = brain.hatBeside ? null : PipSprites.hats[brain.hat];
+  final hat = brain.hatBeside || brain.hatHop != null
+      ? null
+      : PipSprites.hats[brain.hat];
   // Clear of the hat's brim (Round 72: the beanie's as wide as his head).
   final out =
       hat == null ? 0 : math.max(2, 7 - PipSprites.hatLeftOf(hat)).toDouble();

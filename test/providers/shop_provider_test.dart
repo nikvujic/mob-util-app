@@ -15,33 +15,33 @@ void main() {
   String idOf(String name) =>
       notifier.state.firstWhere((i) => i.name == name).id;
 
-  test('adds trimmed items to the end of "To buy" and ignores blanks', () {
+  test('adds trimmed items to the top of "To buy" and ignores blanks', () {
     notifier
       ..addItem('Milk')
       ..addItem('  Bread ')
       ..addItem('   ');
-    expect(toBuy(), ['Milk', 'Bread']);
+    expect(toBuy(), ['Bread', 'Milk']);
     expect(notifier.state.map((i) => i.id).toSet().length, 2);
   });
 
-  test('new items go after everything in "To buy", not among "Items"', () {
+  test('new items go on top of "To buy", not among "Items"', () {
     notifier
       ..addItem('Milk')
       ..addItem('Eggs');
     notifier.toggle(idOf('Milk')); // bought
     notifier.addItem('Bread');
 
-    expect(toBuy(), ['Eggs', 'Bread']);
+    expect(toBuy(), ['Bread', 'Eggs']);
     expect(stock(), ['Milk']);
   });
 
   test(
       'bought items go to the top of "Items"; '
-      'moved back, to the end of "To buy"', () {
+      'moved back, to the top of "To buy"', () {
     notifier
-      ..addItem('Eggs')
+      ..addItem('Bread')
       ..addItem('Milk')
-      ..addItem('Bread');
+      ..addItem('Eggs');
 
     notifier.toggle(idOf('Eggs'));
     notifier.toggle(idOf('Bread'));
@@ -49,17 +49,17 @@ void main() {
     expect(stock(), ['Bread', 'Eggs']);
 
     notifier.toggle(idOf('Eggs'));
-    expect(toBuy(), ['Milk', 'Eggs']);
+    expect(toBuy(), ['Eggs', 'Milk']);
     expect(stock(), ['Bread']);
   });
 
   test('reorder only moves items within the given section', () {
     notifier
-      ..addItem('A')
-      ..addItem('X')
-      ..addItem('B')
+      ..addItem('C')
       ..addItem('Y')
-      ..addItem('C');
+      ..addItem('B')
+      ..addItem('X')
+      ..addItem('A');
     notifier
       ..toggle(idOf('Y'))
       ..toggle(idOf('X')); // Items: X, Y
@@ -191,11 +191,11 @@ void main() {
       notifier.toggle(idOf('Milk')); // bought
       final milk = idOf('Milk');
       expect(notifier.addItem(' milk '), milk);
-      expect(toBuy(), ['Eggs', 'Bread', 'Milk']);
+      expect(toBuy(), ['Milk', 'Bread', 'Eggs']);
       expect(stock(), isEmpty);
-      // Already to buy: to the end, as if new.
+      // Already to buy: to the top, as if new.
       expect(notifier.addItem('EGGS'), idOf('Eggs'));
-      expect(toBuy(), ['Bread', 'Milk', 'Eggs']);
+      expect(toBuy(), ['Eggs', 'Milk', 'Bread']);
       expect(notifier.state, hasLength(3));
     });
 
@@ -214,8 +214,8 @@ void main() {
 
     test('rename: trimmed; not blank, not another item\'s name', () {
       notifier
-        ..addItem('Milk')
-        ..addItem('Bread');
+        ..addItem('Bread')
+        ..addItem('Milk');
       final milk = idOf('Milk');
       expect(notifier.rename(milk, '  Oat milk '), isTrue);
       expect(notifier.state.first.name, 'Oat milk');

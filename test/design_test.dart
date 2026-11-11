@@ -864,9 +864,10 @@ void main() {
 
       await openTab(tester, 'Shop');
       final shopRow = tester.getSize(rowOf('Eggs')).height;
-      // Bread and Eggs are adjacent in "To buy", in that order.
-      final shopGap = tester.getTopLeft(rowOf('Eggs')).dy -
-          tester.getBottomLeft(rowOf('Bread')).dy;
+      // Eggs and Bread are adjacent in "To buy", in that order (the
+      // newest on top, Round 141).
+      final shopGap = tester.getTopLeft(rowOf('Bread')).dy -
+          tester.getBottomLeft(rowOf('Eggs')).dy;
 
       expect(shopRow, lessThanOrEqualTo(noteRow * 0.8));
       expect(shopGap, greaterThanOrEqualTo(0), reason: 'rows in this order');

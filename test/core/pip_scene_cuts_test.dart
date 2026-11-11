@@ -64,12 +64,31 @@ void main() {
     expect(brain.questView!.place, QuestScenePlace.mine);
   });
 
-  test('his work over, seen: he walks back in from his field\'s right edge',
-      () {
+  /// Round 141: his work over, seen, at [place]: he walks off it (its
+  /// left edge, the way home) first, still there, never cut away.
+  void walksOff(PipBrain brain, QuestScenePlace place) {
+    expect(brain.activity, PipActivity.questing, reason: 'still there');
+    var last = brain.questView!.pipCentre(160);
+    for (var i = 0; i < 2000 && brain.activity == PipActivity.questing; i++) {
+      final view = brain.questView!;
+      expect(view.place, place, reason: 'walking off it, not cut away');
+      final centre = view.pipCentre(160);
+      expect(centre, lessThanOrEqualTo(last + 0.01));
+      last = centre;
+      brain.step(0.05);
+      brain.quest(null, animate: true, toHome: brain.atHome);
+    }
+    expect(last, lessThan(0), reason: 'off its left edge');
+  }
+
+  test(
+      'his work over, seen: off the mine, then back in from his field\'s '
+      'right edge', () {
     final brain = up();
     final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
     brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
     brain.quest(null, animate: true);
+    walksOff(brain, QuestScenePlace.mine);
     expect(brain.activity, PipActivity.walking);
     expect(brain.questView, isNull);
     expect(brain.x, greaterThan(160 - PipBrain.width), reason: 'off the edge');
@@ -97,9 +116,15 @@ void main() {
     final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
     brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
     brain.quest(null, animate: true, toHome: true);
+    expect(brain.atHome, isFalse, reason: 'off the mine first');
+    var i = 0;
+    for (; i < 2000 && brain.activity == PipActivity.questing; i++) {
+      brain.step(0.05);
+      brain.quest(null, animate: true, toHome: true);
+    }
     expect(brain.atHome, isTrue);
     expect(brain.activity, PipActivity.walking);
-    expect(brain.x, closeTo(PipBrain.homeRight - PipBrain.width, 0.01));
+    expect(brain.x, closeTo(PipBrain.homeRight - PipBrain.width, 2));
     expect(brain.facingRight, isFalse);
     // Asked again (his room, a second later): already home, nothing more.
     brain.home(true, animate: true);
@@ -145,9 +170,51 @@ void main() {
     final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
     back.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
     back.quest(null, animate: true);
+    run(back, 1);
+    expect(back.activity, PipActivity.questing, reason: 'walking off it');
     back.freshScenes();
     expect(back.activity, PipActivity.standing);
     expect(back.x + PipBrain.width, lessThanOrEqualTo(160));
+  });
+
+  test(
+      'Round 141: off at the mine, a battery, his work over by then: he '
+      'gets up there and walks off it, not cut to his field', () {
+    final brain = up();
+    final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
+    brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
+    brain.quest(null, down: true);
+    brain.show(PipShow.off);
+    expect(brain.takeBattery(brain.x + 30), isTrue);
+    run(brain, PipBrain.onEnd + 0.1);
+    expect(brain.questView!.place, QuestScenePlace.mine);
+    brain.quest(null, animate: true);
+    walksOff(brain, QuestScenePlace.mine);
+    expect(brain.activity, PipActivity.walking);
+    expect(brain.x, greaterThan(160 - PipBrain.width),
+        reason: 'in from the '
+            'edge');
+  });
+
+  test('Round 141: his work over at the house area, seen: down, and off it',
+      () {
+    final brain = up();
+    final high = q.steps.indexWhere((s) => s.piece?.id == 'rafters');
+    brain.quest((at: q.at(q.startOf(high) + 2), seconds: 150.0));
+    expect(brain.lift, greaterThan(20));
+    brain.quest(null, animate: true);
+    var lift = brain.lift;
+    var i = 0;
+    for (; i < 2000 && brain.activity == PipActivity.questing; i++) {
+      expect(brain.questView!.place, QuestScenePlace.house);
+      expect(brain.lift, lessThanOrEqualTo(math.max(lift, 1) + 0.01),
+          reason: 'down (a step\'s bob aside)');
+      lift = brain.lift;
+      brain.step(0.05);
+      brain.quest(null, animate: true);
+    }
+    expect(i, greaterThan(20), reason: 'a walk, not a cut');
+    expect(brain.activity, PipActivity.walking);
   });
 
   testWidgets(
