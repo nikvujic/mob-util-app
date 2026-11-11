@@ -44,8 +44,12 @@ class PipBrain {
     if (pixels == _roomWidth) return;
     final first = _roomWidth == 0;
     _roomWidth = pixels;
-    x = first ? _maxX / 2 : x.clamp(_minX, _maxX);
+    x = first ? _maxX / 2 : (_placed ? x : x.clamp(_minX, _maxX));
   }
+
+  /// Round 141: where he is is his work's place's to say (at it, or down
+  /// at it), not held in his room.
+  bool get _placed => activity == PipActivity.questing || downAtWork;
 
   /// Pip's size, in pixels (Round 27: 19 tall, his screen a row taller).
   static const width = 20;
@@ -368,6 +372,8 @@ class PipBrain {
       _startUnplugging();
       return false;
     }
+    // Round 141: walking in from (or off) his room's edge: in first.
+    if (_offEdge && show != PipShow.awake) return false;
     final fresh = activity == PipActivity.spawning && _t == 0;
     if (fresh && show != PipShow.awake) _stand();
     switch (show) {
@@ -386,10 +392,13 @@ class PipBrain {
           _start(PipActivity.asleep);
           return true;
         }
+        // Round 141: at his work still (walking off it): asleep after.
+        if (activity == PipActivity.questing) return false;
         if (activity == PipActivity.asleep) return true;
         return play(PipAnimation.fallAsleep);
       case PipShow.fallAsleep:
         if (activity == PipActivity.asleep) return true;
+        if (activity == PipActivity.questing) return false;
         return play(PipAnimation.fallAsleep);
       case PipShow.wakeUp:
         if (fresh) _start(PipActivity.asleep);
@@ -763,8 +772,10 @@ class PipBrain {
     // Round 55: his medicine before charging (or anything else).
     _stepMedicine();
     if (activity == PipActivity.standing) _maybeCharge();
-    // Thrown in, he's still coming in from beyond the edge.
-    if (activity != PipActivity.thrown && !_offEdge) {
+    // Thrown in, he's still coming in from beyond the edge. Round 141:
+    // nor at his work's places (they put him where he is: walking off an
+    // edge, or in from one, not stopped at it).
+    if (activity != PipActivity.thrown && !_offEdge && !_placed) {
       x = x.clamp(_minX, _maxX);
     }
   }

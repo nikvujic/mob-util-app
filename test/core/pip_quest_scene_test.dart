@@ -28,6 +28,39 @@ void main() {
   });
 
   test(
+      'Round 141: on the field between his places he walks in from one edge '
+      'and off the other (no cut while he\'s in view); the ground goes by '
+      'only while he\'s in its middle', () {
+    const width = 200;
+    for (final (step, right) in [
+      (first((s) => s.action == QuestAction.walkOut), true),
+      (first((s) => s.action == QuestAction.walkBack), false),
+    ]) {
+      final length = q.steps[step].minutes * 60.0;
+      final fieldFrom = right ? QuestView.leaveFor : QuestView.arriveFor;
+      final fieldTo =
+          length - (right ? QuestView.arriveFor : QuestView.leaveFor);
+      final inAt = view(step, fieldFrom + 0.01);
+      final outAt = view(step, fieldTo - 0.01);
+      expect(inAt.place, QuestScenePlace.field);
+      expect(outAt.place, QuestScenePlace.field);
+      // His middle off the edge he comes in at, and the one he goes off.
+      final inX = inAt.pipCentre(width), outX = outAt.pipCentre(width);
+      expect(right ? inX : width - inX, lessThan(-PipBrain.width / 2 + 0.5));
+      expect(right ? width - outX : outX, lessThan(-PipBrain.width / 2 + 0.5));
+      expect(inAt.facingRight, right);
+      expect(inAt.scroll, 0, reason: 'walking in, the ground still');
+      // Every moment along it: a step from the last.
+      var last = inX;
+      for (var t = fieldFrom; t < fieldTo; t += 0.25) {
+        final x = view(step, t).pipCentre(width);
+        expect((x - last).abs(), lessThan(5), reason: 'at $t');
+        last = x;
+      }
+    }
+  });
+
+  test(
       'walking home: out of the place, along the field (the other way), '
       'into the house area', () {
     final back = first((s) => s.action == QuestAction.walkBack);

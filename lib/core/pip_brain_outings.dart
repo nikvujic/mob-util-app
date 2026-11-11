@@ -150,6 +150,9 @@ extension PipBrainOutings on PipBrain {
     }
     if (activity != PipActivity.adventuring) {
       if (!_canGoOut) return;
+      // Round 141: seen in his house, or walking in from his field's
+      // edge: out on his field first.
+      if (animate && (atHome || _offEdge)) return;
       _setOut();
       // Round 66: opened as his break starts: seen starting (he runs up
       // to the tavern); later in it, simply at the table.

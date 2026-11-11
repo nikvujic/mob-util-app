@@ -965,6 +965,13 @@ window since the last count it finds, by binary search, the first
 minute he's out of energy (his level only falls between changes), and
 leaves out five-minute chunks spent away on a ski trip.
 
+Round 142: while he's at his work's places the brain doesn't hold him
+inside the room (`_placed`): the views put him where he is, walking
+off an edge or in from one. Its own clock rolls on past the step his
+life last said (`_scriptView`), and joining or getting back to work it
+walks him to where the work is now (`arriving`). `pip_no_cuts_test`
+checks the whole thing frame by frame over random lives.
+
 Round 126: `core/pip_house.dart` (`PipHouse.of(QuestAt)`: each piece's
 amount up, the house's measures in its own pixels, where he stands to
 work on a piece) and `widgets/pip_house_art.dart` (`PipHouseArt`, drawn

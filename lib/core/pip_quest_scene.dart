@@ -149,11 +149,17 @@ class QuestView {
     switch (step.action) {
       case QuestAction.walkOut:
         if (t < leaveFor) {
-          // From where he was (the stairs' foot) off the house area.
+          // From where he was (Round 141: the last piece's spot, down off
+          // it; else the stairs' foot) off the house area.
+          final before = at.step > 0 ? at.script.steps[at.step - 1] : null;
+          final (fromX, fromLift) =
+              before == null ? (home, 0.0) : spotOf(before);
+          final p = t / leaveFor;
           return QuestView(
               place: QuestScenePlace.house,
               house: house,
-              offset: home + (edge - home) * t / leaveFor,
+              offset: fromX + (edge - fromX) * p,
+              lift: fromLift * (1 - math.min(1.0, p * 4)),
               pose: QuestPose.walking,
               t: t);
         }
@@ -167,14 +173,8 @@ class QuestView {
               pose: QuestPose.walking,
               t: t);
         }
-        return QuestView(
-            place: QuestScenePlace.field,
-            house: house,
-            anchor: 0.5,
-            offset: 0,
-            pose: QuestPose.walking,
-            scroll: (t - leaveFor) * walkSpeed,
-            t: t);
+        return _onField(house, t, t - leaveFor, length - leaveFor - arriveFor,
+            right: true);
       case QuestAction.walkBack:
         if (t < arriveFor) {
           final p = t / arriveFor;
@@ -196,20 +196,52 @@ class QuestView {
               pose: QuestPose.walking,
               t: t);
         }
-        return QuestView(
-            place: QuestScenePlace.field,
-            house: house,
-            anchor: 0.5,
-            offset: 0,
-            facingRight: false,
-            pose: QuestPose.walking,
-            scroll: -(t - arriveFor) * walkSpeed,
-            t: t);
+        return _onField(house, t, t - arriveFor, length - leaveFor - arriveFor,
+            right: false);
       case QuestAction.gather:
         return _gather(at, house, place, t, length);
       case QuestAction.smelt || QuestAction.build:
         return _atHouse(at, house, step, t, length);
     }
+  }
+
+  /// How long he takes walking in from his field's edge to its middle
+  /// (and off the other edge) on a walk between his places (Round 141).
+  static const fieldEdgeFor = 6.0;
+
+  /// Round 141: on his field between his places, [into] seconds of the
+  /// [long] he's on it: in from one edge (the left, going [right]), the
+  /// middle while the ground goes by, off the other: no cut to a place
+  /// while he's in view.
+  static QuestView _onField(PipHouse house, double t, double into, double long,
+      {required bool right}) {
+    final edgeFor = math.min(fieldEdgeFor, long / 2);
+    final way = right ? 1.0 : -1.0;
+    // From the edge he comes in at (0 is the left, 1 the right), to the
+    // middle; then the middle to the other.
+    final double anchor, offset;
+    if (into < edgeFor) {
+      final p = into / edgeFor;
+      anchor = 0.5 - way * 0.5 * (1 - p);
+      offset = -way * 12 * (1 - p);
+    } else if (into > long - edgeFor) {
+      final p = (into - (long - edgeFor)) / edgeFor;
+      anchor = 0.5 + way * 0.5 * p;
+      offset = way * 12 * p;
+    } else {
+      anchor = 0.5;
+      offset = 0;
+    }
+    final scrolled = (into.clamp(edgeFor, long - edgeFor) - edgeFor);
+    return QuestView(
+        place: QuestScenePlace.field,
+        house: house,
+        anchor: anchor,
+        offset: offset,
+        facingRight: right,
+        pose: QuestPose.walking,
+        scroll: way * scrolled * walkSpeed,
+        t: t);
   }
 
   static QuestView _gather(QuestAt at, PipHouse house, QuestScenePlace place,

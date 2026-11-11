@@ -158,8 +158,8 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// What was last made so from his life; null: nothing yet.
   PipShow? _shown;
 
-  /// Round 139: he's been looked at in this room (shown once): what
-  /// happens now is seen. Not undone when [_shown] is cleared to look
+  /// Round 139: he's been looked at in this room (Round 141: a check
+  /// done, moving): what happens now is seen. Not undone when [_shown] is cleared to look
   /// again (a battery given, him woken): those he's watched through, and
   /// what follows (back at his work) he walks to, not a cut.
   bool _lookedAt = false;
@@ -303,6 +303,10 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
       _lookedAt = true;
       link.shown(show);
     }
+    // Round 141: after this first look (things simply as they are), what
+    // happens is watched, even if his first show had to wait (him busy
+    // with his entrance).
+    if (_moving) _lookedAt = true;
     if (!_moving) {
       _finish();
       // Off, plugged in, not moving: the drone's charge simply done.

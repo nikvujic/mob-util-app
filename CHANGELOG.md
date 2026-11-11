@@ -6,6 +6,34 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.2.9] - 2026-11-11
+
+### Fixed
+A deep check of Pip while you watch: a test now runs him through
+random days (sleep, running out, batteries, work starting and ending,
+his house, his adventures, medicine, taps) and checks every frame.
+It found and fixed:
+- **Walking off an edge to or from his work, he stopped at the edge
+  and the scene cut.** He now walks right off it, and in at the next
+  place from its edge.
+- **Walking out to work and back:** on his field he walks in from one
+  edge and off the other, instead of the scene cutting while he's in
+  the middle. Joining work already under way, he walks in to where
+  it's at instead of appearing there.
+- **A battery while he's down at work during work hours:** he gets up
+  where he fell and walks back to the work, not on his field. Run out
+  on his way, he carries on his way.
+- **The first seconds after opening the app:** what happens is shown,
+  not jumped to, even while he's busy with his entrance.
+- **At the building site:** on a phone his room is wider than the site,
+  so walking off its edge he vanished in view; he now walks off the
+  screen. Setting off after a block, he walks from where he built it.
+  Between steps of his work he no longer jumps a little.
+- **Work starting while he's in his house, or an adventure starting:**
+  he comes out of his door (or in from the edge) first.
+- **Bedtime, or running out, while he's walking in from the edge or off
+  his work:** that waits till he's in.
+
 ## [2.2.8] - 2026-11-11
 
 ### Fixed

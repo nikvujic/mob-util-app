@@ -337,6 +337,22 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 142 — the deep no-cuts check (2026-11-11, 2.2.9)
+
+- [x] A fuzz test (`pip_no_cuts_test.dart`) runs his room through
+  random lives watched and checks each frame: a place changes only out
+  of view (or at his door), he moves at most a step, his hat never
+  jumps. 125 seeds clean; five kept in the suite.
+- [x] Found and fixed: his room held him in during his work's views
+  (`_placed`); the field leg of a walk in from one edge, off the other
+  (`QuestView._onField`); joining work under way, a walk in to it
+  (`arriving`, aimed at where the work is now); back on at his work,
+  from where he fell; the brain's own clock on past a step's end
+  (`_scriptView`); past the house area's end stretched off a wider room
+  (`_pastHouseArea`); `_lookedAt` after the first check; the walk out
+  from the last piece's spot; sleep, off and adventures wait till he's
+  in from an edge or out of his house.
+
 ### Round 141 — no jumps: his hat, off his work; a pickaxe; puddles; Shop on top (2026-11-11, 2.2.8)
 
 - [x] His hat hops between his head and the ground as he settles and
