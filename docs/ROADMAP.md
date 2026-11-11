@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 144 — his walks at his pace (2026-11-11, 2.3.1)
+
+- [x] A walk's parts took set times (20 s off the house area, 15 s into
+  the place, 6 s from the field's edge): slow where the way was short,
+  room-width dependent on the field. Now each part's as long as his
+  pace makes it (`QuestView.of(width:)`); a test walks every part at
+  three room widths.
+
 ### Round 143 — To-do adds on top (2026-11-11, 2.3.0)
 
 - [x] The To-do note's + puts the new thing on top of *To do* (asked

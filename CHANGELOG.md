@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-11-11
+
+### Fixed
+- **Pip's walks to and from his work** go at his walking pace
+  everywhere. Coming home through the building site he crawled (a few
+  steps' way in twenty seconds), the walk into the mine was slow too,
+  and walking in and off his field's edges was quicker in Pip Home (a
+  wider room) than in the menu.
+
 ## [2.3.0] - 2026-11-11
 
 ### Changed

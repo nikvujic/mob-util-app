@@ -131,7 +131,7 @@ extension PipBrainPlaces on PipBrain {
       at = at.script.at(at.script.startOf(at.step) + at.current.minutes);
       seconds -= length;
     }
-    return QuestView.of(at, seconds);
+    return QuestView.of(at, seconds, width: roomWidth);
   }
 
   /// Where his work's at now ([QuestView.of]), not as he walks to it.
