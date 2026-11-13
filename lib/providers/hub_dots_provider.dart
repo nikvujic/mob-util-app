@@ -12,7 +12,6 @@ final hubToolDotProvider = Provider.family<bool, HubTool>(
     HubTool.placard => false,
     HubTool.medicine => ref.watch(medicineDotProvider),
     HubTool.recipes => false,
-    HubTool.food => false,
     HubTool.dates => false,
     // Round 79: one to cancel soon (within its reminder).
     HubTool.subscriptions => ref.watch(subscriptionsDotProvider),
@@ -39,7 +38,6 @@ final hubToolNewsProvider = Provider.family<bool, HubTool>(
     HubTool.placard ||
     HubTool.medicine ||
     HubTool.recipes ||
-    HubTool.food ||
     HubTool.subscriptions ||
     HubTool.pip ||
     HubTool.spotify ||

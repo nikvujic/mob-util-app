@@ -122,12 +122,6 @@ const plainScrollAllowed = {
   'pages/hub/counter_sheet.dart',
   // The same, for a medicine.
   'pages/hub/medicine_sheet.dart',
-  // A recipe's ingredients to tick, in a bottom sheet (Round 48): already
-  // at the bottom.
-  'pages/hub/food_recipe_sheet.dart',
-  // The food index under its field (Round 53): a short list capped in
-  // height, right under the thumb already.
-  'pages/hub/food_index.dart',
   // A date's reminder sheet (Round 57): a few chips and a time, scrolled
   // on a short screen; no list to reach.
   'pages/hub/date_reminder_sheet.dart',

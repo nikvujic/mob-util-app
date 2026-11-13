@@ -7,8 +7,8 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/pages/hub/dates.dart';
 
-/// Birthdays & dates on a month calendar (Round 57; like Food's, but it
-/// goes forward too): weeks as rows, Monday first, a day with dates
+/// Birthdays & dates on a month calendar (Round 57; it goes forward
+/// too): weeks as rows, Monday first, a day with dates
 /// in their colours (Round 60: its circle filled, split if several;
 /// before, dots under it), today's number in the accent, the picked day
 /// ringed. A year back and a year ahead; it opens
@@ -201,8 +201,7 @@ class _Day extends StatelessWidget {
     final colors = context.colors;
     final isToday = day == today;
     final isPicked = day == picked;
-    // Round 60: the day's circle in its dates' colours (like Food's rated
-    // days): one colour filled, several split in slices; several of one
+    // Round 60: the day's circle in its dates' colours: one colour filled, several split in slices; several of one
     // colour, a border.
     final kinds = [
       for (final d in dates)

@@ -4,13 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/providers/dates_provider.dart';
-import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
 
 import '../helpers.dart';
 
 /// Round 91: pages saved as they're typed (a subscription, a
-/// date, a meal) ask on back, once changed, Save or Discard, as a note
+/// date) ask on back, once changed, Save or Discard, as a note
 /// does; Discard puts it back (a new one goes); a tap outside stays.
 void main() {
   late ProviderContainer container;
@@ -125,35 +124,5 @@ void main() {
     await tester.tap(dialogButton('Discard'));
     await tester.pumpAndSettle();
     expect(container.read(datesProvider).byId('d'), d);
-  });
-
-  testWidgets(
-      'a meal: a new one with a note, Discard: gone; the food list open, '
-      'back closes it first, nothing asked', (tester) async {
-    container = await pumpApp(tester, clock: () => now);
-    await openTab(tester, 'Hub');
-    await tester.tap(find.byTooltip('Food'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Log a meal'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('mealFoodField')));
-    await tester.pumpAndSettle();
-    await pressBack(tester);
-    expect(find.byType(AlertDialog), findsNothing);
-    expect(find.byKey(const Key('mealNote')), findsOneWidget,
-        reason: 'still on the meal');
-
-    await tester.enterText(find.byKey(const Key('mealNote')), 'Good');
-    await tester.pump();
-    expect(container.read(foodProvider).meals, hasLength(1));
-    // The note field let go first (its own back), then back again.
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
-    await pressBack(tester);
-    expect(find.text('Save new meal?'), findsOneWidget);
-    await tester.tap(dialogButton('Discard'));
-    await tester.pumpAndSettle();
-    expect(container.read(foodProvider).meals, isEmpty);
   });
 }

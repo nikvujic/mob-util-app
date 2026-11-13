@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/app_section.dart';
 import 'package:the_app/models/date_entry.dart';
-import 'package:the_app/models/food.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/placard.dart';
@@ -13,7 +12,6 @@ import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/people.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
-import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
@@ -58,8 +56,6 @@ class SectionData {
         // With the ingredients list.
         HubTool.recipes => _ref.read(recipesProvider).length +
             _ref.read(ingredientsProvider).size,
-        // Its foods and meals.
-        HubTool.food => _ref.read(foodProvider).size,
         HubTool.dates => _ref.read(datesProvider).dates.length,
         HubTool.subscriptions =>
           _ref.read(subscriptionsProvider).subscriptions.length,
@@ -86,8 +82,6 @@ class SectionData {
         _ref
             .read(ingredientsProvider.notifier)
             .replaceAll(IngredientBook.empty);
-      case HubTool.food:
-        _ref.read(foodProvider.notifier).replaceAll(FoodBook.empty);
       case HubTool.dates:
         _ref.read(datesProvider.notifier).replaceAll(DateBook.empty);
       case HubTool.subscriptions:

@@ -186,7 +186,31 @@ extension PipBrainLooks on PipBrain {
 
   /// What his screen shows and how far into it: while [PipActivity.
   /// showing], and after a bug fight (proud) or holding a flower (happy).
-  (PipScreen, double)? get screenShow => switch (activity) {
+  /// Round 145 (asked for): a medicine due, the pill, whatever he's doing
+  /// while he's up (walking, working, out on his adventure...), drawn
+  /// over him as he is.
+  (PipScreen, double)? get screenShow {
+    final shown = _screenNow;
+    if (!medicineDue || !_faceUp || shown?.$1 == PipScreen.pill) return shown;
+    return (PipScreen.pill, sceneClock);
+  }
+
+  /// Up, his screen on: not asleep or waking, not off or coming on.
+  bool get _faceUp => switch (activity) {
+        PipActivity.egg ||
+        PipActivity.hatching ||
+        PipActivity.asleep ||
+        PipActivity.fallingAsleep ||
+        PipActivity.stirring ||
+        PipActivity.wakingUp ||
+        PipActivity.off ||
+        PipActivity.poweringOff =>
+          false,
+        PipActivity.poweringOn => _t >= PipBrain.flickerOnEnd,
+        _ => true,
+      };
+
+  (PipScreen, double)? get _screenNow => switch (activity) {
         PipActivity.showing => (_lk.screenShow, _t),
         PipActivity.dancing => (PipScreen.music, _t),
         PipActivity.eating when _t >= PipBrain.eatenAt => (
@@ -194,11 +218,6 @@ extension PipBrainLooks on PipBrain {
             _t - PipBrain.eatenAt
           ),
         PipActivity.bugHunt when _bugsAllGone => (PipScreen.happy, _bugPhaseT),
-        // Round 127: at his quest's work, his medicine on his screen.
-        PipActivity.questing when medicineDue => (
-            PipScreen.pill,
-            _questClockNow
-          ),
         PipActivity.flower when _flowerStage == 3 => (PipScreen.happy, _t),
         _ => null,
       };

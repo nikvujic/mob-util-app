@@ -10,7 +10,7 @@ answers are in (Round 57); **Decided** marks them.
 ## 1. The page (a Hub page, "Dates")
 
 - Its name in the Hub: **Dates** (decided).
-- **A month calendar** on top, the same kind as Food's (weeks as rows,
+- **A month calendar** on top, the food tracker's kind (gone since Round 145) (weeks as rows,
   Monday first, swipe or ‹ › for other months; this month first). A day
   with a date on it shows a **small dot in its type's colour** (two or
   more: up to three dots); today is ringed. Round 60: instead, the day's

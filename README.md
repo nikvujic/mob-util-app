@@ -25,7 +25,6 @@ lookup, and it can be switched off.
   view, lifetime totals, and reminders with optional follow-ups.
 - **Recipes and Ingredients**: recipes with sections and quantities, and a
   shared ingredient catalogue that feeds the shopping list.
-- **Food**: a daily meal log with ratings and statistics.
 - **Dates**: birthdays, anniversaries and trips, with a month calendar and
   reminders.
 - **Subscriptions**: recurring payments, with reminders before each renewal.

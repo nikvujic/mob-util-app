@@ -234,6 +234,49 @@ void main() {
       expect(hops, greaterThan(10));
     });
 
+    test(
+        'Round 145: due, the pill whatever he does while he\'s up '
+        '(working, out on his adventure, eating...), over him as he is; '
+        'none asleep, off or before his screen comes back on', () {
+      final p = up()..medicineDue = true;
+      void watch(String what) {
+        for (var i = 0; i < 60 * 3; i++) {
+          p.step(1 / 60);
+          expect(p.screenShow?.$1, PipScreen.pill,
+              reason: '$what: ${p.activity.name}');
+        }
+      }
+
+      for (final animation in [
+        PipAnimation.walk,
+        PipAnimation.dance,
+        PipAnimation.ball,
+      ]) {
+        p.play(animation);
+        watch(animation.name);
+      }
+      p.adventure((onBreak: false, breakDone: 0), animate: false);
+      expect(p.activity, PipActivity.adventuring);
+      watch('out');
+      final asleep = up()..medicineDue = true;
+      asleep.show(PipShow.asleep);
+      expect(asleep.screenShow, isNull, reason: 'asleep');
+      final off = up()..medicineDue = true;
+      off.show(PipShow.off);
+      expect(off.screenShow, isNull, reason: 'off');
+      expect(off.takeBattery(off.x + 30), isTrue);
+      off.step(0.1);
+      expect(off.screenShow, isNull, reason: 'the battery on its way');
+      run(off, PipBrain.flickerOnEnd);
+      expect(off.screenShow?.$1, PipScreen.pill, reason: 'back on');
+      // Drawn over his legs as they are, walking.
+      final legs = {
+        for (final f in [PipFrame.step1, PipFrame.step3])
+          PipSprites.screenFrame(PipScreen.pill, 0, base: f).last,
+      };
+      expect(legs, hasLength(2), reason: 'his legs go on walking');
+    });
+
     test('marked: it stops at once; not due, never', () {
       final p = up()..medicineDue = true;
       run(p, 5);

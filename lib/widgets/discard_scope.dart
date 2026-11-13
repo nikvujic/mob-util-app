@@ -16,7 +16,7 @@ class DiscardScope extends StatefulWidget {
   /// A new one: "Save new …?", and Discard removes it.
   final bool isNew;
 
-  /// What it is, for the question: "subscription", "date", "meal".
+  /// What it is, for the question: "subscription", "date".
   final String what;
   final VoidCallback onDiscard;
   final bool Function()? handleBack;

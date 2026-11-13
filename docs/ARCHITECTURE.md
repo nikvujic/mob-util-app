@@ -356,27 +356,13 @@ open the screen stays on: `core/screen.dart` → `MainActivity` over
 `the_app/screen` (`FLAG_KEEP_SCREEN_ON`, which Android drops in the
 background by itself).
 
-## The food tracker (O14, Round 46)
+## The food tracker (O14, Round 46): removed (Round 145)
 
-`models/food.dart`: `FoodBook` (foods and meals, meals kept in time
-order) in `food.json` (version 1) and backups (`food`, v22). A meal's
-foods are `MealFood`s: the food's id and its name, so a deleted food's
-meals stay whole (as recipes keep their ingredients' names). The
-statistics are plain functions in `models/food_stats.dart`
-(`FoodStats.foods`, `tags`, `usual`): each `FoodFinding` compares rated
-meals with it against those without it, and `verdict` is honest about
-too little data. Pages: `pages/hub/food.dart` (the day and its week
-strip, `RatingColours`), `food_meal.dart` (a meal, saved as it goes
-through `FoodNotifier.saveMeal`, which adds a new one once it holds
-something), `food_foods.dart`, `food_stats.dart`; each opened through
-`openFoodPage`, behind the page's lock. Round 47: `food_calendar.dart`
-(a month calendar shaped like Medicine's), the meal page's index of
-foods and ingredients (ingredient names become foods when picked), and
-`FoodFindingPage` in `food_stats.dart`, fed by `FoodStats.mealsWith`,
-`ratings`, `symptoms` and `eatenWith`. Round 48: `FoodStats.bySymptom`
-runs the same comparison with every meal counted and a symptom as the
-outcome, and the index lists recipes, whose ingredients open in a sheet
-to pick from.
+Taken out at the user's ask: its pages, models, provider and icon. On
+opening, `AppStorage` deletes an old `food.json`; a backup's `food`
+(v22 on) is no longer written and is ignored when one's restored (the
+format's otherwise the same, still v33). `HubTool.fromId` drops the
+stored `food` from a Hub layout or a page lock.
 
 ## Pip, the pet (Round 34)
 

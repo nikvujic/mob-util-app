@@ -9,10 +9,6 @@ class _PipPlacesState {
   PipQuestNow? questNow;
   double questT = 0;
 
-  /// Seconds at his quest's work since he started this time (his
-  /// screen's pill runs on it, Round 132).
-  double questClock = 0;
-
   /// How far the house area's moved left to keep him in view (a room
   /// narrower than it, e.g. the menu's).
   double questCamera = 0;
@@ -238,7 +234,6 @@ extension PipBrainPlaces on PipBrain {
     final down = _pl.downView;
     _pl.downView = null;
     _start(PipActivity.questing);
-    _pl.questClock = 0;
     _pl.joinFrom = null;
     _pl.arriving = null;
     // Round 141: run out on his field on his way (or off to it): on his
@@ -370,7 +365,6 @@ extension PipBrainPlaces on PipBrain {
       if (!_canGoOut) return;
       final from = x;
       _start(PipActivity.questing);
-      _pl.questClock = 0;
       _pl.joinFrom = animate && !freshSpawn ? from : null;
       _pl.joinT = 0;
       _pl.arriving = null;
@@ -393,7 +387,6 @@ extension PipBrainPlaces on PipBrain {
 
   void _stepQuest(double dt) {
     _pl.questT += dt;
-    _pl.questClock += dt;
     if (_pl.leaving case final leaving?) {
       final on =
           (from: leaving.from, t: leaving.t + dt, toHome: leaving.toHome);
@@ -599,7 +592,4 @@ extension PipBrainPlaces on PipBrain {
 
   /// Down where he ran out at his work: how high that was; null: not.
   double? get _downLift => downAtWork ? _pl.downView!.lift : null;
-
-  /// Seconds at his quest's work this time (his screen's pill).
-  double get _questClockNow => _pl.questClock;
 }

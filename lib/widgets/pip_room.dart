@@ -2285,7 +2285,7 @@ List<String> pipFrameOf(PipBrain brain) {
   final picture = charge != null
       ? PipSprites.chargingFrame(charge.$1, charge.$2, lamp: brain.stationLamp)
       : shown != null
-          ? PipSprites.screenFrame(shown.$1, shown.$2)
+          ? PipSprites.screenFrame(shown.$1, shown.$2, base: brain.frame)
           : null;
   if (picture == null) return PipSprites.frameOf(brain.frame, brain.face);
   return brain.facingRight ? picture : PipSprites.screenTurned(picture);

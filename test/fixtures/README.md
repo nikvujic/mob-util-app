@@ -118,7 +118,8 @@ app still reads every version, so an update can never lose existing data.
   `todoLocked`; settings.json still version 2), no other locks. Not in
   backups.
 - `v21/backup-plain.json` — backup (version 21) with the to-dos.
-- `v22/storage/food.json` — the food tracker (Round 46, food.json
+- `v22/storage/food.json` — (Round 145: the food tracker's gone; kept
+  to check the file's deleted on opening) the food tracker (Round 46, food.json
   version 1): foods "Burek 🥟" (gluten, fried), "Jogurt" (dairy), "Kafa"
   (caffeine); breakfast 14 Oct 06:30 UTC with Burek and Jogurt, rated
   **bad**, bloating and heartburn, note "Previše, šta god"; a snack at

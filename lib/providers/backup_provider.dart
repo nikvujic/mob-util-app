@@ -18,7 +18,6 @@ import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/people.dart';
-import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -30,7 +29,6 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
-import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
@@ -75,7 +73,6 @@ class BackupExporter {
       pip: _ref.read(pipLifeProvider),
       recipes: _ref.read(recipesProvider),
       ingredients: _ref.read(ingredientsProvider),
-      food: _ref.read(foodProvider),
       dates: _ref.read(datesProvider),
       subscriptions: _ref.read(subscriptionsProvider),
       packing: _ref.read(packingProvider),
@@ -388,7 +385,6 @@ class BackupImporter {
       source.pip,
       source.recipes,
       source.ingredients,
-      source.food,
       source.dates,
       source.subscriptions,
       source.packing,
@@ -771,7 +767,6 @@ class BackupImporter {
       undo._previous.pip,
       undo._previous.recipes,
       undo._previous.ingredients,
-      undo._previous.food,
       undo._previous.dates,
       undo._previous.subscriptions,
       undo._previous.packing,
@@ -853,7 +848,6 @@ class BackupImporter {
     PipLife? pip,
     List<Recipe> recipes,
     IngredientBook ingredients,
-    FoodBook food,
     DateBook dates,
     SubscriptionBook subscriptions,
     PackingBook packing,
@@ -872,7 +866,6 @@ class BackupImporter {
     if (pip != null) _ref.read(pipLifeProvider.notifier).replace(pip);
     _ref.read(recipesProvider.notifier).replaceAll(recipes);
     _ref.read(ingredientsProvider.notifier).replaceAll(ingredients);
-    _ref.read(foodProvider.notifier).replaceAll(food);
     _ref.read(datesProvider.notifier).replaceAll(dates);
     _ref.read(subscriptionsProvider.notifier).replaceAll(subscriptions);
     _ref.read(packingProvider.notifier).replaceAll(packing);

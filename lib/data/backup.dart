@@ -13,7 +13,6 @@ import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/people.dart';
-import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -95,7 +94,9 @@ class Backup {
   /// packing lists (`packing`, as in `packing.json`, Round 94); 31 = a
   /// packing list's own sections (in `packing`, Round 95); 32 = people
   /// (`people`, as in `people.json`, Round 108), and a date's person (in
-  /// `dates`); 33 = Pip's quests (in `pip`, Round 125).
+  /// `dates`); 33 = Pip's quests (in `pip`, Round 125). Round 145: the
+  /// food tracker's gone: `food` isn't written, and is ignored in older
+  /// backups (the format's otherwise the same, so still 33).
   static const version = 33;
 
   final DateTime createdAt;
@@ -128,9 +129,6 @@ class Backup {
   /// before them.
   final List<Recipe> recipes;
   final IngredientBook ingredients;
-
-  /// The food tracker (Round 46); empty in backups from before it.
-  final FoodBook food;
 
   /// Birthdays & dates (Round 57); empty in backups from before them.
   final DateBook dates;
@@ -165,7 +163,6 @@ class Backup {
     this.pip,
     this.recipes = const [],
     this.ingredients = IngredientBook.empty,
-    this.food = FoodBook.empty,
     this.dates = DateBook.empty,
     this.subscriptions = SubscriptionBook.empty,
     PackingBook? packing,
@@ -204,7 +201,6 @@ class Backup {
           if (pip != null) 'pip': pip!.toJson(),
           'recipes': [for (final r in recipes) r.toJson()],
           'ingredients': ingredients.toJson(),
-          'food': food.toJson(),
           'dates': [for (final d in dates.dates) d.toJson()],
           'subscriptions': [
             for (final s in subscriptions.subscriptions) s.toJson()
@@ -322,9 +318,6 @@ class Backup {
             ? IngredientBook.empty
             : IngredientBook.fromJson(
                 data['ingredients'] as Map<String, dynamic>),
-        food: data['food'] == null
-            ? FoodBook.empty
-            : FoodBook.fromJson(data['food'] as Map<String, dynamic>),
         dates: DateBook.fromJson({'dates': data['dates'] ?? const []}),
         subscriptions: SubscriptionBook.fromJson(
             {'subscriptions': data['subscriptions'] ?? const []}),
@@ -356,8 +349,6 @@ class Backup {
         !unique(backup.recipes.map((r) => r.id)) ||
         !unique(backup.ingredients.all.map((i) => i.id)) ||
         !unique(backup.ingredients.sections.map((s) => s.id)) ||
-        !unique(backup.food.foods.map((f) => f.id)) ||
-        !unique(backup.food.meals.map((m) => m.id)) ||
         !unique(backup.dates.dates.map((d) => d.id)) ||
         !unique(backup.subscriptions.subscriptions.map((s) => s.id)) ||
         !unique(backup.packing.lists.map((l) => l.id)) ||

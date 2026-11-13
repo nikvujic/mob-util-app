@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/app/app.dart';
 import 'package:the_app/core/crypto.dart';
@@ -25,7 +24,6 @@ import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
-import 'package:the_app/providers/food_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
 import 'package:the_app/providers/notification_log_provider.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
@@ -178,32 +176,6 @@ Future<void> seed(ProviderContainer container) async {
       createdAt: today,
     ),
   ]);
-  // The food tracker (Round 46): a rated meal, one not rated, enough
-  // for a verdict or two.
-  container.read(foodProvider.notifier).replaceAll(FoodBook(
-        foods: [
-          Food(id: 'f1', name: 'Burek', tags: {FoodTag.fried})
-        ],
-        meals: [
-          for (var i = 0; i < 6; i++)
-            Meal(
-              id: 'b$i',
-              at: today.subtract(Duration(days: i, hours: 1)),
-              kind: MealKind.breakfast,
-              foods: const [MealFood(foodId: 'f1', name: 'Burek')],
-              rating: MealRating.bad,
-              symptoms: {Symptom.bloating},
-            ),
-          for (var i = 0; i < 6; i++)
-            Meal(
-              id: 's$i',
-              at: today.subtract(Duration(days: i, hours: -4)),
-              kind: MealKind.lunch,
-              foods: const [MealFood(name: 'Soup')],
-              rating: i == 0 ? null : MealRating.great,
-            ),
-        ],
-      ));
 }
 
 /// A fake file picker that returns a small backup when importing.
@@ -362,68 +334,6 @@ void main() {
         await t.tap(find.byTooltip('Counters'));
         await t.pumpAndSettle();
         await t.tap(find.byTooltip('New counter'));
-        await t.pumpAndSettle();
-      },
-      'food': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        expect(find.text('Burek'), findsOneWidget);
-      },
-      'food, a meal': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        await t.tap(find.text('Burek'));
-        await t.pumpAndSettle();
-      },
-      'food statistics': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Statistics'));
-        await t.pumpAndSettle();
-        expect(find.text('Likely trouble'), findsWidgets);
-        await t.scrollUntilVisible(find.text('BY SYMPTOM'), 200,
-            scrollable: find.byType(Scrollable).last);
-      },
-      "a food's statistics": (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Statistics'));
-        await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('finding-Burek')));
-        await t.pumpAndSettle();
-        expect(find.byKey(const Key('findingVerdict')), findsOneWidget);
-      },
-      'food, the index of foods': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Log a meal'));
-        await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('mealFoodField')));
-        await t.pumpAndSettle();
-        expect(find.byKey(const Key('foodIndex')), findsOneWidget);
-      },
-      "food, a recipe's ingredients": (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Log a meal'));
-        await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('mealFoodField')));
-        await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('indexRecipe-Pancakes')));
-        await t.pumpAndSettle();
-        expect(find.byKey(const Key('addFromRecipe')), findsOneWidget);
-      },
-      'foods list': (t) async {
-        await openTab(t, 'Hub');
-        await t.tap(find.byTooltip('Food'));
-        await t.pumpAndSettle();
-        await t.tap(find.byTooltip('Foods'));
         await t.pumpAndSettle();
       },
       'recipes': (t) async {

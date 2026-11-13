@@ -430,8 +430,10 @@ abstract final class PipSprites {
   // Round 52: his screen showing things, and what's in his field.
 
   /// His standing frame with [screen] on his screen, [t] seconds in.
-  static List<String> screenFrame(PipScreen screen, double t) {
-    final rows = [for (final r in frames[PipFrame.idle]!) r.split('')];
+  static List<String> screenFrame(PipScreen screen, double t,
+      {PipFrame base = PipFrame.idle}) {
+    // Round 145: over his body as it is (walking: his legs going).
+    final rows = [for (final r in frames[base]!) r.split('')];
     for (var y = 0; y < screenRows; y++) {
       for (var x = 0; x < screenWidth; x++) {
         rows[_screenY + y][_screenX + x] = 'W';

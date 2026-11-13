@@ -21,7 +21,6 @@ import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/people.dart';
 import 'package:the_app/models/date_entry.dart';
-import 'package:the_app/models/food.dart';
 import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/notes_provider.dart';
@@ -1026,54 +1025,24 @@ void main() {
     });
   });
 
-  group('food.json v1 / v22 backup (the food tracker, Round 46)', () {
-    void expectSample(FoodBook book) {
-      expect(
-          book.foods
-              .map((f) => (f.id, f.name, f.tags.map((t) => t.name).join(','))),
-          [
-            ('f1', 'Burek 🥟', 'gluten,fried'),
-            ('f2', 'Jogurt', 'dairy'),
-            ('f3', 'Kafa', 'caffeine'),
-          ]);
-      final (first, second) = (book.meals.first, book.meals.last);
-      expect(first.at, DateTime.utc(2026, 10, 14, 6, 30));
-      expect(first.kind, MealKind.breakfast);
-      expect(first.foods.map((f) => (f.foodId, f.name)),
-          [('f1', 'Burek 🥟'), ('f2', 'Jogurt')]);
-      expect(first.rating, MealRating.bad);
-      expect(first.symptoms, {Symptom.bloating, Symptom.heartburn});
-      expect(first.note, 'Previše, šta god');
-      expect(second.kind, MealKind.snack);
-      expect(second.rating, isNull);
-      expect(second.foods.map((f) => (f.foodId, f.name)),
-          [('f3', 'Kafa'), (null, 'Keks')]);
-    }
-
-    test('food.json version 1 loads', () async {
-      final storage = await AppStorage.open(
-        directory: copyOf('test/fixtures/v22/storage'),
-      );
-      expectSample(storage.initialFood);
+  group(
+      'food.json v1 / v22 backup (the food tracker, Round 46; gone, '
+      'Round 145)', () {
+    test('its file is deleted, the rest loads as it was', () async {
+      final dir = copyOf('test/fixtures/v22/storage');
+      expect(File('${dir.path}/food.json').existsSync(), isTrue);
+      final storage = await AppStorage.open(directory: dir);
+      expect(File('${dir.path}/food.json').existsSync(), isFalse);
       expect(storage.unreadable, isEmpty);
     });
 
-    test('v22 backup restores it', () {
+    test('a backup with it restores the rest; new backups have none', () {
       final file = BackupFile.parse(
         File('test/fixtures/v22/backup-plain.json').readAsStringSync(),
       ) as PlainBackupFile;
-      expectSample(file.backup.food);
-    });
-
-    test('older backups and storage have none', () async {
-      final file = BackupFile.parse(
-        File('test/fixtures/v21/backup-plain.json').readAsStringSync(),
-      ) as PlainBackupFile;
-      expect(file.backup.food.size, 0);
-      final storage = await AppStorage.open(
-        directory: copyOf('test/fixtures/v21/storage'),
-      );
-      expect(storage.initialFood.size, 0);
+      expect(file.backup.placard.text, 'Add text here!',
+          reason: 'the rest read');
+      expect(file.backup.toJson()['data'], isNot(contains('food')));
     });
   });
 

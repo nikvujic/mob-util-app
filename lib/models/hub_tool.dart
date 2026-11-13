@@ -20,9 +20,6 @@ enum HubTool {
   /// Recipes (Round 42), with the ingredients list they pick from.
   recipes('Recipes'),
 
-  /// The food tracker (O14, Round 46).
-  food('Food'),
-
   /// Birthdays & dates (Round 57).
   dates('Dates'),
 

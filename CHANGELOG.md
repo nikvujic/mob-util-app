@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-13
+
+### Removed
+- **The food tracker** (Hub → Food): its page, meals, foods and
+  statistics. Its saved data is deleted when the app opens; backups no
+  longer include it, and older backups restore without it.
+
+### Changed
+- **Pip's medicine reminder:** while a medicine is due, the pill stays
+  on his screen whatever he's doing while he's up (walking, working,
+  out on his adventure), his legs still going. It used to show only
+  while he stood reminding you, and went away once he set off.
+
 ## [2.3.1] - 2026-11-11
 
 ### Fixed

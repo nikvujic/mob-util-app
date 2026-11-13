@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 145 — the pill stays; the food tracker removed (2026-11-13, 2.4.0)
+
+- [x] A medicine due: the pill on his screen whatever he does while
+  he's up (`screenShow` over `_faceUp`), drawn over his frame as it is
+  (`screenFrame(base:)`, his legs walking); `questClock` gone.
+- [x] The food tracker taken out (asked for): pages, models, provider,
+  icon, `RatingColours`, its tests; `food.json` deleted on opening;
+  backups' `food` neither written nor read (still v33).
+
 ### Round 144 — his walks at his pace (2026-11-11, 2.3.1)
 
 - [x] A walk's parts took set times (20 s off the house area, 15 s into

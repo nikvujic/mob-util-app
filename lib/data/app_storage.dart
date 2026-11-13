@@ -20,7 +20,6 @@ import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/people.dart';
-import 'package:the_app/models/food.dart';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/shop_item.dart';
@@ -46,8 +45,6 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/recipes.json {"version": 1, "recipes": [...]}
 ///     <app documents>/data/ingredients.json
 ///         {"version": 1, "sections": [...]}
-///     <app documents>/data/food.json
-///         {"version": 1, "foods": [...], "meals": [...]}
 ///     <app documents>/data/dates.json {"version": 3, "dates": [...]}
 ///     <app documents>/data/subscriptions.json
 ///         {"version": 1, "subscriptions": [...]}
@@ -133,10 +130,6 @@ class AppStorage {
   /// from. History: 1 = first format.
   static const ingredientsFormatVersion = 1;
 
-  /// Version of `food.json` (Round 46), the food tracker. History: 1 =
-  /// first format.
-  static const foodFormatVersion = 1;
-
   /// Version of `dates.json` (Round 57), birthdays & dates. History: 1 =
   /// first format; 2 = a holiday or an event may last several days
   /// (`days`, Round 59); 3 = a holiday or an event may be of a kind
@@ -173,7 +166,6 @@ class AppStorage {
   final JsonFileStore? _pipStore;
   final JsonFileStore? _recipesStore;
   final JsonFileStore? _ingredientsStore;
-  final JsonFileStore? _foodStore;
   final JsonFileStore? _datesStore;
   final JsonFileStore? _subscriptionsStore;
   final JsonFileStore? _packingStore;
@@ -195,7 +187,6 @@ class AppStorage {
   final PipLife initialPip;
   final List<Recipe> initialRecipes;
   final IngredientBook initialIngredients;
-  final FoodBook initialFood;
   final DateBook initialDates;
   final SubscriptionBook initialSubscriptions;
   final PackingBook initialPacking;
@@ -236,7 +227,6 @@ class AppStorage {
     this._pipStore,
     this._recipesStore,
     this._ingredientsStore,
-    this._foodStore,
     this._datesStore,
     this._subscriptionsStore,
     this._packingStore,
@@ -256,7 +246,6 @@ class AppStorage {
     required this.initialPip,
     required this.initialRecipes,
     required this.initialIngredients,
-    required this.initialFood,
     required this.initialDates,
     required this.initialSubscriptions,
     required this.initialPacking,
@@ -284,7 +273,6 @@ class AppStorage {
     this.initialPip = PipLife.egg,
     this.initialRecipes = const [],
     this.initialIngredients = IngredientBook.empty,
-    this.initialFood = FoodBook.empty,
     this.initialDates = DateBook.empty,
     this.initialSubscriptions = SubscriptionBook.empty,
     PackingBook? initialPacking,
@@ -310,7 +298,6 @@ class AppStorage {
         _pipStore = null,
         _recipesStore = null,
         _ingredientsStore = null,
-        _foodStore = null,
         _datesStore = null,
         _subscriptionsStore = null,
         _packingStore = null,
@@ -344,7 +331,13 @@ class AppStorage {
     final recipesStore = JsonFileStore(File('${dir.path}/recipes.json'));
     final ingredientsStore =
         JsonFileStore(File('${dir.path}/ingredients.json'));
-    final foodStore = JsonFileStore(File('${dir.path}/food.json'));
+    // Round 145: the food tracker's gone (asked for): its file too.
+    try {
+      final food = File('${dir.path}/food.json');
+      if (food.existsSync()) food.deleteSync();
+    } on FileSystemException {
+      // Left; nothing reads it.
+    }
     final datesStore = JsonFileStore(File('${dir.path}/dates.json'));
     final subscriptionsStore =
         JsonFileStore(File('${dir.path}/subscriptions.json'));
@@ -383,7 +376,6 @@ class AppStorage {
       pipStore,
       recipesStore,
       ingredientsStore,
-      foodStore,
       datesStore,
       subscriptionsStore,
       packingStore,
@@ -502,12 +494,6 @@ class AppStorage {
         IngredientBook.empty,
         maxVersion: ingredientsFormatVersion,
         IngredientBook.fromJson,
-      ),
-      initialFood: await _load(
-        foodStore,
-        FoodBook.empty,
-        maxVersion: foodFormatVersion,
-        FoodBook.fromJson,
       ),
       initialDates: await _load(
         datesStore,
@@ -669,13 +655,6 @@ class AppStorage {
     });
   }
 
-  Future<void> saveFood(FoodBook book) async {
-    await _foodStore?.write({
-      'version': foodFormatVersion,
-      ...book.toJson(),
-    });
-  }
-
   Future<void> saveDates(DateBook book) async {
     await _datesStore?.write({
       'version': datesFormatVersion,
@@ -769,7 +748,6 @@ class AppStorage {
           _pipStore,
           _recipesStore,
           _ingredientsStore,
-          _foodStore,
           _datesStore,
           _subscriptionsStore,
           _packingStore,
@@ -802,7 +780,6 @@ class AppStorage {
           _pipStore,
           _recipesStore,
           _ingredientsStore,
-          _foodStore,
           _datesStore,
           _subscriptionsStore,
           _packingStore,
@@ -847,7 +824,6 @@ class AppStorage {
     await _pipStore?.flush();
     await _recipesStore?.flush();
     await _ingredientsStore?.flush();
-    await _foodStore?.flush();
     await _datesStore?.flush();
     await _subscriptionsStore?.flush();
     await _packingStore?.flush();

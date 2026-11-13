@@ -26,7 +26,6 @@ void main() {
       'assets/icons/placard.svg',
       'assets/icons/medicine.svg',
       'assets/icons/recipes.svg', // Round 42
-      'assets/icons/food.svg', // Round 46
       'assets/icons/dates.svg', // Round 57
       'assets/icons/subscriptions.svg', // Round 79
       'assets/icons/spotify.svg', // Round 93
@@ -66,7 +65,6 @@ void main() {
       HubTool.placard,
       HubTool.pip,
       HubTool.recipes,
-      HubTool.food,
       HubTool.dates,
       HubTool.subscriptions, // Round 79
       HubTool.spotify, // Round 93
@@ -99,7 +97,6 @@ void main() {
         HubTool.medicine,
         HubTool.pip,
         HubTool.recipes,
-        HubTool.food,
         HubTool.dates,
         HubTool.subscriptions,
         HubTool.spotify,
@@ -139,7 +136,6 @@ void main() {
         HubTool.placard,
         HubTool.pip,
         HubTool.recipes,
-        HubTool.food,
         HubTool.dates,
         HubTool.subscriptions,
         HubTool.spotify,
@@ -181,7 +177,6 @@ void main() {
         HubTool.counters,
         HubTool.placard,
         HubTool.recipes,
-        HubTool.food,
         HubTool.dates,
         HubTool.subscriptions,
         HubTool.spotify,
