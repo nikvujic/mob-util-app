@@ -83,7 +83,7 @@ class QuestView {
   double pipCentre(int width) => anchor * width + offset;
 
   /// His walking speed, in pixels a second.
-  static const walkSpeed = 9.0;
+  static const walkSpeed = 12.0;
 
   /// A swing of his sword (seconds).
   static const swingTime = 1.1;
@@ -101,7 +101,8 @@ class QuestView {
         _ => 0.3,
       };
   static double workOffset(QuestScenePlace p) => switch (p) {
-        QuestScenePlace.forest => -2,
+        // Round 146: beside the great tree's trunk, his axe in it.
+        QuestScenePlace.forest => -16,
         QuestScenePlace.mine => -16,
         _ => -8,
       };

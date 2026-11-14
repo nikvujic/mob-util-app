@@ -88,8 +88,8 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 | Material | Where | How (animation) |
 |---|---|---|
-| **Wood** | **The forest** (Round 123; Round 124: denser, three layers of trees, the far ones hazy): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
-| **Stone** | **The mine** (Round 124): **a mountain** rising up the right of the screen and off its top (rock in bands, ore glints, ledges, pines on its slope, snow up high, hazy peaks behind), a timber-framed mouth at its foot with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine until a block cracks off, chips flying; the block flies to him. |
+| **Wood** | **The forest** (Round 123; Round 124: denser, three layers of trees, the far ones hazy): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword (Round 146: an axe, at a great tree of its own, half as tall again as the others) until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
+| **Stone** | **The mine** (Round 124): **a mountain** rising up the right of the screen and off its top (rock in bands, ore glints, ledges, pines on its slope, snow up high, hazy peaks behind), a timber-framed mouth at its foot with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine (Round 141: with a pickaxe) until a block cracks off, chips flying; the block flies to him. |
 | **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs; sand flies to him in little heaps. |
 | **Glass** | His **fireplace**, in the house | Two sand and a wood (the fire) go into a crucible in the fire; it glows; a pane comes out. |
 
@@ -349,7 +349,8 @@ from use):
   foundation's top row has got, walls on the whole floor and the
   posts, the roof on the beam and scaffold. Gathering is quicker (a
   tree 24 min, a stone 12, sand 6), so building is about half his
-  time from the start. About 58 days in all.
+  time from the start. About 58 days in all (Round 146: walks 2 minutes,
+  about 54).
 - **The next quest** isn't offered yet: after the house, the Quests card
   shows it done with its picture.
 

@@ -812,6 +812,140 @@ abstract final class PipSprites {
   /// The sword's grip row the hand holds (the middle of the grip).
   static const swordGrip = 10;
 
+  /// Round 146: his axe (in the forest), 7 x 13 like the sword, held the
+  /// same way: a steel blade on one side of the head (forward, as he
+  /// swings it), a wooden handle.
+  static const axe = [
+    '...sss.',
+    '..hsse.',
+    '..hsse.',
+    '...sse.',
+    '...tss.',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+  ];
+
+  /// Round 146: the great tree he fells in the forest, 30 x 48 (half as
+  /// tall again as his field's), his trunk's middle at [greatTreeFoot]
+  /// from its left; in winter bare, its branches showing.
+  static const greatTree = [
+    '............HHHHHH............',
+    '...........HLDDDDDH...........',
+    '..........HHLLLDLDLHHH.U......',
+    '......UHHHLLHLDDDLDDLDHH......',
+    '.....HHLLLLHLDLLDDDLLLLDH.....',
+    '.....HLLLLLLBLLLLDDLDDDDDH....',
+    '....HHHLHLLLLLLLDLLDDDDDLD....',
+    '....HLHLLLLLLBLLLLDDDLDDDD....',
+    '....HHHHDLBLLHLLLDLLDDDDDD....',
+    '....DHHLLHLBLLLLLLDLDLDDLD....',
+    '.....LLLLLLLBBLLLLLLLLDDD.....',
+    '.....HLLLLLLLDLLLLLDLDLLDH..U.',
+    '.U..HLHDHLLHLLLLLDBLLDLDLLHH..',
+    '..HHLLLDLLLLLLLLLLBLDDLDDLLD..',
+    '..HLLDLLLLLLLLLLLLLLLDLLLLDLH.',
+    '.HDDLDLDLLLHLLHLLLLLLLLDDDDDD.',
+    '.LBLLBLLLBLLLDLBLLDLLLDDLLLDD.',
+    '.LLDLLLDLBLLLLLLDLLDHBLDDLDDD.',
+    '.HBLBLLHLLDLLLLLLLLLLLLDDDDDL.',
+    '.HHDLLLLLLLHLLLLLLLLLBLLDDDDD.',
+    '.HLBBLLLLLLLLLLLHLLBLLLLLDDD..',
+    '.LLLLLLLLBDLDLLLLLLBLLLLLDLDH.',
+    '.HLLLLLLLLLLLDHLLLLBBLLLLLDDD.',
+    '.HLHLLBLLLLLLLLLHLLDLLLLLLDDD.',
+    '.HLLHLLLBLLDLLLLLLLLLLLBDLLLD.',
+    '.HLHLLLLLLLLLBLLLLLBLDLLLLLLD.',
+    '.HDLHHLLLLLLLDHDLDLLLLLLLDDD..',
+    '...HDLDLLLLLLLLLLLBBLLLLD.....',
+    '.....HDLLLLDHDDDDLLLLBLDD.....',
+    '.......DDDDDDTTTUHDDDDD.......',
+    '...........UTUTTUT............',
+    '...........TTUTTU.............',
+    '...........TTTTUU.............',
+    '...........TTTTTU.............',
+    '...........TUTTTU.............',
+    '...........TTTUTU.............',
+    '...........TTTTTU.............',
+    '...........UTTTTU.............',
+    '...........TTUTTU.............',
+    '...........TTTTUU.............',
+    '...........TTTTTU.............',
+    '...........TUTTTU.............',
+    '...........TTTUTU.............',
+    '...........TTTTTU.............',
+    '...........UTTTTU.............',
+    '..........TTTUTTTU............',
+    '.........TTTTTTUTTU...........',
+    '........TTUTTTTTTUTU..........',
+  ];
+
+  static const bareGreatTree = [
+    '..............................',
+    '.................U............',
+    '............U.....U....U......',
+    '......U....U..U...U...U.......',
+    '.......U...U..UT...U..U.......',
+    '........U.U...UT...U.U........',
+    '........U.U...UT....U.........',
+    '.........U....UT....UT........',
+    '.........UT...UT....UT........',
+    '..........T...UT...UT..U......',
+    '......U...UT..UT...UT..U......',
+    '......U...UT..UT...UT...U...U.',
+    '.U...U....UT..UT...UT...U..U..',
+    '..U..U....UT..UT..U.T...U.U...',
+    '..U..U.....UT.UT..UT.....UU...',
+    '...UU......UT.UT..UT.....U....',
+    '....U......UT.UT..UT....U.T...',
+    '.....T......T.UT.UT.....UT....',
+    '.....UT.....UTUT.UT....U.T....',
+    '......T.....UTUT.UT....UT..U..',
+    '..UU...T....UTUT.UT...UTUUU...',
+    '....U..UT...UTUTU.T..UUU......',
+    '.....UUUT....UUTUT..UUTTT.....',
+    '.......TTTTU.UUTUTUTTTT.......',
+    '.........UTTTTTTUTT.UT........',
+    '..........UT..UTT..UT.........',
+    '..........UTTTUTT.U.T.........',
+    '...........UTTUUT.UT..........',
+    '...........TUTUTUUT...........',
+    '...........TUTTTUUT...........',
+    '...........UTUTTUT............',
+    '...........TTUTTU.............',
+    '...........TTTTUU.............',
+    '...........TTTTTU.............',
+    '...........TUTTTU.............',
+    '...........TTTUTU.............',
+    '...........TTTTTU.............',
+    '...........UTTTTU.............',
+    '...........TTUTTU.............',
+    '...........TTTTUU.............',
+    '...........TTTTTU.............',
+    '...........TUTTTU.............',
+    '...........TTTUTU.............',
+    '...........TTTTTU.............',
+    '...........UTTTTU.............',
+    '..........TTTUTTTU............',
+    '.........TTTTTTUTTU...........',
+    '........TTUTTTTTTUTU..........',
+  ];
+
+  /// Where the great tree's trunk is (its middle, from its left).
+  static const greatTreeFoot = 15.0;
+
+  /// The great tree in [season] (bare in winter), in the field tree's
+  /// colours.
+  static (List<String>, Map<String, Color>) greatTreeOf(Season season) => (
+        season == Season.winter ? bareGreatTree : greatTree,
+        treeColours[season.index],
+      );
+
   /// Round 141: his pickaxe (at the mine), 9 x 13 like the sword, held
   /// the same way: a steel head curving down to its points, on a wooden
   /// handle.

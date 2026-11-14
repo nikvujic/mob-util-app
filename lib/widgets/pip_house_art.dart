@@ -673,7 +673,7 @@ class PipHouseArt {
   /// [haze], their bottom left at [x], [bottom].
   void sprite(
       List<String> rows, Map<String, Color> colours, double x, double bottom,
-      {double haze = 0, double scale = 1}) {
+      {double haze = 0, double scale = 1, Color into = PipHouseColours.haze}) {
     final h = (rows.length * scale).floor(),
         w = (rows.first.length * scale).floor();
     for (var y = 0; y < h; y++) {
@@ -683,14 +683,17 @@ class PipHouseArt {
         final c = colours[ch];
         if (ch == '.' || c == null) continue;
         put(x + i, bottom - h + 1 + y,
-            haze > 0 ? Color.lerp(c, PipHouseColours.haze, haze)! : c);
+            haze > 0 ? Color.lerp(c, into, haze)! : c);
       }
     }
   }
 
   /// The forest (Round 124: dense, in three layers, the far ones hazy):
   /// the ground's top at [ground]; [width] wide; [season]'s colours.
-  void forest(double ground, int width, Season season) {
+  void forest(double ground, int width, Season season, {bool dark = false}) {
+    // Round 146: the far trees fade into the sky's colour by day, into
+    // the dark at night (they were pale against a night sky).
+    final into = dark ? PipHouseColours.nightHaze : PipHouseColours.haze;
     final oak = PipSprites.treeOf(PipTreeKind.oak, season);
     final birch = PipSprites.treeOf(PipTreeKind.birch, season);
     final pine = PipSprites.treeOf(PipTreeKind.pine, season);
@@ -709,12 +712,15 @@ class PipHouseArt {
     ];
     for (var i = 0, x = -8; x < width + 10; i++, x += 18) {
       final k = kinds[i % kinds.length];
-      sprite(k.$1, k.$2, x.toDouble(), ground - 8, haze: 0.62, scale: 0.95);
+      // Round 146: standing on the ground (they floated above it).
+      sprite(k.$1, k.$2, x.toDouble(), ground,
+          haze: dark ? 0.55 : 0.45, scale: 0.75, into: into);
     }
     final mid = [oak, birch, pine, oak, birch, pine, oak, birch];
     for (var i = 0, x = -4; x < width + 10; i++, x += 22) {
       final k = mid[i % mid.length];
-      sprite(k.$1, k.$2, x.toDouble(), ground - 4, haze: 0.38, scale: 1.15);
+      sprite(k.$1, k.$2, x.toDouble(), ground,
+          haze: dark ? 0.35 : 0.22, scale: 0.9, into: into);
     }
     for (var x = 0; x < width; x += 9) {
       if (_h(x, 5) % 3 != 0) continue;
@@ -738,10 +744,12 @@ class PipHouseArt {
     }
   }
 
-  /// The tree he's felling (a field oak), its bottom left at [x], and how
-  /// far it's fallen ([fall], 0 standing to 1 down): it leans, then lies.
-  void fellingTree(Season season, double x, double ground, double fall) {
-    final (rows, colours, _) = PipSprites.treeOf(PipTreeKind.oak, season);
+  /// The tree he's felling (Round 146: the great tree, taller than his
+  /// field's), its trunk's middle at [foot], and how far it's fallen
+  /// ([fall], 0 standing to 1 down): it leans, then lies.
+  void fellingTree(Season season, double foot, double ground, double fall) {
+    final (rows, colours) = PipSprites.greatTreeOf(season);
+    final x = foot - PipSprites.greatTreeFoot;
     if (fall <= 0) {
       sprite(rows, colours, x, ground);
       return;
@@ -750,7 +758,6 @@ class PipHouseArt {
     // left.
     final a = fall.clamp(0.0, 1.0) * math.pi / 2;
     final ca = math.cos(a), sa = math.sin(a);
-    final foot = x + 14.5;
     for (var y = 0; y < rows.length; y++) {
       final up = rows.length - 1 - y;
       if (up < 3) continue;
@@ -765,8 +772,8 @@ class PipHouseArt {
             nx.floorToDouble() + 1, (ground - nup).floorToDouble() + 1, c);
       }
     }
-    rect(x + 13, ground - 2, x + 16, ground, PipColours.bark);
-    rect(x + 13, ground - 2, x + 16, ground - 2, PipHouseColours.plank[1]);
+    rect(foot - 3, ground - 2, foot + 2, ground, PipColours.bark);
+    rect(foot - 3, ground - 2, foot + 2, ground - 2, PipHouseColours.plank[1]);
   }
 
   /// The mine (Round 124): a mountain rising up the right and off the top,

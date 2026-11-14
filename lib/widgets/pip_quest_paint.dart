@@ -53,9 +53,9 @@ void paintQuestPlace(
             PipHouse.floorTop - 6.0, 14, PipHouseColours.fire);
       }
     case QuestScenePlace.forest:
-      art.forest(g, columns, season);
-      art.fellingTree(season, QuestView.resourceAt(view.place) * columns - 13,
-          g, view.fall);
+      art.forest(g, columns, season, dark: dark);
+      art.fellingTree(
+          season, QuestView.resourceAt(view.place) * columns, g, view.fall);
     case QuestScenePlace.mine:
       art.gravel(PipHouse.ground.toDouble(), columns, 6);
       art.mine(g, columns);
@@ -76,11 +76,14 @@ void paintQuestPlace(
     art.lantern(lx, ly);
     _glow(art, lx + 1, ly + 2, 16, PipHouseColours.lantern);
   }
+  // Round 146: measured as he is, from the place's anchor (they were
+  // drawn from the room's left edge: the chips flew by the edge).
+  final from = view.anchor * columns;
   for (final f in view.flyers) {
-    art.item(f.item, f.x - 1, PipHouse.ground - f.up);
+    art.item(f.item, from + f.x - 1, PipHouse.ground - f.up);
   }
   for (final p in view.puffs) {
-    art.puff(p.x, PipHouse.ground - p.up, p.t);
+    art.puff(from + p.x, PipHouse.ground - p.up, p.t);
   }
 }
 

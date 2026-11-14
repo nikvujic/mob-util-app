@@ -66,9 +66,11 @@ void main() {
   group('the house', () {
     final q = Quests.house;
 
-    test('about two months of work (55–65 days of quest hours)', () {
+    test(
+        'about two months of work (50–65 days of quest hours; Round 146: '
+        'shorter walks, about 54)', () {
       final days = q.totalMinutes / PipQuest.minutesPerDay;
-      expect(days, inInclusiveRange(55, 65));
+      expect(days, inInclusiveRange(50, 65));
     });
 
     test(

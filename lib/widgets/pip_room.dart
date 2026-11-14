@@ -1237,15 +1237,18 @@ class _RoomPainter extends CustomPainter {
 
     /// His sword, its grip's middle at [hand] (screen), turned by [angle]
     /// (0: pointing up) and scaled by [size]. Round 141: at the mine,
-    /// his pickaxe.
+    /// his pickaxe; Round 146: in the forest, his axe.
     void blade(Offset hand, double angle, double size) {
       canvas.save();
       canvas.translate(hand.dx, hand.dy);
       canvas.rotate(angle);
       canvas.scale(size);
-      final art = brain.questView?.place == QuestScenePlace.mine
-          ? PipSprites.pickaxe
-          : PipSprites.sword;
+      final art = switch (brain.questView?.place) {
+        QuestScenePlace.mine => PipSprites.pickaxe,
+        // Round 146: an axe in the forest.
+        QuestScenePlace.forest => PipSprites.axe,
+        _ => PipSprites.sword,
+      };
       for (var y = 0; y < art.length; y++) {
         for (var x = 0; x < art[y].length; x++) {
           final colour = PipSprites.fieldColours[art[y][x]];

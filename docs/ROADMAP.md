@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 146 — the forest put right; an axe; shorter walks (2026-11-14, 2.4.1)
+
+- [x] The far trees rooted on the ground, faded into the sky's colour
+  by day and `nightHaze` at night, smaller (0.75, 0.9) so the felled
+  tree stands out.
+- [x] Puffs and flyers placed from the view's anchor (they were drawn
+  from the room's left edge, in the forest and the mine).
+- [x] The great tree (`PipSprites.greatTree`, bare in winter), 30 x 48,
+  felled from its trunk's foot; he works beside it (`workOffset` −16)
+  with an axe (`PipSprites.axe`).
+- [x] A walk 2 minutes (was 5), his pace 12 px/s (was 9).
+
 ### Round 145 — the pill stays; the food tracker removed (2026-11-13, 2.4.0)
 
 - [x] A medicine due: the pill on his screen whatever he does while

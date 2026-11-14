@@ -19,10 +19,10 @@ void main() {
     expect(leaving.pose, QuestPose.walking);
     expect(leaving.offset, greaterThan(QuestView.home));
     expect(leaving.offset, lessThan(QuestView.edge));
-    final field = view(0, 120);
+    final field = view(0, 60);
     expect(field.place, QuestScenePlace.field);
     expect(field.scroll, greaterThan(0));
-    final arriving = view(0, 5 * 60 - 3);
+    final arriving = view(0, 2 * 60 - 1);
     expect(arriving.place, QuestScenePlace.mine);
     expect(arriving.pose, QuestPose.walking);
   });
@@ -70,14 +70,14 @@ void main() {
       'walking home: out of the place, along the field (the other way), '
       'into the house area', () {
     final back = first((s) => s.action == QuestAction.walkBack);
-    expect(view(back, 3).facingRight, isFalse);
+    expect(view(back, 1).facingRight, isFalse);
     expect(
-        view(back, 3).place,
+        view(back, 1).place,
         q.steps[back].place == QuestPlace.mine
             ? QuestScenePlace.mine
             : isNotNull);
-    expect(view(back, 100).scroll, lessThan(0));
-    expect(view(back, 5 * 60 - 2).place, QuestScenePlace.house);
+    expect(view(back, 60).scroll, lessThan(0));
+    expect(view(back, 2 * 60 - 1).place, QuestScenePlace.house);
   });
 
   test(

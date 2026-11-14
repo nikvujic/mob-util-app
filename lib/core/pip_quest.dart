@@ -325,7 +325,8 @@ abstract final class Quests {
   // Gathering (minutes). A walk out or back; a tree felled (4 wood); a
   // block of stone broken off; a heap of sand dug; a pane smelted (two
   // sand and a wood). What he carries home at most, of each.
-  static const walk = 5;
+  // Round 146: a walk 2 minutes (it was 5: minutes of him just walking).
+  static const walk = 2;
   static const treeMinutes = 24;
   static const woodPerTree = 4;
   static const stoneMinutes = 12;

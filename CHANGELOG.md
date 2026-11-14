@@ -6,6 +6,22 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-11-14
+
+### Fixed
+- **The forest:** the trees behind stand on the ground (they floated,
+  at different heights) and fade into the sky by day, into the dark at
+  night (they were pale against a night sky). The chips when he hits
+  the tree fly from the trunk, not by the left edge; the same for the
+  mine's chips and the logs flying to him.
+
+### Changed
+- **Pip chops with an axe**, at a great tree of its own, half as tall
+  again as the rest, standing beside its trunk.
+- **His walks to and from work** take 2 minutes instead of 5 (it was
+  minutes of him just walking before the next place came), and he walks
+  a little quicker. The house takes about 54 days now.
+
 ## [2.4.0] - 2026-11-13
 
 ### Removed

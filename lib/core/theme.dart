@@ -862,6 +862,9 @@ abstract final class PipHouseColours {
 
   // The forest's haze over far trees.
   static const haze = Color(0xFFC4D6E2);
+
+  /// Round 146: the far trees' fade at night: into the dark.
+  static const nightHaze = Color(0xFF151C33);
   static const mushroom = Color(0xFFC83C32);
   static const mushroomStalk = Color(0xFFE6E0D2);
 }
