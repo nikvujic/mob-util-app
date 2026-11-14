@@ -1058,6 +1058,13 @@ class _RoomPainter extends CustomPainter {
         dot(px - 1.0, groundTop - 9, PipColours.flagRed, 3, 1);
       }
     }
+    // Round 147: up on his house (its roof, the scaffold), the house area
+    // slides down to keep him in view (a short room, the menu's, had
+    // him and the roof off its top).
+    if (questPlace == QuestScenePlace.house) {
+      final over = brain.lift + PipBrain.height + 8 - groundTop;
+      if (over > 0) groundTop += over.ceilToDouble();
+    }
     // Round 127: the mine and the beach have their own ground.
     final ownGround = questPlace == QuestScenePlace.mine ||
         questPlace == QuestScenePlace.beach;
@@ -1245,8 +1252,10 @@ class _RoomPainter extends CustomPainter {
       canvas.scale(size);
       final art = switch (brain.questView?.place) {
         QuestScenePlace.mine => PipSprites.pickaxe,
-        // Round 146: an axe in the forest.
+        // Round 146: an axe in the forest; Round 147: a shovel at the
+        // beach.
         QuestScenePlace.forest => PipSprites.axe,
+        QuestScenePlace.beach => PipSprites.shovel,
         _ => PipSprites.sword,
       };
       for (var y = 0; y < art.length; y++) {

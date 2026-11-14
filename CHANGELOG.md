@@ -6,6 +6,24 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.2] - 2026-11-14
+
+### Fixed
+A sweep of every quest scene (each place, its walks, the building
+steps, day, night and winter, in the menu and Pip Home):
+- **Up on the roof** in the menu (a short room), he and the roof were
+  off its top: the house slides down to keep him in view.
+- **Walking between his places** he hovered a pixel above the grass
+  (a raised foot and a bob together); he walks on it.
+- **At night** the beach's sea and the mine's far peaks stayed a day's
+  colours; they're dark now.
+- **The sea's glints** lined up into streaks that looked like rain;
+  they're scattered now, twinkling.
+
+### Changed
+- **At the beach he digs with a shovel**: into the hole, then up, the
+  sand over his shoulder.
+
 ## [2.4.1] - 2026-11-14
 
 ### Fixed

@@ -90,7 +90,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 |---|---|---|
 | **Wood** | **The forest** (Round 123; Round 124: denser, three layers of trees, the far ones hazy): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword (Round 146: an axe, at a great tree of its own, half as tall again as the others) until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
 | **Stone** | **The mine** (Round 124): **a mountain** rising up the right of the screen and off its top (rock in bands, ore glints, ledges, pines on its slope, snow up high, hazy peaks behind), a timber-framed mouth at its foot with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine (Round 141: with a pickaxe) until a block cracks off, chips flying; the block flies to him. |
-| **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs; sand flies to him in little heaps. |
+| **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs (Round 147: with a shovel, a scoop every 2 s, the sand over his shoulder); sand flies to him in little heaps. |
 | **Glass** | His **fireplace**, in the house | Two sand and a wood (the fire) go into a crucible in the fire; it glows; a pane comes out. |
 
 - **Requested (Round 123):** no furnace outside: a **stone fireplace in

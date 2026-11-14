@@ -812,6 +812,25 @@ abstract final class PipSprites {
   /// The sword's grip row the hand holds (the middle of the grip).
   static const swordGrip = 10;
 
+  /// Round 147: his shovel (at the beach), 7 x 13 like the sword, held
+  /// the same way: its blade (forward, as he digs), a wooden handle and
+  /// grip.
+  static const shovel = [
+    '..sss..',
+    '.hssse.',
+    '.hssse.',
+    '.hssse.',
+    '..sse..',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '...t...',
+    '..ttt..',
+    '..t.t..',
+  ];
+
   /// Round 146: his axe (in the forest), 7 x 13 like the sword, held the
   /// same way: a steel blade on one side of the head (forward, as he
   /// swings it), a wooden handle.

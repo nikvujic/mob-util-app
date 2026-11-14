@@ -196,9 +196,13 @@ extension PipBrainEvents on PipBrain {
     // Round 127: felling a tree, breaking stone: swing after swing.
     if (questView?.swing case final swing?) {
       final forward = facingRight ? 1.0 : -1.0;
+      // Round 147: digging, the shovel goes deeper, its blade into the
+      // hole, and back up.
+      final (from, by) =
+          questView?.place == QuestScenePlace.beach ? (0.5, 2.1) : (0.3, 1.5);
       final angle = swing < 0.5
-          ? forward * (0.3 + 1.5 * PipBrain._ease(swing * 2))
-          : forward * (1.8 - 1.5 * PipBrain._ease((swing - 0.5) * 2));
+          ? forward * (from + by * PipBrain._ease(swing * 2))
+          : forward * (from + by - by * PipBrain._ease((swing - 0.5) * 2));
       return (handBeside(right: facingRight), 7, angle, 1);
     }
     if (activity != PipActivity.bugHunt) return null;

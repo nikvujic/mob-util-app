@@ -778,8 +778,11 @@ class PipHouseArt {
 
   /// The mine (Round 124): a mountain rising up the right and off the top,
   /// its mouth at its foot, rails and a cart; hazy peaks behind.
-  void mine(double ground, int width) {
+  void mine(double ground, int width, {bool dark = false}) {
     final g = ground;
+    // Round 147: the far peaks into the dark at night (they stayed pale).
+    Color far(Color c) =>
+        dark ? Color.lerp(c, PipHouseColours.nightHaze, 0.6)! : c;
     for (var x = 0; x < width; x++) {
       final top = (g -
               48 -
@@ -790,9 +793,9 @@ class PipHouseArt {
         put(
             x,
             y,
-            y > top + 1
+            far(y > top + 1
                 ? PipHouseColours.farPeak
-                : PipHouseColours.farPeakEdge);
+                : PipHouseColours.farPeakEdge));
       }
     }
     final foot = width * 0.36;
@@ -885,22 +888,28 @@ class PipHouseArt {
 
   /// The beach (Round 123): the sea to the horizon, waves foaming onto
   /// wet sand, shells, a starfish, beach grass; [t] moves the waves.
-  void beach(double ground, int width, int below, double t) {
+  void beach(double ground, int width, int below, double t,
+      {bool dark = false}) {
     final horizon = ground - 34, shore = ground - 10;
+    // Round 147: the sea dark at night (it stayed a day's blue).
+    Color sea(Color c) =>
+        dark ? Color.lerp(c, PipHouseColours.nightHaze, 0.62)! : c;
     for (var y = horizon; y < shore; y++) {
       final p = (y - horizon) / (shore - horizon);
       final base =
           Color.lerp(PipHouseColours.seaDeep, PipHouseColours.seaShallow, p)!;
       for (var x = 0; x < width; x++) {
         var c = base;
-        if ((x * 7 + y.toInt() * 13 + (t * 3).floor()) % 41 == 0) {
+        // Glints here and there, twinkling (Round 147: scattered; in a
+        // pattern they lined up into streaks, like rain).
+        if (_h(x, y.toInt(), (t * 2).floor() % 4) % 113 == 0) {
           c = PipHouseColours.seaGlint;
         }
         if ((y - horizon).toInt() % 6 == 0 &&
             (x + y.toInt() * 5 + (t * 4).floor()) % 17 < 6) {
           c = PipHouseColours.seaLine;
         }
-        put(x, y, c);
+        put(x, y, sea(c));
       }
     }
     for (var x = 0; x < width; x++) {

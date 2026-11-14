@@ -337,6 +337,17 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 147 — a sweep of the quest scenes; a shovel (2026-11-14, 2.4.2)
+
+- [x] Rendered every place (gathering, walks out and back, building
+  steps, smelting) by day, night and in winter, at the menu's and Pip
+  Home's widths, and looked.
+- [x] The house area slides down when he's up high (the roof was off a
+  short room's top); no walking bob at his work (he hovered); the sea
+  and the far peaks dark at night; the sea's glints scattered.
+- [x] A shovel at the beach (`PipSprites.shovel`), a deeper swing, the
+  sand flying as it comes up (`QuestView.digTime`).
+
 ### Round 146 — the forest put right; an axe; shorter walks (2026-11-14, 2.4.1)
 
 - [x] The far trees rooted on the ground, faded into the sky's colour

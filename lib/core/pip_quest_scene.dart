@@ -88,6 +88,9 @@ class QuestView {
   /// A swing of his sword (seconds).
   static const swingTime = 1.1;
 
+  /// A scoop of his shovel (seconds, Round 147).
+  static const digTime = 2.0;
+
   /// Where he goes in and out of the house area (its right edge) and
   /// stands at the foot of the stairs, coming home.
   static const edge = PipHouse.areaWidth + 12.0;
@@ -254,18 +257,23 @@ class QuestView {
     final anchor = resourceAt(place);
     final flyers = <QuestFlyer>[];
     final puffs = <QuestPuff>[];
-    final swinging = place != QuestScenePlace.beach;
+    // Round 147: digging too, with his shovel: into the hole, then up.
+    final digging = place == QuestScenePlace.beach;
+    const swinging = true;
     // A chip with each swing; and what it gives flies to him at the end.
-    final cycle = t % swingTime / swingTime;
-    if (swinging && cycle > 0.5) {
+    final cycle = digging ? t % digTime / digTime : t % swingTime / swingTime;
+    if (!digging && cycle > 0.5) {
       final p = (cycle - 0.5) * 2;
       puffs.add((x: x + 12, up: 10, t: p));
     }
-    if (!swinging) {
-      // Digging: a scoop of sand over his shoulder every two seconds.
-      final p = t % 2 / 2;
-      flyers.add(
-          (item: item, x: x + 8 - 18 * p, up: 6 + 14 * math.sin(math.pi * p)));
+    if (digging && cycle > 0.5) {
+      // Digging: a scoop out of the hole over his shoulder as he lifts.
+      final p = (cycle - 0.5) * 2;
+      flyers.add((
+        item: item,
+        x: x + 14 - 24 * p,
+        up: 4 + 14 * math.sin(math.pi * p),
+      ));
     }
     final left = length - t;
     double fall = 0;

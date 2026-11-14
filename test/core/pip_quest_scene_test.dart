@@ -101,7 +101,11 @@ void main() {
     final sand = first(
         (s) => s.action == QuestAction.gather && s.place == QuestPlace.beach);
     expect(view(sand, 400).dug, greaterThan(view(sand, 30).dug));
-    expect(view(sand, 30).swing, isNull, reason: 'digging, no sword');
+    // Round 147: his shovel, a scoop every 2 s: into the hole, then up,
+    // the sand over his shoulder as it comes up.
+    expect(view(sand, 30).swing, isNotNull, reason: 'his shovel');
+    expect(view(sand, 30.5).flyers, isEmpty, reason: 'going in');
+    expect(view(sand, 31.5).flyers.map((f) => f.item), ['sand']);
   });
 
   test(

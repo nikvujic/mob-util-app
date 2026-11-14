@@ -58,11 +58,11 @@ void paintQuestPlace(
           season, QuestView.resourceAt(view.place) * columns, g, view.fall);
     case QuestScenePlace.mine:
       art.gravel(PipHouse.ground.toDouble(), columns, 6);
-      art.mine(g, columns);
+      art.mine(g, columns, dark: dark);
       art.boulder(QuestView.resourceAt(view.place) * columns + 2, g,
           view.rock.clamp(0.0, 1.0));
     case QuestScenePlace.beach:
-      art.beach(g, columns, 6, view.t);
+      art.beach(g, columns, 6, view.t, dark: dark);
       art.bucketAndHole(QuestView.resourceAt(view.place) * columns + 2, g,
           view.dug.clamp(0.0, 1.0));
     case QuestScenePlace.field:

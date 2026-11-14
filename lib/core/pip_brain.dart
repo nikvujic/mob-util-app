@@ -958,13 +958,11 @@ class PipBrain {
     }
     // Round 75: a puddle jump, hops in the snow.
     if (_weatherLift case final weather?) return weather;
-    // Round 127: at his quest's work: the floor, the scaffold, a bob.
+    // Round 127: at his quest's work: the floor, the scaffold. Round
+    // 147: no bob walking (a raised foot and a bob had both off the
+    // ground: he hovered).
     if (questView case final view? when activity == PipActivity.questing) {
-      final bob = view.pose == QuestPose.walking &&
-              (frame == PipFrame.step1 || frame == PipFrame.step3)
-          ? 1.0
-          : 0.0;
-      return view.lift + bob;
+      return view.lift;
     }
     // Round 52: dropping from the sky, or thrown in on an arc.
     if (activity == PipActivity.falling && _t < _fallTime) {
