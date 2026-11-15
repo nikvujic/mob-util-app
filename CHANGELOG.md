@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.3] - 2026-11-15
+
+### Fixed
+- **Lists' drag handles** (Notes, Shop, Packing, Ingredients...): the
+  area that grabs a row starts at the handle's left edge, not well left
+  of it, so scrolling near it no longer picks a row up. The handle looks
+  and sits as before.
+
 ## [2.4.2] - 2026-11-14
 
 ### Fixed

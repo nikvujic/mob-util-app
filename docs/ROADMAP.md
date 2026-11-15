@@ -337,6 +337,13 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 148 — a list's grab area from its handle (2026-11-15, 2.4.3)
+
+- [x] `ReorderOrSelectIndicator`: the grab area from the icon's left
+  edge to the row's right (it was 72 dp, 28 left of the icon); the icon
+  where it was. Tests: the area starts at the icon; a drag just left of
+  it doesn't move the row.
+
 ### Round 147 — a sweep of the quest scenes; a shovel (2026-11-14, 2.4.2)
 
 - [x] Rendered every place (gathering, walks out and back, building

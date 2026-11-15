@@ -828,16 +828,16 @@ void main() {
         greaterThanOrEqualTo(ReorderOrSelectIndicator.width),
         reason: text,
       );
-      // The icon stays near the right edge; the extra area is to its left.
+      // Round 148: the area starts at the icon's left edge and takes all
+      // right of it.
       final icon = find.descendant(
         of: row,
         matching: find.byIcon(Icons.drag_handle),
       );
-      expect(
-        tester.getRect(icon).right,
-        tester.getRect(handle).right - ReorderOrSelectIndicator.iconInset,
-        reason: text,
-      );
+      expect(tester.getRect(icon).left, tester.getRect(handle).left,
+          reason: text);
+      expect(tester.getRect(handle).right, tester.getRect(row).right,
+          reason: text);
     }
 
     await check('Groceries');
