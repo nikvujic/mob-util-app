@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.5] - 2026-11-15
+
+### Changed
+- **Pip's inventory**, carrying nothing, says *Empty* (it said
+  *Nothing yet*).
+
 ## [2.4.4] - 2026-11-15
 
 ### Changed

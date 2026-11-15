@@ -337,6 +337,10 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 150 — "Empty" (2026-11-15, 2.4.5)
+
+- [x] Pip Home's inventory with nothing in it says EMPTY (asked for).
+
 ### Round 149 — a hammer; snow on what's built (2026-11-15, 2.4.4)
 
 - [x] Building: `PipSprites.hammer`, a blow every `QuestView.hammerTime`

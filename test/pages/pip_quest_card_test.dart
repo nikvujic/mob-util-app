@@ -143,7 +143,7 @@ void main() {
     await tester.fling(
         find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
     await tester.pumpAndSettle();
-    expect(words(), contains('NOTHING YET'));
+    expect(words(), contains('EMPTY'));
   });
 
   testWidgets('finished: its framed picture, its name, when', (tester) async {

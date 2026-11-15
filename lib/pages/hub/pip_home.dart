@@ -1381,7 +1381,7 @@ class _InventoryState extends ConsumerState<_Inventory> {
           _words('INVENTORY', colour: PipColours.light, pixel: 4),
           const SizedBox(height: 20),
           if (held.isEmpty)
-            _words('NOTHING YET', colour: PipColours.dim)
+            _words('EMPTY', colour: PipColours.dim)
           else
             Wrap(
               spacing: 16,
