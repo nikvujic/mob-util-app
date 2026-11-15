@@ -510,13 +510,29 @@ class PipHouseArt {
   /// Snow on an unfinished house: on its open floor, the porch, the tops
   /// of what's up.
   void _snowOn(PipHouse house) {
-    if (house.roofless) {
-      for (var x = _hx0; x <= _hx1; x += 2) {
-        put(x, _fl - 1, PipHouseColours.snow);
+    // Round 149: lying on what's built (a dotted line across the whole
+    // house floated where there was no floor yet).
+    void layer(int x0, int x1, int y) {
+      for (var x = x0; x <= x1; x++) {
+        if (_h(x, y) % 9 != 0) put(x, y, PipHouseColours.snow);
       }
     }
-    if (house.has('deck') && !house.has('porchRoof')) {
-      rect(_px0, _fy0 - 3, _px1, _fy0 - 3, PipHouseColours.snow);
+
+    if (house.roofless) {
+      // On the floor as far as it's laid; past it, on the foundation if
+      // that's done.
+      final floor = house.share('floor');
+      final end = floor <= 0
+          ? _hx0 - 1
+          : _hx0 + ((_hx1 - _hx0 + 1) * floor).round() - 1;
+      if (end >= _hx0) layer(_hx0, end, _fl - 1);
+      if (house.has('foundation') && end < _hx1 + 2) {
+        layer(math.max(end + 1, _hx0 - 2), _hx1 + 2, _fy0 - 1);
+      }
+    }
+    final deck = house.share('deck');
+    if (deck > 0 && !house.has('porchRoof')) {
+      layer(_px0, _px0 + ((_px1 - _px0 + 1) * deck).round() - 1, _fy0 - 3);
     }
     if (house.of('shingles') > 0 && !house.has('shingles')) {
       const rows = (_cb0 - 1 - 50) ~/ 3 + 1;

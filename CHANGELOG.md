@@ -6,6 +6,21 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.4] - 2026-11-15
+
+### Changed
+- **Pip builds with a hammer**: a blow every moment or so, the dust
+  where it lands (in front of him, where the block's going up), the
+  materials flying there too. His face stays as it is (his mouth went
+  to an "o" and back, like panting).
+
+### Fixed
+- **Snow on the unfinished house** lies on what's built: on the floor
+  as far as it's laid, the finished foundation past it, the deck. It
+  was a dotted line across the whole house, floating where there was
+  no floor yet.
+- His tool is held at his height up on the floor or the scaffold.
+
 ## [2.4.3] - 2026-11-15
 
 ### Fixed

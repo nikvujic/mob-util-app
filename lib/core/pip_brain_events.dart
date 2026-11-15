@@ -198,12 +198,17 @@ extension PipBrainEvents on PipBrain {
       final forward = facingRight ? 1.0 : -1.0;
       // Round 147: digging, the shovel goes deeper, its blade into the
       // hole, and back up.
-      final (from, by) =
-          questView?.place == QuestScenePlace.beach ? (0.5, 2.1) : (0.3, 1.5);
+      // Round 149: his hammer, from overhead down onto what's in front.
+      final (from, by) = switch (questView?.place) {
+        QuestScenePlace.beach => (0.5, 2.1),
+        QuestScenePlace.house => (0.1, 1.6),
+        _ => (0.3, 1.5),
+      };
       final angle = swing < 0.5
           ? forward * (from + by * PipBrain._ease(swing * 2))
           : forward * (from + by - by * PipBrain._ease((swing - 0.5) * 2));
-      return (handBeside(right: facingRight), 7, angle, 1);
+      // Round 149: as high as he stands (the floor, the scaffold).
+      return (handBeside(right: facingRight), 7 + questView!.lift, angle, 1);
     }
     if (activity != PipActivity.bugHunt) return null;
     // Round 53: held out in front, pointing up and away from him.

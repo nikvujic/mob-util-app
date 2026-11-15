@@ -1256,6 +1256,8 @@ class _RoomPainter extends CustomPainter {
         // beach.
         QuestScenePlace.forest => PipSprites.axe,
         QuestScenePlace.beach => PipSprites.shovel,
+        // Round 149: building, a hammer.
+        QuestScenePlace.house => PipSprites.hammer,
         _ => PipSprites.sword,
       };
       for (var y = 0; y < art.length; y++) {

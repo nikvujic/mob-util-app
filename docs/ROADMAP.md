@@ -337,6 +337,15 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 149 — a hammer; snow on what's built (2026-11-15, 2.4.4)
+
+- [x] Building: `PipSprites.hammer`, a blow every `QuestView.hammerTime`
+  (0.8 s), the dust and the materials where it lands (18 px in front);
+  no "oh" face working; the tool at his lift.
+- [x] `_snowOn`: a layer on the laid floor, the done foundation past
+  it, the built deck (a dotted line floated across the house).
+- [x] Tests: `pip_building_test.dart`.
+
 ### Round 148 — a list's grab area from its handle (2026-11-15, 2.4.3)
 
 - [x] `ReorderOrSelectIndicator`: the grab area from the icon's left

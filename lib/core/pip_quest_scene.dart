@@ -91,6 +91,9 @@ class QuestView {
   /// A scoop of his shovel (seconds, Round 147).
   static const digTime = 2.0;
 
+  /// A blow of his hammer (seconds, Round 149).
+  static const hammerTime = 0.8;
+
   /// Where he goes in and out of the house area (its right edge) and
   /// stands at the foot of the stairs, coming home.
   static const edge = PipHouse.areaWidth + 12.0;
@@ -342,6 +345,12 @@ class QuestView {
         : x + 10;
     final pieceUp =
         atFire ? (step.piece?.id == 'flue' ? lift + 30 : lift + 8) : lift + 10;
+    // Round 149: building, he hammers: where his hammer lands (in front
+    // of him, about his middle) is the block going up, its materials
+    // and its dust there. Smelting, the fire's.
+    final building = step.action == QuestAction.build;
+    final hitX = x + (right ? 1 : -1) * 18.0, hitUp = lift + 6;
+    final toX = building ? hitX : pieceX, toUp = building ? hitUp : pieceUp;
     // His materials fly from him into it, the first moments.
     if (work < 3) {
       final p = work / 3;
@@ -350,15 +359,23 @@ class QuestView {
         for (var k = 0; k < math.min(n, 3); k++, i++) {
           flyers.add((
             item: item.name,
-            x: x + (pieceX - x) * p + i * 2,
+            x: x + (toX - x) * p + i * 2,
             up: lift + 8 + 10 * math.sin(math.pi * p) + i,
           ));
         }
       }
     }
-    // Smoke as he works, now and then.
-    final cycle = work % 2.4 / 2.4;
-    if (cycle < 0.8) puffs.add((x: pieceX, up: pieceUp, t: cycle / 0.8));
+    final hammer = work % hammerTime / hammerTime;
+    if (building) {
+      // A puff of dust as each blow lands.
+      if (work >= 3 && hammer >= 0.5) {
+        puffs.add((x: toX, up: toUp, t: (hammer - 0.5) * 2));
+      }
+    } else {
+      // Smoke as it smelts, now and then.
+      final cycle = work % 2.4 / 2.4;
+      if (cycle < 0.8) puffs.add((x: pieceX, up: pieceUp, t: cycle / 0.8));
+    }
     // Smelted: the pane comes out to him at the end.
     if (step.action == QuestAction.smelt && length - t < 3) {
       final p = 1 - (length - t) / 3;
@@ -379,6 +396,8 @@ class QuestView {
       puffs: puffs,
       smelting: step.action == QuestAction.smelt,
       t: t,
+      // Hammering once its materials are in.
+      swing: building && work >= 3 ? hammer : null,
     );
   }
 }

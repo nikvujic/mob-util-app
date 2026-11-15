@@ -575,8 +575,8 @@ extension PipBrainPlaces on PipBrain {
           PipFrame.step3,
           PipFrame.step4,
         ][(view.t / PipBrain.stepTime).floor() % 4],
-      QuestPose.working when view.swing == null =>
-        (view.t / 0.6).floor().isEven ? PipFrame.idle : PipFrame.oh,
+      // Round 149: working, his face as it is (an "oh" every 0.6 s
+      // looked like panting).
       _ => PipFrame.idle,
     };
   }
