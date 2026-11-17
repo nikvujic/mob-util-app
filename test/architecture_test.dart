@@ -262,6 +262,18 @@ void main() {
     expect(violations, isEmpty, reason: violations.join('\n'));
   });
 
+  test(
+      'only core/system_ui.dart changes the phone\'s bars or which way up '
+      '(Round 151: a page left its own, and others were laid out wrong)', () {
+    final calls = RegExp(r'SystemChrome\.(setEnabledSystemUIMode|'
+        r'setPreferredOrientations|setEnabledSystemUIOverlays)');
+    final elsewhere = [
+      for (final f in files)
+        if (f.path != 'core/system_ui.dart' && calls.hasMatch(f.source)) f.path,
+    ];
+    expect(elsewhere, isEmpty, reason: 'use AppSystemUi');
+  });
+
   test('a toast replaces the one showing, never queues (Round 39)', () {
     final violations = [
       for (final f in files) ...toastViolations(f.path, f.source),

@@ -337,6 +337,18 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 151 — the Placard can't change other pages' layout (2026-11-17, 2.4.6)
+
+- [x] `core/system_ui.dart` (`AppSystemUi`): the app's own bars and
+  orientation (`restore`), the Placard's (`fullScreenSideways`,
+  `upright`); the Placard restores the app's own (it set edge to edge:
+  People's 64 dp bar lost the navigation bar's height inside it).
+- [x] People: the bar and the open panel grow by the bottom inset
+  instead of holding it inside.
+- [x] Tests: only `system_ui.dart` calls `SystemChrome`'s bars or
+  orientation (architecture); the Placard restores the overlays; People
+  with a 48 dp navigation bar under it isn't squashed.
+
 ### Round 150 — "Empty" (2026-11-15, 2.4.5)
 
 - [x] Pip Home's inventory with nothing in it says EMPTY (asked for).

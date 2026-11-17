@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/widgets/low_handles.dart';
+import 'package:the_app/core/system_ui.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/sound.dart';
 import 'package:the_app/core/theme.dart';
@@ -104,20 +105,16 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-    // Nothing but the placard: no status bar.
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // Nothing but the placard, sideways: no status bar.
+    AppSystemUi.fullScreenSideways();
   }
 
   @override
   void dispose() {
     _leaveTimer?.cancel();
-    // Back to whatever the phone allows, with its bars.
-    SystemChrome.setPreferredOrientations([]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // Round 151: back to the app's own (it was edge to edge, under the
+    // navigation bar: other pages' bottoms got squashed).
+    AppSystemUi.restore();
     _hold.dispose();
     _pop.dispose();
     super.dispose();
@@ -184,7 +181,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   void _leave() {
     if (_leaving) return;
     setState(() => _leaving = true);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    AppSystemUi.upright();
     // In case the phone doesn't turn (e.g. rotation locked to sideways).
     _leaveTimer = Timer(const Duration(milliseconds: 800), _close);
   }

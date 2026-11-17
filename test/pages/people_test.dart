@@ -734,4 +734,19 @@ void main() {
       expect(book().view.zoom, zoom, reason: 'too slow: a pan');
     });
   });
+
+  testWidgets(
+      'Round 151: drawn over by the phone\'s navigation bar (edge to edge), '
+      'its bottom bar keeps its height, above it', (tester) async {
+    tester.view.padding = const FakeViewPadding(bottom: 144); // 48 dp
+    tester.view.viewPadding = const FakeViewPadding(bottom: 144);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    await openPeople(tester, people: family);
+    final add = tester.getRect(find.byKey(const Key('peopleAdd')));
+    final screen = tester.getSize(find.byType(MaterialApp));
+    expect(add.height, greaterThanOrEqualTo(36), reason: 'not squashed');
+    expect(add.bottom, lessThanOrEqualTo(screen.height - 48),
+        reason: 'above the navigation bar');
+  });
 }

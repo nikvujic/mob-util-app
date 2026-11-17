@@ -124,7 +124,10 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
       appBar: AppBar(title: const Text('People')),
       body: LayoutBuilder(builder: (context, constraints) {
         final open = person != null;
-        final panelHeight = open ? constraints.maxHeight * 0.5 : 64.0;
+        // Round 151: and the phone's navigation bar under it, if it's
+        // drawn over the app (the bar was squashed into 64 with it).
+        final under = MediaQuery.paddingOf(context).bottom;
+        final panelHeight = (open ? constraints.maxHeight * 0.5 : 64.0) + under;
         return Column(
           children: [
             Expanded(
@@ -163,6 +166,7 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
                 color: colors.card,
                 border: Border(top: BorderSide(color: colors.divider)),
               ),
+              padding: EdgeInsets.only(bottom: under),
               child: open
                   ? PersonPanel(
                       key: ValueKey(person.id),
@@ -186,40 +190,37 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
   Widget _bar(BuildContext context, PeopleBook book) {
     final colors = context.colors;
     final n = book.people.length;
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                n == 1 ? '1 person' : '$n people',
-                key: const Key('peopleCount'),
-                style: TextStyle(color: colors.textSecondary),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              n == 1 ? '1 person' : '$n people',
+              key: const Key('peopleCount'),
+              style: TextStyle(color: colors.textSecondary),
             ),
-            IconButton(
-              key: const Key('peopleFind'),
-              tooltip: 'Find',
-              icon: const Icon(Icons.search),
-              onPressed: n == 0 ? null : _find,
-            ),
-            IconButton(
-              key: const Key('peopleOptions'),
-              tooltip: 'Options',
-              icon: const Icon(Icons.more_vert),
-              onPressed: n == 0 ? null : _options,
-            ),
-            const SizedBox(width: 4),
-            FilledButton.icon(
-              key: const Key('peopleAdd'),
-              icon: const Icon(Icons.person_add_alt_1),
-              label: const Text('Add'),
-              onPressed: _add,
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            key: const Key('peopleFind'),
+            tooltip: 'Find',
+            icon: const Icon(Icons.search),
+            onPressed: n == 0 ? null : _find,
+          ),
+          IconButton(
+            key: const Key('peopleOptions'),
+            tooltip: 'Options',
+            icon: const Icon(Icons.more_vert),
+            onPressed: n == 0 ? null : _options,
+          ),
+          const SizedBox(width: 4),
+          FilledButton.icon(
+            key: const Key('peopleAdd'),
+            icon: const Icon(Icons.person_add_alt_1),
+            label: const Text('Add'),
+            onPressed: _add,
+          ),
+        ],
       ),
     );
   }

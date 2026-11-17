@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.6] - 2026-11-17
+
+### Fixed
+- **People's bottom bar squashed after the Placard:** leaving the
+  Placard switched the app to drawing under the phone's navigation bar,
+  and People's bar (count, Find, Options, Add) was squeezed into its
+  height. The Placard now puts the phone's bars back as the app has
+  them, and People's bar and panel keep their height above the
+  navigation bar whatever the phone does.
+- Only one place in the app changes the phone's bars or which way up
+  it is; a test keeps it that way, so no page can change how the
+  pages after it are laid out.
+
 ## [2.4.5] - 2026-11-15
 
 ### Changed

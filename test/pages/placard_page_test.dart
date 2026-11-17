@@ -162,7 +162,10 @@ void main() {
     expect(find.byKey(const Key('placardText')), findsNothing);
     expect(find.byTooltip('Placard'), findsOneWidget);
     expect(requests('setPreferredOrientations').last, isEmpty);
-    expect(requests('setEnabledSystemUIMode').last, 'SystemUiMode.edgeToEdge');
+    // Round 151: the app's own bars back (it was edge to edge, under the
+    // navigation bar: other pages' bottoms got squashed).
+    expect(calls.last.$1, 'SystemChrome.setEnabledSystemUIOverlays');
+    expect(calls.last.$2, ['SystemUiOverlay.top', 'SystemUiOverlay.bottom']);
   });
 
   testWidgets('back: closes anyway if the phone doesn\'t turn', (tester) async {

@@ -1017,3 +1017,11 @@ default sections). Pages: `pages/hub/packing.dart` (the lists),
 Back asks Save or Discard), `packing_sections.dart` (default sections)
 and `packing_copy_sheet.dart`. Backups carry the book (`packing`,
 version 31).
+
+## The phone's bars and orientation (Round 151)
+
+`core/system_ui.dart` (`AppSystemUi`) is the only place that calls
+`SystemChrome` for the system bars or orientation (an architecture test
+enforces it). The app's own is the phone's bars shown, any way up
+(`restore`); a page that changes them puts that back as it goes, so it
+can't change how the pages after it are laid out.
