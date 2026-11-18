@@ -149,7 +149,11 @@ extension PipBrainOutings on PipBrain {
       return;
     }
     if (activity != PipActivity.adventuring) {
-      if (!_canGoOut) return;
+      // Round 152: simply out (the app just opened on it): even from a
+      // moment of his own, not after it, seen setting off.
+      if (!_canGoOut && (animate || !_mayBePut)) return;
+      if (!_canGoOut) _packTent();
+      if (!animate) _settleUmbrella();
       // Round 141: seen in his house, or walking in from his field's
       // edge: out on his field first.
       if (animate && (atHome || _offEdge)) return;

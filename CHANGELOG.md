@@ -6,6 +6,19 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.4.7] - 2026-11-18
+
+### Fixed
+- **Coming back to the app** (or opening it) on Pip partway through
+  something: what happened meanwhile is simply so. Brought back at
+  12:38, he's out running, as he's been since 12:00, not seen setting
+  off (walking to the middle, drawing his sword) with his field's trees
+  jumping on; the same at his work. (The app put away and brought back
+  went on as if he'd been watched all along.)
+- **The weather learned as the app opens** (it's fetched once it's
+  open) is simply the weather: he doesn't look up at it, and his
+  umbrella's simply up (or not), not going up and then down.
+
 ## [2.4.6] - 2026-11-17
 
 ### Fixed

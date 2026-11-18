@@ -79,8 +79,34 @@ class PipRoom extends StatefulWidget {
   State<PipRoom> createState() => _PipRoomState();
 }
 
-class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
+class _PipRoomState extends State<PipRoom>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final Ticker _ticker = createTicker(_tick);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Round 152: the app put away and brought back is his room opened
+  /// again: what happened meanwhile is simply so (out on his adventure,
+  /// the rain), not played out as if watched (it went on as watched:
+  /// opened at 12:38 he set off, his umbrella up and down, his trees
+  /// jumping).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.hidden &&
+        state != AppLifecycleState.paused) {
+      return;
+    }
+    final link = widget.link;
+    if (link != null) widget.brain.leftAt = link.now;
+    _lastLook = null;
+    _lookedAt = false;
+    _entered = false;
+  }
+
   Duration _last = Duration.zero;
 
   void _tick(Duration elapsed) {
@@ -150,6 +176,11 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
   /// When his life was last looked at (notifications since then).
   DateTime? _lastLook;
 
+  /// Round 152: till when the weather's simply learned, after a first
+  /// look (opened, or the app brought back).
+  DateTime? _freshUntil;
+  static const _learnWeatherFor = Duration(seconds: 10);
+
   PipEntrance _pickEntrance() {
     final ways = widget.entrances.toList();
     return ways[widget.brain.random.nextInt(ways.length)];
@@ -194,6 +225,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
     // battery being changed): that's done by now, not picked up where it
     // was left (he'd finish it, then snap to his quest's work).
     final left = brain.leftAt;
+    if (_lastLook == null) _freshUntil = now.add(_learnWeatherFor);
     if (_lastLook == null && left != null) {
       // Round 132: out, a while since: his run taken up afresh.
       if (now.difference(left) >= PipBrain.outStale) brain.freshOut();
@@ -481,6 +513,7 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     // Round 52: when he was left, for coming back in after a while.
     final link = widget.link;
     if (link != null) widget.brain.leftAt = link.now;
@@ -523,8 +556,19 @@ class _PipRoomState extends State<PipRoom> with SingleTickerProviderStateMixin {
             widget.brain.dark =
                 scene?.part == DayPart.night || scene?.part == DayPart.dusk;
             widget.brain.overcast = scene?.grey ?? false;
-            // Round 75: the weather, for what he does in it.
-            widget.brain.weather = scene?.weather;
+            // Round 75: the weather, for what he does in it. Round 152:
+            // before his room's first look, or just after (it's fetched
+            // once the app's open), simply known (it may have changed
+            // while he wasn't watched: not noticed, no umbrella going up
+            // in view).
+            final fresh = _freshUntil;
+            if (_lastLook == null ||
+                (fresh != null &&
+                    (widget.link?.now ?? DateTime.now()).isBefore(fresh))) {
+              widget.brain.learnWeather(scene?.weather);
+            } else {
+              widget.brain.weather = scene?.weather;
+            }
             widget.brain.bleak = scene != null &&
                 (scene.season == Season.winter ||
                     scene.props.contains(PipProp.rain) ||

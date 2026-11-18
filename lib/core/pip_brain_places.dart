@@ -362,7 +362,11 @@ extension PipBrainPlaces on PipBrain {
     _pl.leaving = null;
     final before = _pl.questNow;
     if (activity != PipActivity.questing) {
-      if (!_canGoOut) return;
+      // Round 152: simply at it (the app just opened on it): even from a
+      // moment of his own.
+      if (!_canGoOut && (animate || !_mayBePut)) return;
+      if (!_canGoOut) _packTent();
+      if (!animate) _settleUmbrella();
       final from = x;
       _start(PipActivity.questing);
       _pl.joinFrom = animate && !freshSpawn ? from : null;

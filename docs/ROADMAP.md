@@ -337,6 +337,20 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 152 — brought back, things are simply so (2026-11-18, 2.4.7)
+
+- [x] `PipRoom` watches the app's lifecycle: put away (hidden, paused),
+  his room's next look is a first look (`_lastLook`, `_lookedAt`,
+  `_entered` reset, `leftAt` set), so a resume no longer plays out
+  what happened meanwhile as if watched.
+- [x] The weather before a first look and 10 s after it is learned
+  (`learnWeather`): not noticed, the umbrella settled (`settle`); from
+  unknown (null) to known is never a change.
+- [x] Simply out, or at work, unseen, even from a moment of his own
+  (`_mayBePut`: looking up, the weather's, a dance, the stars); his tent
+  packed, his umbrella settled.
+- [x] Tests: `pip_opened_out_test.dart` (fail on the old code).
+
 ### Round 151 — the Placard can't change other pages' layout (2026-11-17, 2.4.6)
 
 - [x] `core/system_ui.dart` (`AppSystemUi`): the app's own bars and

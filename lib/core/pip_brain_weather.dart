@@ -10,6 +10,10 @@ class _PipWeatherState {
   WeatherKind? weather;
   bool known = false;
 
+  /// Round 152: the weather just learned (not changed): his umbrella
+  /// simply as it should be at his next step, not opening.
+  bool settle = false;
+
   /// Seconds since it changed (it comes in over [comeIn]).
   double since = comeIn;
 
@@ -94,13 +98,36 @@ extension PipBrainWeather on PipBrain {
     if (!wx.known) {
       wx.known = true;
       wx.weather = next;
+      wx.settle = true;
       return;
     }
     if (next == wx.weather) return;
+    // Round 152: none known yet (it's fetched once the app's open): just
+    // learned, not a change: no looking up, no umbrella going up.
+    if (wx.weather == null) {
+      wx.weather = next;
+      wx.settle = true;
+      return;
+    }
     wx.weather = next;
     wx.since = 0;
     wx.noticed = true;
   }
+
+  /// Round 152: the weather as it is, learned (his room just opened on
+  /// it): not a change he notices, his umbrella simply as it should be.
+  void learnWeather(WeatherKind? now) {
+    final wx = _wx;
+    wx.known = true;
+    if (now != wx.weather) wx.since = comeIn;
+    wx.weather = now;
+    wx.noticed = false;
+    wx.settle = true;
+  }
+
+  /// His umbrella simply as it should be at his next step (put somewhere
+  /// unseen: not shutting in view).
+  void _settleUmbrella() => _wx.settle = true;
 
   /// How far the weather has come in, 0 to 1 (rain and snow thicken).
   double get weatherIn => math.min(1, _wx.since / comeIn);
@@ -428,14 +455,18 @@ extension PipBrainWeather on PipBrain {
     }
 
     // His umbrella, open in the rain while his hands are free for it.
-    wx.umbrella.step(dt,
-        wanted: home &&
-            !atHome &&
-            wx.weather == WeatherKind.rain &&
-            _umbrellaWhile.contains(activity) &&
-            !(activity == PipActivity.weatherEvent &&
-                (wx.event == PipWeatherEvent.snowball ||
-                    wx.event == PipWeatherEvent.handOut)));
+    final wanted = home &&
+        !atHome &&
+        wx.weather == WeatherKind.rain &&
+        _umbrellaWhile.contains(activity) &&
+        !(activity == PipActivity.weatherEvent &&
+            (wx.event == PipWeatherEvent.snowball ||
+                wx.event == PipWeatherEvent.handOut));
+    if (wx.settle) {
+      wx.settle = false;
+      wx.umbrella.open = wanted ? 1 : 0;
+    }
+    wx.umbrella.step(dt, wanted: wanted);
 
     // The weather changed: he looks up, when he's free to.
     if (wx.noticed &&

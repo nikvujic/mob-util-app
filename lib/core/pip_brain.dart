@@ -800,6 +800,15 @@ class PipBrain {
 
   /// Whether he can set off now: up and about, or just made (opened
   /// while he's out: he's simply there, out).
+  /// Round 152: in a moment of his own that he can simply be put out of,
+  /// unseen (the weather's, a dance, the stars), to where his life says.
+  bool get _mayBePut =>
+      activity == PipActivity.lookingUp ||
+      activity == PipActivity.weatherEvent ||
+      activity == PipActivity.sheltering ||
+      activity == PipActivity.dancing ||
+      activity == PipActivity.stargazing;
+
   bool get _canGoOut =>
       activity == PipActivity.standing ||
       activity == PipActivity.walking ||
