@@ -6,6 +6,12 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-11-20
+
+### Changed
+- **The unit converter** shows and takes at most two decimals (it showed
+  three).
+
 ## [2.5.0] - 2026-11-20
 
 ### Changed

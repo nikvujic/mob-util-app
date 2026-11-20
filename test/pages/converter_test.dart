@@ -36,7 +36,7 @@ void main() {
     await openConverter(tester);
     // g ↔ oz: the first cooking pair, last group (Round 119).
     await type(tester, 'unit-7-left', '100');
-    expect(text('unit-7-right'), '3.527');
+    expect(text('unit-7-right'), '3.53'); // Round 154: two decimals
     await type(tester, 'unit-7-right', '1');
     expect(text('unit-7-left'), '28.35');
     await type(tester, 'unit-7-right', '');
@@ -96,5 +96,16 @@ void main() {
     final field =
         tester.widget<TextField>(find.byKey(const Key('unit-0-right')));
     expect(field.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgets('Round 154: no more than two decimals can be typed',
+      (tester) async {
+    await openConverter(tester);
+    await tester.enterText(find.byKey(const Key('unit-0-left')), '1.25');
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('unit-0-left')), '1.255');
+    await tester.pump();
+    expect(text('unit-0-left'), '1.25');
+    expect(text('unit-0-right'), '34.25');
   });
 }

@@ -69,6 +69,13 @@ final unitGroups = [
   ]),
 ];
 
+/// Whether [text] as typed has no more than [maxDecimals] decimals
+/// ("1.25", "1,2"; not "1.255").
+bool withinDecimals(String text) {
+  final at = text.indexOf(RegExp('[.,]'));
+  return at < 0 || text.length - at - 1 <= maxDecimals;
+}
+
 /// A typed number ("1,5" as well as "1.5"), or null.
 double? parseAmount(String text) {
   final t = text.trim().replaceAll(',', '.');
@@ -76,11 +83,14 @@ double? parseAmount(String text) {
   return double.tryParse(t);
 }
 
-/// A converted number, shown short: up to three decimals, no trailing
-/// zeros ("2.5", "0.125", "1000").
+/// Round 154 (asked for): at most two decimals, typed or converted.
+const maxDecimals = 2;
+
+/// A converted number, shown short: up to [maxDecimals] decimals, no
+/// trailing zeros ("2.5", "0.13", "1000").
 String formatAmount(double value) {
   if (!value.isFinite) return '';
-  var s = value.toStringAsFixed(3);
+  var s = value.toStringAsFixed(maxDecimals);
   if (s.contains('.')) {
     s = s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
   }

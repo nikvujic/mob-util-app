@@ -267,6 +267,9 @@ class _UnitTileState extends State<_UnitTile> {
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
                           RegExp(widget.signed ? r'[-0-9.,]' : r'[0-9.,]')),
+                      // Round 154: two decimals at most.
+                      TextInputFormatter.withFunction((old, typed) =>
+                          withinDecimals(typed.text) ? typed : old),
                     ],
                     style: TextStyle(
                       color: colors.textPrimary,

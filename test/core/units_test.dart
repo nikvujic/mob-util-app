@@ -40,8 +40,13 @@ void main() {
   test('shown short: three decimals at most, no trailing zeros', () {
     expect(formatAmount(2.5), '2.5');
     expect(formatAmount(1000), '1000');
-    expect(formatAmount(0.12549), '0.125');
-    expect(formatAmount(1 / 3), '0.333');
+    // Round 154: two decimals at most.
+    expect(formatAmount(0.12549), '0.13');
+    expect(formatAmount(1 / 3), '0.33');
+    expect(withinDecimals('1.25'), isTrue);
+    expect(withinDecimals('1,2'), isTrue);
+    expect(withinDecimals('12'), isTrue);
+    expect(withinDecimals('1.255'), isFalse);
     expect(formatAmount(-0.0001), '0');
     expect(formatAmount(double.nan), '');
   });

@@ -337,6 +337,11 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 154 — two decimals (2026-11-20, 2.5.1)
+
+- [x] The converter: results to two decimals (`maxDecimals`), and no
+  more than two can be typed (`withinDecimals`).
+
 ### Round 153 — the converter redesigned (2026-11-20, 2.5.0)
 
 - [x] Each group a card (its icon in an accent circle, its title);
