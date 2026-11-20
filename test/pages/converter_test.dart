@@ -75,12 +75,26 @@ void main() {
       'every box shows its unit and its name before anything is typed; '
       'temperature first, cooking last', (tester) async {
     await openConverter(tester);
-    expect(find.text('Celsius (°C)'), findsOneWidget);
-    expect(find.text('Fahrenheit (°F)'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Pounds (lb)'), 80,
+    // Round 153: its name over the number, its symbol beside it.
+    for (final t in ['Celsius', '°C', 'Fahrenheit', '°F']) {
+      expect(find.text(t), findsOneWidget, reason: t);
+    }
+    await tester.scrollUntilVisible(find.text('Pounds'), 80,
         scrollable: find.byType(Scrollable).first);
-    expect(find.text('Kilograms (kg)'), findsOneWidget);
+    for (final t in ['Kilograms', 'kg', 'lb']) {
+      expect(find.text(t), findsOneWidget, reason: t);
+    }
     expect(unitGroups.map((g) => g.title),
         ['Temperature', 'Length', 'Weight', 'Volume', 'Speed', 'Cooking']);
+  });
+
+  testWidgets('Round 153: a tap anywhere on a tile (its name too) types in it',
+      (tester) async {
+    await openConverter(tester);
+    await tester.tap(find.text('Fahrenheit'));
+    await tester.pump();
+    final field =
+        tester.widget<TextField>(find.byKey(const Key('unit-0-right')));
+    expect(field.focusNode!.hasFocus, isTrue);
   });
 }

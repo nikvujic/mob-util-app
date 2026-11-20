@@ -337,6 +337,14 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 153 — the converter redesigned (2026-11-20, 2.5.0)
+
+- [x] Each group a card (its icon in an accent circle, its title);
+  each unit a tile (`_UnitTile`): its name, a 22 sp number (tabular
+  figures, "0" as its hint), its symbol; focused, the card colour, an
+  accent border and glow; the whole tile takes the tap. The swap mark an
+  accent circle. Checked rendered in three palettes.
+
 ### Round 152 — brought back, things are simply so (2026-11-18, 2.4.7)
 
 - [x] `PipRoom` watches the app's lifecycle: put away (hidden, paused),

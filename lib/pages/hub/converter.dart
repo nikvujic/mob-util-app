@@ -8,7 +8,9 @@ import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The unit converter (Round 118): a list of unit pairs, two boxes each;
 /// typing in one fills in the other. Nothing is kept once the page is
-/// left.
+/// left. Round 153 (asked for: it looked plain): each group a card with
+/// its icon; each unit a tile, its name over a big number and its symbol;
+/// the one being typed in lifts in the accent.
 class ConverterPage extends StatefulWidget {
   const ConverterPage({super.key});
 
@@ -41,29 +43,45 @@ class _ConverterPageState extends State<ConverterPage> {
         : formatAmount(left ? pair.toRight(value) : pair.toLeft(value));
   }
 
-  Widget _box(int i, {required bool left}) {
+  /// Each group's icon.
+  static IconData _iconOf(String title) => switch (title) {
+        'Temperature' => Icons.thermostat_rounded,
+        'Length' => Icons.straighten_rounded,
+        'Weight' => Icons.scale_rounded,
+        'Volume' => Icons.water_drop_rounded,
+        'Speed' => Icons.speed_rounded,
+        'Cooking' => Icons.restaurant_rounded,
+        _ => Icons.swap_horiz_rounded,
+      };
+
+  Widget _pairRow(int i) {
     final pair = _pairs[i];
-    return Expanded(
-      child: TextField(
-        key: Key('unit-$i-${left ? 'left' : 'right'}'),
-        controller: left ? _left[i] : _right[i],
-        selectionControls: lowHandles,
-        keyboardType:
-            TextInputType.numberWithOptions(decimal: true, signed: pair.signed),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(
-              RegExp(pair.signed ? r'[-0-9.,]' : r'[0-9.,]')),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: _UnitTile(
+              fieldKey: Key('unit-$i-left'),
+              controller: _left[i],
+              name: pair.leftName,
+              symbol: pair.left,
+              signed: pair.signed,
+              onChanged: () => _typed(i, left: true),
+            ),
+          ),
+          const _SwapMark(),
+          Expanded(
+            child: _UnitTile(
+              fieldKey: Key('unit-$i-right'),
+              controller: _right[i],
+              name: pair.rightName,
+              symbol: pair.right,
+              signed: pair.signed,
+              onChanged: () => _typed(i, left: false),
+            ),
+          ),
         ],
-        // Round 119: the unit always shown (a suffix only shows while
-        // typing), with its name.
-        decoration: InputDecoration(
-          isDense: true,
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelText: left
-              ? '${pair.leftName} (${pair.left})'
-              : '${pair.rightName} (${pair.right})',
-        ),
-        onChanged: (_) => _typed(i, left: left),
       ),
     );
   }
@@ -76,37 +94,215 @@ class _ConverterPageState extends State<ConverterPage> {
       appBar: AppBar(title: Text(HubTool.converter.label)),
       body: PullDownList.children(
         children: [
-          for (final group in unitGroups) ...[
+          const SizedBox(height: 8),
+          for (final group in unitGroups)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: Text(
-                group.title.toUpperCase(),
-                style: TextStyle(
-                  color: colors.accent,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1,
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.card,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: colors.divider),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: colors.accent.withValues(alpha: 0.14),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(_iconOf(group.title),
+                                  size: 17, color: colors.accent),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              group.title,
+                              style: TextStyle(
+                                color: colors.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      for (final _ in group.pairs) _pairRow(i++),
+                    ],
+                  ),
                 ),
               ),
             ),
-            for (final _ in group.pairs)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                child: Row(
-                  children: [
-                    _box(i, left: true),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Icon(Icons.swap_horiz,
-                          size: 20, color: colors.textHint),
-                    ),
-                    _box(i++, left: false),
-                  ],
-                ),
-              ),
-          ],
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+}
+
+/// The mark between a pair's two tiles: it goes both ways.
+class _SwapMark extends StatelessWidget {
+  const _SwapMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ExcludeSemantics(
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: colors.accent.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.sync_alt_rounded, size: 16, color: colors.accent),
+        ),
+      ),
+    );
+  }
+}
+
+/// One unit of a pair: its name, the number (big), its symbol. Being
+/// typed in, it lifts: an accent border and a soft glow. A tap anywhere
+/// on it types in it.
+class _UnitTile extends StatefulWidget {
+  final Key fieldKey;
+  final TextEditingController controller;
+  final String name;
+  final String symbol;
+  final bool signed;
+  final VoidCallback onChanged;
+
+  const _UnitTile({
+    required this.fieldKey,
+    required this.controller,
+    required this.name,
+    required this.symbol,
+    required this.signed,
+    required this.onChanged,
+  });
+
+  @override
+  State<_UnitTile> createState() => _UnitTileState();
+}
+
+class _UnitTileState extends State<_UnitTile> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final on = _focus.hasFocus;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _focus.requestFocus,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.fromLTRB(12, 9, 12, 8),
+        decoration: BoxDecoration(
+          color: on ? colors.cardSelected : colors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: on ? colors.accent : colors.divider,
+            width: on ? 1.6 : 1,
+          ),
+          boxShadow: [
+            if (on)
+              BoxShadow(
+                color: colors.accent.withValues(alpha: 0.22),
+                blurRadius: 12,
+                spreadRadius: 0.5,
+              ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: on ? colors.accent : colors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Expanded(
+                  child: TextField(
+                    key: widget.fieldKey,
+                    controller: widget.controller,
+                    focusNode: _focus,
+                    selectionControls: lowHandles,
+                    keyboardType: TextInputType.numberWithOptions(
+                        decimal: true, signed: widget.signed),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(widget.signed ? r'[-0-9.,]' : r'[0-9.,]')),
+                    ],
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                    cursorColor: colors.accent,
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      hintText: '0',
+                      hintStyle: TextStyle(
+                        color: colors.textHint,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    onChanged: (_) => widget.onChanged(),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  widget.symbol,
+                  style: TextStyle(
+                    color: on ? colors.accent : colors.textMuted,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

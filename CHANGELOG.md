@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-11-20
+
+### Changed
+- **The unit converter, redesigned:** each group (Temperature, Length,
+  Weight...) is a card with its icon; each unit a tile with its name
+  over a big number and its symbol beside it; the one you're typing in
+  lifts, outlined and glowing in the accent. A tap anywhere on a tile
+  types in it.
+
 ## [2.4.7] - 2026-11-18
 
 ### Fixed
