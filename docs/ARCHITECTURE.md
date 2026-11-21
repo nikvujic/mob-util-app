@@ -1025,3 +1025,14 @@ version 31).
 enforces it). The app's own is the phone's bars shown, any way up
 (`restore`); a page that changes them puts that back as it goes, so it
 can't change how the pages after it are laid out.
+
+## A first look catches him up (Round 155)
+
+`PipRoom._check` has one rule for what's seen: a first look (the room
+opened, or the app brought back, `didChangeAppLifecycleState`) shows
+him as his life is, not how he got there. It applies the show, runs
+whatever that started to its end (`_finish`), applies where his life
+has him (`place(animate: false)`: home, plugged in, the bus, out, his
+work) and finishes again, all before the first frame. From then on what
+happens is watched and animates. `pip_opened_out_test.dart` checks every
+combination.

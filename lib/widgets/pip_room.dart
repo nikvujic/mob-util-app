@@ -241,6 +241,74 @@ class _PipRoomState extends State<PipRoom>
     // Round 127: at his quest's work in quest hours (not while he's out, or
     // on his trip's bus).
     final questNow = out == null && trip.leg == null ? link.questNow() : null;
+    // Round 53: a medicine due, he reminds (known before he's caught up).
+    brain.medicineDue = link.medicineDue;
+    // Round 44: plugged in or out; seen happening only once he's been
+    // looked at (opened while charging, he's simply there, charging).
+    final seen = _lookedAt && _moving;
+    // Where his life has him (his house, plugged in, on the bus, out, at
+    // his work); [animate]: seen happening.
+    final home = out == null &&
+        trip.leg == null &&
+        !trip.snowy &&
+        questNow == null &&
+        link.homeNow();
+    void place({required bool animate}) {
+      // Round 128: his house built, he lives in it (but for his field's
+      // times, and while he's out, away on his trip, or at work).
+      // Round 134: seen, he walks out of one into the other.
+      brain.home(home, animate: animate);
+      // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
+      // Round 64: not till Android has said (the first time, simply so).
+      if (link.plugged case final plugged?) {
+        // Round 127: nor at his quest's work (he's moving between places).
+        brain.setPlugged(
+            plugged &&
+                out == null &&
+                trip.leg == null &&
+                questNow == null &&
+                // Round 134: nor lying where he ran out at it (or about to:
+                // his work's over this check).
+                !brain.downAtWork &&
+                brain.activity != PipActivity.questing,
+            animate: animate && _pluggedKnown);
+        _pluggedKnown = true;
+      }
+      // Round 67: on his ski trip's bus.
+      brain.ride(trip, animate: animate);
+      brain.adventure(out, animate: animate);
+      // Round 127: simply there, at the step and moment it's at (Round 133:
+      // seen setting off, he walks off his field to it first).
+      // Round 134: run out at it, he falls there; his work over, seen, he
+      // walks back onto his field.
+      // Round 136: his work over and home next, he comes in at his door.
+      brain.quest(questNow,
+          animate: animate,
+          down: show == PipShow.powerOff || show == PipShow.off,
+          toHome: home);
+      // Round 74: his field's trees go by with his time out, alike here and
+      // in the other room.
+      brain.syncOutRun(out == null ? null : link.outRun(),
+          paused: out?.onBreak ?? false);
+    }
+
+    // Round 155: a first look (opened, or the app brought back): he's
+    // caught up before anything's shown: as his life says (awake or
+    // asleep, off), whatever that took done (woken, fallen asleep, run
+    // out), then where it has him (out, at his work, home). Before, each
+    // of these went its own way: woken in view, he then set off in view,
+    // his field jumping.
+    // Out of the ground the first time: his way in's still to come.
+    final spawnedFresh = brain.freshSpawn;
+    if (!seen && _moving) {
+      if (show != _shown && brain.show(show)) {
+        _shown = show;
+        link.shown(show);
+      }
+      _finish();
+      place(animate: false);
+      _finish();
+    }
     // Round 52: his way in, the first time or back after a while (not
     // while he's out: he's simply there, running; Round 130: nor at his
     // quest's work, simply there working).
@@ -251,15 +319,13 @@ class _PipRoomState extends State<PipRoom>
           now.difference(left) >= PipBrain.awayFor &&
           (brain.activity == PipActivity.standing ||
               brain.activity == PipActivity.walking);
-      if (brain.freshSpawn || back) brain.enter(_pickEntrance());
+      if (spawnedFresh || back) brain.enter(_pickEntrance());
     }
     // A notification came since the last look: his screen shows it.
     final since = _lastLook;
     if (since != null && link.notifiedBetween(since, now)) brain.notify();
     _lastLook = now;
-    // Round 53: a medicine due, he reminds; a recipe read within the
-    // hour, he eats (once for it).
-    brain.medicineDue = link.medicineDue;
+    // Round 53: a recipe read within the hour, he eats (once for it).
     // Round 57: a birthday, the party hat.
     brain.birthday = link.partyHat;
     // Round 61: otherwise today's (a day of the year's, or a random one).
@@ -275,50 +341,7 @@ class _PipRoomState extends State<PipRoom>
         brain.eat()) {
       brain.ateFor = read;
     }
-    // Round 44: plugged in or out; seen happening only once he's been
-    // looked at (opened while charging, he's simply there, charging).
-    final seen = _lookedAt && _moving;
-    // Round 128: his house built, he lives in it (but for his field's
-    // times, and while he's out, away on his trip, or at work).
-    // Round 134: seen, he walks out of one into the other.
-    final home = out == null &&
-        trip.leg == null &&
-        !trip.snowy &&
-        questNow == null &&
-        link.homeNow();
-    brain.home(home, animate: seen);
-    // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
-    // Round 64: not till Android has said (the first time, simply so).
-    if (link.plugged case final plugged?) {
-      // Round 127: nor at his quest's work (he's moving between places).
-      brain.setPlugged(
-          plugged &&
-              out == null &&
-              trip.leg == null &&
-              questNow == null &&
-              // Round 134: nor lying where he ran out at it (or about to:
-              // his work's over this check).
-              !brain.downAtWork &&
-              brain.activity != PipActivity.questing,
-          animate: seen && _pluggedKnown);
-      _pluggedKnown = true;
-    }
-    // Round 67: on his ski trip's bus.
-    brain.ride(trip, animate: seen);
-    brain.adventure(out, animate: seen);
-    // Round 127: simply there, at the step and moment it's at (Round 133:
-    // seen setting off, he walks off his field to it first).
-    // Round 134: run out at it, he falls there; his work over, seen, he
-    // walks back onto his field.
-    // Round 136: his work over and home next, he comes in at his door.
-    brain.quest(questNow,
-        animate: seen,
-        down: show == PipShow.powerOff || show == PipShow.off,
-        toHome: home);
-    // Round 74: his field's trees go by with his time out, alike here and
-    // in the other room.
-    brain.syncOutRun(out == null ? null : link.outRun(),
-        paused: out?.onBreak ?? false);
+    place(animate: seen);
     // Round 73: watched fighting, his XP shown goes up only as he strikes
     // bugs; a boss may come if none was beaten today.
     brain.bossDue = link.bossDue;

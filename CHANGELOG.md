@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.5.2] - 2026-11-21
+
+### Fixed
+- **Opening the app (or coming back to it), Pip is simply as his life
+  is now**: opened at 12:44 on him asleep since the night, he's out
+  running, not seen waking up, then setting off with his field jumping.
+  The same for every change while you were away: woken, fallen asleep,
+  run out or back on, out on his adventure, at his work. His room now
+  catches him up in one go before showing anything; the animations are
+  kept for what happens while you're watching (or his way in, opening).
+
 ## [2.5.1] - 2026-11-20
 
 ### Changed

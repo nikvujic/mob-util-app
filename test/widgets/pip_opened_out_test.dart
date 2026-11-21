@@ -3,6 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
+import 'package:the_app/core/pip_energy.dart';
+import 'package:the_app/core/pip_quest.dart';
+import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/widgets/pip_room.dart';
@@ -156,4 +159,195 @@ void main() {
       }
     }
   });
+
+  for (final resumed in [true, false]) {
+    testWidgets(
+        'Round 155: ${resumed ? 'brought back' : 'opened'} at 12:44 on him '
+        'asleep since the night, out on his adventure by now, a medicine '
+        'due: simply out running, not seen waking or setting off',
+        (tester) async {
+      final link = FakePipLink(show: PipShow.asleep)
+        ..at = DateTime(2026, 11, 21, 2, 0);
+      final brain = PipBrain(random: math.Random(5));
+      Widget room() => Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: 400,
+                  child: PipRoom(
+                    brain: brain,
+                    animate: true,
+                    link: link,
+                    scene: PipScene.at(PipPlace.room, link.at!),
+                  ),
+                ),
+              ),
+            ),
+          );
+      void lateMorning() => link
+        ..at = DateTime(2026, 11, 21, 12, 44)
+        ..show = PipShow.awake
+        ..medicineDue = true
+        ..out = (onBreak: false, breakDone: 0.0)
+        ..running = 44 * 60.0;
+      // Seen asleep in the night.
+      await tester.pumpWidget(room());
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(brain.activity, PipActivity.asleep);
+      if (resumed) {
+        for (final s in [
+          AppLifecycleState.inactive,
+          AppLifecycleState.hidden,
+          AppLifecycleState.paused,
+        ]) {
+          tester.binding.handleAppLifecycleStateChanged(s);
+        }
+        lateMorning();
+        for (final s in [
+          AppLifecycleState.hidden,
+          AppLifecycleState.inactive,
+          AppLifecycleState.resumed,
+        ]) {
+          tester.binding.handleAppLifecycleStateChanged(s);
+        }
+        await tester.pump(const Duration(seconds: 2));
+      } else {
+        // The room closed, opened again (a new room, the same Pip).
+        await tester.pumpWidget(const SizedBox());
+        lateMorning();
+        await tester.pumpWidget(room());
+        await tester.pump();
+      }
+      for (var i = 0; i < 40; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        link.running = link.running! + 0.1;
+        expect(brain.activity, PipActivity.adventuring,
+            reason: 'simply out, frame $i');
+        expect(
+            brain.run!.phase, isNot(anyOf(RunPhase.toCentre, RunPhase.drawing)),
+            reason: 'running already: frame $i');
+        expect(brain.screenShow?.$1, PipScreen.pill,
+            reason: 'his medicine on his screen');
+      }
+    });
+  }
+
+  // Round 155: whatever his life says when his room's opened (or the
+  // app's brought back), the first look finds him settled in it: none of
+  // the in-betweens (waking, falling asleep, running out, setting off)
+  // shown as if they were happening.
+  final mine =
+      Quests.house.steps.indexWhere((s) => s.action == QuestAction.gather);
+  for (final resumed in [false, true]) {
+    for (final was in [PipShow.asleep, PipShow.awake, PipShow.off]) {
+      for (final now in [PipShow.asleep, PipShow.awake, PipShow.off]) {
+        for (final doing in ['nothing', 'out', 'work']) {
+          if (now != PipShow.awake && doing != 'nothing') continue;
+          testWidgets(
+              'Round 155: ${resumed ? 'brought back' : 'opened'}, '
+              '${was.name} before, ${now.name} now, $doing: settled',
+              (tester) async {
+            final link = FakePipLink(show: was)
+              ..at = DateTime(2026, 11, 21, 6, 0);
+            final brain = PipBrain(random: math.Random(7));
+            Widget room() => Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: MediaQuery(
+                    data: const MediaQueryData(),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: SizedBox(
+                        width: 400,
+                        child: PipRoom(
+                          brain: brain,
+                          animate: true,
+                          link: link,
+                          scene: PipScene.at(PipPlace.room, link.at!),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+            await tester.pumpWidget(room());
+            for (var i = 0; i < 60; i++) {
+              await tester.pump(const Duration(milliseconds: 100));
+            }
+            void later() {
+              link
+                ..at = DateTime(2026, 11, 21, 14, 0)
+                ..show = now;
+              if (doing == 'out') {
+                link
+                  ..out = (onBreak: false, breakDone: 0.0)
+                  ..running = 600;
+              }
+              if (doing == 'work') {
+                link.questing = (
+                  at: Quests.house.at(Quests.house.startOf(mine) + 2),
+                  seconds: 150.0
+                );
+              }
+            }
+
+            if (resumed) {
+              for (final s in [
+                AppLifecycleState.inactive,
+                AppLifecycleState.hidden,
+                AppLifecycleState.paused,
+              ]) {
+                tester.binding.handleAppLifecycleStateChanged(s);
+              }
+              later();
+              for (final s in [
+                AppLifecycleState.hidden,
+                AppLifecycleState.inactive,
+                AppLifecycleState.resumed,
+              ]) {
+                tester.binding.handleAppLifecycleStateChanged(s);
+              }
+              await tester.pump(const Duration(seconds: 2));
+            } else {
+              await tester.pumpWidget(const SizedBox());
+              later();
+              await tester.pumpWidget(room());
+              await tester.pump();
+            }
+            const inBetween = {
+              PipActivity.wakingUp,
+              PipActivity.stirring,
+              PipActivity.fallingAsleep,
+              PipActivity.poweringOff,
+              PipActivity.poweringOn,
+            };
+            for (var i = 0; i < 20; i++) {
+              await tester.pump(const Duration(milliseconds: 100));
+              final act = brain.activity;
+              expect(inBetween, isNot(contains(act)),
+                  reason: 'caught ${act.name}, frame $i');
+              switch ((now, doing)) {
+                case (PipShow.asleep, _):
+                  expect(act, PipActivity.asleep);
+                case (PipShow.off, _):
+                  expect(act, PipActivity.off);
+                case (_, 'out'):
+                  expect(act, PipActivity.adventuring);
+                  expect(brain.run!.phase,
+                      isNot(anyOf(RunPhase.toCentre, RunPhase.drawing)));
+                case (_, 'work'):
+                  expect(act, PipActivity.questing);
+                  expect(brain.questView!.place, QuestScenePlace.mine,
+                      reason: 'at it, not walking off his field to it');
+                default:
+              }
+            }
+          });
+        }
+      }
+    }
+  }
 }

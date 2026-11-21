@@ -388,7 +388,9 @@ class PipBrain {
           _ => !_busy,
         };
       case PipShow.asleep:
-        if (fresh) {
+        // Round 155: off till now (a battery since, unseen): simply asleep
+        // (he'd have stayed lying off, nothing taking him from it).
+        if (fresh || activity == PipActivity.off) {
           _start(PipActivity.asleep);
           return true;
         }

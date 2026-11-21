@@ -337,6 +337,22 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 155 — one catch-up on a first look (2026-11-21, 2.5.2)
+
+- [x] Why it kept coming back: each part of his life (awake/asleep,
+  out, at work, home, the weather) had its own "seen or not" rule, and
+  `show` had none: woken in view, he was busy, so his adventure waited
+  and then ran as watched.
+- [x] `PipRoom._check`: on a first look (opened, or brought back),
+  before anything's shown, his life's state applied (show first),
+  whatever it took run to its end (`_finish`), where it has him applied
+  again (`place(animate: false)`), and done. His way in still plays
+  (`spawnedFresh`).
+- [x] Off to asleep directly (a battery since, unseen).
+- [x] Tests: every combination of before/now (asleep, awake, off) and
+  doing (nothing, out, work), opened and brought back, settled on the
+  first look (16 of the 35 failed before).
+
 ### Round 154 — two decimals (2026-11-20, 2.5.1)
 
 - [x] The converter: results to two decimals (`maxDecimals`), and no
