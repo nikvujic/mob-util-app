@@ -3,6 +3,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/back_handlers.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/section_reset.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Tracks which items of a list are selected.
 ///
@@ -373,7 +374,7 @@ class ReorderOrSelectIndicator extends StatelessWidget {
       ),
     );
     if (selectionMode) return area;
-    return ReorderableDragStartListener(
+    return SmoothDragStartListener(
       index: index,
       // The whole area takes the touch, not just the icon.
       child: ColoredBox(color: Colors.transparent, child: area),

@@ -23,6 +23,7 @@ import 'package:the_app/widgets/markdown_text.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// One recipe. It opens in **view mode**, which keeps the
 /// screen on (cooking with the phone set aside): its prep time and type,
@@ -858,7 +859,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
         ),
         SliverPadding(
           padding: const EdgeInsets.only(left: 16),
-          sliver: SliverReorderableList(
+          sliver: SmoothSliverReorderableList(
             itemCount: ingredients.length,
             // onReorderItem only exists on newer Flutter than we target.
             // ignore: deprecated_member_use

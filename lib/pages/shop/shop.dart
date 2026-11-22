@@ -12,6 +12,7 @@ import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Shopping list: "To buy" on top, "Items" (previously bought) below. Tapping
 /// an item moves it between the two sections; each section can be reordered.
@@ -181,7 +182,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
 
   Widget _section(List<ShopItem> items,
       {required bool toBuy, bool reorderable = true}) {
-    return SliverReorderableList(
+    return SmoothSliverReorderableList(
       itemCount: items.length,
       // onReorderItem only exists on newer Flutter than we target.
       // ignore: deprecated_member_use

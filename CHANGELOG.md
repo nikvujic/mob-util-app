@@ -6,6 +6,20 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.5.4] - 2026-11-22
+
+### Fixed
+- **Reordering by the handle** (every list): the rows making room glide
+  smoothly even when the drag goes back and forth fast (they snapped or
+  jerked), and a drop lands where the gap is shown, without a jump at
+  the end.
+
+### Changed
+- **Moving a row up a long list** scrolls it as soon as the row enters a
+  band at the top of the list (about as tall as the pull-down space), so
+  a small upward move is enough. A row picked up already inside that
+  band scrolls only at the very edge.
+
 ## [2.5.3] - 2026-11-22
 
 ### Changed

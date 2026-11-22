@@ -1036,3 +1036,24 @@ has him (`place(animate: false)`: home, plugged in, the bus, out, his
 work) and finishes again, all before the first frame. From then on what
 happens is watched and animates. `pip_opened_out_test.dart` checks every
 combination.
+
+## Reordering lists
+
+Every reorderable list uses `widgets/smooth_reorderable_list.dart`
+(`SmoothSliverReorderableList`, `SmoothDragStartListener`), a copy of
+Flutter 3.29's `SliverReorderableList` under its BSD licence, changed in
+three places:
+
+- The rows making room follow their target offset as a critically damped
+  spring, all driven by one ticker on the list, so a gap that moves again
+  mid-way is taken up from the current speed instead of restarting a
+  fixed animation.
+- A drop completes (and calls `onReorder`) only once those rows have
+  settled, so the dropped row and its neighbours never jump at the end.
+- Auto-scrolling is its own: up while the dragged row is inside a band at
+  the top (`autoScrollZone`, 28% of the list's height by default), faster
+  the deeper; a row picked up inside the band scrolls only at the edge
+  until it has been below the band; down at the bottom edge.
+
+`test/widgets/smooth_reorder_test.dart` checks the motion frame by frame
+and the scrolling.

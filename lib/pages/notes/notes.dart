@@ -17,6 +17,7 @@ import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/main_app_bar.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({super.key});
@@ -236,7 +237,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                         ),
                       SliverPadding(
                         padding: const EdgeInsets.only(top: 4),
-                        sliver: SliverReorderableList(
+                        sliver: SmoothSliverReorderableList(
                           itemCount: notes.length,
                           // onReorderItem only exists on newer Flutter than
                           // we target.

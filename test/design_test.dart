@@ -30,6 +30,7 @@ import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/shop_provider.dart';
 import 'package:the_app/widgets/selection.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 import 'helpers.dart';
 
@@ -819,7 +820,7 @@ void main() {
       );
       final handle = find.descendant(
         of: row,
-        matching: find.byType(ReorderableDragStartListener),
+        matching: find.byType(SmoothDragStartListener),
       );
       expect(tester.getSize(handle).height, tester.getSize(row).height,
           reason: text);

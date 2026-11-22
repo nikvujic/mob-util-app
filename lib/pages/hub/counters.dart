@@ -12,6 +12,7 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Counters (O2): each with its name, its value and big − / + buttons.
 /// Long-press selects them to reset, rename or delete; the handle
@@ -123,7 +124,7 @@ class _CountersPageState extends ConsumerState<CountersPage> {
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.only(top: 4),
-                      sliver: SliverReorderableList(
+                      sliver: SmoothSliverReorderableList(
                         itemCount: counters.length,
                         // onReorderItem only exists on newer Flutter than we
                         // target.

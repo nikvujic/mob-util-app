@@ -17,6 +17,7 @@ import 'package:the_app/widgets/password_prompt.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Opens the to-do note.
 void openTodo(BuildContext context) {
@@ -110,7 +111,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
   /// dragged between them: [open], the Waiting header, then [waiting].
   Widget _openAndWaiting(List<TodoItem> open, List<TodoItem> waiting) {
     final count = open.length + 1 + waiting.length;
-    return SliverReorderableList(
+    return SmoothSliverReorderableList(
       itemCount: count,
       // onReorderItem only exists on newer Flutter than we target.
       // ignore: deprecated_member_use
@@ -164,7 +165,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
   }
 
   Widget _section(List<TodoItem> items, {required bool done}) {
-    return SliverReorderableList(
+    return SmoothSliverReorderableList(
       itemCount: items.length,
       // onReorderItem only exists on newer Flutter than we target.
       // ignore: deprecated_member_use

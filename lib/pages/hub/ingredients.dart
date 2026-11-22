@@ -13,6 +13,7 @@ import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Opens the ingredients list to manage it.
 void openIngredients(BuildContext context) {
@@ -578,7 +579,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       body = PullDownList(
         bottomSpace: BottomActions.contentClearance,
         slivers: [
-          SliverReorderableList(
+          SmoothSliverReorderableList(
             itemCount: rows.length,
             // onReorderItem only exists on newer Flutter than we target.
             // ignore: deprecated_member_use

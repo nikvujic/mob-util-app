@@ -12,6 +12,7 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Opens a packing list (view mode).
 void openPackingList(BuildContext context, String id) =>
@@ -89,7 +90,7 @@ class _PackingPageState extends ConsumerState<PackingPage> {
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.only(top: 4),
-                      sliver: SliverReorderableList(
+                      sliver: SmoothSliverReorderableList(
                         itemCount: lists.length,
                         // onReorderItem only exists on newer Flutter than
                         // we target.

@@ -17,6 +17,7 @@ import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// One packing list (revised). It opens in
 /// **view mode**: its sections, each thing a row with a box; a tap
@@ -836,7 +837,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
             ),
           ),
         ),
-        SliverReorderableList(
+        SmoothSliverReorderableList(
           itemCount: rows.length,
           // onReorderItem only exists on newer Flutter than we target.
           // ignore: deprecated_member_use

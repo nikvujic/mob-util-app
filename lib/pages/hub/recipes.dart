@@ -13,6 +13,7 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// Opens a recipe (view mode), or a new one in edit mode ([isNew]).
 void openRecipe(BuildContext context, String id, {bool isNew = false}) {
@@ -98,7 +99,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                   slivers: [
                     SliverPadding(
                       padding: const EdgeInsets.only(top: 4),
-                      sliver: SliverReorderableList(
+                      sliver: SmoothSliverReorderableList(
                         itemCount: recipes.length,
                         // onReorderItem only exists on newer Flutter than
                         // we target.

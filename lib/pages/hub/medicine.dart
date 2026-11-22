@@ -16,6 +16,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 /// The medicine tracker (O6): today's doses, one tap each to mark taken
 /// (with the time); several a day show "1 of 2". The history lists every
@@ -233,7 +234,7 @@ class MedicinePage extends ConsumerWidget {
                   ),
                 ),
                 // Today's, in the user's order: drag a card's handle.
-                SliverReorderableList(
+                SmoothSliverReorderableList(
                   itemCount: now.length,
                   // onReorderItem only exists on newer Flutter than we
                   // target.
@@ -422,7 +423,7 @@ class _MedicineCard extends StatelessWidget {
                     ),
                   ),
                   // Drag here to move it.
-                  ReorderableDragStartListener(
+                  SmoothDragStartListener(
                     index: index,
                     child: Semantics(
                       label: 'Move ${medicine.name}',

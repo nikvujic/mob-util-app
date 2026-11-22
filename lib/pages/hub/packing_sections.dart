@@ -10,6 +10,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
+import 'package:the_app/widgets/smooth_reorderable_list.dart';
 
 void openPackingSections(BuildContext context) {
   Navigator.of(context).push(
@@ -107,7 +108,7 @@ class PackingSectionsPage extends ConsumerWidget {
               ),
             ),
           ),
-          SliverReorderableList(
+          SmoothSliverReorderableList(
             itemCount: sections.length,
             // onReorderItem only exists on newer Flutter than we target.
             // ignore: deprecated_member_use
