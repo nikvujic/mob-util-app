@@ -8,7 +8,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 
 /// The unit converter (Round 118): a list of unit pairs, two boxes each;
 /// typing in one fills in the other. Nothing is kept once the page is
-/// left. Round 153 (asked for: it looked plain): each group a card with
+/// left. Round 153: each group a card with
 /// its icon; each unit a tile, its name over a big number and its symbol;
 /// the one being typed in lifts in the accent.
 class ConverterPage extends StatefulWidget {

@@ -14,7 +14,7 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     addListener(storage.saveTodo, fireImmediately: false);
   }
 
-  /// Adds [text] at the top of the things to do (Round 143, asked for:
+  /// Adds [text] at the top of the things to do (Round 143:
   /// the newest first, as Shop) and returns its id; blank text is
   /// ignored (null).
   String? add(String text) {

@@ -168,9 +168,9 @@ List<String> toastViolations(String path, String source) {
 /// Top bars with action buttons (G11: actions are at the bottom, on the
 /// hand's side; only the menu ☰ and back go at the top). 1.29.1: Shop's
 /// search went into the top bar unasked. A file listed in
-/// [appBarActionsAllowed] may, only where the user asked for it.
+/// [appBarActionsAllowed] may, only where listed here.
 const appBarActionsAllowed = <String>{
-  // Round 131: Import / export, asked for in the top bar (the same on
+  // Round 131: Import / export in the top bar (the same on
   // every page that gets it).
   'pages/hub/recipes.dart',
 };
@@ -194,7 +194,7 @@ List<String> appBarActionViolations(String path, String source) {
     if (args.toString().split(',').any((a) => a.startsWith('actions:'))) {
       final line = '\n'.allMatches(source.substring(0, m.start)).length + 1;
       violations.add('$path:$line: actions in a top bar — put them at the '
-          'bottom (G11), unless the user asked for it');
+          'bottom (G11), unless listed as allowed');
     }
   }
   return violations;

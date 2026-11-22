@@ -334,11 +334,12 @@ class ReorderOrSelectIndicator extends StatelessWidget {
   static const bareWidth = 16.0;
 
   /// Width of the area: as tall as the row when the row lets it stretch
-  /// (see [ReorderableRow]). Round 148 (asked for): it starts at the
-  /// icon's left edge and takes everything right of it (it reached 28 dp
-  /// left of the icon, so scrolling grabbed it); the icon where it was,
-  /// [iconInset] from the right edge.
-  static const width = 24.0 + iconInset;
+  /// (see [ReorderableRow]). It reaches [leftReach] left of the icon
+  /// (enough to grab without aiming, little enough that scrolling past
+  /// doesn't pick a row up) and takes everything right of it; the icon
+  /// sits [iconInset] from the right edge.
+  static const width = leftReach + 24.0 + iconInset;
+  static const leftReach = 8.0;
   static const iconInset = 20.0;
 
   @override

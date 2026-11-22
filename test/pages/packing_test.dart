@@ -218,8 +218,7 @@ void main() {
 
   testWidgets(
       "edit mode: the list's own sections added (by Done), renamed, deleted "
-      'with their items (asked); the last one stays; Save keeps it',
-      (tester) async {
+      'with their items; the last one stays; Save keeps it', (tester) async {
     await openPacking(tester, start: sample());
     await openTrip(tester, edit: true);
 

@@ -3,15 +3,15 @@
 Built in Round 108 (1.43.0); written in Round 107 (v2 item 4): the people you know as **floating
 boxes on a zoomable board**, with **relations** that make a **family
 tree**, laid out like Pip Home (the picture on top, the controls below).
-**Requested** marks what was asked for, **Decided** an answer to a
+**Required** marks a requirement, **Decided** an answer to a
 question, **Proposed** what was filled in; what's still open is in
 section 9.
 
 ## 1. The page (a Hub page, "People")
 
-- **Requested:** like Pip Home: the **board** fills the top half of the
+- **Required:** like Pip Home: the **board** fills the top half of the
   screen, the **panel** sits below it.
-- **Requested:** with nobody selected, the panel is hidden but for **a small
+- **Required:** with nobody selected, the panel is hidden but for **a small
   bar with Add**. Selecting a person opens the panel with their info.
 - **Proposed:** the bar shows how many people there are ("23 people") and,
   beside Add, **Find** (a search by name that centres on the match) and
@@ -26,23 +26,23 @@ section 9.
 
 | Field | Notes |
 |---|---|
-| **Name** (needed) | **Requested:** the full name. |
-| **Birthday** | **Requested:** day, month, and the year if known. Tied to Dates (section 6). |
-| **Gender** | **Requested:** shown as blue or pink. **Decided:** male or female, picked when adding. |
-| **Deceased** | **Requested:** a person can be marked deceased. **Decided:** with the date of death (the year at least); the age stops there ("lived to 84"). |
-| **Highlighted** | **Requested:** important people stand out (section 4.2). |
-| **Note** | **Requested:** free text; shown in the panel, never on the board. |
-| **Relations** | **Requested:** to other people (section 5). |
-| **Position** | **Requested:** where the box sits on the board, remembered. |
+| **Name** (needed) | **Required:** the full name. |
+| **Birthday** | **Required:** day, month, and the year if known. Tied to Dates (section 6). |
+| **Gender** | **Required:** shown as blue or pink. **Decided:** male or female, picked when adding. |
+| **Deceased** | **Required:** a person can be marked deceased. **Decided:** with the date of death (the year at least); the age stops there ("lived to 84"). |
+| **Highlighted** | **Required:** important people stand out (section 4.2). |
+| **Note** | **Required:** free text; shown in the panel, never on the board. |
+| **Relations** | **Required:** to other people (section 5). |
+| **Position** | **Required:** where the box sits on the board, remembered. |
 
 - **Proposed:** a new person is placed at the middle of what the board
   shows, nudged so it doesn't cover anyone.
 
 ## 3. The panel (below the board)
 
-- **Requested:** selecting a person shows their **info**: name, birthday and
+- **Required:** selecting a person shows their **info**: name, birthday and
   age, gender, deceased, highlighted, relations, note.
-- **Requested:** an **Edit** button turns it into fields to change them.
+- **Required:** an **Edit** button turns it into fields to change them.
 - **Proposed:** in view, each relation is a row ("Mother: Ana Petrović");
   tapping it selects and centres that person. **Edit** shows the fields,
   **Add relation**, each relation with × to remove it, and **Delete
@@ -56,19 +56,19 @@ section 9.
 
 ### 4.1 Moving around
 
-- **Requested:** **zoomable**: pinch to zoom, drag the empty board to pan.
-- **Requested:** **touch and drag a person** to move them; the new position is
+- **Required:** **zoomable**: pinch to zoom, drag the empty board to pan.
+- **Required:** **touch and drag a person** to move them; the new position is
   remembered.
-- **Requested:** **tapping a person centres on them** (animated) and opens the
+- **Required:** **tapping a person centres on them** (animated) and opens the
   panel.
-- **Requested:** **animated**: people glide to their new places when rearranged,
+- **Required:** **animated**: people glide to their new places when rearranged,
   and a new relation's line draws itself in.
 - **Proposed:** zoom from about a quarter of the size to twice the size;
   the view (where you were and how close) is remembered between visits.
 
 ### 4.2 A person's box
 
-- **Requested:** an **avatar by age** (worked out from the birthday, so it
+- **Required:** an **avatar by age** (worked out from the birthday, so it
   changes by itself):
 
   | Avatar | Age |
@@ -84,12 +84,12 @@ section 9.
   **Proposed:** pixel-art faces in Pip's style, one per age and gender (7 ×
   2); no birth year: the adult face.
   **Decided:** drafts first, to pick from, as with Pip.
-- **Requested:** the box shows the person's info **except the note**.
+- **Required:** the box shows the person's info **except the note**.
   **Proposed:** the name, and under it the age or "b. 1958", plus a small
   cake on their birthday.
-- **Requested:** **gender as blue or pink** (proposed: the border and the
+- **Required:** **gender as blue or pink** (proposed: the border and the
   avatar's backdrop).
-- **Requested:** **highlighted** people stand out; the others have a plain
+- **Required:** **highlighted** people stand out; the others have a plain
   greyish border and muted text. **Proposed:** highlighted people get a
   thicker border in their colour, full-strength text and a slightly bigger
   box.
@@ -101,7 +101,7 @@ section 9.
 
 ### 5.1 Adding one
 
-- **Requested:** **Add relation**, then **pick another person**; the two get
+- **Required:** **Add relation**, then **pick another person**; the two get
   connected on the board, with the line drawing in.
 - **Proposed:** the picker is a searchable list of the others, then the
   kind:
@@ -157,16 +157,16 @@ section 9.
 
 ## 6. Birthdays and Dates
 
-- **Requested:** when **creating** a person, a button lets you **pick a birthday
+- **Required:** when **creating** a person, a button lets you **pick a birthday
   from the Dates page**: the person takes it over, so the original date
   isn't left as a separate entry ("we kill the original").
   **Changed (Round 113):** the pages stay separate: picking one only copies
   its day, month and year; the original stays in Dates, and the person's
   birthday is projected as its own date.
-- **Requested (Round 113):** a per-person switch, **Show in Dates**, on by
+- **Required (Round 113):** a per-person switch, **Show in Dates**, on by
   default: off, the birthday stays in People only (no date, no reminders).
-- **Requested:** a birthday typed in **by hand is added to Dates** as a birthday.
-- **Requested:** in Dates, **those dates show a small People icon**, and
+- **Required:** a birthday typed in **by hand is added to Dates** as a birthday.
+- **Required:** in Dates, **those dates show a small People icon**, and
   **can't be deleted there** (they go when the person is deleted, or when
   their birthday is cleared).
 - **Decided:** in Dates, a linked birthday's **reminders and note** can be

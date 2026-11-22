@@ -18,7 +18,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// One packing list (Round 94; Round 95: the user's changes). It opens in
+/// One packing list (Round 94; Round 95: revised). It opens in
 /// **view mode**: its sections, each thing a row with a box; a tap
 /// anywhere on a row ticks it (or unticks it), in place. **Reset**
 /// unticks them all, asked first. **Edit**: its name, its own sections

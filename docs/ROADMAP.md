@@ -130,7 +130,7 @@ Small fixes, not urgent; can go out together as one polish release.
   Dropped (Round 30): not needed any more.
   
   work (what's encrypted, what the password protects, what backups
-  carry) — he asked for it.
+  carry).
 
 ### One-handed use & touch polish (from the second phone test)
 
@@ -337,6 +337,12 @@ fixtures for every stored format.
   converter.
 - UI polish (U1): animations, shake on a wrong password, transitions.
 
+### Round 156 — drag handles' reach; formal wording (2026-11-22, 2.5.3)
+
+- [x] `ReorderOrSelectIndicator.leftReach` (8 dp) left of the icon,
+  Medicine's handle the same; tests: 4 dp left grabs, 12 dp doesn't.
+- [x] Request-log wording removed from docs, comments and tests.
+
 ### Round 155 — one catch-up on a first look (2026-11-21, 2.5.2)
 
 - [x] Why it kept coming back: each part of his life (awake/asleep,
@@ -394,7 +400,7 @@ fixtures for every stored format.
 
 ### Round 150 — "Empty" (2026-11-15, 2.4.5)
 
-- [x] Pip Home's inventory with nothing in it says EMPTY (asked for).
+- [x] Pip Home's inventory with nothing in it says EMPTY.
 
 ### Round 149 — a hammer; snow on what's built (2026-11-15, 2.4.4)
 
@@ -440,7 +446,7 @@ fixtures for every stored format.
 - [x] A medicine due: the pill on his screen whatever he does while
   he's up (`screenShow` over `_faceUp`), drawn over his frame as it is
   (`screenFrame(base:)`, his legs walking); `questClock` gone.
-- [x] The food tracker taken out (asked for): pages, models, provider,
+- [x] The food tracker taken out: pages, models, provider,
   icon, `RatingColours`, its tests; `food.json` deleted on opening;
   backups' `food` neither written nor read (still v33).
 
@@ -561,7 +567,7 @@ fixtures for every stored format.
 
 - [x] `widgets/transfer_sheet.dart`: the shared Import / export menu and
   sheets (`TransferKit`), for any page; Recipes first, its button in
-  the top bar (asked for; G11 exception).
+  the top bar (G11 exception).
 - [x] Export several recipes at once (a list to tick); import lists
   what's in the pasted text first (new ingredients named; same name as
   one there starts unticked); format v2 (`the-app/recipes`, a list),
@@ -1194,7 +1200,7 @@ sections and bell). Pip (done in 1.31.0):
 ### Round 71 — feedback on 1.28 (2026-10-19, patch 1.29.1)
 
 - [x] **Shop search** button beside **+** (G11), not in the top bar; it
-  filters **only the bought list** (as asked in Round 64); its icon and
+  filters **only the bought list** (Round 64); its icon and
   text aligned. The user asked whether this was sloppy: it was, both rules
   were written down (G11, and the ask itself). The architecture test now
   fails on any top-bar action, so it can't slip through again.
@@ -1592,7 +1598,7 @@ it a bigger change". Decisions Claude's.
 - [x] All of them in Pip Home's Animations list, and in the `mayStart`
   table so nothing clashes (no bug fight while charging or asleep).
 
-**More of the kind** (Claude's, as asked)
+**More of the kind** (Claude's)
 - [x] A **little dance** (hops to a beat, turning, music on his screen).
 - [x] At dusk or night, a **shooting star** he looks up at.
 
@@ -2579,11 +2585,11 @@ Chunks, in order (each its own commit; release when a few are in):
 
 **3. Food tracker** (O14) — first in line when new Hub pages come
 - [x] A Hub page for what was eaten each day and how well it agreed
-  (asked for by someone; details left to Claude): a list of foods,
+  (details settled in its spec): a list of foods,
   each day's meals from it with a rating, a day view, and **statistics
   that point out what tends to cause trouble** (and what's fine).
   Design to propose first. (Built in Round 46 without his review, at
-  his ask: see there for what changed from this.)
+  see there for what changed from this.)
 
   **Proposal:**
   - *Foods* are a list that grows as you log (name, optional tags like
@@ -2992,7 +2998,7 @@ task)
   row more), Counters a bit more again.
 - [x] **Reach mode snapped back late:** a small scroll the other way only
   snapped back on the next touch (the snap waited for a frame nothing
-  asked for); now it snaps as the finger lets go.
+  ); now it snaps as the finger lets go.
 - [x] **Note editor without the ⋮ menu** (N10): it held only *Lock note*
   and opening it fought with the keyboard. *Lock note* / *Remove lock*
   is a button; ↶ / ↷ are outermost, under the thumb.

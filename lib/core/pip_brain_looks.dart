@@ -186,7 +186,7 @@ extension PipBrainLooks on PipBrain {
 
   /// What his screen shows and how far into it: while [PipActivity.
   /// showing], and after a bug fight (proud) or holding a flower (happy).
-  /// Round 145 (asked for): a medicine due, the pill, whatever he's doing
+  /// Round 145: a medicine due, the pill, whatever he's doing
   /// while he's up (walking, working, out on his adventure...), drawn
   /// over him as he is.
   (PipScreen, double)? get screenShow {

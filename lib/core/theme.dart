@@ -87,9 +87,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Color(0x24FFFFFF),
   );
 
-  /// Near-black warm greys with Claude's orange, like the Claude app.
+  /// Near-black warm greys with a clay orange.
   static const clay = AppPalette(
-    // Anthropic's brand colours, as in the Claude app's dark look.
+    // Warm greys and a clay orange.
     background: Color(0xFF141413),
     surface: Color(0xFF1C1B19),
     card: Color(0xFF262624),

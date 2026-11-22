@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.5.3] - 2026-11-22
+
+### Changed
+- **Drag handles** (every list, and Medicine): the grab area reaches a
+  little left of the handle (8 dp) and takes everything right of it,
+  so a handle is easy to grab without scrolling picking rows up.
+- Documentation and code comments reworded to a neutral, formal style.
+
 ## [2.5.2] - 2026-11-21
 
 ### Fixed

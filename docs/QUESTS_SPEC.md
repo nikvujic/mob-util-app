@@ -3,19 +3,19 @@
 Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating; Round 123: the fireplace inside, a larger porch, the forest, the mine and the beach; Round 124: the house area's own tall tree, wooden stairs, a denser forest, the mine in a mountain. The first quest is **Build a house**:
 Pip gathers wood, stone and sand, makes glass, and builds a house piece by
 piece over about two months, during two set hours a day. The house then
-becomes where he lives. **Requested** marks what was asked for,
+becomes where he lives. **Required** marks a requirement,
 **Decided** an answer to a question, **Proposed** what was filled in;
 what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 1. What a quest is
 
-- **Requested:** a new kind of idling, with **progression**. A quest is
+- **Required:** a new kind of idling, with **progression**. A quest is
   long: it may take him **months**.
-- **Requested:** one quest is offered at a time, as a chain: once the
+- **Required:** one quest is offered at a time, as a chain: once the
   house is built, the next is *decorate / furnish it* (later: **Build a
   bed**, section 12).
-- **Requested:** a quest **can't be cancelled** once started.
-- **Requested:** a quest has a **name** ("Build a house") and, once done,
+- **Required:** a quest **can't be cancelled** once started.
+- **Required:** a quest has a **name** ("Build a house") and, once done,
   a **picture**: a framed snapshot of it. **Decided:** a drawn picture of
   the finished house in a little frame (the same every time), not a
   screenshot.
@@ -25,20 +25,20 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 2. Quest hours
 
-- **Requested:** every day **10:00–11:30** and **19:00–20:30** (local
+- **Required:** every day **10:00–11:30** and **19:00–20:30** (local
   time): three hours a day.
 - These fit around his day as it is: asleep 23:00–8:00, adventures
   12:00–18:00. The field keeps 8:00–10:00, 11:30–12:00, 18:00–19:00 and
   20:30–23:00.
-- **Requested:** a quest can be **started only during quest hours** (as
+- **Required:** a quest can be **started only during quest hours** (as
   an adventure is registered only in its hours). Started, he sets to work
   at once, for what's left of that window.
-- **Requested:** **no quest work on a ski trip**; he picks up where he
+- **Required:** **no quest work on a ski trip**; he picks up where he
   left off when he's back.
 
 ## 3. Pip Home: the Quests button, the inventory card
 
-- **Requested:** a **Quests** button under **Adventures**. Like
+- **Required:** a **Quests** button under **Adventures**. Like
   Adventures, it changes what the **info card** shows; it doesn't open a
   page.
 - **The Quests card:**
@@ -51,7 +51,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
     finish date assumes no days lost; days powered down push it on.
   - **Completed:** below, each done quest as its framed picture with its
     name and the date it was finished.
-- **Requested:** an **inventory card** to the right of the info card:
+- **Required:** an **inventory card** to the right of the info card:
   swiping from the info card goes **info → inventory → animations** (the
   animations preview stays last). It shows what he carries: **wood,
   stone, sand, glass**, each as a small pixel icon with a count. Empty:
@@ -61,7 +61,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 4. The script: work worked out from the clock
 
-- **Requested:** what he does is **set in advance**, so whenever the app
+- **Required:** what he does is **set in advance**, so whenever the app
   is opened during quest hours he's shown at the right point of his work,
   watched or not.
 - **Proposed:** the quest is a fixed **script**: a list of steps, each
@@ -76,7 +76,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   into it** he is, **what's built** and **what's in his inventory**. A
   window ending mid-step just stops there; the next window carries on
   from the same point.
-- **Requested:** the whole house takes about **two months** of work:
+- **Required:** the whole house takes about **two months** of work:
   60 days × 180 minutes ≈ **10,800 work minutes**. The script's minutes
   are tuned to that, with a test that holds the total between 55 and 65
   days.
@@ -93,7 +93,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 | **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs (Round 147: with a shovel, a scoop every 2 s, the sand over his shoulder); sand flies to him in little heaps. |
 | **Glass** | His **fireplace**, in the house | Two sand and a wood (the fire) go into a crucible in the fire; it glows; a pane comes out. |
 
-- **Requested (Round 123):** no furnace outside: a **stone fireplace in
+- **Required (Round 123):** no furnace outside: a **stone fireplace in
   the house**, against the back wall on the left, is where he smelts
   sand into glass (and later, warmth and light).
 - **Proposed:** a trip out gathers until he carries a load (about a
@@ -103,26 +103,26 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 6. The house, built piece by piece
 
-- **Requested:** the house is on **its own screen**, his **house area**
-  (the background always the same, **one tree**: **Requested (Round
+- **Required:** the house is on **its own screen**, his **house area**
+  (the background always the same, **one tree**: **Required (Round
   124):** a **tree of its own**, taller than the field's (the house is
   big), in the field trees' style and colours, **following the
   seasons**: blossom in spring, green in summer, orange in autumn, bare
   with snow on its branches in winter), the house **big**, on
-  the **left** of it. **Requested:** he leaves the house area by its
+  the **left** of it. **Required:** he leaves the house area by its
   **right edge** and appears on the field (section 7).
-- **Requested:** so big that the **menu's strip can't show it all**:
+- **Required:** so big that the **menu's strip can't show it all**:
   the strip shows where he works (the floor and walls); the **roof shows
   only in Pip Home's taller scene**.
-- **Requested:** **every part built**, each costing its materials, no
-  interior. **Requested:** stone, wood and glass; **detailed and
+- **Required:** **every part built**, each costing its materials, no
+  interior. **Required:** stone, wood and glass; **detailed and
   sound**, since it becomes where he lives.
 - Seen from the side, cut away at the front, so he's seen inside.
-- **Requested (Round 122): nothing floats.** Every block rests on what's
+- **Required (Round 122): nothing floats.** Every block rests on what's
   under it: built bottom-up, row by row, each on the ground or on a
   block already in place. Only materials flying to him or into a piece
   are in the air.
-- **Requested (Round 122):** detailed, like **a good-looking Terraria
+- **Required (Round 122):** detailed, like **a good-looking Terraria
   house**: textured stone bricks (mortar, shades), plank grain, dark
   log beams, multi-pane windows with sills, a banded door under a stone
   lintel, a porch with a railing, eaves with trim, a gable with a round
@@ -154,7 +154,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   14. The **porch roof** and **bench**; **eave trim**, the flue's cap,
       **flower boxes** under the windows.
   15. **Scaffold taken down**; done.
-- **Requested:** building is shown: he **walks to the piece**, its
+- **Required:** building is shown: he **walks to the piece**, its
   materials **fly from him into it**, and it **smokes / puffs** while he
   works until it's in place. For high parts he climbs the scaffold.
 - **Proposed:** a piece being built shows as a dotted outline that fills
@@ -179,7 +179,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 8. What can interrupt him
 
-- **Requested:** nothing during quest hours but a **medicine reminder**
+- **Required:** nothing during quest hours but a **medicine reminder**
   or **powering down**.
 - **Proposed:** the random events (bugs, butterflies, the ball, flowers,
   notifications shown on his screen, coming in from the sky or the side)
@@ -188,7 +188,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   the field), then goes back to work. **Proposed:** the work minutes
   don't pause for it (it's a few seconds shown, not lost work).
 - **Powered down:** he falls **where he is** (in the forest mid-chop, on
-  the scaffold's foot); **Requested:** where the clock says he fell.
+  the scaffold's foot); **Required:** where the clock says he fell.
   Those minutes aren't work. A battery during quest hours brings him back
   up, and he carries on from the same point.
 - **Decided:** **no charging during quest hours**: plugging the phone in
@@ -202,10 +202,10 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 - **Decided:** in **rain, snow or a thunderstorm** he wears a **rain
   hat** while he works (out gathering and at the house). His hats for
   occasions give way to it while it's wet.
-- **Requested:** **rain** with the roof **started but not finished**:
+- **Required:** **rain** with the roof **started but not finished**:
   it **leaks**, drips falling inside and a puddle growing on the floor.
   No roof started: the rain simply falls in.
-- **Requested:** **snow** piles on a house that isn't finished: caps on
+- **Required:** **snow** piles on a house that isn't finished: caps on
   the top edges of what's built, a drift on the floor while there's no
   roof.
 - **Proposed:**
@@ -225,11 +225,11 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 10. Once the house is built
 
-- **Requested:** the house becomes his **new idling area**, with its
+- **Required:** the house becomes his **new idling area**, with its
   own events (more to come later); some events stay, some stop (**the
   bug attacks don't happen there**).
-- **Requested:** he **sleeps inside** the house.
-- **Requested:** he's still **out on the field 11:30–12:00 and
+- **Required:** he **sleeps inside** the house.
+- **Required:** he's still **out on the field 11:30–12:00 and
   18:00–19:00** (out of the house), with its usual events.
 - **Decided:** his **charging station** appears where he is: in the
   house (outside it, on the grass, if the house area's view leaves some
@@ -256,10 +256,10 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 ## 12. Later quests
 
-- **Requested:** after the house, more quests, e.g. **Build a bed**: he
+- **Required:** after the house, more quests, e.g. **Build a bed**: he
   looks for sheep (wool), wood, etc.; it brings new idling (jumping on
   the bed) and a new place to sleep.
-- **Requested:** house-area events to be added later.
+- **Required:** house-area events to be added later.
 
 ## 13. Open
 
@@ -336,12 +336,12 @@ from use):
   porch lantern is lit.
 - **The menu's strip** shows the house's floor and walls (the roof only
   in Pip Home's taller scene), as specced.
-- **A load at a time** (Round 135, asked for): one trip's load (or a
+- **A load at a time** (Round 135): one trip's load (or a
   few panes smelted), then building what it covers, then off again; it
   was all of a piece's gathering first (about six days at the mine
   before the first block). The total time is the same; a quest under way
   carries on from its minutes in the new order.
-- **Round 140 (asked for): small loads, pieces in turn.** A trip brings
+- **Round 140: small loads, pieces in turn.** A trip brings
   4 stones or one tree (sand: 6); then a few blocks (up to 3) of the
   next piece that's ready, the pieces taken in turn, so the foundation,
   the porch and the floor go up together. Each block rests on what's

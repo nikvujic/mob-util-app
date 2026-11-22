@@ -21,7 +21,7 @@ void main() {
   SubscriptionBook book() => container.read(subscriptionsProvider);
 
   /// a real list.
-  final nikolas = SubscriptionBook([
+  final sample = SubscriptionBook([
     Subscription(
         id: 'claude',
         name: 'Claude',
@@ -77,7 +77,7 @@ void main() {
   testWidgets(
       'his list: two to a row, in his order, tinted by state, with all there is '
       'to know; a month\'s total', (tester) async {
-    await open(tester, start: nikolas);
+    await open(tester, start: sample);
     expect(find.text('~61€ a month'), findsOneWidget,
         reason: 'Claude, Claude 2, Grok, AWS: running ones that cost');
     // Round 89: in his order (as added; moved by dragging), not by state.
@@ -156,7 +156,7 @@ void main() {
   testWidgets(
       'edited: to cancel brings a reminder 2 days before; its reminder and '
       'about change on the card; cancelled: active until', (tester) async {
-    await open(tester, start: SubscriptionBook([nikolas.byId('claude')!]));
+    await open(tester, start: SubscriptionBook([sample.byId('claude')!]));
     await tester.tap(card('claude'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('subscriptionStateChip-toCancel')));
@@ -195,7 +195,7 @@ void main() {
   testWidgets(
       'Round 80: the card\'s expiry set on its page, shown on its card; '
       'before it renews, a warning; cleared', (tester) async {
-    await open(tester, start: SubscriptionBook([nikolas.byId('claude')!]));
+    await open(tester, start: SubscriptionBook([sample.byId('claude')!]));
     await tester.tap(card('claude'));
     await tester.pumpAndSettle();
     final expires = find.byKey(const Key('subscriptionCardExpires'));
@@ -241,7 +241,7 @@ void main() {
   testWidgets(
       'Round 81: typing its name, then its day: the name lets go, so the '
       'keyboard doesn\'t come back once the picker closes', (tester) async {
-    await open(tester, start: SubscriptionBook([nikolas.byId('claude')!]));
+    await open(tester, start: SubscriptionBook([sample.byId('claude')!]));
     await tester.tap(card('claude'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('subscriptionName')));
@@ -269,7 +269,7 @@ void main() {
 
   testWidgets('an inactive one set going again gets a day a month on',
       (tester) async {
-    await open(tester, start: SubscriptionBook([nikolas.byId('spotify')!]));
+    await open(tester, start: SubscriptionBook([sample.byId('spotify')!]));
     await tester.tap(card('spotify'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('subscriptionStateChip-active')));
@@ -279,7 +279,7 @@ void main() {
   });
 
   testWidgets('deleted, asked first, with Undo', (tester) async {
-    await open(tester, start: nikolas);
+    await open(tester, start: sample);
     await tester.tap(card('aws'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
@@ -298,20 +298,20 @@ void main() {
 
   testWidgets('one to cancel soon: a red dot on its tile', (tester) async {
     container = await pumpApp(tester,
-        clock: () => DateTime(2026, 11, 15, 12), subscriptions: nikolas);
+        clock: () => DateTime(2026, 11, 15, 12), subscriptions: sample);
     await openTab(tester, 'Hub');
     final dot = find.descendant(
         of: find.byTooltip('Subscriptions'),
         matching: find.byKey(const Key('toolDot')));
     expect(dot, findsOneWidget, reason: 'Grok by the 17th, 2 days before');
     container.read(subscriptionsProvider.notifier).save(
-        nikolas.byId('grok')!.copyWith(state: SubscriptionState.cancelled));
+        sample.byId('grok')!.copyWith(state: SubscriptionState.cancelled));
     await tester.pumpAndSettle();
     expect(dot, findsNothing);
   });
 
   testWidgets('its notification tapped: the page', (tester) async {
-    container = await pumpApp(tester, clock: () => now, subscriptions: nikolas);
+    container = await pumpApp(tester, clock: () => now, subscriptions: sample);
     container.read(pendingTargetProvider.notifier).state =
         const SubscriptionsTarget();
     await tester.pumpAndSettle();

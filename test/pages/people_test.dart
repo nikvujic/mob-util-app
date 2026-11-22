@@ -308,7 +308,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 113: Show in Dates off (asked) takes the birthday out of '
+      'Round 113: Show in Dates off takes the birthday out of '
       'Dates, kept here; on again puts it back', (tester) async {
     await openPeople(tester, people: family);
     await tester.tap(find.byKey(const Key('person-i')));

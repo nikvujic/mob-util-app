@@ -83,7 +83,7 @@ double? parseAmount(String text) {
   return double.tryParse(t);
 }
 
-/// Round 154 (asked for): at most two decimals, typed or converted.
+/// Round 154: at most two decimals, typed or converted.
 const maxDecimals = 2;
 
 /// A converted number, shown short: up to [maxDecimals] decimals, no

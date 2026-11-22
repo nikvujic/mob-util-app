@@ -45,7 +45,7 @@ class _IntroductionPageState extends ConsumerState<IntroductionPage> {
       destructive: true,
     );
     if (!confirmed || !mounted) return;
-    // No toast (Round 27): it was asked, and Settings brings it back.
+    // No toast (Round 27): the choice was explicit, and Settings brings it back.
     ref.read(preferencesProvider.notifier).setIntroDeleted(true);
     Navigator.of(context).pop();
   }

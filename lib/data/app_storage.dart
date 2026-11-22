@@ -331,7 +331,7 @@ class AppStorage {
     final recipesStore = JsonFileStore(File('${dir.path}/recipes.json'));
     final ingredientsStore =
         JsonFileStore(File('${dir.path}/ingredients.json'));
-    // Round 145: the food tracker's gone (asked for): its file too.
+    // Round 145: the food tracker's gone: its file too.
     try {
       final food = File('${dir.path}/food.json');
       if (food.existsSync()) food.deleteSync();

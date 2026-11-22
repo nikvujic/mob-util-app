@@ -126,7 +126,7 @@ class InternetSettings {
   /// The last weather fetched, shown till the next (and after a restart).
   final WeatherReport? report;
 
-  /// Round 106: the user's own Tomorrow.io key for the rain radar; null:
+  /// Round 106: an own Tomorrow.io key for the rain radar; null:
   /// none, the weather is Open-Meteo's alone. Settings aren't in backups,
   /// so it never leaves the phone but to Tomorrow.io.
   final String? radarKey;

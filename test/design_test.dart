@@ -834,7 +834,8 @@ void main() {
         of: row,
         matching: find.byIcon(Icons.drag_handle),
       );
-      expect(tester.getRect(icon).left, tester.getRect(handle).left,
+      expect(tester.getRect(icon).left - tester.getRect(handle).left,
+          ReorderOrSelectIndicator.leftReach,
           reason: text);
       expect(tester.getRect(handle).right, tester.getRect(row).right,
           reason: text);

@@ -11,6 +11,7 @@ import 'package:the_app/pages/hub/medicine_sheet.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/reminders_provider.dart';
+import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/empty_state.dart';
@@ -426,11 +427,19 @@ class _MedicineCard extends StatelessWidget {
                     index: index,
                     child: Semantics(
                       label: 'Move ${medicine.name}',
-                      child: SizedBox.square(
-                        dimension: kMinInteractiveDimension,
-                        child: Icon(
-                          Icons.drag_handle,
-                          color: colors.textSecondary,
+                      // The same reach as every list's handle: a little
+                      // left of the icon, all of it right of it.
+                      child: SizedBox(
+                        width: ReorderOrSelectIndicator.leftReach + 24 + 12,
+                        height: kMinInteractiveDimension,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              left: ReorderOrSelectIndicator.leftReach,
+                              right: 12),
+                          child: Icon(
+                            Icons.drag_handle,
+                            color: colors.textSecondary,
+                          ),
                         ),
                       ),
                     ),

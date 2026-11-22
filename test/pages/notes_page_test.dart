@@ -269,30 +269,33 @@ void main() {
     expect(container.read(notesProvider).first.title, 'B');
   });
 
-  testWidgets(
-      'Round 148: just left of the icon is the row, not the handle: a drag '
-      'there doesn\'t move it', (tester) async {
-    container = await pumpApp(tester);
-    notes()
-      ..addNote(title: 'C')
-      ..addNote(title: 'B')
-      ..addNote(title: 'A');
-    await tester.pump();
-    final icon = tester.getRect(find
-        .descendant(
-          of: find.ancestor(
-              of: find.text('A'), matching: find.byType(SelectableCard)),
-          matching: find.byIcon(Icons.drag_handle),
-        )
-        .first);
-    final gesture =
-        await tester.startGesture(icon.centerLeft - const Offset(4, 0));
-    for (var i = 0; i < 10; i++) {
-      await gesture.moveBy(const Offset(0, 20));
-      await tester.pump(const Duration(milliseconds: 16));
-    }
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(container.read(notesProvider).first.title, 'A');
-  });
+  for (final (left, moves) in [(4.0, true), (12.0, false)]) {
+    testWidgets(
+        'a drag ${left.toInt()} dp left of the handle\'s icon '
+        '${moves ? 'takes the row (within its reach)' : 'doesn\'t (the row\'s, '
+            'for scrolling)'}', (tester) async {
+      container = await pumpApp(tester);
+      notes()
+        ..addNote(title: 'C')
+        ..addNote(title: 'B')
+        ..addNote(title: 'A');
+      await tester.pump();
+      final icon = tester.getRect(find
+          .descendant(
+            of: find.ancestor(
+                of: find.text('A'), matching: find.byType(SelectableCard)),
+            matching: find.byIcon(Icons.drag_handle),
+          )
+          .first);
+      final gesture =
+          await tester.startGesture(icon.centerLeft - Offset(left, 0));
+      for (var i = 0; i < 10; i++) {
+        await gesture.moveBy(const Offset(0, 20));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(container.read(notesProvider).first.title, moves ? 'B' : 'A');
+    });
+  }
 }
