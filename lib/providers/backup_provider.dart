@@ -141,7 +141,7 @@ class RestorableBackup {
   int get todoCount => _backup.todo.length;
   int get recipeCount => _backup.recipes.length;
 
-  // What's in it, to pick from (restoring part of it, Round 28).
+  // What's in it, to pick from (restoring part of it).
   List<Note> get notes => _backup.notes;
   List<TodoItem> get todo => _backup.todo;
   List<ShopItem> get shopItems => _backup.shopItems;
@@ -157,7 +157,7 @@ class RestorableBackup {
   List<Person> get people => _backup.people?.people ?? const [];
 }
 
-/// The kinds of things in a backup, to restore some of them (Round 28).
+/// The kinds of things in a backup, to restore some of them.
 enum BackupPart {
   notes,
   todo,
@@ -169,22 +169,22 @@ enum BackupPart {
   medicines,
   recipes,
 
-  /// Birthdays & dates (Round 57).
+  /// Birthdays & dates.
   dates,
 
-  /// Subscriptions (Round 79).
+  /// Subscriptions.
   subscriptions,
 
-  /// Packing lists (Round 94).
+  /// Packing lists.
   packing,
 
-  /// People (Round 108).
+  /// People.
   people
 }
 
 /// [book] with the ingredients [ids] from [from] it doesn't have yet,
 /// each into the section of the same id there (or its name), made at the
-/// end if missing (Round 42: restoring part of a backup).
+/// end if missing (restoring part of a backup).
 IngredientBook withIngredients(
   IngredientBook book,
   IngredientBook from,
@@ -209,7 +209,7 @@ IngredientBook withIngredients(
   return IngredientBook(sections);
 }
 
-/// A copy's title (Round 30): "Bank" → "Bank (Copy)".
+/// A copy's title: "Bank" → "Bank (Copy)".
 String copyTitle(String title) => '$title (Copy)';
 
 /// What [BackupImporter.restorePart] did.
@@ -398,7 +398,7 @@ class BackupImporter {
   }
 
   /// Adds the things [picked] (ids, by kind) from [backup] to what's in
-  /// the app, leaving the rest as it is (Round 28: e.g. one note back).
+  /// the app, leaving the rest as it is (e.g. one note back).
   /// Something still in the app (the same id) comes back as a copy
   /// beside it; planner tasks and routines whose time is taken (or that
   /// are still there) are left out. A medicine comes with its history.
@@ -613,7 +613,7 @@ class BackupImporter {
         .read(medicineProvider.notifier)
         .replaceAll(MedicineBook(medicines: medicines, taken: marks));
 
-    // Recipes (Round 42), each bringing its ingredients the list doesn't
+    // Recipes, each bringing its ingredients the list doesn't
     // have yet (by id), into a section of the backup's name.
     final pickedRecipes = [
       for (final r in source.recipes)
@@ -638,7 +638,7 @@ class BackupImporter {
           _ref.read(ingredientsProvider), source.ingredients, wanted));
     }
 
-    // Dates (Round 57).
+    // Dates.
     final pickedDates = [
       for (final d in source.dates.dates)
         if (chosen(BackupPart.dates, d.id)) d,
@@ -655,7 +655,7 @@ class BackupImporter {
           )));
     }
 
-    // Subscriptions (Round 79).
+    // Subscriptions.
     final pickedSubscriptions = [
       for (final s in source.subscriptions.subscriptions)
         if (chosen(BackupPart.subscriptions, s.id)) s,
@@ -674,7 +674,7 @@ class BackupImporter {
           );
     }
 
-    // Packing lists (Round 94), each with its own sections (Round 95).
+    // Packing lists, each with its own sections.
     final pickedLists = [
       for (final l in source.packing.lists)
         if (chosen(BackupPart.packing, l.id)) l,
@@ -693,7 +693,7 @@ class BackupImporter {
       _ref.read(packingProvider.notifier).replaceAll(now.copyWith(lists: all));
     }
 
-    // People (Round 108): one still here is left as is; the relations
+    // People: one still here is left as is; the relations
     // between the people there now come too, and each one's birthday is
     // put back on the Dates page.
     final fromPeople = source.people;

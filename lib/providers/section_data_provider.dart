@@ -34,7 +34,7 @@ class SectionData {
 
   /// How many things [section] holds.
   int count(AppSection section) => switch (section) {
-        // With the to-do note's list (Round 28).
+        // With the to-do note's list.
         AppSection.notes =>
           _ref.read(notesProvider).length + _ref.read(todoProvider).length,
         AppSection.shop => _ref.read(shopProvider).length,
@@ -60,11 +60,11 @@ class SectionData {
         HubTool.subscriptions =>
           _ref.read(subscriptionsProvider).subscriptions.length,
         // His life isn't cleared with the Hub's pages; Spotify's morning
-        // is a setting (Round 93).
+        // is a setting.
         HubTool.pip || HubTool.spotify || HubTool.converter => 0,
-        // Its lists (Round 94).
+        // Its lists.
         HubTool.packing => _ref.read(packingProvider).lists.length,
-        // Round 108: everyone on the board.
+        // Everyone on the board.
         HubTool.people => _ref.read(peopleProvider).people.length,
       };
 

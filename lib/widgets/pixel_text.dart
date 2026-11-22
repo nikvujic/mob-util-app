@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pixel_font.dart';
 
-/// A line in the app's pixel letters (Round 34): [parts] side by side,
+/// A line in the app's pixel letters: [parts] side by side,
 /// each in its own colour, [pixel] logical pixels a dot (snapped to whole
 /// device pixels, like Pip's room).
 class PixelText extends StatelessWidget {
@@ -35,7 +35,7 @@ class PixelText extends StatelessWidget {
   }
 }
 
-/// Words in the pixel letters (Round 66), wrapped onto as many lines as
+/// Words in the pixel letters, wrapped onto as many lines as
 /// the width needs (a word longer than a line goes on its own).
 class PixelParagraph extends StatelessWidget {
   final String text;

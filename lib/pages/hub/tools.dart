@@ -35,7 +35,7 @@ extension HubToolPage on HubTool {
   Widget page() => switch (this) {
         HubTool.counters => const CountersPage(),
         HubTool.placard => const PlacardPage(),
-        // Round 61: opened, their shown notifications go.
+        // Opened, their shown notifications go.
         HubTool.medicine =>
           const ClearsShown(page: NotifyPage.medicine, child: MedicinePage()),
         HubTool.recipes => const RecipesPage(),

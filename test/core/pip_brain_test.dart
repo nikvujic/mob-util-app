@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 
-/// Pip in his room (Round 26).
+/// Pip in his room.
 void main() {
   PipBrain pip({int width = 120}) =>
       PipBrain(roomWidth: width, random: math.Random(7));
@@ -97,7 +97,7 @@ void main() {
     expect(p.x, inInclusiveRange(0, 30 - PipBrain.width));
   });
 
-  group('his egg (Round 34)', () {
+  group('his egg', () {
     test('cracks with taps: 1, then every 2; the 7th hatches him', () {
       final p =
           PipBrain(roomWidth: 120, random: math.Random(7), hatched: false);
@@ -135,7 +135,7 @@ void main() {
     });
   });
 
-  group('energy, sleep and batteries (Round 37)', () {
+  group('energy, sleep and batteries', () {
     PipBrain up({int width = 120}) {
       final p = pip(width: width);
       run(p, 3); // out of the ground, standing about
@@ -169,7 +169,7 @@ void main() {
       expect(p.frame, PipFrame.tuck);
       expect(p.zs, hasLength(3));
       expect(p.show(PipShow.wakeUp), isTrue);
-      run(p, PipBrain.wakeHopStart + 0.3); // Round 57: a longer wake
+      run(p, PipBrain.wakeHopStart + 0.3); // A longer wake
       expect(p.lift, greaterThan(0), reason: 'the hop');
       run(p, 1);
       expect(p.activity, isNot(PipActivity.asleep));
@@ -208,7 +208,7 @@ void main() {
       expect(p.takeBattery(80), isTrue);
       expect(p.activity, PipActivity.fetching);
       expect(p.battery!.$2, PipBrain.dropHeight, reason: 'falling in');
-      // Hurrying (Round 44), whatever his energy.
+      // Hurrying, whatever his energy.
       p.segments = 1;
       run(p, 1);
       expect(p.x, closeTo(10 + PipBrain.hurry, 1));
@@ -216,7 +216,7 @@ void main() {
         p.step(0.05);
       }
       expect(p.battery, isNull, reason: 'picked up');
-      // Round 54: beside it (on his right), not over it; Round 97: a few
+      // Beside it (on his right), not over it; a few
       // pixels off.
       expect(
           p.x,

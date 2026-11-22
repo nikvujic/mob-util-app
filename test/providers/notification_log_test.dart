@@ -10,7 +10,7 @@ import 'package:the_app/providers/reminders_provider.dart';
 
 import '../helpers.dart';
 
-/// The notifications' history (Round 31): what was scheduled, once its
+/// The notifications' history: what was scheduled, once its
 /// time has come.
 void main() {
   LoggedNotification n(DateTime at, String title) =>

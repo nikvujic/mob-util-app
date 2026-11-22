@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// A folder for automatic backups (Round 39): picked once with Android's
+/// A folder for automatic backups: picked once with Android's
 /// folder picker, which lets the app keep writing there.
 typedef PickedFolder = ({String uri, String name});
 

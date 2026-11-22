@@ -1,7 +1,7 @@
 import 'package:the_app/core/pip_adventure.dart';
 import 'package:the_app/models/date_entry.dart';
 
-/// Pip's ski trips (Round 65–67, `docs/ADVENTURES_SPEC.md` section 8):
+/// Pip's ski trips (`docs/ADVENTURES_SPEC.md` section 8):
 /// plain rules from Dates and the clock. A Skiing holiday makes its days
 /// snowy and his adventures skiing; with travel set, a bus takes him
 /// there and back.

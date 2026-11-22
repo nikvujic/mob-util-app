@@ -3,7 +3,7 @@ import 'package:the_app/data/app_storage.dart';
 
 import '../helpers.dart';
 
-/// When saving fails (D6, Round 23), e.g. a full phone: the app says so
+/// When saving fails (D6), e.g. a full phone: the app says so
 /// once, and says when it's saved again.
 void main() {
   testWidgets('failing: a dialog; saved again: a short note', (tester) async {

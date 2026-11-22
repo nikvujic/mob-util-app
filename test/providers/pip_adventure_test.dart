@@ -10,7 +10,7 @@ import 'package:the_app/providers/pip_life_provider.dart';
 
 import '../helpers.dart';
 
-/// Pip's adventures (Round 63): registering, his days out, XP, energy.
+/// Pip's adventures: registering, his days out, XP, energy.
 void main() {
   DateTime at(int day, int hour, [int minute = 0]) =>
       DateTime(2026, 10, day, hour, minute);
@@ -181,8 +181,7 @@ void main() {
     expect(PipAdventure.titleFor(PipAdventure.levelFor(0)), 'Rookie');
   });
 
-  test('plugged in, out on his adventure: he can have a battery (Round 65)',
-      () {
+  test('plugged in, out on his adventure: he can have a battery', () {
     final pip = hatched(energy: 1, energyAt: at(19, 11, 59));
     pip.replace(pip.state.copyWith(
       registeredAt: () => at(18, 14),
@@ -199,7 +198,7 @@ void main() {
 
   test(
       'no break while he\'s watched: registered at 14:00 in front of you, '
-      'then only after five minutes away (Round 66)', () {
+      'then only after five minutes away', () {
     final pip = hatched();
     pip.lookedAt(at(
       18,
@@ -224,7 +223,7 @@ void main() {
 
   test(
       'through his room\'s link: watched each second, no break; back '
-      'after five minutes, his break (Round 66)', () {
+      'after five minutes, his break', () {
     var now = at(18, 13, 59);
     final container = ProviderContainer(overrides: [
       appStorageProvider.overrideWithValue(AppStorage.inMemory(
@@ -247,8 +246,7 @@ void main() {
     expect(link.outing()!.onBreak, isTrue);
   });
 
-  test('days nobody looked in on (Round 67): out if he had energy at 12:00',
-      () {
+  test('days nobody looked in on: out if he had energy at 12:00', () {
     final pip = hatched();
     pip.register(at(18, 16)); // 120 XP that day
     // Full at 11:00 on the 19th (batteries); empty by 23:00.
@@ -264,7 +262,7 @@ void main() {
 
   test(
       'watched since before 14:00, not having seen him set off: his '
-      'break starts all the same (Round 66)', () {
+      'break starts all the same', () {
     final pip = hatched();
     pip.register(at(18, 16)); // the day before
     pip.replace(
@@ -280,7 +278,7 @@ void main() {
 
   test(
       'back on with a battery in front of you at 14:20: no break till '
-      'you\'ve been away (Round 66)', () {
+      'you\'ve been away', () {
     final pip = hatched(energy: 0, energyAt: at(19, 9));
     pip.replace(pip.state.copyWith(
       registeredAt: () => at(18, 14),
@@ -299,7 +297,7 @@ void main() {
     expect(pip.state.breakAt, at(19, 14, 30));
   });
 
-  group('Round 73: XP by the bug, watched', () {
+  group('XP by the bug, watched', () {
     test('ten XP a minute, one every six seconds; a day out banks 3600', () {
       final pip = hatched();
       pip.register(at(18, 16));
@@ -420,7 +418,7 @@ void main() {
   });
 
   test(
-      'Round 74: how long he\'s been running out (his field\'s trees go by '
+      'how long he\'s been running out (his field\'s trees go by '
       'with it): his break not counted', () {
     final pip = hatched();
     expect(pip.runningAt(at(18, 14)), isNull, reason: 'not out');

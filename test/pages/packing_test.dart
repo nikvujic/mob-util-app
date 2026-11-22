@@ -6,7 +6,7 @@ import 'package:the_app/providers/packing_provider.dart';
 
 import '../helpers.dart';
 
-/// Hub → Packing (Round 94; Round 95: his changes): lists, a
+/// Hub → Packing (his changes): lists, a
 /// list's view mode (rows of a normal size, a tap ticks, Reset asked),
 /// edit mode (its own sections, + Add under each, hold to select and
 /// delete, Save or Discard on back), Copy list, the default sections.
@@ -82,7 +82,7 @@ void main() {
     for (final s in PackingBook.defaults) {
       expect(find.byKey(Key('packingAdd-${s.id}')), findsOneWidget);
     }
-    // Round 95: no room asked above the name, so typing doesn't bounce
+    // No room asked above the name, so typing doesn't bounce
     // the page into its reach space.
     final name = tester.widget<TextField>(find.byKey(const Key('packingName')));
     expect(name.scrollPadding.top, 0);
@@ -145,7 +145,7 @@ void main() {
       expect(find.byKey(Key('packingSection-${s.id}')), findsOneWidget);
     }
     expect(find.text('× 5'), findsOneWidget);
-    // Round 95: a normal row, as Shop's.
+    // A normal row, as Shop's.
     expect(tester.getSize(find.byKey(const Key('packingTick-i1'))).height,
         lessThanOrEqualTo(56));
 
@@ -182,7 +182,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('choice-delete')), findsNothing,
         reason: 'deleting is by holding');
-    // Round 103: Count above Rename.
+    // Count above Rename.
     expect(tester.getTopLeft(find.byKey(const Key('choice-count'))).dy,
         lessThan(tester.getTopLeft(find.byKey(const Key('choice-rename'))).dy));
     await choose(tester, 'count');
@@ -223,7 +223,7 @@ void main() {
     await openTrip(tester, edit: true);
 
     expect(find.byKey(const Key('packingAddSection')), findsNothing,
-        reason: 'Round 96: a button by Done, not at the end');
+        reason: 'a button by Done, not at the end');
     await tapTooltip(tester, 'Add section');
     await tester.enterText(sheetField(), 'clothes');
     await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -235,7 +235,7 @@ void main() {
     expect(trip().sections.map((s) => s.name),
         ['Documents', 'Clothes', 'Ski gear', 'Food']);
 
-    // Renamed (Round 96: moved by dragging, not from here).
+    // Renamed (moved by dragging, not from here).
     await tester.tap(find.byKey(const Key('packingSection-gear')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('choice-up')), findsNothing);

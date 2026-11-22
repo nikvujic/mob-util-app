@@ -9,7 +9,7 @@ import 'package:the_app/widgets/app_dialog.dart';
 
 import '../helpers.dart';
 
-/// Hub → Dates, birthdays & dates (Round 57).
+/// Hub → Dates, birthdays & dates.
 void main() {
   late ProviderContainer container;
   // Thursday 15 October 2026, 13:20.
@@ -80,7 +80,7 @@ void main() {
   });
 
   testWidgets(
-      'today on top (Round 72); upcoming: soonest first, how soon, turns '
+      'today on top; upcoming: soonest first, how soon, turns '
       'N, N years; gone-by one-offs under Past', (tester) async {
     // A phone's height: all of it in view.
     tester.view.physicalSize = const Size(1080, 2400);
@@ -124,7 +124,7 @@ void main() {
     DateMarkPainter mark(String day) =>
         tester.widget<CustomPaint>(find.byKey(Key('datesMark-$day'))).painter!
             as DateMarkPainter;
-    // Round 60: the circle in their colours, split; a border for several
+    // The circle in their colours, split; a border for several
     // of one colour.
     expect(mark('2026-10-24').colours,
         [DateType.birthday.colour, DateType.anniversary.colour]);
@@ -147,7 +147,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 81: typing its title, then its day: the title lets go (the '
+      'typing its title, then its day: the title lets go (the '
       'keyboard stays down after the picker)', (tester) async {
     await openDates(tester);
     await tap(tester, find.byTooltip('Add a date'));
@@ -164,7 +164,7 @@ void main() {
 
   testWidgets(
       '+ on a picked day: a new date there, saved once titled; year '
-      'not known; reminders (Round 61): a day and a week before at 09:00, '
+      'not known; reminders: a day and a week before at 09:00, '
       'another added, one removed', (tester) async {
     await openDates(tester);
     await tester.tap(find.byKey(const Key('datesDay-2026-10-24')));
@@ -219,7 +219,7 @@ void main() {
   });
 
   testWidgets(
-      'each type its form (Round 61): a birthday every year, Year known '
+      'each type its form: a birthday every year, Year known '
       'for the age; an event once, with kinds; Other chooses', (tester) async {
     await openDates(tester);
     await tap(tester, find.byTooltip('Add a date'));
@@ -275,7 +275,7 @@ void main() {
   });
 
   testWidgets(
-      'a ski trip\'s travel (Round 67): only on Skiing; hours each way, '
+      'a ski trip\'s travel: only on Skiing; hours each way, '
       'leaving at 06:00 the first day, back at 11:00 the day after',
       (tester) async {
     await openDates(tester);
@@ -304,7 +304,7 @@ void main() {
   });
 
   testWidgets(
-      'a card says it all (Round 61): its day (no year for one every '
+      'a card says it all: its day (no year for one every '
       'year), how soon, the age; its kind, days, year, reminders',
       (tester) async {
     await openDates(tester, start: [
@@ -334,7 +334,7 @@ void main() {
     String details(String id) =>
         tester.widget<Text>(find.byKey(Key('dateDetails-$id'))).data!;
     expect(details('ana'), 'born 1995');
-    // Round 72: its reminders on their own line, with a bell.
+    // Its reminders on their own line, with a bell.
     final reminders = find.byKey(const Key('dateReminders-ana'));
     expect(find.descendant(of: reminders, matching: find.text('1 day before')),
         findsOneWidget);
@@ -349,15 +349,14 @@ void main() {
     expect(find.byIcon(Icons.downhill_skiing), findsOneWidget);
   });
 
-  testWidgets('opened; deleted once confirmed (Round 58), with Undo',
-      (tester) async {
+  testWidgets('opened; deleted once confirmed, with Undo', (tester) async {
     await openDates(tester, start: [date('Ana', 24, 10, year: 1995)]);
     await tap(tester, find.text('Ana'));
     expect(appBarTitle('Date'), findsOneWidget);
     expect(find.byKey(const Key('dateNext')), findsOneWidget);
     expect(find.text('Sat, 24 Oct  ·  in 9 days  ·  turns 31'), findsOneWidget);
     await tap(tester, find.byKey(const Key('deleteDate')));
-    // Round 116: a full button, as Delete person.
+    // A full button, as Delete person.
     expect(tester.widget(find.byKey(const Key('deleteDate'))),
         isA<OutlinedButton>());
     expect(find.text('Delete Ana?'), findsOneWidget);
@@ -376,7 +375,7 @@ void main() {
     expect(find.text('Ana'), findsOneWidget);
   });
 
-  testWidgets('+ on the right (Round 59), even opened from a tile on the left',
+  testWidgets('+ on the right, even opened from a tile on the left',
       (tester) async {
     container = await pumpApp(tester, clock: () => now);
     await openTab(tester, 'Hub');
@@ -391,7 +390,7 @@ void main() {
   });
 
   testWidgets(
-      'a holiday lasts (Round 59): days picked; on each of them in the '
+      'a holiday lasts: days picked; on each of them in the '
       'calendar; its days on its card', (tester) async {
     await openDates(tester);
     await tester.tap(find.byKey(const Key('datesDay-2026-10-24')));
@@ -432,7 +431,7 @@ void main() {
   });
 
   testWidgets(
-      'a day with two dates of one kind (Round 60): its colour once, with '
+      'a day with two dates of one kind: its colour once, with '
       'a border; picked, ringed', (tester) async {
     await openDates(tester, start: [
       date('Ana', 24, 10),

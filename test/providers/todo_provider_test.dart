@@ -8,7 +8,7 @@ import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/section_data_provider.dart';
 import 'package:the_app/providers/todo_provider.dart';
 
-/// The to-do note's list (Round 28).
+/// The to-do note's list.
 void main() {
   late TodoNotifier todo;
 
@@ -18,14 +18,14 @@ void main() {
   String idOf(String text) => todo.state.firstWhere((i) => i.text == text).id;
 
   /// Adds [texts] so they're listed in that order (each one added goes on
-  /// top, Round 143).
+  /// top).
   void addInOrder(List<String> texts) {
     for (final text in texts.reversed) {
       todo.add(text);
     }
   }
 
-  test('adds trimmed text on top (Round 143) and ignores blanks', () {
+  test('adds trimmed text on top and ignores blanks', () {
     todo
       ..add('Call mum')
       ..add('  Pay rent ')
@@ -45,7 +45,7 @@ void main() {
 
   test(
       'done goes to the top of Completed; back, to the end of To do '
-      '(Round 30)', () {
+      '', () {
     addInOrder(['A', 'B', 'C']);
     todo.toggle(idOf('B'));
     todo.toggle(idOf('A'));
@@ -59,7 +59,7 @@ void main() {
     expect(todo.state, hasLength(4));
   });
 
-  group('Round 83: back from Completed', () {
+  group('back from Completed', () {
     setUp(() {
       addInOrder(['A', 'B', 'C', 'D']);
     });
@@ -164,7 +164,7 @@ void main() {
     expect(container.read(todoProvider), isEmpty);
   });
 
-  group('waiting (Round 45)', () {
+  group('waiting', () {
     List<String> waiting() => [
           for (final i in todo.state)
             if (!i.done && i.waiting) i.text,
@@ -198,7 +198,7 @@ void main() {
     });
 
     test(
-        'done, it is no longer waiting; back, waiting again (Round 83), '
+        'done, it is no longer waiting; back, waiting again, '
         'or to do once the list changed', () {
       addInOrder(['A', 'B']);
       todo.place(toDo: [idOf('B')], waiting: [idOf('A')]);

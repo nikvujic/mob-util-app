@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 /// What a reminder is about: each kind has its own Android channel, so
 /// they can be set apart in the phone's settings.
-/// Round 72: [plannerNow], the planner's notification that stays while a
+/// [plannerNow], the planner's notification that stays while a
 /// block or routine is on.
 enum ReminderKind {
   planner,
@@ -19,7 +19,7 @@ enum ReminderKind {
   dates,
   plannerNow,
 
-  /// Round 79: a subscription renewing, to cancel, ending.
+  /// A subscription renewing, to cancel, ending.
   subscriptions,
 }
 
@@ -30,23 +30,23 @@ class Reminder {
   final String body;
   final ReminderKind kind;
 
-  /// Where tapping it leads (Round 19), as [NotificationTarget.payload].
+  /// Where tapping it leads, as [NotificationTarget.payload].
   final String? target;
 
-  /// Its tint (Round 31), or null: the phone's own.
+  /// Its tint, or null: the phone's own.
   final Color? colour;
 
-  /// Its sound (Round 31), and how loud (Round 41).
+  /// Its sound, and how loud.
   final NotifySound sound;
   final NotifyVolume volume;
 
-  /// Round 72 ([ReminderKind.plannerNow]): it stays (can't be swiped
+  /// It stays (can't be swiped
   /// away) until then, counting down, with a Done button; and it's
   /// already on ([at] gone by): shown at once, not scheduled.
   final DateTime? until;
   final bool onNow;
 
-  /// Round 78: whether it has its Done button (a block's, not a
+  /// Whether it has its Done button (a block's, not a
   /// routine's: they aren't ticked off).
   final bool done;
 
@@ -64,7 +64,7 @@ class Reminder {
     this.done = true,
   });
 
-  /// As its page's settings say (Round 31).
+  /// As its page's settings say.
   Reminder styled({
     Color? colour,
     NotifySound sound = NotifySound.phone,
@@ -97,12 +97,12 @@ abstract class ReminderScheduler {
   /// Whether the phone lets the app show notifications at all.
   Future<bool> areAllowed();
 
-  /// Replaces every scheduled reminder with [reminders]. Round 61: ones
+  /// Replaces every scheduled reminder with [reminders]. Ones
   /// already shown stay in the phone's tray.
   Future<void> replaceAll(List<Reminder> reminders);
 
-  /// Takes the shown notifications of [kind] out of the tray (Round 61:
-  /// once their page is opened, not when the app is).
+  /// Takes the shown notifications of [kind] out of the tray (once
+  /// their page is opened, not when the app is).
   Future<void> clearShown(ReminderKind kind);
 
   /// The [Reminder.target] of each notification tapped while the app runs.
@@ -139,7 +139,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
       channelDescription: 'When a week has gone by without a backup',
       category: AndroidNotificationCategory.reminder,
     ),
-    // Round 61: Dates' own (it was missing: a date's reminder couldn't be
+    // Dates' own (it was missing: a date's reminder couldn't be
     // scheduled, nor any after it).
     ReminderKind.dates: AndroidNotificationDetails(
       'dates-reminders',
@@ -149,7 +149,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
     ),
-    // Round 79: Subscriptions' own.
+    // Subscriptions' own.
     ReminderKind.subscriptions: AndroidNotificationDetails(
       'subscriptions-reminders',
       'Subscriptions reminders',
@@ -158,7 +158,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
     ),
-    // Round 72: quiet (the block's own reminder rings), and stays.
+    // Quiet (the block's own reminder rings), and stays.
     ReminderKind.plannerNow: AndroidNotificationDetails(
       'planner-now',
       'Planner: on now',
@@ -178,10 +178,10 @@ class NotificationReminderScheduler implements ReminderScheduler {
     ),
   };
 
-  /// Its kind's channel, with its tint and sound (Round 31). Android fixes
+  /// Its kind's channel, with its tint and sound. Android fixes
   /// a channel's sound when it's made, so each sound is a channel of its
   /// own: the kind's as before for the phone's sound, `…-coin` etc.
-  /// The Done button on a block that's on (Round 72); the app opens and
+  /// The Done button on a block that's on; the app opens and
   /// ticks it.
   static const doneAction = 'done';
 
@@ -222,7 +222,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
       );
     }
     final sound = reminder.sound;
-    // Round 41: a quieter copy of the sound for a quieter volume, each its
+    // A quieter copy of the sound for a quieter volume, each its
     // own channel too (`…-coin-quiet`).
     final volume = sound.resource == null ? NotifyVolume.loud : reminder.volume;
     final resource = volume.resourceOf(sound);
@@ -275,7 +275,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
   }
 
   /// The tapped notification's target; with `|done` for its Done button
-  /// (Round 72).
+  ///.
   static String _withAction(NotificationResponse response) =>
       response.actionId == doneAction
           ? '${response.payload}|done'
@@ -323,7 +323,7 @@ class NotificationReminderScheduler implements ReminderScheduler {
     }
   }
 
-  /// Each reminder's notification id (Round 61): from what it is, so a
+  /// Each reminder's notification id: from what it is, so a
   /// plan made again gives it the same one (and a shown one keeps its
   /// own); unique within [reminders].
   @visibleForTesting
@@ -347,14 +347,14 @@ class NotificationReminderScheduler implements ReminderScheduler {
   Future<void> replaceAll(List<Reminder> reminders) async {
     if (!await _init()) return;
     try {
-      // Round 61: only what's planned and no longer wanted is cancelled
+      // Only what's planned and no longer wanted is cancelled
       // (`cancelAll` also took shown ones out of the tray).
       final ids = idsFor(reminders);
       final keep = ids.toSet();
       for (final pending in await _plugin.pendingNotificationRequests()) {
         if (!keep.contains(pending.id)) await _plugin.cancel(pending.id);
       }
-      // Round 72: a block's notification that stays goes once it's no
+      // A block's notification that stays goes once it's no
       // longer on (ticked, moved, deleted); one on and not shown, shows.
       final nowChannel = _channels[ReminderKind.plannerNow]!.channelId;
       final shown = <int>{};

@@ -87,7 +87,7 @@ int daysBetween(DateTime from, DateTime to) =>
 /// `Nov` for [month] 11.
 String monthShort(int month) => _months[month - 1];
 
-/// `11/26`: a card's expiry (Round 85), its month and year as printed on
+/// `11/26`: a card's expiry, its month and year as printed on
 /// cards.
 String formatCardMonth(DateTime month) =>
     '${month.month.toString().padLeft(2, '0')}/'
@@ -98,7 +98,7 @@ String formatMinutes(int minutes) =>
     '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
     '${(minutes % 60).toString().padLeft(2, '0')}';
 
-/// `24 October`, or `24 October 1995` with a [year] (Round 57: a date
+/// `24 October`, or `24 October 1995` with a [year] (a date
 /// with its year not known).
 String formatDayMonth(int day, int month, [int? year]) =>
     '$day ${_monthsLong[month - 1]}${year == null ? '' : ' $year'}';

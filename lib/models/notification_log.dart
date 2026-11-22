@@ -1,4 +1,4 @@
-/// One notification the app scheduled (Round 31): what it said, when,
+/// One notification the app scheduled: what it said, when,
 /// from which page, and where tapping it leads.
 class LoggedNotification {
   final DateTime at;
@@ -38,7 +38,7 @@ class LoggedNotification {
       );
 }
 
-/// What the app scheduled (Round 31), kept on this phone: Android doesn't
+/// What the app scheduled, kept on this phone: Android doesn't
 /// tell an app which notifications were shown, but a scheduled one shows
 /// at its time, so those whose time has come are the history.
 class NotificationLog {

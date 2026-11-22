@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_weather.dart';
 
-/// What stands on his ski slope (Round 67).
+/// What stands on his ski slope.
 enum SlopeThing { tree, redFlag, blueFlag }
 
-/// What he fights on his day out (Round 73): bugs, and now and then
+/// What he fights on his day out: bugs, and now and then
 /// bigger ones that take more than one strike; once a day out, if he's
 /// watched, a boss.
 enum PipFoe {
@@ -15,7 +15,7 @@ enum PipFoe {
   spider(hits: 3, width: 14, crawl: 7),
   boss(hits: 6, width: 24, crawl: 3.5),
 
-  /// Round 75: in the snow, a snowman coming at him (two strikes).
+  /// In the snow, a snowman coming at him (two strikes).
   snowman(hits: 2, width: 12, crawl: 4);
 
   /// Strikes it takes, its width, and how fast it crawls at him.
@@ -26,7 +26,7 @@ enum PipFoe {
   const PipFoe({required this.hits, required this.width, required this.crawl});
 }
 
-/// Where he is in his day out (Round 63).
+/// Where he is in his day out.
 enum RunPhase {
   /// Just registered: his sword held up high, a fanfare.
   cheer,
@@ -55,7 +55,7 @@ enum RunPhase {
   /// ...and back to the middle.
   back,
 
-  /// Round 64: a tavern coming up; he runs till it's beside him.
+  /// A tavern coming up; he runs till it's beside him.
   arriving,
 
   /// Putting the sword away, walking to his seat.
@@ -70,7 +70,7 @@ enum RunPhase {
   /// 18:00: slowing to a stop, the sword away.
   ending,
 
-  // Round 67: skiing (a ski day's look for his day out).
+  // Skiing (a ski day's look for his day out).
 
   /// Walking to his gear in the snowbank...
   toGear,
@@ -88,7 +88,7 @@ enum RunPhase {
   /// ...and stepping back in.
   skiOn,
 
-  /// Round 75: a storm: slowing to a stop, the sword away...
+  /// A storm: slowing to a stop, the sword away...
   toShelter,
 
   /// ...in his tent by the path till it's over (it comes down after).
@@ -98,7 +98,7 @@ enum RunPhase {
   done,
 }
 
-/// His day out as it's drawn (Round 63): Pip in the middle of his room,
+/// His day out as it's drawn: Pip in the middle of his room,
 /// running, while the ground and what's on it scroll by. Measured in the
 /// room's pixels; "world" places move with the ground ([shift]), so a
 /// thing at world x is drawn at x − [shift].
@@ -108,7 +108,7 @@ class PipRun {
   PipRun(this.random,
       {required this.x, required this.roomWidth, this.skiing = false});
 
-  /// Round 67: a ski day: he skis down instead of running right; no bugs,
+  /// A ski day: he skis down instead of running right; no bugs,
   /// no sword; poles and skis from his gear in the snowbank ([gearX]).
   final bool skiing;
 
@@ -168,7 +168,7 @@ class PipRun {
   double breakDone = 0;
 
   /// His life says: on his break or not (and how far), or over.
-  /// Round 75: the weather out (his brain says): a storm (he shelters
+  /// The weather out (his brain says): a storm (he shelters
   /// in his tent), snow (snowmen among the bugs), his pace (slower in
   /// fog).
   bool storm = false;
@@ -212,7 +212,7 @@ class PipRun {
   /// Off he goes: running right, or (skiing) down the slope.
   void _go() {
     if (skiing) {
-      // Round 72: the slope already dotted with what he's passed.
+      // The slope already dotted with what he's passed.
       if (slope.isEmpty && tavernAt == null) {
         for (var behind = 0.0; behind < farthest; behind += 18) {
           _placeThing(drop - behind - random.nextDouble() * 12);
@@ -227,7 +227,7 @@ class PipRun {
     }
   }
 
-  // Round 67: skiing down. Round 72 (he should go *down*): the
+  // Skiing down: the
   // room becomes the slope, seen from below; what he passes comes up
   // from the bottom of the screen and shrinks away to the horizon.
 
@@ -311,7 +311,7 @@ class PipRun {
   double _nextBug = bugFrom;
   double _swing = -1;
 
-  /// Round 73: what's coming ([PipFoe]), how many strikes it's taken,
+  /// What's coming ([PipFoe]), how many strikes it's taken,
   /// and its stagger back after one that didn't finish it (seconds in;
   /// -1: none).
   PipFoe foe = PipFoe.bug;
@@ -343,7 +343,7 @@ class PipRun {
   double _poofT = 0;
   double _poofSize = 1;
 
-  /// Round 73: XP gained, rising over where a foe was struck down: how
+  /// XP gained, rising over where a foe was struck down: how
   /// much, its middle on the screen (it stays there), seconds in.
   final xpPops = <(int, double, double)>[];
   static const xpPopTime = 1.2;
@@ -361,14 +361,14 @@ class PipRun {
   double? swordAt;
   bool _sheathed = false;
 
-  /// The tavern's left edge (world; Round 64), and the plate's flight to
+  /// The tavern's left edge (world), and the plate's flight to
   /// the table (0 to 1; null: not yet).
   double? tavernAt;
   double? plate;
 
   /// The tavern's size, and where in it: the window's middle, the table,
   /// and his seat (his left edge, from the tavern's left); his bench
-  /// (Round 83: centred under him).
+  /// (centred under him).
   static const tavernWidth = 54;
   static const windowMiddle = 22;
   static const tableLeft = 33;
@@ -379,7 +379,7 @@ class PipRun {
 
   double _seatX(double near) => near + 8;
 
-  /// A bug coming now (a preview's, tests): [hits] him or not. Round 72:
+  /// A bug coming now (a preview's, tests): [hits] him or not:
   /// it crawls in from the room's edge, as any does (it was put just
   /// ahead of him, and seemed to teleport); not while one is coming.
   bool bugComing({required bool hits, PipFoe foe = PipFoe.bug}) {
@@ -413,7 +413,7 @@ class PipRun {
     return PipFoe.bug;
   }
 
-  /// Round 65: a battery given while he's out, flying from where it was
+  /// A battery given while he's out, flying from where it was
   /// dropped to him (he catches it without stopping); seconds into it.
   double? _batteryFrom;
   double _batteryT = 0;
@@ -484,7 +484,7 @@ class PipRun {
         }
       case RunPhase.takeGear:
         if (t >= gearTime / 2) _geared = true;
-        // Round 72: skis on, straight down the slope (not walked over).
+        // Skis on, straight down the slope (not walked over).
         if (t >= gearTime) {
           facingRight = true;
           _go();
@@ -495,7 +495,7 @@ class PipRun {
         if (t >= gearTime) _to(RunPhase.done);
       case RunPhase.skiFall:
         final p = (t / fallTime).clamp(0.0, 1.0);
-        // Round 72: the ski lands beside him; he clicks back in where
+        // The ski lands beside him; he clicks back in where
         // he is (no walking over).
         skiAt = _skiFrom + 4 * _ease(p);
         if (t >= fallTime) _to(RunPhase.skiOn);
@@ -608,11 +608,11 @@ class PipRun {
       _ski(dt);
       return;
     }
-    // Round 75: slower in the fog.
+    // Slower in the fog.
     speed = runSpeed * pace;
     facingRight = true;
     x = centre;
-    // Round 75: a storm: he stops and shelters in his tent (a foe coming
+    // A storm: he stops and shelters in his tent (a foe coming
     // runs off first).
     if (storm && _swing < 0 && tavernAt == null && !_wantEnd) {
       if (bugAt != null) _fleeing = true;
@@ -637,7 +637,7 @@ class PipRun {
         _struck++;
         final boss = foe == PipFoe.boss;
         if (_struck < foe.hits) {
-          // Round 73: not down yet: it staggers back, then comes again.
+          // Not down yet: it staggers back, then comes again.
           _recoil = 0;
           buzzes.add(boss ? PipBuzz.medium : PipBuzz.light);
           return;
@@ -681,7 +681,7 @@ class PipRun {
   /// his break and the end as when running.
   void _ski(double dt) {
     facingRight = true;
-    // Round 72: a gentle slalom, eased into from where he set off.
+    // A gentle slalom, eased into from where he set off.
     final lane = centre + swayAt(drop);
     x += (lane - x) * math.min(1, dt * 3);
     _dropSpeed = skiSpeed;
@@ -778,13 +778,13 @@ class PipRun {
     final bug = bugAt;
     if (bug == null) return;
     if (_recoil >= 0) {
-      // Staggering back from a strike (Round 73: away from him, the
+      // Staggering back from a strike (away from him, the
       // ground's run too).
       _recoil += dt;
       bugAt = bug + (speed + recoilSpeed * (1 - _recoil / recoilTime)) * dt;
       if (_recoil >= recoilTime) _recoil = -1;
     } else if (_fleeing) {
-      // Scurrying off (Round 73: faster than the ground, so one that got
+      // Scurrying off (faster than the ground, so one that got
       // him is gone even once he's running again).
       bugAt = bug + (speed + fleeSpeed) * dt;
       if (bugAt! - shift > roomWidth) bugAt = null;
@@ -810,7 +810,7 @@ class PipRun {
 
   /// Walking or running (his legs step).
   bool get stepping => switch (phase) {
-        // Round 67: on skis he glides.
+        // On skis he glides.
         RunPhase.running || RunPhase.arriving => !skiing,
         RunPhase.toGear || RunPhase.toSki => true,
         RunPhase.ending || RunPhase.toShelter => speed > 2,
@@ -842,7 +842,7 @@ class PipRun {
         _ => 0,
       };
 
-  /// Round 83: sitting on it, his feet over its front (no longer standing
+  /// Sitting on it, his feet over its front (no longer standing
   /// on its top): his body on its top, a row under his bench's 3.
   static const seatHeight = 2.0;
 
@@ -857,7 +857,7 @@ class PipRun {
   /// Tumbling back (radians) as he's knocked.
   double get spin => switch (phase) {
         RunPhase.knocked => -2 * math.pi * (t / knockTime).clamp(0.0, 1.0),
-        // Round 67: a fall on skis, head over heels forward.
+        // A fall on skis, head over heels forward.
         RunPhase.skiFall =>
           2 * math.pi * _ease((t / (fallTime * 0.6)).clamp(0.0, 1.0)),
         _ => 0,
@@ -917,7 +917,7 @@ class PipRun {
 
   /// The sword flying off or lying on the ground: (its grip's middle x,
   /// height above the ground, angle) on the screen; null: in his hand.
-  /// Round 76: it turns over twice and a quarter in the air, up in an
+  /// It turns over twice and a quarter in the air, up in an
   /// arc and down, and lands flat; never into the ground (it used to
   /// come down point first, through it, then flip flat).
   (double, double, double)? get lyingSword {
@@ -966,10 +966,10 @@ class PipRun {
     return (p - shift, _poofT / (poofTime * math.sqrt(_poofSize)));
   }
 
-  /// How big the poof is (Round 73: a boss's bigger).
+  /// How big the poof is (a boss's bigger).
   double get poofSize => _poofSize;
 
-  /// Strikes the foe coming can still take (Round 73), and whether it's
+  /// Strikes the foe coming can still take, and whether it's
   /// staggering from one (it flashes).
   int get foeHitsLeft => foe.hits - _struck;
   bool get foeFlash => _recoil >= 0 && (_recoil * 20).floor().isEven;
@@ -1001,7 +1001,7 @@ class PipRun {
   /// A fall now (a preview's, tests and pictures).
   void fallNow() => _nextFall = 0;
 
-  /// Round 74: his meal (or hot chocolate) bite by bite (sip by sip):
+  /// His meal (or hot chocolate) bite by bite (sip by sip):
   /// every [biteEvery] seconds once the plate's down his hand takes a
   /// bite from it to his mouth ([biteLength]: there at [mouthAt], then
   /// chewing; a mug is carried back after a sip); [bitesPerMeal] finish

@@ -1,8 +1,8 @@
 part of 'pip_brain.dart';
 
-/// Round 138 (out of `pip_brain.dart`): his days out: his adventure
-/// (Round 63: running, striking bugs, his break at the tavern; Round 67:
-/// skiing) and his ski trip's bus (Round 67), and Pip Home's previews of
+/// His days out: his adventure
+/// (running, striking bugs, his break at the tavern;
+/// skiing) and his ski trip's bus, and Pip Home's previews of
 /// them.
 class _PipOutingsState {
   PipBus? bus;
@@ -13,14 +13,14 @@ class _PipOutingsState {
   double? busPreview;
   PipRun? run;
 
-  /// Round 73: a boss may come today (his life says).
+  /// A boss may come today (his life says).
   bool bossDue = false;
   double? outRun;
   double outRunSince = 0;
   bool outPaused = false;
   double? treeRun;
 
-  /// A level up seen (Round 63): a flash over him for [levelFlashTime],
+  /// A level up seen: a flash over him for [levelFlashTime],
   /// with a buzz (no sound).
   double? levelFlash;
 }
@@ -29,7 +29,7 @@ extension PipBrainOutings on PipBrain {
   bool get bossDue => _out.bossDue;
   set bossDue(bool value) => _out.bossDue = value;
 
-  // Round 67: his ski trip's bus.
+  // His ski trip's bus.
 
   /// The bus ride, as it's drawn; null: not on it.
   PipBus? get bus => activity == PipActivity.riding ? _out.bus : null;
@@ -90,9 +90,9 @@ extension PipBrainOutings on PipBrain {
     _stand();
   }
 
-  /// Played from Pip Home's Adventures (Round 67): a short day out (a
+  /// Played from Pip Home's Adventures: a short day out (a
   /// bug, one that gets him, a beetle), a ski run ([ski]: snowing, his
-  /// gear, a fall), or a boss fight ([boss], Round 73), with no XP; it
+  /// gear, a fall), or a boss fight ([boss]), with no XP; it
   /// ends by itself, or with [stopPreviews]. True if he could (up and
   /// about).
   bool previewAdventure({bool ski = false, bool boss = false}) {
@@ -116,7 +116,7 @@ extension PipBrainOutings on PipBrain {
     if (_out.busPreview != null && activity == PipActivity.riding) _endBus();
   }
 
-  /// Played from Pip Home's Adventures (Round 67): the bus pulls in, he
+  /// Played from Pip Home's Adventures: the bus pulls in, he
   /// boards, it drives a while, stops and he steps out. True if it could.
   bool previewBus() {
     if (!_canGoOut) return false;
@@ -126,7 +126,7 @@ extension PipBrainOutings on PipBrain {
     return true;
   }
 
-  // Round 63: his adventures.
+  // His adventures.
 
   /// His day out, as it's drawn (the room's painter); null: not out.
   PipRun? get run => activity == PipActivity.adventuring ? _out.run : null;
@@ -149,16 +149,16 @@ extension PipBrainOutings on PipBrain {
       return;
     }
     if (activity != PipActivity.adventuring) {
-      // Round 152: simply out (the app just opened on it): even from a
+      // Simply out (the app just opened on it): even from a
       // moment of his own, not after it, seen setting off.
       if (!_canGoOut && (animate || !_mayBePut)) return;
       if (!_canGoOut) _packTent();
       if (!animate) _settleUmbrella();
-      // Round 141: seen in his house, or walking in from his field's
+      // Seen in his house, or walking in from his field's
       // edge: out on his field first.
       if (animate && (atHome || _offEdge)) return;
       _setOut();
-      // Round 66: opened as his break starts: seen starting (he runs up
+      // Opened as his break starts: seen starting (he runs up
       // to the tavern); later in it, simply at the table.
       if (out.onBreak &&
           !animate &&
@@ -171,7 +171,7 @@ extension PipBrainOutings on PipBrain {
     _out.run!.want(onBreak: out.onBreak, done: out.breakDone);
   }
 
-  /// Round 132: his room opened again on him out a while after it was
+  /// His room opened again on him out a while after it was
   /// left: what he was doing out there then is long past, so his run is
   /// taken up afresh from his life (at the table on his break, else
   /// simply running), not carried on from where it was left.
@@ -210,7 +210,7 @@ extension PipBrainOutings on PipBrain {
       _stand();
       return;
     }
-    // Round 67: a preview's moments, then home.
+    // A preview's moments, then home.
     final preview = _out.runPreview;
     if (preview != null) {
       final next = preview + dt;
@@ -225,7 +225,7 @@ extension PipBrainOutings on PipBrain {
       } else {
         if (at(PipBrain.previewEventAt - 4)) run.bugComing(hits: false);
         if (at(PipBrain.previewEventAt + 1.5)) run.bugComing(hits: true);
-        // Round 73: a beetle, two strikes.
+        // A beetle, two strikes.
         if (at(PipBrain.previewEventAt + 5.5)) {
           run.bugComing(hits: false, foe: PipFoe.beetle);
         }
@@ -234,7 +234,7 @@ extension PipBrainOutings on PipBrain {
     } else {
       run.bossDue = bossDue;
     }
-    // Round 75: the weather out: a storm (his tent), snowmen, fog.
+    // The weather out: a storm (his tent), snowmen, fog.
     // (On skis he skis on: no tent.)
     run.storm = weather == WeatherKind.storm;
     run.snowFoes = weather == WeatherKind.snow;
@@ -275,7 +275,7 @@ extension PipBrainOutings on PipBrain {
     return switch (run.phase) {
       RunPhase.knocked => PipFrame.oh,
       RunPhase.down => PipFrame.tuck,
-      // Round 74: sitting still (it was "oh" and tucked in turn: up and
+      // Sitting still (it was "oh" and tucked in turn: up and
       // down, like squats), chewing as he eats.
       RunPhase.sitting => run.chewing && (run.clock / 0.15).floor().isEven
           ? PipFrame.chew
@@ -284,7 +284,7 @@ extension PipBrainOutings on PipBrain {
     };
   }
 
-  /// Round 74: how long he's been running on his day out, as his life
+  /// How long he's been running on his day out, as his life
   /// says ([syncOutRun], every second), going on between ([paused]: on
   /// his break, it stands); null: not out. His field's trees go by with
   /// it, alike in every room.
@@ -299,7 +299,7 @@ extension PipBrainOutings on PipBrain {
     _out.outPaused = paused;
   }
 
-  /// Round 76: how far his field's trees have gone by (seconds of his
+  /// How far his field's trees have gone by (seconds of his
   /// running): they move with the ground (still while he's knocked over,
   /// fetching his sword, at his break), catching up with [outRun] a little
   /// as he runs on (a little quicker or slower), so every room keeps to

@@ -7,7 +7,7 @@ import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 52: his entrances, the things that happen in his field, his
+/// His entrances, the things that happen in his field, his
 /// screen's pictures, and the richer skies.
 void main() {
   /// Pip up and about in a room [width] wide.
@@ -357,7 +357,7 @@ void main() {
     });
   });
 
-  test('skies (Round 52): more hues than top and bottom, which they keep', () {
+  test('skies: more hues than top and bottom, which they keep', () {
     for (final part in DayPart.values) {
       final stops = PipBackground.field.stopsAt(part);
       final (top, bottom) = PipBackground.field.skyAt(part);

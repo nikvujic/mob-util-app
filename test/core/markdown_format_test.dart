@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/markdown.dart';
 
-/// More formats and the format buttons (N17, Round 27).
+/// More formats and the format buttons (N17).
 void main() {
   /// [text] with the selection marked: `[` and `]` around it, or `|` for
   /// a cursor; the edit's result in the same notation.
@@ -53,7 +53,7 @@ void main() {
       const text = 'x\n```\n# not a heading\n- not a list\n```\ny';
       expect(where(text, (r) => r.block && r.role == MdRole.text).join(),
           contains('# not a heading\n- not a list'));
-      // With their line breaks (Round 29).
+      // With their line breaks.
       expect(where(text, (r) => r.role == MdRole.marker), ['```\n', '```\n']);
       expect(where(text, (r) => r.heading > 0), isEmpty);
       // After the closing fence: plain again.
@@ -62,7 +62,7 @@ void main() {
           ('y', false));
     });
 
-    test('a ``` never closed is just text, not a block (Round 29)', () {
+    test('a ``` never closed is just text, not a block', () {
       // As in 1.2.0's "What's new": a ``` in a sentence turned the rest
       // into code.
       const text = '- code blocks (between\n  ``` lines)\n### Changed\n- x';
@@ -103,7 +103,7 @@ void main() {
       expect(wrap('|', '~~'), '~~|~~');
     });
 
-    test('pressed again it toggles, not stacking more marks (Round 32)', () {
+    test('pressed again it toggles, not stacking more marks', () {
       // An empty pair just put there: gone again.
       expect(wrap('buy **|**', '**'), 'buy |');
       expect(wrap('*|*', '*'), '|');

@@ -9,7 +9,7 @@ import 'package:the_app/providers/weather_provider.dart';
 
 import '../helpers.dart';
 
-/// Menu → Internet Access (Round 70): nothing used unless turned on; the
+/// Menu → Internet Access: nothing used unless turned on; the
 /// weather's places, picked from a search; the weather fetched for one.
 void main() {
   const noviSad = WeatherPlace(
@@ -140,7 +140,7 @@ void main() {
         ));
     await tester.pumpAndSettle();
     expect(api.fetches, 0);
-    // Round 79: with its wind.
+    // With its wind.
     expect(
         find.text('Now: Snow, -2°C, 18 km/h · updated 10:00'), findsOneWidget);
     await tester.tap(find.byKey(const Key('weatherRefresh')));
@@ -200,7 +200,7 @@ void main() {
     await turnOff(tester);
   });
 
-  group('the rain radar, with his own key (Round 106)', () {
+  group('the rain radar, with his own key', () {
     final on = InternetSettings(weather: true, places: const [beograd]);
     String? clipboard;
     setUp(() {

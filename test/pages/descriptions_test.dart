@@ -71,7 +71,7 @@ void main() {
 
     expect(lines('Long'), greaterThan(1));
     expect(lines('Short'), 1, reason: 'beside-the-title layout: one line');
-    expect(lines('Tiny'), 1, reason: 'even the smallest block (Round 12)');
+    expect(lines('Tiny'), 1, reason: 'even the smallest block');
 
     await tester.ensureVisible(find.text('Short'));
     await tester.pumpAndSettle();

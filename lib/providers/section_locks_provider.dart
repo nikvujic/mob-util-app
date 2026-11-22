@@ -57,7 +57,7 @@ final sectionClosedProvider = Provider.family<bool, AppSection>((ref, section) {
       ref.watch(sessionProvider) == null;
 });
 
-/// The Hub's pages locked behind the master password (O7, Round 21).
+/// The Hub's pages locked behind the master password (O7).
 /// State: the locked pages. Saved in `settings.json` with the section
 /// locks. Independent of the Hub's own lock: a free Hub can have locked
 /// pages, and a locked Hub's pages keep their own switches. Like section
@@ -105,7 +105,7 @@ final pageClosedProvider = Provider.family<bool, HubTool>((ref, page) {
       ref.watch(sessionProvider) == null;
 });
 
-/// The to-do note locked behind the master password (Round 45). Like a
+/// The to-do note locked behind the master password. Like a
 /// Hub page's lock it hides, not encrypts, and needs a master password.
 /// Saved in `settings.json`; the Settings switch for the note's card
 /// leaves it as it is.
@@ -161,7 +161,7 @@ final anyPageClosedProvider = Provider<bool>((ref) {
   return HubTool.values.any((t) => ref.watch(pageClosedProvider(t)));
 });
 
-/// Whether any section, Hub page or the to-do note (Round 45) is closed
+/// Whether any section, Hub page or the to-do note is closed
 /// right now (e.g. backups need unlocking).
 final anySectionClosedProvider = Provider<bool>((ref) {
   return AppSection.values.any((s) => ref.watch(sectionClosedProvider(s))) ||

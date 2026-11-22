@@ -21,12 +21,12 @@ import 'package:the_app/providers/pip_trip.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/recipe_read_provider.dart';
 
-/// Pip, the pet (Round 34): an egg until hatched, then his birthday and
-/// name; his energy and batteries (Round 37). Saved to `pip.json`.
+/// Pip, the pet: an egg until hatched, then his birthday and
+/// name; his energy and batteries. Saved to `pip.json`.
 class PipLifeNotifier extends StateNotifier<PipLife> {
   final DateTime Function() _clock;
 
-  /// The dates (Round 67: his ski trips' buses, his days out on them).
+  /// The dates (his ski trips' buses, his days out on them).
   final DateBook Function() _dates;
 
   PipLifeNotifier(
@@ -40,7 +40,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     addListener(storage.savePip, fireImmediately: false);
   }
 
-  /// A Pip from before Round 37 (or such a backup): full from now on,
+  /// A Pip from before energy existed (or such a backup): full from now on,
   /// his first battery on its way.
   PipLife _started(PipLife pip) {
     if (!pip.hatched || pip.energyAt != null) return pip;
@@ -51,7 +51,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     );
   }
 
-  /// He's out, at [now]: that's his birthday. Once only. Round 61: two
+  /// He's out, at [now]: that's his birthday. Once only. Two
   /// segments and a battery in hand (so there's one to give him), the
   /// next on its way.
   static const hatchEnergy = 2.0;
@@ -67,7 +67,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     );
   }
 
-  /// A new name: trimmed, at most [maxName] letters (Round 35: 6, so
+  /// A new name: trimmed, at most [maxName] letters (6, so
   /// it never overflows); blank keeps his.
   static const maxName = 6;
   void rename(String name) {
@@ -78,7 +78,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     );
   }
 
-  /// The phone is plugged in (Round 44): he can't lose power meanwhile.
+  /// The phone is plugged in: he can't lose power meanwhile.
   bool _charging = false;
   bool get charging => _charging;
 
@@ -98,15 +98,15 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// his energy as it was.
   void resumeCharging(bool charging) => _charging = charging;
 
-  /// His battery icon's segments at [now]: what he has (Round 58: also
+  /// His battery icon's segments at [now]: what he has (also
   /// plugged in; it used to keep what he was plugged in with).
   int segmentsAt(DateTime now) => PipEnergy.segments(levelAt(now));
 
-  /// His energy at [now]. Round 63: out on an adventure he can't power
+  /// His energy at [now]. Out on an adventure he can't power
   /// down; he does once it's over, if he's run out by then.
   double levelAt(DateTime now) {
     final since = state.energyAt ?? now;
-    // Round 67: on his ski trip's bus, he uses none.
+    // On his ski trip's bus, he uses none.
     final level = PipEnergy.levelPausing(
       state.energy,
       since,
@@ -123,7 +123,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// What he keeps, out, however long it's been (a few minutes' worth).
   static const adventureFloor = 0.01;
 
-  /// Out on his adventure at [now] (Round 63).
+  /// Out on his adventure at [now].
   bool outAt(DateTime now) {
     final from = state.outFrom;
     return from != null &&
@@ -131,7 +131,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
         now.isBefore(PipAdventure.endOf(from));
   }
 
-  /// On his break at [now] (Round 64).
+  /// On his break at [now].
   bool onBreakAt(DateTime now) {
     final at = state.breakAt;
     return outAt(now) &&
@@ -140,8 +140,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
         now.isBefore(at.add(PipAdventure.breakLength));
   }
 
-  /// His XP at [now]: what's banked and this day out so far (Round 73:
-  /// an XP every six seconds of it).
+  /// His XP at [now]: what's banked and this day out so far (an
+  /// XP every six seconds of it).
   int xpAt(DateTime now) {
     final banked = state.minutesOut * PipAdventure.xpPerMinute;
     final from = state.outFrom;
@@ -151,7 +151,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     return banked + seconds * PipAdventure.xpPerMinute ~/ 60;
   }
 
-  /// His XP as shown at [now] (Round 73): while he's watched fighting,
+  /// His XP as shown at [now]: while he's watched fighting,
   /// what it was at the last bug he struck ([held], kept up while his
   /// room is shown); else (or once his room's gone a moment) as it is.
   int shownXpAt(DateTime now, PipHeldXp? held) {
@@ -165,7 +165,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   static const heldFor = Duration(seconds: 3);
 
   /// How long he's been running at [now] on his day out (seconds, his
-  /// break not counted), or null: not out (Round 74).
+  /// break not counted), or null: not out.
   double? runningAt(DateTime now) {
     final from = state.outFrom;
     if (from == null || !outAt(now)) return null;
@@ -181,14 +181,14 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     return seconds;
   }
 
-  /// The day out a boss was beaten on (Round 73: one a day out). In
+  /// The day out a boss was beaten on (one a day out). In
   /// memory: the app's first look is a fresh one.
   String? _bossDay;
 
   /// Whether a boss may still come at [now]: out, none beaten today.
   bool bossDueAt(DateTime now) => outAt(now) && _bossDay != state.outDay;
 
-  /// A boss beaten at [now] (Round 73): [PipAdventure.bossMinutes] more
+  /// A boss beaten at [now]: [PipAdventure.bossMinutes] more
   /// banked, once a day out. The XP it brought (none if not due).
   int bossBeaten(DateTime now) {
     if (!bossDueAt(now)) return 0;
@@ -198,7 +198,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     return PipAdventure.bossMinutes * PipAdventure.xpPerMinute;
   }
 
-  /// Registers him as an adventurer at [now] (Round 63): only between
+  /// Registers him as an adventurer at [now]: only between
   /// 13:00 and 17:00, once. His energy is filled and he goes out at once.
   /// True if he was.
   bool register(DateTime now) {
@@ -213,7 +213,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       energyAt: () => now,
       offSeen: false,
       outDay: () => dayKey(now),
-      // On the minute (Round 73: so a day out banks the XP shown).
+      // On the minute (so a day out banks the XP shown).
       outFrom: () => _minuteOf(now),
       breakAt: () => null,
     );
@@ -221,7 +221,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     return true;
   }
 
-  /// His days out, made right for [now] (Round 63): a finished one's XP
+  /// His days out, made right for [now]: a finished one's XP
   /// banked; today's started if it's time and he could go: at 12:00 if he
   /// had energy then (charging or not), or else when he's back on before
   /// 17:00 (a battery). Run before anything that changes his energy, so
@@ -246,7 +246,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     DateTime? out;
     final since = state.energyAt ?? now;
     if (PipTrip.busDay(_dates(), now)) {
-      // Round 67: on the bus that day: no adventure shown, its XP all
+      // On the bus that day: no adventure shown, its XP all
       // the same.
       out = start;
     } else if (!since.isAfter(start) && levelAt(start) > 0) {
@@ -260,7 +260,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       outFrom: () => out,
       breakAt: () => null,
     );
-    // Setting off now: seen (Round 66: his break waits).
+    // Setting off now: seen (his break waits).
     if (now.difference(out) < const Duration(minutes: 1)) _startSeen = true;
     // Not seen till after 18:00: the whole day out at once.
     if (!now.isBefore(PipAdventure.endOf(out))) _settle(now);
@@ -270,7 +270,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       DateTime(t.year, t.month, t.day, t.hour, t.minute);
 
   /// When he was last looked at, and whether he was seen setting off
-  /// today and not left unseen since (Round 66; in memory: the app's
+  /// today and not left unseen since (in memory: the app's
   /// first look is a fresh one). Then his break waits.
   DateTime? _seenAt;
   bool _startSeen = false;
@@ -285,7 +285,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   }
 
   /// The days between his last day out and [now]'s that nobody looked in
-  /// on (Round 67): each a whole day out if he could go at 12:00 (energy
+  /// on: each a whole day out if he could go at 12:00 (energy
   /// then, by what's known; he can't power down once out) or was on his
   /// ski trip's bus; else none. Each such day is then done with.
   void _settleMissed(DateTime now) {
@@ -311,8 +311,8 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     }
   }
 
-  /// His break starts at [now] if it's due (Round 64: looked at between
-  /// 14:00 and 16:00, none had today; Round 66: if he was seen setting
+  /// His break starts at [now] if it's due (looked at between
+  /// 14:00 and 16:00, none had today; if he was seen setting
   /// off, only once he's gone unseen five minutes).
   void breakIfDue(DateTime now) {
     final from = state.outFrom;
@@ -325,7 +325,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     state = state.copyWith(breakAt: () => now);
   }
 
-  /// The batteries due by [now] (Round 45: every few hours on the clock,
+  /// The batteries due by [now] (every few hours on the clock,
   /// piling up while away, up to 3 held).
   void collect(DateTime now) {
     if (!state.hatched) return;
@@ -351,7 +351,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
         wokenAt: state.wokenAt,
       );
 
-  /// Round 77: three taps on him asleep at [now]: woken (true), if he may
+  /// Three taps on him asleep at [now]: woken (true), if he may
   /// be (`PipEnergy.mayWakeAt`; not on his trip's bus).
   bool wake(DateTime now) {
     _settle(now);
@@ -401,10 +401,10 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     if (segmentsAt(now) >= 3) return PipRefusal.full;
     final show = showAt(now);
     if (show == PipShow.asleep) return PipRefusal.asleep;
-    // Round 67: on his ski trip's bus, nothing.
+    // On his ski trip's bus, nothing.
     if (PipTrip.at(_dates(), now).leg != null) return PipRefusal.travelling;
-    // Round 44: plugged in (at his station), not now.
-    // Round 65: not while he's out (he isn't at his station then).
+    // Plugged in (at his station), not now.
+    // Not while he's out (he isn't at his station then).
     if (_charging && show != PipShow.off && !outAt(now)) {
       return PipRefusal.charging;
     }
@@ -422,12 +422,12 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       energyAt: () => now,
       offSeen: false,
     );
-    // Round 63: back on before 17:00, he goes out.
+    // Back on before 17:00, he goes out.
     _settle(now);
     return true;
   }
 
-  /// A segment from his station at [now] (Round 58): a segment more, up
+  /// A segment from his station at [now]: a segment more, up
   /// to full, and on again if he was off. False if he's full (or an egg).
   bool chargeTick(DateTime now) {
     if (!state.hatched) return false;
@@ -443,7 +443,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     return true;
   }
 
-  // ---- Quests (Round 125, docs/QUESTS_SPEC.md) ----
+  // ---- Quests (docs/QUESTS_SPEC.md) ----
 
   /// The quest under way, or null.
   QuestScript? get quest => Quests.byId(state.questId);
@@ -454,7 +454,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
       ? null
       : Quests.nextAfter(state.questsDone.map((d) => d.id));
 
-  /// Round 128: his house is built (he lives in it).
+  /// His house is built (he lives in it).
   bool get houseBuilt => state.questsDone.any((d) => d.id == Quests.house.id);
 
   /// Away on a ski trip at [t] (on the bus or at the resort): no quest
@@ -576,7 +576,7 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
   /// Brings his quest up to [now] (the app looking in).
   void settleQuest(DateTime now) => _settleQuest(now);
 
-  /// Replaces him (restoring a backup): one from before Round 37 starts
+  /// Replaces him (restoring a backup): one from before energy existed starts
   /// full from now.
   void replace(PipLife pip) => state = _started(pip);
 }
@@ -592,18 +592,18 @@ final pipLifeProvider = StateNotifierProvider<PipLifeNotifier, PipLife>(
   ),
 );
 
-/// His XP as last collected while he's watched fighting (Round 73: it
+/// His XP as last collected while he's watched fighting (it
 /// goes up as he strikes bugs, not by the clock), and when his room last
 /// kept it up; null: not watched, it shows as it is.
 typedef PipHeldXp = ({int xp, DateTime at});
 final pipHeldXpProvider = StateProvider<PipHeldXp?>((ref) => null);
 
-/// His XP as shown now (Round 73): [PipLifeNotifier.shownXpAt].
+/// His XP as shown now: [PipLifeNotifier.shownXpAt].
 int pipShownXp(WidgetRef ref, DateTime now) => ref
     .read(pipLifeProvider.notifier)
     .shownXpAt(now, ref.watch(pipHeldXpProvider));
 
-/// Pip's life as his room sees it (Round 37): what to show, what was
+/// Pip's life as his room sees it: what to show, what was
 /// shown, a battery given.
 class _Link implements PipLink {
   final Ref _ref;
@@ -615,7 +615,7 @@ class _Link implements PipLink {
 
   @override
   (PipShow, int) look() {
-    // Plugged in or not first (Round 44): it decides his energy.
+    // Plugged in or not first: it decides his energy.
     _ref.read(pipPowerProvider.notifier).refresh();
     final now = _now;
     _pip.lookedAt(now);
@@ -663,7 +663,7 @@ class _Link implements PipLink {
   PipOut? outing() {
     final now = _now;
     if (!_pip.outAt(now)) return null;
-    // Round 67: a day on the ski trip's bus: its XP, no adventure shown.
+    // A day on the ski trip's bus: its XP, no adventure shown.
     if (PipTrip.busDay(_ref.read(datesProvider), now)) return null;
     _pip.breakIfDue(now);
     final at = _ref.read(pipLifeProvider).breakAt;
@@ -746,7 +746,7 @@ class _Link implements PipLink {
       .any((n) => n.at.isAfter(from) && !n.at.isAfter(to));
 }
 
-/// Whether the phone is plugged in (Round 44: Pip's charging station):
+/// Whether the phone is plugged in (Pip's charging station):
 /// asked of Android at first and again while he's looked at (every few
 /// seconds at most: so also when the app comes back), and told as it
 /// changes while the app is open. Kept in his life (he can't lose power
@@ -779,7 +779,7 @@ class PipPowerNotifier extends StateNotifier<bool> {
     if (mounted) _set(plugged);
   }
 
-  /// Android has said, this run (Round 64).
+  /// Android has said, this run.
   bool get known => _known;
   bool _known = false;
 

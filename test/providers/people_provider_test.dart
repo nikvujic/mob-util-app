@@ -19,7 +19,7 @@ import 'package:the_app/providers/section_data_provider.dart';
 
 import '../helpers.dart';
 
-/// People (Round 108): kept as changed, birthdays in step with Dates,
+/// People: kept as changed, birthdays in step with Dates,
 /// relations' rules, Undo, Tidy, Clear data, backups.
 void main() {
   late ProviderContainer container;
@@ -87,7 +87,7 @@ void main() {
     });
 
     test(
-        'a birthday from Dates (Round 113): its day copied; the original '
+        'a birthday from Dates: its day copied; the original '
         'left as it was; their own date beside it', () {
       container.read(datesProvider.notifier).save(const DateEntry(
             id: 'd1',
@@ -188,7 +188,7 @@ void main() {
     });
 
     test(
-        "Round 114: a parent's child's brothers and sisters are their "
+        "a parent's child's brothers and sisters are their "
         'children too; only where it makes sense; said', () {
       final mum = add('Mum'), dad = add('Dad'), step = add('Step');
       final a = add('A'), b = add('B'), c = add('C');

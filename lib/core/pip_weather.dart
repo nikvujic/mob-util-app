@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:the_app/core/weather.dart';
 
-/// Round 75: what the weather makes of Pip's days ("a bunch of
+/// What the weather makes of Pip's days ("a bunch of
 /// events that can entertain"). This is the one place that says what
 /// each weather does while he's doing what; his brain follows it.
 ///
@@ -37,7 +37,7 @@ PipCover coverFor(WeatherKind? weather) => switch (weather) {
 /// How fast he walks (or runs out) in [weather]: slower in fog.
 double paceIn(WeatherKind? weather) => weather == WeatherKind.fog ? 0.55 : 1;
 
-/// The weather's events (Round 75), each in its own weather.
+/// The weather's events, each in its own weather.
 enum PipWeatherEvent {
   /// Rain: he jumps in a puddle, a splash.
   puddle,
@@ -212,6 +212,6 @@ class PipSplat {
   double get fade => flying ? 0 : (t - flyTime) / stayTime;
 }
 
-/// How far a new weather has come in (Round 75: rain and snow thicken over
+/// How far a new weather has come in (rain and snow thicken over
 /// [comeIn] seconds; 1: all there).
 const comeIn = 4.0;

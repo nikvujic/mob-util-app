@@ -33,7 +33,7 @@ void main() {
   testWidgets('add one: once a day at 08:00 by default', (tester) async {
     await openMedicine(tester);
     expect(find.text('No medicines'), findsOneWidget);
-    // The app's add button, like every page's (Round 39: it was grey).
+    // The app's add button, like every page's (it was grey).
     expect(
         tester
             .widget<FloatingActionButton>(find.ancestor(
@@ -73,8 +73,7 @@ void main() {
         DateTime(2026, 10, 12, 8, 3));
   });
 
-  testWidgets('a second tap unmarks it, after asking (Round 18)',
-      (tester) async {
+  testWidgets('a second tap unmarks it, after asking', (tester) async {
     late String id;
     await openMedicine(tester, () {
       id = medicine().add('Vitamin D', times: [480], from: today)!;
@@ -96,8 +95,7 @@ void main() {
     expect(find.text('Undo'), findsNothing);
   });
 
-  testWidgets('each card shows how many were taken in all (Round 18)',
-      (tester) async {
+  testWidgets('each card shows how many were taken in all', (tester) async {
     late String id;
     await openMedicine(tester, () {
       id = medicine()
@@ -109,7 +107,7 @@ void main() {
     });
     final count = find.byKey(Key('medicineCount-$id'));
     expect(tester.widget<Text>(count).data, '2');
-    // Level with the drag handle beside it (Round 20).
+    // Level with the drag handle beside it.
     expect(
         tester.getCenter(count).dy,
         moreOrLessEquals(tester.getCenter(find.byIcon(Icons.drag_handle)).dy,
@@ -146,7 +144,7 @@ void main() {
 
     await tester.tap(find.byKey(Key('dose-$id-0')));
     await tester.pumpAndSettle();
-    // Two pulses, like the gulp's two bloops (Round 17).
+    // Two pulses, like the gulp's two bloops.
     expect(calls, [
       'buzz:HapticFeedbackType.mediumImpact',
       'sound:done',
@@ -195,7 +193,7 @@ void main() {
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('medicineName')), 'Pills 💊');
-    // How many doses stays as it was (Round 32); their times can change.
+    // How many doses stays as it was; their times can change.
     expect(find.byKey(const Key('medicineAddTime')), findsNothing);
     expect(find.byTooltip('Remove this dose'), findsNothing);
     expect(find.byKey(const Key('medicineDosesFixed')), findsOneWidget);
@@ -205,7 +203,7 @@ void main() {
     expect(m.name, 'Pills 💊');
     expect(m.times, [480]);
 
-    // Its menu is open again, on the medicine as it now is (Round 24).
+    // Its menu is open again, on the medicine as it now is.
     expect(find.text('History'), findsOneWidget);
     expect(find.text('Pills 💊'), findsNWidgets(2), reason: 'card and menu');
     await tester.tap(find.text('Delete'));
@@ -218,8 +216,7 @@ void main() {
     expect(container.read(medicineProvider).medicines, hasLength(1));
   });
 
-  testWidgets('an important one: deleting asks to type DELETE (Round 32)',
-      (tester) async {
+  testWidgets('an important one: deleting asks to type DELETE', (tester) async {
     await openMedicine(tester, () {
       medicine().add('Heart', times: [480], from: today, important: true);
     });
@@ -236,8 +233,7 @@ void main() {
     expect(container.read(medicineProvider).medicines, isEmpty);
   });
 
-  testWidgets('some days only (Round 40): picked in the sheet, shown',
-      (tester) async {
+  testWidgets('some days only: picked in the sheet, shown', (tester) async {
     await openMedicine(tester);
     await tester.tap(find.byTooltip('Add medicine'));
     await tester.pumpAndSettle();
@@ -279,7 +275,7 @@ void main() {
     expect(find.text('Once a day, at'), findsOneWidget);
   });
 
-  testWidgets('history: the medicines on top, each day a table (Round 18)',
+  testWidgets('history: the medicines on top, each day a table',
       (tester) async {
     late String id;
     late String other;
@@ -391,13 +387,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(total(), '13 doses', reason: '30 Sep–11 Oct, and today');
       expect(find.byKey(const Key('fillPast')), findsNothing);
-      // It can be undone (Round 39).
+      // It can be undone.
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
       expect(total(), '1 dose');
     });
 
-    testWidgets('ten or fewer not set: no "Mark past days taken" (Round 16)',
+    testWidgets('ten or fewer not set: no "Mark past days taken"',
         (tester) async {
       await openMedicine(tester, () {
         medicine().add('Coffee', times: [480], from: DateTime(2026, 10, 2));
@@ -409,7 +405,7 @@ void main() {
 
     testWidgets(
         'a month calendar: weeks as rows, older months to the left '
-        '(Round 16)', (tester) async {
+        '', (tester) async {
       late String id;
       await openMedicine(tester, () {
         id = medicine()
@@ -438,7 +434,7 @@ void main() {
           Theme.of(tester.element(day('2026-10-01'))).extension<AppPalette>()!;
       Color? fill(String d) =>
           (tester.widget<Container>(day(d)).decoration as BoxDecoration).color;
-      // The same colours in every theme (Round 18).
+      // The same colours in every theme.
       expect(fill('2026-10-01'), DoseColours.taken);
       expect(fill('2026-10-02'), DoseColours.missed);
       expect(palette.accent, isNot(DoseColours.taken));
@@ -468,8 +464,7 @@ void main() {
       expect(month(), 'October 2026');
     });
 
-    testWidgets(
-        'a calendar day shows that day below; it changes nothing (Round 18)',
+    testWidgets('a calendar day shows that day below; it changes nothing',
         (tester) async {
       late String id;
       await openMedicine(tester, () {
@@ -516,7 +511,7 @@ void main() {
     expect(book.markFor(id, today, 0), isNull, reason: 'not today');
   });
 
-  testWidgets('started a few days back: not asked (Round 16)', (tester) async {
+  testWidgets('started a few days back: not asked', (tester) async {
     await openMedicine(tester);
     await tester.tap(find.byTooltip('Add medicine'));
     await tester.pumpAndSettle();
@@ -532,7 +527,7 @@ void main() {
     expect(find.text('Mark the past days taken?'), findsNothing);
   });
 
-  group('handling (Round 14)', () {
+  group('handling', () {
     testWidgets('doses: two per row, the same width; one takes column 1',
         (tester) async {
       late String one, three;
@@ -596,8 +591,7 @@ void main() {
     });
   });
 
-  testWidgets('remind again is set per medicine, in its sheet (Round 16)',
-      (tester) async {
+  testWidgets('remind again is set per medicine, in its sheet', (tester) async {
     await openMedicine(tester);
     await tester.tap(find.byTooltip('Add medicine'));
     await tester.pumpAndSettle();
@@ -626,7 +620,7 @@ void main() {
             .widget<ChoiceChip>(find.byKey(const Key('followUp-120')))
             .selected,
         isTrue);
-    // Clear of the Save button below (Round 40: the sheet grew).
+    // Clear of the Save button below (the sheet grew).
     await Scrollable.ensureVisible(
         tester.element(find.byKey(const Key('followUp-0'))),
         alignment: 0.5);
@@ -638,7 +632,7 @@ void main() {
     expect(container.read(medicineProvider).medicines.single.followUp, isNull);
   });
 
-  testWidgets('back to top in the histories, once scrolled far (Round 20)',
+  testWidgets('back to top in the histories, once scrolled far',
       (tester) async {
     late String id;
     await openMedicine(tester, () {
@@ -674,7 +668,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(scale(), 0, reason: 'not far yet');
       for (var i = 0; i < 6; i++) {
-        // With the left hand: the button stays on the right (Round 24).
+        // With the left hand: the button stays on the right.
         await tester.dragFrom(tester.getTopLeft(list) + const Offset(20, 300),
             const Offset(0, -600));
         await tester.pumpAndSettle();

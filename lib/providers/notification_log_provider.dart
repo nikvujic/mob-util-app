@@ -3,7 +3,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/notification_log.dart';
 
-/// What the app scheduled, for the notifications' history (Round 31),
+/// What the app scheduled, for the notifications' history,
 /// saved to `notifications.json`.
 class NotificationLogNotifier extends StateNotifier<NotificationLog> {
   NotificationLogNotifier(AppStorage storage)

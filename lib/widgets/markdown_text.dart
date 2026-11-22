@@ -10,7 +10,7 @@ import 'package:the_app/core/theme.dart';
 /// Formatting symbols (`##`, `**`, …) are hidden, except on the line being
 /// edited while [editing] (live preview): there they show, muted, so they
 /// can be changed. The text itself is never changed, only how it looks.
-/// The font code is set in (Round 41): bundled, so it works offline.
+/// The font code is set in: bundled, so it works offline.
 const codeFont = 'JetBrainsMono';
 
 /// How far a code block's panel reaches past the text on each side; the
@@ -77,8 +77,8 @@ class MarkdownEditingController extends TextEditingController {
 
   /// What stands in the text for a checkbox's `[` and its mark: a
   /// square, empty space (an em space and a zero-width one, two for two,
-  /// so positions stay the same). [CheckboxBoxes] draws the box over it
-  /// (Round 16): the phone's fonts drew ☐ / ☑ at their own size and
+  /// so positions stay the same). [CheckboxBoxes] draws the box over it:
+  /// the phone's fonts drew ☐ / ☑ at their own size and
   /// colour, whatever the app asked for.
   static const boxRoom = '\u2003\u200B';
 
@@ -124,7 +124,7 @@ class MarkdownEditingController extends TextEditingController {
   }
 
   /// Each ``` code block (N17), fences included: drawn on a panel. Only
-  /// closed ones (Round 29), as [markdownRuns] reads them.
+  /// closed ones, as [markdownRuns] reads them.
   List<({int start, int end})> codeBlocks() {
     final blocks = <({int start, int end})>[];
     int? open;
@@ -142,11 +142,11 @@ class MarkdownEditingController extends TextEditingController {
       if (end >= text.length) break;
       lineStart = end + 1;
     }
-    // Not closed (Round 29): not a block, just text.
+    // Not closed: not a block, just text.
     return blocks;
   }
 
-  /// Whether a code block's ``` fences show (Round 42): while [editing]
+  /// Whether a code block's ``` fences show: while [editing]
   /// with the cursor anywhere in the block, fences included, so an empty
   /// block can be found and deleted. Elsewhere they're hidden.
   bool fencesShown(({int start, int end}) block) {
@@ -160,15 +160,15 @@ class MarkdownEditingController extends TextEditingController {
     return next == -1 ? text.length : next;
   }
 
-  /// Heading sizes, relative to the body text: `#` to `####` (Round 27:
-  /// `####` just a little bigger than the text, bold).
+  /// Heading sizes, relative to the body text: `#` to `####`
+  /// (`####` just a little bigger than the text, bold).
   static const headingScale = [1.5, 1.3, 1.15, 1.05];
 
-  /// A bullet's dot, bigger than the text's (Round 27), at the same line
+  /// A bullet's dot, bigger than the text's, at the same line
   /// height.
   static const bulletScale = 1.35;
 
-  /// Code's size, relative to the text around it (Round 29).
+  /// Code's size, relative to the text around it.
   static const codeScale = 0.88;
 
   @override
@@ -210,10 +210,10 @@ class MarkdownEditingController extends TextEditingController {
       // gets a whole panel), highlights on the accent, quotes muted and
       // slanted.
       if (run.code) {
-        // A little smaller than the text (Round 29: wide letters made it
+        // A little smaller than the text (wide letters made it
         // hard to read).
         s = s.copyWith(
-          // Round 41: JetBrains Mono, bundled with the app.
+          // JetBrains Mono, bundled with the app.
           fontFamily: codeFont,
           fontFamilyFallback: const ['monospace', 'Roboto Mono'],
           fontSize: (s.fontSize ?? 16) * codeScale,
@@ -260,7 +260,7 @@ class MarkdownEditingController extends TextEditingController {
     final revealed = _revealed();
     bool onRevealedLine(MdRun run) =>
         run.start >= revealed.start && run.end <= revealed.end;
-    // The fences of the code block the cursor is in show too (Round 42).
+    // The fences of the code block the cursor is in show too.
     final openBlocks = codeBlocks().where(fencesShown).toList();
     bool inOpenBlock(MdRun run) =>
         openBlocks.any((b) => run.start >= b.start && run.end <= b.end + 1);
@@ -334,7 +334,7 @@ class MarkdownEditingController extends TextEditingController {
         var piece = text.substring(from, to);
         if (bullet && from == run.start) {
           // The dot on its own: drawn, centred on the text's middle
-          // (Round 29: a bigger "•" sat above it). One character still.
+          // (a bigger "•" sat above it). One character still.
           final size = style.fontSize ?? 16;
           spans.add(WidgetSpan(
             alignment: PlaceholderAlignment.middle,
@@ -498,7 +498,7 @@ class _BoxTapRecognizer extends OneSequenceGestureRecognizer {
 
 /// Draws the checkboxes of a note's text (N15) over the field in [child]:
 /// a rounded square in the accent, filled with a tick when ticked. Drawn
-/// by the app, so they look the same on every phone (Round 16: the font's
+/// by the app, so they look the same on every phone (the font's
 /// ☐ / ☑ came out small or grey). Where they go comes from the field's
 /// own layout, at the room [MarkdownEditingController] leaves for them.
 class CheckboxBoxes extends SingleChildRenderObjectWidget {
@@ -651,7 +651,7 @@ class RenderCheckboxBoxes extends RenderProxyBox {
       final text = _controller.text;
       for (final block in _controller.codeBlocks()) {
         final (:start, :end) = block;
-        // Round 42: around the code lines only, the same room above and
+        // Around the code lines only, the same room above and
         // below: hidden fences still keep some height of their own,
         // unequal. With the fences showing (or no code), around them too.
         final first = text.indexOf('\n', start) + 1;
@@ -661,7 +661,7 @@ class RenderCheckboxBoxes extends RenderProxyBox {
             ? _around(editable, toHere, first, last)
             : _around(editable, toHere, start, end);
         if (around == null) continue;
-        // Round 41: room around the code ([codeInset]), rounded corners
+        // Room around the code ([codeInset]), rounded corners
         // that show (the field's scroll leaves room for them).
         final rect = Rect.fromLTRB(width.left - codeInset, around.top - 6,
             width.right + codeInset, around.bottom + 6);

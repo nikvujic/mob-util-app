@@ -1,7 +1,7 @@
 part of 'pip_brain.dart';
 
-/// Round 138 (out of `pip_brain.dart`): what happens in his field now and
-/// then while he stands about (Round 52): a shooting star at dusk, bugs
+/// What happens in his field now and
+/// then while he stands about: a shooting star at dusk, bugs
 /// he fights off, a flower he picks, a butterfly, a ball.
 class _PipEventsState {
   // A shooting star.
@@ -32,7 +32,7 @@ class _PipEventsState {
 }
 
 extension PipBrainEvents on PipBrain {
-  // Round 52: events, now and then while he stands about.
+  // Events, now and then while he stands about.
 
   /// Room enough for an event (something coming in, him going to it).
   bool get _eventRoom => roomWidth >= 3 * PipBrain.width + 10;
@@ -42,11 +42,11 @@ extension PipBrainEvents on PipBrain {
   bool _maybeEvent() {
     if (!_eventRoom || _wantsStation || _bedtime) return false;
     if (random.nextDouble() >= PipBrain.eventChance) return false;
-    // Round 128: in his house, its own.
+    // In his house, its own.
     if (atHome) return _maybeHomeEvent();
-    // Round 75: mostly the weather's, while it's doing something.
+    // Mostly the weather's, while it's doing something.
     if (_maybeWeatherEvent()) return true;
-    // At dusk or night, now and then a shooting star (Round 70: not
+    // At dusk or night, now and then a shooting star (not
     // under a grey sky).
     if (dark && !overcast && random.nextInt(4) == 0) {
       play(PipAnimation.shootingStar);
@@ -56,7 +56,7 @@ extension PipBrainEvents on PipBrain {
     switch (pick) {
       case 0 || 1:
         _startBugs();
-      // Round 70: no flowers or butterflies in rain, snow or winter.
+      // No flowers or butterflies in rain, snow or winter.
       case 2 || 3 when !bleak:
         _startFlower();
       case 4 || 5 when !bleak:
@@ -187,18 +187,18 @@ extension PipBrainEvents on PipBrain {
     );
   }
 
-  /// His sword (Round 52, for the adventures later): held in a floating
+  /// His sword (for the adventures later): held in a floating
   /// hand at (x, height above the ground), its angle (0 up, pointing
   /// forward as it grows) and size (popping in and away); null when put
   /// away.
   (double, double, double, double)? get sword {
     if (activity == PipActivity.adventuring) return run?.sword;
-    // Round 127: felling a tree, breaking stone: swing after swing.
+    // Felling a tree, breaking stone: swing after swing.
     if (questView?.swing case final swing?) {
       final forward = facingRight ? 1.0 : -1.0;
-      // Round 147: digging, the shovel goes deeper, its blade into the
+      // Digging, the shovel goes deeper, its blade into the
       // hole, and back up.
-      // Round 149: his hammer, from overhead down onto what's in front.
+      // His hammer, from overhead down onto what's in front.
       final (from, by) = switch (questView?.place) {
         QuestScenePlace.beach => (0.5, 2.1),
         QuestScenePlace.house => (0.1, 1.6),
@@ -207,12 +207,12 @@ extension PipBrainEvents on PipBrain {
       final angle = swing < 0.5
           ? forward * (from + by * PipBrain._ease(swing * 2))
           : forward * (from + by - by * PipBrain._ease((swing - 0.5) * 2));
-      // Round 149: as high as he stands (the floor, the scaffold).
+      // As high as he stands (the floor, the scaffold).
       return (handBeside(right: facingRight), 7 + questView!.lift, angle, 1);
     }
     if (activity != PipActivity.bugHunt) return null;
-    // Round 53: held out in front, pointing up and away from him.
-    // Round 54: a little closer to him.
+    // Held out in front, pointing up and away from him.
+    // A little closer to him.
     final hand = handBeside(right: facingRight);
     final double size = switch (_ev.bugPhase) {
       0 => (_ev.phaseT / PipBrain.swordIn).clamp(0.0, 1.0),
@@ -264,7 +264,7 @@ extension PipBrainEvents on PipBrain {
         }
       case 2:
         if (_t >= PipBrain.flowerPick) {
-          _buzzes.add(PipBuzz.light); // Round 98: picked
+          _buzzes.add(PipBuzz.light); // Picked
           _ev.flowerPhase = 3;
           _t = 0;
         }
@@ -286,7 +286,7 @@ extension PipBrainEvents on PipBrain {
       0 => (_ev.flowerX, 0, (_t / PipBrain.sproutTime).clamp(0.0, 1.0), 0),
       1 || 2 => (_ev.flowerX, 0, 1, 0),
       _ => (
-          // Round 53: its stem down in his hand.
+          // Its stem down in his hand.
           handBeside(right: facingRight) - 2,
           4,
           1,
@@ -387,7 +387,7 @@ extension PipBrainEvents on PipBrain {
         _ev.ballUp += _ev.ballVy * dt;
         if (_ev.ballUp < 0) {
           _ev.ballUp = 0;
-          // Round 98: a buzz on each bounce that's still a bounce.
+          // A buzz on each bounce that's still a bounce.
           if (_ev.ballVy < -PipBrain.ballBuzzSpeed) _buzzes.add(PipBuzz.light);
           _ev.ballVy = -_ev.ballVy * 0.5; // a bounce
         }

@@ -1,6 +1,6 @@
 part of 'pip_brain.dart';
 
-/// Round 75: the weather in his field, as his brain lives it
+/// The weather in his field, as his brain lives it
 /// (`core/pip_weather.dart` says what each weather does): his tent in a
 /// storm, his umbrella in the rain, the weather's events, the snowman
 /// he built, a snowball's splat, and the weather coming in.
@@ -10,7 +10,7 @@ class _PipWeatherState {
   WeatherKind? weather;
   bool known = false;
 
-  /// Round 152: the weather just learned (not changed): his umbrella
+  /// The weather just learned (not changed): his umbrella
   /// simply as it should be at his next step, not opening.
   bool settle = false;
 
@@ -74,7 +74,7 @@ const _awayOrArriving = {
   PipActivity.thrown,
   PipActivity.adventuring,
   PipActivity.riding,
-  // Round 128: at his quest's work (his rain hat's for the wet).
+  // At his quest's work (his rain hat's for the wet).
   PipActivity.questing,
 };
 
@@ -87,7 +87,7 @@ const _umbrellaWhile = {
 };
 
 extension PipBrainWeather on PipBrain {
-  /// The weather event [animation] plays, if it's one (Round 75).
+  /// The weather event [animation] plays, if it's one.
   static PipWeatherEvent? eventOf(PipAnimation animation) =>
       _weatherAnimations[animation];
 
@@ -102,7 +102,7 @@ extension PipBrainWeather on PipBrain {
       return;
     }
     if (next == wx.weather) return;
-    // Round 152: none known yet (it's fetched once the app's open): just
+    // None known yet (it's fetched once the app's open): just
     // learned, not a change: no looking up, no umbrella going up.
     if (wx.weather == null) {
       wx.weather = next;
@@ -114,7 +114,7 @@ extension PipBrainWeather on PipBrain {
     wx.noticed = true;
   }
 
-  /// Round 152: the weather as it is, learned (his room just opened on
+  /// The weather as it is, learned (his room just opened on
   /// it): not a change he notices, his umbrella simply as it should be.
   void learnWeather(WeatherKind? now) {
     final wx = _wx;
@@ -189,7 +189,7 @@ extension PipBrainWeather on PipBrain {
     );
   }
 
-  /// Round 133: a battery flying to him at his quest's work (on the
+  /// A battery flying to him at his quest's work (on the
   /// floor, the scaffold): (left edge, height), or null.
   (double, double)? get _questBattery {
     final from = _wx.flyFrom;
@@ -358,7 +358,7 @@ extension PipBrainWeather on PipBrain {
           case 1: // building
             wx.snowman?.built = math.min(1, wx.t / _buildTime);
             if (wx.t >= _buildTime) {
-              _buzzes.add(PipBuzz.light); // Round 98: done
+              _buzzes.add(PipBuzz.light); // Done
               facingRight = !facingRight;
               next();
             }
@@ -382,7 +382,7 @@ extension PipBrainWeather on PipBrain {
             }
           case 2:
             if (wx.t >= _throwTime) {
-              // Round 98: it splats on the glass, at you.
+              // It splats on the glass, at you.
               _buzzes.add(PipBuzz.medium);
               next();
             }
@@ -404,7 +404,7 @@ extension PipBrainWeather on PipBrain {
     final wx = _wx;
     wx.since += dt;
     final home = !_awayOrArriving.contains(activity);
-    // Round 128: in his house he needs no tent or umbrella.
+    // In his house he needs no tent or umbrella.
     final storm = wx.weather == WeatherKind.storm && home && !atHome;
 
     // His tent: up round him when he's free, over him asleep or off;

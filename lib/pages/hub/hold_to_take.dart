@@ -9,15 +9,15 @@ import 'package:the_app/widgets/app_dialog.dart';
 /// How long the button is held to take an important medicine's dose.
 const holdToTakeTime = Duration(seconds: 5);
 
-/// Once full (Round 25): a small pop, a tick in place of the icon, and
+/// Once full: a small pop, a tick in place of the icon, and
 /// this long before the dialog closes.
 const holdToTakeEnd = Duration(milliseconds: 900);
 
-/// Asks to take a dose of an important medicine (Round 24): [name] at
+/// Asks to take a dose of an important medicine: [name] at
 /// [time]. A big round button has to be held for [holdToTakeTime]: it
 /// fills up like a glass, with a sound and small ticks while held, and
 /// drains if let go early. True once held to the end; false if cancelled.
-/// Round 92 (a take was lost): while it's held, and once full,
+/// While it's held, and once full,
 /// it can't be closed (no Cancel, no tap outside, no Back), and a full
 /// one counts however the dialog goes.
 Future<bool> showHoldToTake(
@@ -71,7 +71,7 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
     duration: const Duration(milliseconds: 1200),
   );
 
-  /// The ending (Round 25): 0 → 1, a burst out and a ring spreading.
+  /// The ending: 0 → 1, a burst out and a ring spreading.
   late final AnimationController _pop = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 450),
@@ -203,7 +203,7 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
                                 children: [
                                   // Light once the liquid is over it.
                                   Icon(
-                                    // A tick once taken (Round 25).
+                                    // A tick once taken.
                                     _finished
                                         ? Icons.check_rounded
                                         : Icons.medication_outlined,
@@ -255,7 +255,7 @@ class _HoldToTakeDialogState extends State<_HoldToTakeDialog>
 /// A round glass filling up to [fill] (0–1), its surface waving with
 /// [wave] (0–1, a cycle), inside a ring that goes round as it fills.
 /// The liquid's surface (its waves' middle) in a glass of [inner] radius
-/// around [centerY], [fill] full (Round 41): from below the bottom to
+/// around [centerY], [fill] full: from below the bottom to
 /// past the top by more than a wave is high, so it's really full at 1
 /// (the waves' troughs had left a gap under the rim).
 @visibleForTesting

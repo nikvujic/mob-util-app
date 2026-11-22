@@ -1,9 +1,8 @@
 part of 'pip_brain.dart';
 
-/// Round 138 (out of `pip_brain.dart`): a battery given him (Round 37):
+/// A battery given him:
 /// dropped where it was tapped, him walking over, a hand pulling the old
-/// one out of his side and throwing it away, the new one pushed in (Round
-/// 54), or, off, it flying to him and him coming back on.
+/// one out of his side and throwing it away, the new one pushed in, or, off, it flying to him and him coming back on.
 class _PipBatteryState {
   /// The battery dropped in his room: its left edge, and how high above
   /// the ground it still is (it falls); null when there's none.
@@ -16,34 +15,34 @@ class _PipBatteryState {
   /// Seconds into picking it up, once he's there.
   double? picking;
 
-  /// Which side of him the dropped battery is (Round 54).
+  /// Which side of him the dropped battery is.
   bool onRight = true;
 
-  /// Seconds since the dropped battery hit the ground (Round 97: it
+  /// Seconds since the dropped battery hit the ground (it
   /// bounces once), or null while it falls.
   double? landed;
 }
 
 extension PipBrainBattery on PipBrain {
-  // Round 37–97: his batteries.
+  // His batteries.
 
   /// Whether a battery dropped now would be taken (up and about, or
   /// off: it flies to him).
   bool get canTakeBattery =>
       mayStart(activity, PipAnimation.fetch) ||
       mayStart(activity, PipAnimation.powerOn) ||
-      // Round 65: out on his adventure, it flies to him as he runs.
+      // Out on his adventure, it flies to him as he runs.
       (activity == PipActivity.adventuring && run?.canCatch == true) ||
-      // Round 75: in his tent, it flies in (one at a time).
+      // In his tent, it flies in (one at a time).
       (activity == PipActivity.sheltering && !_batteryFlying) ||
-      // Round 133: at his quest's work, it flies to him there.
+      // At his quest's work, it flies to him there.
       (activity == PipActivity.questing && !_batteryFlying);
 
   /// A battery dropped at [at] (room pixels from the left): he walks over
   /// and picks it up, or, off, it flies to him and he comes back on.
   bool takeBattery(double at) {
     if (!canTakeBattery) return false;
-    // Round 128: at home, on his house's floor.
+    // At home, on his house's floor.
     final left = (atHome
             ? at.clamp(_minX, _maxX + PipBrain.width - PipBrain.batteryWidth)
             : at.clamp(0, math.max(0, roomWidth - PipBrain.batteryWidth)))
@@ -67,9 +66,9 @@ extension PipBrainBattery on PipBrain {
     }
     _start(PipActivity.fetching);
     _bt.picking = null;
-    // Round 54: to stand beside it (it by the hand he'll use), on the
+    // To stand beside it (it by the hand he'll use), on the
     // side he comes from if there's room there.
-    // Round 97: a few pixels off, so the old one pulled out of
+    // A few pixels off, so the old one pulled out of
     // his side isn't over the new one.
     final rightOf = left + PipBrain.batteryWidth / 2 >= x + PipBrain.width / 2;
     final besideLeft = left -
@@ -92,7 +91,7 @@ extension PipBrainBattery on PipBrain {
     return true;
   }
 
-  /// A spot a few steps off for a battery to drop at (Round 54: the
+  /// A spot a few steps off for a battery to drop at (the
   /// preview), on whichever side has room.
   double get _batterySpot {
     final right = x + PipBrain.width - PipBrain.bodyInset + 1 + 20;
@@ -123,7 +122,7 @@ extension PipBrainBattery on PipBrain {
         _bt.height * (1 - p) + 18 * math.sin(math.pi * p),
       );
     }
-    // Round 54: taken by the hand, carried to his slot, pushed in.
+    // Taken by the hand, carried to his slot, pushed in.
     final p = _bt.picking;
     if (activity == PipActivity.fetching &&
         p != null &&
@@ -148,7 +147,7 @@ extension PipBrainBattery on PipBrain {
     return (b, _bt.height + bounce);
   }
 
-  /// Round 97: a glint on the new battery now and then while it waits on
+  /// A glint on the new battery now and then while it waits on
   /// the ground ((x, height above the ground) of its middle), or null.
   (double, double)? get batteryGlint {
     final b = _bt.left;
@@ -203,7 +202,7 @@ extension PipBrainBattery on PipBrain {
     final land = _oldBatteryLands;
     final q = (p - PipBrain.throwAt) / PipBrain.throwFlight;
     if (q < 1) {
-      // Round 97 (never over the new one): over his head to his
+      // Over his head to his
       // other side, end over end.
       return (
         out + (land - out) * q,
@@ -233,7 +232,7 @@ extension PipBrainBattery on PipBrain {
         .toDouble();
   }
 
-  /// Round 97: the old battery's landing, a puff of dust: (x, height
+  /// The old battery's landing, a puff of dust: (x, height
   /// above the ground, how faded) for each speck.
   List<(double, double, double)> get batteryDust {
     final p = _bt.picking;
@@ -323,18 +322,18 @@ extension PipBrainBattery on PipBrain {
   bool get _batteryOnRight => _bt.onRight;
 
   /// Changing his battery, each step: it falls, he hurries over, a hand
-  /// swaps it (Round 54); a buzz at each moment felt (Round 98).
+  /// swaps it; a buzz at each moment felt.
   void _stepFetching(double dt) {
     if (_bt.height == 0) {
       _bt.landed = (_bt.landed ?? 0) + dt;
-      // Round 98: down again after its bounce.
+      // Down again after its bounce.
       if (PipBrain._passed(PipBrain.bounceTime, _bt.landed!, dt)) {
         _buzzes.add(PipBuzz.light);
       }
     }
     final falling = _bt.height > 0;
     _bt.height = math.max(0, _bt.height - PipBrain.fallSpeed * dt);
-    // Round 98: the battery drop.
+    // The battery drop.
     if (falling && _bt.height == 0) _buzzes.add(PipBuzz.medium);
     final picking = _bt.picking;
     if (picking == null) {
@@ -350,7 +349,7 @@ extension PipBrainBattery on PipBrain {
       }
     } else {
       final p = _bt.picking = picking + dt;
-      // Round 98: the old one pulled out, landing with its clunk; the
+      // The old one pulled out, landing with its clunk; the
       // new one clicking in; down from his hop of joy.
       for (final (at, buzz) in const [
         (PipBrain.pulledOut, PipBuzz.light),

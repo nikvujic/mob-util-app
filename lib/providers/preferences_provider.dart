@@ -50,11 +50,11 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   /// Deletes the Introduction from Notes (false brings it back).
   void setIntroDeleted(bool deleted) => state = state.copyWith(
         introDeleted: deleted,
-        // Restored: from the top (Round 29).
+        // Restored: from the top.
         introScroll: deleted ? null : 0,
       );
 
-  /// Where the Introduction was left, scrolled (Round 29).
+  /// Where the Introduction was left, scrolled.
   void setIntroScroll(double offset) {
     if (offset != state.introScroll) {
       state = state.copyWith(introScroll: offset);
@@ -80,13 +80,13 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
 
   void setBackupReminder(bool on) => state = state.copyWith(backupReminder: on);
 
-  /// The to-do note on or off (Round 28).
+  /// The to-do note on or off.
   void setTodoNote(bool on) => state = state.copyWith(todoNote: on);
 
-  /// The to-do note's *Waiting* list on or off (Round 45).
+  /// The to-do note's *Waiting* list on or off.
   void setTodoWaiting(bool on) => state = state.copyWith(todoWaiting: on);
 
-  /// Automatic backup into [folder] (Round 39), or off with null.
+  /// Automatic backup into [folder], or off with null.
   void setAutoBackupFolder(PickedFolder? folder) => state = state.copyWith(
         autoBackupFolder: () => folder?.uri,
         autoBackupFolderName: () => folder?.name,
@@ -102,20 +102,20 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
       );
   void autoBackupFailed() => state = state.copyWith(autoBackupFailed: true);
 
-  /// Whether the phone was plugged in when last seen (Round 44).
+  /// Whether the phone was plugged in when last seen.
   void setPipPlugged(bool plugged) {
     if (plugged != state.pipPlugged) {
       state = state.copyWith(pipPlugged: plugged);
     }
   }
 
-  /// Shop's bought list A–Z or in its own order (Round 69).
+  /// Shop's bought list A–Z or in its own order.
   void setShopSorted(bool sorted) => state = state.copyWith(shopSorted: sorted);
 
   void setHidePeopleNotes(bool hide) =>
       state = state.copyWith(hidePeopleNotes: hide);
 
-  /// What the app may use the internet for, and the weather (Round 70).
+  /// What the app may use the internet for, and the weather.
   void setInternet(InternetSettings internet) =>
       state = state.copyWith(internet: internet);
 
@@ -124,11 +124,11 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
     if (state.introUnread) state = state.copyWith(introUnread: false);
   }
 
-  /// The planner's notifications on or off (Round 31).
+  /// The planner's notifications on or off.
   void setPlannerReminders(bool on) =>
       state = state.copyWith(plannerReminders: on);
 
-  /// Round 72: the notification that stays while a block is on.
+  /// The notification that stays while a block is on.
   void setPlannerNow(bool on) => state = state.copyWith(plannerNow: on);
 
   /// Pauses the planner's notifications through [day]; null resumes.
@@ -137,13 +137,13 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
             day == null ? null : DateTime(day.year, day.month, day.day),
       );
 
-  /// How [page]'s notifications look and sound (Round 31).
+  /// How [page]'s notifications look and sound.
   void setNotifyStyle(NotifyPage page, NotifyStyle style) =>
       state = state.copyWith(
         notifyStyles: {...state.notifyStyles, page: style},
       );
 
-  /// Birthdays & dates' notifications on or off (Round 57).
+  /// Birthdays & dates' notifications on or off.
   void setDatesReminders(bool on) => state = state.copyWith(datesReminders: on);
 
   /// Pauses the dates' notifications through [day]; null resumes.
@@ -152,8 +152,8 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
             day == null ? null : DateTime(day.year, day.month, day.day),
       );
 
-  /// Subscriptions' notifications on or off (Round 79).
-  /// Spotify in the morning (Round 93).
+  /// Subscriptions' notifications on or off.
+  /// Spotify in the morning.
   void setMorningMusic(MorningMusic music) =>
       state = state.copyWith(morningMusic: music);
 

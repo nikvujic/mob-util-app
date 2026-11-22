@@ -7,7 +7,7 @@ import 'package:the_app/core/pip_bus.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_run.dart';
 
-/// Pip's ski days and his trip's bus (Round 67).
+/// Pip's ski days and his trip's bus.
 void main() {
   const out = (onBreak: false, breakDone: 0.0);
   const riding =
@@ -52,7 +52,7 @@ void main() {
       expect(run.shift, 0, reason: 'the ground doesn\'t move');
       expect(run.slope, isNotEmpty);
       expect(b.bug, isNull);
-      // Round 72: down the slope, a gentle slalom about the middle.
+      // Down the slope, a gentle slalom about the middle.
       expect(run.downhill, isTrue);
       expect((b.x - run.centre).abs(), lessThanOrEqualTo(5.01));
       // ...side to side, not straight down.
@@ -65,7 +65,7 @@ void main() {
     });
 
     test(
-        'the slope (Round 72): what he passes comes up from below him and '
+        'the slope: what he passes comes up from below him and '
         'shrinks away to the horizon; there from the start', () {
       final b = standing(ski: true);
       b.adventure(out, animate: false);
@@ -90,7 +90,7 @@ void main() {
 
     test(
         'seen setting off: to his gear, takes it, and down the slope '
-        '(Round 72: not walked to the middle on skis)', () {
+        '(not walked to the middle on skis)', () {
       final b = standing(ski: true);
       b.x = 120;
       b.adventure(out, animate: true);
@@ -108,7 +108,7 @@ void main() {
 
     test(
         'a fall: tumbling, a ski off beside him; he clicks back in where he '
-        'is (Round 72: no walking over) and goes on', () {
+        'is (no walking over) and goes on', () {
       final b = standing(ski: true);
       b.adventure(out, animate: false);
       b.takeBuzzes();

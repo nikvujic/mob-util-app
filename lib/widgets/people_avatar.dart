@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/people_sprites.dart';
 
-/// A person's face (Round 108): their age group's pixel face on a disc in
+/// A person's face: their age group's pixel face on a disc in
 /// their gender's colour; all grey for someone deceased.
 class PeopleAvatar extends StatelessWidget {
   /// 0 (baby) to 6 (old).

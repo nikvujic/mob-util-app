@@ -1,9 +1,8 @@
 part of 'pip_brain.dart';
 
-/// Round 138 (out of `pip_brain.dart`): his charging station (Round 44):
+/// His charging station:
 /// it rising where he is, him hurrying over, plugging in, charging (a
-/// segment every few seconds watched), unplugging; and its drone (Round
-/// 58) beaming a segment into him when he's off.
+/// segment every few seconds watched), unplugging; and its drone beaming a segment into him when he's off.
 class _PipStationState {
   /// The phone plugged in (from his room, checked every second).
   bool phonePlugged = false;
@@ -42,7 +41,7 @@ extension PipBrainStation on PipBrain {
   bool get phonePlugged => _st.phonePlugged;
   set phonePlugged(bool value) => _st.phonePlugged = value;
 
-  // Round 44: his charging station.
+  // His charging station.
 
   /// Whether the station should be up: the phone plugged in, or a demo.
   bool get _wantsStation => phonePlugged || _st.demoCharge != null;
@@ -64,7 +63,7 @@ extension PipBrainStation on PipBrain {
 
   /// Room for the station and him beside it, with some to spare.
   /// The station's spot: on the side of him with more room, at his
-  /// room's edge (Round 128: or his house's wall).
+  /// room's edge (or his house's wall).
   void _placeStation() {
     final low = atHome ? PipBrain.homeLeft : 0.0;
     final high = atHome ? PipBrain.homeRight : roomWidth.toDouble();
@@ -105,7 +104,7 @@ extension PipBrainStation on PipBrain {
       } else if (_st.dir < 0) {
         _st.dir = 1; // sinking: back up
       }
-      // Round 55: a medicine due, he reminds first (and goes after).
+      // A medicine due, he reminds first (and goes after).
       if (!animate && _goesCharging && !medicineDue) {
         // Simply there, charging.
         x = _plugX;
@@ -156,7 +155,7 @@ extension PipBrainStation on PipBrain {
     }
   }
 
-  // Round 58: off with the phone plugged in, the station's drone flies
+  // Off with the phone plugged in, the station's drone flies
   // over and charges him a segment; then he's up and walks over to plug
   // in as ever.
 
@@ -298,7 +297,7 @@ extension PipBrainStation on PipBrain {
       _st.x != null &&
       _wantsStation &&
       !_bedtime &&
-      // Round 58: empty, he's off: the drone sees to him first.
+      // Empty, he's off: the drone sees to him first.
       segments > 0 &&
       (segments < 3 || _st.demoCharge != null) &&
       (activity == PipActivity.standing ||
@@ -358,15 +357,15 @@ extension PipBrainStation on PipBrain {
         PipBrain.socketUp,
       );
 
-  /// His floating hand (Round 44: it pops in when he needs it, and away
-  /// after): each (x, height above the ground, size 0–1); Round 54: only
+  /// His floating hand (it pops in when he needs it, and away
+  /// after): each (x, height above the ground, size 0–1); only
   /// the one he uses (two holding his plate); none when not needed.
   List<(double, double, double)> get mitts {
-    // Round 54: changing his battery.
+    // Changing his battery.
     if (_batteryHand case (final hx, final hy, final size)) {
       return [(hx - 1, hy - 1.5, size)];
     }
-    // Round 53: holding his plate, one each side.
+    // Holding his plate, one each side.
     if (plate case (final px, final py, _, final size)) {
       return [
         (px - 1, py - 0.5, size),
@@ -375,7 +374,7 @@ extension PipBrainStation on PipBrain {
     }
     final plugging = activity == PipActivity.plugging;
     if (!plugging && activity != PipActivity.unplugging) return const [];
-    // Round 54: close by his side (a pixel off it), only the one he uses.
+    // Close by his side (a pixel off it), only the one he uses.
     final near = handBeside(right: _st.right) - 1;
     const rest = 8.0;
     final double size;
@@ -456,7 +455,7 @@ extension PipBrainStation on PipBrain {
         (_st.screenT * 6).floor().isEven;
     final p = _picking;
     if (activity == PipActivity.fetching && p != null) {
-      // Round 97: a crackle at his slot as the new one clicks in.
+      // A crackle at his slot as the new one clicks in.
       if (p >= PipBrain.pushedIn && p < PipBrain.pushedIn + PipBrain.sparkFor) {
         final q = (p - PipBrain.pushedIn) / PipBrain.sparkFor;
         final side = _batteryOnRight ? 1.0 : -1.0;
@@ -475,7 +474,7 @@ extension PipBrainStation on PipBrain {
             (sx + side * dx * (1 + 4 * q), sy + dy * (1 + 3 * q)),
         ];
       }
-      // Round 97: sparkles round him as he hops for joy.
+      // Sparkles round him as he hops for joy.
       if (p >= PipBrain.shakeEnd && p < PipBrain.pickEnd) {
         final q =
             (p - PipBrain.shakeEnd) / (PipBrain.pickEnd - PipBrain.shakeEnd);
@@ -553,7 +552,7 @@ extension PipBrainStation on PipBrain {
         if (!phonePlugged || segments >= 3) _startUnplugging();
       }
     } else if (segments >= 3) {
-      // Round 59: full, he's done: he unplugs and goes about (the
+      // Full, he's done: he unplugs and goes about (the
       // station stays while the phone's plugged in; he's back once a
       // segment's gone).
       _startUnplugging();

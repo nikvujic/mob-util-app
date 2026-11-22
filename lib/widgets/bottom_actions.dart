@@ -60,7 +60,7 @@ class BottomAction {
   /// to undo), so the buttons around it keep their places.
   final bool enabled;
 
-  /// The page's main action, e.g. adding (Round 33): the app's add button
+  /// The page's main action, e.g. adding: the app's add button
   /// look, as on Notes and Shop.
   final bool primary;
 
@@ -99,7 +99,7 @@ class BottomActions extends StatefulWidget {
   final int keepOrderOfLast;
 
   /// Always this side, instead of the hand's (e.g. where the hand can't be
-  /// told from the touches, Round 14).
+  /// told from the touches).
   final HandSide? side;
 
   /// A full-width bar over everything (e.g. the notes' formatting, N17).

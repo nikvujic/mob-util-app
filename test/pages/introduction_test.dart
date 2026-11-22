@@ -74,7 +74,7 @@ void main() {
 
   testWidgets(
       "scrolled to the end, Delete covers no text, above the phone's "
-      'own bar too (Round 17)', (tester) async {
+      'own bar too', (tester) async {
     // A 48 dp navigation bar (the view's padding is in physical pixels).
     tester.view.padding =
         FakeViewPadding(bottom: 48 * tester.view.devicePixelRatio);
@@ -95,7 +95,7 @@ void main() {
     expect(screen - textBottom, greaterThanOrEqualTo(button.height + 16 + 48));
   });
 
-  testWidgets('deleted after asking, no toast (Round 27); Settings restores it',
+  testWidgets('deleted after asking, no toast; Settings restores it',
       (tester) async {
     await start(tester);
     await open(tester);
@@ -110,7 +110,7 @@ void main() {
     // Settings offers to restore it; the menu has no entry.
     await openMenu(tester);
     expect(find.text('Introduction'), findsNothing);
-    // Round 70: below Internet Access, scrolled to on a short screen.
+    // Below Internet Access, scrolled to on a short screen.
     await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
@@ -144,7 +144,7 @@ void main() {
     expect(find.text('No notes'), findsOneWidget);
   });
 
-  group('opens where it was left (Round 29)', () {
+  group('opens where it was left', () {
     final text = find.byKey(const Key('introductionText'));
     double scrolled(WidgetTester tester) =>
         PullDownList.scrolledOf(tester.element(text));
@@ -190,10 +190,10 @@ void main() {
     expect(tile, findsNothing);
   });
 
-  testWidgets('Settings: line numbers first (Round 20)', (tester) async {
+  testWidgets('Settings: line numbers first', (tester) async {
     await start(tester);
     await openMenu(tester);
-    // Round 70: below Internet Access, scrolled to on a short screen.
+    // Below Internet Access, scrolled to on a short screen.
     await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
@@ -207,7 +207,7 @@ void main() {
   testWidgets('Settings switches it off for updates', (tester) async {
     await start(tester);
     await openMenu(tester);
-    // Round 70: below Internet Access, scrolled to on a short screen.
+    // Below Internet Access, scrolled to on a short screen.
     await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
@@ -228,7 +228,7 @@ void main() {
     expect(find.text('1 selected'), findsOneWidget);
   });
 
-  group('changes since the What\'s new last read (Round 61)', () {
+  group('changes since the What\'s new last read', () {
     const changelog = '''
 ## [1.23.0] - x
 
@@ -266,7 +266,7 @@ void main() {
 
     test(
         'always the whole minor version, even its patches read already '
-        '(Round 70)', () {
+        '', () {
       const patched = '## [1.22.2] - x\n\n### Fixed\n- Four\n\n$changelog';
       expect(
           changesSince(patched, '1.22.2', '1.22.0'),
@@ -330,7 +330,7 @@ void main() {
 
     test(
         "a patch shows its whole minor version's changes, newest first "
-        '(Round 48)', () {
+        '', () {
       const patched = '''
 ## [0.3.1] - unreleased
 
@@ -361,7 +361,7 @@ void main() {
 
   test(
       'every version\'s "What\'s new" reads as text, no stray code block '
-      '(Round 29: 1.2.0\'s turned mostly into code)', () {
+      '(1.2.0\'s turned mostly into code)', () {
     final changelog = File('CHANGELOG.md').readAsStringSync();
     final versions = RegExp(r'^## \[(\d+\.\d+\.\d+)\]', multiLine: true)
         .allMatches(changelog)

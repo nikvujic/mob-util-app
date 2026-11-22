@@ -17,7 +17,7 @@ import 'package:the_app/providers/todo_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
-/// Picks what to bring back from [backup] (Round 28): everything in it,
+/// Picks what to bring back from [backup]: everything in it,
 /// by kind, with boxes to tick; nothing is ticked at first. Returns the
 /// ids picked, by kind, or null if left without restoring.
 Future<Map<BackupPart, Set<String>>?> pickBackupParts(
@@ -280,7 +280,7 @@ class _RestorePartPageState extends ConsumerState<RestorePartPage> {
                 ],
               ],
             ),
-      // A wide button at the bottom, in thumb reach (Round 30: the round
+      // A wide button at the bottom, in thumb reach (the round
       // one couldn't hold its label).
       bottomNavigationBar: _count == 0
           ? null

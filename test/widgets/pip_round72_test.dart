@@ -9,7 +9,7 @@ import 'package:the_app/widgets/pip_sprites.dart';
 
 void main() {
   test(
-      'the bus (Round 72): bigger, his window clear, and him in it with '
+      'the bus: bigger, his window clear, and him in it with '
       'room around (not his whole face)', () {
     const art = PipSprites.bus;
     expect(art.length, PipBus.height);
@@ -37,7 +37,7 @@ void main() {
         reason: 'his feet hidden by the bus');
   });
 
-  test('trees (Round 72): a lot bigger than him, in every season', () {
+  test('trees: a lot bigger than him, in every season', () {
     for (final art in [PipSprites.tree, PipSprites.bareTree]) {
       expect(art.length, greaterThanOrEqualTo(PipBrain.height * 1.8));
       expect(art.every((r) => r.length == art.first.length), isTrue);
@@ -58,7 +58,7 @@ void main() {
     }
   });
 
-  test('trees (Round 72): in a random spot each time, apart', () {
+  test('trees: in a random spot each time, apart', () {
     final seen = <String>{};
     for (var seed = 0; seed < 50; seed++) {
       final [(at: a, pine: _, kind: _), (at: b, pine: _, kind: _)] =
@@ -71,7 +71,7 @@ void main() {
   });
 
   test(
-      'trees (Round 74): an oak, a birch or a pine each, at random; each '
+      'trees: an oak, a birch or a pine each, at random; each '
       'drawn in every season (the pine green all year)', () {
     final kinds = <PipTreeKind>{};
     for (var seed = 0; seed < 200; seed++) {
@@ -103,7 +103,7 @@ void main() {
   });
 
   test(
-      'the ski beanie (Round 72): down over his head, its cuff on his '
+      'the ski beanie: down over his head, its cuff on his '
       "casing's top, as wide as it", () {
     final art = PipSprites.hats[PipHat.skiBeanie]!;
     final drop = PipSprites.hatDrop[PipHat.skiBeanie]!;
@@ -116,7 +116,7 @@ void main() {
     expect(PipSprites.hatDrop.keys, [PipHat.skiBeanie], reason: 'the rest sit');
   });
 
-  test("Christmas's things (Round 72): every colour drawn", () {
+  test("Christmas's things: every colour drawn", () {
     for (final art in [PipSprites.badnjak, PipSprites.straw]) {
       for (final row in art) {
         for (final c in row.split('')) {
@@ -134,7 +134,7 @@ void main() {
   });
 
   test(
-      'trees (Round 75): a pine rarely (5%), but mostly in winter (60%); '
+      'trees: a pine rarely (5%), but mostly in winter (60%); '
       'the two the same kind but now and then (10%)', () {
     const opens = 4000;
     final pines = {for (final s in Season.values) s: 0};

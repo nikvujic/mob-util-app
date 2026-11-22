@@ -103,13 +103,13 @@ final _plainScroll = RegExp(
   r'(\.\w+)?\(',
 );
 const plainScrollAllowed = {
-  // People's panel and pickers (Round 108): the lower half of the
+  // People's panel and pickers: the lower half of the
   // screen and bottom sheets, already in thumb reach.
   'pages/hub/people_panel.dart',
-  // Things to pick to export or import (Round 104; Round 131 for every
+  // Things to pick to export or import (for every
   // page), in a bottom sheet capped in height: already at the bottom.
   'widgets/transfer_sheet.dart',
-  // A person's note (Round 109), on its own page like a recipe's method.
+  // A person's note, on its own page like a recipe's method.
   'pages/hub/person_note_page.dart',
   // A centred lock message, not a list.
   'app/section_gate.dart',
@@ -122,28 +122,28 @@ const plainScrollAllowed = {
   'pages/hub/counter_sheet.dart',
   // The same, for a medicine.
   'pages/hub/medicine_sheet.dart',
-  // A date's reminder sheet (Round 57): a few chips and a time, scrolled
+  // A date's reminder sheet: a few chips and a time, scrolled
   // on a short screen; no list to reach.
   'pages/hub/date_reminder_sheet.dart',
   // A reminder mark's menu: a short list in a bottom sheet.
   'pages/planner/pin_menu.dart',
-  // All the planner's reminders (Round 70): a list in a bottom sheet,
+  // All the planner's reminders: a list in a bottom sheet,
   // capped in height, already at the bottom.
   'pages/planner/reminders_sheet.dart',
-  // A few places found for the weather (Round 70), above the search
+  // A few places found for the weather, above the search
   // field at the bottom of a sheet: already in reach.
   'pages/internet/place_search_sheet.dart',
-  // The sounds to pick from (Round 39): a short list in a bottom sheet.
+  // The sounds to pick from: a short list in a bottom sheet.
   'pages/notifications/notifications.dart',
   // A note's text while editing: a pull would move the text being typed.
   'pages/notes/note_detail.dart',
-  // Pip Home's card (Round 35): short lists inside a card at the bottom,
+  // Pip Home's card: short lists inside a card at the bottom,
   // already in reach; a pull would fight the card's swipe.
   'pages/hub/pip_home.dart',
-  // A recipe in view mode (Round 42): the user wants no reach mode there,
+  // A recipe in view mode: the user wants no reach mode there,
   // only in edit mode (which has it).
   'pages/hub/recipe_page.dart',
-  // Copy list's sheet (Round 94): a name and a few sections to tick, in
+  // Copy list's sheet: a name and a few sections to tick, in
   // a bottom sheet, scrolling only to stay clear of the keyboard.
   'pages/hub/packing_copy_sheet.dart',
 };
@@ -151,8 +151,8 @@ const plainScrollAllowed = {
 final _rawColor = RegExp(r'(?<![A-Za-z])Colors\.(?!transparent\b)|Color\(0x');
 final _print = RegExp(r'(?<![A-Za-z_.])print\(');
 
-/// Toasts shown without first hiding the one showing (UI conventions,
-/// Round 39): within the three lines before.
+/// Toasts shown without first hiding the one showing (UI conventions):
+/// within the three lines before.
 List<String> toastViolations(String path, String source) {
   final lines = source.split('\n');
   return [
@@ -170,7 +170,7 @@ List<String> toastViolations(String path, String source) {
 /// search went into the top bar unasked. A file listed in
 /// [appBarActionsAllowed] may, only where listed here.
 const appBarActionsAllowed = <String>{
-  // Round 131: Import / export in the top bar (the same on
+  // Import / export in the top bar (the same on
   // every page that gets it).
   'pages/hub/recipes.dart',
 };
@@ -264,7 +264,7 @@ void main() {
 
   test(
       'only core/system_ui.dart changes the phone\'s bars or which way up '
-      '(Round 151: a page left its own, and others were laid out wrong)', () {
+      '(a page left its own, and others were laid out wrong)', () {
     final calls = RegExp(r'SystemChrome\.(setEnabledSystemUIMode|'
         r'setPreferredOrientations|setEnabledSystemUIOverlays)');
     final elsewhere = [
@@ -274,7 +274,7 @@ void main() {
     expect(elsewhere, isEmpty, reason: 'use AppSystemUi');
   });
 
-  test('a toast replaces the one showing, never queues (Round 39)', () {
+  test('a toast replaces the one showing, never queues', () {
     final violations = [
       for (final f in files) ...toastViolations(f.path, f.source),
     ];
@@ -287,7 +287,7 @@ void main() {
   });
 
   test(
-      'every text field has the lowered selection handles (Round 92: '
+      'every text field has the lowered selection handles ('
       'selectionControls set)', () {
     List<String> missing(String path, String source) => [
           for (final m
@@ -306,7 +306,7 @@ void main() {
   });
 
   test(
-      "Pip's brain (Round 138): a part touches only its own state; the "
+      "Pip's brain: a part touches only its own state; the "
       'core none (it calls the parts)', () {
     const holders = {
       'core/pip_brain_battery.dart': '_bt',

@@ -6,10 +6,10 @@ import 'package:the_app/providers/medicine_provider.dart';
 
 import '../helpers.dart';
 
-/// Important medicines (Round 24): set in the sheet; a dose is taken only
+/// Important medicines: set in the sheet; a dose is taken only
 /// by holding a button for 5 seconds.
 void main() {
-  test('full means full: no gap left under the rim (Round 41)', () {
+  test('full means full: no gap left under the rim', () {
     const centre = 100.0, inner = 60.0;
     // Full: even a wave's trough is above the glass's top.
     expect(surfaceTop(centre, inner, 1) + maxWave, lessThan(centre - inner));
@@ -158,7 +158,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpAndSettle();
       await gesture.up();
-      // Full: a pop, a tick, and a moment before it closes (Round 25).
+      // Full: a pop, a tick, and a moment before it closes.
       expect(find.text('Taken'), findsOneWidget);
       expect(find.byKey(const Key('holdTaken')), findsOneWidget);
       expect(find.text('Take Iron?'), findsOneWidget, reason: 'still there');
@@ -170,7 +170,7 @@ void main() {
 
     testWidgets(
         'a second finger neither restarts nor stops it; one finger left '
-        'keeps filling (Round 24)', (tester) async {
+        'keeps filling', (tester) async {
       await start(tester);
       await tester.tap(find.byKey(Key('dose-$id-0')));
       await tester.pumpAndSettle();
@@ -193,7 +193,7 @@ void main() {
     });
 
     testWidgets(
-        'Round 92: while held, and once full, nothing closes it (outside, '
+        'while held, and once full, nothing closes it (outside, '
         'Back, Cancel); full, it\'s taken', (tester) async {
       await start(tester);
       await tester.tap(find.byKey(Key('dose-$id-0')));

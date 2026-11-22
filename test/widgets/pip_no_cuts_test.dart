@@ -10,7 +10,7 @@ import 'package:the_app/widgets/pip_room.dart';
 
 import '../helpers.dart';
 
-/// Round 141: whatever his life says while he's watched (sleep, waking,
+/// Whatever his life says while he's watched (sleep, waking,
 /// running out, a battery, his work's hours, his house, plugged in, a
 /// medicine due, out on his adventure, taps), every frame follows from
 /// the last: he only changes place out of view (or at his door), never
@@ -18,10 +18,10 @@ import '../helpers.dart';
 void main() {
   final q = Quests.house;
   final issues = <String>[];
-  // Seeds that found cuts before they were fixed (Round 141).
+  // Seeds that found cuts before they were fixed.
   for (final seed in const [10, 17, 23, 57, 62]) {
     testWidgets(
-        'Round 141: watched through a random life (seed $seed), he never '
+        'watched through a random life (seed $seed), he never '
         'jumps: no cut between places in view, no jump in where he is, no '
         'hat jumping', (tester) async {
       final r = math.Random(seed);

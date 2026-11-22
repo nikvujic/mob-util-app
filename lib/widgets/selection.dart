@@ -105,7 +105,7 @@ class SelectionActions extends StatelessWidget {
 
   final List<SelectionAction> extra;
 
-  /// Actions between Select all and Delete (Round 58: Shop's Rename,
+  /// Actions between Select all and Delete (Shop's Rename,
   /// with one item selected).
   final List<SelectionAction> nearDelete;
 
@@ -318,7 +318,7 @@ class ReorderOrSelectIndicator extends StatelessWidget {
   final bool selectionMode;
   final bool selected;
 
-  /// Round 69: false, no handle (a list shown sorted or filtered can't
+  /// False, no handle (a list shown sorted or filtered can't
   /// be reordered).
   final bool reorderable;
 

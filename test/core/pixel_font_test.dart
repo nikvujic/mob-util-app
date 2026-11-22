@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pixel_font.dart';
 
-/// The app's pixel letters (Round 34).
+/// The app's pixel letters.
 void main() {
   test('every letter and digit, each 3 x 5', () {
     for (final c

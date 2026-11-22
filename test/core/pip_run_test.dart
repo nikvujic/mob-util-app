@@ -5,8 +5,8 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/core/pip_run.dart';
 
-/// Pip's day out, as it's drawn (Round 63): setting off, running, bugs,
-/// his break at the tavern (Round 64), coming back.
+/// Pip's day out, as it's drawn: setting off, running, bugs,
+/// his break at the tavern, coming back.
 void main() {
   const out = (onBreak: false, breakDone: 0.0);
   const onBreak = (onBreak: true, breakDone: 0.0);
@@ -61,7 +61,7 @@ void main() {
   });
 
   test(
-      'a bug coming: in from the edge, crawling closer (Round 72: never '
+      'a bug coming: in from the edge, crawling closer (never '
       'popping up beside him); struck, a poof and a buzz; he runs on', () {
     final b = standing();
     b.adventure(out, animate: false);
@@ -135,7 +135,7 @@ void main() {
     final (_, height, left) = b.run!.plateAt!;
     expect(height, closeTo(PipRun.tableHeight, 1e-9));
     expect(left, 1);
-    // Round 74: not watched, eaten by a quarter of the way into it.
+    // Not watched, eaten by a quarter of the way into it.
     b.adventure((onBreak: true, breakDone: 0.1), animate: true);
     expect(b.run!.plateAt!.$3, closeTo(0.6, 1e-9),
         reason: 'eaten as his break goes');
@@ -151,7 +151,7 @@ void main() {
 
   test(
       'opened just as his break starts: he runs up to the tavern '
-      '(Round 66)', () {
+      '', () {
     final b = standing();
     b.adventure((onBreak: true, breakDone: 0.0), animate: false);
     expect(b.run!.phase, isNot(RunPhase.sitting));
@@ -223,7 +223,7 @@ void main() {
   });
 
   test(
-      'a battery given while he\'s out (Round 65): it flies to him, he '
+      'a battery given while he\'s out: it flies to him, he '
       'catches it running; one at a time', () {
     final b = standing();
     b.adventure(out, animate: false);

@@ -4,7 +4,7 @@ import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 
 /// Takes [page]'s shown notifications out of the phone's tray once
-/// [child] (that page) is opened (Round 61: not when the app is).
+/// [child] (that page) is opened (not when the app is).
 class ClearsShown extends ConsumerStatefulWidget {
   final NotifyPage page;
   final Widget child;

@@ -1,4 +1,4 @@
-/// People (Round 108, spec `docs/PEOPLE_SPEC.md`): the people you know
+/// People (spec `docs/PEOPLE_SPEC.md`): the people you know
 /// as boxes on a board, with relations that make family trees. A person's
 /// birthday may be tied to a date on the Dates page ([Person.dateId]).
 enum Gender {
@@ -101,7 +101,7 @@ class Person {
   /// The birthday's date on the Dates page (spec 6), if it has one.
   final String? dateId;
 
-  /// Round 113: their birthday shown in Dates (a projection, for the
+  /// Their birthday shown in Dates (a projection, for the
   /// overview and its reminders); off, People keeps it to itself.
   final bool inDates;
 
@@ -286,7 +286,7 @@ class PeopleBook {
   final List<Relation> relations;
   final BoardView view;
 
-  /// Round 109: the main person (the board can centre on them; their
+  /// The main person (the board can centre on them; their
   /// family can be highlighted), if one is set.
   final String? mainId;
 
@@ -316,8 +316,8 @@ class PeopleBook {
   Set<String> get familyShown =>
       highlightFamily && main != null ? familyOf(mainId!) : const {};
 
-  /// Whether a sibling relation [r] gets its own line on the board
-  /// (Round 115): not with a parent in common, whose line to their
+  /// Whether a sibling relation [r] gets its own line on the board:
+  /// not with a parent in common, whose line to their
   /// children already joins them.
   bool drawsSiblingBar(Relation r) =>
       r.kind == RelationKind.sibling &&

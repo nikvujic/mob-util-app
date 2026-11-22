@@ -1,14 +1,14 @@
-/// The app's pages that send notifications (Round 31), each with its own
+/// The app's pages that send notifications, each with its own
 /// settings on the Notifications page.
 enum NotifyPage {
   planner('Planner'),
   medicine('Medicine'),
   backup('Backup'),
 
-  /// Birthdays & dates (Round 57).
+  /// Birthdays & dates.
   dates('Dates'),
 
-  /// Subscriptions (Round 79): renewing, to cancel, ending.
+  /// Subscriptions: renewing, to cancel, ending.
   subscriptions('Subscriptions');
 
   final String label;
@@ -19,11 +19,11 @@ enum NotifyPage {
       values.where((p) => p.name == name).firstOrNull;
 }
 
-/// A notification's sound (Round 31). Android fixes a channel's sound when
+/// A notification's sound. Android fixes a channel's sound when
 /// it's made, so each is a channel of its own.
 enum NotifySound {
   phone('Phone\'s default'),
-  // Round 39: hacky 8-bit ones, to try (Chime, Bell and Soft are gone).
+  // Hacky 8-bit ones, to try (Chime, Bell and Soft are gone).
   coin('Coin', 'notify_coin'),
   powerUp('Power-up', 'notify_powerup'),
   blip('Blip', 'notify_blip'),
@@ -40,7 +40,7 @@ enum NotifySound {
 
   const NotifySound(this.label, [this.resource]);
 
-  /// The one stored as [name]; the gone ones (Round 39) as the nearest
+  /// The one stored as [name]; the gone ones as the nearest
   /// new one; unknown: the phone's.
   static NotifySound fromName(String? name) =>
       values.where((s) => s.name == name).firstOrNull ??
@@ -52,7 +52,7 @@ enum NotifySound {
       };
 }
 
-/// How loud the app's own sounds are (Round 41: they were loud). Android
+/// How loud the app's own sounds are (they were loud). Android
 /// plays a notification's sound at the phone's notification volume, so
 /// each level is its own copy of the sound, quieter
 /// (`tool/make_notify_sounds.py`); the phone's own sound can't be made
@@ -80,7 +80,7 @@ enum NotifyVolume {
       values.where((v) => v.name == name).firstOrNull ?? loud;
 }
 
-/// How one page's notifications look and sound (Round 31).
+/// How one page's notifications look and sound.
 class NotifyStyle {
   /// Names left out ("A task at 10:00", "A dose is due"), so nothing
   /// private shows on the lock screen.
@@ -91,7 +91,7 @@ class NotifyStyle {
 
   final NotifySound sound;
 
-  /// How loud its sound (Round 41), if it's one of the app's.
+  /// How loud its sound, if it's one of the app's.
   final NotifyVolume volume;
 
   const NotifyStyle({

@@ -3,7 +3,7 @@ import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/notification_target.dart';
 
-/// A notification tapped (Round 19), waiting for its page to show it: the
+/// A notification tapped, waiting for its page to show it: the
 /// home screen goes to its section, and the page takes it once it's in
 /// view and not locked. Locked, it waits for the next visit after
 /// unlocking.
@@ -16,7 +16,7 @@ final notificationOpenerProvider = Provider<void>((ref) {
   void take(String? payload) {
     final target = NotificationTarget.parse(payload);
     if (target is PlannerNowTarget) {
-      // Round 72: Done on a block that's on ticks it; either way, to it.
+      // Done on a block that's on ticks it; either way, to it.
       if (target.done) tickNow(ref, target);
       ref.read(pendingTargetProvider.notifier).state = target.at;
       return;
@@ -29,8 +29,8 @@ final notificationOpenerProvider = Provider<void>((ref) {
   scheduler.takeLaunch().then(take);
 });
 
-/// Ticks off the block [target] is about (Round 72: its notification's
-/// Done), unless it already is (or is gone). Round 78: a routine isn't
+/// Ticks off the block [target] is about (its notification's
+/// Done), unless it already is (or is gone). A routine isn't
 /// ticked off (an old notification's Done just opens the planner).
 void tickNow(Ref ref, PlannerNowTarget target) {
   if (target.routine) return;

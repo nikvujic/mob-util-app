@@ -182,7 +182,7 @@ void main() {
     });
   });
 
-  group('Round 58', () {
+  group('duplicates, rename, suggestions', () {
     test('an item added again is moved, not doubled (any case)', () {
       notifier
         ..addItem('Milk')

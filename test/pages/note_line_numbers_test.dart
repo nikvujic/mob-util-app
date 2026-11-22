@@ -45,8 +45,7 @@ void main() {
     }
   });
 
-  testWidgets('no number beside a code block\'s hidden fences (Round 29)',
-      (tester) async {
+  testWidgets('no number beside a code block\'s hidden fences', (tester) async {
     await openNote(tester, 'one\n```\ncode\n```\nfive');
     expect(numbers(tester), [1, 3, 5], reason: 'counted, not shown');
   });

@@ -38,7 +38,7 @@ void main() {
 
   testWidgets(
       'a fractional height (e.g. above Pip\'s room) settles, not '
-      'settling back every frame (Round 26)', (tester) async {
+      'settling back every frame', (tester) async {
     for (final height in [525.3333333, 457.6666667, 381.3333333, 600.1]) {
       await pumpList(tester, 3, height: height);
       await tester.pumpAndSettle();

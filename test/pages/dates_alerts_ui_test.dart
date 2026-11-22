@@ -14,7 +14,7 @@ import 'package:the_app/providers/security_provider.dart';
 
 import '../helpers.dart';
 
-/// Birthdays & dates in the app (Round 57): their reminders, the
+/// Birthdays & dates in the app: their reminders, the
 /// Notifications page, a reminder tapped, and the green dot.
 void main() {
   late ProviderContainer container;
@@ -69,8 +69,7 @@ void main() {
     expect(dateReminders(), isEmpty);
   });
 
-  testWidgets('private: no names; Round 82: locked, names still',
-      (tester) async {
+  testWidgets('private: no names; locked, names still', (tester) async {
     await start(tester, dates: [ana]);
     final prefs = container.read(preferencesProvider.notifier);
     prefs.setNotifyStyle(

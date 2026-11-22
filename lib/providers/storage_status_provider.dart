@@ -7,7 +7,7 @@ final unreadableFilesProvider = Provider<List<String>>(
   (ref) => ref.watch(appStorageProvider).unreadable,
 );
 
-/// Whether saving fails right now (D6, Round 23), e.g. the phone's storage
+/// Whether saving fails right now (D6), e.g. the phone's storage
 /// is full: the home screen says so, and when it's saved again.
 class SaveFailingNotifier extends StateNotifier<bool> {
   SaveFailingNotifier(AppStorage storage) : super(storage.saveFailing.value) {

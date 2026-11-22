@@ -1,4 +1,4 @@
-/// What kind of date a date is (Round 57): a fixed list, each shown with
+/// What kind of date a date is: a fixed list, each shown with
 /// its icon and colour. The [name] is stored, so a type is never renamed
 /// here, only its [label].
 enum DateType {
@@ -15,15 +15,15 @@ enum DateType {
   /// Whether a new date of this type is every year.
   final bool yearly;
 
-  /// Whether it can last several days (Round 59: a holiday, an event).
+  /// Whether it can last several days (a holiday, an event).
   final bool lasts;
 
-  /// Whether its form offers *Every year* and *Year known* (Round 61:
-  /// only Other; a birthday or anniversary is every year, a holiday or an
+  /// Whether its form offers *Every year* and *Year known* (only
+  /// Other; a birthday or anniversary is every year, a holiday or an
   /// event is once, on a date with its year).
   bool get choosesYearly => this == other;
 
-  /// Its kinds (Round 61), besides the plain one.
+  /// Its kinds, besides the plain one.
   List<DateKind> get kinds => [
         for (final k in DateKind.values)
           if (k.type == this) k
@@ -34,7 +34,7 @@ enum DateType {
       values.where((t) => t.name == id).firstOrNull ?? other;
 }
 
-/// A kind of holiday or event (Round 61): a holiday can be a ski trip
+/// A kind of holiday or event: a holiday can be a ski trip
 /// (Pip goes skiing then, later), a beach or a trip; an event a wedding
 /// (its own reminders). None: just a holiday or an event. The [name] is
 /// stored.
@@ -55,7 +55,7 @@ enum DateKind {
   static DateKind? fromId(String? id) =>
       values.where((k) => k.name == id).firstOrNull;
 
-  /// Its own reminders for a new date of its kind (Round 61: a wedding,
+  /// Its own reminders for a new date of its kind (a wedding,
   /// a week and a month before), or null: the usual.
   List<DateReminder>? get reminders => switch (this) {
         wedding => DateReminder.weddingDefaults,
@@ -63,7 +63,7 @@ enum DateKind {
       };
 }
 
-/// A date's reminder (Round 57): [daysBefore] it (0: on the day), at
+/// A date's reminder: [daysBefore] it (0: on the day), at
 /// [minutes] into that day.
 class DateReminder {
   final int daysBefore;
@@ -71,17 +71,17 @@ class DateReminder {
 
   const DateReminder({required this.daysBefore, required this.minutes});
 
-  /// A new date's (Round 57): the day before, at 09:00.
+  /// A new date's: the day before, at 09:00.
   static const standard = DateReminder(daysBefore: 1, minutes: 9 * 60);
 
-  /// A new date's reminders (Round 61): the day before and a
+  /// A new date's reminders: the day before and a
   /// week before, at 09:00.
   static const defaults = [
     standard,
     DateReminder(daysBefore: 7, minutes: 9 * 60),
   ];
 
-  /// A wedding's (Round 61): a week and a month before.
+  /// A wedding's: a week and a month before.
   static const weddingDefaults = [
     DateReminder(daysBefore: 7, minutes: 9 * 60),
     DateReminder(daysBefore: 30, minutes: 9 * 60),
@@ -118,7 +118,7 @@ class DateReminder {
       );
 }
 
-/// An important date (Round 57): a birthday, an anniversary, a holiday,
+/// An important date: a birthday, an anniversary, a holiday,
 /// an event. Its [day] and [month], and its [year] if known (needed for
 /// a one-off: [yearly] off). A birthday on 29 February comes on 28
 /// February in a year without it.
@@ -133,7 +133,7 @@ class DateEntry {
   final String note;
   final List<DateReminder> reminders;
 
-  /// How many days it lasts (Round 59), from its day on; only a type that
+  /// How many days it lasts, from its day on; only a type that
   /// [DateType.lasts] (else it's kept, unused, for if the type comes
   /// back). See [span].
   final int days;
@@ -141,14 +141,14 @@ class DateEntry {
   /// The longest it can last.
   static const mostDays = 31;
 
-  /// Its kind (Round 61), if one of its type's; see [kindNow].
+  /// Its kind, if one of its type's; see [kindNow].
   final DateKind? kind;
 
   /// Its kind as its type has it: none if the kind is another type's
   /// (kept, unused, for if the type comes back).
   DateKind? get kindNow => kind?.type == type ? kind : null;
 
-  /// A ski trip's travel (Round 67): hours each way (0: none), when the
+  /// A ski trip's travel: hours each way (0: none), when the
   /// bus leaves on the first day ([leaveAt]) and on the day after the
   /// last ([backAt]), as minutes into the day. Only for a Skiing holiday
   /// ([hasTravel]); kept otherwise, unused.
@@ -158,7 +158,7 @@ class DateEntry {
 
   static const mostTravelHours = 24;
 
-  /// Round 108: a birthday that belongs to a person on the People page;
+  /// A birthday that belongs to a person on the People page;
   /// its title, day, month, year, type and yearly come from them (edited
   /// there), and it can't be deleted here. Null: an ordinary date.
   final String? personId;
@@ -252,7 +252,7 @@ class DateEntry {
   }
 
   /// When the time it covers [date] began (its first day), or null if
-  /// it doesn't fall on [date] (a day, local). Round 59: lasting several
+  /// it doesn't fall on [date] (a day, local). Lasting several
   /// days, every one of them (also into the new year).
   DateTime? startCovering(DateTime date) {
     final day = DateTime(date.year, date.month, date.day);
@@ -269,7 +269,7 @@ class DateEntry {
   bool on(DateTime date) => startCovering(date) != null;
 
   /// The next time it falls, on [from] or after (a day): its first day,
-  /// which is before [from] while it's on (Round 59); null if never again
+  /// which is before [from] while it's on; null if never again
   /// (a one-off gone by).
   DateTime? nextFrom(DateTime from) {
     final start = DateTime(from.year, from.month, from.day);
@@ -336,7 +336,7 @@ class DateEntry {
 /// A date on the day it next falls (for the upcoming list).
 typedef DateOn = ({DateEntry date, DateTime on});
 
-/// The dates (Round 57), in the order they were added.
+/// The dates, in the order they were added.
 class DateBook {
   final List<DateEntry> dates;
 
@@ -370,7 +370,7 @@ class DateBook {
     return found;
   }
 
-  /// The dates on [today] (Round 72: the Today section), each from its
+  /// The dates on [today] (the Today section), each from its
   /// first day (one lasting several may have begun before), by title.
   List<DateOn> today(DateTime today) => [
         for (final d in dates)
@@ -378,7 +378,7 @@ class DateBook {
       ]..sort((a, b) =>
           a.date.title.toLowerCase().compareTo(b.date.title.toLowerCase()));
 
-  /// One-off dates gone by (Round 72: the Past section, kept so they
+  /// One-off dates gone by (the Past section, kept so they
   /// aren't lost), the latest first.
   List<DateOn> past(DateTime today) {
     final day = DateTime(today.year, today.month, today.day);

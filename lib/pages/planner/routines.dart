@@ -141,7 +141,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
   DateTime get _today => dayOf(ref.read(clockProvider)());
 
   /// Adds a routine in [slot]; tapped at minute [at], it starts there
-  /// (to :00 / :30, as on the planner, Round 16).
+  /// (to :00 / :30, as on the planner).
   Future<void> _add(FreeSlot slot, {int? at}) async {
     final today = _today;
     final int? start = at == null
@@ -219,7 +219,7 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             ),
           ),
           Expanded(
-            // Reach mode, as on the planner (Round 17).
+            // Reach mode, as on the planner.
             child: PullDownList(
               initialOffset: _opensAt,
               slivers: [

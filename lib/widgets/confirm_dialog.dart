@@ -141,7 +141,7 @@ Widget _saveChanges(BuildContext context, String title, String? message) =>
     );
 
 /// Asks to type [word] (DELETE) before something that matters goes for
-/// good (Round 32: an important medicine). True only once typed and
+/// good (an important medicine). True only once typed and
 /// confirmed.
 Future<bool> showTypeToConfirmDialog(
   BuildContext context, {

@@ -42,7 +42,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   @override
   void initState() {
     super.initState();
-    // Round 61: opened, the backup reminder leaves the tray.
+    // Opened, the backup reminder leaves the tray.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(clearShownProvider)(NotifyPage.backup);
@@ -90,7 +90,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   /// False if the user cancels.
   Future<bool> _unlockIfSectionsClosed({bool replaces = false}) async {
     // Restoring also replaces locked notes: not without the password
-    // either, sections locked or not (Round 21).
+    // either, sections locked or not.
     final lockedNotes = replaces &&
         ref.read(securityProvider) != null &&
         ref.read(sessionProvider) == null &&
@@ -345,8 +345,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     }
   }
 
-  /// Restores some things from a backup, added to what's there (Round
-  /// 28).
+  /// Restores some things from a backup, added to what's there.
   Future<void> _importPart() async {
     if (!await _unlockIfSectionsClosed() || !mounted) return;
     final importer = ref.read(backupImporterProvider);
@@ -391,7 +390,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
 
   /// "today", "yesterday", "8 days ago".
   static String _ago(DateTime at, DateTime now) {
-    // Round 137: calendar days, right across a clock change.
+    // Calendar days, right across a clock change.
     final days = daysBetween(at, now);
     return switch (days) {
       <= 0 => 'today',
@@ -415,7 +414,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             subtitle: Text(
               last == null
                   ? 'No backup yet'
-                  // One space here (Round 27; the notes' dates keep two).
+                  // One space here (the notes' dates keep two).
                   : 'Last backup: ${formatDateTime(last, gap: ' ')} '
                       '(${_ago(last, ref.watch(clockProvider)())})',
               key: const Key('lastBackup'),
@@ -459,7 +458,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             ),
             onTap: _busy ? null : _importPart,
           ),
-          // Automatic backup (Round 39): daily, into a folder picked once.
+          // Automatic backup: daily, into a folder picked once.
           SwitchListTile(
             key: const Key('autoBackup'),
             secondary: const Icon(Icons.folder_outlined),

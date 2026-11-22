@@ -1,14 +1,14 @@
 part of 'pip_brain.dart';
 
-/// Round 138 (out of `pip_brain.dart`): how he looks and what his screen
-/// says: his hats (Round 57, 61), his medicine reminder (Round 53), a
-/// meal after a recipe (Round 53), and something on his screen now and
+/// How he looks and what his screen
+/// says: his hats, his medicine reminder, a
+/// meal after a recipe, and something on his screen now and
 /// then.
 class _PipLooksState {
   /// Someone's birthday today, or his own (the room says): the party hat.
   bool birthday = false;
 
-  /// Today's hat otherwise (Round 61, the room says): a day of the year's
+  /// Today's hat otherwise (the room says): a day of the year's
   /// (a Santa hat at New Year...) or a random day's; null: none.
   PipHat? dayHat;
 
@@ -44,7 +44,7 @@ extension PipBrainLooks on PipBrain {
   DateTime? get ateFor => _lk.ateFor;
   set ateFor(DateTime? value) => _lk.ateFor = value;
 
-  // Round 57: his hats.
+  // His hats.
 
   /// Tries [hat] on (none: null), instead of what he'd wear.
   void tryOn(PipHat? hat) {
@@ -65,16 +65,16 @@ extension PipBrainLooks on PipBrain {
       return null;
     }
     if (_lk.tryingOn) return _lk.triedOn;
-    // Round 67: no hat on the bus.
+    // No hat on the bus.
     if (activity == PipActivity.riding) return null;
     if (birthday) return PipHat.party;
-    // Round 128: working his quest in the wet, his rain hat.
+    // Working his quest in the wet, his rain hat.
     if (activity == PipActivity.questing && wetOut) return PipHat.rainHat;
-    // Round 67: a ski beanie all his ski days.
+    // A ski beanie all his ski days.
     return snowing ? PipHat.skiBeanie : dayHat;
   }
 
-  /// Round 141: his hat hopping off his head to the ground beside him as
+  /// His hat hopping off his head to the ground beside him as
   /// he settles to sleep, and back on as he puts his legs out waking, so
   /// it's never simply there: 0 on the ground → 1 on his head; null when
   /// it isn't hopping.
@@ -103,22 +103,22 @@ extension PipBrainLooks on PipBrain {
           activity == PipActivity.stirring ||
           activity == PipActivity.wakingUp);
 
-  // Round 53: his medicine reminder.
+  // His medicine reminder.
 
-  /// Round 55: due, the first thing he does whenever he's up and about
+  /// Due, the first thing he does whenever he's up and about
   /// (before going to charge, or a battery), and he keeps at it.
   void _stepMedicine() {
     if (!medicineDue) return;
     if (activity != PipActivity.standing && activity != PipActivity.walking) {
       return;
     }
-    // Round 141: not while he's walking in from (or off) his room's edge.
+    // Not while he's walking in from (or off) his room's edge.
     if (_offEdge) return;
     _lk.previewing = false;
     _startShowing(PipScreen.pill);
   }
 
-  // Round 53: eating, after a recipe was looked at a while.
+  // Eating, after a recipe was looked at a while.
 
   /// Eating, if he's up and about: true if he started.
   bool eat() {
@@ -186,7 +186,7 @@ extension PipBrainLooks on PipBrain {
 
   /// What his screen shows and how far into it: while [PipActivity.
   /// showing], and after a bug fight (proud) or holding a flower (happy).
-  /// Round 145: a medicine due, the pill, whatever he's doing
+  /// A medicine due, the pill, whatever he's doing
   /// while he's up (walking, working, out on his adventure...), drawn
   /// over him as he is.
   (PipScreen, double)? get screenShow {
@@ -238,10 +238,10 @@ extension PipBrainLooks on PipBrain {
   /// Something on his screen, each step: a hop's landing; his medicine
   /// marked, or its time up, it's done.
   void _stepShowing(double dt) {
-    // Round 98: down from his hop.
+    // Down from his hop.
     if (_lk.screenShow.hops) _buzzOn(PipBrain.showHop, dt, PipBuzz.light);
     if (_lk.screenShow == PipScreen.pill) _buzzOn(0.9, dt, PipBuzz.light);
-    // Round 55: his medicine reminder, marked, stops at once; still
+    // His medicine reminder, marked, stops at once; still
     // due, it starts over ([_stepMedicine]), a hop each time.
     if ((_lk.screenShow == PipScreen.pill && !medicineDue && !_lk.previewing) ||
         _t >= _lk.showFor) {

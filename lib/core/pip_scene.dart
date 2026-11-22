@@ -5,14 +5,14 @@ import 'package:the_app/core/pip_hats.dart' show orthodoxEaster;
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/weather.dart';
 
-/// Where Pip is shown (Round 35): the menu's strip, or Pip Home's tall
+/// Where Pip is shown: the menu's strip, or Pip Home's tall
 /// scene. Each has its own version of a background.
 enum PipPlace { room, home }
 
 /// The part of the day his sky follows.
 enum DayPart { night, dawn, day, dusk }
 
-/// The season his field is in (Round 70), by the month: spring from
+/// The season his field is in, by the month: spring from
 /// March, summer from June, autumn from September, winter from December.
 enum Season {
   spring('Spring'),
@@ -32,14 +32,14 @@ enum Season {
       };
 }
 
-/// Days his field dresses up for (Round 70).
+/// Days his field dresses up for.
 ///
 /// - **Halloween**, 24–31 October: jack-o'-lanterns (lit after dark),
 ///   bats at night.
 /// - **New Year's Eve**, all 31 December and on to 1 January 02:00
-///   (Round 72: no Christmas weeks before it): a decorated pine, its
+///   (no Christmas weeks before it): a decorated pine, its
 ///   lights blinking; fireworks after dark.
-/// - **Christmas** (Round 72), the Orthodox one on 7 January, as kept
+/// - **Christmas**, the Orthodox one on 7 January, as kept
 ///   where the app's made: a badnjak (an oak branch, its dry leaves on,
 ///   tied with a red ribbon), straw on the ground, a lit candle.
 /// - **Easter**, Orthodox Easter Sunday and Monday: painted eggs in the
@@ -70,7 +70,7 @@ enum PipOccasion {
   }
 }
 
-/// [now]'s part of the day (Round 59: with the seasons): dawn from 45
+/// [now]'s part of the day (with the seasons): dawn from 45
 /// minutes before sunrise to 20 after, day to 20 minutes before sunset,
 /// dusk to 35 after, night otherwise. October evenings get dark before
 /// seven, June ones only after nine.
@@ -89,7 +89,7 @@ DayPart dayPartAt(DateTime now) {
 /// along the same time zone).
 const sunLatitude = 45.0;
 
-/// Sunrise and sunset on [day] (Round 59), in minutes into its day, by
+/// Sunrise and sunset on [day], in minutes into its day, by
 /// the phone's clock: worked out for [sunLatitude] on the middle meridian
 /// of the phone's time zone (15° an hour), an hour later in summer time.
 /// [zone] and [standardZone] (its offset that day, and outside summer
@@ -138,7 +138,7 @@ const sunLatitude = 45.0;
   return (rise, set);
 }
 
-/// The moon's phase (Round 38), as his sky shows it: none (new moon),
+/// The moon's phase, as his sky shows it: none (new moon),
 /// thin, half or full, growing (lit on the right) or shrinking (left).
 enum MoonPhase {
   none,
@@ -175,7 +175,7 @@ MoonPhase moonPhaseAt(DateTime now) {
   return MoonPhase.none;
 }
 
-/// A background for his field (Round 35): a sky for each part of the day.
+/// A background for his field: a sky for each part of the day.
 /// One for now ("Field"); more can come, each saying how it looks.
 enum PipBackground {
   field('Field');
@@ -184,7 +184,7 @@ enum PipBackground {
 
   const PipBackground(this.label);
 
-  /// The one stored as [id]; his field if there's none (Round 36).
+  /// The one stored as [id]; his field if there's none.
   static PipBackground byId(String id) =>
       values.where((b) => b.name == id).firstOrNull ?? field;
 
@@ -196,7 +196,7 @@ enum PipBackground {
         DayPart.dusk => (PipColours.duskTop, PipColours.duskBottom),
       };
 
-  /// The sky's colours at [part], top to bottom (Round 52: more hues than
+  /// The sky's colours at [part], top to bottom (more hues than
   /// its top and bottom, e.g. dusk's indigo to purple, pink, orange, gold).
   List<Color> stopsAt(DayPart part) => switch (part) {
         DayPart.night => PipColours.nightStops,
@@ -206,7 +206,7 @@ enum PipBackground {
       };
 }
 
-/// Things drawn in his sky (Round 35) and field (Round 70). Each says
+/// Things drawn in his sky and field. Each says
 /// where it may show: in which places, at which parts of the day, on
 /// which backgrounds; [PipScene.at] adds the season, the occasion and
 /// the weather, so nothing turns up where it doesn't belong.
@@ -214,11 +214,11 @@ enum PipProp {
   stars(parts: {DayPart.night}),
   moon(parts: {DayPart.night, DayPart.dusk}),
   sun(parts: {DayPart.day, DayPart.dawn}),
-  // In both since the menu's room grew (Round 36); at night too under a
-  // grey sky (Round 70).
+  // In both since the menu's room grew; at night too under a
+  // grey sky.
   clouds(parts: {DayPart.day, DayPart.dawn, DayPart.dusk}),
 
-  // Round 70: his field.
+  // His field.
   /// A tree or two in their season's colours, swaying.
   trees,
 
@@ -235,7 +235,7 @@ enum PipProp {
   /// New Year's Eve's decorated pine, its lights blinking.
   festiveTree,
 
-  /// Christmas's badnjak, straw and candle (Round 72).
+  /// Christmas's badnjak, straw and candle.
   badnjak,
 
   /// New Year's Eve's fireworks, after dark.
@@ -272,7 +272,7 @@ enum PipProp {
       backgrounds.contains(background);
 }
 
-/// What's tried on his field in Pip Home (Round 70), over what now is:
+/// What's tried on his field in Pip Home, over what now is:
 /// a season, the weather, an occasion, a part of the day. Not kept.
 class PipLook {
   final Season? season;
@@ -314,7 +314,7 @@ class PipLook {
 }
 
 /// What's showing in one place at one moment: the one place that works it
-/// out (Round 35), so the menu and Pip Home can't disagree.
+/// out, so the menu and Pip Home can't disagree.
 class PipScene {
   final PipPlace place;
 
@@ -323,17 +323,17 @@ class PipScene {
   final DayPart part;
   final Set<PipProp> props;
 
-  /// The real moon's phase (Round 38); at a new moon there's no moon.
+  /// The real moon's phase; at a new moon there's no moon.
   final MoonPhase moon;
 
-  /// Round 70: the season, the day's occasion, and the weather (null:
+  /// The season, the day's occasion, and the weather (null:
   /// none known, a plain sky); how heavy its rain or snow is, 1 to 3.
   final Season season;
   final PipOccasion? occasion;
   final WeatherKind? weather;
   final int strength;
 
-  /// Round 79: how windy (his trees sway by it).
+  /// How windy (his trees sway by it).
   final PipWind wind;
 
   const PipScene._(
@@ -349,8 +349,8 @@ class PipScene {
     this.wind = PipWind.calm,
   });
 
-  /// [weather]: Open-Meteo's code now (Round 70), if it's on, and the
-  /// wind (km/h, Round 79); [look]: what Pip Home is trying on, over all
+  /// [weather]: Open-Meteo's code now, if it's on, and the
+  /// wind (km/h); [look]: what Pip Home is trying on, over all
   /// of it (its weather tried on: windy if wet, else a breeze).
   factory PipScene.at(
     PipPlace place,
@@ -418,7 +418,7 @@ class PipScene {
     );
   }
 
-  /// A grey sky (Round 70): clouds over everything.
+  /// A grey sky: clouds over everything.
   bool get grey => weather?.grey ?? false;
 
   /// Snow on the ground: while it snows (a ski day's is the brain's).
@@ -430,8 +430,8 @@ class PipScene {
     return s == null ? null : (s.first, s.last);
   }
 
-  /// Its colours top to bottom (Round 52), or null without a background;
-  /// greyed under a grey sky (Round 70), darker in a storm.
+  /// Its colours top to bottom, or null without a background;
+  /// greyed under a grey sky, darker in a storm.
   List<Color>? get skyStops {
     final stops = background?.stopsAt(part);
     if (stops == null || !grey) return stops;

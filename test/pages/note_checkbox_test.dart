@@ -64,7 +64,7 @@ void main() {
 
   testWidgets(
       'the app draws both boxes: the same size, in the accent, '
-      'level with their line (Round 16)', (tester) async {
+      'level with their line', (tester) async {
     await openNote(tester, '- [ ] milk\n- [x] eggs');
     final painted = boxes(tester).painted;
     expect([for (final b in painted) b.ticked], [false, true]);
@@ -136,7 +136,7 @@ void main() {
     expect(content(tester).text, '- [x] milk\n- [ ] ');
   });
 
-  group('the Format button (in place of Checkbox, Round 27)', () {
+  group('the Format button (in place of Checkbox)', () {
     testWidgets('only while typing, next to Edit title', (tester) async {
       await openNote(tester, 'Buy');
       expect(find.byTooltip('Format'), findsNothing);

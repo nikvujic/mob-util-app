@@ -14,7 +14,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// Opens the ingredients list to manage it (Round 42).
+/// Opens the ingredients list to manage it.
 void openIngredients(BuildContext context) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
@@ -42,10 +42,10 @@ Future<List<Ingredient>?> pickIngredients(
       ),
     );
 
-/// The ingredients list (Round 42), in sections: one list for all
+/// The ingredients list, in sections: one list for all
 /// recipes. **Edit mode** (from Recipes): + adds ingredients (to the top
 /// of the first section), Section adds a section (under the first, which
-/// stays on top: Round 43; the others move by their handle), the handle
+/// stays on top; the others move by their handle), the handle
 /// drags an ingredient (between sections too), holding one or a
 /// section's name renames or deletes it. **Pick mode** (from a recipe):
 /// boxes to tick and a wide Add button; Edit switches to edit mode, and
@@ -74,7 +74,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
   late bool _picking = widget.picking;
   final _picked = <String>{};
 
-  /// In the list, to find it (Round 92: scrolled at its edges while a
+  /// In the list, to find it (scrolled at its edges while a
   /// section's dragged).
   final _listKey = GlobalKey();
 
@@ -116,7 +116,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
     );
   }
 
-  /// Round 92: said when [name] is there already (no two of the same).
+  /// Said when [name] is there already (no two of the same).
   String? _already(String name, {String? except}) =>
       switch (_notifier.named(name, except: except)) {
         null => null,
@@ -126,7 +126,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
   void _addSection() {
     showTextInputSheet(
       context,
-      // Under the first section (Round 43).
+      // Under the first section.
       hint: 'Section, e.g. Dairy',
       submitLabel: 'Add',
       onSubmit: _notifier.addSection,
@@ -158,7 +158,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
     _notifier.move(moving.id, sectionId: above.section.id, index: index);
   }
 
-  /// A section's name dropped at [newIndex] (Round 43): the section goes
+  /// A section's name dropped at [newIndex]: the section goes
   /// after the sections whose names are above that place (never above the
   /// first one).
   void _moveSection(List<_Row> rows, int oldIndex, int newIndex) {
@@ -268,7 +268,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
   }
 
   /// A section's name; in edit mode, a tap gives its options, and
-  /// (Round 45, all but the first, which stays on top) touching it and
+  /// (all but the first, which stays on top) touching it and
   /// moving drags it: no handle shown.
   Widget _header(IngredientSection section, {Key? key, int? index}) {
     final colors = context.colors;
@@ -298,8 +298,8 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
       onTap: () => _sectionMenu(section),
       child: header,
     );
-    // Round 92: dragged only from the right, where an
-    // ingredient's handle is (no handle drawn, Round 45); a tap anywhere
+    // Dragged only from the right, where an
+    // ingredient's handle is (no handle drawn); a tap anywhere
     // gives its options. The first stays on top.
     final row = IntrinsicHeight(
       child: Row(
@@ -342,7 +342,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
     );
   }
 
-  /// The section being dragged (Round 92), and before which section it
+  /// The section being dragged, and before which section it
   /// would go (an index in the book's sections; their count: the end).
   String? _draggingSection;
   int? _dropBefore;
@@ -397,11 +397,11 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
     return before == moving || before == moving + 1 ? null : before;
   }
 
-  /// The rows shown (Round 92), for where a dragged section would go:
+  /// The rows shown, for where a dragged section would go:
   /// each row's context and its (section's index, whether it's the name).
   final _rowsShown = <BuildContext, (int, bool)>{};
 
-  /// A row a section can be dropped on (Round 92): known by where it is,
+  /// A row a section can be dropped on: known by where it is,
   /// so the finger's height alone finds it (the buttons in the corner
   /// don't get in the way).
   Widget _sectionDropTarget(IngredientBook book, int sectionIndex,
@@ -624,7 +624,7 @@ class _IngredientsPageState extends ConsumerState<IngredientsPage> {
               );
             },
           ),
-          // Round 92: a dragged section's place at the very end.
+          // A dragged section's place at the very end.
           SliverToBoxAdapter(
             child: KeyedSubtree(
               key: _listKey,

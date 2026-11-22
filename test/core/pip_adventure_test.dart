@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_adventure.dart';
 
-/// Pip's adventures (Round 63): the levels, titles and times.
+/// Pip's adventures: the levels, titles and times.
 void main() {
   int levelAfterDays(double days) =>
       PipAdventure.levelFor((days * PipAdventure.xpPerDay).round());
 
-  test('a full day out is 3600 XP (Round 73: ten a minute)', () {
+  test('a full day out is 3600 XP (ten a minute)', () {
     expect(PipAdventure.xpPerDay, 3600);
     expect(PipAdventure.minutesPerDay, 360);
   });
@@ -70,7 +70,7 @@ void main() {
 
   test(
       'a break between 14:00 and 16:00; not while his setting off was '
-      'seen (Round 66)', () {
+      'seen', () {
     final noon = DateTime(2026, 10, 18, 12);
     expect(
         PipAdventure.breakDueAt(DateTime(2026, 10, 18, 13, 59), noon), isFalse);

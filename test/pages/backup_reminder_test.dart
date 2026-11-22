@@ -11,7 +11,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
-/// The weekly backup reminder (D8, Round 23).
+/// The weekly backup reminder (D8).
 void main() {
   /// Tuesday 13 October 2026, 10:00.
   final now = DateTime(2026, 10, 13, 10);

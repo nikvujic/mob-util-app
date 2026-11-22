@@ -1,6 +1,6 @@
 import 'package:the_app/models/shop_item.dart';
 
-/// What kind of dish a recipe is (Round 40): a fixed list (Round 41).
+/// What kind of dish a recipe is: a fixed list.
 /// The [name] is stored, so a type is never renamed here, only its
 /// [label].
 enum RecipeType {
@@ -68,8 +68,8 @@ class RecipeIngredient {
   int get hashCode => Object.hash(ingredientId, name, quantity);
 }
 
-/// A recipe (Round 40): a name, how long it takes, what kind it is, its
-/// ingredients in order (one flat list, Round 42), and the method as
+/// A recipe: a name, how long it takes, what kind it is, its
+/// ingredients in order (one flat list), and the method as
 /// Markdown text, like a note's.
 class Recipe {
   final String id;
@@ -173,7 +173,7 @@ String prepTimeLabel(int minutes) {
   return rest == 0 ? '$hours h' : '$hours h ${rest.toString().padLeft(2, '0')}';
 }
 
-/// The kinds of quantity a recipe's ingredient picks from (Round 43): as
+/// The kinds of quantity a recipe's ingredient picks from: as
 /// Shop's (a count, a weight), and spoons, small and big.
 enum AmountKind {
   none('None'),
@@ -230,7 +230,7 @@ final _amount = RegExp(
 );
 
 /// [text] read back as an [Amount] (to start the picker where it is);
-/// null for text it doesn't know (typed before Round 43, e.g. "a pinch").
+/// null for text it doesn't know (free text, e.g. "a pinch").
 Amount? readAmount(String text) {
   final trimmed = text.trim();
   if (trimmed.isEmpty) return (kind: AmountKind.none, value: 0);
@@ -271,7 +271,7 @@ double? amountDown(Amount amount) => switch (amount.kind) {
         amount.value > 0.5 ? amount.value - 0.5 : null,
     };
 
-/// One ingredient in the list (Round 40).
+/// One ingredient in the list.
 class Ingredient {
   final String id;
   final String name;
@@ -323,7 +323,7 @@ class IngredientSection {
       );
 }
 
-/// The ingredients list (Round 40): sections in order.
+/// The ingredients list: sections in order.
 class IngredientBook {
   final List<IngredientSection> sections;
 

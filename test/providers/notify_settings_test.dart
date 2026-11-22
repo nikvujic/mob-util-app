@@ -13,7 +13,7 @@ import 'package:the_app/providers/reminders_provider.dart';
 
 import '../helpers.dart';
 
-/// Each page's notification settings (Round 31).
+/// Each page's notification settings.
 void main() {
   /// Tuesday 13 October 2026, 10:00.
   final now = DateTime(2026, 10, 13, 10);
@@ -96,7 +96,7 @@ void main() {
             sound: NotifySound.alert, volume: NotifyVolume.medium));
     expect((await planned(ReminderKind.planner)).map((r) => r.sound),
         everyElement(NotifySound.alert));
-    // And how loud (Round 41).
+    // And how loud.
     expect((await planned(ReminderKind.planner)).map((r) => r.volume),
         everyElement(NotifyVolume.medium));
     expect(

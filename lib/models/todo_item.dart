@@ -1,6 +1,6 @@
-/// One thing on the to-do note (Round 28). Done ones go down to the
-/// *Completed* list (Round 30) until deleted; ones to do may be waiting
-/// (on someone or something, Round 45), in a *Waiting* list of their own
+/// One thing on the to-do note. Done ones go down to the
+/// *Completed* list until deleted; ones to do may be waiting
+/// (on someone or something), in a *Waiting* list of their own
 /// when it's on.
 class TodoItem {
   final String id;

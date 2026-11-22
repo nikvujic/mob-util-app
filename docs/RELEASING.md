@@ -6,51 +6,46 @@ The version lives in one place, `pubspec.yaml`:
 
 ```yaml
 version: 0.2.0+2
-#        │ │ │ └─ build number (Android versionCode): +1 on every release
-#        │ │ └─── patch: bug fixes only
-#        │ └───── minor: new features or visible changes
-#        └─────── major: 0 until the planned feature set is complete → 1.0.0
+# │ │ │ └─ build number (Android versionCode): +1 on every release
+# │ │ └─── patch: bug fixes only
+# │ └───── minor: new features or visible changes
+# └─────── major: 0 until the planned feature set is complete → 1.0.0
 ```
 
 Android only installs an update over an existing app if the build number is
 higher, so it goes up by one on **every** release.
 
-Every roadmap step that changes the app is a release. Docs-only or CI-only
+Every change to the app is a release. Documentation-only or CI-only
 changes are not released on their own.
 
 ## Making a release
 
-**Who runs it (agreed with the user):** Claude does. Since 1.4.0 (Round
-32) without asking first: when a set of changes is done and checked,
-Claude releases it. (Before, it asked "Release vX.Y.Z now?" every time.)
-Once the release is confirmed published, Claude writes in the chat the
-link and **what changed** in that version (from its CHANGELOG section),
-as a short list — not step-by-step test instructions.
-
 1. Bump `version` in `pubspec.yaml`.
 2. Add a section to `CHANGELOG.md`: `## [X.Y.Z] - YYYY-MM-DD` with
-   *Added* / *Changed* / *Fixed* lists, written for the user: the app
-   shows it as **What's new** in the Introduction note (N16). Update
-   `assets/introduction.md` when a feature is added or changes.
-   **Patches keep their minor version's changes** (Rounds 48,
-   70, 80): for a patch (1.36.1), What's new shows every section of that
-   minor version, newest first (1.36.1, then 1.36.0), so what came with
-   1.36.0 isn't lost behind the fix. A patch only adds its own section;
-   never fold or drop the minor version's (`core/changelog.dart`
-   `changesFor` / `changesSince`, tested in `introduction_test.dart`).
-3. Commit (`Release vX.Y.Z`) and push to `main`.
+  *Added* / *Changed* / *Fixed* lists, written for the app's users: the
+  app shows it as **What's new** in the Introduction note (N16). Update
+  `assets/introduction.md` when a feature is added or changes.
+  **Patches keep their minor version's changes**: for a patch (1.36.1),
+  What's new shows every section of that minor version, newest first
+  (1.36.1, then 1.36.0), so what came with 1.36.0 isn't lost behind the
+  fix. A patch only adds its own section; never fold or drop the minor
+  version's (`core/changelog.dart` `changesFor` / `changesSince`, tested
+  in `introduction_test.dart`).
+3. Commit and push to `main`.
 4. Start the release, either way:
-   - **On GitHub** (works from the phone too): *Actions → Release → Run
-     workflow* on `main`. It releases the version in `pubspec.yaml` and
-     creates the `vX.Y.Z` tag; it refuses if that version is already
-     released.
-   - **Or push a tag**: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin
-     vX.Y.Z` (the tag must match `pubspec.yaml`).
+  - **On GitHub**: *Actions → Release → Run workflow* on `main`. It
+  releases the version in `pubspec.yaml` and creates the `vX.Y.Z` tag;
+  it refuses if that version is already released.
+  - **Or push a tag**: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin
+  vX.Y.Z` (the tag must match `pubspec.yaml`).
 5. The **Release** workflow runs the tests, builds the APK signed with the
-   release key, and publishes a GitHub Release with the APK and the
-   changelog section as notes. Older releases are deleted, so only the
-   latest APK is on GitHub (an older APK can't be installed over a newer
-   version anyway); tags stay as history.
+  release key, and publishes a GitHub Release with the APK and the
+  changelog section as notes. Older releases are deleted, so only the
+  latest APK is on GitHub (an older APK can't be installed over a newer
+  version anyway); tags stay as history.
+
+Run one release at a time: the workflow keeps only the newest release, so
+a release that finishes after a newer one deletes the newer one.
 
 To install: open the release on the phone and download the APK (allow
 installing from the browser once).
@@ -64,26 +59,26 @@ safe, and given to GitHub as secrets.
 
 1. Create the key (needs a JDK; Android Studio ships one):
 
-   ```sh
-   keytool -genkeypair -v -keystore the-app-release.jks \
-     -alias the-app -keyalg RSA -keysize 4096 -validity 36500
-   ```
+  ```sh
+  keytool -genkeypair -v -keystore the-app-release.jks \
+  -alias the-app -keyalg RSA -keysize 4096 -validity 36500
+  ```
 
-   Pick a strong password; use the same one for the key when asked.
+  Pick a strong password; use the same one for the key when asked.
 
 2. **Back it up** (password manager / encrypted drive) together with the
-   password. Losing it means future versions can't be installed over the
-   current one. Never commit it — `*.jks` and `key.properties` are ignored.
+  password. Losing it means future versions can't be installed over the
+  current one. Never commit it — `*.jks` and `key.properties` are ignored.
 
 3. Add four repository secrets on GitHub
-   (*Settings → Secrets and variables → Actions → New repository secret*):
+  (*Settings → Secrets and variables → Actions → New repository secret*):
 
-   | Secret | Value |
-   |--------|-------|
-   | `ANDROID_KEYSTORE_BASE64` | output of `base64 -w0 the-app-release.jks` (macOS: `base64 -i the-app-release.jks`; Windows PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("the-app-release.jks"))`) |
-   | `ANDROID_KEYSTORE_PASSWORD` | the keystore password |
-   | `ANDROID_KEY_ALIAS` | `the-app` |
-   | `ANDROID_KEY_PASSWORD` | the key password |
+  | Secret | Value |
+  |--------|-------|
+  | `ANDROID_KEYSTORE_BASE64` | output of `base64 -w0 the-app-release.jks` (macOS: `base64 -i the-app-release.jks`; Windows PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("the-app-release.jks"))`) |
+  | `ANDROID_KEYSTORE_PASSWORD` | the keystore password |
+  | `ANDROID_KEY_ALIAS` | `the-app` |
+  | `ANDROID_KEY_PASSWORD` | the key password |
 
 ### Signed builds on your PC (optional)
 

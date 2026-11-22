@@ -6,7 +6,7 @@ import 'package:the_app/models/people.dart';
 import 'package:the_app/models/people_layout.dart';
 import 'package:the_app/providers/dates_provider.dart';
 
-/// People (Round 108), saved to `people.json`. A person's birthday lives
+/// People, saved to `people.json`. A person's birthday lives
 /// on the Dates page too (spec 6): kept in step from here, the date's
 /// title, day, month, year and type being the person's.
 class PeopleNotifier extends StateNotifier<PeopleBook> {
@@ -42,7 +42,7 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     final dateId = person.dateId;
     final existing =
         dateId == null ? null : _ref.read(datesProvider).byId(dateId);
-    // None, or kept out of Dates (Round 113): no date for it there.
+    // None, or kept out of Dates: no date for it there.
     if (birthday == null || !person.inDates) {
       if (existing != null) _dates.delete(existing.id);
       return dateId == null ? person : person.copyWith(dateId: () => null);
@@ -54,7 +54,7 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
               type: DateType.birthday,
               day: birthday.day,
               month: birthday.month,
-              // Round 109: reminded as a birthday made in Dates is.
+              // Reminded as a birthday made in Dates is.
               reminders: DateReminder.defaults,
             ))
         .copyWith(
@@ -77,7 +77,7 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
       ];
 
   /// [person]'s birthday set from the birthday [dateId] on the Dates
-  /// page (Round 113: only its day, month and year are taken; the
+  /// page (only its day, month and year are taken; the
   /// original stays as it was, theirs to delete if they like). Shown in
   /// Dates, it's their own date there, as one set by hand.
   Person takeBirthday(Person person, String dateId) {
@@ -138,10 +138,10 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     return null;
   }
 
-  /// Who [relate] related as well, the last time (Round 114), to say so.
+  /// Who [relate] related as well, the last time, to say so.
   List<String> lastAlso = const [];
 
-  /// Round 114: what follows from it. A parent's child's brothers and
+  /// What follows from it. A parent's child's brothers and
   /// sisters are their children too; a new brother or sister shares the
   /// other's parents. Each only where it makes sense (two parents at
   /// most, nobody their own ancestor); nobody moves.
@@ -228,7 +228,7 @@ class PeopleNotifier extends StateNotifier<PeopleBook> {
     return before;
   }
 
-  /// Round 109: [id] the main person (null: none).
+  /// [id] the main person (null: none).
   void setMain(String? id) => state = state.copyWith(mainId: () => id);
 
   void setHighlightFamily(bool on) =>

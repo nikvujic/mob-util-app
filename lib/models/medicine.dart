@@ -14,14 +14,14 @@ class Medicine {
   final DateTime? until;
 
   /// Minutes after a dose's time to remind again while it's not marked
-  /// (Round 16: set per medicine); null: no second reminder.
+  /// (set per medicine); null: no second reminder.
   final int? followUp;
 
-  /// Important (Round 24): taking a dose needs a 5-second hold, and only
+  /// Important: taking a dose needs a 5-second hold, and only
   /// important medicines bring up the red dot.
   final bool important;
 
-  /// The days of the week it's taken (Round 40: 1 Monday to 7 Sunday);
+  /// The days of the week it's taken (1 Monday to 7 Sunday);
   /// null: every day.
   final Set<int>? weekdays;
 
@@ -157,7 +157,7 @@ class MedicineBook {
   static const empty = MedicineBook._none();
 
   /// Each book's marks by medicine, day and dose, made on first use: a
-  /// lookup stays quick with years of marks (Round 18). A book never
+  /// lookup stays quick with years of marks. A book never
   /// changes, so its index doesn't either.
   static final _indexes = Expando<Map<String, DoseTaken>>();
 
@@ -203,7 +203,7 @@ class MedicineBook {
   }
 
   /// "Mark the past days taken" is offered only past this many doses not
-  /// set (Round 16): for a few, setting them one by one is easy enough.
+  /// set: for a few, setting them one by one is easy enough.
   static const fillPastAfter = 10;
 
   /// Whether to offer filling in [medicine]'s past days.

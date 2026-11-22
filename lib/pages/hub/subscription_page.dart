@@ -16,7 +16,7 @@ import 'package:the_app/widgets/month_picker.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
-/// A subscription (Round 79): its name, price (about, currency, every
+/// A subscription: its name, price (about, currency, every
 /// month or year), state and date, card, reminder before and note. Saved
 /// as it's changed, once it has a name; a new one left without one is
 /// dropped. Delete at the end, asked first, with Undo.
@@ -40,7 +40,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
           );
 
   /// As it was when the page opened (null: a new one), for Discard
-  /// (Round 91).
+  ///.
   late final Subscription? _original =
       ref.read(subscriptionsProvider).byId(widget.subscriptionId ?? '');
 
@@ -103,14 +103,14 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   Future<void> _pickDate() async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
     final picked = await pickDate(
       context,
       today: today,
-      // Round 91: a new one's day (a month on, by default) isn't set
+      // A new one's day (a month on, by default) isn't set
       // until picked: its calendar opens on today.
       value:
           _datePicked || _original?.date != null ? _draft.dateOn(today) : null,
@@ -123,11 +123,11 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   Future<void> _pickCardExpiry() async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
-    // Round 85: a month and year, as on the card.
+    // A month and year, as on the card.
     final picked = await showMonthPicker(
       context,
       title: 'Card expires',
@@ -186,7 +186,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     final colors = context.colors;
     final today = _today;
     final at = s.dateOn(today);
-    // Round 91: back asks Save or Discard once it's changed.
+    // Back asks Save or Discard once it's changed.
     final now = ref.watch(subscriptionsProvider).byId(_draft.id);
     return DiscardScope(
       changed: now != _original,
@@ -356,7 +356,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                     _change(_draft.copyWith(card: text.trim())),
               ),
             ),
-            // Round 80: when the card paying it expires.
+            // When the card paying it expires.
             ListTile(
               key: const Key('subscriptionCardExpires'),
               leading: const Icon(Icons.credit_card_off_outlined),

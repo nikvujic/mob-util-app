@@ -265,7 +265,7 @@ void main() {
       await openForgot(tester);
       await tester.enterText(find.byKey(const Key('resetConfirm')), 'RESET');
       await tester.pump();
-      // Held for 10 seconds (Round 21), a bar filling meanwhile.
+      // Held for 10 seconds, a bar filling meanwhile.
       final finger = await tester.startGesture(tester.getCenter(resetButton()));
       await tester.pump(); // the hold starts
       await tester.pump(const Duration(seconds: 5));
@@ -294,7 +294,7 @@ void main() {
       expect(security().hasMasterPassword, isFalse);
     });
 
-    group('hidden in plain sight (Round 21)', () {
+    group('hidden in plain sight', () {
       Future<void> lockedShop(WidgetTester tester) async {
         container = await pumpApp(
           tester,

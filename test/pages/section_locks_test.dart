@@ -70,7 +70,7 @@ void main() {
 
   testWidgets(
       "every section's switch can be reached, above the phone's bar "
-      '(Round 21: the Hub hid under it)', (tester) async {
+      '(the Hub hid under it)', (tester) async {
     tester.view.padding =
         FakeViewPadding(bottom: 48 * tester.view.devicePixelRatio);
     addTearDown(tester.view.resetPadding);
@@ -81,7 +81,7 @@ void main() {
       await tester.drag(list, const Offset(0, -600));
       await tester.pumpAndSettle();
     }
-    // At the end, the last switch clear of the bar (Round 108: more Hub
+    // At the end, the last switch clear of the bar (more Hub
     // pages under it now, so not always the Hub's own).
     final screen = tester.getSize(find.byType(MaterialApp)).height;
     final last = find.byType(SwitchListTile).last;

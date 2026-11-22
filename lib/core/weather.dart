@@ -1,4 +1,4 @@
-/// The weather as Pip's sky shows it (Round 70), from Open-Meteo's WMO
+/// The weather as Pip's sky shows it, from Open-Meteo's WMO
 /// weather codes (https://open-meteo.com/en/docs: "weather_code").
 enum WeatherKind {
   clear('Clear'),
@@ -38,9 +38,9 @@ enum WeatherKind {
       values.where((k) => k.name == name).firstOrNull;
 }
 
-/// How windy it is (Round 79, trees sway only in the wind).
+/// How windy it is (trees sway only in the wind).
 enum PipWind {
-  /// Still: the trees don't sway (Round 80: also when the wind isn't
+  /// Still: the trees don't sway (also when the wind isn't
   /// known, the weather off).
   calm,
 

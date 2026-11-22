@@ -7,9 +7,9 @@ import 'package:the_app/providers/subscriptions_alerts_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 84: a card's expiry coloured on its subscription's
+/// A card's expiry coloured on its subscription's
 /// card: orange a week or less ahead, red once gone by. No notification.
-/// Round 85: an expiry is a month (good through its last day).
+/// An expiry is a month (good through its last day).
 void main() {
   final now = DateTime(2026, 10, 26, 12);
   final today = DateTime(2026, 10, 26);
@@ -82,7 +82,7 @@ void main() {
 
   for (final scale in [1.0, 1.6]) {
     testWidgets(
-        'Round 85: its icons centred on their text\'s first line (text at '
+        'its icons centred on their text\'s first line (text at '
         '$scale)', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.625;

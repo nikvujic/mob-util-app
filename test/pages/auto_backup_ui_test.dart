@@ -5,7 +5,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
-/// Automatic backup on the Backup page (Round 39).
+/// Automatic backup on the Backup page.
 void main() {
   final now = DateTime(2026, 10, 14, 9, 5);
 

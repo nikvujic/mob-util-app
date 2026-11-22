@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 
-/// Pip's charging station (Round 44).
+/// Pip's charging station.
 void main() {
   /// Pip up and about (out of the ground), [segments] of energy.
   PipBrain up({int width = 120, int segments = 2, double? x}) {
@@ -53,7 +53,7 @@ void main() {
     expect(p.plug, isNotNull);
     final onHook = p.plug!;
     run(p, PipBrain.mittsInEnd + 0.01);
-    expect(p.mitts, hasLength(1), reason: 'Round 54: only the hand he uses');
+    expect(p.mitts, hasLength(1), reason: 'only the hand he uses');
     expect(p.mitts.every((m) => m.$3 == 1), isTrue);
     run(p, PipBrain.carryEnd - PipBrain.mittsInEnd);
     expect(p.plug, isNot(onHook), reason: 'in his side now');
@@ -114,7 +114,7 @@ void main() {
     p.setPlugged(false);
     expect(p.activity, PipActivity.unplugging);
     run(p, PipBrain.mittsInEnd + 0.01);
-    expect(p.mitts, hasLength(1), reason: 'a hand pops in (Round 54: one)');
+    expect(p.mitts, hasLength(1), reason: 'a hand pops in (one)');
     until(p, PipActivity.unplugging);
     expect(p.activity, PipActivity.standing);
     expect(p.station!.$2, lessThanOrEqualTo(1));
@@ -176,7 +176,7 @@ void main() {
   });
 
   test(
-      'the demo with the phone plugged in (Round 45): plays if he isn\'t '
+      'the demo with the phone plugged in: plays if he isn\'t '
       'at the station (full); not while he is', () {
     final full = up(segments: 3, x: 20)..setPlugged(true, animate: false);
     expect(full.activity, isNot(PipActivity.charging), reason: 'ignores it');
@@ -194,7 +194,7 @@ void main() {
     expect(charging.play(PipAnimation.charge), isFalse);
   });
 
-  group('energy while plugged in (Round 45: for fun, not to save him)', () {
+  group('energy while plugged in (for fun, not to save him)', () {
     final at = DateTime(2026, 10, 14, 10);
 
     test('he uses it as ever', () {
@@ -210,7 +210,7 @@ void main() {
       expect(PipEnergy.segments(PipEnergy.chargingFloor), 1);
     });
 
-    // Round 58: watched at the station, it does (a segment every 30
+    // Watched at the station, it does (a segment every 30
     // seconds), and off, its drone: [PipLink.chargeTick].
     test("out already, he stays out (the clock alone doesn't fill him)", () {
       expect(PipEnergy.chargingLevelAt(0, at, at.add(const Duration(hours: 4))),

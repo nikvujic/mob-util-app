@@ -27,30 +27,30 @@ class Preferences {
   /// null (or a day gone by): not paused.
   final DateTime? medicinePausedUntil;
 
-  /// The planner's notifications (Round 31): on, and paused through a day.
+  /// The planner's notifications: on, and paused through a day.
   final bool plannerReminders;
 
-  /// Round 72: while a block or routine is on, a notification that stays
+  /// While a block or routine is on, a notification that stays
   /// (with Done), till it ends or is ticked.
   final bool plannerNow;
   final DateTime? plannerPausedUntil;
 
-  /// Birthdays & dates' notifications (Round 57): on, and paused through
+  /// Birthdays & dates' notifications: on, and paused through
   /// a day; and the day the Dates page was last opened (the green dot on
   /// a birthday goes once it's been looked at that day).
   final bool datesReminders;
   final DateTime? datesPausedUntil;
   final DateTime? datesSeenOn;
 
-  /// Subscriptions' notifications (Round 79): on, and paused through a
+  /// Subscriptions' notifications: on, and paused through a
   /// day.
   final bool subscriptionsReminders;
   final DateTime? subscriptionsPausedUntil;
 
-  /// Spotify in the morning (Round 93).
+  /// Spotify in the morning.
   final MorningMusic morningMusic;
 
-  /// How each page's notifications look and sound (Round 31); a page not
+  /// How each page's notifications look and sound; a page not
   /// here is [NotifyStyle.plain].
   final Map<NotifyPage, NotifyStyle> notifyStyles;
 
@@ -65,7 +65,7 @@ class Preferences {
   /// before the first start (or before N16).
   final String? introVersion;
 
-  /// The version whose What's new was last read (Round 61): the
+  /// The version whose What's new was last read: the
   /// Introduction's What's new lists every version after it. Updates
   /// while it's still unread keep it, so they pile up until read.
   final String? introFrom;
@@ -73,11 +73,11 @@ class Preferences {
   /// It's new to the user (a fresh install or an update), until opened.
   final bool introUnread;
 
-  /// How far down the Introduction was read (Round 29), to open there
+  /// How far down the Introduction was read, to open there
   /// again; back to the top when it's new or restored.
   final double introScroll;
 
-  /// "Forgot master password?" is greyed out until then (Round 21): its
+  /// "Forgot master password?" is greyed out until then: its
   /// Reset was tapped instead of held, as someone not in on it would.
   /// Cleared by the next unlock.
   final DateTime? resetBlockedUntil;
@@ -93,15 +93,15 @@ class Preferences {
   /// once a week has gone by without a backup.
   final bool backupReminder;
 
-  /// The to-do note at the top of Notes (Round 28); its list stays when
+  /// The to-do note at the top of Notes; its list stays when
   /// it's turned off.
   final bool todoNote;
 
-  /// The to-do note's *Waiting* list (Round 45): off, waiting things show
+  /// The to-do note's *Waiting* list: off, waiting things show
   /// with the rest, still marked.
   final bool todoWaiting;
 
-  /// Automatic backup (Round 39): the folder picked (Android's uri for it,
+  /// Automatic backup: the folder picked (Android's uri for it,
   /// and its name to show), or null: off. This phone only.
   final String? autoBackupFolder;
   final String? autoBackupFolderName;
@@ -111,19 +111,19 @@ class Preferences {
   final DateTime? lastAutoBackupAt;
   final bool autoBackupFailed;
 
-  /// The phone was plugged in when last seen (Round 44: Pip's charging
+  /// The phone was plugged in when last seen (Pip's charging
   /// station); so after a restart, time away plugged in still counts as
   /// charging. This phone only.
   final bool pipPlugged;
 
-  /// Shop's bought list shown A–Z (Round 69); its own order is kept.
+  /// Shop's bought list shown A–Z; its own order is kept.
   final bool shopSorted;
 
-  /// People's notes hidden (Round 109: showing the page to others);
+  /// People's notes hidden (showing the page to others);
   /// shown again only with the master password, if there is one.
   final bool hidePeopleNotes;
 
-  /// What the app may use the internet for (Round 70), and the weather.
+  /// What the app may use the internet for, and the weather.
   final InternetSettings internet;
 
   const Preferences({
@@ -211,10 +211,10 @@ class Preferences {
   /// Whether medicine reminders and the dot are paused on [day].
   bool medicinePausedOn(DateTime day) => _pausedOn(medicinePausedUntil, day);
 
-  /// Whether the planner's notifications are paused on [day] (Round 31).
+  /// Whether the planner's notifications are paused on [day].
   bool plannerPausedOn(DateTime day) => _pausedOn(plannerPausedUntil, day);
 
-  /// Whether the dates' notifications are paused on [day] (Round 57).
+  /// Whether the dates' notifications are paused on [day].
   bool datesPausedOn(DateTime day) => _pausedOn(datesPausedUntil, day);
 
   /// Whether the subscriptions' notifications are paused on [day].

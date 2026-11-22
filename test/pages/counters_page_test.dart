@@ -142,8 +142,7 @@ void main() {
       return calls;
     }
 
-    testWidgets('opening the page wakes the sound, silently (Round 18)',
-        (tester) async {
+    testWidgets('opening the page wakes the sound, silently', (tester) async {
       final sounds = <String>[];
       const sound = MethodChannel('the_app/sound');
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(sound,
@@ -185,7 +184,7 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
       await openMenu(tester);
-      // Round 70: below Internet Access, scrolled to on a short screen.
+      // Below Internet Access, scrolled to on a short screen.
       await scrollMenuTo(tester, 'Settings');
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
@@ -293,7 +292,7 @@ void main() {
     });
   });
 
-  group('look (Round 14)', () {
+  group('look', () {
     testWidgets('every card the same height, limits or not', (tester) async {
       await openCounters(tester);
       container.read(countersProvider.notifier)

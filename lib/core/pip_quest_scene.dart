@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:the_app/core/pip_house.dart';
 import 'package:the_app/core/pip_quest.dart';
 
-/// Where his quest's work is shown (Round 127): his house area, the
+/// Where his quest's work is shown: his house area, the
 /// field on the way, or a place he gathers in.
 enum QuestScenePlace { house, field, forest, mine, beach }
 
@@ -17,7 +17,7 @@ typedef QuestFlyer = ({String item, double x, double up});
 /// A puff of dust or smoke: where, and how far through it (0 to 1).
 typedef QuestPuff = ({double x, double up, double t});
 
-/// What his quest's work looks like at a moment (Round 127, spec 4 and 7):
+/// What his quest's work looks like at a moment (spec 4 and 7):
 /// worked out from where the quest is and the seconds into its step, so
 /// the app shows the same whenever it's opened. In the house area, x is
 /// the house's own (`PipHouse`); in a place he gathers in, x is a share
@@ -88,10 +88,10 @@ class QuestView {
   /// A swing of his sword (seconds).
   static const swingTime = 1.1;
 
-  /// A scoop of his shovel (seconds, Round 147).
+  /// A scoop of his shovel (seconds).
   static const digTime = 2.0;
 
-  /// A blow of his hammer (seconds, Round 149).
+  /// A blow of his hammer (seconds).
   static const hammerTime = 0.8;
 
   /// Where he goes in and out of the house area (its right edge) and
@@ -107,7 +107,7 @@ class QuestView {
         _ => 0.3,
       };
   static double workOffset(QuestScenePlace p) => switch (p) {
-        // Round 146: beside the great tree's trunk, his axe in it.
+        // Beside the great tree's trunk, his axe in it.
         QuestScenePlace.forest => -16,
         QuestScenePlace.mine => -16,
         _ => -8,
@@ -135,7 +135,7 @@ class QuestView {
       };
 
   /// What his quest looks like [seconds] into [at]'s step, in a room
-  /// [width] wide. Round 144: his walks between his places go at his
+  /// [width] wide. His walks between his places go at his
   /// walking pace in any room (they took set times: slow in the house
   /// area and into the mine, quicker in a wider room).
   static QuestView of(QuestAt at, double seconds, {int width = 160}) {
@@ -158,7 +158,7 @@ class QuestView {
     final placeFor = math.min((workAt + 12) / walkSpeed, length / 3);
     switch (step.action) {
       case QuestAction.walkOut:
-        // From where he was (Round 141: the last piece's spot, down off
+        // From where he was (the last piece's spot, down off
         // it; else the stairs' foot) off the house area.
         final before = at.step > 0 ? at.script.steps[at.step - 1] : null;
         final (fromX, fromLift) = before == null ? (home, 0.0) : spotOf(before);
@@ -216,7 +216,7 @@ class QuestView {
     }
   }
 
-  /// Round 141: on his field between his places, [into] seconds of the
+  /// On his field between his places, [into] seconds of the
   /// [long] he's on it: in from one edge (the left, going [right]), the
   /// middle while the ground goes by, off the other: no cut to a place
   /// while he's in view.
@@ -260,7 +260,7 @@ class QuestView {
     final anchor = resourceAt(place);
     final flyers = <QuestFlyer>[];
     final puffs = <QuestPuff>[];
-    // Round 147: digging too, with his shovel: into the hole, then up.
+    // Digging too, with his shovel: into the hole, then up.
     final digging = place == QuestScenePlace.beach;
     const swinging = true;
     // A chip with each swing; and what it gives flies to him at the end.
@@ -345,7 +345,7 @@ class QuestView {
         : x + 10;
     final pieceUp =
         atFire ? (step.piece?.id == 'flue' ? lift + 30 : lift + 8) : lift + 10;
-    // Round 149: building, he hammers: where his hammer lands (in front
+    // Building, he hammers: where his hammer lands (in front
     // of him, about his middle) is the block going up, its materials
     // and its dust there. Smelting, the fire's.
     final building = step.action == QuestAction.build;

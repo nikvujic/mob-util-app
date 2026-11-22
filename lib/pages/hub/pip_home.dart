@@ -27,10 +27,10 @@ import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 import 'package:the_app/widgets/pixel_text.dart';
 
-/// Pip Home (Round 35): his field, big, on top, following the time of
+/// Pip Home: his field, big, on top, following the time of
 /// day; under it a card in his own pixel letters, swiped between his
 /// status and his settings (rename, animations, backgrounds). Everything
-/// happens in the card: renaming has its own keyboard. Round 73: two
+/// happens in the card: renaming has its own keyboard. Two
 /// views, switched from the first card: his info (and his settings), or
 /// his adventures (his level, XP and items; later more cards), the one
 /// it opens in while he's out.
@@ -44,8 +44,7 @@ class PipHomePage extends ConsumerStatefulWidget {
 /// What the settings side of the card shows.
 enum _Settings { menu, rename, animations, adventures, backgrounds, hats }
 
-/// Which card the first page shows (Round 73: info or adventures; Round
-/// 126: or his quests).
+/// Which card the first page shows (info or adventures; or his quests).
 enum _View { info, adventure, quest }
 
 class _PipHomePageState extends ConsumerState<PipHomePage> {
@@ -55,8 +54,8 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
   int _page = 0;
   _Settings _settings = _Settings.menu;
 
-  /// Round 73: the adventure view (his adventure card, no settings), or
-  /// his info; it opens in the adventure view while he's out. Round 126:
+  /// The adventure view (his adventure card, no settings), or
+  /// his info; it opens in the adventure view while he's out;
   /// or the quest view, opened in while he's at his quest's work.
   late _View _view = _openIn();
 
@@ -79,11 +78,11 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
         _settings = _Settings.menu;
       });
 
-  /// Previews (Round 57): a background and a hat tried, together with
+  /// Previews: a background and a hat tried, together with
   /// his animations; back to his info card (or leaving), they're gone.
   PipBackground _background = PipBackground.field;
 
-  /// Round 70: a season, the weather, an occasion or a time of day tried
+  /// A season, the weather, an occasion or a time of day tried
   /// on his field, with the background.
   PipLook _look = PipLook.none;
 
@@ -91,11 +90,11 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
     _background = PipBackground.field;
     _look = PipLook.none;
     _brain.stopTryingOn();
-    // Round 67: an adventure preview stops too.
+    // An adventure preview stops too.
     _brain.stopPreviews();
   }
 
-  /// The scene's pixel: Pip as big as in the menu (Round 38), in a
+  /// The scene's pixel: Pip as big as in the menu, in a
   /// bigger field.
   static const _pixel = PipRoom.smallPixel;
 
@@ -114,7 +113,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
       PipPlace.home,
       ref.watch(clockProvider)(),
       background: background,
-      // Round 70: the weather, if it's on in Internet Access.
+      // The weather, if it's on in Internet Access.
       weatherCode: ref.watch(skyWeatherProvider),
       windSpeed: ref.watch(skyWindProvider),
       look: _look,
@@ -123,7 +122,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
       appBar: AppBar(title: const Text('Pip')),
       body: LayoutBuilder(
         builder: (context, box) {
-          // Half the page for his field (Round 36).
+          // Half the page for his field.
           // (His pixels are whole device pixels, as PipRoom draws them.)
           final ratio = MediaQuery.devicePixelRatioOf(context);
           final pixel = math.max(1.0, (_pixel * ratio).floorToDouble()) / ratio;
@@ -137,7 +136,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                 scene: scene,
                 height: rows,
                 pixel: _pixel,
-                // Round 52: out of the ground or from the sky (thrown in
+                // Out of the ground or from the sky (thrown in
                 // only by the menu's swing).
                 entrances: const {PipEntrance.ground, PipEntrance.sky},
               ),
@@ -157,7 +156,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                 : const NeverScrollableScrollPhysics(),
                             onPageChanged: (page) => setState(() {
                               _page = page;
-                              // Round 126: off the settings, previews end.
+                              // Off the settings, previews end.
                               if (page != 2) _endPreviews();
                             }),
                             children: [
@@ -166,10 +165,10 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                 showView: _showView,
                                 cheer: () => setState(_brain.cheer),
                               ),
-                              // Round 126: his inventory, between his info
+                              // His inventory, between his info
                               // and his settings.
                               if (_infoView) const _Inventory(),
-                              // Round 73: the settings (animations and
+                              // The settings (animations and
                               // the rest) are his info's.
                               if (_infoView)
                                 switch (_settings) {
@@ -182,7 +181,7 @@ class _PipHomePageState extends ConsumerState<PipHomePage> {
                                     ),
                                   _Settings.animations => _Animations(
                                       brain: _brain,
-                                      // Round 75: the weather's, tried on.
+                                      // The weather's, tried on.
                                       tryWeather: (kind) =>
                                           setState(() => _look = PipLook(
                                                 season: _look.season,
@@ -283,12 +282,12 @@ Widget _words(String text, {Color colour = PipColours.screen, double? pixel}) =>
 
 /// His status: how he looks, his name, age and birthday.
 class _Status extends ConsumerStatefulWidget {
-  /// Round 73: his adventure card (the adventure view) or his info card;
-  /// Round 126: or his quest card. The rows on them switch.
+  /// His adventure card (the adventure view) or his info card;
+  /// Or his quest card. The rows on them switch.
   final _View view;
   final ValueChanged<_View> showView;
 
-  /// Just registered as an adventurer (Round 63): his sword up high.
+  /// Just registered as an adventurer: his sword up high.
   final VoidCallback cheer;
 
   const _Status({
@@ -331,7 +330,7 @@ class _StatusState extends ConsumerState<_Status> {
   }
 
   /// What the adventure card says after a tap on Register outside its
-  /// hours (Round 63).
+  /// hours.
   String? _message;
 
   void _open(_View view) {
@@ -339,7 +338,7 @@ class _StatusState extends ConsumerState<_Status> {
     widget.showView(view);
   }
 
-  /// Registers him (Round 63): from 13:00 to 17:00; else come back then.
+  /// Registers him: from 13:00 to 17:00; else come back then.
   void _register() {
     final now = ref.read(clockProvider)();
     if (!PipAdventure.canRegisterAt(now)) {
@@ -367,7 +366,7 @@ class _StatusState extends ConsumerState<_Status> {
     final face = switch (show) {
       PipShow.off || PipShow.powerOff => PipFace.off,
       PipShow.asleep => PipFace.asleep,
-      // Round 77: woken at night, drowsy.
+      // Woken at night, drowsy.
       _ when life.drowsyAt(now) => PipFace.veryTired,
       _ => switch (segments) {
           3 => PipFace.normal,
@@ -380,7 +379,7 @@ class _StatusState extends ConsumerState<_Status> {
     }
     if (widget.view == _View.quest) return _questCard(pip, life, now, face);
     final next = pip.nextBatteryAt;
-    // Why a battery can't go to him now (Round 37); Round 116: no how-to
+    // Why a battery can't go to him now; no how-to
     // (tap the field, tap him three times), only how he is.
     final hint = switch (life.refusalAt(now)) {
       null => null,
@@ -416,7 +415,7 @@ class _StatusState extends ConsumerState<_Status> {
             ],
           ),
           const SizedBox(height: 20),
-          // His energy and batteries (Round 37).
+          // His energy and batteries.
           Row(
             children: [
               _words('ENERGY  ', colour: PipColours.dim),
@@ -437,7 +436,7 @@ class _StatusState extends ConsumerState<_Status> {
             const SizedBox(height: 16),
             _words(hint, colour: PipColours.light),
           ],
-          // Round 63: his adventures, always here.
+          // His adventures, always here.
           const SizedBox(height: 12),
           _CardRow(
             key: const Key('pipAdventures'),
@@ -445,7 +444,7 @@ class _StatusState extends ConsumerState<_Status> {
             value: '>',
             onTap: () => _open(_View.adventure),
           ),
-          // Round 126: his quests, under it.
+          // His quests, under it.
           _CardRow(
             key: const Key('pipQuests'),
             label: 'QUESTS',
@@ -457,11 +456,11 @@ class _StatusState extends ConsumerState<_Status> {
     );
   }
 
-  /// His adventure card (Round 63): his level and title, the XP to the
+  /// His adventure card: his level and title, the XP to the
   /// next, his weapon, off-hand and hat; not registered yet, a button to.
   Widget _adventureCard(
       PipLife pip, PipLifeNotifier life, DateTime now, PipFace face) {
-    // Round 73: as shown in his room (up as he strikes bugs, watched).
+    // As shown in his room (up as he strikes bugs, watched).
     final xp = pipShownXp(ref, now);
     final level = PipAdventure.levelFor(xp);
     final from = PipAdventure.xpFor(level);
@@ -490,7 +489,7 @@ class _StatusState extends ConsumerState<_Status> {
                       _words(PipAdventure.titleFor(level).toUpperCase(),
                           colour: PipColours.light),
                     ] else
-                      // Round 66: wrapped, clear of the card's edge.
+                      // Wrapped, clear of the card's edge.
                       const PixelParagraph('NOT AN ADVENTURER YET',
                           colour: PipColours.dim, pixel: 3),
                   ],
@@ -548,7 +547,7 @@ class _StatusState extends ConsumerState<_Status> {
     );
   }
 
-  /// Starts the offered quest (Round 126): only in quest hours; else when
+  /// Starts the offered quest: only in quest hours; else when
   /// to come back.
   void _startQuest() {
     final now = ref.read(clockProvider)();
@@ -569,7 +568,7 @@ class _StatusState extends ConsumerState<_Status> {
     AppSound.fanfare();
   }
 
-  /// His quest card (Round 126, spec 3): the quest under way (how far, what
+  /// His quest card (spec 3): the quest under way (how far, what
   /// he's on, about when it's done), or the one offered with Start; then
   /// the finished ones, each its framed picture.
   Widget _questCard(
@@ -768,22 +767,21 @@ class _SettingsMenu extends StatelessWidget {
           value: '>',
           onTap: () => open(_Settings.animations),
         ),
-        // Round 67: his adventures, as previews (no XP).
+        // His adventures, as previews (no XP).
         _CardRow(
           key: const Key('pipAdventurePreviews'),
           label: 'ADVENTURES',
           value: '>',
           onTap: () => open(_Settings.adventures),
         ),
-        // Picked from a list (Round 36); the one in use beside it. Round
-        // 57: a preview, like a hat.
+        // Picked from a list; the one in use beside it. A preview, like a hat.
         _CardRow(
           key: const Key('pipBackground'),
           label: 'BACKGROUND',
           value: '${background.label.toUpperCase()} >',
           onTap: () => open(_Settings.backgrounds),
         ),
-        // Round 57: hats to try on him.
+        // Hats to try on him.
         _CardRow(
           key: const Key('pipHats'),
           label: 'HATS',
@@ -795,9 +793,9 @@ class _SettingsMenu extends StatelessWidget {
   }
 }
 
-/// His backgrounds to pick from (Round 36: one for now, Field; day and
-/// night are the same one), the one in use marked. Round 57: a preview,
-/// not kept. Round 70: under it, what can be tried on it: the seasons,
+/// His backgrounds to pick from (one for now, Field; day and
+/// night are the same one), the one in use marked. A preview,
+/// not kept. Under it, what can be tried on it: the seasons,
 /// the weather, the occasions and the times of day (one of each at a
 /// time, tapped again to take it off).
 class _Backgrounds extends StatelessWidget {
@@ -879,7 +877,7 @@ class _Backgrounds extends StatelessWidget {
   }
 }
 
-/// Hats to try on him (Round 57): a tap puts one on (None takes it off),
+/// Hats to try on him: a tap puts one on (None takes it off),
 /// the one he has marked. Not kept: back to his info card, it's gone.
 class _Hats extends StatelessWidget {
   final PipHat? current;
@@ -927,7 +925,7 @@ class _Animations extends StatefulWidget {
   final PipBrain brain;
   final VoidCallback back;
 
-  /// Round 75: tries a weather on his field (the weather's animations,
+  /// Tries a weather on his field (the weather's animations,
   /// and his tent and umbrella), as Background's list does.
   final ValueChanged<WeatherKind> tryWeather;
 
@@ -955,8 +953,8 @@ class _AnimationsState extends State<_Animations> {
 
   void _play(PipAnimation animation) {
     final brain = widget.brain;
-    // Round 75: the weather's in its weather (tried on, as Background's).
-    // Round 128: his field's things, not in his house.
+    // The weather's in its weather (tried on, as Background's).
+    // His field's things, not in his house.
     final indoors = brain.atHome && PipBrain.fieldOnly.contains(animation);
     if (PipBrainWeather.eventOf(animation) case final event? when !indoors) {
       widget.tryWeather(weatherFor(event));
@@ -970,13 +968,13 @@ class _AnimationsState extends State<_Animations> {
           _ when indoors => 'NOT IN HIS HOUSE',
           PipActivity.asleep => "HE'S ASLEEP",
           PipActivity.off => "HE'S OFF",
-          // Round 45: at his station (the phone plugged in).
+          // At his station (the phone plugged in).
           PipActivity.toStation ||
           PipActivity.plugging ||
           PipActivity.charging ||
           PipActivity.unplugging =>
             "HE'S CHARGING",
-          // Round 128: at his quest's work.
+          // At his quest's work.
           PipActivity.questing => "HE'S AT WORK",
           _ => "HE'S BUSY, A MOMENT",
         });
@@ -1002,7 +1000,7 @@ class _AnimationsState extends State<_Animations> {
                     value: '>',
                     onTap: () => _play(a),
                   ),
-              // Round 75: the weather's cover, seen coming (it goes when
+              // The weather's cover, seen coming (it goes when
               // the weather's taken off, in Background).
               for (final (kind, label) in const [
                 (WeatherKind.storm, 'HIS TENT IN A STORM'),
@@ -1032,7 +1030,7 @@ class _AnimationsState extends State<_Animations> {
   }
 }
 
-/// His adventures as previews (Round 67): a day out, a ski run, a bus
+/// His adventures as previews: a day out, a ski run, a bus
 /// trip, played in his field; no XP, nothing kept, stopped back on his
 /// info card.
 class _Adventures extends StatefulWidget {
@@ -1090,7 +1088,7 @@ class _AdventuresState extends State<_Adventures> {
                 value: '>',
                 onTap: () => _play(brain.previewAdventure),
               ),
-              // Round 73: the boss's fight (a real one's luck: once a
+              // The boss's fight (a real one's luck: once a
               // day out, while watched).
               _CardRow(
                 key: const Key('pipPreview-boss'),
@@ -1306,11 +1304,11 @@ class _Key extends StatelessWidget {
   }
 }
 
-/// How far into his level he is (Round 63): a bar filling up.
+/// How far into his level he is: a bar filling up.
 class _XpBar extends StatelessWidget {
   final double progress;
 
-  /// Round 126: a quest's bar too.
+  /// A quest's bar too.
   final String? label;
 
   const _XpBar({super.key, required this.progress, this.label});
@@ -1337,7 +1335,7 @@ class _XpBar extends StatelessWidget {
   }
 }
 
-/// His inventory (Round 126, spec 3): what he carries for his quest,
+/// His inventory (spec 3): what he carries for his quest,
 /// each with its count; nothing, says so.
 class _Inventory extends ConsumerStatefulWidget {
   const _Inventory();
@@ -1421,7 +1419,7 @@ class _InventoryState extends ConsumerState<_Inventory> {
   }
 }
 
-/// A box for what he carries (Round 63): his weapon (the sword), his
+/// A box for what he carries: his weapon (the sword), his
 /// off-hand and his hat (empty for now; later from his inventory).
 class _ItemBox extends StatelessWidget {
   final String label;

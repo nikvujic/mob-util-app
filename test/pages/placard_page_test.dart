@@ -162,7 +162,7 @@ void main() {
     expect(find.byKey(const Key('placardText')), findsNothing);
     expect(find.byTooltip('Placard'), findsOneWidget);
     expect(requests('setPreferredOrientations').last, isEmpty);
-    // Round 151: the app's own bars back (it was edge to edge, under the
+    // The app's own bars back (it was edge to edge, under the
     // navigation bar: other pages' bottoms got squashed).
     expect(calls.last.$1, 'SystemChrome.setEnabledSystemUIOverlays');
     expect(calls.last.$2, ['SystemUiOverlay.top', 'SystemUiOverlay.bottom']);
@@ -181,7 +181,7 @@ void main() {
         greaterThanOrEqualTo(const Duration(milliseconds: 1800)));
   });
 
-  group('the pop and its sounds (Round 17)', () {
+  group('the pop and its sounds', () {
     test('the pop starts where the inflating ends: no jump', () {
       expect(popScale(0), closeTo(1 + inflated, 1e-9));
       expect(popScale(1), closeTo(1, 1e-9));

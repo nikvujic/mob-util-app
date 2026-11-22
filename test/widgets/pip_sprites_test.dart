@@ -5,7 +5,7 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Pip's frames (Round 26), his screen a row taller (Round 27), and the
+/// Pip's frames, his screen a row taller, and the
 /// launcher icon drawn from the same idle frame.
 void main() {
   test('every frame is his size, the brain\'s', () {
@@ -61,7 +61,7 @@ void main() {
 
     test('in his colours', () {
       String hex(int v) => v.toRadixString(16).padLeft(2, '0');
-      // The colours his standing frame uses (not the egg's, Round 34).
+      // The colours his standing frame uses (not the egg's).
       final used = PipSprites.frames[PipFrame.idle]!.join().split('').toSet();
       for (final MapEntry(:key, :value) in PipSprites.colours.entries) {
         if (!used.contains(key)) continue;
@@ -74,7 +74,7 @@ void main() {
     });
   });
 
-  group('his charging station (Round 44)', () {
+  group('his charging station', () {
     test('the station: 14 x 27, every pixel in its colours', () {
       expect(PipSprites.station, hasLength(PipBrain.stationHeight));
       for (final row in [...PipSprites.station, ...PipSprites.stationLampOff]) {

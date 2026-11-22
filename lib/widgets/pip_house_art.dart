@@ -12,8 +12,8 @@ import 'package:the_app/widgets/pip_sprites.dart';
 typedef HouseDot = void Function(double x, double y, Color c,
     [double w, double h]);
 
-/// Pip's house and the places he gathers in (Round 126), drawn from the
-/// approved drafts (`docs/pip_house_drafts.png`, Round 124).
+/// Pip's house and the places he gathers in, drawn from the
+/// approved drafts (`docs/pip_house_drafts.png`).
 class PipHouseArt {
   final HouseDot _dot;
 
@@ -280,7 +280,7 @@ class PipHouseArt {
     }
   }
 
-  /// Round 128: after dark, the night through the windows.
+  /// After dark, the night through the windows.
   bool _dark = false;
   Color get _glass =>
       _dark ? PipHouseColours.nightGlass : PipHouseColours.glass;
@@ -510,7 +510,7 @@ class PipHouseArt {
   /// Snow on an unfinished house: on its open floor, the porch, the tops
   /// of what's up.
   void _snowOn(PipHouse house) {
-    // Round 149: lying on what's built (a dotted line across the whole
+    // Lying on what's built (a dotted line across the whole
     // house floated where there was no floor yet).
     void layer(int x0, int x1, int y) {
       for (var x = x0; x <= x1; x++) {
@@ -704,10 +704,10 @@ class PipHouseArt {
     }
   }
 
-  /// The forest (Round 124: dense, in three layers, the far ones hazy):
+  /// The forest (dense, in three layers, the far ones hazy):
   /// the ground's top at [ground]; [width] wide; [season]'s colours.
   void forest(double ground, int width, Season season, {bool dark = false}) {
-    // Round 146: the far trees fade into the sky's colour by day, into
+    // The far trees fade into the sky's colour by day, into
     // the dark at night (they were pale against a night sky).
     final into = dark ? PipHouseColours.nightHaze : PipHouseColours.haze;
     final oak = PipSprites.treeOf(PipTreeKind.oak, season);
@@ -728,7 +728,7 @@ class PipHouseArt {
     ];
     for (var i = 0, x = -8; x < width + 10; i++, x += 18) {
       final k = kinds[i % kinds.length];
-      // Round 146: standing on the ground (they floated above it).
+      // Standing on the ground (they floated above it).
       sprite(k.$1, k.$2, x.toDouble(), ground,
           haze: dark ? 0.55 : 0.45, scale: 0.75, into: into);
     }
@@ -760,7 +760,7 @@ class PipHouseArt {
     }
   }
 
-  /// The tree he's felling (Round 146: the great tree, taller than his
+  /// The tree he's felling (the great tree, taller than his
   /// field's), its trunk's middle at [foot], and how far it's fallen
   /// ([fall], 0 standing to 1 down): it leans, then lies.
   void fellingTree(Season season, double foot, double ground, double fall) {
@@ -792,11 +792,11 @@ class PipHouseArt {
     rect(foot - 3, ground - 2, foot + 2, ground - 2, PipHouseColours.plank[1]);
   }
 
-  /// The mine (Round 124): a mountain rising up the right and off the top,
+  /// The mine: a mountain rising up the right and off the top,
   /// its mouth at its foot, rails and a cart; hazy peaks behind.
   void mine(double ground, int width, {bool dark = false}) {
     final g = ground;
-    // Round 147: the far peaks into the dark at night (they stayed pale).
+    // The far peaks into the dark at night (they stayed pale).
     Color far(Color c) =>
         dark ? Color.lerp(c, PipHouseColours.nightHaze, 0.6)! : c;
     for (var x = 0; x < width; x++) {
@@ -902,12 +902,12 @@ class PipHouseArt {
     }
   }
 
-  /// The beach (Round 123): the sea to the horizon, waves foaming onto
+  /// The beach: the sea to the horizon, waves foaming onto
   /// wet sand, shells, a starfish, beach grass; [t] moves the waves.
   void beach(double ground, int width, int below, double t,
       {bool dark = false}) {
     final horizon = ground - 34, shore = ground - 10;
-    // Round 147: the sea dark at night (it stayed a day's blue).
+    // The sea dark at night (it stayed a day's blue).
     Color sea(Color c) =>
         dark ? Color.lerp(c, PipHouseColours.nightHaze, 0.62)! : c;
     for (var y = horizon; y < shore; y++) {
@@ -916,7 +916,7 @@ class PipHouseArt {
           Color.lerp(PipHouseColours.seaDeep, PipHouseColours.seaShallow, p)!;
       for (var x = 0; x < width; x++) {
         var c = base;
-        // Glints here and there, twinkling (Round 147: scattered; in a
+        // Glints here and there, twinkling (scattered; in a
         // pattern they lined up into streaks, like rain).
         if (_h(x, y.toInt(), (t * 2).floor() % 4) % 113 == 0) {
           c = PipHouseColours.seaGlint;

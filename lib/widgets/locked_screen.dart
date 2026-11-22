@@ -8,7 +8,7 @@ class LockedScreen extends StatefulWidget {
   final PreferredSizeWidget appBar;
   final VoidCallback onUnlock;
 
-  /// Asks at once, as it's shown (Round 61: the To-do and Hub pages,
+  /// Asks at once, as it's shown (the To-do and Hub pages,
   /// opened locked, go straight to the fingerprint as a locked note does;
   /// not when one locks while open); the button is there to ask again.
   final bool askAtOnce;

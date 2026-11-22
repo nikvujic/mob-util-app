@@ -6,7 +6,7 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/models/shop_item.dart';
 import 'package:the_app/providers/shop_provider.dart';
 
-/// The recipes (Round 42), in the user's order, saved to `recipes.json`.
+/// The recipes, in the user's order, saved to `recipes.json`.
 class RecipesNotifier extends StateNotifier<List<Recipe>> {
   final DateTime Function() _now;
 
@@ -24,7 +24,7 @@ class RecipesNotifier extends StateNotifier<List<Recipe>> {
     return recipe.id;
   }
 
-  /// Round 104: a whole new recipe at the top (imported); returns its id.
+  /// A whole new recipe at the top (imported); returns its id.
   String addWhole({
     required String name,
     int? prepMinutes,
@@ -116,7 +116,7 @@ class RecipesNotifier extends StateNotifier<List<Recipe>> {
   }
 
   /// An ingredient renamed in the list: recipes that use it follow
-  /// (decided, Round 41). Their modified times stay.
+  /// (decided). Their modified times stay.
   void renameIngredient(String ingredientId, String name) {
     if (!state.any((r) => r.ingredients
         .any((i) => i.ingredientId == ingredientId && i.name != name))) {
@@ -140,7 +140,7 @@ final recipesProvider = StateNotifierProvider<RecipesNotifier, List<Recipe>>(
       RecipesNotifier(ref.watch(appStorageProvider), ref.watch(clockProvider)),
 );
 
-/// The ingredients list (Round 42), saved to `ingredients.json`.
+/// The ingredients list, saved to `ingredients.json`.
 class IngredientsNotifier extends StateNotifier<IngredientBook> {
   final Ref _ref;
 
@@ -149,7 +149,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     addListener(storage.saveIngredients, fireImmediately: false);
   }
 
-  /// The first section (Round 43): the default one, "Ingredients", which
+  /// The first section: the default one, "Ingredients", which
   /// stays at the top; new sections go under it. An empty list makes it
   /// when the first ingredient or section is added.
   static const firstSectionName = 'Ingredients';
@@ -167,7 +167,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
       ? [IngredientSection(id: generateId(), name: firstSectionName)]
       : state.sections;
 
-  /// The ingredient called [name] (Round 92: case and spaces aside) and
+  /// The ingredient called [name] (case and spaces aside) and
   /// its section, other than [except]; null if there's none.
   (Ingredient, IngredientSection)? named(String name, {String? except}) {
     final key = ingredientKey(name);
@@ -181,7 +181,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
 
   /// Adds [name] at the top of the first section (made if there's none);
   /// returns its id, or null for a blank name or one already there
-  /// (Round 92: no two of the same).
+  /// (no two of the same).
   String? add(String name) {
     final trimmed = name.trim();
     if (trimmed.isEmpty || named(trimmed) != null) return null;
@@ -194,7 +194,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     return item.id;
   }
 
-  /// Round 104 (an imported recipe): the id of the ingredient called
+  /// The id of the ingredient called
   /// [name], added at the top of the section called [section] (made, as
   /// a new section, if there's none; the first section if null) when
   /// it isn't there yet.
@@ -214,7 +214,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     return id;
   }
 
-  /// A new section just under the first one (Round 43); returns its id,
+  /// A new section just under the first one; returns its id,
   /// or null for a blank name.
   String? addSection(String name) {
     final trimmed = name.trim();
@@ -235,7 +235,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
   }
 
   /// Deletes a section; its ingredients move to the end of the section
-  /// above. The first one stays (Round 43). Returns the book as it was
+  /// above. The first one stays. Returns the book as it was
   /// (for Undo), or null if nothing changed.
   IngredientBook? deleteSection(String id) {
     final sections = [...state.sections];
@@ -264,7 +264,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     _ref.read(recipesProvider.notifier).renameIngredient(id, trimmed);
   }
 
-  /// Deletes an ingredient (recipes keep theirs, Round 41); returns the
+  /// Deletes an ingredient (recipes keep theirs); returns the
   /// book as it was (for Undo).
   IngredientBook delete(String id) {
     final before = state;
@@ -302,7 +302,7 @@ class IngredientsNotifier extends StateNotifier<IngredientBook> {
     ]);
   }
 
-  /// Moves a whole section to [index] among the sections (Round 43);
+  /// Moves a whole section to [index] among the sections;
   /// never above the first one, which doesn't move.
   void moveSection(String id, int index) {
     final sections = [...state.sections];
@@ -322,9 +322,9 @@ final ingredientsProvider =
   (ref) => IngredientsNotifier(ref, ref.watch(appStorageProvider)),
 );
 
-/// A recipe's quantity as Shop reads it (Round 41): "200 g" or "1.5 kg" a
+/// A recipe's quantity as Shop reads it: "200 g" or "1.5 kg" a
 /// weight, "2" or "3 pcs" a count; anything else ("1 tbsp", "1-2") typed
-/// text (Round 70); empty none.
+/// text; empty none.
 ({Quantity? quantity, int count, double grams, String text}) shopQuantityOf(
     String text) {
   final trimmed = text.trim();
@@ -372,7 +372,7 @@ final _quantity = RegExp(
 /// What [sendToShop] did.
 typedef ToShop = ({int added, int putBack, List<ShopItem> before});
 
-/// Puts [recipe]'s ingredients on Shop's to-buy list (Round 41): one with
+/// Puts [recipe]'s ingredients on Shop's to-buy list: one with
 /// the same name (any case) and the same quantity is put back on the
 /// list (or left there); otherwise a new item, a copy beside any with
 /// another quantity. [ToShop.before] is Shop as it was, for Undo. [read]
@@ -406,7 +406,7 @@ ToShop sendToShop(
       }
       continue;
     }
-    // Another quantity: a copy beside it (Round 58: not moved).
+    // Another quantity: a copy beside it (not moved).
     final id = shop.addItem(name, copy: true);
     if (id == null) continue;
     added++;
@@ -427,6 +427,6 @@ ToShop sendToShop(
   return (added: added, putBack: putBack, before: before);
 }
 
-/// An ingredient's name as compared (Round 92): no case, single spaces.
+/// An ingredient's name as compared: no case, single spaces.
 String ingredientKey(String name) =>
     name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');

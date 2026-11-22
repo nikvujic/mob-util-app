@@ -8,7 +8,7 @@ import 'package:the_app/models/people.dart';
 import 'package:the_app/models/people_layout.dart';
 import 'package:the_app/widgets/people_avatar.dart';
 
-/// The People page's board (Round 108, spec 4–5): everyone as a box on a
+/// The People page's board (spec 4–5): everyone as a box on a
 /// plane you pan and zoom, their family lines under them. A tap on a
 /// person centres on them; dragging one moves them, their family
 /// following once the drag goes far (spec 5.3). People glide to new
@@ -49,7 +49,7 @@ class PeopleBoardState extends State<PeopleBoard>
   /// Where each person is drawn (board units), gliding to where they are.
   final _shown = <String, Offset>{};
 
-  /// Round 109: people move on springs (a little past, then back) and
+  /// People move on springs (a little past, then back) and
   /// squash a little the way they go, as if soft: each one's speed
   /// (board units a second), and that speed smoothed for the squash.
   final _vel = <String, Offset>{};
@@ -70,7 +70,7 @@ class PeopleBoardState extends State<PeopleBoard>
   final _lineIn = <String, double>{};
   late Set<String> _relations = {for (final r in widget.book.relations) r.id};
 
-  // Round 109: opened on the main person, when there is one.
+  // Opened on the main person, when there is one.
   late Offset _center = switch (widget.book.main) {
     final m? => Offset(m.x, m.y),
     null => Offset(widget.book.view.x, widget.book.view.y),
@@ -79,7 +79,7 @@ class PeopleBoardState extends State<PeopleBoard>
   Offset? _centerTo;
   Size _size = Size.zero;
 
-  // Dragging a person (Round 114: only them, nobody follows): who, and
+  // Dragging a person (only them, nobody follows): who, and
   // where from.
   String? _dragId;
   Offset _dragStart = Offset.zero;
@@ -95,7 +95,7 @@ class PeopleBoardState extends State<PeopleBoard>
   int _pointers = 0;
 
   // Panning and zooming.
-  /// Round 112: a double tap held and moved zooms (as in maps): down in,
+  /// A double tap held and moved zooms (as in maps): down in,
   /// up out, about where it was tapped. The last quick tap (when, where),
   /// and whether this finger is such a second tap.
   Duration? _tapAt;
@@ -245,7 +245,7 @@ class PeopleBoardState extends State<PeopleBoard>
   Offset _toWorld(Offset screen) =>
       (screen - _size.center(Offset.zero)) / _zoom + _center;
 
-  // Round 109: every box the same size (highlighted ones were bigger).
+  // Every box the same size (highlighted ones were bigger).
   Rect _rectOf(Person p) => Rect.fromCenter(
         center: _shown[p.id] ?? _target(p),
         width: BoardSizes.boxWidth,
@@ -264,7 +264,7 @@ class PeopleBoardState extends State<PeopleBoard>
   void _onScaleStart(ScaleStartDetails d) {
     _centerTo = null;
     _zoomTo = null;
-    // Round 109: only a gesture starting with a finger just down may drag
+    // Only a gesture starting with a finger just down may drag
     // someone, and from where it went down; a pinch's last finger left on
     // the screen pans from where it is (it used to start at a finger's old
     // touch-down: the board, or a person, jumped).
@@ -453,7 +453,7 @@ class PeopleBoardState extends State<PeopleBoard>
       ..rotateZ(-a);
   }
 
-  /// Round 109: zoom with one thumb. Pulled down, out; up, in; a tap
+  /// Zoom with one thumb. Pulled down, out; up, in; a tap
   /// goes back to 100%.
   Widget _zoomHandle(AppPalette colors) => GestureDetector(
         key: const Key('peopleZoom'),
@@ -499,8 +499,7 @@ class _PersonBox extends StatelessWidget {
   final DateTime now;
   final bool selected;
 
-  /// The board's zoom: zoomed out, names grow and faces shrink (Round
-  /// 109), so they stay readable.
+  /// The board's zoom: zoomed out, names grow and faces shrink, so they stay readable.
   final double zoom;
 
   /// The main person (a star), and in their highlighted family (a ring).
@@ -544,8 +543,8 @@ class _PersonBox extends StatelessWidget {
     final strong = p.highlighted || selected;
     // Text in board units, so it shrinks with the zoom: grown back as the
     // board zooms out (up to about 2.2×), the face giving way.
-    // Round 111: gentler (up to 1.6×), so the face stays near its size
-    // rather than dwarfed; Round 112: the name still on two lines, so a
+    // Gentler (up to 1.6×), so the face stays near its size
+    // rather than dwarfed; the name still on two lines, so a
     // first and last name are shown whole (only a long one cut short).
     final text = (1 / zoom).clamp(1.0, 1.6);
     final name = p.deceased ? '† ${p.name}' : p.name;
@@ -607,7 +606,7 @@ class _PersonBox extends StatelessWidget {
       ),
     );
     if (!main) return box;
-    // Round 111: the main person's star on the box's corner.
+    // The main person's star on the box's corner.
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -628,7 +627,7 @@ class _PersonBox extends StatelessWidget {
   }
 }
 
-/// Round 112: [style] made smaller, if need be, until the longest word
+/// [style] made smaller, if need be, until the longest word
 /// of [text] fits [width], so a name breaks between words, never inside
 /// one or cut short (only past two lines).
 TextStyle _fitWords(String text, TextStyle style, double width) {

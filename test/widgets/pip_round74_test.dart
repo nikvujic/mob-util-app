@@ -6,7 +6,7 @@ import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 74: his break at the tavern (eating bite by bite, sitting
+/// His break at the tavern (eating bite by bite, sitting
 /// still), its new look, and his field's trees alike in every room.
 void main() {
   const out = (onBreak: false, breakDone: 0.0);
@@ -106,7 +106,7 @@ void main() {
 
   test(
       'his field\'s trees go by with his time out: two rooms (each its own '
-      'run, the ground moved differently) agree; Round 76: knocked over, '
+      'run, the ground moved differently) agree; knocked over, '
       'they stand with the ground, then catch up as he runs on', () {
     final a = PipBrain(roomWidth: 200, random: math.Random(1));
     final b = PipBrain(roomWidth: 140, random: math.Random(2));
@@ -173,7 +173,7 @@ void main() {
   });
 
   test(
-      'Round 76: his sword knocked flying turns over in an arc and lands '
+      'his sword knocked flying turns over in an arc and lands '
       'flat, never down into the ground', () {
     final b = PipBrain(roomWidth: 200, random: math.Random(1));
     b.step(PipBrain.landEnd);

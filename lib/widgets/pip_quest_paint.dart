@@ -9,7 +9,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/weather.dart';
 import 'package:the_app/widgets/pip_house_art.dart';
 
-/// Draws his quest's place behind him (Round 127): his house area (the
+/// Draws his quest's place behind him: his house area (the
 /// house as far as it's built, its tree, the weather on it), or the
 /// forest, the mine, the beach; what flies, the dust and smoke; a lantern
 /// after dark. [dot] draws in room pixels; [groundTop] is the ground's
@@ -76,7 +76,7 @@ void paintQuestPlace(
     art.lantern(lx, ly);
     _glow(art, lx + 1, ly + 2, 16, PipHouseColours.lantern);
   }
-  // Round 146: measured as he is, from the place's anchor (they were
+  // Measured as he is, from the place's anchor (they were
   // drawn from the room's left edge: the chips flew by the edge).
   final from = view.anchor * columns;
   for (final f in view.flyers) {

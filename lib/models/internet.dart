@@ -1,4 +1,4 @@
-/// A place for the weather (Round 70), as Open-Meteo's place search found
+/// A place for the weather, as Open-Meteo's place search found
 /// it: its name, region and country, and where it is.
 class WeatherPlace {
   /// Open-Meteo's id for it (a GeoNames id), as text.
@@ -56,7 +56,7 @@ class WeatherPlace {
       Object.hash(id, name, region, country, latitude, longitude);
 }
 
-/// The weather at a place, as last fetched (Round 70).
+/// The weather at a place, as last fetched.
 class WeatherReport {
   /// The place's [WeatherPlace.id].
   final String placeId;
@@ -67,11 +67,11 @@ class WeatherReport {
   /// In °C.
   final double temperature;
 
-  /// Round 79: the wind, km/h at 10 m (null: a report from before).
+  /// The wind, km/h at 10 m (null: a report from before).
   final double? wind;
   final DateTime fetchedAt;
 
-  /// Round 106: [code]'s rain or snow now was checked by the rain radar
+  /// [code]'s rain or snow now was checked by the rain radar
   /// (Tomorrow.io, with the user's key); false: Open-Meteo's alone.
   final bool radar;
 
@@ -112,7 +112,7 @@ class WeatherReport {
       );
 }
 
-/// What the app may use the internet for (Round 70: the Internet Access
+/// What the app may use the internet for (the Internet Access
 /// page). Nothing unless turned on here; this phone only.
 class InternetSettings {
   /// The weather (Open-Meteo) for Pip's sky.
@@ -126,7 +126,7 @@ class InternetSettings {
   /// The last weather fetched, shown till the next (and after a restart).
   final WeatherReport? report;
 
-  /// Round 106: an own Tomorrow.io key for the rain radar; null:
+  /// An own Tomorrow.io key for the rain radar; null:
   /// none, the weather is Open-Meteo's alone. Settings aren't in backups,
   /// so it never leaves the phone but to Tomorrow.io.
   final String? radarKey;

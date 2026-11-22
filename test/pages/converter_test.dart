@@ -5,7 +5,7 @@ import 'package:the_app/models/hub_tool.dart';
 
 import '../helpers.dart';
 
-/// The unit converter (Round 118): two boxes per pair, either one fills
+/// The unit converter: two boxes per pair, either one fills
 /// the other; nothing kept.
 void main() {
   Future<void> openConverter(WidgetTester tester) async {
@@ -34,9 +34,9 @@ void main() {
       'typed on the left, the right shows it; on the right, the left; '
       'cleared, both empty', (tester) async {
     await openConverter(tester);
-    // g ↔ oz: the first cooking pair, last group (Round 119).
+    // g ↔ oz: the first cooking pair, last group.
     await type(tester, 'unit-7-left', '100');
-    expect(text('unit-7-right'), '3.53'); // Round 154: two decimals
+    expect(text('unit-7-right'), '3.53'); // Two decimals
     await type(tester, 'unit-7-right', '1');
     expect(text('unit-7-left'), '28.35');
     await type(tester, 'unit-7-right', '');
@@ -46,7 +46,7 @@ void main() {
   testWidgets('a temperature below zero; a comma for the decimals',
       (tester) async {
     await openConverter(tester);
-    // °C ↔ °F comes first (Round 119).
+    // °C ↔ °F comes first.
     await tester.enterText(find.byKey(const Key('unit-0-right')), '-4');
     await tester.pump();
     expect(text('unit-0-left'), '-20');
@@ -75,7 +75,7 @@ void main() {
       'every box shows its unit and its name before anything is typed; '
       'temperature first, cooking last', (tester) async {
     await openConverter(tester);
-    // Round 153: its name over the number, its symbol beside it.
+    // Its name over the number, its symbol beside it.
     for (final t in ['Celsius', '°C', 'Fahrenheit', '°F']) {
       expect(find.text(t), findsOneWidget, reason: t);
     }
@@ -88,7 +88,7 @@ void main() {
         ['Temperature', 'Length', 'Weight', 'Volume', 'Speed', 'Cooking']);
   });
 
-  testWidgets('Round 153: a tap anywhere on a tile (its name too) types in it',
+  testWidgets('a tap anywhere on a tile (its name too) types in it',
       (tester) async {
     await openConverter(tester);
     await tester.tap(find.text('Fahrenheit'));
@@ -98,8 +98,7 @@ void main() {
     expect(field.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('Round 154: no more than two decimals can be typed',
-      (tester) async {
+  testWidgets('no more than two decimals can be typed', (tester) async {
     await openConverter(tester);
     await tester.enterText(find.byKey(const Key('unit-0-left')), '1.25');
     await tester.pump();

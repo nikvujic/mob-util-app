@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
-/// Pip, the pet (Round 34): whether he's hatched, when (his birthday),
+/// Pip, the pet: whether he's hatched, when (his birthday),
 /// and his name. In backups; his age isn't stored, it comes from his
 /// birthday, so restored he's as old as he really is.
 ///
-/// Round 37: his energy and batteries. His energy is kept as a level at
+/// His energy and batteries. His energy is kept as a level at
 /// a moment ([energy] at [energyAt]); what it is now is worked out from
 /// the time since (`core/pip_energy.dart`), so a restored Pip carries on
 /// from where the backup left him. What was already shown (him turning
@@ -17,7 +17,7 @@ class PipLife {
   final String name;
 
   /// His energy (0 to 3) at [energyAt]; null [energyAt]: full, from when
-  /// he's next looked at (a Pip from before Round 37).
+  /// he's next looked at (a Pip from before energy existed).
   final double energy;
   final DateTime? energyAt;
 
@@ -34,24 +34,24 @@ class PipLife {
   final String? sleepSeen;
   final String? wakeSeen;
 
-  /// Round 77: when three taps last woke him in his sleeping hours (at
+  /// When three taps last woke him in his sleeping hours (at
   /// night for a while, early for the day: `PipEnergy.wokenAt`).
   final DateTime? wokenAt;
 
-  /// His adventures (Round 63): when he registered as an adventurer
+  /// His adventures: when he registered as an adventurer
   /// (null: not yet), the minutes out banked from his days out before
-  /// (Round 73: each worth ten XP, `PipAdventure.xpPerMinute`; stored as
+  /// (each worth ten XP, `PipAdventure.xpPerMinute`; stored as
   /// "xp", which they were till then), and his
   /// latest day out: the day ([dayKey]-like, "2026-10-18"), from when
   /// (null: he hasn't gone out that day, or it's banked) and when his
-  /// break started (Round 64; null: not had).
+  /// break started (null: not had).
   final DateTime? registeredAt;
   final int minutesOut;
   final String? outDay;
   final DateTime? outFrom;
   final DateTime? breakAt;
 
-  /// His quests (Round 125, `docs/QUESTS_SPEC.md`): the one under way
+  /// His quests (`docs/QUESTS_SPEC.md`): the one under way
   /// (its id, null: none; when it began; the work minutes done, counted
   /// up to [questCountedTo]), and those finished, with when.
   final String? questId;
@@ -108,7 +108,7 @@ class PipLife {
     return days < 0 ? 1 : days + 1;
   }
 
-  /// Whether [day] is his birthday (Round 57: the party hat): the day he
+  /// Whether [day] is his birthday (the party hat): the day he
   /// hatched, each year after (not that day itself); 29 February on the
   /// 28th in a year without it.
   bool birthdayOn(DateTime day) {
@@ -296,7 +296,7 @@ class PipLife {
       Object.hashAll(questsDone));
 }
 
-/// A quest finished (Round 125): which, and when.
+/// A quest finished: which, and when.
 class PipQuestDone {
   final String id;
   final DateTime at;

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/date_entry.dart';
 
-/// Birthdays & dates (Round 57), saved to `dates.json`. A date is saved
+/// Birthdays & dates, saved to `dates.json`. A date is saved
 /// as it's edited (upserted); one left without a title is dropped by its
 /// page.
 class DatesNotifier extends StateNotifier<DateBook> {

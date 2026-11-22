@@ -18,7 +18,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// One packing list (Round 94; Round 95: revised). It opens in
+/// One packing list (revised). It opens in
 /// **view mode**: its sections, each thing a row with a box; a tap
 /// anywhere on a row ticks it (or unticks it), in place. **Reset**
 /// unticks them all, asked first. **Edit**: its name, its own sections
@@ -395,7 +395,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
   Future<void> _itemOptions(PackingItem item) async {
     _leaveFields();
     final choice = await showChoicesSheet(context, item.name, const [
-      // Count first (Round 103): the one used most.
+      // Count first: the one used most.
       (Icons.numbers, 'Count', 'count'),
       (Icons.edit_outlined, 'Rename', 'rename'),
     ]);
@@ -472,7 +472,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
                       onPressed: _deleteSelected,
                     )
                   else ...[
-                    // Round 96: by Done, not at the list's end.
+                    // By Done, not at the list's end.
                     BottomAction(
                       icon: Icons.playlist_add,
                       tooltip: 'Add section',
@@ -605,7 +605,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     );
   }
 
-  // Round 96 (as Ingredients'): a section dragged by the right
+  // A section dragged by the right
   // of its heading; a line shows where it'd go; the list scrolls at its
   // edges.
 
@@ -765,7 +765,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     );
   }
 
-  /// "+ Add" under a section's things (Round 96: the whole width taps).
+  /// "+ Add" under a section's things (the whole width taps).
   Widget _addRow(PackingSection section) => Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
         child: TextButton.icon(
@@ -784,7 +784,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
     final colors = context.colors;
     const clearance = BottomActions.contentClearance;
     final groups = _list.grouped();
-    // Round 96: the first heading above the list and the last "+ Add"
+    // The first heading above the list and the last "+ Add"
     // under it; between sections, one row holds a section's "+ Add" and
     // the next one's heading. So every place a thing can be dropped is
     // where it ends up (a gap between "+ Add" and a heading settled there,
@@ -807,8 +807,8 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
               selectionControls: lowHandles,
               controller: _name,
               focusNode: _nameFocus,
-              // No room asked for above it (Round 95, as a recipe's name in
-              // Round 64): at the list's top that pulled into the reach
+              // No room asked for above it (as a recipe's name):
+              // at the list's top that pulled into the reach
               // space at every key, which snapped back: the page bounced.
               scrollPadding:
                   const EdgeInsets.fromLTRB(20, 0, 20, clearance + 20),
@@ -936,7 +936,7 @@ class _PackingListPageState extends ConsumerState<PackingListPage> {
   }
 }
 
-/// A view-mode row (Round 95: a normal size, as Shop's): the box, the
+/// A view-mode row (a normal size, as Shop's): the box, the
 /// name, its count; a tap anywhere on it ticks it. Ticked, it's struck
 /// through, in place.
 class _TickRow extends StatelessWidget {
@@ -1030,7 +1030,7 @@ class _CountChip extends StatelessWidget {
   }
 }
 
-/// A thing's count (Round 94: just a count): big − and +, from 1 to
+/// A thing's count (just a count): big − and +, from 1 to
 /// [PackingItem.maxCount]. Resolves to it when Set, null if closed.
 Future<int?> showCountSheet(BuildContext context, PackingItem item) {
   var count = item.count;

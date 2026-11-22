@@ -131,7 +131,7 @@ void main() {
     );
     expect(reminders.map((r) => r.at), [
       DateTime(2026, 10, 8, 17, 45), // today
-      // Round 78: an old tick (routines aren't ticked off now) is no
+      // An old tick (routines aren't ticked off now) is no
       // reason to stay quiet.
       DateTime(2026, 10, 15, 17, 45),
       DateTime(2026, 10, 19, 17, 45),

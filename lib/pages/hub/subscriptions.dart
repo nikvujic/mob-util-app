@@ -15,7 +15,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
-/// A subscription state's colour (Round 79): a card's tint and edge.
+/// A subscription state's colour: a card's tint and edge.
 extension SubscriptionStateLook on SubscriptionState {
   Color get colour => switch (this) {
         SubscriptionState.active => SubscriptionColours.active,
@@ -38,7 +38,7 @@ void openSubscriptionPage(BuildContext context, Widget page) {
   );
 }
 
-/// Subscriptions (Round 79, `docs/SUBSCRIPTIONS_SPEC.md`): what the running
+/// Subscriptions (`docs/SUBSCRIPTIONS_SPEC.md`): what the running
 /// ones come to a month, then a card for each, two to a row, tinted by
 /// its state. A tap opens one; + adds one.
 class SubscriptionsPage extends ConsumerWidget {
@@ -49,7 +49,7 @@ class SubscriptionsPage extends ConsumerWidget {
     final book = ref.watch(subscriptionsProvider);
     final today = dayOf(ref.watch(clockProvider)());
     final colors = context.colors;
-    // Round 89: in his order, set by dragging their cards.
+    // In his order, set by dragging their cards.
     final shown = book.subscriptions;
     final notifier = ref.read(subscriptionsProvider.notifier);
     final totals = book.monthly();
@@ -129,7 +129,7 @@ class SubscriptionsPage extends ConsumerWidget {
   }
 }
 
-/// A card held and dragged to a new place (Round 89, as the Hub's tiles,
+/// A card held and dragged to a new place (as the Hub's tiles,
 /// O8); screen readers get "Move earlier" / "Move later" instead.
 class _MovableCard extends StatelessWidget {
   final String id;
@@ -213,7 +213,7 @@ class _TwoColumns extends StatelessWidget {
       );
 }
 
-/// A subscription's card (Round 79): tinted by its state (Round 80: a
+/// A subscription's card: tinted by its state (a
 /// thin outline, its state a pill), its name, price, state and date, card
 /// (and when it expires), reminder and note.
 class SubscriptionCard extends StatelessWidget {
@@ -242,7 +242,7 @@ class SubscriptionCard extends StatelessWidget {
       height: _lineHeight,
       leadingDistribution: TextLeadingDistribution.even,
     );
-    // Round 85: each icon centred on its text's first line (it
+    // Each icon centred on its text's first line (it
     // sat high), whatever the text size.
     final firstLine = MediaQuery.textScalerOf(context).scale(12) * _lineHeight;
     Widget line(IconData icon, Widget text, {Key? key}) => Padding(
@@ -262,7 +262,7 @@ class SubscriptionCard extends StatelessWidget {
             ],
           ),
         );
-    // Round 80 (no thick edge): a plain rounded card, lightly
+    // A plain rounded card, lightly
     // tinted, a thin outline in its state's colour.
     return SelectableCard(
       selected: false,
@@ -314,7 +314,7 @@ class SubscriptionCard extends StatelessWidget {
             const SizedBox(height: 2),
             line(
               Icons.credit_card,
-              // Round 84: its expiry orange a week or less ahead, red gone by.
+              // Its expiry orange a week or less ahead, red gone by.
               switch ((cardExpiryLabel(s, today), s.cardExpiryOn(today))) {
                 (final expiry?, final state) when state != CardExpiry.fine =>
                   Text.rich(
@@ -343,7 +343,7 @@ class SubscriptionCard extends StatelessWidget {
               },
               key: Key('subscriptionCard-${s.id}'),
             ),
-            // Round 80: its card runs out before it renews.
+            // Its card runs out before it renews.
             if (s.cardRunsOutOn(today))
               line(
                 Icons.warning_amber_rounded,

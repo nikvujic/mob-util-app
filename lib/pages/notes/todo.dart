@@ -18,20 +18,20 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// Opens the to-do note (Round 28).
+/// Opens the to-do note.
 void openTodo(BuildContext context) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(builder: (_) => const TodoPage()),
   );
 }
 
-/// The to-do note (Round 28): like Shop, two lists (Round 30): the things
+/// The to-do note: like Shop, two lists: the things
 /// to do, and *Completed* below. Tapping one moves it to the other list;
 /// holding one changes its text; the handle moves it within its list.
 /// The buttons sit on the hand's side; *Delete completed* clears the
 /// lower list.
 ///
-/// Its options (Round 45, the button beside Add): a *Waiting* list under
+/// Its options (the button beside Add): a *Waiting* list under
 /// the things to do, things dragged into it and back (a tap still
 /// completes one); and a lock, closing the note while the app is locked,
 /// as a Hub page's lock does.
@@ -106,7 +106,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
         builder: (_) => const _TodoOptions(),
       );
 
-  /// *To do* and *Waiting* as one list (Round 45), so things can be
+  /// *To do* and *Waiting* as one list, so things can be
   /// dragged between them: [open], the Waiting header, then [waiting].
   Widget _openAndWaiting(List<TodoItem> open, List<TodoItem> waiting) {
     final count = open.length + 1 + waiting.length;
@@ -157,7 +157,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
         item: item,
         index: index,
         onTap: () => _toggle(item),
-        // Only the ones to do can be changed (Round 33).
+        // Only the ones to do can be changed.
         onLongPress: done ? null : () => _edit(item),
       ),
     );
@@ -249,7 +249,7 @@ class _TodoPageState extends ConsumerState<TodoPage> {
                   _SectionHeader(
                     title: 'Completed',
                     count: done.length,
-                    // Quietly beside its list (Round 33: a red round
+                    // Quietly beside its list (a red round
                     // button looked out of place).
                     action: TextButton(
                       key: const Key('deleteCompleted'),
@@ -315,7 +315,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// The *Waiting* list's header (Round 45), a row of the to-do list so
+/// The *Waiting* list's header, a row of the to-do list so
 /// things can be dragged past it; empty, it says what it's for.
 class _WaitingHeader extends StatelessWidget {
   final int count;
@@ -353,7 +353,7 @@ class _WaitingHeader extends StatelessWidget {
   }
 }
 
-/// The to-do note's options (Round 45): the *Waiting* list, and the lock.
+/// The to-do note's options: the *Waiting* list, and the lock.
 class _TodoOptions extends ConsumerWidget {
   const _TodoOptions();
 
@@ -453,7 +453,7 @@ class _TodoRow extends StatelessWidget {
                 checked: item.done,
                 child: SizedBox.square(
                   dimension: kMinInteractiveDimension,
-                  // Waiting (Round 45): an hourglass, wherever it shows.
+                  // Waiting: an hourglass, wherever it shows.
                   child: Icon(
                     item.done
                         ? Icons.check
@@ -493,7 +493,7 @@ class _TodoRow extends StatelessWidget {
   }
 }
 
-/// The to-do note at the top of Notes (Round 28): a note of its own kind,
+/// The to-do note at the top of Notes: a note of its own kind,
 /// not selectable or movable, showing how many things are left.
 class TodoTile extends ConsumerWidget {
   /// Selection mode is on in the list: it takes no part (taps do nothing).
@@ -503,10 +503,10 @@ class TodoTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Closed by its lock (Round 45): nothing of it shown.
+    // Closed by its lock: nothing of it shown.
     final closed = ref.watch(todoClosedProvider);
-    // What's left to do (Round 30: done ones stay, in Completed); waiting
-    // ones (Round 45) count, but the summary names one to do first.
+    // What's left to do (done ones stay, in Completed); waiting
+    // ones count, but the summary names one to do first.
     final items = closed
         ? const <TodoItem>[]
         : [

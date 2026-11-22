@@ -42,7 +42,7 @@ class SettingsPage extends ConsumerWidget {
             onChanged:
                 ref.read(preferencesProvider.notifier).setCounterFeedback,
           ),
-          // The Introduction first, then the To-do note (Round 58).
+          // The Introduction first, then the To-do note.
           SwitchListTile(
             key: const Key('introOnUpdates'),
             secondary: const Icon(Icons.auto_stories_outlined),
@@ -89,7 +89,7 @@ class SettingsPage extends ConsumerWidget {
             value: preferences.todoNote,
             onChanged: ref.read(preferencesProvider.notifier).setTodoNote,
           ),
-          // Round 109: People's notes hidden (someone looking over a
+          // People's notes hidden (someone looking over a
           // shoulder); shown again only with the password, when there is
           // one.
           SwitchListTile(

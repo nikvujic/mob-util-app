@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 
-/// Round 54: his battery changed by hand (the old one pulled out of his
+/// His battery changed by hand (the old one pulled out of his
 /// side and thrown away, the new one picked up and pushed in), and his
 /// hands close to his body, only the one he uses.
 void main() {
@@ -46,7 +46,7 @@ void main() {
       expect(p.facingRight, isTrue);
       expect(
           p.x, closeTo(80 - (rightOf(p) - p.x) - 1 - PipBrain.batteryGap, 0.01),
-          reason: 'Round 97: a few pixels off his casing, by his hand');
+          reason: 'a few pixels off his casing, by his hand');
       expect(p.batterySlot, isNull, reason: 'shut till the hand is there');
       final slots = <double>{};
       final olds = <(double, double, double, bool)>[];
@@ -58,7 +58,7 @@ void main() {
         p.step(1 / 60);
         if (p.batterySlot case final s?) slots.add(s);
         if (p.oldBattery case final o?) olds.add(o);
-        // Round 97: the old one never over the new one.
+        // The old one never over the new one.
         if ((p.oldBattery, p.battery) case ((final o?, final b?))) {
           final apart = o.$1 + PipBrain.batteryWidth <= b.$1 ||
               b.$1 + PipBrain.batteryWidth <= o.$1 ||
@@ -81,7 +81,7 @@ void main() {
       expect(olds.first.$1, lessThan(rightOf(p)));
       final out = olds.firstWhere((o) => o.$2 > PipBrain.slotUp);
       expect(out.$1, rightOf(p) + 1);
-      // …then (Round 97) thrown over his head to his other side, end over
+      // …then thrown over his head to his other side, end over
       // end; it lands there, lies a moment, fading away.
       expect(olds.last.$1 + PipBrain.batteryWidth, lessThan(leftOf(p)));
       expect(
@@ -213,7 +213,7 @@ void main() {
     });
 
     test(
-        'the fist, angry: by his side, beside his head (Round 79: never '
+        'the fist, angry: by his side, beside his head (never '
         'out from him or over his head), shaken up and down', () {
       for (final right in [true, false]) {
         final p = up()..enter(PipEntrance.side);

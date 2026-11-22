@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-/// Pip's quests (Round 125, `docs/QUESTS_SPEC.md`): plain rules, worked
+/// Pip's quests (`docs/QUESTS_SPEC.md`): plain rules, worked
 /// out from the clock as his energy and adventures are. A quest is a
 /// fixed **script** of steps, each taking a set number of **work
 /// minutes**; from the work minutes alone come the step he's on, how
@@ -19,7 +19,7 @@ abstract final class PipQuest {
     return windows.any((w) => m >= w.$1 && m < w.$2);
   }
 
-  /// Round 128: once his house is built he lives in it, but for his
+  /// Once his house is built he lives in it, but for his
   /// field's times (local, minutes of the day): 11:30–12:00 and
   /// 18:00–19:00, round his adventures.
   static const fieldTimes = [
@@ -37,7 +37,7 @@ abstract final class PipQuest {
   /// registered only in its own).
   static bool canStartAt(DateTime t) => inHoursAt(t);
 
-  /// [day] at [minutes] past midnight on the clock (Round 137: not
+  /// [day] at [minutes] past midnight on the clock (not
   /// midnight plus that many minutes, an hour out on the days the clocks
   /// change).
   static DateTime _on(DateTime day, int minutes) =>
@@ -325,7 +325,7 @@ abstract final class Quests {
   // Gathering (minutes). A walk out or back; a tree felled (4 wood); a
   // block of stone broken off; a heap of sand dug; a pane smelted (two
   // sand and a wood). What he carries home at most, of each.
-  // Round 146: a walk 2 minutes (it was 5: minutes of him just walking).
+  // A walk 2 minutes (it was 5: minutes of him just walking).
   static const walk = 2;
   static const treeMinutes = 24;
   static const woodPerTree = 4;
@@ -333,12 +333,12 @@ abstract final class Quests {
   static const sandMinutes = 6;
   static const smeltMinutes = 25;
 
-  /// Panes smelted at a time (Round 135), between building; blocks of a
-  /// piece built at a time before he moves on (Round 140).
+  /// Panes smelted at a time, between building; blocks of a
+  /// piece built at a time before he moves on.
   static const glassAtOnce = 3;
   static const blocksAtOnce = 3;
 
-  /// Round 140: what [id]'s [index]th (of [count]) rests on: each piece
+  /// What [id]'s [index]th (of [count]) rests on: each piece
   /// under it, and how much of that must be up first (nothing floats).
   /// One laid left to right on another goes as far as that one has.
   static Map<String, double> supportsOf(String id, int index, int count) {
@@ -381,7 +381,7 @@ abstract final class Quests {
     QuestItem.sand: 6
   };
 
-  /// The house's pieces (spec 6, the order decided in Round 123–124),
+  /// The house's pieces (spec 6),
   /// each on what's built before it.
   static const housePieces = [
     QuestPiece(
@@ -463,10 +463,10 @@ abstract final class Quests {
       }
     }
 
-    // Round 140: a small load at a time, then a few blocks of whichever
+    // A small load at a time, then a few blocks of whichever
     // piece is next and ready (resting on what's built, [supportsOf]):
     // the pieces taken in turn, so the foundation, the porch and the
-    // floor go up together, not one piece till it's done (Round 135 still
+    // floor go up together, not one piece till it's done (still
     // finished each piece before the next).
     final built = {for (final p in housePieces) p.id: 0};
     final count = {for (final p in housePieces) p.id: p.count};

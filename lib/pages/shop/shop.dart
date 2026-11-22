@@ -32,7 +32,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
   /// About how much of the list the add sheet covers.
   static const _sheetHeight = 80.0;
 
-  /// Round 69: searching (a field above the keyboard, kept when the
+  /// Searching (a field above the keyboard, kept when the
   /// keyboard goes), and what's typed.
   bool _searching = false;
   final _query = TextEditingController();
@@ -88,7 +88,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     );
   }
 
-  /// Renames the one selected item (Round 58); a name another item has
+  /// Renames the one selected item; a name another item has
   /// is refused, with a word why.
   Future<void> _renameSelected() async {
     final id = _selection.selected.single;
@@ -164,7 +164,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
   }
 
   /// The amount sheet (S7): big − / + at the bottom, in thumb reach; a
-  /// weight can also be typed exactly, or the amount as text (Round 70).
+  /// weight can also be typed exactly, or the amount as text.
   Future<void> _editAmount(String id) async {
     await showModalBottomSheet<void>(
       context: context,
@@ -232,11 +232,11 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       _selection.retain(next.map((i) => i.id));
     });
 
-    // Round 69 (fixed in 1.29.1): the search filters the bought list only.
+    // The search filters the bought list only.
     final toBuy = items.where((i) => i.toBuy).toList();
     final bought = items.where((i) => !i.toBuy).toList();
     var stock = _matching(bought);
-    // Round 69: the bought list A–Z if asked (shown so; its own order is
+    // The bought list A–Z if asked (shown so; its own order is
     // kept, and new ones still go on its top).
     final sorted = ref.watch(preferencesProvider.select((p) => p.shopSorted));
     if (sorted) {
@@ -250,7 +250,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
       child: ListenableBuilder(
         listenable: _selection,
         builder: (context, _) => PopScope(
-          // Round 69: Back closes the search first.
+          // Back closes the search first.
           canPop: !_searching || _selection.isActive,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop && _searching) _closeSearch();
@@ -350,7 +350,7 @@ class _ShopPageState extends ConsumerState<ShopPage> {
     );
   }
 
-  /// Round 69: the search field, above the keyboard (kept when it goes),
+  /// The search field, above the keyboard (kept when it goes),
   /// and its close button.
   Widget _searchBar(BuildContext context) {
     final colors = context.colors;
@@ -442,7 +442,7 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final int count;
 
-  /// On its right (Round 69: the bought list's sort).
+  /// On its right (the bought list's sort).
   final Widget? trailing;
 
   const _SectionHeader(
@@ -485,7 +485,7 @@ class _ShopItemTile extends StatelessWidget {
   final ShopItem item;
   final int index;
 
-  /// Round 69: a drag handle (not while shown sorted or filtered).
+  /// A drag handle (not while shown sorted or filtered).
   final bool reorderable;
   final bool selectionMode;
   final bool selected;
@@ -829,7 +829,7 @@ class _AmountSheet extends ConsumerWidget {
   }
 }
 
-/// A typed amount (Round 70): "1-2", "a bunch"; saved as it's typed.
+/// A typed amount: "1-2", "a bunch"; saved as it's typed.
 class _TypedAmount extends StatefulWidget {
   final String initial;
   final ValueChanged<String> onChanged;

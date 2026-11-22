@@ -5,7 +5,7 @@ import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_house_art.dart';
 
-/// Round 149: building, he hammers (the dust where it lands, not beside
+/// Building, he hammers (the dust where it lands, not beside
 /// him); snow on an unfinished house lies on what's built.
 void main() {
   final q = Quests.house;

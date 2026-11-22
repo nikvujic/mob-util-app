@@ -12,7 +12,7 @@ import 'package:the_app/providers/subscriptions_provider.dart';
 
 import '../helpers.dart';
 
-/// Subscriptions in the app (Round 79): their notifications, the
+/// Subscriptions in the app: their notifications, the
 /// Notifications page, private or locked.
 void main() {
   late ProviderContainer container;
@@ -63,8 +63,7 @@ void main() {
     expect(ours(), isEmpty);
   });
 
-  testWidgets('private: no names; Round 82: locked, names still',
-      (tester) async {
+  testWidgets('private: no names; locked, names still', (tester) async {
     await start(tester);
     final prefs = container.read(preferencesProvider.notifier);
     prefs.setNotifyStyle(

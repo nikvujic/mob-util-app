@@ -7,7 +7,7 @@ import 'package:the_app/core/pip_weather.dart';
 import 'package:the_app/core/weather.dart';
 import 'package:the_app/widgets/pip_room.dart';
 
-/// Round 75: the weather in his field: his tent in a storm (over
+/// The weather in his field: his tent in a storm (over
 /// everything else he might be doing), his umbrella in the rain, the
 /// weather's events, and the weather out on his adventure.
 void main() {
@@ -225,7 +225,7 @@ void main() {
     });
 
     test(
-        'Round 141: out on his adventure, the puddles go by with the ground '
+        'out on his adventure, the puddles go by with the ground '
         '(not following him); on his field, where they lie', () {
       final b = up(weather: WeatherKind.rain);
       final columns = b.roomWidth;

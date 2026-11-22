@@ -10,13 +10,13 @@ abstract final class AppSound {
   static Future<void> click() => _play('click');
 
   /// Plays the click silently, so the audio is awake for the first real
-  /// one (Round 18: the first tap's click lagged its buzz).
+  /// one (the first tap's click lagged its buzz).
   static Future<void> warm() => _play('warm');
 
-  /// A soft gulp: something done (a dose taken, Round 16).
+  /// A soft gulp: something done (a dose taken).
   static Future<void> done() => _play('done');
 
-  /// The gulp's feel (Round 17): two soft pulses, with its two bloops.
+  /// The gulp's feel: two soft pulses, with its two bloops.
   static Future<void> doneBuzz() async {
     await HapticFeedback.mediumImpact();
     await Future<void>.delayed(gulpGap);
@@ -26,7 +26,7 @@ abstract final class AppSound {
   /// Between the gulp's two bloops (see tool/make_done_sound.py).
   static const gulpGap = Duration(milliseconds: 110);
 
-  /// The Placard filling up (Round 17): a rising sound as long as a
+  /// The Placard filling up: a rising sound as long as a
   /// hold; [stopInflate] stops it when the finger lifts early.
   static Future<void> inflate() => _play('inflate');
   static Future<void> stopInflate() => _play('stopInflate');
@@ -34,17 +34,17 @@ abstract final class AppSound {
   /// The Placard popping.
   static Future<void> pop() => _play('pop');
 
-  /// An important medicine's hold-to-take (Round 24): a glass filling up,
+  /// An important medicine's hold-to-take: a glass filling up,
   /// as long as the hold; [stopFill] stops it when the finger lifts early.
   static Future<void> fill() => _play('fill');
   static Future<void> stopFill() => _play('stopFill');
 
-  /// Pip's fanfare (Round 63): he's registered as an adventurer. On the
+  /// Pip's fanfare: he's registered as an adventurer. On the
   /// media volume (muted: silent).
   static Future<void> fanfare() => _play('fanfare');
 
-  /// A notification sound (Round 31), heard when picking one: its raw
-  /// resource's name, e.g. `notify_coin`, at [volume] (Round 41: 0 to 1).
+  /// A notification sound, heard when picking one: its raw
+  /// resource's name, e.g. `notify_coin`, at [volume] (0 to 1).
   static Future<void> notify(String resource, {double volume = 1}) =>
       _play('notify', {'sound': resource, 'volume': volume});
 

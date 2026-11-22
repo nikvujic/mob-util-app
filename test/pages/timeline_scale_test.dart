@@ -6,7 +6,7 @@ import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
-/// Short blocks stretch the timeline where they are (Round 10): every
+/// Short blocks stretch the timeline where they are: every
 /// block gets at least a touch target; the rest keeps its scale.
 void main() {
   int at(num hours) => (hours * 60).round();

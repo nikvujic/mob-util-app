@@ -1,6 +1,6 @@
 import 'package:the_app/core/pip_brain.dart';
 
-/// Pip's hat for a day (Round 61; a birthday's party hat comes first, the
+/// Pip's hat for a day (a birthday's party hat comes first, the
 /// room's say): a day of the year's, else now and then a random one.
 ///
 /// - A **Santa hat** from 25 December to 2 January.

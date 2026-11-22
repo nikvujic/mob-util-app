@@ -1,5 +1,5 @@
-/// Packing lists (Round 94): lists like "Ski trip" or "Beach",
-/// each with its own sections (Round 95: set up in edit mode, for that
+/// Packing lists: lists like "Ski trip" or "Beach",
+/// each with its own sections (set up in edit mode, for that
 /// trip) and its things under them. A new list starts with the default
 /// sections (Documents, Clothes, …), which the user can change. Not tied to
 /// Dates or anything else.
@@ -204,7 +204,7 @@ class PackingList {
     return copyWith(items: order);
   }
 
-  /// Section [id] moved to [to] among the sections (Round 96: dragged,
+  /// Section [id] moved to [to] among the sections (dragged,
   /// as Ingredients'), its things with it.
   PackingList sectionMovedTo(String id, int to) {
     final at = sections.indexWhere((s) => s.id == id);
@@ -256,7 +256,7 @@ class PackingList {
         'items': [for (final i in items) i.toJson()],
       };
 
-  /// Round 94's lists had no sections of their own: they get [shared]
+  /// Older lists had no sections of their own: they get [shared]
   /// (the sections all lists shared then).
   factory PackingList.fromJson(
     Map<String, dynamic> json, {
@@ -282,7 +282,7 @@ class PackingList {
 }
 
 /// Everything Packing holds: the default sections a new list starts with
-/// (Round 95; Round 94's shared ones) and the lists, in the user's order.
+/// (formerly shared by all) and the lists, in the user's order.
 class PackingBook {
   final List<PackingSection> sections;
   final List<PackingList> lists;
@@ -293,7 +293,7 @@ class PackingBook {
   })  : sections = List.unmodifiable(sections.isEmpty ? defaults : sections),
         lists = List.unmodifiable(lists);
 
-  /// The user's (Round 94): the usual sections.
+  /// The user's: the usual sections.
   static const defaults = [
     PackingSection(id: 'documents', name: 'Documents'),
     PackingSection(id: 'clothes', name: 'Clothes'),
@@ -340,7 +340,7 @@ class PackingBook {
       };
 
   /// No sections stored: the usual ones. A list without its own sections
-  /// (Round 94's) gets the ones stored here.
+  /// (an older one) gets the ones stored here.
   factory PackingBook.fromJson(Map<String, dynamic> json) {
     final stored = json['sections'] as List<dynamic>?;
     final sections = stored == null

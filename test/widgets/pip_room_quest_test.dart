@@ -12,7 +12,7 @@ import 'package:the_app/widgets/pip_room.dart';
 
 import '../helpers.dart';
 
-/// His room at his quest's work (Round 127): it asks his life, he's at
+/// His room at his quest's work: it asks his life, he's at
 /// it; plugged in, he doesn't go to his station meanwhile (spec 8).
 void main() {
   Future<PipBrain> room(WidgetTester tester, FakePipLink link,
@@ -96,7 +96,7 @@ void main() {
 
   testWidgets(
       'opened again on him left mid-battery in quest hours: straight at his '
-      'work (Round 129)', (tester) async {
+      'work', (tester) async {
     final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
     expect(brain.takeBattery(120), isTrue);
     brain.step(0.3);
@@ -132,7 +132,7 @@ void main() {
 
   testWidgets(
       'opened fresh in quest hours: no way in (from the sky): straight at '
-      'his work (Round 130)', (tester) async {
+      'his work', (tester) async {
     final brain = PipBrain();
     final link = FakePipLink()
       ..questing = (at: q.at(0), seconds: 100)
@@ -164,7 +164,7 @@ void main() {
 
   testWidgets(
       'opened again out on his break, long after: at the table, not his '
-      'old run carried on into the tavern (Round 132)', (tester) async {
+      'old run carried on into the tavern', (tester) async {
     final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
     brain.adventure((onBreak: false, breakDone: 0), animate: false);
     brain.step(1);
@@ -200,7 +200,7 @@ void main() {
 
   testWidgets(
       'watched as his work begins (back on, a battery given): he walks off '
-      'his field first (Round 133)', (tester) async {
+      'his field first', (tester) async {
     final link = FakePipLink();
     // Seeded, and nothing else going on when his work comes (a dance
     // first was a flaky CI run).
@@ -235,7 +235,7 @@ void main() {
   for (final medicine in [false, true]) {
     testWidgets(
         'off on his field, watched: a battery tapped in, he gets up and walks '
-        'off to his work, not cut to it (Round 139: the tap no longer counted '
+        'off to his work, not cut to it (the tap no longer counted '
         'as not watched)${medicine ? ', a medicine due' : ''}', (tester) async {
       final link = FakePipLink(batteries: 1)..medicineDue = medicine;
       final brain = await room(tester, link,
@@ -269,7 +269,7 @@ void main() {
 
   for (final medicine in [false, true]) {
     testWidgets(
-        'Round 141: off at the mine, his work over, watched: a battery tapped '
+        'off at the mine, his work over, watched: a battery tapped '
         'in, he gets up there and walks off it, not cut to his field'
         '${medicine ? ', a medicine due' : ''}', (tester) async {
       final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);

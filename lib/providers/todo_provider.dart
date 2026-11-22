@@ -5,17 +5,17 @@ import 'package:the_app/models/todo_item.dart';
 import 'package:the_app/providers/introduction_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 
-/// The to-do note's list (Round 28), saved to `todo.json`: one ordered
-/// list; "to do" and "Completed" (Round 30) are its things filtered by
-/// [TodoItem.done], in list order, and "Waiting" (Round 45, when on) the
+/// The to-do note's list, saved to `todo.json`: one ordered
+/// list; "to do" and "Completed" are its things filtered by
+/// [TodoItem.done], in list order, and "Waiting" (when on) the
 /// ones to do that are [TodoItem.waiting].
 class TodoNotifier extends StateNotifier<List<TodoItem>> {
   TodoNotifier(AppStorage storage) : super(storage.initialTodo) {
     addListener(storage.saveTodo, fireImmediately: false);
   }
 
-  /// Adds [text] at the top of the things to do (Round 143:
-  /// the newest first, as Shop) and returns its id; blank text is
+  /// Adds [text] at the top of the things to do (the
+  /// newest first, as Shop) and returns its id; blank text is
   /// ignored (null).
   String? add(String text) {
     final trimmed = text.trim();
@@ -25,7 +25,7 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     return item.id;
   }
 
-  /// Where each thing done was among the things to do (Round 83): its
+  /// Where each thing done was among the things to do: its
   /// place, whether it was waiting, and the things to do as they were
   /// left (ids, waiting or not). Kept while the app runs.
   final _left = <String, (int, bool, List<(String, bool)>)>{};
@@ -38,7 +38,7 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
 
   /// Done, or not done again: to the top of *Completed* (done most
   /// recently), or back to the end of the things to do. As Shop's toggle.
-  /// Done, it's no longer waiting. Round 83: not done again,
+  /// Done, it's no longer waiting. Not done again,
   /// it goes back where it was (waiting again, if it was), unless the
   /// things to do changed since.
   void toggle(String id) {
@@ -118,7 +118,7 @@ class TodoNotifier extends StateNotifier<List<TodoItem>> {
     ];
   }
 
-  /// The things to do placed anew (Round 45: dragged within or between
+  /// The things to do placed anew (dragged within or between
   /// *To do* and *Waiting*): [toDo] then [waiting], by id, in order; each
   /// waiting or not by its list. Completed ones stay as they are; ids not
   /// given (or done) are left out of the move, kept after.

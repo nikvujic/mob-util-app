@@ -3,7 +3,7 @@
 /// own heading; the newest section if [version] has none. Null if there's
 /// no section at all.
 ///
-/// A patch shows its whole minor version (Round 48): for 1.14.1, the
+/// A patch shows its whole minor version: for 1.14.1, the
 /// sections of 1.14.1 and 1.14.0, newest first, each under `## 1.14.1`
 /// and so on, so what came with the minor version isn't missed.
 String? changesFor(String changelog, String version) {
@@ -31,10 +31,9 @@ String? changesFor(String changelog, String version) {
   ].join('\n\n');
 }
 
-/// The changes from every version after [from] up to [version] (Round
-/// 61: updates not read yet pile up), each under its own `## X.Y.Z`,
+/// The changes from every version after [from] up to [version] (updates not read yet pile up), each under its own `## X.Y.Z`,
 /// newest first; [changesFor] when [from] is null or there's only the
-/// one (or none) after it. Round 70: always the whole of [version]'s
+/// one (or none) after it. Always the whole of [version]'s
 /// minor version too (1.28.0 with 1.28.2, even if it was read).
 String? changesSince(String changelog, String version, String? from) {
   final heading = RegExp(r'^## \[([^\]]+)\].*$', multiLine: true);

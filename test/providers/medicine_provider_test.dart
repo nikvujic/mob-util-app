@@ -34,7 +34,7 @@ void main() {
     expect(medicine.state.medicines.last.isOn(DateTime(2030, 1, 1)), isTrue);
   });
 
-  group('some weekdays only (Round 40)', () {
+  group('some weekdays only', () {
     test('on those days only; every day kept as none chosen', () {
       // 12 Oct 2026 is a Monday.
       medicine.add('Vitamin D', times: [480], from: today, weekdays: {1, 3, 5});
@@ -183,7 +183,7 @@ void main() {
     });
   });
 
-  test('years of marks: each found quickly (Round 18)', () {
+  test('years of marks: each found quickly', () {
     final start = DateTime(2020, 1, 1);
     final marks = [
       for (var d = 0; d < 2500; d++)

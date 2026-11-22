@@ -59,7 +59,7 @@ Future<void> seed(ProviderContainer container) async {
   container
       .read(preferencesProvider.notifier)
       .backedUp(designClock().subtract(const Duration(days: 10)));
-  // A notification shown an hour ago (Round 31), for the history.
+  // A notification shown an hour ago, for the history.
   container.read(notificationLogProvider.notifier).planned([
     Reminder(
       at: designClock().subtract(const Duration(hours: 1)),
@@ -68,7 +68,7 @@ Future<void> seed(ProviderContainer container) async {
       target: 'planner|2026-10-08|480',
     ),
   ], designClock().subtract(const Duration(hours: 2)));
-  // The to-do note's list (Round 28).
+  // The to-do note's list.
   container.read(todoProvider.notifier)
     ..add('Call the dentist')
     ..add('Pay rent');
@@ -125,7 +125,7 @@ Future<void> seed(ProviderContainer container) async {
         from: DateTime(2026, 10, 1),
         color: 'purple',
       );
-  // A 5-minute block: it stretches its hour (Round 10).
+  // A 5-minute block: it stretches its hour.
   container.read(plannerProvider.notifier).addTask(today, 'Pills',
       start: 20 * 60, end: 20 * 60 + 5, description: 'With water');
   // A reminder (P14): a mark beside the task and routine.
@@ -144,7 +144,7 @@ Future<void> seed(ProviderContainer container) async {
       max: 3000,
     ));
   // The medicine tracker (O6): one dose taken, one not; one ended. The
-  // antibiotic is important (Round 24): the hold-to-take is checked too.
+  // antibiotic is important: the hold-to-take is checked too.
   final medicine = container.read(medicineProvider.notifier);
   final pills = medicine.add('Antibiotic',
       times: [480, 1200], from: addDays(today, -3), important: true)!;
@@ -152,7 +152,7 @@ Future<void> seed(ProviderContainer container) async {
     ..toggleDose(pills, today, 0)
     ..add('Course',
         times: [540], from: addDays(today, -20), until: addDays(today, -10));
-  // Recipes (Round 42): one with everything, the ingredients in sections.
+  // Recipes: one with everything, the ingredients in sections.
   container.read(ingredientsProvider.notifier).replaceAll(IngredientBook([
         IngredientSection(id: 's1', name: 'Baking', items: const [
           Ingredient(id: 'i1', name: 'Flour'),
@@ -553,7 +553,7 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));
         await t.pumpAndSettle();
-        // Round 126: past his inventory to the settings.
+        // Past his inventory to the settings.
         for (var i = 0; i < 2; i++) {
           await t.fling(
               find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
@@ -566,7 +566,7 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));
         await t.pumpAndSettle();
-        // Round 126: past his inventory to the settings.
+        // Past his inventory to the settings.
         for (var i = 0; i < 2; i++) {
           await t.fling(
               find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
@@ -579,7 +579,7 @@ void main() {
         await openTab(t, 'Hub');
         await t.tap(find.byTooltip('Pip'));
         await t.pumpAndSettle();
-        // Round 126: past his inventory to the settings.
+        // Past his inventory to the settings.
         for (var i = 0; i < 2; i++) {
           await t.fling(
               find.byKey(const Key('pipCard')), const Offset(-400, 0), 1000);
@@ -633,14 +633,14 @@ void main() {
       },
       'settings': (t) async {
         await openMenu(t);
-        // Round 70: below Internet Access, scrolled to on a short screen.
+        // Below Internet Access, scrolled to on a short screen.
         await scrollMenuTo(t, 'Settings');
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
       },
       'clear data': (t) async {
         await openMenu(t);
-        // Round 70: below Internet Access, scrolled to on a short screen.
+        // Below Internet Access, scrolled to on a short screen.
         await scrollMenuTo(t, 'Settings');
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
@@ -651,7 +651,7 @@ void main() {
       },
       'clear data dialog': (t) async {
         await openMenu(t);
-        // Round 70: below Internet Access, scrolled to on a short screen.
+        // Below Internet Access, scrolled to on a short screen.
         await scrollMenuTo(t, 'Settings');
         await t.tap(find.text('Settings'));
         await t.pumpAndSettle();
@@ -775,7 +775,7 @@ void main() {
       await openTab(tester, 'Shop');
       final shopRow = tester.getSize(rowOf('Eggs')).height;
       // Eggs and Bread are adjacent in "To buy", in that order (the
-      // newest on top, Round 141).
+      // newest on top).
       final shopGap = tester.getTopLeft(rowOf('Bread')).dy -
           tester.getBottomLeft(rowOf('Eggs')).dy;
 
@@ -828,7 +828,7 @@ void main() {
         greaterThanOrEqualTo(ReorderOrSelectIndicator.width),
         reason: text,
       );
-      // Round 148: the area starts at the icon's left edge and takes all
+      // The area starts at the icon's left edge and takes all
       // right of it.
       final icon = find.descendant(
         of: row,

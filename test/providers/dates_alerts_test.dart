@@ -4,7 +4,7 @@ import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 
-/// Birthdays & dates' reminders (Round 57).
+/// Birthdays & dates' reminders.
 void main() {
   // Thursday 15 October 2026, 13:20.
   final now = DateTime(2026, 10, 15, 13, 20);
@@ -114,7 +114,7 @@ void main() {
         isEmpty);
   });
 
-  test('when (Round 59): its days if it lasts; on now; the last day; gone', () {
+  test('when: its days if it lasts; on now; the last day; gone', () {
     final today = DateTime(2026, 8, 6);
     const holiday = DateEntry(
       id: 'h',
@@ -174,7 +174,7 @@ void main() {
         isEmpty);
   });
 
-  test('details (Round 61): kind, days, year, reminders, shortly', () {
+  test('details: kind, days, year, reminders, shortly', () {
     expect(beforeLabel(0), 'on the day');
     expect(beforeLabel(1), '1 day');
     expect(beforeLabel(3), '3 days');

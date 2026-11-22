@@ -12,7 +12,7 @@ import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
 
-/// Restoring part of a backup from the Backup page (Round 28).
+/// Restoring part of a backup from the Backup page.
 void main() {
   late ProviderContainer container;
 
@@ -58,7 +58,7 @@ void main() {
     await openPicker(tester);
     await tester.tap(find.text('Lost note'));
     await tester.pumpAndSettle();
-    // A wide button, its label inside it (Round 30).
+    // A wide button, its label inside it.
     final button = tester.getRect(find.byKey(const Key('restorePicked')));
     final label = tester.getRect(find.text('Restore 1'));
     expect(button.contains(label.topLeft) && button.contains(label.bottomRight),

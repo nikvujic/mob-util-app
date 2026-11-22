@@ -15,7 +15,7 @@ String howSoon(DateTime on, DateTime today) => switch (daysBetween(today, on)) {
       final n => 'in $n days',
     };
 
-/// When [date] is, starting [on] (Round 59): its day, or its days
+/// When [date] is, starting [on]: its day, or its days
 /// ("Sat, 24 Oct – Mon, 26 Oct") if it lasts; how soon ("in 9 days"), or
 /// "on now" / "last day today" while it's on, or how long ago ("2 days
 /// ago", a day picked in the past); "turns 31" / "10 years".
@@ -23,7 +23,7 @@ String whenLabel(DateEntry date, DateTime on, DateTime today) {
   final end = date.endFrom(on);
   final years = yearsLabel(date, on);
   final ago = daysBetween(end, today);
-  // Round 61: the day it's on, without a year for one every year (the
+  // The day it's on, without a year for one every year (the
   // year shown was the next one's, which read as a birth year); a
   // one-off in another year has its year.
   final shownYear = date.yearly ? on : today;
@@ -40,7 +40,7 @@ String whenLabel(DateEntry date, DateTime on, DateTime today) {
   ].join('  ·  ');
 }
 
-/// What else there is to say about [date] (Round 61, its card's second
+/// What else there is to say about [date] (its card's second
 /// line): its kind ("Skiing"), how long it lasts ("4 days"), its year
 /// ("born 1995", "since 2016") and its reminders ("1 day, 1 week before").
 List<String> dateDetails(DateEntry date, {bool reminders = true}) => [
@@ -87,7 +87,7 @@ String? yearsLabel(DateEntry date, DateTime on) {
   };
 }
 
-/// The dates' reminders (Round 57) due after [now] for the next [days]
+/// The dates' reminders due after [now] for the next [days]
 /// days: each of a date's reminders, its days before the date, at its
 /// time. A reminder up to 30 days before a date is planned once its time
 /// comes into those days, like the others. None while off or paused.
@@ -141,7 +141,7 @@ List<Reminder> planDateReminders({
   ]..sort((a, b) => a.at.compareTo(b.at));
 }
 
-/// The green dot on the Dates tile (Round 57): someone's birthday today,
+/// The green dot on the Dates tile: someone's birthday today,
 /// and the page not opened yet today. Looked at again with the red dots.
 final datesDotProvider = Provider<bool>((ref) {
   final today = dayOf(ref.watch(clockProvider)());

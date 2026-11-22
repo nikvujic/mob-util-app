@@ -15,7 +15,7 @@ import 'package:the_app/widgets/pixel_text.dart';
 
 import '../helpers.dart';
 
-/// Pip's energy, sleep and batteries on screen (Round 37).
+/// Pip's energy, sleep and batteries on screen.
 void main() {
   late ProviderContainer container;
   PipBrain brain() => container.read(pipBrainProvider);
@@ -43,7 +43,7 @@ void main() {
         offSeen: offSeen,
       );
 
-  group('batteries (Round 42)', () {
+  group('batteries', () {
     test('are blue, unlike his energy', () {
       const blue = PipColours.batteryCharge;
       expect(blue.b, greaterThan(blue.r));
@@ -71,7 +71,7 @@ void main() {
     });
   });
 
-  group('his charging station (Round 44)', () {
+  group('his charging station', () {
     testWidgets(
         'opened while the phone charges: he\'s at his station, charging; '
         'Pip Home says so', (tester) async {
@@ -136,8 +136,7 @@ void main() {
               batteries: 1,
               next: now.subtract(const Duration(hours: 30))));
       await tester.pump();
-      expect(life().batteries, 3,
-          reason: 'piled up while away (Round 45), at most 3');
+      expect(life().batteries, 3, reason: 'piled up while away, at most 3');
       expect(life().nextBatteryAt!.isAfter(now), isTrue);
     });
 
@@ -263,11 +262,10 @@ void main() {
           2);
       expect(words(), containsAll(['BATTERIES 2/3', 'NEXT IN 2H 15M']));
       expect(words(), isNot(contains('TAP THE FIELD TO GIVE HIM ONE')),
-          reason: 'Round 116: no how-to');
+          reason: 'no how-to');
     });
 
-    testWidgets('Round 77: asleep (Round 116: no how-to wake him)',
-        (tester) async {
+    testWidgets('asleep (no how-to wake him)', (tester) async {
       final now = DateTime(2026, 10, 15, 2);
       await start(
           tester,
@@ -281,7 +279,7 @@ void main() {
           PipFace.asleep);
     });
 
-    testWidgets('Round 77: woken this night already: asleep', (tester) async {
+    testWidgets('woken this night already: asleep', (tester) async {
       final now = DateTime(2026, 10, 15, 2);
       await start(
           tester,
@@ -293,7 +291,7 @@ void main() {
       expect(words(), contains("HE'S ASLEEP"));
     });
 
-    testWidgets('Round 77: woken: drowsy on his status', (tester) async {
+    testWidgets('woken: drowsy on his status', (tester) async {
       final now = DateTime(2026, 10, 15, 2);
       await start(
           tester,

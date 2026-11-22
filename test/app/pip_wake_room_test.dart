@@ -9,7 +9,7 @@ import 'package:the_app/providers/pip_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 77: three taps on him asleep wake him (if his life lets it).
+/// Three taps on him asleep wake him (if his life lets it).
 void main() {
   final room = find.byKey(const Key('pipRoom'));
   late ProviderContainer container;

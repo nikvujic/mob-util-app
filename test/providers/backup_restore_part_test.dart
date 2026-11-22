@@ -29,7 +29,7 @@ import 'package:the_app/providers/todo_provider.dart';
 
 import '../helpers.dart';
 
-/// Restoring part of a backup (Round 28): only what's picked, added to
+/// Restoring part of a backup: only what's picked, added to
 /// what's in the app.
 void main() {
   late ProviderContainer container;
@@ -138,7 +138,7 @@ void main() {
 
     final notes = container.read(notesProvider);
     expect(notes.map((n) => n.title), ['Wanted (Copy)', 'Wanted, edited since'],
-        reason: 'a copy says so (Round 30)');
+        reason: 'a copy says so');
     expect(notes.map((n) => n.id).toSet(), hasLength(2), reason: 'new id');
     expect(notes.first.content, 'Wanted text');
     final shop = container.read(shopProvider);

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_hats.dart';
 
-/// Round 61: Pip's hats by the day: days of the year's, random ones.
+/// Pip's hats by the day: days of the year's, random ones.
 void main() {
   test('days of the year: Santa at New Year, a witch, bunny ears, a heart', () {
     expect(seasonalHatOn(DateTime(2026, 12, 24)), isNull);

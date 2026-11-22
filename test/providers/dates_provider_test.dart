@@ -16,7 +16,7 @@ import 'package:the_app/providers/section_data_provider.dart';
 
 import '../helpers.dart';
 
-/// Birthdays & dates' store (Round 57).
+/// Birthdays & dates' store.
 void main() {
   DateEntry ana({String title = 'Ana'}) => DateEntry(
         id: 'd1',

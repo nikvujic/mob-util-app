@@ -118,7 +118,7 @@ void main() {
   });
 
   testWidgets(
-      'typed as text (Round 70): shown as typed; the button takes it to '
+      'typed as text: shown as typed; the button takes it to '
       'none', (tester) async {
     await openShop(tester);
     await tester.tap(kind);
@@ -202,7 +202,7 @@ void main() {
     expect(milk().toBuy, isTrue);
   });
 
-  testWidgets('holding − or + shows no tooltip (Round 15)', (tester) async {
+  testWidgets('holding − or + shows no tooltip', (tester) async {
     await openShop(tester);
     await tester.tap(kind);
     await tester.pump();

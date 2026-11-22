@@ -5,7 +5,7 @@ import 'package:the_app/core/theme.dart';
 /// Rules in the app's theme that every screen gets.
 void main() {
   test(
-      'Round 81: a picked chip has no tick, plainly marked instead: a wash '
+      'a picked chip has no tick, plainly marked instead: a wash '
       'of the accent and edged in it, in every theme', () {
     for (final choice in AppThemeChoice.values) {
       final palette = choice.palette;

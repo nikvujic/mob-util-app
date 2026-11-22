@@ -12,7 +12,7 @@ import 'package:the_app/widgets/pip_room.dart';
 
 import '../helpers.dart';
 
-/// His finished house as his home (Round 128, spec section 10): the
+/// His finished house as his home (spec section 10): the
 /// field's times, idling on its floor, its own events, his station and
 /// his sleep in it, his field's things not.
 void main() {

@@ -408,7 +408,7 @@ void main() {
     expect(await readLocked('Old bank'), 'old PIN', reason: 'our key');
   });
 
-  group('deleting locked notes needs the password (Round 21)', () {
+  group('deleting locked notes needs the password', () {
     Future<void> deleteSelected(WidgetTester tester, String? title) async {
       if (title != null) {
         await tester.longPress(find.text(title));

@@ -23,10 +23,10 @@ const followUpChoices = [0, 60, 120, 180, 240];
 
 /// The sheet to add a medicine, or edit [medicine] (O6): its name, the
 /// time of each dose (how many a day = how many times), from when until
-/// when (or for good), whether to remind again if a dose isn't taken
-/// (Round 16), and whether it's important (Round 24). Null if closed.
+/// when (or for good), whether to remind again if a dose isn't taken,
+/// and whether it's important. Null if closed.
 ///
-/// Like the routines' sheet (Round 24): it scrolls (pulling down is reach
+/// Like the routines' sheet: it scrolls (pulling down is reach
 /// mode, not closing), and only back closes it, asking first when
 /// something changed.
 Future<MedicineDraft?> showMedicineSheet(
@@ -64,7 +64,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
   late int _followUp = widget.medicine?.followUp ?? 0;
   late bool _important = widget.medicine?.important ?? false;
 
-  /// The days it's taken (Round 40); empty: every day.
+  /// The days it's taken; empty: every day.
   late Set<int> _weekdays = {...?widget.medicine?.weekdays};
 
   /// The times it opened with.
@@ -137,7 +137,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
   static const maxDoses = 8;
 
   Future<int?> _pickTime(int initial) async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final picked = await showTimePicker(
@@ -165,7 +165,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
       });
 
   Future<void> _pickDate({required bool until}) async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final first = until ? _from : DateTime(widget.today.year - 5);
@@ -262,7 +262,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                                   label: Text(formatMinutes(minutes)),
                                   onPressed: () => _editTime(index),
                                   // At least one dose; and once added, as
-                                  // many as it had (Round 32: changing
+                                  // many as it had (changing
                                   // the number confused its history).
                                   onDeleted: widget.medicine == null &&
                                           _times.length > 1
@@ -295,7 +295,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                                 ),
                               ),
                             ),
-                          // Which days (Round 40): every day, or some.
+                          // Which days: every day, or some.
                           const SizedBox(height: 8),
                           Text('Days', style: label),
                           Wrap(
@@ -398,7 +398,7 @@ class _MedicineSheetState extends State<_MedicineSheet> {
                         ],
                       ),
                     ),
-                    // Important (Round 24): what it does, said here.
+                    // Important: what it does, said here.
                     SwitchListTile(
                       key: const Key('medicineImportant'),
                       secondary: const Icon(Icons.priority_high),

@@ -446,7 +446,7 @@ void main() {
 
     await tester.ensureVisible(free('00:00–24:00'));
     await tester.pumpAndSettle();
-    // Without a point (a finger picks its own time, Round 14).
+    // Without a point (a finger picks its own time).
     await tapAsScreenReader(tester, free('00:00–24:00'));
     expect(find.widgetWithText(OutlinedButton, '13:00'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, '14:00'), findsOneWidget);
@@ -644,7 +644,7 @@ void main() {
     });
   });
 
-  group('where you tap (Round 14)', () {
+  group('where you tap', () {
     /// The point on screen at [minutes], [dx] in from the timeline's left.
     Offset pointAt(WidgetTester tester, int minutes, {double dx = 150}) {
       // The day's own scale: short blocks stretch their hour.
@@ -701,7 +701,7 @@ void main() {
     });
   });
 
-  testWidgets('the hour labels keep a margin from the screen edge (Round 15)',
+  testWidgets('the hour labels keep a margin from the screen edge',
       (tester) async {
     await openPlanner(tester);
     final label = find.text('12:00').first;

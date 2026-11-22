@@ -15,7 +15,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import '../helpers.dart';
 
 /// Hub → Recipes, a recipe's view and edit modes, the ingredients list
-/// (Round 42).
+///.
 void main() {
   late ProviderContainer container;
 
@@ -92,7 +92,7 @@ void main() {
       container.read(recipesProvider.notifier).replaceAll([pancakes()]);
       await tester.pumpAndSettle();
       expect(find.text('Pancakes'), findsOneWidget);
-      // As chips (Round 44).
+      // As chips.
       expect(
           find.descendant(
               of: find.byKey(const Key('recipeChip-time')),
@@ -118,7 +118,7 @@ void main() {
     });
 
     testWidgets(
-        'typing its name, the page stays still (Round 64: it bounced at '
+        'typing its name, the page stays still (it bounced at '
         'every key)', (tester) async {
       tester.view.physicalSize = const Size(1080, 2340);
       tester.view.devicePixelRatio = 2.625;
@@ -203,7 +203,7 @@ void main() {
     });
 
     testWidgets(
-        'open 5 minutes, it counts as read (Round 53: Pip eats after), '
+        'open 5 minutes, it counts as read (Pip eats after), '
         'marked again each minute it stays open', (tester) async {
       var now = DateTime(2026, 10, 15, 18);
       container = await pumpApp(tester, clock: () => now);
@@ -315,8 +315,7 @@ void main() {
     });
   });
 
-  testWidgets(
-      'Round 102: into edit and back, the page stays where it was scrolled',
+  testWidgets('into edit and back, the page stays where it was scrolled',
       (tester) async {
     final long = pancakes().copyWith(
       ingredients: [
@@ -355,7 +354,7 @@ void main() {
     expect(view().pixels, closeTo(then, 1), reason: 'and back, where it is');
   });
 
-  group('import / export (Round 104)', () {
+  group('import / export', () {
     String? clipboard;
     setUp(() {
       clipboard = null;
@@ -474,8 +473,7 @@ void main() {
       expect(book().size, 6);
     });
 
-    testWidgets('import: one recipe (Round 104\'s shape) asked about as one',
-        (tester) async {
+    testWidgets('import: a single recipe asked about as one', (tester) async {
       await openRecipes(tester);
       clipboard = '{"format": "the-app/recipe", "version": 1, '
           '"recipe": {"name": "Cake"}}';
@@ -587,14 +585,14 @@ void main() {
       expect(find.byKey(const Key('choice-quantity')), findsOneWidget);
       expect(tester.getCenter(find.byKey(const Key('choice-quantity'))).dy,
           lessThan(tester.getCenter(find.byKey(const Key('choice-delete'))).dy),
-          reason: 'Quantity, then Delete (Round 43)');
+          reason: 'Quantity, then Delete');
       await tester.tap(find.byKey(Key('choice-$choice')));
       await tester.pumpAndSettle();
     }
 
     testWidgets(
         'a tap gives Quantity and Delete; quantities picked like Shop’s, '
-        'spoons too (Round 43)', (tester) async {
+        'spoons too', (tester) async {
       await openEdit(tester);
       // No quantity button on the rows: only the quantity, quietly.
       expect(find.text('Quantity'), findsNothing);
@@ -620,8 +618,7 @@ void main() {
           recipes().single.ingredients.map((i) => i.name), ['Flour', 'Eggs']);
     });
 
-    testWidgets(
-        'or typed as text (Round 70): "1-2", kept, and read back as text',
+    testWidgets('or typed as text: "1-2", kept, and read back as text',
         (tester) async {
       await openEdit(tester);
       await options(tester, 1, 'quantity');
@@ -668,7 +665,7 @@ void main() {
 
     testWidgets(
         'after a sheet the page stays where it was, the method not '
-        'typed in (Round 43)', (tester) async {
+        'typed in', (tester) async {
       await openEdit(tester);
       final method = find.byKey(const Key('recipeMethod'));
       await tester.ensureVisible(method);
@@ -770,7 +767,7 @@ void main() {
 
     testWidgets(
         '+ adds to the top of the first section; Section adds one '
-        'under it (Round 43)', (tester) async {
+        'under it', (tester) async {
       await openList(tester);
       await tapTooltip(tester, 'Add ingredients');
       await tester.enterText(find.byType(TextField).last, 'Salt');
@@ -787,7 +784,7 @@ void main() {
     });
 
     testWidgets(
-        'Round 92: one already there isn\'t added again: said where it is, '
+        'one already there isn\'t added again: said where it is, '
         'the sheet kept; renaming to another\'s name the same', (tester) async {
       await openList(tester);
       await tapTooltip(tester, 'Add ingredients');
@@ -819,7 +816,7 @@ void main() {
     });
 
     testWidgets(
-        'Round 92: a section dragged only from its right edge (no handle '
+        'a section dragged only from its right edge (no handle '
         'drawn); dropped only between sections, where a line shows; the '
         'first stays', (tester) async {
       await openList(tester);
@@ -951,7 +948,7 @@ void main() {
     });
 
     testWidgets(
-        "a tap on a section's name opens its menu (Round 45); delete moves "
+        "a tap on a section's name opens its menu; delete moves "
         'its ingredients up', (tester) async {
       await openList(tester);
       await tester.tap(find.text('DAIRY  ·  2'));

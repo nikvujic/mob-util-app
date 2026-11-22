@@ -8,7 +8,7 @@ class BottomNav extends StatelessWidget {
   /// A red dot on the Hub tab: one of its pages asks for attention (O13).
   final bool hubDot;
 
-  /// A green one, without a red one (Round 57): something new to see.
+  /// A green one, without a red one: something new to see.
   final bool hubNews;
 
   const BottomNav({

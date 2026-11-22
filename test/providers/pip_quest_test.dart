@@ -6,7 +6,7 @@ import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 
-/// Pip's quests (Round 125): starting one, its work minutes from the
+/// Pip's quests: starting one, its work minutes from the
 /// clock (powered down, away), finishing.
 void main() {
   DateTime at(int day, int hour, [int minute = 0, int month = 11]) =>
@@ -127,7 +127,7 @@ void main() {
     expect(pip.state.questMinutes, 0);
     expect(pip.state.questsDone.single.id, 'house');
     expect(pip.state.questsDone.single.at, at(2, 11, 1));
-    // Round 128: his home now.
+    // His home now.
     expect(pip.houseBuilt, isTrue);
     expect(pip.questOffered, isNull);
     expect(pip.questAt(at(2, 12)), isNull);

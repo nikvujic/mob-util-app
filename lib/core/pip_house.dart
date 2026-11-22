@@ -1,6 +1,6 @@
 import 'package:the_app/core/pip_quest.dart';
 
-/// Pip's house (Round 126, `docs/QUESTS_SPEC.md` section 6): how much of
+/// Pip's house (`docs/QUESTS_SPEC.md` section 6): how much of
 /// each piece stands, from his quest's progress, and where he stands to
 /// work on each. Drawn by `widgets/pip_house_art.dart`.
 ///
@@ -66,7 +66,7 @@ class PipHouse {
   /// No roof begun yet: the sky's over the walls.
   bool get roofless => of('rafters') == 0;
 
-  // The house's measures (the drafts', Round 124).
+  // The house's measures (the drafts').
   static const ground = 145;
   static const left = 4, right = 90; // the walls' outer edges
   static const foundationTop = 139;

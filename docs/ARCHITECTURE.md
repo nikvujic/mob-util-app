@@ -8,11 +8,11 @@ in CI) — a change that breaks them fails the build.
 
 ```
 main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
-                │            │
-                │            ▼
-                └──────► providers/ ──► data/ ──► models/
-                                                     ▲
-                core/  (used by every layer except models)
+  │ │
+  │ ▼
+  └──────► providers/ ──► data/ ──► models/
+  ▲
+  core/ (used by every layer except models)
 ```
 
 | Layer | What lives there | May import |
@@ -33,7 +33,7 @@ main.dart ──► app/ ──► pages/<feature>/ ──► widgets/
   `AppPalette` defined in `core/theme.dart`); no `Colors.*` (except
   `Colors.transparent`) or `Color(0x…)` anywhere else, so every screen
   follows the chosen theme.
-- No `print()`; use `debugPrint`.
+- No `print`; use `debugPrint`.
 - A feature that opens another feature's page does it by route name
   (`core/routes.dart`); `app/` maps names to pages, so features still never
   import each other.
@@ -149,13 +149,13 @@ an end in minutes from midnight; `freeSlots` gives the gaps of a day, and
 format version (`AppStorage.plannerFormatVersion`), so an older app sets a
 newer planner file aside instead of dropping the times.
 
-## Restoring part of a backup (D10, Round 28)
+## Restoring part of a backup (D10)
 
 `BackupImporter.restorePart` takes the ids picked, by kind
 (`BackupPart`), and adds those things to what's in the app instead of
 replacing it: notes on top, list items at the end. Something with an id
 still in the app comes back as a copy with a new id and "(Copy)" after
-its title (`copyTitle`, Round 30) (a locked note is
+its title (`copyTitle`) (a locked note is
 opened and sealed again, as its seal names its id); planner tasks and
 routines go through their notifiers' `restoreTask` / `restore`, so one
 whose time is taken (or that is still there) is left out and counted. A
@@ -165,7 +165,7 @@ it was before. The page picking them is `pages/backup/restore_part.dart`.
 
 ## Android's own backup
 
-The app keeps Android's Auto Backup on (the default, decided with the user):
+The app keeps Android's Auto Backup on (the default):
 if Google backup is on in the phone's settings, Android copies the app's
 files to a hidden area of the Google account, end-to-end encrypted with
 the phone's screen lock (Android 9+), and puts them back when the app is
@@ -197,7 +197,7 @@ appear they take that side and keep it — bottom right in order, or bottom
 left mirrored. Content leaves `BottomActions.contentClearance` free below
 it, so nothing hides behind them.
 
-## UI conventions (Round 33)
+## UI conventions
 
 Written down after the to-do page broke several (Review of
 1.4.0). Check a new page against these, and against a page like it
@@ -208,7 +208,7 @@ Written down after the to-do page broke several (Review of
   main tabs, `BottomAction(primary: true)` elsewhere), at the bottom.
   Not a grey button.
 - **Buttons at the bottom** follow the hand (`BottomActions`), except
-  where the user fixed them to the right (Medicine).
+  where they're fixed to the right (Medicine).
 - **Deleting several** (selection, "completed" lists): ask with
   `showDeleteConfirmDialog` ("This cannot be undone."), and then **no
   Undo** after it (the dialog said there's none). Deleting **one** thing
@@ -221,7 +221,7 @@ Written down after the to-do page broke several (Review of
   (the to-do); done / bought rows can't be edited.
 - **Toasts** only say what happened when it isn't plain on screen, and
   carry **Undo** when it can be undone. A new one **replaces** the one
-  showing (`hideCurrentSnackBar` first; Round 39), so they never queue
+  showing (`hideCurrentSnackBar` first), so they never queue
   up; the architecture test checks it.
 
 ## Back button
@@ -237,7 +237,7 @@ pages (selection mode uses `SelectionPopScope`), and only then runs the
 - Each feature has one `StateNotifier` holding an immutable list; pages read
   it with `ref.watch` and change it only through the notifier's methods.
 - Notifiers save every new state through `AppStorage` (one JSON file per
-  feature, crash-safe writes). Storage is loaded once in `main()` and
+  feature, crash-safe writes). Storage is loaded once in `main` and
   injected with a provider override; tests inject in-memory storage.
 - Slow work (key derivation) runs in a background isolate. Widget tests
   run it for real with `tester.runAsync`, via the `settleBusy` helper.
@@ -268,20 +268,20 @@ at the top of Notes. Its text is `assets/introduction.md` (the guide,
 kept up to date with the features) followed by the version's section of
 `CHANGELOG.md`, which is bundled too (`core/changelog.dart` finds it;
 `data/bundled_text.dart` reads the files). Whether it shows, and whether
-it's new, are preferences: `main()` passes the version this start is
+it's new, are preferences: `main` passes the version this start is
 (`startedVersionProvider`), and a version not seen before brings it
 back. Most tests don't pass one, so their Notes hold only their notes.
 
-## The to-do note (N18, Round 28)
+## The to-do note (N18)
 
-Like the Introduction, a tile at the top of Notes (under it, Round 30)
+Like the Introduction, a tile at the top of Notes (under it)
 and a page (`pages/notes/todo.dart`), not a stored note. Its list is
 `List<TodoItem>` (`models/todo_item.dart`: id, text, done) in
 `todo.json` (version 2; 1 had no `done`) and in backups (`todo`, backup
 v15; v16 with `done`), counted and cleared with Notes (`SectionData`).
 Like Shop, one ordered list shown as two (to do, *Completed*);
 `TodoNotifier.toggle` moves a thing between them, `deleteCompleted`
-clears the done ones. Round 83: done, it remembers (in memory, `_left`)
+clears the done ones. Done, it remembers (in memory, `_left`)
 the thing's place among the things to do and those as it left them (ids,
 waiting or not); back, it goes to that place if they're unchanged, else
 to the end. The
@@ -290,7 +290,7 @@ the Introduction it only shows in the app as started
 (`introductionAvailableProvider`), so tests that don't ask see only their
 notes.
 
-Its options (Round 45): `TodoItem.waiting` (`todo.json` v3, backup v21)
+Its options: `TodoItem.waiting` (`todo.json` v3, backup v21)
 and the `todoWaiting` preference. With it on, *To do*, a Waiting header
 and the waiting ones are one `SliverReorderableList`, so a drag can cross
 the header; `TodoNotifier.place` takes both lists' ids and sets each
@@ -300,7 +300,7 @@ page's: `todoClosedProvider` turns the page into a `LockedScreen` and the
 tile into *Locked*, counts in `anySectionClosedProvider` (backups ask),
 and the app closes the page when it locks while on Notes.
 
-## Automatic backup (Round 39)
+## Automatic backup
 
 `providers/auto_backup_provider.dart` (`AutoBackup.run`) writes a plain
 snapshot (`BackupExporter.snapshot`) once a day into the folder picked,
@@ -312,15 +312,15 @@ its own files beyond 7 deleted, off the main thread). The folder, its
 name, the last time and a failure flag are in `Preferences` (this phone
 only). Tests use `FakeBackupFolder`.
 
-## Recipes (Round 42)
+## Recipes
 
-Round 104: recipes as text (`providers/recipe_transfer.dart`): pure
+Recipes as text (`providers/recipe_transfer.dart`): pure
 export / parse functions over `Recipe` and `IngredientBook`, and
 `importRecipe`, which takes the two notifiers (so it's tested without
 widgets); the page side (`pages/hub/recipe_transfer_sheet.dart`) only
 copies, pastes and asks.
 
-Round 131: import / export for any page. `widgets/transfer_sheet.dart`
+Import / export for any page. `widgets/transfer_sheet.dart`
 holds the menu (Import, Export, Agent instructions) and the sheets (a
 list to tick: what to export, what's in pasted text before importing),
 driven by a `TransferKit<T, I>` a page fills in (its things, export,
@@ -341,7 +341,7 @@ stays whole if the ingredient is deleted or the list isn't restored;
 a backup brings a recipe's ingredients the list lacks (`withIngredients`).
 *To Shop* (`sendToShop`) reads a quantity as Shop's weight or count
 (`shopQuantityOf`), else none. Quantities stay text, written by the
-picker (Round 43: `Amount`, `amountText`, `readAmount`; "2", "200 g",
+picker (`Amount`, `amountText`, `readAmount`; "2", "200 g",
 "1½ tsp", "2 tbsp"), so older typed ones still read. The first
 ingredients section is pinned on top (`moveSection` and
 `deleteSection` leave it). Before a sheet or page opens over a recipe in
@@ -356,17 +356,17 @@ open the screen stays on: `core/screen.dart` → `MainActivity` over
 `the_app/screen` (`FLAG_KEEP_SCREEN_ON`, which Android drops in the
 background by itself).
 
-## The food tracker (O14, Round 46): removed (Round 145)
+## The food tracker (O14): removed
 
-Taken out at the user's ask: its pages, models, provider and icon. On
+Removed: its pages, models, provider and icon. On
 opening, `AppStorage` deletes an old `food.json`; a backup's `food`
 (v22 on) is no longer written and is ignored when one's restored (the
 format's otherwise the same, still v33). `HubTool.fromId` drops the
 stored `food` from a Hub layout or a page lock.
 
-## Pip, the pet (Round 34)
+## Pip, the pet
 
-His brain (Round 138): `core/pip_brain.dart` is one library in parts.
+His brain: `core/pip_brain.dart` is one library in parts.
 `PipBrain` (the class, in `pip_brain.dart`) keeps what he is and does
 every moment: his place, his activity and its clock, [play] and
 [_start] (every activity starts there), [show] (his life: awake,
@@ -388,7 +388,7 @@ part reaches another only through its extension's members (e.g.
 `_stepFetching`, `_clearOfStation`, `run`); its state holder is only
 its own, and the core touches none: the architecture test holds it.
 
-Charging station (Round 44): `data/power.dart` asks `MainActivity` over
+Charging station: `data/power.dart` asks `MainActivity` over
 `the_app/power` (the sticky battery state: plugged in or not) and hears
 `the_app/power_changes` (power connected / disconnected, a receiver
 registered only while listened to). `PipPowerNotifier`
@@ -396,10 +396,10 @@ registered only while listened to). `PipPowerNotifier`
 keeps the answer in `Preferences.pipPlugged` (this phone only), and
 tells `PipLifeNotifier.setCharging`, which takes his energy as it is
 then: while charging `PipEnergy.chargingLevelAt` lets it drain as ever
-but never below `chargingFloor` (Round 45); `segmentsAt` shows what he
-has (Round 58: it used to keep the segments he was plugged in with,
+but never below `chargingFloor`; `segmentsAt` shows what he
+has (it used to keep the segments he was plugged in with,
 which, with `pipPlugged` restored after a restart, could look full for
-days). Round 58: `PipLink.chargeTick` (`PipLifeNotifier.chargeTick`: a
+days). `PipLink.chargeTick` (`PipLifeNotifier.chargeTick`: a
 segment, up to full, on again if off) is called by the room every
 `PipBrain.chargeEvery` (30 s) of its ticker while he's `charging`, and
 once when `PipBrain.takeDroneCharge` says the station's drone charged
@@ -417,17 +417,17 @@ hatched: `tapEgg` counts taps (cracks at 1, 3, 5; the 7th starts
 his birthday. Letters for him are `core/pixel_font.dart` (3 x 5 glyphs)
 drawn by `widgets/pixel_text.dart` on the room's pixel grid.
 
-One system for his world (Round 35), so nothing shows or plays where it
+One system for his world, so nothing shows or plays where it
 doesn't belong. `core/pip_scene.dart`: a `PipPlace` (the menu's `room`,
-Pip Home's `home`), the `DayPart` from the clock (`dayPartAt`; Round 59:
+Pip Home's `home`), the `DayPart` from the clock (`dayPartAt`:
 by `sunTimesOn`, sunrise and sunset for the date at `sunLatitude` on
 the time zone's meridian, an hour later in summer time), a
 `PipBackground` (each gives its sky per part of the day), and `PipProp`s
 (stars, moon, sun, clouds; later snow, hats...), each declaring the
 places, parts of the day and backgrounds it shows in. `PipScene.at` is
-the one place that works out what's showing (Round 38: with the real
+the one place that works out what's showing (with the real
 moon's phase, `moonPhaseAt`, counted from a known new moon; no moon
-drawn at a new moon); `PipRoom` only draws it. Round 70: it also takes
+drawn at a new moon); `PipRoom` only draws it. It also takes
 the `Season` (by the month), the day's `PipOccasion` (Halloween,
 New Year's Eve, Orthodox Christmas on 7 January, Orthodox Easter) and the weather
 (an Open-Meteo WMO code, read by `core/weather.dart` into a
@@ -436,8 +436,8 @@ it); the field's props (trees, leaves, petals, pumpkins, bats, the
 festive pine, the badnjak, fireworks, eggs, rain, snowfall, lightning, fog) are
 decided there, a grey sky hiding the sun, moon and stars.
 
-Round 106: the rain radar, optional: `RadarApi` (`TomorrowIoApi`, with
-The user's own key in `InternetSettings.radarKey`; settings aren't in
+The rain radar, optional: `RadarApi` (`TomorrowIoApi`, with
+An own key in `InternetSettings.radarKey`; settings aren't in
 backups) answers whether it's raining or snowing now, as a WMO code
 (`wmoFromTomorrow`), or null when dry. `WeatherNotifier.refresh` asks it
 after Open-Meteo: its rain or snow replaces the report's code
@@ -446,7 +446,7 @@ failing, the report is Open-Meteo's and `WeatherFetch.radarFailed` says
 why. With a key a report is stale after 14 minutes (`radarStaleAfter`),
 so the 15-minute timer asks it every time.
 
-The weather (Round 70): `data/weather_api.dart` (the only network code,
+The weather: `data/weather_api.dart` (the only network code,
 `dart:io`'s `HttpClient`; `OpenMeteoApi`, a fake in tests) searches
 places and fetches the weather now; `providers/weather_provider.dart`
 fetches while Internet Access's weather is on (`WeatherNotifier`: on
@@ -460,7 +460,7 @@ animation)` in `pip_brain.dart`, and `play` asks it first (nothing
 interrupts the egg, the hatch or coming up). New props and animations
 add a row to these tables; tests check the tables, not each screen.
 
-Round 52: `PipBrain.enter(PipEntrance)` (ground, sky, side) and the
+`PipBrain.enter(PipEntrance)` (ground, sky, side) and the
 events (`bugHunt`, `showing`, `flower`, `butterfly`, `ball`,
 `stargazing`, `dancing`) are activities like the others, each with its
 row in `mayStart`, started now and then from standing (`_maybeEvent`) or
@@ -474,41 +474,41 @@ sky) the first time and after `PipBrain.awayFor`, using `PipLink.now`
 and `leftAt`; `PipLink.notifiedBetween` (the notification log) says a
 notification came since its last look. The sky's colours are stops
 (`PipBackground.stopsAt`), sampled into bands.
-Round 53: the brain queues `PipBuzz`es where something hits;
-`takeBuzzes()` hands them to the room's tick, which buzzes the phone
+The brain queues `PipBuzz`es where something hits;
+`takeBuzzes` hands them to the room's tick, which buzzes the phone
 (and drops them when it runs an event to its end unseen).
-Round 98: most animations buzz on their marks: `_buzzOn(mark, dt,
+Most animations buzz on their marks: `_buzzOn(mark, dt,
 buzz)` queues one when the activity's clock `_t` passes `mark` this
 step (`_passed`; the battery swap passes its own `_picking` clock and
 `_batteryLanded`); the room buzzes itself for a charged segment.
 `PipSprites.screenTurned` turns a screen picture so it reads right when
 he's drawn mirrored.
-Round 53 (1.16.0): `PipLink.medicineDue` (the red dot's rule, read
-fresh) sets `PipBrain.medicineDue`; Round 55: while it's set, the
+From 1.16.0: `PipLink.medicineDue` (the red dot's rule, read
+fresh) sets `PipBrain.medicineDue`; while it's set, the
 brain's step starts the pill (`reminding`) whenever he's standing or
 walking, before `_maybeCharge`, so it stays until marked; `showing`
 gives way only to falling asleep or running out (`mayStart`). `recipeReadProvider` holds
 when a recipe was last open 5 minutes (the recipe page's minute timer);
-`PipLink.recipeReadAt` hands it to the room, which starts `eat()` within
+`PipLink.recipeReadAt` hands it to the room, which starts `eat` within
 `PipBrain.eatsWithin` and keeps `ateFor` so it's once a reading. The
 brain gives `plate` and `crumbs`; the plate's hands come from `mitts`.
-Round 54: hands go by his casing, not his box: `PipBrain.bodyInset` and
+Hands go by his casing, not his box: `PipBrain.bodyInset` and
 `handBeside`. Changing his battery is a timeline in `fetching` (`handIn`
 … `pickEnd`): `battery` (the new one, carried and pushed in), `oldBattery`
 (pulled out, thrown), `batterySlot` and the hand in `mitts`. The old
 and new ones are drawn before him, so in the slot they're behind his
 casing.
-Round 57: `pipFrameOf(brain)` (pip_room.dart) picks his frame: his
+`pipFrameOf(brain)` (pip_room.dart) picks his frame: his
 body and face, or a screen picture (charging or shown), turned
 (`PipSprites.screenTurned`) when he faces left so it reads right
 mirrored. Hats: `PipBrain.hat` (the party hat while `birthday`, which
 the room sets from `PipLink.partyHat`; or one `tryOn`'d, Pip Home's
 Hats), drawn by the painter right after his body inside the same moves
-(mirror, stretch, tilt, spin), from `PipSprites.hatLeftOf` (Round 58:
-centred on `hatCentre`, over his antenna) and `hatBottom`;
-`hatBeside` (asleep) puts it on the ground beside him. Round 61: `PipBrain.dayHat` from `PipLink.hatToday` (`core/pip_hats.dart`: `pipHatOn`, days of the year and steady random days) when there's no party hat.
+(mirror, stretch, tilt, spin), from `PipSprites.hatLeftOf`
+(centred on `hatCentre`, over his antenna) and `hatBottom`;
+`hatBeside` (asleep) puts it on the ground beside him. `PipBrain.dayHat` from `PipLink.hatToday` (`core/pip_hats.dart`: `pipHatOn`, days of the year and steady random days) when there's no party hat.
 
-Dates (Round 57): `models/date_entry.dart` (`DateEntry`, `DateBook`:
+Dates: `models/date_entry.dart` (`DateEntry`, `DateBook`:
 `on`, `nextFrom`, `upcoming`, `birthdayOn`), `datesProvider`
 (dates.json), `planDateReminders` and `datesDotProvider` (the green dot,
 via `hubToolNewsProvider`/`hubNewsProvider`, red winning) in
@@ -516,11 +516,11 @@ via `hubToolNewsProvider`/`hubNewsProvider`, red winning) in
 notification. Preferences keep `datesReminders`, `datesPausedUntil` and
 `datesSeenOn`.
 
-Subscriptions (Round 79, `docs/SUBSCRIPTIONS_SPEC.md`):
+Subscriptions (`docs/SUBSCRIPTIONS_SPEC.md`):
 `models/subscription.dart` (`Subscription`: price, about, currency,
 every, `SubscriptionState`, a date read by `dateOn` — one that renews
 moves on past days gone by — `endedOn`, `cancelDueOn`; `SubscriptionBook`:
-`monthly`; Round 89: the list's order is the page's, `moveTo` sets it
+`monthly`; the list's order is the page's, `moveTo` sets it
 by dragging, `ordered` gone), `subscriptionsProvider` (subscriptions.json, in
 backups from v29) and `subscriptionsDotProvider` (the red dot: one to
 cancel within its reminder); `planSubscriptionReminders` and the card's
@@ -529,34 +529,34 @@ and `NotifyPage.subscriptions` (Preferences `subscriptionsReminders`,
 `subscriptionsPausedUntil`); `SubscriptionsTarget` opens the page. The
 page (`pages/hub/subscriptions.dart`) lays its cards out two to a row;
 `subscription_page.dart` edits one, saved as it changes.
-Round 84: `Subscription.cardExpiryOn` (`CardExpiry` fine / soon /
+`Subscription.cardExpiryOn` (`CardExpiry` fine / soon /
 expired) colours a card's expiry part (`cardExpiryLabel`) orange or red.
-Round 85: `cardExpires` is kept as its month's last day (the constructor
+`cardExpires` is kept as its month's last day (the constructor
 moves any day there), picked with `widgets/month_picker.dart`'s
-`showMonthPicker` (Round 86: three across, four rows; Round 87: opens on this year) and shown `formatCardMonth` ("10/26").
+`showMonthPicker` (three across, four rows; opens on this year) and shown `formatCardMonth` ("10/26").
 
-His adventures (Round 63): `core/pip_adventure.dart` has the rules
+His adventures: `core/pip_adventure.dart` has the rules
 (the 12:00–18:00 day out, registering 13:00–17:00, the break window,
 `levelFor`/`xpFor`/`progressFor`, `titleFor`). `PipLifeNotifier` keeps
 his days out right with `_settle` (run before anything that changes his
 energy, so his energy at 12:00 is still known): a finished day's XP
 banked, today's started at 12:00 or when he's back on before 17:00;
-`levelAt` floors his energy while he's out. `PipLink.outing()` tells
+`levelAt` floors his energy while he's out. `PipLink.outing` tells
 his room (starting the break when it's due) and `PipLink.level` its
 flashes. In the brain he's `PipActivity.adventuring` (a row of `false`
 in `mayStart`), driven by `core/pip_run.dart`'s `PipRun` (phases,
 the ground's shift, bugs, the knocked-off sword, the tavern and plate;
-Round 83: `seatHeight` puts his body on the bench, `benchLeft` centres it
+`seatHeight` puts his body on the bench, `benchLeft` centres it
 under him, drawn off the pixel grid as he is),
 which the painter draws in screen terms (world x − shift).
-Round 73: XP is ten a minute, worked out from `minutesOut`; while his
+XP is ten a minute, worked out from `minutesOut`; while his
 room is shown and he's `fighting`, it calls `PipLink.fighting` each
 second (`pipHeldXpProvider` holds the XP shown, `shownXpAt`) and, for
 each foe `PipRun` reports struck down (`defeats`, a `PipFoe`),
 `PipLink.defeated`, which collects the XP (a boss banks
 `PipAdventure.bossMinutes` once a day out, `bossDueAt`) and returns
 what to show rising (`showXp`).
-Round 75: the weather (`core/pip_weather.dart`: the table of what each
+The weather (`core/pip_weather.dart`: the table of what each
 weather does in each activity, `PipTent`, `PipUmbrella`, `PipSnowman`,
 `PipSplat`) is lived by the brain in a part file,
 `core/pip_brain_weather.dart` (`_PipWeatherState`, the
@@ -566,28 +566,28 @@ opens his umbrella, melts his snowman; `PipActivity.sheltering`,
 `weatherEvent` and `lookingUp` have their rows in `mayStart`). Out, the
 run takes `storm`, `snowFoes` and `pace` from the brain
 (`RunPhase.toShelter`/`sheltering`, `PipFoe.snowman`).
-Round 74: each room's brain has its own run, so the field's trees go by
-his time out from his life instead (Round 76: through `treeRun`, which
+Each room's brain has its own run, so the field's trees go by
+his time out from his life instead (through `treeRun`, which
 moves with the run's ground and eases back to that time) (`PipLink.outRun`, synced each
 second into `PipBrain.outRun`, read by `fieldPassing`), standing still
 at his break.
 
-His ski trips (Round 67): `providers/pip_trip.dart` works out from
+His ski trips: `providers/pip_trip.dart` works out from
 Dates the bus rides (`ridesNear`), ski days, bus days and the snowy
 look (`PipTrip.at`, a `PipTripNow` from `core/pip_adventure.dart`);
 `PipLifeNotifier` gets the dates as a function, pauses his energy over
 the rides (`PipEnergy.levelPausing`) and counts bus days' XP;
-`PipLink.trip()` tells his room. The brain's `PipActivity.riding` is
+`PipLink.trip` tells his room. The brain's `PipActivity.riding` is
 driven by `core/pip_bus.dart` (`PipBus`); skiing is `PipRun` with
 `skiing` (slope things, bumps, falls, gear); `PipBrain.snowing` (a ski
 day or a ski preview) decides the snow, the beanie and his gear's
 snowbank. Previews (`previewAdventure`, `previewBus`) run their course
 whatever his life says and stop with `stopPreviews`.
 
-His energy and sleep (Round 37): `core/pip_energy.dart` has the rules
+His energy and sleep: `core/pip_energy.dart` has the rules
 as plain functions of the clock (`PipEnergy.usedBetween`, `levelAt`,
 `emptyAt`, `segments`, `nextBattery`, `batteriesAt`: one every 5 h on
-the clock, piling up while away, Round 45; `pipShowAt` says what to show:
+the clock, piling up while away; `pipShowAt` says what to show:
 awake, fallAsleep, asleep, wakeUp, powerOff, off). Nothing runs in the
 background: `PipLife` keeps his energy as a level at a moment, and the
 battery due is collected when the app starts or comes back
@@ -599,7 +599,7 @@ again), and tells it back (`shown`, so an animation isn't replayed); a
 tap gives a battery (`giveBattery`, then `PipBrain.takeBattery`). Tests
 override the link with `FakePipLink` unless they ask for the real one.
 The brain's new activities all have their row in `mayStart`.
-Round 77: asleep, the room counts taps instead (three within
+Asleep, the room counts taps instead (three within
 `PipEnergy.wakeTapGap` of each other) and asks the life to wake him
 (`PipLink.wake`: `mayWakeAt`, kept as `PipLife.wokenAt`, after which
 `pipShowAt` says awake for a while); the brain stirs
@@ -607,7 +607,7 @@ Round 77: asleep, the room counts taps instead (three within
 `drowsy` while `PipLink.drowsy` says.
 
 Pip Home (`pages/hub/pip_home.dart`, `HubTool.pip`): its own `PipBrain`
-(the menu's stays put) in a `PipRoom` with the menu's `pixel` (Round 38)
+(the menu's stays put) in a `PipRoom` with the menu's `pixel`
 and half the page's `height`, and a `PageView` card (status, settings) drawn with
 `PixelText` and `widgets/pip_portrait.dart` in `PipColours`' panel
 colours, whatever the theme. `HubTool.lockable` and `clearable` keep it
@@ -615,7 +615,7 @@ out of page locks and Clear data; the Hub shows it once hatched, moving
 tiles by their place in the whole stored order. The background switch is
 the `pipBackground` preference: a background's id (`PipBackground.byId`; 1.5.0's on/off reads as Field).
 
-## Notifications page (E3, Round 31)
+## Notifications page (E3)
 
 Settings per page (`models/notify_settings.dart`: `NotifyPage`,
 `NotifyStyle` with private, colour and sound) live in `Preferences`, with
@@ -655,11 +655,11 @@ there (task left, routine right). A block is one `SelectableCard` whose
 corners only; the shape also limits where it takes taps. Free time is
 time with neither; a task's room (`PlannerNotifier.roomFor` / `freeOn`)
 only counts tasks, and the add sheet switches to the routines' room
-while Repeat is on. Round 83: a block moved to another day
+while Repeat is on. A block moved to another day
 (`PlannerNotifier.moveTask`) keeps its time if `freeOn` that day has it,
 else takes `fitTime`'s nearest free time as long (the page says so first).
 
-## The timeline's scale (Round 10)
+## The timeline's scale
 
 `TimeScale` (`pages/planner/timeline.dart`) maps minutes to heights: an
 hour is `hourHeight`, but every block gets at least `minBlockHeight` (a
@@ -695,10 +695,10 @@ planner, merged with the planner's and capped together; it also runs on
 medicine and medicine-setting changes. Each `Reminder` has a kind, and
 each kind its own Android channel (`planner-reminders`,
 `medicine-reminders`). A page's reminders leave out titles and names
-only when its notifications are set private (Round 82: a lock no longer
+only when its notifications are set private (a lock no longer
 does).
 
-## Years of medicine history (Round 18)
+## Years of medicine history
 
 Marks are found through an index (`MedicineBook.markFor`), made once per
 book (a book never changes; a new one comes with each change), so a
@@ -708,7 +708,7 @@ a day scrolls there in steps until that day is built. `medicine.json`
 grows by about 80 bytes a mark: ten years of three doses a day is about
 a megabyte, written whole on each change, which is still quick.
 
-## Tapping a notification (Round 19)
+## Tapping a notification
 
 Each `Reminder` carries a target (`models/notification_target.dart`):
 `planner|day|minutes` or `medicine`, as the notification's payload. The
@@ -791,21 +791,21 @@ store fails, `retryFailed` writes the kept documents again (the home
 screen calls it when the app comes back), and the home screen says when
 saving starts failing and when it works again (`saveFailingProvider`).
 
-Important medicines (Round 24): `Medicine.important` (medicine.json v4,
+Important medicines: `Medicine.important` (medicine.json v4,
 backup v14). The red dot (`doseDue`) counts only important medicines.
 Ticking one's dose goes through `showHoldToTake` (`pages/hub/
 hold_to_take.dart`): a 5-second `AnimationController` drives a painted
 glass, the native `fill` sound (`tool/make_fill_sound.py`) and haptic
 ticks; letting go reverses it.
 
-Pip (Round 25), the mascot: `widgets/pip.dart` draws him standing (his
+Pip, the mascot: `widgets/pip.dart` draws him standing (his
 room's idle frame, `widgets/pip_sprites.dart`), each grid pixel snapped
 to whole device pixels, in his own colours; the menu's header shows him.
 The launcher icon (`tool/make_icon.py`) holds a copy of the same frame
 and colours; `test/widgets/pip_sprites_test.dart` keeps them equal, so
 after changing his look, update the tool's `SPRITE` and run it.
 
-Pip's room (Round 26): `core/pip_brain.dart` is his behaviour, plain
+Pip's room: `core/pip_brain.dart` is his behaviour, plain
 Dart (spawning, standing, walking; where he is, his frame, squash and
 stretch), stepped with the time gone by and a `Random` (seeded in
 tests). `widgets/pip_room.dart` draws the field and his frames
@@ -815,13 +815,13 @@ the menu is open; `pipBrainProvider` keeps one brain for the app's run,
 so he spawns only the first time. `pipAnimatesProvider` is off in tests
 (an endless animation never settles) except Pip's own.
 
-Stuck Shift (Round 26): Flutter's text fields extend the selection on a
+Stuck Shift: Flutter's text fields extend the selection on a
 tap while Shift is held, and some phone keyboards leave Shift "held".
 `app/stuck_shift.dart` wraps the app's pointer input (installed in
 `main`): a touch going down first sends a synthetic key-up for a held
 Shift.
 
-More formats (N17, Round 27): `markdownRuns` also reads inline code,
+More formats (N17): `markdownRuns` also reads inline code,
 highlights, quotes, dividers and ``` blocks (a block's lines are code,
 nothing else). Drawn by `MarkdownEditingController` as styles, and by
 `RenderCheckboxBoxes` around the text: code panels under it, quote bars
@@ -832,14 +832,14 @@ functions in `core/markdown.dart` (`toggleWrap`, `toggleLines`,
 and selection; `widgets/format_bar.dart` is the row, in `BottomActions`'
 `bar` slot.
 
-## Date pickers (Rounds 87, 91)
+## Date pickers
 
 Every date is picked with `widgets/date_pick.dart`'s `pickDate`, not
 `showDatePicker` directly: it opens on the day set, or with none on
 today (the nearest day allowed if today isn't), today marked. A new
 subscription's default day isn't "set" until picked.
 
-## Save or Discard (Round 91)
+## Save or Discard
 
 Pages saved as they're typed (Subscription, Date, Meal) sit in a
 `DiscardScope`: with the item changed since the page opened (the store's
@@ -847,22 +847,22 @@ copy against the one read then), back asks Save / Discard
 (`showSaveChangesDialog`, as a note); Discard puts the original back,
 or deletes a new one.
 
-## Letting a field go (Round 88)
+## Letting a field go
 
 `MaterialApp.builder` wraps every route in a translucent `GestureDetector`
 (excluded from semantics) whose tap unfocuses the primary focus: a tap on
 nothing (not a field, button, row or chip, which win the gesture arena)
 lets the field being typed in go, on every page, sheet and dialog.
 
-## Text fields (Round 92)
+## Text fields
 
 Every `TextField` / `TextFormField` takes `selectionControls: lowHandles`
 (`widgets/low_handles.dart`): finger-sized handles reaching away from
-the text (Rounds 64, 74), so a tap on the text doesn't grab one. Notes
+the text, so a tap on the text doesn't grab one. Notes
 and a recipe's method use `FormatBarSelectionControls`, built on it. The
 architecture test fails on a field without `selectionControls`.
 
-## Spotify in the morning (Round 93)
+## Spotify in the morning
 
 `models/morning_music.dart` (on, minutes, weekdays, volume) lives in
 `Preferences.morningMusic`; the Spotify page (`pages/hub/spotify.dart`)
@@ -875,7 +875,7 @@ whatever had the music last, and sets the next alarm, so it runs with
 the app closed; after a restart or an update the same receiver sets it
 again.
 
-## People (Round 108)
+## People
 
 `models/people.dart`: `Person` (a `PersonDate` birthday, deceased with
 `diedOn`, highlighted, note, the box's middle `x`/`y` in board units,
@@ -884,7 +884,7 @@ maybe `former`, `sibling`, `other` with a `label`), `PeopleBook` with the
 rules (`whyNot`, `isAncestor`, `familyOf` over family relations) and the
 `BoardView`. `models/people_layout.dart`: `BoardSizes`, `generations`
 (a bounded fix-point: a child below its parents, partners and siblings
-level, a root parent just above), `tidyLayout` (Round 114: a drag moves
+level, a root parent just above), `tidyLayout` (a drag moves
 only the one dragged; `familyPull` is gone). `PeopleNotifier` keeps a person's
 birthday in step with a `DateEntry` whose `personId` is theirs (Dates
 locks its title, day, year and type; Clear data of People removes
@@ -896,7 +896,7 @@ stops when settled glides people and the view and draws new lines in.
 Faces: `widgets/people_sprites.dart` (grids) and `people_avatar.dart`
 (colours in `PeopleColours`).
 
-Round 109: `PeopleBook.mainId` / `highlightFamily` (`familyShown`). The
+`PeopleBook.mainId` / `highlightFamily` (`familyShown`). The
 board starts a person drag only from a gesture whose single finger just
 went down (a Listener counts pointers), so a pinch's remaining finger
 pans; a box's content is sized by the zoom (text up to 2.2× zoomed out,
@@ -906,7 +906,7 @@ view kept). The note is written on `pages/hub/person_note_page.dart` (a
 `MarkdownEditingController`, the format bar, `DiscardScope`) and shown
 read-only with `CheckboxBoxes`; `Preferences.hidePeopleNotes` hides it.
 
-Round 110: the ticker moves each person on a damped spring (stiffness
+The ticker moves each person on a damped spring (stiffness
 170, damping 15, four sub-steps a frame) instead of an exponential
 glide; held people's speed is measured from frame to frame, and a
 smoothed speed squashes the box (`_squash`, a `Transform` stretching up
@@ -915,28 +915,28 @@ until the new `PeopleBook` arrives. The zoom handle sits over the
 board, outside its gesture detector, so it never competes with pan and
 pinch.
 
-Round 111: the box's text scales by `clamp(1/zoom, 1, 1.6)`, one line
+The box's text scales by `clamp(1/zoom, 1, 1.6)`, one line
 past 1.3; the face is a fixed 78 in a `Flexible` `FittedBox`, so it
 gives way only when the text needs the room; the star is stacked on the
 box, not the face.
 
-Round 112: names keep two lines, their style shrunk by `_fitWords`
+Names keep two lines, their style shrunk by `_fitWords`
 (a `TextPainter` measuring the longest word) to fit the box's width. A
 double tap held and moved zooms: the board's `Listener` remembers the
 last quick tap (its event time and place); a finger down within 300 ms
 and 40 px of it marks a quick zoom, which the scale handlers turn into
 zoom by the vertical move, the tapped spot held still.
 
-Round 113: `Person.inDates` (JSON `inDates`, written only when false):
+`Person.inDates` (JSON `inDates`, written only when false):
 `_syncDate` keeps a date in Dates only for a birthday shown there.
 `takeBirthday` copies a Dates birthday's day, month and year into the
 person (the original untouched); their own date follows from `save`.
 
-## Pip's quests (Round 125)
+## Pip's quests
 
 `core/pip_quest.dart` holds the rules: `PipQuest` (the quest hours,
 `windowsBetween`, `finishAt`) and `Quests.house`, a `QuestScript` built
-once from `housePieces` (Round 140): the pieces taken in turn, the next
+once from `housePieces`: the pieces taken in turn, the next
 one that's ready (each block resting on what `supportsOf` says it needs
 built); a small load (`carry`) or a few panes (`glassAtOnce`) when its
 materials are short, then up to `blocksAtOnce` of it. A step has minutes, what it
@@ -951,29 +951,29 @@ window since the last count it finds, by binary search, the first
 minute he's out of energy (his level only falls between changes), and
 leaves out five-minute chunks spent away on a ski trip.
 
-Round 142: while he's at his work's places the brain doesn't hold him
+While he's at his work's places the brain doesn't hold him
 inside the room (`_placed`): the views put him where he is, walking
 off an edge or in from one. Its own clock rolls on past the step his
 life last said (`_scriptView`), and joining or getting back to work it
 walks him to where the work is now (`arriving`). `pip_no_cuts_test`
 checks the whole thing frame by frame over random lives.
 
-Round 126: `core/pip_house.dart` (`PipHouse.of(QuestAt)`: each piece's
+`core/pip_house.dart` (`PipHouse.of(QuestAt)`: each piece's
 amount up, the house's measures in its own pixels, where he stands to
 work on a piece) and `widgets/pip_house_art.dart` (`PipHouseArt`, drawn
 through a `dot` callback so the room and the framed picture share it).
 Pip Home's quest card and inventory read `PipLifeNotifier.questAt`.
 
-Round 127: `core/pip_quest_scene.dart` turns a `QuestAt` and the seconds
+`core/pip_quest_scene.dart` turns a `QuestAt` and the seconds
 into its step into a `QuestView` (the place, his spot and lift, pose,
 flying materials, puffs, the tree's fall), a pure function of the clock.
-`PipLink.questNow()` hands it to his room each second; `PipBrain.quest`
+`PipLink.questNow` hands it to his room each second; `PipBrain.quest`
 puts him in `PipActivity.questing` and `_placeQuest` keeps him at the
 view's spot (a camera, `questCamera`, for a room narrower than the house
 area). `widgets/pip_quest_paint.dart` draws the place before his props.
 `PipBrain.hat` gives the rain hat at work in the wet.
 
-Round 128: his home. `PipLink.homeNow()` (his house built, not
+His home. `PipLink.homeNow` (his house built, not
 `PipQuest.fieldTimeAt`); the room passes `brain.home(...)` only when
 he's not out, on his trip or at work. At home `PipBrain` keeps his x
 between `homeLeft` and `homeRight` (`_minX`/`_maxX`), picks
@@ -985,12 +985,12 @@ room moves `groundTop` up by `PipHouse.onFloor` for his own things (the
 station, a battery, his words, him), back down after, and clips the
 weather to outside `_houseShape`.
 
-Round 129: the menu's `PipRoom` is disposed with the menu while its
+The menu's `PipRoom` is disposed with the menu while its
 brain lives on (a provider), frozen mid-doing. A room's first check on a
-brain it had left (`leftAt` set) runs `_finish()` (as a still room does)
+brain it had left (`leftAt` set) runs `_finish` (as a still room does)
 before the quest, adventure or trip is asked about.
 
-## Converter (Round 118)
+## Converter
 
 `core/units.dart`: `UnitPair` (two units and a conversion each way;
 `scaled` for a plain factor), `unitGroups`, `parseAmount` (comma or
@@ -999,26 +999,26 @@ point) and `formatAmount` (three decimals at most). The page
 state, nothing in a provider or storage, so leaving it forgets them;
 `HubTool.converter` is neither lockable nor clearable.
 
-## Packing lists (Round 94)
+## Packing lists
 
 `models/packing.dart`: a `PackingBook` holds the default sections (what
 a new list starts with) and the lists; a `PackingList` its own sections
-(Round 95; at least one) and its things, each with a section id, a count
-and whether it's packed. `grouped()` shows a list by its sections, every
-one (a thing whose section is gone falls under the last); `moved()` is
+(at least one) and its things, each with a section id, a count
+and whether it's packed. `grouped` shows a list by its sections, every
+one (a thing whose section is gone falls under the last); `moved` is
 edit mode's drag over the rows (headings and things), the thing taking
-the heading above where it lands; `sectionMovedTo()` (a heading dragged, Round 96) and
-`withoutSection()` (its things with it). `providers/packing_provider.dart`
+the heading above where it lands; `sectionMovedTo` (a heading dragged) and
+`withoutSection` (its things with it). `providers/packing_provider.dart`
 saves the book to `packing.json` (v2; v1's lists get the shared sections
-as their own) and does the rest (a new list's `draft()`, kept on its
-first `save()`, ticks, Reset, Copy list with the sections picked, the
+as their own) and does the rest (a new list's `draft`, kept on its
+first `save`, ticks, Reset, Copy list with the sections picked, the
 default sections). Pages: `pages/hub/packing.dart` (the lists),
 `packing_list.dart` (a list's view and edit modes; edits saved as made,
 Back asks Save or Discard), `packing_sections.dart` (default sections)
 and `packing_copy_sheet.dart`. Backups carry the book (`packing`,
 version 31).
 
-## The phone's bars and orientation (Round 151)
+## The phone's bars and orientation
 
 `core/system_ui.dart` (`AppSystemUi`) is the only place that calls
 `SystemChrome` for the system bars or orientation (an architecture test
@@ -1026,7 +1026,7 @@ enforces it). The app's own is the phone's bars shown, any way up
 (`restore`); a page that changes them puts that back as it goes, so it
 can't change how the pages after it are laid out.
 
-## A first look catches him up (Round 155)
+## A first look catches him up
 
 `PipRoom._check` has one rule for what's seen: a first look (the room
 opened, or the app brought back, `didChangeAppLifecycleState`) shows

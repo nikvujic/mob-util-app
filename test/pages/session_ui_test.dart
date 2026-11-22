@@ -72,7 +72,7 @@ void main() {
   group('menu', () {
     testWidgets(
         'offers Lock now only while unlocked; locks quietly, the menu '
-        'staying open (Round 24)', (tester) async {
+        'staying open', (tester) async {
       await start(tester);
       container.read(sectionLocksProvider.notifier).lock(AppSection.notes);
       await openMenu(tester);
@@ -85,15 +85,15 @@ void main() {
       expect(find.byType(SnackBar), findsNothing);
     });
 
-    testWidgets('the header: Pip, and the same height locked or not (Round 25)',
+    testWidgets('the header: Pip, and the same height locked or not',
         (tester) async {
       await start(tester);
       await openMenu(tester);
       expect(find.byKey(const Key('menuPip')), findsOneWidget);
-      // The room's idle frame, 20 x 19 (Round 27), whole pixels.
+      // The room's idle frame, 20 x 19, whole pixels.
       final size = tester.getSize(find.byKey(const Key('menuPip')));
       expect(size.width / size.height, closeTo(20 / 19, 0.001));
-      // The title a little below Pip's middle (Round 27).
+      // The title a little below Pip's middle.
       final pip = tester.getCenter(find.byKey(const Key('menuPip'))).dy;
       final title = tester.getCenter(find.byKey(const Key('menuTitle'))).dy;
       expect(title - pip, inInclusiveRange(1, 5));
@@ -108,7 +108,7 @@ void main() {
 
     testWidgets(
         "locking from Security while on a locked section: Security stays "
-        '(Round 24)', (tester) async {
+        '', (tester) async {
       await start(tester);
       container.read(sectionLocksProvider.notifier).lock(AppSection.notes);
       await openMenu(tester);

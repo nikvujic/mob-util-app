@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-/// Releases a Shift the app wrongly thinks is held (Round 26).
+/// Releases a Shift the app wrongly thinks is held.
 ///
 /// A tap in a text field while Shift is held extends the selection
 /// instead of placing the cursor (Flutter does that for real keyboards).

@@ -151,7 +151,7 @@ void main() {
           reason: 'alone, the task takes the full width');
     });
 
-    testWidgets('the task ticks off; the routine has nothing to (Round 78)',
+    testWidgets('the task ticks off; the routine has nothing to',
         (tester) async {
       await openPlanner(tester);
       addMedicine();

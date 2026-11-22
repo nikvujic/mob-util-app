@@ -7,7 +7,7 @@ void main() {
   final manifest =
       File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
 
-  test('one task: no empty taskAffinity (Round 32)', () {
+  test('one task: no empty taskAffinity', () {
     // With one, opening the app from the installer (after an update) or a
     // notification started a second task: two of it in the recent apps.
     expect(manifest, isNot(contains('android:taskAffinity=""')));

@@ -11,7 +11,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
-/// Whether the phone is plugged in (Round 44: Pip's charging station).
+/// Whether the phone is plugged in (Pip's charging station).
 void main() {
   var now = DateTime(2026, 10, 14, 10);
 
@@ -37,12 +37,12 @@ void main() {
   setUp(() => now = DateTime(2026, 10, 14, 10));
 
   test(
-      'plugged in (Round 45): he uses energy as ever, and can\'t run out; '
-      'his icon shows what he has (Round 58)', () async {
+      'plugged in: he uses energy as ever, and can\'t run out; '
+      'his icon shows what he has', () async {
     final power = FakePower(isPlugged: true);
     final container = start(power);
     final link = container.read(pipLinkProvider);
-    expect(link.plugged, isNull, reason: 'not asked yet (Round 64)');
+    expect(link.plugged, isNull, reason: 'not asked yet');
     await pumpEventQueue();
     expect(link.plugged, isTrue);
     expect(container.read(preferencesProvider).pipPlugged, isTrue,
@@ -50,8 +50,7 @@ void main() {
     final pip = container.read(pipLifeProvider.notifier);
     now = now.add(const Duration(hours: 2));
     expect(pip.levelAt(now), closeTo(1.0, 0.001), reason: 'used as ever');
-    expect(pip.segmentsAt(now), 1,
-        reason: 'Round 58: not kept as when plugged in');
+    expect(pip.segmentsAt(now), 1, reason: 'not kept as when plugged in');
     now = now.add(const Duration(hours: 20));
     expect(pip.levelAt(now), PipEnergy.chargingFloor, reason: 'never out');
     expect(pip.showAt(now), isNot(PipShow.powerOff));
@@ -91,7 +90,7 @@ void main() {
     expect(pip.charging, isTrue, reason: 'straight away');
     now = now.add(const Duration(hours: 2));
     await pumpEventQueue();
-    // Round 58: what he has, however long ago he was plugged in (it used
+    // What he has, however long ago he was plugged in (it used
     // to keep what he had then: full for days).
     expect(pip.segmentsAt(now), 1);
     expect(pip.levelAt(now), closeTo(1.0, 0.001));

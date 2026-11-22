@@ -18,7 +18,7 @@ import 'package:the_app/providers/pip_life_provider.dart';
 
 import '../helpers.dart';
 
-/// Pip, the pet (Round 34): hatched once, his age from his birthday.
+/// Pip, the pet: hatched once, his age from his birthday.
 void main() {
   test('an egg until hatched; hatched once, on that day', () {
     final pip = PipLifeNotifier(AppStorage.inMemory());
@@ -99,7 +99,7 @@ void main() {
     });
   });
 
-  group('his energy and batteries (Round 37)', () {
+  group('his energy and batteries', () {
     late DateTime now;
     PipLifeNotifier start({PipLife? pip}) {
       now = DateTime(2026, 10, 14, 9);
@@ -110,7 +110,7 @@ void main() {
     }
 
     test(
-        'hatched (Round 61): two segments, a battery in hand, the next on '
+        'hatched: two segments, a battery in hand, the next on '
         'its way', () {
       final pip = start()..hatch(DateTime(2026, 10, 14, 9));
       expect(pip.state.energy, 2);
@@ -132,12 +132,12 @@ void main() {
 
     test(
         'batteries come on the clock and pile up while away, up to 3 '
-        '(Round 45)', () {
+        '', () {
       final pip = start()..hatch(now);
       final due = pip.state.nextBatteryAt!;
       pip.collect(due.subtract(const Duration(minutes: 1)));
       expect(pip.state.batteries, 1, reason: 'not yet: only his first');
-      // Away a little over 5 hours past it: two came (Round 61: three
+      // Away a little over 5 hours past it: two came (three
       // held with the one he hatched with).
       final later = due.add(const Duration(hours: 5, minutes: 10));
       pip.collect(later);
@@ -170,7 +170,7 @@ void main() {
       );
       expect(pip.refusalAt(now), PipRefusal.full);
       expect(pip.giveBattery(now), isFalse);
-      // Four hours on (Round 58): two segments left.
+      // Four hours on: two segments left.
       final later = DateTime(2026, 10, 14, 13);
       expect(PipEnergy.segments(pip.levelAt(later)), 2);
       expect(pip.giveBattery(later), isTrue);
@@ -242,14 +242,14 @@ void main() {
       ]);
       addTearDown(container.dispose);
       final link = container.read(pipLinkProvider);
-      // Round 58: three hours at a segment every four.
+      // Three hours at a segment every four.
       expect(link.look(), (PipShow.awake, 1));
       expect(container.read(pipLifeProvider).batteries, 1, reason: 'due');
       expect(link.giveBattery(), isTrue);
       expect(link.look().$2, 2);
     });
 
-    test("the link: today's hat (Round 61), Santa's at Christmas", () {
+    test("the link: today's hat, Santa's at Christmas", () {
       DateTime now = DateTime(2026, 12, 26, 12);
       final container = ProviderContainer(overrides: [
         appStorageProvider.overrideWithValue(AppStorage.inMemory(

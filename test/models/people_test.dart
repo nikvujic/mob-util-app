@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/people.dart';
 import 'package:the_app/models/people_layout.dart';
 
-/// People (Round 108): ages, relations' rules, families, Tidy, the pull.
+/// People: ages, relations' rules, families, Tidy, the pull.
 void main() {
   Person person(String id,
           {int? born,
@@ -242,7 +242,7 @@ void main() {
   });
 
   test(
-      'the main person (Round 109): kept, read back; their family shown '
+      'the main person: kept, read back; their family shown '
       'only when on; gone with them', () {
     final book = PeopleBook(
       people: [person('a'), person('b'), person('c')],
@@ -262,7 +262,7 @@ void main() {
 
   test(
       'a brother and sister with their parents: one line (the parents\'), '
-      'no sibling bar too (Round 115)', () {
+      'no sibling bar too', () {
     final book = PeopleBook(
       people: [person('m'), person('d'), person('b'), person('s')],
       relations: [

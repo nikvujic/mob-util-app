@@ -6,7 +6,7 @@ import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
 
-/// Shop's search and A–Z (Round 69).
+/// Shop's search and A–Z.
 void main() {
   late ProviderContainer container;
 

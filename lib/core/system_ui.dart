@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 
-/// Round 151: the phone's bars and which way up, kept in one place. The
+/// The phone's bars and which way up, kept in one place. The
 /// app's own (what every page is laid out for) is the phone's bars shown,
 /// any way up; a page that changes them (the Placard: sideways, no bars)
 /// puts them back with [restore] as it goes, so it can't change how the

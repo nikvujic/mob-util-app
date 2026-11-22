@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers.dart';
 
-/// The Notifications page (Settings before Round 31) says so when the
-/// phone blocks the app's notifications (E1, Round 23), and tapping it
+/// The Notifications page (formerly in Settings) says so when the
+/// phone blocks the app's notifications (E1), and tapping it
 /// asks to allow them.
 void main() {
   final warning = find.byKey(const Key('notificationsOff'));

@@ -26,9 +26,9 @@ class HubPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // A medicine notification tapped (Round 19): its page, once the Hub
+    // A medicine notification tapped: its page, once the Hub
     // is open (locked, it waits for the next visit).
-    // A notification tapped: its page (Round 57: Dates too).
+    // A notification tapped: its page (Dates too).
     final target = switch (ref.watch(pendingTargetProvider)) {
       MedicineTarget() => HubTool.medicine,
       DatesTarget() => HubTool.dates,
@@ -49,7 +49,7 @@ class HubPage extends ConsumerWidget {
         _open(context, target);
       });
     }
-    // Pip's home only once he's hatched (Round 35). Moves are by place in
+    // Pip's home only once he's hatched. Moves are by place in
     // the whole order, which holds it either way.
     final all = ref.watch(layoutProvider).hub;
     final hatched = ref.watch(pipLifeProvider.select((p) => p.hatched));
@@ -181,12 +181,12 @@ class _ToolTile extends StatelessWidget {
   /// A red dot in the corner: the page asks for attention (O13).
   final bool dot;
 
-  /// A green one, without a red one (Round 57): something to see (a
+  /// A green one, without a red one: something to see (a
   /// birthday today), gone once it's been seen.
   final bool news;
 
   /// A small lock in the bottom left corner, clear of the icon: the page
-  /// has its own lock (O7; Rounds 24–25).
+  /// has its own lock (O7).
   final bool locked;
   final VoidCallback onTap;
 

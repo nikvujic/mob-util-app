@@ -10,7 +10,7 @@ import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 
-/// Locks for each of the Hub's pages (O7, Round 21).
+/// Locks for each of the Hub's pages (O7).
 void main() {
   const password = 'master password';
 

@@ -8,7 +8,7 @@ import 'package:the_app/providers/reminders_provider.dart';
 
 import '../helpers.dart';
 
-/// Reminders are planned two weeks ahead (E1, Round 23): when they'd run
+/// Reminders are planned two weeks ahead (E1): when they'd run
 /// on past that, a notice asks to open the app before they stop.
 void main() {
   /// Tuesday 13 October 2026, 10:00.

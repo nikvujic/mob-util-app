@@ -71,7 +71,7 @@ class PullDownList extends StatefulWidget {
   }
 
   /// Scrolls the list that [inside] is in back to its normal top,
-  /// smoothly (e.g. a "back to top" button, Round 20).
+  /// smoothly (e.g. a "back to top" button).
   static Future<void> scrollToTop(BuildContext inside) async {
     await inside.findAncestorStateOfType<_PullDownListState>()?._scrollToTop();
   }
@@ -236,11 +236,11 @@ class _PullDownListState extends State<PullDownList> {
                   final rows = constraints.precedingScrollExtent - top;
                   // Room for the buttons, and always for the phone's own
                   // bar (gesture or buttons) on pages that reach under it
-                  // (Round 21: the last row, Security's Hub, sat hidden
+                  // (the last row, Security's Hub, sat hidden
                   // under it).
                   final room =
                       widget.bottomSpace + MediaQuery.paddingOf(context).bottom;
-                  // Rounded up (Round 26): with fractional sizes (e.g. Pip's
+                  // Rounded up: with fractional sizes (e.g. Pip's
                   // room, in whole device pixels, below the menu) the end
                   // could come out a hair short of the normal top, and the
                   // list kept trying to settle back there, every frame.

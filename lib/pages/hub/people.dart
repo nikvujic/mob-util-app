@@ -10,7 +10,7 @@ import 'package:the_app/providers/people_provider.dart';
 import 'package:the_app/widgets/choices_sheet.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
 
-/// People (Round 108, spec `docs/PEOPLE_SPEC.md`): the board on top, and
+/// People (spec `docs/PEOPLE_SPEC.md`): the board on top, and
 /// under it a bar (Find, Tidy, Add) or, with someone selected, their
 /// panel, taking half the screen.
 class PeoplePage extends ConsumerStatefulWidget {
@@ -66,12 +66,12 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
           'placing is lost.',
       confirmLabel: 'Tidy',
     );
-    // Round 109: no toast after; the dialog already asked.
+    // No toast after; the dialog already asked.
     if (!ok || !mounted) return;
     _people.tidy();
   }
 
-  /// The board's options (Round 109): center on the main person, their
+  /// The board's options: center on the main person, their
   /// family highlighted, Tidy.
   Future<void> _options() async {
     final book = ref.read(peopleProvider);
@@ -124,7 +124,7 @@ class _PeoplePageState extends ConsumerState<PeoplePage> {
       appBar: AppBar(title: const Text('People')),
       body: LayoutBuilder(builder: (context, constraints) {
         final open = person != null;
-        // Round 151: and the phone's navigation bar under it, if it's
+        // And the phone's navigation bar under it, if it's
         // drawn over the app (the bar was squashed into 64 with it).
         final under = MediaQuery.paddingOf(context).bottom;
         final panelHeight = (open ? constraints.maxHeight * 0.5 : 64.0) + under;

@@ -161,7 +161,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
       plural: 'notes',
     );
     if (!confirmed || !mounted) return;
-    // A locked note isn't deleted without the master password (Round 21):
+    // A locked note isn't deleted without the master password:
     // the app unlocked, or the password now.
     final anyLocked = ref
         .read(notesProvider)
@@ -213,7 +213,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                     bottomSpace: SelectionActions.listBottomSpace,
                     slivers: [
                       // The Introduction first (N16), then the to-do
-                      // note (Round 28; under it since Round 30), apart
+                      // note (under it), apart
                       // from the notes.
                       if (introduction)
                         SliverPadding(

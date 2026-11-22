@@ -14,7 +14,7 @@ import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
-/// The to-do note (Round 28).
+/// The to-do note.
 void main() {
   late ProviderContainer container;
   final tile = find.byKey(const Key('todoTile'));
@@ -57,8 +57,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('under the Introduction (Round 30), above the notes',
-      (tester) async {
+  testWidgets('under the Introduction, above the notes', (tester) async {
     await start(tester, todo: const [
       TodoItem(id: 't1', text: 'Call the dentist'),
       TodoItem(id: 't2', text: 'Pay rent'),
@@ -97,7 +96,7 @@ void main() {
     expect(find.text('No notes'), findsNothing);
   });
 
-  testWidgets('adding things puts them on top, the newest first (Round 143)',
+  testWidgets('adding things puts them on top, the newest first',
       (tester) async {
     await start(tester);
     await open(tester);
@@ -109,7 +108,7 @@ void main() {
     expect(find.text('Feed the cow'), findsOneWidget);
   });
 
-  testWidgets('tapping one moves it to Completed, and back again (Round 30)',
+  testWidgets('tapping one moves it to Completed, and back again',
       (tester) async {
     await start(tester, todo: const [
       TodoItem(id: 't1', text: 'One'),
@@ -132,8 +131,7 @@ void main() {
     expect(find.text('COMPLETED  ·  1'), findsNothing);
   });
 
-  testWidgets(
-      'Delete all, beside Completed: asked, then gone, no Undo (Round 33)',
+  testWidgets('Delete all, beside Completed: asked, then gone, no Undo',
       (tester) async {
     await start(tester, todo: const [
       TodoItem(id: 't1', text: 'Open'),
@@ -161,8 +159,7 @@ void main() {
     expect(find.byKey(const Key('deleteCompleted')), findsNothing);
   });
 
-  testWidgets('a done one can\'t be changed by holding it (Round 33)',
-      (tester) async {
+  testWidgets('a done one can\'t be changed by holding it', (tester) async {
     await start(tester,
         todo: const [TodoItem(id: 't1', text: 'Done', done: true)]);
     await open(tester);
@@ -171,8 +168,7 @@ void main() {
     expect(find.byType(TextField), findsNothing);
   });
 
-  testWidgets('+ looks like the other pages\' add button (Round 33)',
-      (tester) async {
+  testWidgets('+ looks like the other pages\' add button', (tester) async {
     await start(tester);
     await open(tester);
     final add = tester.widget<FloatingActionButton>(find.ancestor(
@@ -182,8 +178,7 @@ void main() {
     expect(add.backgroundColor, isNull, reason: 'the theme\'s, as Notes');
   });
 
-  testWidgets('its buttons on the side of the hand in use (Round 30)',
-      (tester) async {
+  testWidgets('its buttons on the side of the hand in use', (tester) async {
     await start(tester);
     // Opened with the left hand: the buttons on the left.
     await tester.tapAt(tester.getCenter(tile) - const Offset(300, 0));
@@ -218,11 +213,11 @@ void main() {
   testWidgets('Settings turns it off (its list kept) and on', (tester) async {
     await start(tester, todo: const [TodoItem(id: 't1', text: 'Kept')]);
     await openMenu(tester);
-    // Round 70: below Internet Access, scrolled to on a short screen.
+    // Below Internet Access, scrolled to on a short screen.
     await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
-    // Round 58: under Introduction after updates.
+    // Under Introduction after updates.
     expect(
         tester.getTopLeft(find.byKey(const Key('todoNote'))).dy,
         greaterThan(
@@ -240,7 +235,7 @@ void main() {
     expect(tile, findsNothing);
   });
 
-  group('options (Round 45)', () {
+  group('options', () {
     Future<void> options(WidgetTester tester) async {
       await tester.tap(find.byTooltip('To-do options'));
       await tester.pumpAndSettle();
@@ -391,7 +386,7 @@ void main() {
         expect(find.text('Secret'), findsNothing);
         expect(appBarTitle('To-do'), findsNothing, reason: 'closed, back home');
         expect(find.byKey(const Key('promptPassword')), findsNothing,
-            reason: 'Round 61: no prompt left over the notes');
+            reason: 'no prompt left over the notes');
         expect(tester.widget<Text>(find.byKey(const Key('todoSummary'))).data,
             'Locked');
         expect(find.byKey(const Key('todoCount')), findsNothing);
@@ -399,7 +394,7 @@ void main() {
         await open(tester);
         expect(find.text('To-do is locked'), findsOneWidget);
         expect(find.text('Secret'), findsNothing);
-        // Round 61: it asks at once (the fingerprint first, if set).
+        // It asks at once (the fingerprint first, if set).
         expect(find.byKey(const Key('promptPassword')), findsOneWidget);
         await tester.enterText(
             find.byKey(const Key('promptPassword')), password);

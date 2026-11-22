@@ -108,7 +108,7 @@ List<BlockPiece> blockPieces(
   return pieces;
 }
 
-/// Where each minute of the day goes on a [PlannerTimeline] (Round 10): an
+/// Where each minute of the day goes on a [PlannerTimeline]: an
 /// hour is [PlannerTimeline.hourHeight] tall, but a block too short for a
 /// touch target stretches the timeline where it is (that hour is a
 /// bit taller than the others), so no block is squeezed. It's a picture of
@@ -198,7 +198,7 @@ class PlannerTimeline extends StatelessWidget {
   static const gap = 6.0;
 
   /// The hour labels' column: a small margin from the screen's edge, then
-  /// the time (Round 15: they had sat right on the edge).
+  /// the time (they had sat right on the edge).
   static const _labelWidth = 64.0;
   static const _labelInset = 7.0;
 
@@ -210,13 +210,12 @@ class PlannerTimeline extends StatelessWidget {
   /// Null while selecting.
   final ValueChanged<FreeSlot>? onAdd;
 
-  /// Free time tapped at a point: the slot and the minute tapped (Round
-  /// 14: a new block starts near there). Screen readers, which tap
+  /// Free time tapped at a point: the slot and the minute tapped (a new block starts near there). Screen readers, which tap
   /// without a point, get [onAdd].
   final void Function(FreeSlot slot, int at)? onAddAt;
 
   /// The left edge (by the hour labels) tapped: the minute there, for a
-  /// reminder (Round 14). Null: nothing there.
+  /// reminder. Null: nothing there.
   final ValueChanged<int>? onLeftTap;
 
   /// What adding in free time makes, for screen readers ("a task").
@@ -253,7 +252,7 @@ class PlannerTimeline extends StatelessWidget {
           [for (final b in blocks) (start: b.start, end: b.end)]);
 
   /// The reminders, grouped into marks: each takes the ones after it whose
-  /// icons would overlap it (Round 19: before, any within a touch
+  /// icons would overlap it (before, any within a touch
   /// target's height merged, even ones nearly half an hour apart).
   List<List<TimelinePin>> _pinGroups() {
     final sorted = [...pins]..sort((a, b) => a.time.compareTo(b.time));
@@ -368,7 +367,7 @@ class PlannerTimeline extends StatelessWidget {
               ),
             ),
           // The left edge, by the hour labels: a tap adds a reminder there
-          // (Round 14). Under the marks, so those still open theirs. Screen
+          //. Under the marks, so those still open theirs. Screen
           // readers have the bell button instead.
           if (onLeftTap != null)
             Positioned(
@@ -515,7 +514,7 @@ class _FreeTime extends StatelessWidget {
       button: true,
       label: 'Free time, $range. Add $adds',
       // Its own tap for screen readers: the tap below is left out with the
-      // rest of what's inside (it wasn't reachable before, Round 14).
+      // rest of what's inside (it wasn't reachable before).
       onTap: onTap,
       excludeSemantics: true,
       child: Padding(
@@ -694,7 +693,7 @@ class _Block extends StatelessWidget {
                             12, 4, hasCheckbox ? 48 : 12, 4),
                         child: compact
                             // The time beside the title leaves a line
-                            // below for the description (Round 12).
+                            // below for the description.
                             ? _TopThenRest(
                                 top: Row(
                                   children: [
@@ -769,7 +768,7 @@ class _PinMark extends StatelessWidget {
   /// Its touch target.
   static const size = 48.0;
 
-  /// The bell, and the count circle (Round 19: a bit bigger).
+  /// The bell, and the count circle (a bit bigger).
   static const icon = 20.0;
   static const circle = 22.0;
 

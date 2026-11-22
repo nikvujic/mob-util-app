@@ -3,7 +3,7 @@ import 'package:the_app/data/reminder_scheduler.dart';
 
 import '../helpers.dart';
 
-/// Round 61: shown notifications stay in the tray until their page is
+/// Shown notifications stay in the tray until their page is
 /// opened (not just the app).
 void main() {
   testWidgets(
@@ -28,7 +28,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(scheduler.cleared.last, ReminderKind.dates);
     await pressBack(tester);
-    // Round 79.
     await tester.tap(find.byTooltip('Subscriptions'));
     await tester.pumpAndSettle();
     expect(scheduler.cleared.last, ReminderKind.subscriptions);
@@ -38,8 +37,8 @@ void main() {
     await tester.tap(find.text('Backup'));
     await tester.pumpAndSettle();
     expect(scheduler.cleared.last, ReminderKind.backup);
-    // All but the planner's notification that stays while a block is on
-    // (Round 72): it goes when the block ends or is ticked.
+    // All but the planner's notification that stays while a block is on:
+    // it goes when the block ends or is ticked.
     expect(scheduler.cleared.toSet(),
         ReminderKind.values.toSet()..remove(ReminderKind.plannerNow));
   });

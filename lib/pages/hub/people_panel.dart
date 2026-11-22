@@ -74,14 +74,14 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
   /// The note as shown (Markdown, read only); written on its own page.
   late final _noteView = MarkdownEditingController(text: widget.person.note);
 
-  /// As it all was when Edit was pressed (Round 109): Discard goes back.
+  /// As it all was when Edit was pressed: Discard goes back.
   PeopleBook? _bookBefore;
   DateBook? _datesBefore;
 
   /// Something changed since Edit was pressed.
   bool _dirty = false;
 
-  /// The header's downward swipe so far (Round 109: down closes).
+  /// The header's downward swipe so far (down closes).
   double _swipe = 0;
 
   PeopleNotifier get _people => ref.read(peopleProvider.notifier);
@@ -144,7 +144,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
         _snapshot();
       });
 
-  /// Done: the changes kept, nothing asked (Round 109).
+  /// Done: the changes kept, nothing asked.
   void _done() {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!_kept) {
@@ -182,7 +182,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     });
   }
 
-  /// Back while editing (Round 109), as on other pages: unchanged, out
+  /// Back while editing, as on other pages: unchanged, out
   /// of editing; changed, Save or Discard; a tap outside stays.
   Future<void> _back() async {
     // Out of the name field first.
@@ -218,7 +218,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
       destructive: true,
     );
     if (!ok || !mounted) return;
-    // Round 109: asked already, so no Undo toast after.
+    // Asked already, so no Undo toast after.
     final people = _people;
     widget.onClose();
     people.remove(_draft.id);
@@ -242,7 +242,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     ));
   }
 
-  /// Round 109: asked first; with it goes their date in Dates, and its
+  /// Asked first; with it goes their date in Dates, and its
   /// reminders and note.
   Future<void> _clearBirthday() async {
     final ok = await showConfirmDialog(
@@ -258,7 +258,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     _change(_draft.copyWith(birthday: () => null));
   }
 
-  /// Round 113: off, the birthday leaves Dates (asked first: its
+  /// Off, the birthday leaves Dates (asked first: its
   /// reminders and note there go with it); on, it's shown there again.
   Future<void> _setInDates(bool on) async {
     if (!on && _draft.dateId != null) {
@@ -275,7 +275,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     _change(_draft.copyWith(inDates: on));
   }
 
-  /// Spec 6, Round 113: a birthday on the Dates page, its day copied (the
+  /// Spec 6, a birthday on the Dates page, its day copied (the
   /// original stays there).
   Future<void> _birthdayFromDates() async {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -286,7 +286,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     }
     final picked = await showModalBottomSheet<String>(
       context: context,
-      // Round 109: a long list scrolls.
+      // A long list scrolls.
       isScrollControlled: true,
       builder: (context) => SafeArea(
         child: ConstrainedBox(
@@ -399,7 +399,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
       return;
     }
     setState(() => _dirty = true);
-    // Round 114: what followed from it, said.
+    // What followed from it, said.
     final also = [
       for (final id in _people.lastAlso)
         ref.read(peopleProvider).byId(id)?.name ?? '',
@@ -483,7 +483,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
       },
       child: Column(
         children: [
-          // Round 109: swiped down (viewing), the panel closes.
+          // Swiped down (viewing), the panel closes.
           GestureDetector(
             key: const Key('personHeader'),
             behavior: HitTestBehavior.opaque,
@@ -570,7 +570,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                 onTap: () => widget.onSelect(other.id),
               ),
         ],
-        // Round 109: the note last, as Markdown; written on its own page.
+        // The note last, as Markdown; written on its own page.
         if (!hideNotes && _kept) ...[
           Row(
             children: [
@@ -624,7 +624,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
     final b = p.birthday;
     final kept = book.byId(p.id) != null;
     final freeBirthdays = _people.freeBirthdays();
-    // Round 109: every row's text in one column, behind an icon.
+    // Every row's text in one column, behind an icon.
     const pad = EdgeInsets.zero;
     return ListView(
       key: const Key('personForm'),
@@ -699,7 +699,7 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
                     birthday: () => PersonDate(day: b.day, month: b.month),
                   )),
           ),
-        // Round 113: their birthday shown in Dates (its overview and
+        // Their birthday shown in Dates (its overview and
         // reminders), or kept to People.
         if (b != null)
           SwitchListTile(

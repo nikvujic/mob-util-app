@@ -16,15 +16,15 @@ import 'package:the_app/core/weather.dart';
 import 'package:the_app/widgets/pip_quest_paint.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Pip's room (Round 26): a strip of field at the bottom of the menu where
+/// Pip's room: a strip of field at the bottom of the menu where
 /// Pip stands about and walks, moved by [brain]. Drawn in pixels (each a
 /// whole number of the screen's), crisp at any size. With [animate] off
 /// (tests, or the phone's "remove animations") he just stands there.
 ///
-/// Before he's hatched (Round 34) it holds his egg: each tap cracks it a
+/// Before he's hatched it holds his egg: each tap cracks it a
 /// little more, with a buzz; the last one pops him out ([onHatched]).
 ///
-/// Round 37: with a [link] to his life, he shows as it says (asleep,
+/// With a [link] to his life, he shows as it says (asleep,
 /// off, falling asleep...), checked every second; his face and pace
 /// follow his energy; a tap drops a battery for him, if he can have one.
 class PipRoom extends StatefulWidget {
@@ -37,7 +37,7 @@ class PipRoom extends StatefulWidget {
   /// The tap that hatched him: that moment is his birthday.
   final VoidCallback? onHatched;
 
-  /// What's in his sky (Round 35), worked out for this place and moment;
+  /// What's in his sky, worked out for this place and moment;
   /// null: no sky (the page's own colour behind him).
   final PipScene? scene;
 
@@ -57,7 +57,7 @@ class PipRoom extends StatefulWidget {
     this.entrances = const {PipEntrance.ground},
   });
 
-  /// How he may come in (Round 52): the menu has all three (thrown in by
+  /// How he may come in: the menu has all three (thrown in by
   /// its swing only there), Pip Home the ground and the sky. One at
   /// random, the first time he's seen and back after a while
   /// ([PipBrain.awayFor]); not without animations (he's simply there).
@@ -68,7 +68,7 @@ class PipRoom extends StatefulWidget {
   final double pixel;
   static const smallPixel = 2.5;
 
-  /// The menu room's height, in Pip's pixels (Round 36: twice the first
+  /// The menu room's height, in Pip's pixels (twice the first
   /// one's 32): Pip (19), a hop, the ground (5) and his sky.
   static const rows = 64;
 
@@ -89,7 +89,7 @@ class _PipRoomState extends State<PipRoom>
     WidgetsBinding.instance.addObserver(this);
   }
 
-  /// Round 152: the app put away and brought back is his room opened
+  /// The app put away and brought back is his room opened
   /// again: what happened meanwhile is simply so (out on his adventure,
   /// the rain), not played out as if watched (it went on as watched:
   /// opened at 12:38 he set off, his umbrella up and down, his trees
@@ -112,7 +112,7 @@ class _PipRoomState extends State<PipRoom>
   void _tick(Duration elapsed) {
     final dt = (elapsed - _last).inMicroseconds / 1e6;
     _last = elapsed;
-    // His life checked every second (Round 37).
+    // His life checked every second.
     _sinceCheck += dt;
     if (_sinceCheck >= 1) {
       _sinceCheck = 0;
@@ -121,13 +121,13 @@ class _PipRoomState extends State<PipRoom>
     // A long pause (e.g. the app away) doesn't jump him across the room.
     setState(() => widget.brain.step(dt.clamp(0, 0.1)));
     _charge(dt.clamp(0, 0.1));
-    // Round 73: bugs struck down, watched: his XP shown collects what
+    // Bugs struck down, watched: his XP shown collects what
     // he's gained (a boss brings more), rising over where it was.
     for (final foe in widget.brain.takeDefeats()) {
       final xp = widget.link?.defeated(boss: foe == PipFoe.boss) ?? 0;
       if (xp > 0) widget.brain.showXp(xp);
     }
-    // Round 53: a buzz where something hits (a landing, a strike, a kick).
+    // A buzz where something hits (a landing, a strike, a kick).
     for (final buzz in widget.brain.takeBuzzes()) {
       switch (buzz) {
         case PipBuzz.light:
@@ -145,7 +145,7 @@ class _PipRoomState extends State<PipRoom>
   /// Seconds at his station, watched, since the last segment it gave.
   double _charging = 0;
 
-  /// Round 58: his station's charge reaches his life: a segment every
+  /// His station's charge reaches his life: a segment every
   /// [PipBrain.chargeEvery] he's at it while watched, and the drone's
   /// when he was off. His icon shows it at once.
   void _charge(double dt) {
@@ -165,7 +165,7 @@ class _PipRoomState extends State<PipRoom>
     if (brain.takeDroneCharge()) charged = link.chargeTick() || charged;
     if (charged) {
       brain.segments = link.look().$2;
-      // Round 98: a buzz for each segment he gains, watched.
+      // A buzz for each segment he gains, watched.
       HapticFeedback.lightImpact();
     }
   }
@@ -176,7 +176,7 @@ class _PipRoomState extends State<PipRoom>
   /// When his life was last looked at (notifications since then).
   DateTime? _lastLook;
 
-  /// Round 152: till when the weather's simply learned, after a first
+  /// Till when the weather's simply learned, after a first
   /// look (opened, or the app brought back).
   DateTime? _freshUntil;
   static const _learnWeatherFor = Duration(seconds: 10);
@@ -189,19 +189,19 @@ class _PipRoomState extends State<PipRoom>
   /// What was last made so from his life; null: nothing yet.
   PipShow? _shown;
 
-  /// Round 139: he's been looked at in this room (Round 141: a check
+  /// He's been looked at in this room (a check
   /// done, moving): what happens now is seen. Not undone when [_shown] is cleared to look
   /// again (a battery given, him woken): those he's watched through, and
   /// what follows (back at his work) he walks to, not a cut.
   bool _lookedAt = false;
 
-  /// His adventure level when last looked at (Round 63).
+  /// His adventure level when last looked at.
   int? _level;
 
   /// Whether the phone's plugged in was known at an earlier look.
   bool _pluggedKnown = false;
 
-  /// Round 77: the taps on him asleep so far, close together.
+  /// The taps on him asleep so far, close together.
   final _wakeTaps = <DateTime>[];
 
   /// Asks his life what to show and makes it so (once a change, not over
@@ -218,32 +218,32 @@ class _PipRoomState extends State<PipRoom>
     }
     final (show, segments) = link.look();
     brain.segments = segments;
-    // Round 77: woken at night, drowsy.
+    // Woken at night, drowsy.
     brain.drowsy = link.drowsy;
     final now = link.now;
-    // Round 129: opened again on him left in the middle of something (a
+    // Opened again on him left in the middle of something (a
     // battery being changed): that's done by now, not picked up where it
     // was left (he'd finish it, then snap to his quest's work).
     final left = brain.leftAt;
     if (_lastLook == null) _freshUntil = now.add(_learnWeatherFor);
     if (_lastLook == null && left != null) {
-      // Round 132: out, a while since: his run taken up afresh.
+      // Out, a while since: his run taken up afresh.
       if (now.difference(left) >= PipBrain.outStale) brain.freshOut();
-      // Round 134: a walk between his places done by now.
+      // A walk between his places done by now.
       brain.freshScenes();
       _finish();
       brain.takeBuzzes();
     }
-    // Round 63: out on his adventure (looked at: his break may start).
+    // Out on his adventure (looked at: his break may start).
     final out = link.outing();
-    // Round 67: his ski trip: snow, skiing for his day out.
+    // His ski trip: snow, skiing for his day out.
     final trip = link.trip();
-    // Round 127: at his quest's work in quest hours (not while he's out, or
+    // At his quest's work in quest hours (not while he's out, or
     // on his trip's bus).
     final questNow = out == null && trip.leg == null ? link.questNow() : null;
-    // Round 53: a medicine due, he reminds (known before he's caught up).
+    // A medicine due, he reminds (known before he's caught up).
     brain.medicineDue = link.medicineDue;
-    // Round 44: plugged in or out; seen happening only once he's been
+    // Plugged in or out; seen happening only once he's been
     // looked at (opened while charging, he's simply there, charging).
     final seen = _lookedAt && _moving;
     // Where his life has him (his house, plugged in, on the bus, out, at
@@ -254,45 +254,45 @@ class _PipRoomState extends State<PipRoom>
         questNow == null &&
         link.homeNow();
     void place({required bool animate}) {
-      // Round 128: his house built, he lives in it (but for his field's
+      // His house built, he lives in it (but for his field's
       // times, and while he's out, away on his trip, or at work).
-      // Round 134: seen, he walks out of one into the other.
+      // Seen, he walks out of one into the other.
       brain.home(home, animate: animate);
-      // Round 63: out, he doesn't charge (at 12:00 he unplugs and goes).
-      // Round 64: not till Android has said (the first time, simply so).
+      // Out, he doesn't charge (at 12:00 he unplugs and goes).
+      // Not till Android has said (the first time, simply so).
       if (link.plugged case final plugged?) {
-        // Round 127: nor at his quest's work (he's moving between places).
+        // Nor at his quest's work (he's moving between places).
         brain.setPlugged(
             plugged &&
                 out == null &&
                 trip.leg == null &&
                 questNow == null &&
-                // Round 134: nor lying where he ran out at it (or about to:
+                // Nor lying where he ran out at it (or about to:
                 // his work's over this check).
                 !brain.downAtWork &&
                 brain.activity != PipActivity.questing,
             animate: animate && _pluggedKnown);
         _pluggedKnown = true;
       }
-      // Round 67: on his ski trip's bus.
+      // On his ski trip's bus.
       brain.ride(trip, animate: animate);
       brain.adventure(out, animate: animate);
-      // Round 127: simply there, at the step and moment it's at (Round 133:
-      // seen setting off, he walks off his field to it first).
-      // Round 134: run out at it, he falls there; his work over, seen, he
+      // Simply there, at the step and moment it's at (seen
+      // setting off, he walks off his field to it first).
+      // Run out at it, he falls there; his work over, seen, he
       // walks back onto his field.
-      // Round 136: his work over and home next, he comes in at his door.
+      // His work over and home next, he comes in at his door.
       brain.quest(questNow,
           animate: animate,
           down: show == PipShow.powerOff || show == PipShow.off,
           toHome: home);
-      // Round 74: his field's trees go by with his time out, alike here and
+      // His field's trees go by with his time out, alike here and
       // in the other room.
       brain.syncOutRun(out == null ? null : link.outRun(),
           paused: out?.onBreak ?? false);
     }
 
-    // Round 155: a first look (opened, or the app brought back): he's
+    // A first look (opened, or the app brought back): he's
     // caught up before anything's shown: as his life says (awake or
     // asleep, off), whatever that took done (woken, fallen asleep, run
     // out), then where it has him (out, at his work, home). Before, each
@@ -309,8 +309,8 @@ class _PipRoomState extends State<PipRoom>
       place(animate: false);
       _finish();
     }
-    // Round 52: his way in, the first time or back after a while (not
-    // while he's out: he's simply there, running; Round 130: nor at his
+    // His way in, the first time or back after a while (not
+    // while he's out: he's simply there, running; nor at his
     // quest's work, simply there working).
     if (out != null || questNow != null) _entered = true;
     if (_moving && show == PipShow.awake && !_entered) {
@@ -325,10 +325,10 @@ class _PipRoomState extends State<PipRoom>
     final since = _lastLook;
     if (since != null && link.notifiedBetween(since, now)) brain.notify();
     _lastLook = now;
-    // Round 53: a recipe read within the hour, he eats (once for it).
-    // Round 57: a birthday, the party hat.
+    // A recipe read within the hour, he eats (once for it).
+    // A birthday, the party hat.
     brain.birthday = link.partyHat;
-    // Round 61: otherwise today's (a day of the year's, or a random one).
+    // Otherwise today's (a day of the year's, or a random one).
     brain.dayHat = link.hatToday;
     brain.snowy = trip.snowy;
     brain.skiing = trip.skiing;
@@ -342,7 +342,7 @@ class _PipRoomState extends State<PipRoom>
       brain.ateFor = read;
     }
     place(animate: seen);
-    // Round 73: watched fighting, his XP shown goes up only as he strikes
+    // Watched fighting, his XP shown goes up only as he strikes
     // bugs; a boss may come if none was beaten today.
     brain.bossDue = link.bossDue;
     link.fighting(_moving && brain.fighting);
@@ -358,7 +358,7 @@ class _PipRoomState extends State<PipRoom>
       _lookedAt = true;
       link.shown(show);
     }
-    // Round 141: after this first look (things simply as they are), what
+    // After this first look (things simply as they are), what
     // happens is watched, even if his first show had to wait (him busy
     // with his entrance).
     if (_moving) _lookedAt = true;
@@ -408,7 +408,7 @@ class _PipRoomState extends State<PipRoom>
   void _finish() {
     final brain = widget.brain;
     for (var i = 0; i < 6; i++) {
-      // Round 55: his medicine reminder has no end: the pill just shows.
+      // His medicine reminder has no end: the pill just shows.
       if (brain.reminding) return;
       switch (brain.activity) {
         case PipActivity.spawning:
@@ -426,7 +426,7 @@ class _PipRoomState extends State<PipRoom>
         case PipActivity.poweringOn:
           brain.step(PipBrain.onEnd);
         case PipActivity.adventuring:
-          // Round 63: out, whatever he's in the middle of done: simply
+          // Out, whatever he's in the middle of done: simply
           // running (or at the table).
           final run = brain.run!;
           for (var s = 0;
@@ -443,7 +443,7 @@ class _PipRoomState extends State<PipRoom>
               PipActivity.toStation ||
               PipActivity.plugging ||
               PipActivity.unplugging ||
-              // Round 52: an entrance or an event, run to its end.
+              // An entrance or an event, run to its end.
               PipActivity.falling ||
               PipActivity.thrown ||
               PipActivity.angry ||
@@ -462,7 +462,7 @@ class _PipRoomState extends State<PipRoom>
           }
           brain.takeBuzzes(); // run past unseen: no buzzes for it
         default:
-          // The station up or gone at once (Round 44), and whatever he
+          // The station up or gone at once, and whatever he
           // then does (off to plug in) done too.
           if (!brain.stationMoving) return;
           brain.step(PipBrain.stationRise);
@@ -470,7 +470,7 @@ class _PipRoomState extends State<PipRoom>
     }
   }
 
-  /// A tap in his room (Round 37): a battery for him, dropped there, if
+  /// A tap in his room: a battery for him, dropped there, if
   /// he can have one now; a light buzz if not.
   void _tapRoom(double atPixel) {
     final link = widget.link;
@@ -491,7 +491,7 @@ class _PipRoomState extends State<PipRoom>
     }
   }
 
-  /// A tap on him asleep (Round 77): the third close together wakes him,
+  /// A tap on him asleep: the third close together wakes him,
   /// if his life lets it (at night once, for a while; from 07:00 for the
   /// day): one eye opens first. A light buzz a tap.
   void _tapAsleep(PipLink link) {
@@ -537,7 +537,7 @@ class _PipRoomState extends State<PipRoom>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    // Round 52: when he was left, for coming back in after a while.
+    // When he was left, for coming back in after a while.
     final link = widget.link;
     if (link != null) widget.brain.leftAt = link.now;
     _ticker.dispose();
@@ -579,7 +579,7 @@ class _PipRoomState extends State<PipRoom>
             widget.brain.dark =
                 scene?.part == DayPart.night || scene?.part == DayPart.dusk;
             widget.brain.overcast = scene?.grey ?? false;
-            // Round 75: the weather, for what he does in it. Round 152:
+            // The weather, for what he does in it;
             // before his room's first look, or just after (it's fetched
             // once the app's open), simply known (it may have changed
             // while he wasn't watched: not noticed, no umbrella going up
@@ -647,7 +647,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// Round 70: [rows] drawn in [colours], top left at [left], [top].
+    /// [rows] drawn in [colours], top left at [left], [top].
     void pixels(List<String> rows, double left, double top,
         Map<String, Color> colours) {
       for (var y = 0; y < rows.length; y++) {
@@ -658,9 +658,9 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// The moon in [phase] (Round 38): pale grey with darker seas, only
+    /// The moon in [phase]: pale grey with darker seas, only
     /// its lit part drawn: a thin sliver, half, or all of it; growing,
-    /// lit on the right. Round 52: seas in two greys and a few craters,
+    /// lit on the right. Seas in two greys and a few craters,
     /// placed by its size.
     void moon(int cx, int cy, int r, MoonPhase phase) {
       final seas = <(int, int)>{};
@@ -706,7 +706,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// A pixel cloud (Round 52: three shapes, lit on top and shaded
+    /// A pixel cloud (three shapes, lit on top and shaded
     /// underneath; warm at dawn and dusk), its top left at [x], [y].
     void cloud(double x, double y, int shape, DayPart part,
         {bool grey = false}) {
@@ -730,7 +730,7 @@ class _RoomPainter extends CustomPainter {
       ];
       final warm = part == DayPart.dawn || part == DayPart.dusk;
       final night = part == DayPart.night;
-      // Round 70: grey under a grey sky, dark ones at night.
+      // Grey under a grey sky, dark ones at night.
       final colours = grey
           ? {
               'l': night
@@ -755,13 +755,13 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    // Round 128: at home, what's his (his station, a battery, his words)
+    // At home, what's his (his station, a battery, his words)
     // stands on his house's floor: [groundTop] is moved up to it for them.
     var groundTop = (height - PipRoom.ground).toDouble();
     final fieldTop = groundTop;
 
-    // His sky (Round 35): bands of colour from top to bottom (stepped,
-    // pixel style), then what's in it now. Round 52: through more hues
+    // His sky: bands of colour from top to bottom (stepped,
+    // pixel style), then what's in it now. Through more hues
     // (the scene's stops), more and thinner bands, each edge dithered.
     if (scene case final scene? when scene.skyStops != null) {
       final stops = scene.skyStops!;
@@ -787,7 +787,7 @@ class _RoomPainter extends CustomPainter {
       }
       // A tall sky gets the bigger sun and moon.
       final home = groundTop > 40;
-      // The sun's or moon's place: high on the right (Round 52: the sun
+      // The sun's or moon's place: high on the right (the sun
       // low and orange at dawn).
       final bodyX = columns - (home ? 16 : 10);
       final dawn = scene.part == DayPart.dawn;
@@ -799,8 +799,8 @@ class _RoomPainter extends CustomPainter {
       for (final prop in scene.props) {
         switch (prop) {
           case PipProp.stars:
-            // The same stars every time (Round 38: fewer, most of them
-            // dim, a few bright with a twinkle; Round 52: some warm,
+            // The same stars every time (fewer, most of them
+            // dim, a few bright with a twinkle; some warm,
             // some cool), in the upper sky and clear of the moon.
             final top = (groundTop * 0.7).floor();
             for (var i = 0; i < columns * top ~/ 130; i++) {
@@ -826,10 +826,10 @@ class _RoomPainter extends CustomPainter {
               }
             }
           case PipProp.moon:
-            // Round 61: no halo (it read as a dark ring round it).
+            // No halo (it read as a dark ring round it).
             moon(bodyX, bodyY, bodyR, scene.moon);
           case PipProp.sun:
-            // A round sun with rays (Round 38: unlike the moon); Round 52:
+            // A round sun with rays (unlike the moon):
             // a glow round it, long and short rays, a bright core.
             final face = dawn ? PipColours.sunLow : PipColours.sun;
             disc(bodyX, bodyY, bodyR + 2, Color.lerp(behind, face, 0.35)!);
@@ -863,7 +863,7 @@ class _RoomPainter extends CustomPainter {
                       (0.2, 0.5),
                     ]
                   : const [(0.15, 0.25), (0.55, 0.12), (0.8, 0.35)],
-              // Round 70: more under a grey sky, or a few more clouds.
+              // More under a grey sky, or a few more clouds.
               if (scene.grey || scene.weather == WeatherKind.partlyCloudy)
                 ...home
                     ? const [
@@ -876,7 +876,7 @@ class _RoomPainter extends CustomPainter {
                       ]
                     : const [(0.0, 0.05), (0.35, 0.3), (0.68, 0.02)],
             ];
-            // Round 63: out, they drift slowly back as he runs; Round 70:
+            // Out, they drift slowly back as he runs,
             // and drift by anyway, slowly.
             final drift =
                 (brain.run?.shift ?? 0) * 0.12 + brain.sceneClock * 0.4;
@@ -888,7 +888,7 @@ class _RoomPainter extends CustomPainter {
                   grey: scene.grey);
             }
           case PipProp.bats:
-            // Round 70: Halloween's bats, flapping across.
+            // Halloween's bats, flapping across.
             final t = brain.sceneClock;
             for (var i = 0; i < (home ? 3 : 2); i++) {
               final wide = columns + 14;
@@ -904,7 +904,7 @@ class _RoomPainter extends CustomPainter {
                   const {'b': PipColours.bat});
             }
           case PipProp.fireworks:
-            // Round 70: New Year's Eve: rockets up, bursts, fading.
+            // New Year's Eve: rockets up, bursts, fading.
             final t = brain.sceneClock;
             const colours = [
               PipColours.lightRed,
@@ -938,7 +938,7 @@ class _RoomPainter extends CustomPainter {
               }
             }
           case PipProp.lightning:
-            // Round 70: a storm's bolt now and then (the flash is drawn
+            // A storm's bolt now and then (the flash is drawn
             // over everything, at the end).
             final phase = brain.sceneClock % _stormEvery;
             if (phase < _flashTime) {
@@ -950,7 +950,7 @@ class _RoomPainter extends CustomPainter {
               }
             }
           default:
-            // Round 70: the field's things are drawn on the ground, the
+            // The field's things are drawn on the ground, the
             // weather over everything.
             break;
         }
@@ -977,17 +977,17 @@ class _RoomPainter extends CustomPainter {
     }
 
     // The ground: a row of grass with lighter tufts, dirt with specks.
-    // Round 63: out on his adventure, it moves under him (and a pebble
+    // Out on his adventure, it moves under him (and a pebble
     // now and then shows it).
     final run = brain.run;
-    // Round 127: walking out to gather or home, the ground moves too.
-    // Round 128: at home, his house's the same.
+    // Walking out to gather or home, the ground moves too.
+    // At home, his house's the same.
     final questView = brain.questView ?? brain.homeView;
     final questPlace = questView?.place;
     final atPlace = questPlace != null && questPlace != QuestScenePlace.field;
     final shift = run?.shift.floor() ??
         (questPlace == QuestScenePlace.field ? questView!.scroll.floor() : 0);
-    // Round 67: a ski day's snow instead of grass; Round 70: or while it
+    // A ski day's snow instead of grass; or while it
     // snows. The grass in its season's colours.
     final skiSnow = brain.snowing;
     final snowy = skiSnow || (scene?.snowyGround ?? false);
@@ -997,7 +997,7 @@ class _RoomPainter extends CustomPainter {
       Season.winter => (PipColours.grassWinter, PipColours.frost),
       _ => (PipColours.grass, PipColours.grassLight),
     };
-    // Round 72: skiing down, the room is the slope (below).
+    // Skiing down, the room is the slope (below).
     final downhill = run?.downhill ?? false;
     // Pines along the back on a ski day.
     if (skiSnow && !downhill) {
@@ -1008,7 +1008,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// [rows] at [scale] (Round 72: smaller further away), its bottom
+    /// [rows] at [scale] (smaller further away), its bottom
     /// middle at [x], [bottom].
     void scaled(List<String> rows, double x, double bottom, double scale,
         Map<String, Color> colours) {
@@ -1029,7 +1029,7 @@ class _RoomPainter extends CustomPainter {
       canvas.restore();
     }
 
-    // Round 72 (he should ski *down*): seen from below, the slope
+    // Seen from below, the slope
     // runs up to a horizon with mountains; what he passes comes up from
     // the bottom of the screen and shrinks away to it, his tracks too.
     if (downhill) {
@@ -1113,7 +1113,7 @@ class _RoomPainter extends CustomPainter {
             PipSprites.snowColours);
       }
     }
-    // Round 67: on the bus, a road moving under it, posts going by.
+    // On the bus, a road moving under it, posts going by.
     final bus = brain.bus;
     final road = bus?.road.floor() ?? 0;
     if (bus != null) {
@@ -1125,14 +1125,14 @@ class _RoomPainter extends CustomPainter {
         dot(px - 1.0, groundTop - 9, PipColours.flagRed, 3, 1);
       }
     }
-    // Round 147: up on his house (its roof, the scaffold), the house area
+    // Up on his house (its roof, the scaffold), the house area
     // slides down to keep him in view (a short room, the menu's, had
     // him and the roof off its top).
     if (questPlace == QuestScenePlace.house) {
       final over = brain.lift + PipBrain.height + 8 - groundTop;
       if (over > 0) groundTop += over.ceilToDouble();
     }
-    // Round 127: the mine and the beach have their own ground.
+    // The mine and the beach have their own ground.
     final ownGround = questPlace == QuestScenePlace.mine ||
         questPlace == QuestScenePlace.beach;
     for (var x = 0; x < columns && !downhill && !ownGround; x++) {
@@ -1151,7 +1151,7 @@ class _RoomPainter extends CustomPainter {
       if (h < 3) {
         dot(x.toDouble(), groundTop - 1, snowy ? PipColours.snow : grassLight);
       }
-      // Round 70: autumn's fallen leaves on the grass.
+      // Autumn's fallen leaves on the grass.
       if (!snowy && season == Season.autumn && (gx * 131) % 17 == 0) {
         dot(x.toDouble(), groundTop,
             gx.isEven ? PipColours.leafAutumnDark : PipColours.leafAutumnLight);
@@ -1170,10 +1170,10 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    // Round 70: his field's things through the year, behind him: a tree
+    // His field's things through the year, behind him: a tree
     // or two swaying (scrolling by as he runs, or rides), Christmas's
     // pine, Halloween's lanterns, Easter's eggs.
-    // Round 127: at his quest's work in his house area or a place he
+    // At his quest's work in his house area or a place he
     // gathers in: it's drawn instead of his field's things (its sky stays).
     if (atPlace) {
       canvas.save();
@@ -1190,13 +1190,13 @@ class _RoomPainter extends CustomPainter {
     }
 
     if (!skiSnow && !atPlace) {
-      // Round 79: by the wind (it was the rain): still when calm.
+      // By the wind (it was the rain): still when calm.
       final wind = scene?.wind ?? PipWind.calm;
       if (props.contains(PipProp.trees)) {
-        // Round 74: each spot's tree its own look (an oak, a birch, a pine;
-        // Round 75: by the season).
+        // Each spot's tree its own look (an oak, a birch, a pine;
+        // By the season).
         final shade = season ?? Season.summer;
-        // Round 72: in their spots for this time the app's open, in full
+        // In their spots for this time the app's open, in full
         // view; beside the road (not on it) while he rides the bus.
         final base = bus != null ? groundTop - 1 : groundTop;
         for (final (i, spot) in _treeSpots.indexed) {
@@ -1257,7 +1257,7 @@ class _RoomPainter extends CustomPainter {
         }
       }
       if (props.contains(PipProp.badnjak)) {
-        // Round 72: Christmas: the badnjak, a candle by it (its flame
+        // Christmas: the badnjak, a candle by it (its flame
         // flickering), straw scattered on the grass.
         final left = along(0.74, 20, passing).floorToDouble();
         sprite(PipSprites.badnjak, left, groundTop + 1,
@@ -1310,8 +1310,8 @@ class _RoomPainter extends CustomPainter {
     }
 
     /// His sword, its grip's middle at [hand] (screen), turned by [angle]
-    /// (0: pointing up) and scaled by [size]. Round 141: at the mine,
-    /// his pickaxe; Round 146: in the forest, his axe.
+    /// (0: pointing up) and scaled by [size]. At the mine,
+    /// his pickaxe; in the forest, his axe.
     void blade(Offset hand, double angle, double size) {
       canvas.save();
       canvas.translate(hand.dx, hand.dy);
@@ -1319,11 +1319,11 @@ class _RoomPainter extends CustomPainter {
       canvas.scale(size);
       final art = switch (brain.questView?.place) {
         QuestScenePlace.mine => PipSprites.pickaxe,
-        // Round 146: an axe in the forest; Round 147: a shovel at the
+        // An axe in the forest; a shovel at the
         // beach.
         QuestScenePlace.forest => PipSprites.axe,
         QuestScenePlace.beach => PipSprites.shovel,
-        // Round 149: building, a hammer.
+        // Building, a hammer.
         QuestScenePlace.house => PipSprites.hammer,
         _ => PipSprites.sword,
       };
@@ -1347,7 +1347,7 @@ class _RoomPainter extends CustomPainter {
       final left = bus.busX.floorToDouble();
       final top = groundTop - PipBus.height;
       sprite(PipSprites.bus, left, groundTop, colours: PipSprites.busColours);
-      // Round 72: his window's glass over him (he's behind it).
+      // His window's glass over him (he's behind it).
       const w = PipBus.window;
       dot(
           left + w.left,
@@ -1363,7 +1363,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// Round 72: inside the bus behind his window: the seats' row and a
+    /// Inside the bus behind his window: the seats' row and a
     /// seat back, drawn before him.
     void busInside(PipBus bus) {
       final left = bus.busX.floorToDouble();
@@ -1376,7 +1376,7 @@ class _RoomPainter extends CustomPainter {
     }
 
     /// A filled disc of [colour], its middle at [cx], [cy], [r] across
-    /// (Round 75: any size, anywhere).
+    /// (any size, anywhere).
     void ball(double cx, double cy, double r, Color colour) {
       for (var dy = -r.ceil(); dy <= r.ceil(); dy++) {
         for (var dx = -r.ceil(); dx <= r.ceil(); dx++) {
@@ -1387,7 +1387,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// Round 75: his snowman, as far as it's built (a base, a body, a
+    /// His snowman, as far as it's built (a base, a body, a
     /// head, coal eyes, a carrot nose, stick arms), shrinking as it melts.
     void drawSnowman(PipSnowman man) {
       final b = man.built;
@@ -1427,7 +1427,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    /// Round 75: a snowball flying out at you, then splatted on the glass,
+    /// A snowball flying out at you, then splatted on the glass,
     /// sliding a little, fading.
     void drawSplat(PipSplat splat) {
       if (splat.flying) {
@@ -1458,7 +1458,7 @@ class _RoomPainter extends CustomPainter {
           PipColours.snowShade.withValues(alpha: alpha), 2, 1);
     }
 
-    /// Round 75: the weather's things with him, in front: his umbrella,
+    /// The weather's things with him, in front: his umbrella,
     /// his tent (him in it, peeking), his hand out (a drop on it), a
     /// snowball in his hand, flakes to his tongue, a question mark.
     void drawWeatherWithHim(double centre, double bottom) {
@@ -1550,7 +1550,7 @@ class _RoomPainter extends CustomPainter {
     final eggLeft =
         brain.eggX + (PipBrain.width - PipSprites.egg[0].length) / 2;
 
-    // Not hatched yet (Round 34): his egg, cracked as far as tapped.
+    // Not hatched yet: his egg, cracked as far as tapped.
     if (brain.activity == PipActivity.egg) {
       sprite(PipSprites.crackedEgg(brain.crack), eggLeft, groundTop);
       return;
@@ -1579,11 +1579,11 @@ class _RoomPainter extends CustomPainter {
       return;
     }
 
-    // Round 128: his own things from here on his house's floor.
+    // His own things from here on his house's floor.
     final indoors = brain.homeView != null;
     if (indoors) groundTop = fieldTop - PipHouse.onFloor;
 
-    // Round 44: his charging station, rising out of the ground (clipped
+    // His charging station, rising out of the ground (clipped
     // there), its socket facing him; the cable from it to the plug.
     if (brain.station case (final sx, final up, final right)) {
       canvas.save();
@@ -1626,11 +1626,11 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    // A battery dropped in his room, or flying to him (Round 37).
+    // A battery dropped in his room, or flying to him.
     if (brain.battery case (final left, final up)) {
       sprite(PipSprites.battery, left, groundTop - up);
     }
-    // Round 54: his old one, pulled out of his side (behind his casing
+    // His old one, pulled out of his side (behind his casing
     // till it's out) and thrown away, end over end, fading.
     if (brain.oldBattery
         case (final left, final up, final faded, final turned)) {
@@ -1638,12 +1638,12 @@ class _RoomPainter extends CustomPainter {
           (groundTop - up).floorToDouble(),
           alpha: 1 - faded, flip: turned);
     }
-    // Round 97: its landing, a puff of dust.
+    // Its landing, a puff of dust.
     for (final (dx, up, fade) in brain.batteryDust) {
       dot(dx.floorToDouble(), (groundTop - up - 1).floorToDouble(),
           PipColours.dirt.withValues(alpha: 1 - fade));
     }
-    // Round 97: a glint on the new one while it waits: a little star.
+    // A glint on the new one while it waits: a little star.
     if (brain.batteryGlint case (final gx, final gy)) {
       final cx = gx.floorToDouble(), cy = (groundTop - gy - 1).floorToDouble();
       dot(cx, cy, PipColours.screen);
@@ -1657,7 +1657,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
 
-    // Round 52: what's in his field, behind him. A flower coming up
+    // What's in his field, behind him. A flower coming up
     // (only its grown part shows), or still in the ground.
     if (brain.flower case (final fx, final up, final grown, final fade)
         when up == 0) {
@@ -1666,13 +1666,13 @@ class _RoomPainter extends CustomPainter {
       sprite(rows.sublist(rows.length - shown), fx - 2, groundTop,
           colours: PipSprites.fieldColours, alpha: 1 - fade);
     }
-    // Round 67: his ski gear in its snowbank.
+    // His ski gear in its snowbank.
     if (brain.gearInBank) {
       sprite(PipSprites.gearBank, PipRun.gearX - 2, groundTop,
           colours: PipSprites.snowColours);
     }
-    // Round 64: his day out's tavern, its table and his bench (Round 67:
-    // a ski day's, a hut with snow on its roof).
+    // His day out's tavern, its table and his bench (on
+    // a ski day, a hut with snow on its roof).
     if (run != null) {
       if (run.tavern case final tx?) {
         sprite(PipSprites.tavern, tx.floorToDouble(), groundTop,
@@ -1681,7 +1681,7 @@ class _RoomPainter extends CustomPainter {
         sprite(PipSprites.table, (tx + PipRun.tableLeft).floorToDouble(),
             groundTop,
             colours: PipSprites.tavernColours);
-        // Round 83: not snapped to the grid, as he isn't: centred under him.
+        // Not snapped to the grid, as he isn't: centred under him.
         sprite(PipSprites.bench, tx + PipRun.benchLeft, groundTop,
             colours: PipSprites.tavernColours);
       }
@@ -1695,15 +1695,14 @@ class _RoomPainter extends CustomPainter {
         blade(Offset(sx * pixel, (groundTop - up) * pixel), angle, 1);
       }
     }
-    // A bug crawling in, its legs stepping; mirrored going right. Round
-    // 73: out, a beetle, a spider or the boss too, flashing as it's
+    // A bug crawling in, its legs stepping; mirrored going right. Out, a beetle, a spider or the boss too, flashing as it's
     // struck, the strikes it can still take over it.
     if (brain.bug case (final bx, final legsUp, final toRight)) {
       final fight =
           brain.activity == PipActivity.adventuring ? brain.run : null;
       final foe = fight?.foe ?? PipFoe.bug;
       final art = PipSprites.foeArt(foe, legsUp);
-      // Round 75: out of the fog, looming as they come.
+      // Out of the fog, looming as they come.
       final fog = fight != null && brain.weather == WeatherKind.fog
           ? ((columns * 0.9 - bx) / (columns * 0.35)).clamp(0.15, 1.0)
           : 1.0;
@@ -1728,7 +1727,7 @@ class _RoomPainter extends CustomPainter {
           colours: PipSprites.fieldColours);
     }
 
-    // Round 75: out in the rain, splashes at his feet as he runs.
+    // Out in the rain, splashes at his feet as he runs.
     if (run != null &&
         run.stepping &&
         !run.skiing &&
@@ -1741,9 +1740,8 @@ class _RoomPainter extends CustomPainter {
             groundTop - 1 - kick % 2, PipColours.puddleLight);
       }
     }
-    // Round 75: rain's puddles (a splash in one), and his snowman (Round
-    // 128: not while his quest's scenes go by).
-    // Round 141: out on his adventure, in the ground going by (not
+    // Rain's puddles (a splash in one), and his snowman (not while his quest's scenes go by).
+    // Out on his adventure, in the ground going by (not
     // following him).
     for (final left in questView != null
         ? const <double>[]
@@ -1764,7 +1762,7 @@ class _RoomPainter extends CustomPainter {
       drawSnowman(man);
     }
 
-    // Round 67: the bus, behind him while he's outside it; Round 72: in
+    // The bus, behind him while he's outside it; in
     // it, the inside behind him first.
     if (bus != null && bus.busShown && !bus.inside) drawBus(bus);
     if (bus != null && bus.busShown && bus.inside) busInside(bus);
@@ -1772,11 +1770,11 @@ class _RoomPainter extends CustomPainter {
     // Pip, clipped at the ground while he comes up.
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, groundTop * pixel));
-    // Falling over (Round 37): turned about the bottom corner of his
+    // Falling over: turned about the bottom corner of his
     // casing on the side he falls to.
     if (brain.tilt > 0) {
       final right = brain.fallRight;
-      // Round 134: where he stands (up on a scaffold, too).
+      // Where he stands (up on a scaffold, too).
       final pivot = Offset(
         (brain.x + (right ? 18 : 2)) * pixel,
         (groundTop - brain.lift) * pixel,
@@ -1785,7 +1783,7 @@ class _RoomPainter extends CustomPainter {
       canvas.rotate((right ? 1 : -1) * brain.tilt * math.pi / 2);
       canvas.translate(-pivot.dx, -pivot.dy);
     }
-    // Thrown in (Round 52): tumbling about his middle.
+    // Thrown in: tumbling about his middle.
     if (brain.spin != 0) {
       final mid = Offset(centre * pixel, (bottom - rows / 2) * pixel);
       canvas.translate(mid.dx, mid.dy);
@@ -1804,7 +1802,7 @@ class _RoomPainter extends CustomPainter {
       canvas.drawRect(Rect.fromLTWH(left, top, w, h), paint..color = colour);
     }
 
-    // Round 75: hidden in his tent.
+    // Hidden in his tent.
     final hidden = brain.inTent;
     for (var y = 0; y < rows && !hidden; y++) {
       final row = sprite0[y];
@@ -1813,7 +1811,7 @@ class _RoomPainter extends CustomPainter {
         if (colour != null) own(x, y, colour);
       }
     }
-    // Round 57: his hat, on his head: moved with him whatever he does.
+    // His hat, on his head: moved with him whatever he does.
     if (brain.hat case final hat?
         when !brain.hatBeside && brain.hatHop == null && !hidden) {
       final art = PipSprites.hats[hat]!;
@@ -1831,13 +1829,13 @@ class _RoomPainter extends CustomPainter {
       }
     }
     canvas.restore();
-    // Round 67: in his seat: the bus over him, him in its window.
+    // In his seat: the bus over him, him in its window.
     if (bus != null && bus.busShown && bus.inside) drawBus(bus);
-    // Round 75: the weather's things with him: his umbrella over his
+    // The weather's things with him: his umbrella over his
     // head, his tent round him, his hand out, a question mark in the fog.
     drawWeatherWithHim(centre, bottom);
     // Asleep, it's on the ground beside him (on the side with room).
-    // Round 141: settling or waking, it hops between there and his head.
+    // Settling or waking, it hops between there and his head.
     if (brain.hat case final hat?
         when brain.hatBeside || brain.hatHop != null) {
       final art = PipSprites.hats[hat]!;
@@ -1866,7 +1864,7 @@ class _RoomPainter extends CustomPainter {
         colours: PipSprites.hatColours,
       );
     }
-    // Round 58: the station's drone, flying to him while he's off, its
+    // The station's drone, flying to him while he's off, its
     // beam on him as it charges him.
     if (brain.drone case (final dx, final dy, final beaming)) {
       if (beaming) {
@@ -1883,7 +1881,7 @@ class _RoomPainter extends CustomPainter {
       sprite(PipSprites.drone[brain.droneSpin ? 0 : 1], dx, groundTop - dy,
           colours: PipSprites.stationColours);
     }
-    // Round 54: the slot in his side, open while his battery's changed.
+    // The slot in his side, open while his battery's changed.
     // Scaled with him, as he crouches.
     if (brain.batterySlot case final column?) {
       final (sx, sy) = brain.stretch;
@@ -1894,7 +1892,7 @@ class _RoomPainter extends CustomPainter {
           sx,
           PipBrain.slotRows * sy);
     }
-    // Round 53: his plate, its meal, crumbs falling (his hands on it
+    // His plate, its meal, crumbs falling (his hands on it
     // next).
     if (brain.plate case (final px, final py, final taken, final size)
         when size > 0.05) {
@@ -1909,7 +1907,7 @@ class _RoomPainter extends CustomPainter {
       dot(cx.floorToDouble(), (groundTop - cy).floorToDouble(),
           PipColours.meal);
     }
-    // His hands (Round 44), popping in and away (a sparkle as they do).
+    // His hands, popping in and away (a sparkle as they do).
     for (final (mx, my, size) in brain.mitts) {
       if (size <= 0.05) continue;
       final w = PipSprites.mitt[0].length * size;
@@ -1929,7 +1927,7 @@ class _RoomPainter extends CustomPainter {
         }
       }
     }
-    // Round 52: in front of him.
+    // In front of him.
     // Dust puffing up either side where he landed.
     if (brain.landingDust case final t?) {
       for (var i = 0; i < 4; i++) {
@@ -1940,7 +1938,7 @@ class _RoomPainter extends CustomPainter {
             (groundTop - 1 - up).floorToDouble(), PipColours.puff);
       }
     }
-    // A bug struck: a poof (Round 73: bigger for a bigger foe).
+    // A bug struck: a poof (bigger for a bigger foe).
     if (brain.poof case (final px, final t)) {
       final size = brain.activity == PipActivity.adventuring
           ? brain.run?.poofSize ?? 1
@@ -1962,7 +1960,7 @@ class _RoomPainter extends CustomPainter {
             PipColours.puff);
       }
     }
-    // Round 73: the XP he gained, rising over it and fading.
+    // The XP he gained, rising over it and fading.
     for (final (xp, px, f)
         in brain.run?.xpRising ?? const <(int, double, double)>[]) {
       final art = PipSprites.tinyText('+$xp XP');
@@ -1980,7 +1978,7 @@ class _RoomPainter extends CustomPainter {
       blade(Offset(hx * pixel, (groundTop - hy) * pixel), angle, size);
       sprite(PipSprites.mitt, hx - 1, groundTop - hy + 2);
     }
-    // Round 67: his skis under his feet, his poles in his hands.
+    // His skis under his feet, his poles in his hands.
     if (run != null && run.skisOn) {
       final feet = bottom.floorToDouble();
       final long = run.oneSki ? 12.0 : PipBrain.width + 6.0;
@@ -2004,8 +2002,8 @@ class _RoomPainter extends CustomPainter {
             (groundTop - 1 - up).floorToDouble(), PipColours.flake);
       }
     }
-    // Round 67: on a ski break, a mug of hot chocolate instead of a plate
-    // (Round 74: lifted to his mouth for a sip).
+    // On a ski break, a mug of hot chocolate instead of a plate
+    // (lifted to his mouth for a sip).
     if (run != null && run.skiing) {
       if (run.plateAt case (final px0, final py0, final left)) {
         final (px, py) = switch (run.hand) {
@@ -2038,7 +2036,7 @@ class _RoomPainter extends CustomPainter {
           bottom - PipSprites.plate.length,
           colours: PipSprites.fieldColours);
     }
-    // Round 74: his hand taking a bite to his mouth (or holding his mug).
+    // His hand taking a bite to his mouth (or holding his mug).
     if (run?.hand case (final hx, final hy, final size, final carrying)
         when size > 0.05) {
       final w = PipSprites.mitt[0].length * size;
@@ -2058,7 +2056,7 @@ class _RoomPainter extends CustomPainter {
             PipColours.mealDark);
       }
     }
-    // Round 63: LEVEL UP over him, rising and fading.
+    // LEVEL UP over him, rising and fading.
     if (brain.levelFlash case final f?) {
       final art = PipSprites.levelUp;
       final left = (centre - art.first.length / 2).floorToDouble();
@@ -2120,13 +2118,13 @@ class _RoomPainter extends CustomPainter {
       sprite(PipSprites.z, centre + dx, groundTop - 18 - up, alpha: 1 - fade);
     }
     groundTop = fieldTop;
-    // Round 128: in his house, the weather's outside it.
+    // In his house, the weather's outside it.
     if (indoors) {
       canvas.save();
       canvas.clipPath(Path.combine(PathOperation.difference,
           Path()..addRect(Offset.zero & size), _houseShape(groundTop, pixel)));
     }
-    // Round 67: snowing on a ski day, drifting down (rising past him as
+    // Snowing on a ski day, drifting down (rising past him as
     // he skis down).
     if (brain.snowing) {
       final t = brain.snowClock;
@@ -2140,14 +2138,14 @@ class _RoomPainter extends CustomPainter {
             i % 4 == 0 ? PipColours.snowShade : PipColours.flake);
       }
     }
-    // Round 70: the weather, over everything: snow falling (a ski day's
+    // The weather, over everything: snow falling (a ski day's
     // is above), rain, leaves or petals drifting down, fog, a storm's
     // flash.
     final t = brain.sceneClock;
     final tall = height.toDouble();
     final strength = (scene?.strength ?? 1).clamp(1, 3);
     if (props.contains(PipProp.snowfall) && !skiSnow) {
-      // Round 75: coming in (thickening) as the weather changes.
+      // Coming in (thickening) as the weather changes.
       final flakes = (columns * strength / 6 * brain.weatherIn).floor();
       for (var i = 0; i < flakes; i++) {
         final speedY = 5.0 + (i % 3) * 2;
@@ -2158,7 +2156,7 @@ class _RoomPainter extends CustomPainter {
       }
     }
     if (props.contains(PipProp.rain)) {
-      // Round 72 (the user didn't like the dashes): long thin streaks, slanted
+      // Long thin streaks, slanted
       // with the wind, in two layers (far ones fainter and slower), and
       // little splashes where they hit the ground.
       final drizzle = scene?.weather == WeatherKind.drizzle;
@@ -2221,7 +2219,7 @@ class _RoomPainter extends CustomPainter {
           paint..color = PipColours.lightning.withValues(alpha: 0.3));
     }
     if (indoors) canvas.restore();
-    // Round 75: a snowball thrown at you, and its splat on the glass.
+    // A snowball thrown at you, and its splat on the glass.
     if (brain.splat case final splat?) drawSplat(splat);
     // The egg's bottom half in front of him, as he jumps out of it.
     if (hatching) {
@@ -2229,7 +2227,7 @@ class _RoomPainter extends CustomPainter {
     }
   }
 
-  /// Round 128: his finished house's outline (its roof, walls and porch
+  /// His finished house's outline (its roof, walls and porch
   /// roof) in the room, [groundTop] its ground's top row; the weather
   /// keeps out of it.
   static Path _houseShape(double groundTop, double pixel) {
@@ -2252,7 +2250,7 @@ class _RoomPainter extends CustomPainter {
         Path.combine(PathOperation.union, roof, walls), porch);
   }
 
-  /// Round 70: a storm's bolt and flash, every [_stormEvery] seconds for
+  /// A storm's bolt and flash, every [_stormEvery] seconds for
   /// [_flashTime].
   static const _stormEvery = 6.5;
   static const _flashTime = 0.18;
@@ -2262,11 +2260,11 @@ class _RoomPainter extends CustomPainter {
 }
 
 /// How far his field's things (the trees) have gone by: half the
-/// ground's shift (they're further off), and the bus's road. Round 74:
+/// ground's shift (they're further off), and the bus's road;
 /// out, by his time running (his life's), so the menu's room and Pip
 /// Home's agree (each has its own run).
 double fieldPassing(PipBrain brain) {
-  // Round 76: with the ground (still when he's knocked over), keeping to
+  // With the ground (still when he's knocked over), keeping to
   // his time out.
   final running = brain.treeRun;
   if (running != null && brain.activity == PipActivity.adventuring) {
@@ -2274,14 +2272,14 @@ double fieldPassing(PipBrain brain) {
   }
   final shift = brain.run?.shift.floor() ?? 0;
   final road = brain.bus?.road.floor() ?? 0;
-  // Round 127: walking out to gather or home along his field.
+  // Walking out to gather or home along his field.
   final view = brain.questView;
   final walk = view?.place == QuestScenePlace.field ? view!.scroll : 0.0;
   return shift * 0.5 + road * 0.6 + walk * 0.5;
 }
 
-/// Round 72: where his field's trees stand for this time the app's open
-/// (Round 74: and how each looks).
+/// Where his field's trees stand for this time the app's open
+/// (and how each looks).
 List<PipTreeSpot> _treeSpots = treeSpots(math.Random());
 
 /// Sets the trees' spots and looks (tests and pictures).
@@ -2291,8 +2289,8 @@ set debugTreeSpots(List<PipTreeSpot> spots) => _treeSpots = spots;
 /// A tree's spot (a share of the room's width) and the rolls that pick
 /// its look by the season ([PipTreeSpot.kindIn]).
 /// How far (whole pixels) tree [i]'s row sways at [clock] seconds, its
-/// [reach] (0 at the trunk, 1 at the crown's top) in [wind] (Round 79:
-/// still when calm, a light sway in a breeze, hard when windy).
+/// [reach] (0 at the trunk, 1 at the crown's top) in [wind] (still
+/// when calm, a light sway in a breeze, hard when windy).
 double treeSway(PipWind wind, double clock, int i, double reach) =>
     switch (wind) {
       PipWind.calm => 0.0,
@@ -2303,11 +2301,11 @@ double treeSway(PipWind wind, double clock, int i, double reach) =>
 
 typedef PipTreeSpot = ({double at, double pine, double kind});
 
-/// Round 75: how often a tree is a pine (green all year): rarely, but
+/// How often a tree is a pine (green all year): rarely, but
 /// more often than not in winter.
 double pineChance(Season season) => season == Season.winter ? 0.6 : 0.05;
 
-/// Round 75: how often the two trees differ (else both the same kind).
+/// How often the two trees differ (else both the same kind).
 const mixedTrees = 0.1;
 
 extension PipTreeSpotKind on PipTreeSpot {
@@ -2318,9 +2316,9 @@ extension PipTreeSpotKind on PipTreeSpot {
       : (kind < 0.5 ? PipTreeKind.oak : PipTreeKind.birch);
 }
 
-/// Round 72: where his field's two trees stand, picked by [random]: one
+/// Where his field's two trees stand, picked by [random]: one
 /// on the left part, one well to the right, so it isn't always the same
-/// view. Round 74: each an oak, a birch or a pine; Round 75: mostly both
+/// view. Each an oak, a birch or a pine; mostly both
 /// the same ([mixedTrees] of the time not), a pine rarely
 /// ([pineChance]).
 List<PipTreeSpot> treeSpots(math.Random random) {
@@ -2356,10 +2354,10 @@ int _hash(int i) {
 }
 
 /// His frame now, as drawn before mirroring (facing left): his body and
-/// face, or a picture on his screen (charging, Round 44; something to
-/// show, Round 52). A picture is turned first when he faces left, so it
-/// reads the right way drawn mirrored (Round 53: notifications; Round 57:
-/// all of them, the charging ones too: the bolt, the battery).
+/// face, or a picture on his screen (charging; something to
+/// show). A picture is turned first when he faces left, so it
+/// reads the right way drawn mirrored (all of
+/// them, the charging ones too: the bolt, the battery).
 List<String> pipFrameOf(PipBrain brain) {
   final charge = brain.chargeScreen;
   final shown = brain.screenShow;
@@ -2372,7 +2370,7 @@ List<String> pipFrameOf(PipBrain brain) {
   return brain.facingRight ? picture : PipSprites.screenTurned(picture);
 }
 
-/// Rain's puddles' left edges in a room [columns] wide. Round 141: out on
+/// Rain's puddles' left edges in a room [columns] wide. Out on
 /// his adventure, the ground going by [shift]: they go by with it (round
 /// again), not following him.
 List<double> puddleLefts(PipBrain brain, int columns, int? shift) => [
@@ -2387,14 +2385,14 @@ List<double> puddleLefts(PipBrain brain, int columns, int? shift) => [
     ];
 
 /// Where his cross words start (their left column) with his frame's
-/// middle at [centre]. Round 53: low, just over his head beside his
-/// antenna, away from the fist. Round 58: in a hat (centred, over his
+/// middle at [centre]. Low, just over his head beside his
+/// antenna, away from the fist. In a hat (centred, over his
 /// antenna), further out, clear of it.
 double crossWordsLeft(PipBrain brain, double centre) {
   final hat = brain.hatBeside || brain.hatHop != null
       ? null
       : PipSprites.hats[brain.hat];
-  // Clear of the hat's brim (Round 72: the beanie's as wide as his head).
+  // Clear of the hat's brim (the beanie's as wide as his head).
   final out =
       hat == null ? 0 : math.max(2, 7 - PipSprites.hatLeftOf(hat)).toDouble();
   return brain.facingRight ? centre - 10 - out : centre + 3 + out;

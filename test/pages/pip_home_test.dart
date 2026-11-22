@@ -12,7 +12,7 @@ import 'package:the_app/widgets/pixel_text.dart';
 
 import '../helpers.dart';
 
-/// Pip Home (Round 35): his field on top, a card below swiped between
+/// Pip Home: his field on top, a card below swiped between
 /// his status and his settings.
 void main() {
   late ProviderContainer container;
@@ -46,7 +46,7 @@ void main() {
 
   PipRoom room(WidgetTester tester) => tester.widget(find.byType(PipRoom));
 
-  // Round 126: his inventory comes first, then the settings.
+  // His inventory comes first, then the settings.
   Future<void> toSettings(WidgetTester tester) async {
     for (var i = 0; i < 2; i++) {
       await tester.fling(
@@ -66,11 +66,11 @@ void main() {
     final scene = room(tester).scene!;
     expect(scene.place, PipPlace.home);
     expect(scene.part, DayPart.night);
-    // Half the page, below the app bar (Round 36).
+    // Half the page, below the app bar.
     final page = tester.getSize(find.byType(Scaffold).last).height;
     expect(tester.getSize(find.byType(PipRoom)).height,
         moreOrLessEquals((page - kToolbarHeight) / 2, epsilon: 12));
-    // Pip as big as in the menu (Round 38), in a bigger field.
+    // Pip as big as in the menu, in a bigger field.
     expect(room(tester).pixel, PipRoom.smallPixel);
     // Born 1 October (the helper's), today the 13th: his 13th day.
     expect(words(), containsAll(['Pip', 'AGE 13 DAYS', 'BORN 1.10.2026']));
@@ -87,7 +87,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 75: the weather\'s animations, each in its weather (tried on); '
+      'the weather\'s animations, each in its weather (tried on); '
       'his tent, umbrella and fog too; back to his info card, gone',
       (tester) async {
     await open(tester);
@@ -128,7 +128,7 @@ void main() {
     expect(room(tester).scene!.weather, isNull, reason: 'a try-on: gone');
   });
 
-  testWidgets('the background: picked from a list (Round 36)', (tester) async {
+  testWidgets('the background: picked from a list', (tester) async {
     await open(tester);
     expect(room(tester).scene!.background, PipBackground.field);
     await toSettings(tester);
@@ -149,7 +149,7 @@ void main() {
 
   testWidgets(
       'his field tried in a season, the weather, a day, a time of day '
-      '(Round 70); back to his info card, as it is', (tester) async {
+      '; back to his info card, as it is', (tester) async {
     await open(tester);
     final now = room(tester).scene!;
     expect(
@@ -207,7 +207,7 @@ void main() {
   });
 
   testWidgets(
-      'hats (Round 57): tried on him, kept while trying other things (an '
+      'hats: tried on him, kept while trying other things (an '
       'animation, the background); back to his info card, gone',
       (tester) async {
     await open(tester);
@@ -217,7 +217,7 @@ void main() {
     await tester.tap(find.byKey(const Key('pipHats')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('pipHat-none')), findsOneWidget);
-    // Round 61: more than fit; each there further down.
+    // More than fit; each there further down.
     final list = find
         .descendant(
             of: find.byKey(const Key('pipHatList')),
@@ -376,14 +376,13 @@ void main() {
     expect(find.byKey(const Key('pipAnimations')), findsOneWidget);
   });
 
-  testWidgets('Charging (Round 44) plays in his field: the station rises',
-      (tester) async {
+  testWidgets('Charging plays in his field: the station rises', (tester) async {
     await open(tester);
     await toSettings(tester);
     await tester.tap(find.byKey(const Key('pipAnimations')));
     await tester.pumpAndSettle();
     final brain = room(tester).brain;
-    // Round 52: more animations after it; scrolled to it.
+    // More animations after it; scrolled to it.
     await tester.scrollUntilVisible(
       find.byKey(const Key('pipPlay-charge')),
       100,
@@ -400,8 +399,7 @@ void main() {
     expect(words(), isNot(contains("HE'S BUSY, A MOMENT")));
   });
 
-  testWidgets(
-      'Changing his battery (Round 54) plays as a preview: no battery used',
+  testWidgets('Changing his battery plays as a preview: no battery used',
       (tester) async {
     final link = FakePipLink(batteries: 1);
     await open(tester, link: link);
@@ -426,7 +424,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 97: Changing his battery plays when he is full, and gives no '
+      'Changing his battery plays when he is full, and gives no '
       'energy', (tester) async {
     final link = FakePipLink(batteries: 1, segments: 3);
     await open(tester, link: link);
@@ -453,14 +451,14 @@ void main() {
     expect(link.batteries, 1);
   });
 
-  testWidgets("at his station, Charging says so (Round 45)", (tester) async {
+  testWidgets("at his station, Charging says so", (tester) async {
     await open(tester, link: FakePipLink(segments: 2)..plugged = true);
     final brain = room(tester).brain;
     expect(brain.activity, PipActivity.charging);
     await toSettings(tester);
     await tester.tap(find.byKey(const Key('pipAnimations')));
     await tester.pumpAndSettle();
-    // Round 52: more animations after it; scrolled to it.
+    // More animations after it; scrolled to it.
     await tester.scrollUntilVisible(
       find.byKey(const Key('pipPlay-charge')),
       100,
@@ -476,7 +474,7 @@ void main() {
   });
 
   testWidgets(
-      'Adventures previews (Round 67): an adventure, skiing, a bus trip; '
+      'Adventures previews: an adventure, skiing, a bus trip; '
       'stopped back on his card', (tester) async {
     await open(tester);
     await toSettings(tester);
@@ -504,8 +502,7 @@ void main() {
     expect(container.read(pipLifeProvider).minutesOut, 0, reason: 'no XP');
   });
 
-  testWidgets('Adventures previews (Round 73): the boss\'s fight, no XP',
-      (tester) async {
+  testWidgets('Adventures previews: the boss\'s fight, no XP', (tester) async {
     await open(tester);
     await toSettings(tester);
     await tester.tap(find.byKey(const Key('pipAdventurePreviews')));
@@ -524,9 +521,9 @@ void main() {
     expect(brain.fighting, isFalse, reason: 'a preview: no XP');
   });
 
-  group('adventures (Round 63)', () {
+  group('adventures', () {
     testWidgets(
-        'Round 73: out, it opens on his adventure view: his adventure card '
+        'out, it opens on his adventure view: his adventure card '
         'alone (no settings, no animations); Info switches to his info '
         'and settings, Adventures back', (tester) async {
       tester.view.physicalSize = const Size(1080, 2340);
@@ -559,7 +556,7 @@ void main() {
       await tester.tap(find.byKey(const Key('pipInfo')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('pipStatus')), findsOneWidget);
-      // Round 126: his inventory, then the settings.
+      // His inventory, then the settings.
       await toSettings(tester);
       expect(find.byKey(const Key('pipAnimations')), findsOneWidget);
       for (var i = 0; i < 2; i++) {
@@ -578,7 +575,7 @@ void main() {
     testWidgets('not out: it opens on his info', (tester) async {
       await open(tester, hour: 13);
       expect(find.byKey(const Key('pipStatus')), findsOneWidget);
-      // Round 126: his info, his inventory, his settings.
+      // His info, his inventory, his settings.
       expect(find.bySemanticsLabel(RegExp('Card 1 of 3')), findsOneWidget);
     });
 
@@ -626,7 +623,7 @@ void main() {
 
     testWidgets(
         'a narrow phone (360 wide): his long words wrap inside the card '
-        '(Round 66)', (tester) async {
+        '', (tester) async {
       tester.view.physicalSize = const Size(360 * 3, 780 * 3);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);

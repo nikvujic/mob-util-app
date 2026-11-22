@@ -1,5 +1,5 @@
-/// How much of an item to buy (S7): a count or a weight; or, from Round
-/// 70, free text ("1-2", "a bunch").
+/// How much of an item to buy (S7): a count or a weight; or free text
+/// ("1-2", "a bunch").
 enum Quantity { count, weight, text }
 
 class ShopItem {

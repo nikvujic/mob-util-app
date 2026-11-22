@@ -1,12 +1,12 @@
 part of 'pip_brain.dart';
 
-// Pip's brain's types (Round 138: out of `pip_brain.dart`): what he's
+// Pip's brain's types (out of `pip_brain.dart`): what he's
 // doing, what may start during what (the one table), his hats, screens,
 // faces, frames and the animations Pip Home's list plays.
 
-/// What Pip is doing (Round 26).
+/// What Pip is doing.
 enum PipActivity {
-  /// Not hatched yet (Round 34): an egg in the middle of the room, cracked
+  /// Not hatched yet: an egg in the middle of the room, cracked
   /// a little more by taps.
   egg,
 
@@ -24,13 +24,13 @@ enum PipActivity {
   /// Walking to a spot.
   walking,
 
-  /// Round 37: eyes closing, he settles down to sleep.
+  /// Eyes closing, he settles down to sleep.
   fallingAsleep,
 
   /// Asleep, settled down, little z's rising.
   asleep,
 
-  /// Round 77: woken by taps, still lying there: one eye opens and looks
+  /// Woken by taps, still lying there: one eye opens and looks
   /// about a moment, shuts, then he wakes ([wakingUp]).
   stirring,
 
@@ -50,7 +50,7 @@ enum PipActivity {
   /// A battery dropped in his room: he walks over and picks it up.
   fetching,
 
-  /// Round 44: the phone plugged in, he hurries to his charging station.
+  /// The phone plugged in, he hurries to his charging station.
   toStation,
 
   /// At the station: his hands pop in, he takes the plug off its hook,
@@ -63,7 +63,7 @@ enum PipActivity {
   /// Unplugging: the same as plugging in, backwards.
   unplugging,
 
-  // Round 52: more ways in, and things happening in his field.
+  // More ways in, and things happening in his field.
 
   /// Dropping in from the sky: he falls, lands with a squash and dust.
   falling,
@@ -96,17 +96,17 @@ enum PipActivity {
   /// A little dance: hops, turning to the beat, music on his screen.
   dancing,
 
-  /// Round 53: eating from a plate in his hands, a few bites, crumbs.
+  /// Eating from a plate in his hands, a few bites, crumbs.
   eating,
 
-  /// Round 63: out on his adventure (12:00 to 18:00): running, the
+  /// Out on his adventure (12:00 to 18:00): running, the
   /// ground moving under him, striking bugs ([PipRun]).
   adventuring,
 
-  /// Round 67: on his ski trip's bus ([PipBus]).
+  /// On his ski trip's bus ([PipBus]).
   riding,
 
-  /// Round 75: in his tent in a storm, awake (`core/pip_weather.dart`):
+  /// In his tent in a storm, awake (`core/pip_weather.dart`):
   /// keeping still till it's over.
   sheltering,
 
@@ -116,12 +116,12 @@ enum PipActivity {
   /// The weather's changed: he stops and looks up.
   lookingUp,
 
-  /// Round 127: at his quest's work (`core/pip_quest_scene.dart`): in his
+  /// At his quest's work (`core/pip_quest_scene.dart`): in his
   /// house area, out gathering, or walking between.
   questing,
 }
 
-/// A hat on his head (Round 57): the party hat on a birthday, or one
+/// A hat on his head: the party hat on a birthday, or one
 /// tried on in Pip Home's Hats.
 enum PipHat {
   party('Party hat'),
@@ -131,41 +131,41 @@ enum PipHat {
   cap('Cap'),
   beanie('Beanie'),
 
-  /// Round 61: for days of the year (see `pip_hats.dart`).
+  /// For days of the year (see `pip_hats.dart`).
   santa('Santa hat', everyday: false),
   witch('Witch hat', everyday: false),
   bunny('Bunny ears', everyday: false),
   heart('Heart band', everyday: false),
 
-  /// Round 67: all his ski days.
+  /// All his ski days.
   skiBeanie('Ski beanie', everyday: false),
 
-  /// Round 128: at his quest's work in rain, snow or a storm.
+  /// At his quest's work in rain, snow or a storm.
   rainHat('Rain hat', everyday: false);
 
   final String label;
 
-  /// Worn on a random day (Round 61); the others are for their days.
+  /// Worn on a random day; the others are for their days.
   final bool everyday;
 
   const PipHat(this.label, {this.everyday = true});
 }
 
-/// A buzz of the phone, how strong (Round 53).
+/// A buzz of the phone, how strong.
 enum PipBuzz { light, medium, heavy }
 
-/// How he comes into his field (Round 52): out of the ground, from the
+/// How he comes into his field: out of the ground, from the
 /// sky, or thrown in from the side (only in the menu, by its swing).
 enum PipEntrance { ground, sky, side }
 
-/// What his screen can show for a while (Round 52): notifications (when
-/// one comes), and with some events (Round 53: not for fun on its own).
+/// What his screen can show for a while: notifications (when
+/// one comes), and with some events (not for fun on its own).
 enum PipScreen {
   envelope(notification: true),
   bell(notification: true),
   alert(notification: true),
 
-  /// Round 53: a pill, reminding of a medicine (the medicine red dot).
+  /// A pill, reminding of a medicine (the medicine red dot).
   pill,
 
   /// Dancing.
@@ -174,7 +174,7 @@ enum PipScreen {
   /// Proud (after the bugs) or glad (holding a flower).
   happy;
 
-  /// Shown when a notification comes (Round 53: no more pictures for fun:
+  /// Shown when a notification comes (no more pictures for fun:
   /// the others go with an event).
   final bool notification;
 
@@ -184,7 +184,7 @@ enum PipScreen {
   const PipScreen({this.notification = false});
 }
 
-/// What his screen shows while he charges (Round 44), now and then
+/// What his screen shows while he charges, now and then
 /// another, at random.
 enum ChargeScreen {
   happy,
@@ -197,7 +197,7 @@ enum ChargeScreen {
   blinking,
 }
 
-/// How his face looks (Round 37): by his energy, asleep, or off.
+/// How his face looks: by his energy, asleep, or off.
 enum PipFace {
   normal,
   tired,
@@ -205,17 +205,17 @@ enum PipFace {
   asleep,
   off,
 
-  /// Round 52: thrown in, and cross about it.
+  /// Thrown in, and cross about it.
   angry,
 
-  /// Round 57: waking up, a big yawn (eyes shut, mouth wide).
+  /// Waking up, a big yawn (eyes shut, mouth wide).
   yawn,
 
-  /// Round 77: woken at night, one eye open (the other shut).
+  /// Woken at night, one eye open (the other shut).
   peek,
 }
 
-/// His animations that can be played on request (Round 35: Pip Home's
+/// His animations that can be played on request (Pip Home's
 /// Animations): each one he has, by name.
 enum PipAnimation {
   spawn('Out of the ground'),
@@ -223,19 +223,19 @@ enum PipAnimation {
   walk('A walk'),
   blink('A blink'),
   turn('A look round'),
-  // Round 37: in the list they come back on their own (asleep, then up
+  // In the list they come back on their own (asleep, then up
   // again; off, then on again).
   fallAsleep('Falling asleep'),
   powerOff('Running out'),
   wakeUp('Waking up', listed: false),
-  // Round 77: three taps at night; in the list, he falls asleep first.
+  // Three taps at night; in the list, he falls asleep first.
   nightWake('Woken at night'),
   powerOn('Back on', listed: false),
-  // Round 54: in the list too, as a preview (no battery used).
+  // In the list too, as a preview (no battery used).
   fetch('Changing his battery'),
-  // Round 44: the station rises, he plugs in, charges a while, unplugs.
+  // The station rises, he plugs in, charges a while, unplugs.
   charge('Charging'),
-  // Round 52: more entrances, and things that happen now and then.
+  // More entrances, and things that happen now and then.
   fromSky('Falling from the sky'),
   fromSide('Thrown in from the side'),
   bugs('Fighting bugs'),
@@ -245,10 +245,10 @@ enum PipAnimation {
   ball('Kicking a ball'),
   shootingStar('A shooting star'),
   dance('A little dance'),
-  // Round 53: a medicine due (the red dot), and after a recipe.
+  // A medicine due (the red dot), and after a recipe.
   medicine('A medicine reminder'),
   eat('Eating'),
-  // Round 75: the weather's (Pip Home's list tries the weather on too).
+  // The weather's (Pip Home's list tries the weather on too).
   puddle('Jumping in a puddle'),
   twirl('A twirl under his umbrella'),
   handOut('A hand out in the drizzle'),
@@ -265,21 +265,21 @@ enum PipAnimation {
   const PipAnimation(this.label, {this.listed = true});
 }
 
-/// What may start while he's doing something (Round 35): the one table
+/// What may start while he's doing something: the one table
 /// that keeps things from clashing. Mid-entrance (out of the ground or
 /// his egg) nothing interrupts; an egg only hatches by its taps. New
 /// activities and events (batteries, bugs...) get their row and column
 /// here, and the table is tested whole.
 ///
-/// Round 37: in the middle of falling asleep, waking, turning off or on,
+/// In the middle of falling asleep, waking, turning off or on,
 /// or picking up a battery, nothing starts either. Asleep, he can only
 /// wake (or run out); off, only come back on (a battery). Up and about,
 /// anything but waking or coming back on.
 ///
-/// Round 44: hurrying to his station, plugging in or out, or charging,
+/// Hurrying to his station, plugging in or out, or charging,
 /// nothing starts (asleep at night, he first unplugs: [PipBrain.show]).
 ///
-/// Round 52: an entrance (from the sky, thrown in, angry after) or an
+/// An entrance (from the sky, thrown in, angry after) or an
 /// event (bugs, his screen, a flower, a butterfly, a ball) runs its
 /// course; they start only while he's up and about.
 bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
@@ -296,7 +296,7 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.plugging ||
       PipActivity.charging ||
       PipActivity.unplugging ||
-      // Round 52: an entrance, or an event, runs its course.
+      // An entrance, or an event, runs its course.
       PipActivity.falling ||
       PipActivity.thrown ||
       PipActivity.angry ||
@@ -307,23 +307,23 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
       PipActivity.stargazing ||
       PipActivity.dancing ||
       PipActivity.eating ||
-      // Round 75: the weather's events, and looking up at it, too.
+      // The weather's events, and looking up at it, too.
       PipActivity.weatherEvent ||
       PipActivity.lookingUp ||
-      // Round 63: out, nothing else happens till he's back; Round 67: on
+      // Out, nothing else happens till he's back; on
       // the bus, nor then.
       PipActivity.adventuring ||
       PipActivity.riding =>
         false,
-      // Round 55: something on his screen (his medicine reminder, which
+      // Something on his screen (his medicine reminder, which
       // keeps on) gives way to bedtime, or running out.
       PipActivity.showing =>
         next == PipAnimation.fallAsleep || next == PipAnimation.powerOff,
       PipActivity.asleep => next == PipAnimation.wakeUp ||
           next == PipAnimation.nightWake ||
           next == PipAnimation.powerOff,
-      // Round 75: in his tent in a storm, he keeps still: nothing starts
-      // but sleep, or running out (a battery flies into it). Round 127: at
+      // In his tent in a storm, he keeps still: nothing starts
+      // but sleep, or running out (a battery flies into it). At
       // his quest's work, the same (spec 8: only a power down stops it).
       PipActivity.sheltering ||
       PipActivity.questing =>
@@ -334,7 +334,7 @@ bool mayStart(PipActivity doing, PipAnimation next) => switch (doing) {
         next != PipAnimation.wakeUp && next != PipAnimation.powerOn,
     };
 
-/// The station's drone's trip (Round 58).
+/// The station's drone's trip.
 enum DronePhase { rising, out, beaming, back, sinking }
 
 /// Pip's frames, by name; drawn by `widgets/pip_room.dart`.
@@ -348,7 +348,7 @@ enum PipFrame {
   oh,
   tuck,
 
-  /// Round 74: sitting (legs tucked, as he looks), and chewing so.
+  /// Sitting (legs tucked, as he looks), and chewing so.
   sit,
   chew,
 }

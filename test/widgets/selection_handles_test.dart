@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/format_bar.dart';
 
-/// The text's selection handles (Round 64): their touch area starts at
+/// The text's selection handles: their touch area starts at
 /// the handle and reaches down, not up into the line they mark (a tap on
-/// the text there grabbed the left one). Round 74: it reaches out away
+/// the text there grabbed the left one). It reaches out away
 /// from the text, barely over it.
 void main() {
   final controls = FormatBarSelectionControls(ValueNotifier(false));
@@ -81,7 +81,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 74: a selection\'s handles: the touch area reaches out from '
+      'a selection\'s handles: the touch area reaches out from '
       'the drawn handle, away from the text; on the text\'s side only a '
       'sliver', (tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;

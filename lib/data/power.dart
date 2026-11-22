@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Whether the phone is plugged in (Round 44: Pip's charging station),
+/// Whether the phone is plugged in (Pip's charging station),
 /// from Android: no permission needed. Charging or already full, it's
 /// plugged in all the same.
 abstract interface class PowerSource {

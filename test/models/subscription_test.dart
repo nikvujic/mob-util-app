@@ -3,7 +3,7 @@ import 'package:the_app/models/preferences.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/providers/subscriptions_alerts_provider.dart';
 
-/// Subscriptions (Round 79, `docs/SUBSCRIPTIONS_SPEC.md`).
+/// Subscriptions (`docs/SUBSCRIPTIONS_SPEC.md`).
 void main() {
   /// Monday, 19 October 2026.
   final today = DateTime(2026, 10, 19);
@@ -147,8 +147,8 @@ void main() {
   });
 
   test(
-      'Round 80: its card\'s expiry: kept; before it renews, it runs out. '
-      'Round 85: a month (its last day), no day', () {
+      'its card\'s expiry: kept; before it renews, it runs out. '
+      'a month (its last day), no day', () {
     final s = Subscription(
       id: 'g',
       name: 'Grok',

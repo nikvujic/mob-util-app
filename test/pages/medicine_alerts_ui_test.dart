@@ -55,7 +55,7 @@ void main() {
 
   group('settings (O12)', () {
     testWidgets(
-        'no bell on the page (Round 55): on the Notifications page, from '
+        'no bell on the page: on the Notifications page, from '
         'the menu; each is kept', (tester) async {
       await start(tester);
       await openMedicine(tester);
@@ -116,7 +116,7 @@ void main() {
         '12 20:0 Pills: Time to take it · 20:00',
       ]);
 
-      // Its sheet: remind again 1 h later (Round 16).
+      // Its sheet: remind again 1 h later.
       final id = container.read(medicineProvider).medicines.single.id;
       final m = container.read(medicineProvider).medicines.single;
       medicine()
@@ -145,7 +145,7 @@ void main() {
       expect(medicineReminders(), isEmpty);
     });
 
-    testWidgets('Round 82: with the Hub locked, names still', (tester) async {
+    testWidgets('with the Hub locked, names still', (tester) async {
       await start(tester, seed: () {
         medicine().add('Pills', times: [600], from: today);
       });
@@ -160,8 +160,7 @@ void main() {
       expect(medicineReminders().first, startsWith('12 10:0 Pills'));
     });
 
-    testWidgets(
-        'Round 82: the Medicine page locked, names still; set private, none',
+    testWidgets('the Medicine page locked, names still; set private, none',
         (tester) async {
       await start(tester, seed: () {
         medicine().add('Pills', times: [600], from: today);
@@ -243,7 +242,7 @@ void main() {
       expect(hubDot, findsNothing);
     });
 
-    testWidgets('a medicine not important: no dot (Round 24)', (tester) async {
+    testWidgets('a medicine not important: no dot', (tester) async {
       await start(tester, seed: () {
         medicine().add('Vitamin C', times: [480], from: today);
       });

@@ -12,7 +12,7 @@ import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// Menu → Internet Access (Round 70): the app uses no internet unless a
+/// Menu → Internet Access: the app uses no internet unless a
 /// service is turned on here, one section each: what it is, what it's
 /// for, and its own settings once on. For now the weather (Open-Meteo),
 /// for Pip's sky.
@@ -173,9 +173,9 @@ class _WeatherNow extends ConsumerWidget {
           ? formatMinutes(at.hour * 60 + at.minute)
           : formatDay(at, today: day);
       final kind = WeatherKind.fromCode(report.code)?.label ?? 'Weather';
-      // Round 79: the wind too, when it came.
+      // The wind too, when it came.
       final wind = report.wind == null ? '' : ', ${report.wind!.round()} km/h';
-      // Round 106: where its rain or snow now came from, with a key.
+      // Where its rain or snow now came from, with a key.
       final source = internet.radarKey == null
           ? ''
           : report.radar
@@ -215,7 +215,7 @@ class _WeatherNow extends ConsumerWidget {
   }
 }
 
-/// Round 106: the rain radar, optional: his own free Tomorrow.io
+/// The rain radar, optional: his own free Tomorrow.io
 /// key (where to get one copied, no link), pasted in, checked once; then
 /// the rain or snow now comes from it. Removed with ×.
 class _RainRadar extends ConsumerWidget {

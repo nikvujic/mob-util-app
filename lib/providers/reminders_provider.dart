@@ -46,9 +46,9 @@ List<Reminder> planReminders({
   final reminders = <Reminder>[];
   final today = dayOf(now);
 
-  /// Round 72 ([onNow]): a notification that stays while it's on, from
+  /// A notification that stays while it's on, from
   /// its start (or now, if it's already on) till its end; tapped, the
-  /// planner at it; Done ticks it (a block's: Round 78, not a routine's).
+  /// planner at it; Done ticks it (a block's, not a routine's).
   void addNow(
       DateTime day, String title, int start, int end, String id, bool routine) {
     final from = DateTime(day.year, day.month, day.day, 0, start);
@@ -66,7 +66,7 @@ List<Reminder> planReminders({
       target: target,
       until: until,
       onNow: !from.isAfter(now),
-      // Round 78: a routine has nothing to tick off.
+      // A routine has nothing to tick off.
       done: !routine,
     ));
   }
@@ -75,7 +75,7 @@ List<Reminder> planReminders({
     // Minutes beyond 0–59 roll over, also into the day before.
     final at = DateTime(day.year, day.month, day.day, 0, start - remind);
     if (!at.isAfter(now)) return;
-    // Tapped: the planner on that day, at the block (Round 19).
+    // Tapped: the planner on that day, at the block.
     final target = PlannerTarget(day, start).payload;
     final time = '${formatMinutes(start)}–${formatMinutes(end)}';
     final when = remind == 0
@@ -233,7 +233,7 @@ class ReminderPlanner {
   Future<void> _plan() async {
     final now = _ref.read(clockProvider)();
     final preferences = _ref.read(preferencesProvider);
-    // Round 82: names are left out only when a page's
+    // Names are left out only when a page's
     // notifications are set private, not because the page is locked.
     bool private(NotifyPage page) => preferences.styleOf(page).private;
     final reminders = [
@@ -274,10 +274,10 @@ class ReminderPlanner {
     ]..sort((a, b) => a.at.compareTo(b.at));
     final scheduled =
         withKeepGoing(withNotifySettings(reminders, preferences), now: now);
-    // Kept for the history (Round 31); nothing shows if not allowed (as
+    // Kept for the history; nothing shows if not allowed (as
     // last looked at: asking here would hold planning up).
     if (_ref.read(notificationsAllowedProvider).valueOrNull ?? true) {
-      // Not the ones that stay while a block is on (Round 72): they're
+      // Not the ones that stay while a block is on: they're
       // what's on, not something that came.
       _ref.read(notificationLogProvider.notifier).planned([
         for (final r in scheduled)
@@ -288,13 +288,13 @@ class ReminderPlanner {
   }
 }
 
-/// Takes [page]'s shown notifications out of the phone's tray (Round 61:
-/// once it's opened, not when the app is); null: the app's own notices.
+/// Takes [page]'s shown notifications out of the phone's tray
+/// (once it's opened, not when the app is); null: the app's own notices.
 final clearShownProvider = Provider<Future<void> Function(NotifyPage?)>(
   (ref) => (page) => ref.read(reminderSchedulerProvider).clearShown(
         switch (page) {
           null => ReminderKind.notice,
-          // Not the ones that stay while a block is on (Round 72).
+          // Not the ones that stay while a block is on.
           NotifyPage.planner => ReminderKind.planner,
           NotifyPage.medicine => ReminderKind.medicine,
           NotifyPage.backup => ReminderKind.backup,
@@ -314,7 +314,7 @@ NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
       ReminderKind.notice => null,
     };
 
-/// [reminders] as each page's settings say (Round 31): none from the
+/// [reminders] as each page's settings say: none from the
 /// planner while it's off or paused that day (Medicine and Backup leave
 /// theirs out when planning), each with its page's tint and sound.
 List<Reminder> withNotifySettings(
@@ -345,7 +345,7 @@ List<Reminder> withNotifySettings(
 /// [reminders] (sorted) as many as can be scheduled, and when they'd run
 /// on past what is (they're planned [reminderDays] ahead, or cut at
 /// [maxReminders]), a notice the evening before the last one to open the
-/// app, which plans them again (E1, Round 23). Without it, an app left
+/// app, which plans them again (E1). Without it, an app left
 /// unopened for two weeks would go quiet with nothing said.
 List<Reminder> withKeepGoing(List<Reminder> reminders,
     {required DateTime now}) {

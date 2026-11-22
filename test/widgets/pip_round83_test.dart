@@ -6,7 +6,7 @@ import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 83: at the tavern he sits on his bench (not standing on it),
+/// At the tavern he sits on his bench (not standing on it),
 /// centred on it.
 void main() {
   const out = (onBreak: false, breakDone: 0.0);

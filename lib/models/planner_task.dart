@@ -122,7 +122,7 @@ typedef FreeSlot = ({int start, int end});
 /// A stretch of time in a day, in minutes (end exclusive).
 typedef TimeSpan = ({int start, int end});
 
-/// Where [span] fits in [free] (Round 83: a block moved to another day):
+/// Where [span] fits in [free] (a block moved to another day):
 /// itself if it's free there, else the nearest time of its length (the
 /// earlier of two as near); null if no free stretch is that long.
 TimeSpan? fitTime(List<FreeSlot> free, TimeSpan span) {

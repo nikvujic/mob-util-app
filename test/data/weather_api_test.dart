@@ -6,7 +6,7 @@ import 'package:the_app/data/weather_api.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/models/preferences.dart';
 
-/// The weather (Round 70): Open-Meteo's answers read, the WMO codes as
+/// The weather: Open-Meteo's answers read, the WMO codes as
 /// Pip's sky shows them, and what's kept on the phone.
 void main() {
   const place = WeatherPlace(
@@ -138,7 +138,7 @@ void main() {
     });
   });
 
-  group("the rain radar's answer (Round 106)", () {
+  group("the rain radar's answer", () {
     Map<String, dynamic> realtime(Object? code) => {
           'data': {
             'time': '2026-10-27T12:00:00Z',

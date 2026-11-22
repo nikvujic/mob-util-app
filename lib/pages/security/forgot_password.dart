@@ -15,12 +15,12 @@ enum ResetChoice {
   /// Confirmed: reset.
   reset,
 
-  /// Reset tapped instead of held (Round 21): someone not in on it. The
+  /// Reset tapped instead of held: someone not in on it. The
   /// caller greys the reset out for a while.
   tapped,
 }
 
-/// How long Reset has to be held when it deletes something (Round 21).
+/// How long Reset has to be held when it deletes something.
 const resetHold = Duration(seconds: 10);
 
 /// Asks to reset a forgotten master password (L7), listing what [plan]

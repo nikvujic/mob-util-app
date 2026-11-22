@@ -1,7 +1,7 @@
-# Recipes — spec (Round 40; settled in Rounds 41–42)
+# Recipes — spec
 
-Built in Round 42 (v1.9.0); type filters and search are for later. From the notes (ROADMAP, Round 40); the drafts are
-in `docs/recipes_drafts.png`. Marked **Q** where the user decides.
+Built in v1.9.0; type filters and search are for later. From the notes (ROADMAP); the drafts are
+in `docs/recipes_drafts.png`. Marked **Q** where a decision was open.
 
 ## 1. The Recipes page (a Hub page)
 
@@ -37,7 +37,7 @@ in `docs/recipes_drafts.png`. Marked **Q** where the user decides.
 ### To Shop
 
 - Puts the recipe's ingredients on the Shop list, with their quantities.
-- All of them go on the **to-buy** list (the user moves what he has).
+- All of them go on the **to-buy** list (what's already at home is moved off by hand).
 - An item already in Shop with the same name (ignoring case) and the
   same quantity is just put back on the to-buy list; with another
   quantity, a **copy** is added (two items, two quantities: easier than
@@ -63,7 +63,7 @@ in `docs/recipes_drafts.png`. Marked **Q** where the user decides.
   with no quantity yet (tap to set).
 - **Method**: works like a note: it shows as text, a tap puts the cursor
   there and the keyboard up, with the format bar (Markdown). (So edit
-  mode has its own view/edit for this text, as the user said.)
+  mode has its own view/edit for this text.)
 - Pull down for reach (reach mode) here, as on other editing pages.
 - Saving like a note: as you go (autosave); bottom buttons **Done**
   (outermost; back to view mode), **Undo**, **Discard changes** (back to
@@ -117,13 +117,13 @@ so picking is quick. Opened from Recipes (to manage it) or from a recipe
   with frozen fixtures; partial restore lists recipes (each brings its
   ingredients that aren't in the list yet).
 
-## 6. Decided (Round 41)
+## 6. Decided
 
 - No servings, no ticking off ingredients, no timer, no photos.
 - Duplicate and copy to the clipboard: yes (the recipe's menu).
 - Search by ingredient ("what can I make with eggs?"): later.
 - Ingredient groups (a cake's "Dough" and "Filling"): **no**, one flat
-  list per recipe (Round 42).
+  list per recipe.
 
 **Quantities, explained**: a recipe's quantity is any text ("200 g",
 "2", "1 tbsp", "a pinch"). Shop only knows a count (×2) or a weight

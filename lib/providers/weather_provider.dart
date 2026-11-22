@@ -8,17 +8,17 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 export 'package:the_app/data/weather_api.dart' show WeatherFailure;
 
-/// The weather service (Round 70); a fake in tests.
+/// The weather service; a fake in tests.
 final weatherApiProvider = Provider<WeatherApi>((ref) => OpenMeteoApi());
 
-/// The rain radar (Round 106), used with the user's key; a fake in tests.
+/// The rain radar, used with the user's key; a fake in tests.
 final radarApiProvider = Provider<RadarApi>((ref) => TomorrowIoApi());
 
 /// Where to get a rain radar key (shown with a copy button).
 const radarSignUp = TomorrowIoApi.signUp;
 
-/// The weather's fetching (Round 70): whether it's under way, and why
-/// the last try failed (null: it didn't); Round 106: why the rain radar
+/// The weather's fetching: whether it's under way, and why
+/// the last try failed (null: it didn't); why the rain radar
 /// failed, the weather then Open-Meteo's alone.
 typedef WeatherFetch = ({bool busy, String? failed, String? radarFailed});
 
@@ -34,7 +34,7 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
       preferencesProvider.select((p) => (p.internet.weather, p.internet.place)),
       (_, __) => _follow(),
     );
-    // Round 106: a key added or changed: fetched again with it.
+    // A key added or changed: fetched again with it.
     _ref.listen(
       preferencesProvider.select((p) => p.internet.radarKey),
       (_, __) => scheduleMicrotask(() => refresh(force: true)),
@@ -48,7 +48,7 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
   static const every = Duration(minutes: 15);
   static const staleAfter = Duration(hours: 1);
 
-  /// Round 106: with the rain radar, its rain now is fetched every time
+  /// With the rain radar, its rain now is fetched every time
   /// ([every]): about 100 calls a day, well in its free limit.
   static const radarStaleAfter = Duration(minutes: 14);
 
@@ -88,7 +88,7 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
     state = (busy: true, failed: null, radarFailed: null);
     try {
       var report = await _ref.read(weatherApiProvider).now(place, now);
-      // Round 106: the rain radar's rain or snow now wins; dry, Open-
+      // The rain radar's rain or snow now wins; dry, Open-
       // Meteo's sky stands. Failing, the weather is Open-Meteo's alone.
       String? radarFailed;
       if (key != null) {
@@ -113,7 +113,7 @@ class WeatherNotifier extends StateNotifier<WeatherFetch> {
     }
   }
 
-  /// Round 106: tries [key] on the rain radar once (at the picked place,
+  /// Tries [key] on the rain radar once (at the picked place,
   /// or anywhere if there's none yet): null if it works, else why not.
   Future<String?> testRadarKey(String key) async {
     final place = _settings.place ??
@@ -137,14 +137,14 @@ final weatherProvider = StateNotifierProvider<WeatherNotifier, WeatherFetch>(
   (ref) => WeatherNotifier(ref),
 );
 
-/// The weather for Pip's sky now (Round 70): Open-Meteo's code, while
+/// The weather for Pip's sky now: Open-Meteo's code, while
 /// it's on and the last report is fresh enough; null for a plain sky.
 final skyWeatherProvider = Provider<int?>((ref) {
   final internet = ref.watch(preferencesProvider.select((p) => p.internet));
   return internet.reportAt(ref.watch(clockProvider)())?.code;
 });
 
-/// The wind for Pip's trees now (Round 79), km/h; null: not known.
+/// The wind for Pip's trees now, km/h; null: not known.
 final skyWindProvider = Provider<double?>((ref) {
   final internet = ref.watch(preferencesProvider.select((p) => p.internet));
   return internet.reportAt(ref.watch(clockProvider)())?.wind;

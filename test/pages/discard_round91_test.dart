@@ -8,7 +8,7 @@ import 'package:the_app/providers/subscriptions_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 91: pages saved as they're typed (a subscription, a
+/// Pages saved as they're typed (a subscription, a
 /// date) ask on back, once changed, Save or Discard, as a note
 /// does; Discard puts it back (a new one goes); a tap outside stays.
 void main() {

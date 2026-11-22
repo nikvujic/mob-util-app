@@ -1,8 +1,8 @@
 part of 'pip_brain.dart';
 
-/// Round 138 (out of `pip_brain.dart`): his places: his quest's work
-/// (Round 127), his finished house (Round 128), and getting between them
-/// and his field without a cut while he's watched (Round 133–136).
+/// His places: his quest's work,
+/// his finished house, and getting between them
+/// and his field without a cut while he's watched.
 class _PipPlacesState {
   /// His quest's work, as his life last said (the room asks every
   /// second), and the seconds since.
@@ -27,13 +27,13 @@ class _PipPlacesState {
   double? joinFrom;
   double joinT = 0;
 
-  /// Round 141: seen, his work over while he's at one of its places (the
+  /// Seen, his work over while he's at one of its places (the
   /// mine, the house area...): how it looked as it ended, how long he's
   /// been walking off it since, and whether he goes into his house next
   /// (else onto his field); null: not leaving.
   ({QuestView from, double t, bool toHome})? leaving;
 
-  /// Round 141: seen joining his work under way (off his field, or back
+  /// Seen joining his work under way (off his field, or back
   /// on where he fell): where he's got to walking to where it's at now
   /// (his middle, as [QuestView.pipCentre] measures), for how long;
   /// null: simply at it.
@@ -62,21 +62,21 @@ extension PipBrainPlaces on PipBrain {
   double get questCamera => _pl.questCamera;
   set questCamera(double value) => _pl.questCamera = value;
 
-  // Round 127: his quests.
+  // His quests.
 
   /// What his quest's work looks like now (the room draws it); null when
   /// he isn't at it.
   QuestView? get questView {
-    // Round 134: run out at his work, he lies there (and gets up there).
+    // Run out at his work, he lies there (and gets up there).
     if (_pl.downView case final view?
         when PipBrain._downActs.contains(activity)) {
       return view;
     }
     final now = _pl.questNow;
     if (activity != PipActivity.questing || now == null) return null;
-    // Round 141: his work over, walking off where he was.
+    // His work over, walking off where he was.
     if (_pl.leaving case final leaving?) return _leaveView(leaving);
-    // Round 133: seen going to his work, first off his field's right
+    // Seen going to his work, first off his field's right
     // edge.
     if (_pl.joinFrom case final from?) {
       return QuestView(
@@ -94,7 +94,7 @@ extension PipBrainPlaces on PipBrain {
     return view;
   }
 
-  /// Round 141: walking to [view] (where his work's at now) from [at]
+  /// Walking to [view] (where his work's at now) from [at]
   /// (his middle), [t] seconds since he set off: up onto what he works on
   /// as he gets there.
   QuestView _arriveView(QuestView view, double at, double t) {
@@ -115,7 +115,7 @@ extension PipBrainPlaces on PipBrain {
     );
   }
 
-  /// His work as his own clock has it: Round 141: past the end of the
+  /// His work as his own clock has it: past the end of the
   /// step his life last said (it says so once a second), on into the
   /// next, not held at its end and then jumped on.
   QuestView _scriptView(PipQuestNow now) {
@@ -136,7 +136,7 @@ extension PipBrainPlaces on PipBrain {
     return now == null ? null : _scriptView(now);
   }
 
-  /// Round 141: walking in to his work: from the place's edge (its left;
+  /// Walking in to his work: from the place's edge (its left;
   /// the house area's right, as the way from his field goes), or [from].
   void _arriveFrom(double? from) {
     final view = _workView;
@@ -147,7 +147,7 @@ extension PipBrainPlaces on PipBrain {
     _pl.arriving = (at: at, t: 0);
   }
 
-  // Round 134: no cuts between his places while he's watched.
+  // No cuts between his places while he's watched.
 
   /// Down where he ran out at his work (his room keeps his station away:
   /// he's not on his field).
@@ -178,8 +178,8 @@ extension PipBrainPlaces on PipBrain {
     _pl.joinFrom = null;
     _pl.arriving = null;
     _pl.leaving = null;
-    // Round 134: seen, his work over, he walks back onto his field
-    // (from its right edge, as he went); Round 136: or, his house
+    // Seen, his work over, he walks back onto his field
+    // (from its right edge, as he went); or, his house
     // next ([toHome]), in at its door (not onto his field, then
     // round and off it again).
     if (animate && toHome) {
@@ -193,7 +193,7 @@ extension PipBrainPlaces on PipBrain {
     }
   }
 
-  /// Round 141: walking off where his work ended: off a place's left
+  /// Walking off where his work ended: off a place's left
   /// edge (the way home); in the house area, down off what he stood on
   /// and off its right edge, or to the foot of its stairs (his house
   /// next). Null once he's off it.
@@ -236,7 +236,7 @@ extension PipBrainPlaces on PipBrain {
     _start(PipActivity.questing);
     _pl.joinFrom = null;
     _pl.arriving = null;
-    // Round 141: run out on his field on his way (or off to it): on his
+    // Run out on his field on his way (or off to it): on his
     // way again, off its edge, then in to his work.
     if (down?.place == QuestScenePlace.field && _pl.leaving == null) {
       _pl.joinFrom = x;
@@ -250,7 +250,7 @@ extension PipBrainPlaces on PipBrain {
     _placeQuest();
   }
 
-  /// Round 141: on his field where he is (walking in if he's past its
+  /// On his field where he is (walking in if he's past its
   /// edge), his work over.
   void _onFieldAgain() {
     final inside = x.clamp(_minX, _maxX).toDouble();
@@ -284,12 +284,12 @@ extension PipBrainPlaces on PipBrain {
     _t = 0;
   }
 
-  /// Round 134: his room opened again: a walk between his places that
+  /// His room opened again: a walk between his places that
   /// was under way when it was left is done by now.
   void freshScenes() {
     _pl.joinFrom = null;
     _pl.arriving = null;
-    // Round 141: a walk off his work's place done by now.
+    // A walk off his work's place done by now.
     if (_pl.leaving case final leaving?) {
       _leftWork(animate: false, toHome: leaving.toHome);
       if (leaving.toHome) _switchHome(true);
@@ -307,18 +307,18 @@ extension PipBrainPlaces on PipBrain {
 
   /// At his quest's work, or not, as his life says ([now]; his room
   /// checks every second): he's simply there, at the step and the moment
-  /// it's at. Round 133: [animate] (seen happening, e.g. back on after a
+  /// it's at. [animate] (seen happening, e.g. back on after a
   /// battery): he walks off his field to it first.
   void quest(PipQuestNow? now,
       {bool animate = false, bool down = false, bool toHome = false}) {
     if (now == null) {
       if (activity == PipActivity.questing) {
-        // Round 134: run out at it ([down]): he falls there, as he is.
+        // Run out at it ([down]): he falls there, as he is.
         if (down) {
           _pl.downView = _still(questView);
           return;
         }
-        // Round 141: seen, off where he is first (the mine, the house
+        // Seen, off where he is first (the mine, the house
         // area...), not cut away from it.
         if (_pl.leaving case final leaving?) {
           // Not watched any more: simply off it.
@@ -337,7 +337,7 @@ extension PipBrainPlaces on PipBrain {
           _pl.leaving = (from: _still(view)!, t: 0, toHome: toHome);
           return;
         }
-        // Round 141: seen on his field: simply carries on from there.
+        // Seen on his field: simply carries on from there.
         if (animate && view?.place == QuestScenePlace.field) {
           _pl.questNow = null;
           _pl.joinFrom = null;
@@ -348,21 +348,21 @@ extension PipBrainPlaces on PipBrain {
       }
       return;
     }
-    // Round 141: down where he ran out at it (off, back on): he gets up
+    // Down where he ran out at it (off, back on): he gets up
     // there (his work as it is now, once he's up), not on his field.
     if (downAtWork) {
       _pl.questNow = now;
       _pl.questT = 0;
       return;
     }
-    // Round 141: seen walking off a place, or through his door: that
+    // Seen walking off a place, or through his door: that
     // first (then he sets off from his field).
     if (animate && (_pl.leaving != null || _pl.homeTo != null)) return;
     _pl.downView = null;
     _pl.leaving = null;
     final before = _pl.questNow;
     if (activity != PipActivity.questing) {
-      // Round 152: simply at it (the app just opened on it): even from a
+      // Simply at it (the app just opened on it): even from a
       // moment of his own.
       if (!_canGoOut && (animate || !_mayBePut)) return;
       if (!_canGoOut) _packTent();
@@ -374,7 +374,7 @@ extension PipBrainPlaces on PipBrain {
       _pl.arriving = null;
     }
     _pl.questNow = now;
-    // Round 132: in the same step, his own smooth clock carries on (the
+    // In the same step, his own smooth clock carries on (the
     // room's check every second only says where he is): loops (a swing,
     // a scoop, his screen) don't hitch. Off by more than a moment, he's
     // put right.
@@ -403,7 +403,7 @@ extension PipBrainPlaces on PipBrain {
     }
     if (_pl.joinFrom case final from?) {
       _pl.joinT += dt;
-      // Off his field: at his work (Round 141: walking in to it, unless
+      // Off his field: at his work (walking in to it, unless
       // it's on his field too).
       if (from + QuestView.walkSpeed * _pl.joinT > roomWidth + 2) {
         _pl.joinFrom = null;
@@ -442,7 +442,7 @@ extension PipBrainPlaces on PipBrain {
     }
   }
 
-  /// Round 141: in a room wider than the house area, past its right end
+  /// In a room wider than the house area, past its right end
   /// (going to or from his field, [QuestView.edge]) stretched to reach off
   /// the room's edge: never vanishing in view.
   double _pastHouseArea(double centre) {
@@ -452,7 +452,7 @@ extension PipBrainPlaces on PipBrain {
     return area + (centre - area) * reach;
   }
 
-  // Round 128: his house, once it's built (spec section 10).
+  // His house, once it's built (spec section 10).
 
   /// In his house or on his field, as his life says ([wanted]; his room
   /// checks every second). He goes when he's free to (not in the middle
@@ -468,7 +468,7 @@ extension PipBrainPlaces on PipBrain {
         activity == PipActivity.dancing ||
         activity == PipActivity.sheltering;
     if (!free) return;
-    // Round 134: seen, he walks out first: to his door, or off his field.
+    // Seen, he walks out first: to his door, or off his field.
     if (animate) {
       if (_pl.homeTo == wanted && activity == PipActivity.walking) return;
       _pl.homeTo = wanted;
@@ -544,7 +544,7 @@ extension PipBrainPlaces on PipBrain {
   /// Arrived somewhere ([_stand] just done): at a window he looks out,
   /// at the fire he stands warming a while.
   void _arrive() {
-    // Round 134: out of one place, in through the other.
+    // Out of one place, in through the other.
     if (_pl.homeTo case final going?) {
       _pl.homeTo = null;
       _switchHome(going);
@@ -579,7 +579,7 @@ extension PipBrainPlaces on PipBrain {
           PipFrame.step3,
           PipFrame.step4,
         ][(view.t / PipBrain.stepTime).floor() % 4],
-      // Round 149: working, his face as it is (an "oh" every 0.6 s
+      // Working, his face as it is (an "oh" every 0.6 s
       // looked like panting).
       _ => PipFrame.idle,
     };

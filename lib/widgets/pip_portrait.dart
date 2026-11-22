@@ -4,12 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Pip standing still, one [frame] of him (Round 35: Pip Home's card),
+/// Pip standing still, one [frame] of him (Pip Home's card),
 /// [pixel] logical pixels a dot, snapped to whole device pixels.
 class PipPortrait extends StatelessWidget {
   final PipFrame frame;
 
-  /// His face (Round 37: tired by his energy, asleep, off).
+  /// His face (tired by his energy, asleep, off).
   final PipFace face;
   final double pixel;
 

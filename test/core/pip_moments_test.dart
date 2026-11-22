@@ -5,7 +5,7 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_energy.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 53: a longer wake-up, a crouch to pick a flower, the flower in
+/// A longer wake-up, a crouch to pick a flower, the flower in
 /// his hand, the sword held out, bigger bugs, buzzes where things hit, no
 /// pictures on his screen just for fun, and his screen reading right
 /// when he faces left.
@@ -30,7 +30,7 @@ void main() {
     return p;
   }
 
-  // Waking up: Round 57 made it longer still (pip_round57_test).
+  // Waking up: longer still (pip_hats_wake_test).
 
   test('picking a flower: he crouches, his feet staying on the ground', () {
     final p = up(seed: 5)..play(PipAnimation.flower);
@@ -76,7 +76,7 @@ void main() {
         if (size < 0.5) continue;
         final away = p.facingRight ? angle > 0 : angle < 0;
         expect(away, isTrue, reason: 'leaning away, angle $angle');
-        // Round 54: by his casing, not over it.
+        // By his casing, not over it.
         expect(
             p.facingRight
                 ? hx - 1 > p.x + PipBrain.width - PipBrain.bodyInset
@@ -107,7 +107,7 @@ void main() {
   group('buzzes', () {
     test('landing from the sky: a medium one, once', () {
       final p = up()
-        ..takeBuzzes() // Round 98: his landing's
+        ..takeBuzzes() // His landing's
         ..enter(PipEntrance.sky);
       final buzzes = <PipBuzz>[];
       for (var i = 0; i < 60 * 10 && p.activity == PipActivity.falling; i++) {
@@ -153,7 +153,7 @@ void main() {
         ball.step(1 / 60);
         kicked.addAll(ball.takeBuzzes());
       }
-      // Round 98: then a light one on each real bounce.
+      // Then a light one on each real bounce.
       expect(kicked.first, PipBuzz.medium);
       expect(kicked.skip(1), everyElement(PipBuzz.light));
     });
@@ -213,7 +213,7 @@ void main() {
     }
   });
 
-  group('his medicine reminder (Round 55: it stays)', () {
+  group('his medicine reminder (it stays)', () {
     test(
         'due: the pill at once, kept on (a hop now and then), him not '
         'walking off', () {
@@ -235,7 +235,7 @@ void main() {
     });
 
     test(
-        'Round 145: due, the pill whatever he does while he\'s up '
+        'due, the pill whatever he does while he\'s up '
         '(working, out on his adventure, eating...), over him as he is; '
         'none asleep, off or before his screen comes back on', () {
       final p = up()..medicineDue = true;

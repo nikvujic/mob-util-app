@@ -103,7 +103,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     ];
   }
 
-  /// Round 83: moves a task to [day], from [start] to [end]. Throws
+  /// Moves a task to [day], from [start] to [end]. Throws
   /// [TaskOverlapException] if that time isn't free there.
   void moveTask(String id, DateTime day,
       {required int start, required int end}) {
@@ -134,7 +134,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     ];
   }
 
-  /// Round 78: a ticked-off task on a day before [today] isn't
+  /// A ticked-off task on a day before [today] isn't
   /// kept; they're deleted. The ones deleted.
   List<PlannerTask> dropDoneBefore(DateTime today) {
     final gone = [

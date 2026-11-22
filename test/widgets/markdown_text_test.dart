@@ -166,9 +166,7 @@ void main() {
     expect(controller.text, '- milk\n* eggs\n1. one', reason: 'unchanged');
   });
 
-  testWidgets(
-      'a bullet\'s dot is bigger (Round 27), centred on the text (Round 29)',
-      (tester) async {
+  testWidgets('a bullet\'s dot is bigger, centred on the text', (tester) async {
     await pumpField(tester, '- milk\nmilk\nmilk');
     final dot = find.byKey(const Key('listDot'));
     expect(dot, findsOneWidget);
@@ -196,8 +194,7 @@ void main() {
     expect(top(7) - top(2), closeTo(top(12) - top(7), 0.5));
   });
 
-  testWidgets('#### is a small heading: bold, a little bigger (Round 27)',
-      (tester) async {
+  testWidgets('#### is a small heading: bold, a little bigger', (tester) async {
     await pumpField(tester, '#### Four\n### Three');
     final four = spanOf(tester, 'Four').style!;
     final three = spanOf(tester, 'Three').style!;

@@ -89,7 +89,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 82: a locked Planner still names its reminders; set private, '
+      'a locked Planner still names its reminders; set private, '
       'they don\'t', (tester) async {
     await openPlanner(tester);
     await tester.runAsync(

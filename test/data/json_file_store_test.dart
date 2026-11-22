@@ -60,7 +60,7 @@ void main() {
     expect(await store.read(), {'n': 3});
   });
 
-  test('a failed write is retried once it can be (D6, Round 23)', () async {
+  test('a failed write is retried once it can be (D6)', () async {
     await store.write({'n': 1});
     final blocker = Directory('${store.file.path}.tmp')..createSync();
     await store.write({'n': 2});
@@ -77,8 +77,7 @@ void main() {
     expect(await store.read(), {'n': 2});
   });
 
-  test('a retry never writes the failed version over a newer one (Round 24)',
-      () async {
+  test('a retry never writes the failed version over a newer one', () async {
     final blocker = Directory('${store.file.path}.tmp')
       ..createSync(recursive: true);
     await store.write({'n': 1}); // fails

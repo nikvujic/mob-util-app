@@ -5,7 +5,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/internet.dart';
 import 'package:the_app/providers/weather_provider.dart';
 
-/// Finding a place for the weather (Round 70): its name typed, then one
+/// Finding a place for the weather: its name typed, then one
 /// picked from the matches (name, region, country), since many towns
 /// share a name. Resolves to the place picked, or null.
 Future<WeatherPlace?> showPlaceSearchSheet(BuildContext context) =>

@@ -2,14 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Every text field's selection handles (Round 92, the notes'
+/// Every text field's selection handles (the notes'
 /// lowered grab area everywhere): give it `selectionControls: lowHandles`.
 final lowHandles = LowHandleSelectionControls();
 
-/// Round 64: each handle as tall as a finger's touch area, drawn at its
+/// Each handle as tall as a finger's touch area, drawn at its
 /// top: its touch area then starts at the handle and reaches down,
 /// not up into the line it marks (where a tap on the text grabbed it).
-/// Round 74: as wide as one too, the drawn handle at its inner edge
+/// As wide as one too, the drawn handle at its inner edge
 /// ([inner] from it): the touch area reaches out away from the text
 /// (right of the end's handle, left of the start's), barely over it.
 /// The cursor's one handle is in its middle.

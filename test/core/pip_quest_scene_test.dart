@@ -5,7 +5,7 @@ import 'package:the_app/core/pip_quest.dart';
 import 'package:the_app/core/pip_quest_scene.dart';
 import 'package:the_app/core/weather.dart';
 
-/// What his quest's work looks like (Round 127): where he is and what
+/// What his quest's work looks like: where he is and what
 /// he's doing, from the step and the seconds into it.
 void main() {
   final q = Quests.house;
@@ -28,7 +28,7 @@ void main() {
   });
 
   test(
-      'Round 141, 144: on the field between his places he walks in from one '
+      'on the field between his places he walks in from one '
       'edge and off the other (no cut in view); every part of a walk at his '
       'walking pace, whatever the room\'s width', () {
     for (final width in const [120, 160, 240]) {
@@ -101,7 +101,7 @@ void main() {
     final sand = first(
         (s) => s.action == QuestAction.gather && s.place == QuestPlace.beach);
     expect(view(sand, 400).dug, greaterThan(view(sand, 30).dug));
-    // Round 147: his shovel, a scoop every 2 s: into the hole, then up,
+    // His shovel, a scoop every 2 s: into the hole, then up,
     // the sand over his shoulder as it comes up.
     expect(view(sand, 30).swing, isNotNull, reason: 'his shovel');
     expect(view(sand, 30.5).flyers, isEmpty, reason: 'going in');
@@ -174,7 +174,7 @@ void main() {
 
     test(
         'checked every second, his moment carries on smoothly (no hitch in '
-        'a swing or his screen); off by a lot, put right (Round 132)', () {
+        'a swing or his screen); off by a lot, put right', () {
       final brain = PipBrain(roomWidth: 160)..medicineDue = true;
       final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
       brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
@@ -191,7 +191,7 @@ void main() {
 
     test(
         'seen going to his work (back on after a battery): off his field\'s '
-        'right edge first, then at it; not seen, simply at it (Round 133)', () {
+        'right edge first, then at it; not seen, simply at it', () {
       final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
       final now = (at: q.at(q.startOf(mine) + 1), seconds: 100.0);
       final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
@@ -220,7 +220,7 @@ void main() {
 
     test(
         'a battery at his work flies to him (on the scaffold too), one at a '
-        'time (Round 133)', () {
+        'time', () {
       final brain = PipBrain(roomWidth: 160)..step(PipBrain.landEnd);
       final high = q.steps.indexWhere((s) => s.piece?.id == 'rafters');
       brain.quest((at: q.at(q.startOf(high) + 2), seconds: 150));

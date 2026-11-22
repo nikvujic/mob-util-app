@@ -10,7 +10,7 @@ import 'package:the_app/data/app_storage.dart';
 /// it to the app through provider overrides.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Taps in notes: never as if Shift were held (Round 26).
+  // Taps in notes: never as if Shift were held.
   guardAgainstStuckShift();
   final storage = await AppStorage.open();
   final info = await PackageInfo.fromPlatform();

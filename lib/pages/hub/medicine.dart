@@ -81,7 +81,7 @@ class MedicinePage extends ConsumerWidget {
   }
 
   /// The medicine's menu: history, edit, delete. After editing it opens
-  /// again, on the medicine as it now is (Round 24).
+  /// again, on the medicine as it now is.
   Future<void> _menu(
     BuildContext context,
     WidgetRef ref,
@@ -154,7 +154,7 @@ class MedicinePage extends ConsumerWidget {
       return;
     }
     // An important one: typing DELETE, so it isn't lost by a slip
-    // (Round 32).
+    //.
     final bool confirmed;
     if (medicine.important) {
       confirmed = await showTypeToConfirmDialog(
@@ -201,7 +201,7 @@ class MedicinePage extends ConsumerWidget {
     final colors = context.colors;
 
     return Scaffold(
-      // Round 55: no notifications button (they're on the Notifications
+      // No notifications button (they're on the Notifications
       // page, from the menu).
       appBar: AppBar(title: const Text('Medicine')),
       body: book.medicines.isEmpty
@@ -258,8 +258,7 @@ class MedicinePage extends ConsumerWidget {
                       onDose: (dose) async {
                         final taken = book.takenFor(medicine.id, today, dose);
                         if (taken == null) {
-                          // Important: only by holding the button (Round
-                          // 24).
+                          // Important: only by holding the button.
                           if (medicine.important) {
                             final held = await showHoldToTake(
                               context,
@@ -273,7 +272,7 @@ class MedicinePage extends ConsumerWidget {
                           AppSound.done();
                         } else {
                           // Unticking asks first: more likely a slip
-                          // (Round 18).
+                          //.
                           final at = taken.at;
                           final undo = await showConfirmDialog(
                             context,
@@ -327,7 +326,7 @@ class MedicinePage extends ConsumerWidget {
               ),
             ),
           ),
-          // The page's main action: the app's add button (Round 39).
+          // The page's main action: the app's add button.
           BottomAction(
             icon: Icons.add,
             tooltip: 'Add medicine',
@@ -349,7 +348,7 @@ String _schedule(Medicine m, DateTime today) {
       m.until == null ? '' : ', until ${formatDay(m.until!, today: today)}';
   final again =
       m.followUp == null ? '' : ' · again after ${m.followUp! ~/ 60} h';
-  // Some days only (Round 40): which.
+  // Some days only: which.
   final days = m.weekdays == null
       ? ''
       : ' · ${([...m.weekdays!]..sort()).map(weekdayName).join(' ')}';
@@ -410,8 +409,8 @@ class _MedicineCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // How many it's been, ever (Round 18), level with the
-                  // handle beside it (Round 20).
+                  // How many it's been, ever, level with the
+                  // handle beside it.
                   Text(
                     '${book.takenCount(medicine.id)}',
                     key: Key('medicineCount-${medicine.id}'),

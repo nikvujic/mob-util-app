@@ -7,37 +7,37 @@
 /// `pages/hub/tools.dart` and `providers/section_data_provider.dart`):
 /// those switches don't compile until a new page is in all of them.
 enum HubTool {
-  // Their order is the Hub's default (Round 48), for a Hub not
+  // Their order is the Hub's default, for a Hub not
   // arranged by hand.
   counters('Counters'),
   medicine('Medicine'),
   placard('Placard'),
 
-  /// Pip's home (Round 35): shown once he's hatched. No lock (he's no
+  /// Pip's home: shown once he's hatched. No lock (he's no
   /// secret) and nothing for Clear data (his life isn't a page's data).
   pip('Pip'),
 
-  /// Recipes (Round 42), with the ingredients list they pick from.
+  /// Recipes, with the ingredients list they pick from.
   recipes('Recipes'),
 
-  /// Birthdays & dates (Round 57).
+  /// Birthdays & dates.
   dates('Dates'),
 
-  /// Subscriptions (Round 79): what's paid, when, and what to do about it.
+  /// Subscriptions: what's paid, when, and what to do about it.
   subscriptions('Subscriptions'),
 
-  /// Spotify in the morning (Round 93): a time, days and a volume; no
+  /// Spotify in the morning: a time, days and a volume; no
   /// data to lock or clear.
   spotify('Spotify'),
 
-  /// Packing lists (Round 94): lists of things to pack, by section.
+  /// Packing lists: lists of things to pack, by section.
   packing('Packing'),
 
-  /// People (Round 108): the people you know on a board, with family
+  /// People: the people you know on a board, with family
   /// trees.
   people('People'),
 
-  /// A unit converter (Round 118): nothing kept, so nothing to lock or
+  /// A unit converter: nothing kept, so nothing to lock or
   /// clear.
   converter('Converter');
 

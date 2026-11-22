@@ -13,7 +13,7 @@ final hubToolDotProvider = Provider.family<bool, HubTool>(
     HubTool.medicine => ref.watch(medicineDotProvider),
     HubTool.recipes => false,
     HubTool.dates => false,
-    // Round 79: one to cancel soon (within its reminder).
+    // One to cancel soon (within its reminder).
     HubTool.subscriptions => ref.watch(subscriptionsDotProvider),
     HubTool.pip => false,
     HubTool.spotify => false,
@@ -30,7 +30,7 @@ final hubDotProvider = Provider<bool>(
 );
 
 /// Whether a Hub page has something new to see, with a green dot on its
-/// tile (Round 57: a birthday today on Dates). Exhaustive like the red.
+/// tile (a birthday today on Dates). Exhaustive like the red.
 final hubToolNewsProvider = Provider.family<bool, HubTool>(
   (ref, tool) => switch (tool) {
     HubTool.dates => ref.watch(datesDotProvider),

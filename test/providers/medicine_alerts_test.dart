@@ -17,11 +17,11 @@ void main() {
     times: [8 * 60, 20 * 60],
     from: DateTime(2026, 10, 1),
     until: tomorrow,
-    // The red dot is for important ones only (Round 24).
+    // The red dot is for important ones only.
     important: true,
   );
 
-  /// The same, reminding again [minutes] after each dose (Round 16).
+  /// The same, reminding again [minutes] after each dose.
   Medicine pillsAgain(int minutes) => Medicine(
         id: 'p',
         name: 'Pills',
@@ -63,7 +63,7 @@ void main() {
     expect(kinds, everyElement(ReminderKind.medicine));
   });
 
-  test('some weekdays only (Round 40): no reminders on its other days', () {
+  test('some weekdays only: no reminders on its other days', () {
     final tuesdays = Medicine(
       id: 't',
       name: 'Tuesdays',
@@ -151,7 +151,7 @@ void main() {
     );
   });
 
-  group('at the same moment: one notification (Round 23)', () {
+  group('at the same moment: one notification', () {
     Medicine at(String id, String name, List<int> times, {int? followUp}) =>
         Medicine(
           id: id,
@@ -193,7 +193,7 @@ void main() {
       expect(doseDue(book, DateTime(2026, 10, 12, 8)), isTrue);
     });
 
-    test('only important medicines count (Round 24)', () {
+    test('only important medicines count', () {
       final plain = Medicine(
         id: 'v',
         name: 'Vitamin C',
@@ -218,7 +218,7 @@ void main() {
       }
     });
 
-    test("yesterday's still count until 02:00 (Round 15)", () {
+    test("yesterday's still count until 02:00", () {
       final late = Medicine(
         id: 'l',
         name: 'Late',
@@ -237,7 +237,7 @@ void main() {
       expect(doseDue(marked, DateTime(2026, 10, 13, 1)), isFalse);
     });
 
-    test("only yesterday's from 22:00 (Round 17)", () {
+    test("only yesterday's from 22:00", () {
       // The user at 00:50: doses from 11:00 to 21:00 kept the dot.
       final day = Medicine(
         id: 'd',

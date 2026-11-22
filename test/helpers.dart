@@ -41,7 +41,7 @@ Future<void> openMenu(WidgetTester tester) async {
 }
 
 /// Scrolls the open menu's list until [label] is built and in view
-/// (Round 70: on a short test screen the last items are below).
+/// (on a short test screen the last items are below).
 Future<void> scrollMenuTo(WidgetTester tester, String label) async {
   await tester.scrollUntilVisible(
     find.text(label),
@@ -81,7 +81,7 @@ Future<ProviderContainer> pumpApp(
 }) async {
   final container = ProviderContainer(
     overrides: [
-      // Pip already out of his egg (Round 34), as on most phones by now;
+      // Pip already out of his egg, as on most phones by now;
       // his egg's own tests pass false.
       appStorageProvider.overrideWithValue(AppStorage.inMemory(
         initialPip: pip ??
@@ -92,11 +92,11 @@ Future<ProviderContainer> pumpApp(
         initialPacking: packing,
         initialPeople: people ?? PeopleBook.empty,
       )),
-      // Automatic backup's folder (Round 39): a fake, never Android's.
+      // Automatic backup's folder: a fake, never Android's.
       backupFolderProvider
           .overrideWithValue(backupFolder ?? FakeBackupFolder()),
       appVersionProvider.overrideWithValue(testAppVersion),
-      // The phone's power (Round 44): a fake, unplugged unless told.
+      // The phone's power: a fake, unplugged unless told.
       powerSourceProvider.overrideWithValue(power ?? FakePower()),
       morningMusicAlarmProvider
           .overrideWithValue(morningMusic ?? FakeMorningMusicAlarm()),
@@ -108,14 +108,14 @@ Future<ProviderContainer> pumpApp(
         reminders ?? FakeReminderScheduler(),
       ),
       if (clock != null) clockProvider.overrideWithValue(clock),
-      // The weather (Round 70): never the real service.
+      // The weather: never the real service.
       weatherApiProvider.overrideWithValue(weather ?? FakeWeatherApi()),
-      // Round 106: the rain radar, likewise.
+      // The rain radar, likewise.
       radarApiProvider.overrideWithValue(radar ?? FakeRadarApi()),
       // Pip stands still (an endless animation never settles); his own
       // tests let him move.
       pipAnimatesProvider.overrideWithValue(pipMoves),
-      // His life (Round 37) as a test sets it: awake and full unless it
+      // His life as a test sets it: awake and full unless it
       // says; [realPipLink] for the real one, by the test's clock.
       if (!realPipLink)
         pipLinkProvider.overrideWithValue(pipLink ?? FakePipLink()),
@@ -172,7 +172,7 @@ Future<void> pressBack(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-/// Leaves a page saved as it's typed (Round 91: subscriptions, dates,
+/// Leaves a page saved as it's typed (subscriptions, dates,
 /// meals) with back, answering Save if it asks.
 Future<void> leaveSaved(WidgetTester tester) async {
   await pressBack(tester);
@@ -287,7 +287,7 @@ class FakeReminderScheduler implements ReminderScheduler {
   List<Reminder> scheduled = const [];
 
   /// [scheduled] but the planner's notifications that stay while a block
-  /// is on (Round 72).
+  /// is on.
   List<Reminder> get scheduledReminders => [
         for (final r in scheduled)
           if (r.kind != ReminderKind.plannerNow) r
@@ -311,7 +311,7 @@ class FakeReminderScheduler implements ReminderScheduler {
     scheduled = List.of(reminders);
   }
 
-  /// The kinds whose shown notifications were cleared (Round 61).
+  /// The kinds whose shown notifications were cleared.
   final cleared = <ReminderKind>[];
 
   @override
@@ -356,7 +356,7 @@ Future<void> reveal(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
-/// Pip's life for tests (Round 37): shows [show] with [segments], and
+/// Pip's life for tests: shows [show] with [segments], and
 /// gives batteries while [batteries] last; records what was shown.
 class FakePipLink implements PipLink {
   PipShow show;
@@ -383,7 +383,7 @@ class FakePipLink implements PipLink {
     return true;
   }
 
-  /// Round 77: three taps wake him while [wakeable] (then awake, drowsy
+  /// Three taps wake him while [wakeable] (then awake, drowsy
   /// if [drowsyWoken]); how many times he was.
   bool wakeable = false;
   bool drowsyWoken = true;
@@ -401,38 +401,38 @@ class FakePipLink implements PipLink {
     return true;
   }
 
-  /// The phone plugged in (Round 44).
+  /// The phone plugged in.
   @override
   bool plugged = false;
 
-  /// The time (Round 52); the real one unless a test sets it.
+  /// The time; the real one unless a test sets it.
   DateTime? at;
   @override
   DateTime get now => at ?? DateTime.now();
 
-  /// When notifications came (Round 52).
+  /// When notifications came.
   final List<DateTime> notifications = [];
   @override
   bool notifiedBetween(DateTime from, DateTime to) =>
       notifications.any((n) => n.isAfter(from) && !n.isAfter(to));
 
-  /// A medicine due (Round 53).
+  /// A medicine due.
   @override
   bool medicineDue = false;
 
-  /// When a recipe was read a while (Round 53).
+  /// When a recipe was read a while.
   @override
   DateTime? recipeReadAt;
 
-  /// A birthday today (Round 57).
+  /// A birthday today.
   @override
   bool partyHat = false;
 
-  /// Today's hat otherwise (Round 61).
+  /// Today's hat otherwise.
   @override
   PipHat? hatToday;
 
-  /// Segments from his station (Round 58): one more each (not full); off,
+  /// Segments from his station: one more each (not full); off,
   /// he's on again.
   int charges = 0;
   @override
@@ -444,19 +444,19 @@ class FakePipLink implements PipLink {
     return true;
   }
 
-  /// Out on his adventure (Round 63): what [outing] says.
+  /// Out on his adventure: what [outing] says.
   PipOut? out;
 
   @override
   PipOut? outing() => out;
 
-  /// His ski trip (Round 67): what [trip] says.
+  /// His ski trip: what [trip] says.
   PipTripNow ride = noTrip;
 
   @override
   PipTripNow trip() => ride;
 
-  /// Round 127: at his quest's work, set by a test.
+  /// At his quest's work, set by a test.
   PipQuestNow? questing;
 
   @override
@@ -470,7 +470,7 @@ class FakePipLink implements PipLink {
   @override
   int level = 1;
 
-  /// Round 73: whether he's watched fighting, what was struck down (true:
+  /// Whether he's watched fighting, what was struck down (true:
   /// a boss), and the XP each brings.
   bool? fightingNow;
   final defeats = <bool>[];
@@ -488,16 +488,16 @@ class FakePipLink implements PipLink {
   @override
   bool bossDue = false;
 
-  /// Round 74: how long he's been running out (seconds).
+  /// How long he's been running out (seconds).
   double? running;
 
   @override
   double? outRun() => running;
 }
 
-/// Whether the phone is plugged in, in tests (Round 44): [isPlugged]
+/// Whether the phone is plugged in, in tests: [isPlugged]
 /// now; [plug] tells the app it changed.
-/// Spotify's morning alarm (Round 93): what the phone was last told.
+/// Spotify's morning alarm: what the phone was last told.
 class FakeMorningMusicAlarm implements MorningMusicAlarm {
   final sent = <MorningMusic>[];
 
@@ -523,7 +523,7 @@ class FakePower implements PowerSource {
   }
 }
 
-/// A folder for automatic backups in tests (Round 39): [picks] what
+/// A folder for automatic backups in tests: [picks] what
 /// [pick] returns, [works] whether writing does; records what's written.
 class FakeBackupFolder implements BackupFolder {
   PickedFolder? picks;
@@ -557,7 +557,7 @@ class FakeBackupFolder implements BackupFolder {
   }
 }
 
-/// The weather service (Round 70) as a test sets it: [places] for any
+/// The weather service as a test sets it: [places] for any
 /// search, [report] for any place; [failing] throws instead. Counts its
 /// calls.
 class FakeWeatherApi implements WeatherApi {
@@ -597,7 +597,7 @@ class FakeWeatherApi implements WeatherApi {
   }
 }
 
-/// The rain radar (Round 106) as a test sets it: [code] for any place
+/// The rain radar as a test sets it: [code] for any place
 /// (null: dry); [failing] throws instead. Keeps the keys it was given.
 class FakeRadarApi implements RadarApi {
   int? code;

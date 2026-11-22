@@ -189,7 +189,7 @@ void main() {
     expect(mark('One at 11:00'), findsOneWidget, reason: 'alone again');
   });
 
-  group('marks (Round 19)', () {
+  group('marks', () {
     testWidgets('20 minutes apart: a mark each (they used to merge)',
         (tester) async {
       await openPlanner(tester);
@@ -244,7 +244,7 @@ void main() {
     });
   });
 
-  group('the reminders list (Round 70)', () {
+  group('the reminders list', () {
     final list = find.text('Reminders');
 
     Future<void> openList(WidgetTester tester) async {

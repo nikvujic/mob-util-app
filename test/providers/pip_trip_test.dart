@@ -12,7 +12,7 @@ import 'package:the_app/providers/pip_trip.dart';
 
 import '../helpers.dart';
 
-/// Pip's ski trips (Round 67): ski days, the bus there and back, snow.
+/// Pip's ski trips: ski days, the bus there and back, snow.
 void main() {
   DateTime at(int day, int hour, [int minute = 0]) =>
       DateTime(2027, 1, day, hour, minute);
@@ -99,8 +99,7 @@ void main() {
       return p;
     }
 
-    test('Round 77: asleep on the bus, taps don\'t wake him; after, they do',
-        () {
+    test('asleep on the bus, taps don\'t wake him; after, they do', () {
       final p = pip();
       expect(p.showAt(at(20, 6, 30)), PipShow.asleep);
       expect(p.mayWakeAt(at(20, 6, 30)), isFalse);

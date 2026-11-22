@@ -46,7 +46,7 @@ void main() {
     }
     seed();
     await openMenu(tester);
-    // Round 70: below Internet Access, scrolled to on a short screen.
+    // Below Internet Access, scrolled to on a short screen.
     await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
@@ -80,12 +80,12 @@ void main() {
         reason: 'the planner counts its task, routine and reminder');
     await pick(tester, 'notes');
     expect(enabled(tester, clearButton), isTrue);
-    // Pip's life isn't a page's data (Round 35).
+    // Pip's life isn't a page's data.
     await tester.scrollUntilVisible(
         find.byKey(const Key('clear-medicine')), 100,
         scrollable: find.byType(Scrollable).last);
     expect(find.byKey(const Key('clear-medicine')), findsOneWidget);
-    // To the end (Round 108: People there now): no Pip anywhere.
+    // To the end (People there now): no Pip anywhere.
     await tester.scrollUntilVisible(find.byKey(const Key('clear-people')), 100,
         scrollable: find.byType(Scrollable).last);
     expect(find.byKey(const Key('clear-pip')), findsNothing);

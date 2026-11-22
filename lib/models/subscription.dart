@@ -1,6 +1,6 @@
 import 'package:the_app/models/planner_task.dart';
 
-/// How often a subscription renews (Round 79).
+/// How often a subscription renews.
 enum SubscriptionEvery {
   month('month'),
   year('year');
@@ -13,7 +13,7 @@ enum SubscriptionEvery {
       values.where((e) => e.name == id).firstOrNull ?? month;
 }
 
-/// What's going on with a subscription (Round 79, `docs/SUBSCRIPTIONS_SPEC.md`).
+/// What's going on with a subscription (`docs/SUBSCRIPTIONS_SPEC.md`).
 /// Its [Subscription.date] means what goes with it.
 enum SubscriptionState {
   /// Running: the date is the next payment.
@@ -40,10 +40,10 @@ enum SubscriptionState {
       values.where((s) => s.name == id).firstOrNull ?? active;
 }
 
-/// How a subscription's card stands (Round 84), for its colour.
+/// How a subscription's card stands, for its colour.
 enum CardExpiry { fine, soon, expired }
 
-/// One subscription (Round 79): a name, what it costs and how often, what
+/// One subscription: a name, what it costs and how often, what
 /// state it's in and its date, the card it's paid with, a note, and a
 /// reminder some days before its date (besides the one on the day).
 class Subscription {
@@ -64,8 +64,8 @@ class Subscription {
   /// The card it's paid with; empty: not known.
   final String card;
 
-  /// Round 80: when that card expires (a virtual card runs out);
-  /// null: not set. Round 85: the last day of its month (cards have no
+  /// When that card expires (a virtual card runs out);
+  /// null: not set. The last day of its month (cards have no
   /// day).
   final DateTime? cardExpires;
   final String note;
@@ -98,7 +98,7 @@ class Subscription {
     this.note = '',
     this.remindBefore,
   })  : date = date == null ? null : DateTime(date.year, date.month, date.day),
-        // Round 85: a card expires with its month (it has no
+        // A card expires with its month (it has no
         // day): kept as that month's last day, whatever day is given.
         cardExpires = cardExpires == null
             ? null
@@ -200,7 +200,7 @@ class Subscription {
         expires.isBefore(at);
   }
 
-  /// Round 84: how its card stands on [today]: expired (gone
+  /// How its card stands on [today]: expired (gone
   /// by), soon (a week or less away, the day itself included), or fine
   /// (later, or no expiry set).
   CardExpiry cardExpiryOn(DateTime today) {
@@ -214,7 +214,7 @@ class Subscription {
     return days <= cardSoonDays ? CardExpiry.soon : CardExpiry.fine;
   }
 
-  /// A card expiring within this many days is soon (Round 84).
+  /// A card expiring within this many days is soon.
   static const cardSoonDays = 7;
 
   /// What it comes to a month (a year's price ÷ 12); null: no price.
@@ -281,7 +281,7 @@ class Subscription {
 /// What the running subscriptions come to a month, in one currency.
 typedef MonthlyTotal = ({String currency, double amount, bool about});
 
-/// The subscriptions (Round 79), in the order they were added.
+/// The subscriptions, in the order they were added.
 class SubscriptionBook {
   final List<Subscription> subscriptions;
 

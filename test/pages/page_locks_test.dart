@@ -13,7 +13,7 @@ import 'package:the_app/providers/session_provider.dart';
 
 import '../helpers.dart';
 
-/// A lock for each of the Hub's pages (O7, Round 21): switches under the
+/// A lock for each of the Hub's pages (O7): switches under the
 /// Hub on Security; a locked page shows a lock screen while the app is
 /// locked, whatever the Hub's own lock says.
 void main() {
@@ -76,14 +76,14 @@ void main() {
     final hub = tester.getTopLeft(find.widgetWithText(SwitchListTile, 'Hub'));
     for (final page in HubTool.values) {
       final tile = find.byKey(Key('pageLock-${page.name}'));
-      // Pip Home has no lock (Round 35).
+      // Pip Home has no lock.
       expect(tile, page.lockable ? findsOneWidget : findsNothing);
       if (!page.lockable) continue;
       expect(tester.getTopLeft(tile).dy, greaterThan(hub.dy));
     }
     expect(HubTool.values.where((p) => !p.lockable),
         [HubTool.pip, HubTool.spotify, HubTool.converter],
-        reason: 'Round 93: Spotify has nothing to hide');
+        reason: 'Spotify has nothing to hide');
     container.read(pageLocksProvider.notifier).lock(HubTool.pip);
     expect(pageLocks(), isEmpty, reason: "Pip can't be locked");
     final title =
@@ -107,7 +107,7 @@ void main() {
     expect(find.text('Hub is locked'), findsNothing);
     expect(find.byKey(const Key('toolLock-Medicine')), findsOneWidget);
     expect(find.byKey(const Key('toolLock-Counters')), findsNothing);
-    // Bottom left (Round 25), clear of the icon (44 dp, centred).
+    // Bottom left, clear of the icon (44 dp, centred).
     final tile = tester.getRect(find.byTooltip('Medicine'));
     final lock = tester.getRect(find.byKey(const Key('toolLock-Medicine')));
     expect(lock.right, lessThan(tile.center.dx - 22));
@@ -122,7 +122,7 @@ void main() {
     await openTile(tester, 'Medicine');
     expect(find.text('Medicine is locked'), findsOneWidget);
     expect(find.byTooltip('Add medicine'), findsNothing, reason: 'not built');
-    // Round 61: it asks at once, no Unlock to press first.
+    // It asks at once, no Unlock to press first.
     expect(find.byType(TextField), findsOneWidget);
     await enterPassword(tester, password);
     expect(find.text('Medicine is locked'), findsNothing);
@@ -138,14 +138,14 @@ void main() {
     await tester.pump();
     expect(find.text('Push-ups'), findsNothing);
     expect(find.text('Counters is locked'), findsOneWidget);
-    // Round 61: locked while open, it doesn't ask by itself.
+    // Locked while open, it doesn't ask by itself.
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets(
       'locking while its menu is open: everything over the page closes '
-      '(Round 24)', (tester) async {
+      '', (tester) async {
     await start(tester, pages: {HubTool.medicine});
     container
         .read(medicineProvider.notifier)

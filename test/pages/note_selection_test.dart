@@ -5,7 +5,7 @@ import 'package:the_app/providers/notes_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 61: in a long note, the start handle dragged up past the text's
+/// In a long note, the start handle dragged up past the text's
 /// top scrolls it on gently, the selection following, to the first line
 /// (it raced a screen at a time and jumped about, or stopped).
 void main() {

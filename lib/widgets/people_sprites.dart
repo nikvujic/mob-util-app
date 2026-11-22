@@ -2,7 +2,7 @@ import 'dart:ui' show Color;
 
 import 'package:the_app/core/theme.dart';
 
-/// People's faces (Round 108): 16 x 16, one letter a pixel ('.' empty),
+/// People's faces: 16 x 16, one letter a pixel ('.' empty),
 /// as drafted (`docs/people_avatar_drafts.png`): an age group's face for
 /// each gender, its hair's colours named.
 abstract final class PeopleSprites {

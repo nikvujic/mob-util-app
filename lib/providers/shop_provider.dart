@@ -11,9 +11,9 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     addListener(storage.saveShopItems, fireImmediately: false);
   }
 
-  /// Adds an item at the top of "To buy" (S5, Round 141: the newest
+  /// Adds an item at the top of "To buy" (S5, the newest
   /// first, where it's seen), and returns its id. Blank names are ignored
-  /// (null). One already there by that name (Round 58, any case) isn't
+  /// (null). One already there by that name (any case) isn't
   /// added twice: it's moved there instead, as if new. [copy]: a new one
   /// all the same (a recipe's To Shop, for another quantity).
   String? addItem(String name, {bool copy = false}) {
@@ -37,7 +37,7 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
   }
 
   /// The items not on the list that [typed] is part of (any case), the
-  /// ones it starts first (Round 58: offered while adding).
+  /// ones it starts first (offered while adding).
   List<String> suggest(String typed) {
     final key = typed.trim().toLowerCase();
     if (key.isEmpty) return const [];
@@ -49,7 +49,7 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     return [...found.where(starts), ...found.where((n) => !starts(n))];
   }
 
-  /// Renames an item (Round 58). False if [name] is blank or another
+  /// Renames an item. False if [name] is blank or another
   /// item has it already; its own name in another case is fine.
   bool rename(String id, String name) {
     final trimmed = name.trim();
@@ -71,7 +71,7 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
   }
 
   /// The quantity button (S7): none → count → weight → none; a typed
-  /// amount (Round 70, set in the amount sheet) → none.
+  /// amount (set in the amount sheet) → none.
   void cycleQuantity(String id) => _update(
         id,
         (item) => item.copyWith(
@@ -97,7 +97,7 @@ class ShopNotifier extends StateNotifier<List<ShopItem>> {
     _update(id, (item) => item.copyWith(grams: grams));
   }
 
-  /// A typed amount (Round 70), trimmed.
+  /// A typed amount, trimmed.
   void setText(String id, String text) =>
       _update(id, (item) => item.copyWith(text: text.trim()));
 

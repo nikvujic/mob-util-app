@@ -8,7 +8,7 @@ import 'package:the_app/models/recipe.dart';
 import 'package:the_app/providers/recipe_transfer.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 
-/// Round 104: recipes as text (Round 131: several at once; agent
+/// Recipes as text (several at once; agent
 /// instructions with a general example): export, import (paste).
 void main() {
   late ProviderContainer container;
@@ -117,7 +117,7 @@ void main() {
 
   group('import reads', () {
     test(
-        "an agent's answer (Round 104's one recipe): words and a code fence "
+        "an agent's answer (a single recipe): words and a code fence "
         'around it', () {
       final r = parseRecipes('Sure! Here it is:\n```json\n'
               '{"format": "$recipeFormat", "version": 1, "recipe": '

@@ -3,7 +3,7 @@ import 'package:the_app/core/id.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/packing.dart';
 
-/// Packing (Round 94), saved to `packing.json`: the lists, in the user's
+/// Packing, saved to `packing.json`: the lists, in the user's
 /// order, and the default sections a new one starts with.
 class PackingNotifier extends StateNotifier<PackingBook> {
   PackingNotifier(AppStorage storage) : super(storage.initialPacking) {
@@ -106,7 +106,7 @@ class PackingNotifier extends StateNotifier<PackingBook> {
     state = state.copyWith(lists: lists);
   }
 
-  // The default sections (Round 95): what a new list starts with; the
+  // The default sections: what a new list starts with; the
   // lists there are keep their own.
 
   /// A new default section called [name], last; returns its id.

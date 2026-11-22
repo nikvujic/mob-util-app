@@ -4,7 +4,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/pages/hub/medicine_history.dart';
 
-/// A medicine's days as a month calendar (O13, Round 16: "an actual
+/// A medicine's days as a month calendar (O13, "an actual
 /// calendar with marks"): weeks as rows, Monday first, each day coloured
 /// by how it went. It opens on this month; older months are to the left
 /// (swipe right, or ‹). Tapping a day sets its doses.

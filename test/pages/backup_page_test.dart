@@ -225,7 +225,7 @@ void main() {
 
     testWidgets(
         'locked notes, app locked: asks for the password before restoring '
-        '(Round 21)', (tester) async {
+        '', (tester) async {
       await openBackup(tester, withPassword: true);
       final session = container.read(sessionProvider.notifier);
       await tester.runAsync(() => session.unlock(password));

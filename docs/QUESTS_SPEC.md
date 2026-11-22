@@ -1,6 +1,6 @@
-# Pip's quests — spec (Round 121)
+# Pip's quests — spec
 
-Written in Round 121, after v2.0.0; Round 122: the house drawn again, more detailed, nothing floating; Round 123: the fireplace inside, a larger porch, the forest, the mine and the beach; Round 124: the house area's own tall tree, wooden stairs, a denser forest, the mine in a mountain. The first quest is **Build a house**:
+Written after v2.0.0; the house drawn again, more detailed, nothing floating; the fireplace inside, a larger porch, the forest, the mine and the beach; the house area's own tall tree, wooden stairs, a denser forest, the mine in a mountain. The first quest is **Build a house**:
 Pip gathers wood, stone and sand, makes glass, and builds a house piece by
 piece over about two months, during two set hours a day. The house then
 becomes where he lives. **Required** marks a requirement,
@@ -43,14 +43,14 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   page.
 - **The Quests card:**
   - **Offered** (none active): the quest's name, a line about it, and
-    **Start**. Outside quest hours Start is greyed: *Starts between 10:00
-    and 11:30, or 19:00 and 20:30*.
+  **Start**. Outside quest hours Start is greyed: *Starts between 10:00
+  and 11:30, or 19:00 and 20:30*.
   - **Active:** the name, a progress bar, what he's on now (*Chopping
-    wood: 37 of 264 wood*, *Laying the floor: 5 of 12 planks*), and
-    roughly when he'll finish (*about 3 December*). Proposed: the
-    finish date assumes no days lost; days powered down push it on.
+  wood: 37 of 264 wood*, *Laying the floor: 5 of 12 planks*), and
+  roughly when he'll finish (*about 3 December*). Proposed: the
+  finish date assumes no days lost; days powered down push it on.
   - **Completed:** below, each done quest as its framed picture with its
-    name and the date it was finished.
+  name and the date it was finished.
 - **Required:** an **inventory card** to the right of the info card:
   swiping from the info card goes **info → inventory → animations** (the
   animations preview stays last). It shows what he carries: **wood,
@@ -88,12 +88,12 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 | Material | Where | How (animation) |
 |---|---|---|
-| **Wood** | **The forest** (Round 123; Round 124: denser, three layers of trees, the far ones hazy): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword (Round 146: an axe, at a great tree of its own, half as tall again as the others) until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
-| **Stone** | **The mine** (Round 124): **a mountain** rising up the right of the screen and off its top (rock in bands, ore glints, ledges, pines on its slope, snow up high, hazy peaks behind), a timber-framed mouth at its foot with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine (Round 141: with a pickaxe) until a block cracks off, chips flying; the block flies to him. |
-| **Sand** | **The beach** (Round 123): the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs (Round 147: with a shovel, a scoop every 2 s, the sand over his shoulder); sand flies to him in little heaps. |
+| **Wood** | **The forest** (denser, three layers of trees, the far ones hazy): oaks, birches and pines as on his field, bushes, ferns, mushrooms, old stumps | He walks out, the ground scrolling, into the forest. He strikes a tree with his sword (an axe, at a great tree of its own, half as tall again as the others) until it creaks and falls; it breaks into logs that fly to him and drop into his inventory, leaving a stump. A tree gives 4 wood. |
+| **Stone** | **The mine**: **a mountain** rising up the right of the screen and off its top (rock in bands, ore glints, ledges, pines on its slope, snow up high, hazy peaks behind), a timber-framed mouth at its foot with a lantern, rails and a cart | The same walk; he strikes a boulder by the mine (with a pickaxe) until a block cracks off, chips flying; the block flies to him. |
+| **Sand** | **The beach**: the sea to the horizon, waves foaming onto wet sand, shells, a starfish, beach grass, his bucket | He digs (with a shovel, a scoop every 2 s, the sand over his shoulder); sand flies to him in little heaps. |
 | **Glass** | His **fireplace**, in the house | Two sand and a wood (the fire) go into a crucible in the fire; it glows; a pane comes out. |
 
-- **Required (Round 123):** no furnace outside: a **stone fireplace in
+- **Required:** no furnace outside: a **stone fireplace in
   the house**, against the back wall on the left, is where he smelts
   sand into glass (and later, warmth and light).
 - **Proposed:** a trip out gathers until he carries a load (about a
@@ -104,8 +104,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 ## 6. The house, built piece by piece
 
 - **Required:** the house is on **its own screen**, his **house area**
-  (the background always the same, **one tree**: **Required (Round
-  124):** a **tree of its own**, taller than the field's (the house is
+  (the background always the same, **one tree**: **Required:** a **tree of its own**, taller than the field's (the house is
   big), in the field trees' style and colours, **following the
   seasons**: blossom in spring, green in summer, orange in autumn, bare
   with snow on its branches in winter), the house **big**, on
@@ -118,41 +117,41 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   interior. **Required:** stone, wood and glass; **detailed and
   sound**, since it becomes where he lives.
 - Seen from the side, cut away at the front, so he's seen inside.
-- **Required (Round 122): nothing floats.** Every block rests on what's
+- **Required: nothing floats.** Every block rests on what's
   under it: built bottom-up, row by row, each on the ground or on a
   block already in place. Only materials flying to him or into a piece
   are in the air.
-- **Required (Round 122):** detailed, like **a good-looking Terraria
+- **Required:** detailed, like **a good-looking Terraria
   house**: textured stone bricks (mortar, shades), plank grain, dark
   log beams, multi-pane windows with sills, a banded door under a stone
   lintel, a porch with a railing, eaves with trim, a gable with a round
-  attic window, flower boxes. **Round 123:** no stone along the outside
+  attic window, flower boxes. No stone along the outside
   wall: the chimney is the fireplace's flue, inside, up through the
   roof; and **a larger porch** (a deck, its own roof on two posts, a
-  railing, a bench, the lantern). **Round 124:** the deck stands on
+  railing, a bench, the lantern). the deck stands on
   wooden posts on small stone pads, and **wooden stairs** (treads, a
   stringer, a handrail) go down from it, no stone slab.
-- **The order (decided, Round 122):**
+- **The order (decided):**
   1. **Stone foundation**, block by block, the bottom row first.
   2. The **porch's posts** (on stone pads), its **deck** and the **wooden
-     stairs** down from it.
+  stairs** down from it.
   3. **Wooden floor**, plank by plank.
   4. **The fireplace's hearth** (stone), on the foundation.
   5. (the hearth is ready: from here glass can be smelted)
   6. **Posts** (log beams): the corners and the middle.
   7. **Walls**: the back wall and the side walls, row by row from the
-     floor up, leaving the window openings and the doorway.
+  floor up, leaving the window openings and the doorway.
   8. **Glass**: smelted in the fireplace, then the **two windows** set in
-     (frames, four panes each, stone sills).
+  (frames, four panes each, stone sills).
   9. **The door** (planks, iron bands, a handle) under a **stone lintel**;
-     the porch **railing** and post, the **lantern** hung on it.
+  the porch **railing** and post, the **lantern** hung on it.
   10. **The ceiling beam** across the posts; the fireplace's **flue**
-      raised on it, block on block, the porch's posts and beam.
+  raised on it, block on block, the porch's posts and beam.
   11. **Scaffold** (wood) put up, to reach the top.
   12. **Rafters**, then the **gable** (planks, the round attic window).
   13. **Shingles**, row by row from the eaves up to the ridge.
   14. The **porch roof** and **bench**; **eave trim**, the flue's cap,
-      **flower boxes** under the windows.
+  **flower boxes** under the windows.
   15. **Scaffold taken down**; done.
 - **Required:** building is shown: he **walks to the piece**, its
   materials **fly from him into it**, and it **smokes / puffs** while he
@@ -210,18 +209,18 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   roof.
 - **Proposed:**
   - **Thunderstorm:** lightning flashes as on the field; he keeps
-    working.
+  working.
   - **Wind:** the scaffold sways a little, sawdust and smoke blow
-    sideways, the house area's tree sways as on the field.
+  sideways, the house area's tree sways as on the field.
   - **Fog:** the scene greys, as on the field.
   - **Night:** the evening window is dark in winter: **a lantern** hangs
-    from the house (on its post while there are no walls), lighting
-    where he works; out gathering he carries it.
+  from the house (on its post while there are no walls), lighting
+  where he works; out gathering he carries it.
   - **Seasons:** the house area's tree and grass follow the season, snow
-    on the ground in winter.
+  on the ground in winter.
   - **Occasions:** Halloween, a jack-o'-lantern by the steps; New Year's
-    Eve, lights along the eaves once there's a roof (on the tree before);
-    Christmas, the badnjak by the door; Easter, painted eggs in the grass.
+  Eve, lights along the eaves once there's a roof (on the tree before);
+  Christmas, the badnjak by the door; Easter, painted eggs in the grass.
 
 ## 10. Once the house is built
 
@@ -240,7 +239,7 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
   bugs, butterflies, flowers, the ball, puddles, the snowman, snowballs.
 - **Proposed:** with no quest active, quest hours are ordinary house
   time.
-- **Decided (Round 122): adventures stay as they are**: once registered
+- **Decided: adventures stay as they are**: once registered
   he's out every day 12:00–18:00. He isn't only when powered down at
   12:00 with no battery until 17:00 (he lies where he fell, then idles
   in the house), or on a ski trip (he's skiing).
@@ -270,39 +269,39 @@ what's still open is in section 13. Drafts: `docs/pip_house_drafts.png`.
 
 1. This spec and the drafts, approved.
 2. **Rules and data:** the script (steps, minutes, materials), work
-   minutes from the clock (power downs, trips, windows, the clock going
-   back), the inventory; `pip.json` v4, backup, fixtures; tests for each
-   case.
+  minutes from the clock (power downs, trips, windows, the clock going
+  back), the inventory; `pip.json` v4, backup, fixtures; tests for each
+  case.
 3. **Pip Home:** the Quests button and card, Start in quest hours,
-   completed quests' pictures, the inventory card and the swipe order.
+  completed quests' pictures, the inventory card and the swipe order.
 4. **Scenes:** the house area, walking between places, gathering
-   (forest, mine, beach), the fireplace, building with flying materials and
-   smoke, the scaffold, the house drawn from the script's progress (the
-   strip's view and Pip Home's).
+  (forest, mine, beach), the fireplace, building with flying materials and
+  smoke, the scaffold, the house drawn from the script's progress (the
+  strip's view and Pip Home's).
 5. **Weather, seasons, night and occasions** in the house area and out
-   gathering; events held off in quest hours; no charging in quest
-   hours.
+  gathering; events held off in quest hours; no charging in quest
+  hours.
 6. **The finished house:** his idling area, sleeping inside, the
-   station where he is, which events stay; the next quest offered (to
-   be specced).
+  station where he is, which events stay; the next quest offered (to
+  be specced).
 
-## 15. As built (Rounds 125–128, 2.1.0)
+## 15. As built (2.1.0)
 
 Built as specced, with these decisions and simplifications (to revisit
 from use):
 
 - **Quest hours' end:** at 11:30 and 20:30 he's simply back on his
   field (no walk home); next window he's simply where the script is.
-  Round 134: watched, he walks back onto his field from its right edge
+  Watched, he walks back onto his field from its right edge
   (and, from 2.2.2, off it to his work).
 - **Powered down in quest hours:** he lies on his field, not where the
   script had him; his minutes stop as specced, and a battery brings him
-  back to the same point. Round 133: seen getting up, he walks off his
-  field's right edge to his work first (no cut). Round 134: he falls
+  back to the same point. Seen getting up, he walks off his
+  field's right edge to his work first (no cut). He falls
   **where he works** (the mine, up the scaffold) and lies there; a
   battery gets him up there and he carries on (his station stays down
   meanwhile). Opened while he's off, he's lying there too.
-- **Batteries at work** (Round 133): given in quest hours, one flies to
+- **Batteries at work**: given in quest hours, one flies to
   him wherever he works (the floor, the scaffold, out gathering), as
   into his tent in a storm.
 - **Medicine:** the pill shows on his screen while he keeps working
@@ -319,7 +318,7 @@ from use):
   and 18:00–19:00, out on his adventure, on a ski trip, or (later) at a
   quest's work. He goes in or out when he's free (not in the middle of
   something; asleep or off he stays where he is till he's up), and is
-  simply there, somewhere on its floor. Round 134: watched, he walks
+  simply there, somewhere on its floor. Watched, he walks
   out first (to his door, or off his field's right edge) and in through
   the other (in at his door, or in from his field's edge).
 - **In it:** he walks between its walls on its floor; his events there
@@ -336,12 +335,12 @@ from use):
   porch lantern is lit.
 - **The menu's strip** shows the house's floor and walls (the roof only
   in Pip Home's taller scene), as specced.
-- **A load at a time** (Round 135): one trip's load (or a
+- **A load at a time**: one trip's load (or a
   few panes smelted), then building what it covers, then off again; it
   was all of a piece's gathering first (about six days at the mine
   before the first block). The total time is the same; a quest under way
   carries on from its minutes in the new order.
-- **Round 140: small loads, pieces in turn.** A trip brings
+- **Small loads, pieces in turn.** A trip brings
   4 stones or one tree (sand: 6); then a few blocks (up to 3) of the
   next piece that's ready, the pieces taken in turn, so the foundation,
   the porch and the floor go up together. Each block rests on what's
@@ -349,7 +348,7 @@ from use):
   foundation's top row has got, walls on the whole floor and the
   posts, the roof on the beam and scaffold. Gathering is quicker (a
   tree 24 min, a stone 12, sand 6), so building is about half his
-  time from the start. About 58 days in all (Round 146: walks 2 minutes,
+  time from the start. About 58 days in all (walks 2 minutes,
   about 54).
 - **The next quest** isn't offered yet: after the house, the Quests card
   shows it done with its picture.

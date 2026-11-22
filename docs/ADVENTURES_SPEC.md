@@ -1,7 +1,7 @@
-# Pip's adventures — spec (Round 63)
+# Pip's adventures — spec
 
-Built in Rounds 63–64 (v1.25.0); skiing (section 8) and the inventory still to come. From the notes (ROADMAP,
-Rounds 41 and 63); his answers are in, and **Decided** marks them.
+Built in v1.25.0; skiing (section 8) and the inventory still to come.
+**Decided** marks a decision.
 
 ## 1. What it is
 
@@ -23,8 +23,8 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   - his **level** where his age was ("Lv 23");
   - his **title** (section 5);
   - three item boxes: **weapon** (the sword), **off-hand** (empty for
-    now) and **hat** (empty for now; later a hat equipped from the
-    inventory overrides his hat of the day) (decided);
+  now) and **hat** (empty for now; later a hat equipped from the
+  inventory overrides his hat of the day) (decided);
   - an **XP bar** to the next level (decided); no "next adventure" line.
   A second tap (or the button, now "Info") goes back to his info card.
 - **Not registered**: the card shows a **Register as adventurer** button
@@ -32,7 +32,7 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   and 17:00" (decided: an hour in from each end of the day).
 - **Registering**: an animation where he **holds his sword in the air**
   for a few seconds with an **8-bit fanfare** (decided). Registering
-  fills his batteries (Round 41). His **first adventure starts at once**
+  fills his batteries. His **first adventure starts at once**
   (decided).
 
 ## 3. The adventure view (decided)
@@ -52,7 +52,7 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   events** (flower, butterfly, ball, bug fights, screens) (decided).
 - He **keeps his hat of the day** (decided).
 
-## 3b. Round 73 ("it feels like he gains XP when killing bugs")
+## 3b. XP from bugs
 
 - **XP by the bug, watched**: XP is still earned by the time out (ten a
   minute, an XP every six seconds), but while you watch him fight, the
@@ -71,7 +71,7 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   card; more cards later, no settings). It opens on the adventure view
   while he's out.
 
-## 3c. The weather out (Round 75)
+## 3c. The weather out
 
 - **Storm**: he slows to a stop, puts his sword away and waits it out in
   his tent by the path (no bugs; a coming one runs off). Over, the tent
@@ -103,12 +103,12 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
   minute he was out. He can't power down once out (section 6), so an
   adventure is always **start → 18:00** or **powered on → 18:00**.
 
-## 4b. The break (Round 64, decided)
+## 4b. The break (decided)
 
 - Once per adventure, **half an hour off**, only for looks: XP goes on
   as if he were running.
 - **When**: he's looked at between **14:00 and 16:00**, none had today.
-  Round 66 (corrected in Round 68): if you **saw him set off** (just
+  If you **saw him set off** (just
   registered, or back on with a battery), not till you've been away at
   least **five minutes**; otherwise at once, watching or not. Opened as
   it starts, you see him run up and sit; later in it, he's simply at
@@ -123,7 +123,7 @@ Rounds 41 and 63); his answers are in, and **Decided** marks them.
 
 ## 5. Levels and titles
 
-**XP = ten per minute adventuring** (Round 73; a full day is 3600 XP; it was one a minute). The level
+**XP = ten per minute adventuring** (a full day is 3600 XP; it was one a minute). The level
 comes from his XP as days of adventuring (D = XP / 360). The curve is only the target: he goes up **one level
 at a time** as usual, each level costing a little more XP than the one
 before (decided):
@@ -173,7 +173,7 @@ these names):
 - He **can't power down** during an adventure: if his energy would run
   out, he keeps going and powers down **after it ends** at 18:00 (or at
   once then, if he's out of energy).
-- Round 65: a **tap gives him a battery** while he's out too (decided):
+- A **tap gives him a battery** while he's out too (decided):
   it flies from where you tapped to him and he catches it without
   stopping (a light buzz), one at a time. Plugged in, out, he isn't at
   his station, so it isn't refused for that. Registering fills his
@@ -188,7 +188,7 @@ these names):
   MainActivity) on the **media volume**, so they follow the phone's
   volume (muted → silent). A short 8-bit clip bundled with the app.
 
-## 8. Skiing (Round 65–67; built in v1.26.0)
+## 8. Skiing (built in v1.26.0)
 
 Skiing is **a different look for his adventure**, not a separate thing:
 the same days out (12:00–18:00), the same XP, break and rules; only
@@ -225,7 +225,7 @@ Three ways to draw going downhill, him always in the middle:
 - **A, tilted slope**: the ground slopes down to the right; trees,
   flags and bumps slide up and to the left past him. Reads most like
   "down a hill".
-- **B, raised snowfield** (the user's idea): the snow fills more of the
+- **B, raised snowfield**: the snow fills more of the
   room; he stays put and the trees and flags **rise past him**, so he
   seems to go down.
 - **C, flat glide**: like running, the snow moving left.
@@ -249,7 +249,7 @@ weapon box still shows it).
   **mug of hot chocolate** (steam rising) pops out of the window; he
   sips it as the break goes. Then skis back on, and down.
 
-### 8.6 The trip: a bus there and back (Round 66, decided)
+### 8.6 The trip: a bus there and back (decided)
 
 - A Skiing holiday in Dates gets a **travel time**: the trip there and
   the trip back (questions 8.8).
@@ -271,26 +271,25 @@ weapon box still shows it).
 
 - In the **Adventures** list (8.9).
 
-### 8.8 the answers (Round 67)
+### 8.8 the answers
 
 1. **Slope: B**, the raised snowfield: trees, flags and bumps rise past
-   him. Round 72 (he looked like he walked on a layer of
-   ground): **downhill**, seen from behind: the slope goes up to
-   mountains on the horizon, he sways gently side to side in the
-   middle, and what he passes comes up from below him and shrinks away
-   to the horizon (`PipRun.nearness`).
+  him. **downhill**, seen from behind: the slope goes up to
+  mountains on the horizon, he sways gently side to side in the
+  middle, and what he passes comes up from below him and shrinks away
+  to the horizon (`PipRun.nearness`).
 2. **Travel in Dates**: on a Skiing holiday, **travel hours** (total,
-   each way) and a **leaving time** for each trip: there on the first
-   day (default **06:00**), back on the **day after the last day**
-   (default **11:00**).
+  each way) and a **leaving time** for each trip: there on the first
+  day (default **06:00**), back on the **day after the last day**
+  (default **11:00**).
 3. A day the bus is on the road any time between 12:00 and 18:00, he
-   **doesn't ski** that day (still gains XP).
+  **doesn't ski** that day (still gains XP).
 4. On the trip his energy stays as it was; **batteries pile up** as
-   ever.
+  ever.
 5. His **gear shows** in the snowbank on ski days whether he's an
-   adventurer or not.
+  adventurer or not.
 
-### 8.9 Previews: Pip Home's Adventures (Round 67, decided)
+### 8.9 Previews: Pip Home's Adventures (decided)
 
 - Pip Home's settings get an **ADVENTURES** list (beside Animations,
   Background and Hats): **Adventure**, **Skiing** and **Bus trip**. Each
@@ -309,13 +308,13 @@ weapon box still shows it).
 ## 10. Order of work
 
 1. Data: the model, the level/title rules (core, with tests), pip.json
-   v3, backup v26, fixtures.
+  v3, backup v26, fixtures.
 2. Brain: the daily activity, start/end, charging and power rules, XP
-   from the clock.
+  from the clock.
 3. Sprites and painter: the running Pip, sword swing, moving ground,
-   bugs, start/end/register animations.
+  bugs, start/end/register animations.
 4. Pip Home's Adventures button and card, the register flow, the
-   fanfare, the menu line.
+  fanfare, the menu line.
 5. Docs, Introduction, What's new, release.
 6. Skiing (section 8).
 7. Later: an inventory to fill the off-hand and hat boxes.

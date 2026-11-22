@@ -299,7 +299,7 @@ class _DayDoses extends StatelessWidget {
   }
 }
 
-/// The history of every medicine (O6, Round 18): the medicines at the
+/// The history of every medicine (O6): the medicines at the
 /// top (a tap opens one's own history), then each day as a small table, a
 /// row per medicine with a mark per dose. Tapping a row opens that
 /// medicine's history at that day, where its doses can be set. Days are
@@ -470,13 +470,13 @@ class _DayRow extends StatelessWidget {
 }
 
 /// One medicine's history (O13): how many were ever taken, a month
-/// calendar of its days (Round 16; older months to the left), and
+/// calendar of its days (older months to the left), and
 /// every day below, each dose settable. Past days not set yet can be filled
 /// in as taken in one go.
 class MedicineOwnHistoryPage extends ConsumerStatefulWidget {
   final String id;
 
-  /// Opens scrolled to this day (from the history of all, Round 18).
+  /// Opens scrolled to this day (from the history of all).
   final DateTime? day;
 
   const MedicineOwnHistoryPage({super.key, required this.id, this.day});
@@ -603,7 +603,7 @@ class _MedicineOwnHistoryPageState
                   ),
                 ),
                 // A day tapped shows it below; it isn't changed from here
-                // (Round 18).
+                //.
                 MedicineCalendar(
                   medicine: medicine,
                   book: book,
@@ -659,7 +659,7 @@ class _MedicineOwnHistoryPageState
     final before = ref.read(medicineProvider);
     final marked = notifier.fillPast(medicine.id);
     if (!context.mounted || marked == 0) return;
-    // It can be undone, so it says so (Round 39: the conventions).
+    // It can be undone, so it says so (the conventions).
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(

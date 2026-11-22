@@ -114,7 +114,7 @@ class _Entry extends ConsumerWidget {
   }
 }
 
-/// The Notifications page (Round 31; menu → Notifications): the latest
+/// The Notifications page (menu → Notifications): the latest
 /// ones (all of today's and yesterday's a tap away), then each page's
 /// settings.
 class NotificationsPage extends ConsumerWidget {
@@ -226,7 +226,7 @@ class _PageSettings extends ConsumerWidget {
       showModalBottomSheet<NotifySound>(
         context: context,
         builder: (context) => SafeArea(
-          // Round 39: more sounds than a short screen holds: it scrolls.
+          // More sounds than a short screen holds: it scrolls.
           child: ListView(
             key: const Key('notifySounds'),
             shrinkWrap: true,
@@ -337,7 +337,7 @@ class _PageSettings extends ConsumerWidget {
           },
         ),
         if (on) ...[
-          // Round 72: the planner's notification that stays.
+          // The planner's notification that stays.
           if (page == NotifyPage.planner)
             SwitchListTile(
               key: const Key('notifyNow-planner'),
@@ -421,7 +421,7 @@ class _PageSettings extends ConsumerWidget {
               notifier.setNotifyStyle(page, style.copyWith(sound: picked));
             },
           ),
-          // How loud (Round 41): the app's own sounds only (the phone's
+          // How loud: the app's own sounds only (the phone's
           // follows the phone's volume).
           if (style.sound.resource case final resource?)
             Padding(
@@ -471,7 +471,7 @@ class _PageSettings extends ConsumerWidget {
   }
 }
 
-/// All of today's and yesterday's notifications (Round 31), newest
+/// All of today's and yesterday's notifications, newest
 /// first; tapping one goes where it leads; *Clear* empties the list.
 class NotificationHistoryPage extends ConsumerWidget {
   const NotificationHistoryPage({super.key});

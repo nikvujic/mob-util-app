@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/notify_settings.dart';
 
-/// The notification sounds to pick from (Round 39: 8-bit ones).
+/// The notification sounds to pick from (8-bit ones).
 void main() {
   final kotlin = File(
     'android/app/src/main/kotlin/com/nikvujic/the_app/MainActivity.kt',
@@ -49,7 +49,7 @@ void main() {
         NotifyStyle.fromJson(const {'sound': 'bell'}).sound, NotifySound.alert);
   });
 
-  group('volume (Round 41)', () {
+  group('volume', () {
     /// A wav file's loudest sample.
     int peakOf(String resource) {
       final bytes =

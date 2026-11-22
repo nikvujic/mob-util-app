@@ -45,7 +45,7 @@ class _IntroductionPageState extends ConsumerState<IntroductionPage> {
       destructive: true,
     );
     if (!confirmed || !mounted) return;
-    // No toast (Round 27): the choice was explicit, and Settings brings it back.
+    // No toast: the choice was explicit, and Settings brings it back.
     ref.read(preferencesProvider.notifier).setIntroDeleted(true);
     Navigator.of(context).pop();
   }
@@ -57,7 +57,7 @@ class _IntroductionPageState extends ConsumerState<IntroductionPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Introduction')),
       body: switch (text) {
-        // Opens where it was left (Round 29), saved when scrolling stops.
+        // Opens where it was left, saved when scrolling stops.
         AsyncData(:final value) => NotificationListener<ScrollEndNotification>(
             onNotification: (end) {
               final inside = end.context;

@@ -10,7 +10,7 @@ import 'package:the_app/widgets/pixel_text.dart';
 
 import '../helpers.dart';
 
-/// Pip Home's quests (Round 126, spec 3): the Quests row and card, Start
+/// Pip Home's quests (spec 3): the Quests row and card, Start
 /// in quest hours, what he's on, the finished ones' pictures, and his
 /// inventory between his info and his settings.
 void main() {

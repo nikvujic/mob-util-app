@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pixel_font.dart';
 import 'package:the_app/core/theme.dart';
 
-/// Pip's energy as a battery of three segments (Round 37): 3 green, 2
+/// Pip's energy as a battery of three segments: 3 green, 2
 /// orange, 1 red, 0 empty; then, with [batteries], the batteries held: a
 /// small one and how many. In his pixels, [pixel] logical pixels a dot.
 class PipEnergyBar extends StatelessWidget {

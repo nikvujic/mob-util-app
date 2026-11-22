@@ -3,10 +3,10 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/app_dialog.dart';
 
-/// Asks for a month (Round 85: a card's expiry, which has no day): a year
+/// Asks for a month (a card's expiry, which has no day): a year
 /// with ‹ › between [firstYear] and [lastYear], and its twelve months; a
 /// tap on one picks it. Opens on [initial]'s year, its month marked, or
-/// with none set on [today]'s (Round 91). The month's first day, or null
+/// with none set on [today]'s. The month's first day, or null
 /// if dismissed.
 Future<DateTime?> showMonthPicker(
   BuildContext context, {
@@ -47,7 +47,7 @@ class _MonthPicker extends StatefulWidget {
 }
 
 class _MonthPickerState extends State<_MonthPicker> {
-  // Round 91: opens on the set month's year; none set, this one.
+  // Opens on the set month's year; none set, this one.
   late int _year = (widget.initial ?? widget.today)
       .year
       .clamp(widget.firstYear, widget.lastYear);
@@ -89,7 +89,7 @@ class _MonthPickerState extends State<_MonthPicker> {
             ],
           ),
           const SizedBox(height: 8),
-          // Round 86 (four across were squished): three across,
+          // Three across,
           // four rows, spaced, each a full-width button.
           for (var row = 0; row < 4; row++)
             Padding(

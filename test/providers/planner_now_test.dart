@@ -15,7 +15,7 @@ import 'package:the_app/providers/routines_provider.dart';
 
 import '../helpers.dart';
 
-/// The planner's notification that stays while a block is on (Round 72):
+/// The planner's notification that stays while a block is on:
 /// from its start till its end, counting down, with Done to tick it.
 void main() {
   /// Thursday 8 October 2026, 12:00.
@@ -83,7 +83,7 @@ void main() {
         (NotificationTarget.parse(on.single.target) as PlannerNowTarget)
             .routine,
         isTrue);
-    // Round 78: nothing to tick off: no Done button; an old tick (from
+    // Nothing to tick off: no Done button; an old tick (from
     // before) changes nothing.
     expect(on.single.done, isFalse);
     expect(
@@ -222,7 +222,7 @@ void main() {
     });
 
     testWidgets(
-        'Round 78: an old routine notification\'s Done just opens the '
+        'an old routine notification\'s Done just opens the '
         'planner (routines aren\'t ticked off)', (tester) async {
       await start(tester);
       container.read(routinesProvider.notifier).replaceAll(RoutineBook(

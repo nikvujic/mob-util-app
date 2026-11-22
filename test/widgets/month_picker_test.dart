@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/month_picker.dart';
 
-/// The month picker (Round 85; Round 86: three across, spaced).
+/// The month picker (three across, spaced).
 void main() {
   void open(WidgetTester tester, {double width = 1080, double scale = 1}) {
     tester.view.physicalSize = Size(width, 1800);

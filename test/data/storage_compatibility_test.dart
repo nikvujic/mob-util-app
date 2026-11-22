@@ -364,7 +364,7 @@ void main() {
     });
   });
 
-  group('subscriptions.json v1 / v29 backup (subscriptions, Round 79)', () {
+  group('subscriptions.json v1 / v29 backup (subscriptions)', () {
     void expectSample(SubscriptionBook book) {
       expect(
         book.subscriptions.map((s) => (s.name, s.price, s.about, s.state)),
@@ -419,7 +419,7 @@ void main() {
     });
   });
 
-  group('packing.json v1 / v30 backup (packing lists, Round 94)', () {
+  group('packing.json v1 / v30 backup (packing lists)', () {
     void expectSample(PackingBook book) {
       expect(book.sections.map((s) => s.name), [
         'Documents',
@@ -443,7 +443,7 @@ void main() {
           ('Kišobran', 'gone', 1, false),
         ],
       );
-      // Round 95: the shared sections became each list's own; its
+      // The shared sections became each list's own; its
       // section gone, it's shown under the last (Other, as before).
       expect(trip.sections, book.sections);
       expect(
@@ -503,7 +503,7 @@ void main() {
     });
   });
 
-  group('packing.json v2 / v31 backup (each list its sections, Round 95)', () {
+  group('packing.json v2 / v31 backup (each list its sections)', () {
     void expectSample(PackingBook book) {
       expect(book.sections.map((s) => s.name),
           ['Documents', 'Clothes', 'Toiletries', 'Other'],
@@ -551,7 +551,7 @@ void main() {
     });
   });
 
-  group('people.json v1 / v32 backup (People, Round 108)', () {
+  group('people.json v1 / v32 backup (People)', () {
     void expectSample(PeopleBook book, DateBook dates) {
       expect(book.people.map((p) => p.name), [
         'Marko Petrović',
@@ -619,7 +619,7 @@ void main() {
     });
   });
 
-  group('shop v4 / v28 backup (typed amounts, Round 70)', () {
+  group('shop v4 / v28 backup (typed amounts)', () {
     void expectSample(List<ShopItem> items) {
       expect(
         items.map((i) => (i.name, i.quantity, i.count, i.text)),
@@ -859,7 +859,7 @@ void main() {
     });
   });
 
-  group('medicine v3 / v13 backup (remind again per medicine, Round 16)', () {
+  group('medicine v3 / v13 backup (remind again per medicine)', () {
     void expectSample(MedicineBook book) {
       final [iron, vitaminC] = book.medicines;
       expect((iron.name, iron.followUp), ('Iron 🩸', 240));
@@ -891,7 +891,7 @@ void main() {
     });
   });
 
-  group('medicine v4 / v14 backup (important medicines, Round 24)', () {
+  group('medicine v4 / v14 backup (important medicines)', () {
     void expectSample(MedicineBook book) {
       final [heart, vitaminC] = book.medicines;
       expect((heart.name, heart.important), ('Heart pills ❤️', true));
@@ -924,7 +924,7 @@ void main() {
     });
   });
 
-  group('todo.json v1 / v15 backup (the to-do note, Round 28)', () {
+  group('todo.json v1 / v15 backup (the to-do note)', () {
     void expectSample(List<TodoItem> items) {
       expect(items.map((i) => (i.id, i.text)), [
         ('t1', 'Call the dentist 🦷'),
@@ -960,7 +960,7 @@ void main() {
     });
   });
 
-  group('todo.json v2 / v16 backup (done to-dos, Round 30)', () {
+  group('todo.json v2 / v16 backup (done to-dos)', () {
     void expectSample(List<TodoItem> items) {
       expect(items.map((i) => (i.text, i.done)), [
         ('Call the dentist 🦷', false),
@@ -992,7 +992,7 @@ void main() {
     });
   });
 
-  group('todo.json v3 / v21 backup (waiting to-dos, Round 45)', () {
+  group('todo.json v3 / v21 backup (waiting to-dos)', () {
     void expectSample(List<TodoItem> items) {
       expect(items.map((i) => (i.text, i.done, i.waiting)), [
         ('Call the dentist 🦷', false, false),
@@ -1025,9 +1025,7 @@ void main() {
     });
   });
 
-  group(
-      'food.json v1 / v22 backup (the food tracker, Round 46; gone, '
-      'Round 145)', () {
+  group('food.json v1 / v22 backup (the food tracker, since removed)', () {
     test('its file is deleted, the rest loads as it was', () async {
       final dir = copyOf('test/fixtures/v22/storage');
       expect(File('${dir.path}/food.json').existsSync(), isTrue);
@@ -1046,7 +1044,7 @@ void main() {
     });
   });
 
-  group('dates.json v1 / v23 backup (birthdays & dates, Round 57)', () {
+  group('dates.json v1 / v23 backup (birthdays & dates)', () {
     void expectSample(DateBook book) {
       expect(
           book.dates.map((d) => (
@@ -1116,7 +1114,7 @@ void main() {
     });
   });
 
-  group('dates.json v2 / v24 backup (lasting days, Round 59)', () {
+  group('dates.json v2 / v24 backup (lasting days)', () {
     void expectSample(DateBook book) {
       expect(
           book.dates.map((d) => (
@@ -1184,7 +1182,7 @@ void main() {
     });
   });
 
-  group('dates.json v3 / v25 backup (kinds, Round 61)', () {
+  group('dates.json v3 / v25 backup (kinds)', () {
     void expectSample(DateBook book) {
       expect(
           book.dates.map((d) => (
@@ -1250,7 +1248,7 @@ void main() {
     });
   });
 
-  group('dates.json v4 / v27 backup (ski travel, Round 67)', () {
+  group('dates.json v4 / v27 backup (ski travel)', () {
     void expectSample(DateBook book) {
       final ski = book.dates.first;
       expect(ski.title, 'Jahorina ⛷');
@@ -1286,7 +1284,7 @@ void main() {
     });
   });
 
-  test('notifications.json version 1 (Round 31) loads', () async {
+  test('notifications.json version 1 loads', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v16/storage'),
     );
@@ -1301,7 +1299,7 @@ void main() {
     expect(storage.unreadable, isEmpty);
   });
 
-  group('pip.json v1 / v17 backup (Pip, the pet, Round 34)', () {
+  group('pip.json v1 / v17 backup (Pip, the pet)', () {
     void expectSample(PipLife? pip) {
       expect(pip!.name, 'Bip 2');
       expect(pip.born!.toUtc(), DateTime.utc(2026, 10, 13, 20, 30));
@@ -1313,7 +1311,7 @@ void main() {
         directory: copyOf('test/fixtures/v17/storage'),
       );
       expectSample(storage.initialPip);
-      // From before his energy (Round 37): full, no batteries yet.
+      // From before his energy: full, no batteries yet.
       expect(storage.initialPip.energy, PipLife.fullEnergy);
       expect(storage.initialPip.energyAt, isNull);
       expect(storage.initialPip.batteries, 0);
@@ -1339,7 +1337,7 @@ void main() {
     });
   });
 
-  group('pip.json v2 / v18 backup (his energy, Round 37)', () {
+  group('pip.json v2 / v18 backup (his energy)', () {
     void expectSample(PipLife? pip) {
       expect(pip!.name, 'Bip 3');
       expect(pip.born!.toUtc(), DateTime.utc(2026, 10, 13, 20, 30));
@@ -1368,7 +1366,7 @@ void main() {
     });
   });
 
-  group('pip.json v3 / v26 backup (his adventures, Round 63)', () {
+  group('pip.json v3 / v26 backup (his adventures)', () {
     void expectSample(PipLife? pip) {
       expect(pip!.name, 'Bip 4');
       expect(pip.energy, 2.5);
@@ -1404,7 +1402,7 @@ void main() {
     });
   });
 
-  group('pip.json v4 / v33 backup (his quests, Round 125)', () {
+  group('pip.json v4 / v33 backup (his quests)', () {
     void expectSample(PipLife? pip) {
       expect(pip!.name, 'Bip 5');
       expect(pip.minutesOut, 4200);
@@ -1451,7 +1449,7 @@ void main() {
     });
   });
 
-  group('medicine.json v5 / v19 backup (weekdays, Round 40)', () {
+  group('medicine.json v5 / v19 backup (weekdays)', () {
     void expectSample(MedicineBook book) {
       final vitamin = book.medicines.firstWhere((m) => m.id == 'm1');
       expect(vitamin.name, 'Vitamin D 💊');
@@ -1479,7 +1477,7 @@ void main() {
     });
   });
 
-  group('recipes.json, ingredients.json v1 / v20 backup (Round 42)', () {
+  group('recipes.json, ingredients.json v1 / v20 backup', () {
     void expectSample(List<Recipe> recipes, IngredientBook ingredients) {
       expect(recipes.map((r) => r.id), ['r1', 'r2'], reason: 'in order');
       final pancakes = recipes.first;
@@ -1534,7 +1532,7 @@ void main() {
     });
   });
 
-  test('settings.json with page locks (O7, Round 21) loads them', () async {
+  test('settings.json with page locks (O7) loads them', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v13/storage'),
     );
@@ -1542,7 +1540,7 @@ void main() {
     expect(storage.initialPageLocks, {HubTool.placard, HubTool.medicine});
   });
 
-  test('settings.json with the to-do lock (Round 45) loads it', () async {
+  test('settings.json with the to-do lock loads it', () async {
     final storage = await AppStorage.open(
       directory: copyOf('test/fixtures/v21/storage'),
     );

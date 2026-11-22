@@ -77,24 +77,23 @@ class Backup {
   /// may have a step, colour and limits (O5); 11 = the medicine tracker
   /// (`medicine`, as in `medicine.json`, O6); 12 = doses missed or not
   /// sure, taken ones maybe without a time (O13); 13 = a medicine may
-  /// remind again after its doses (Round 16); 14 = a medicine may be
-  /// important (Round 24); 15 = the to-do note's list (`todo`, Round 28);
-  /// 16 = to-do things may be done (Round 30); 17 = Pip, the pet (`pip`,
-  /// Round 34); 18 = his energy and batteries (Round 37); 19 = a medicine
-  /// may be taken on some weekdays only (Round 40); 20 = recipes and the
-  /// ingredients list (`recipes`, `ingredients`, as in their files,
-  /// Round 42); 21 = to-do things may be waiting (Round 45); 22 = the
-  /// food tracker (`food`, as in `food.json`, Round 46); 23 = birthdays &
-  /// dates (`dates`, as in `dates.json`, Round 57); 24 = a holiday or an
-  /// event may last several days (`days`, Round 59); 25 = and be of a
-  /// kind (`kind`, Round 61); 26 = Pip's adventures (in `pip`, Round
-  /// 63); 27 = a ski trip's travel (in `dates`, Round 67); 28 = a shop
-  /// item's typed amount (in `shopItems`, Round 70); 29 = subscriptions
-  /// (`subscriptions`, as in `subscriptions.json`, Round 79); 30 =
-  /// packing lists (`packing`, as in `packing.json`, Round 94); 31 = a
-  /// packing list's own sections (in `packing`, Round 95); 32 = people
-  /// (`people`, as in `people.json`, Round 108), and a date's person (in
-  /// `dates`); 33 = Pip's quests (in `pip`, Round 125). Round 145: the
+  /// remind again after its doses; 14 = a medicine may be
+  /// important; 15 = the to-do note's list (`todo`);
+  /// 16 = to-do things may be done; 17 = Pip, the pet (`pip`);
+  /// 18 = his energy and batteries; 19 = a medicine
+  /// may be taken on some weekdays only; 20 = recipes and the
+  /// ingredients list (`recipes`, `ingredients`, as in their files);
+  /// 21 = to-do things may be waiting; 22 = the
+  /// food tracker (`food`, as in `food.json`); 23 = birthdays &
+  /// dates (`dates`, as in `dates.json`); 24 = a holiday or an
+  /// event may last several days (`days`); 25 = and be of a
+  /// kind (`kind`); 26 = Pip's adventures (in `pip`); 27 = a ski trip's travel (in `dates`); 28 = a shop
+  /// item's typed amount (in `shopItems`); 29 = subscriptions
+  /// (`subscriptions`, as in `subscriptions.json`); 30 =
+  /// packing lists (`packing`, as in `packing.json`); 31 = a
+  /// packing list's own sections (in `packing`); 32 = people
+  /// (`people`, as in `people.json`), and a date's person (in
+  /// `dates`); 33 = Pip's quests (in `pip`). The
   /// food tracker's gone: `food` isn't written, and is ignored in older
   /// backups (the format's otherwise the same, so still 33).
   static const version = 33;
@@ -118,30 +117,30 @@ class Backup {
   /// The medicine tracker (O6); empty in backups from before it.
   final MedicineBook medicine;
 
-  /// The to-do note's list (Round 28); empty in backups from before it.
+  /// The to-do note's list; empty in backups from before it.
   final List<TodoItem> todo;
 
-  /// Pip (Round 34); null in backups from before him: restoring one of
+  /// Pip; null in backups from before him: restoring one of
   /// those leaves him as he is.
   final PipLife? pip;
 
-  /// Recipes and the ingredients list (Round 42); none in backups from
+  /// Recipes and the ingredients list; none in backups from
   /// before them.
   final List<Recipe> recipes;
   final IngredientBook ingredients;
 
-  /// Birthdays & dates (Round 57); empty in backups from before them.
+  /// Birthdays & dates; empty in backups from before them.
   final DateBook dates;
 
-  /// Subscriptions (Round 79); empty in backups from before them.
+  /// Subscriptions; empty in backups from before them.
   final SubscriptionBook subscriptions;
 
-  /// Packing lists and the default sections (Round 94); the usual
+  /// Packing lists and the default sections; the usual
   /// sections and no lists in backups from before them.
   PackingBook get packing => _packing ?? PackingBook.initial;
   final PackingBook? _packing;
 
-  /// People (Round 108); null in backups from before them (restoring one
+  /// People; null in backups from before them (restoring one
   /// leaves the People page as it is).
   final PeopleBook? people;
 

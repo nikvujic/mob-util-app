@@ -7,10 +7,10 @@ abstract final class AppRoutes {
   static const setMasterPassword = '/security/set-password';
 
   /// A page opened from the menu (Security, Themes, Backup, Settings):
-  /// the app locking leaves it open (Round 24), it shows nothing of a
+  /// the app locking leaves it open, it shows nothing of a
   /// section.
   static const menuPage = '/menu';
 
-  /// The Notifications page (Round 31), also opened from Medicine.
+  /// The Notifications page, also opened from Medicine.
   static const notifications = '/notifications';
 }

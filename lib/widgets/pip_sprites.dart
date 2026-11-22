@@ -6,12 +6,12 @@ import 'package:the_app/core/pip_run.dart' show PipFoe;
 import 'package:the_app/core/pip_scene.dart' show Season;
 import 'package:the_app/core/theme.dart';
 
-/// Pip's frames on a 20-wide grid (Round 26), one letter a pixel ('.'
-/// empty): his head with a 14 x 9 screen (Round 27: one row taller than
+/// Pip's frames on a 20-wide grid, one letter a pixel ('.'
+/// empty): his head with a 14 x 9 screen (one row taller than
 /// at first, less flat), his face on it, and legs that can step. The room
 /// draws them all; the menu header and the launcher icon
 /// (`tool/make_icon.py`) draw [PipFrame.idle].
-/// Round 74: the looks of his field's trees (each spot one at random,
+/// The looks of his field's trees (each spot one at random,
 /// each time the app opens).
 enum PipTreeKind { oak, birch, pine }
 
@@ -63,7 +63,7 @@ abstract final class PipSprites {
   static Set<(int, int)> _face(String kind, int look) {
     final eyes = [3 + look, 10 + look];
     final mouth = 4 + look;
-    // Round 61: a blink shuts the eyes of the face he has (tired, very
+    // A blink shuts the eyes of the face he has (tired, very
     // tired), keeping its mouth: before, every blink was the smiling one.
     if (kind.startsWith('blink-')) {
       final face = _face(kind.substring(6), look);
@@ -75,7 +75,7 @@ abstract final class PipSprites {
         for (final e in eyes) ...[(e, shut), (e + 1, shut)],
       };
     }
-    // Round 37: tired, eyes half shut and a flat mouth; very tired, eyes
+    // Tired, eyes half shut and a flat mouth; very tired, eyes
     // low and a wobbly mouth; asleep, eyes shut and a small mouth.
     switch (kind) {
       case 'tired':
@@ -98,7 +98,7 @@ abstract final class PipSprites {
           (mouth + 3, 6),
         };
       case 'peek':
-        // Round 77: woken at night, one eye open (his right, the far one
+        // Woken at night, one eye open (his right, the far one
         // looking ahead), the other shut; a small mouth.
         return {
           (eyes[0], 3), (eyes[0] + 1, 3), //
@@ -108,7 +108,7 @@ abstract final class PipSprites {
       case 'off':
         return const {};
       case 'yawn':
-        // Round 57: eyes shut, mouth wide open.
+        // Eyes shut, mouth wide open.
         return {
           for (final e in eyes) ...[(e, 3), (e + 1, 3)],
           (mouth + 2, 4), (mouth + 3, 4), //
@@ -118,7 +118,7 @@ abstract final class PipSprites {
           (mouth + 2, 8), (mouth + 3, 8),
         };
       case 'angry':
-        // Round 52: brows down to the middle, a frown.
+        // Brows down to the middle, a frown.
         return {
           (eyes[0] - 1, 1), (eyes[0], 1), (eyes[0] + 1, 2), //
           (eyes[1] + 2, 1), (eyes[1] + 1, 1), (eyes[1], 2),
@@ -153,7 +153,7 @@ abstract final class PipSprites {
 
   static List<String> _frame(String face, String legs, {int look = 0}) {
     final rows = [for (final r in _head) r.split('')];
-    // Asleep his screen dims; off it's dark, with a glint (Round 37).
+    // Asleep his screen dims; off it's dark, with a glint.
     final screen = switch (face) {
       'asleep' || 'peek' => 'D',
       'off' => 'X',
@@ -195,7 +195,7 @@ abstract final class PipSprites {
     PipFrame.chew: _frame('oh', 'tuck'),
   };
 
-  /// [frame] with [face] (Round 37): tired faces by his energy, asleep
+  /// [frame] with [face]: tired faces by his energy, asleep
   /// (screen dimmed), off (screen dark). Blinks and surprise keep their
   /// own faces while he's awake.
   static List<String> frameOf(PipFrame frame, PipFace face) =>
@@ -235,8 +235,8 @@ abstract final class PipSprites {
     return _frame(kind, legs, look: look);
   }
 
-  /// A battery (Round 37), 4 x 7: its cap, a grey case, blue inside
-  /// (Round 42).
+  /// A battery, 4 x 7: its cap, a grey case, blue inside
+  ///.
   static const battery = [
     '.hh.',
     'gGGg',
@@ -247,8 +247,8 @@ abstract final class PipSprites {
     'gggg',
   ];
 
-  /// His old battery (Round 54), thrown away: dark inside (Round 97,
-  /// no red bit left in it).
+  /// His old battery, thrown away: dark inside (no red
+  /// bit left in it).
   static const batteryEmpty = [
     '.hh.',
     'gXXg',
@@ -259,9 +259,9 @@ abstract final class PipSprites {
     'gggg',
   ];
 
-  // Round 44: his charging station, his hands, his charging screens.
+  // His charging station, his hands, his charging screens.
 
-  /// The power station (Round 44: drafts v2), 14 x 27, its socket and
+  /// The power station (drafts v2), 14 x 27, its socket and
   /// hook on its left (mirrored when it stands on his left): a lamp on
   /// top, a roof, a screen with a bolt, a little panel of lights, vents,
   /// a hazard band, a base with bolts. Its own colours ([stationColours]).
@@ -309,7 +309,7 @@ abstract final class PipSprites {
     'c': PipColours.cable,
   };
 
-  /// The station's drone (Round 58), 10 x 5, its rotors two ways (they
+  /// The station's drone, 10 x 5, its rotors two ways (they
   /// spin), in [stationColours].
   static const drone = [
     [
@@ -333,7 +333,7 @@ abstract final class PipSprites {
     for (final row in station) row.replaceAll('q', 'e'),
   ];
 
-  /// A floating hand (Round 44: no arms, they pop in when needed), 2 x 3.
+  /// A floating hand (no arms, they pop in when needed), 2 x 3.
   static const mitt = ['LL', 'LL', 'SS'];
 
   /// The plug, 2 x 2: grey, its darker end.
@@ -427,12 +427,12 @@ abstract final class PipSprites {
     return [for (final r in rows) r.join()];
   }
 
-  // Round 52: his screen showing things, and what's in his field.
+  // His screen showing things, and what's in his field.
 
   /// His standing frame with [screen] on his screen, [t] seconds in.
   static List<String> screenFrame(PipScreen screen, double t,
       {PipFrame base = PipFrame.idle}) {
-    // Round 145: over his body as it is (walking: his legs going).
+    // Over his body as it is (walking: his legs going).
     final rows = [for (final r in frames[base]!) r.split('')];
     for (var y = 0; y < screenRows; y++) {
       for (var x = 0; x < screenWidth; x++) {
@@ -523,7 +523,7 @@ abstract final class PipSprites {
     return [for (final r in rows) r.join()];
   }
 
-  /// A computer bug (Round 52; Round 53 bigger), 8 x 6, its legs one
+  /// A computer bug (bigger), 8 x 6, its legs one
   /// way or the other: green with darker stripes and belly, a red eye
   /// and two feelers at the front (its left: it's mirrored going right).
   static const bugUp = [
@@ -543,7 +543,7 @@ abstract final class PipSprites {
     'K..K..K.',
   ];
 
-  /// Round 73: a beetle, 12 x 8, two strikes: a blue shell with a shine,
+  /// A beetle, 12 x 8, two strikes: a blue shell with a shine,
   /// its legs one way or the other.
   static const beetleUp = [
     'K..K........',
@@ -566,7 +566,7 @@ abstract final class PipSprites {
     'K..K..K..K..',
   ];
 
-  /// Round 73: a spider, 14 x 9, three strikes: purple, red eyes, eight
+  /// A spider, 14 x 9, three strikes: purple, red eyes, eight
   /// legs.
   static const spiderUp = [
     '.....PPPPPP...',
@@ -591,7 +591,7 @@ abstract final class PipSprites {
     '.K..K.KK.K..K.',
   ];
 
-  /// Round 73: the boss, 24 x 16, six strikes: a giant bug in a crown,
+  /// The boss, 24 x 16, six strikes: a giant bug in a crown,
   /// its red eyes and teeth.
   static const bossUp = [
     '........y..y..y.........',
@@ -630,7 +630,7 @@ abstract final class PipSprites {
     '..K..K...K...K...K..K...',
   ];
 
-  /// Round 75: a snowman coming at him in the snow, 12 x 16: cross coal
+  /// A snowman coming at him in the snow, 12 x 16: cross coal
   /// eyes, a carrot nose, stick arms up (waving as it slides).
   static const snowmanFoeUp = [
     'k..........k',
@@ -692,7 +692,7 @@ abstract final class PipSprites {
     'y': PipColours.hatGold,
     'Y': PipColours.hatYellow,
     'W': PipColours.hatWhite,
-    // Round 75: a snowman's.
+    // A snowman's.
     'n': PipColours.snow,
     'N': PipColours.snowShade,
     'c': PipColours.coal,
@@ -705,7 +705,7 @@ abstract final class PipSprites {
     for (final key in foeColours.keys) key: PipColours.hatWhite,
   };
 
-  /// Round 75: his tent in a storm, 30 x 19 ([PipTent]): orange canvas
+  /// His tent in a storm, 30 x 19 ([PipTent]): orange canvas
   /// (its far side darker), seams, a dark doorway with its flaps open, a
   /// pole's tip at the top, pegs.
   static const tent = [
@@ -763,7 +763,7 @@ abstract final class PipSprites {
     'P': PipColours.puddleLight,
   };
 
-  /// Round 73: little 3 x 5 letters for the XP he gains ("+2 XP").
+  /// Little 3 x 5 letters for the XP he gains ("+2 XP").
   static const _tiny = {
     '0': ['xxx', 'x.x', 'x.x', 'x.x', 'xxx'],
     '1': ['.x.', 'xx.', '.x.', '.x.', 'xxx'],
@@ -778,7 +778,7 @@ abstract final class PipSprites {
     '+': ['...', '.x.', 'xxx', '.x.', '...'],
     'X': ['x.x', 'x.x', '.x.', 'x.x', 'x.x'],
     'P': ['xx.', 'x.x', 'xx.', 'x..', 'x..'],
-    // Round 75: lost in the fog.
+    // Lost in the fog.
     '?': ['xxx', '..x', '.xx', '...', '.x.'],
     '!': ['.x.', '.x.', '.x.', '...', '.x.'],
     ' ': ['.', '.', '.', '.', '.'],
@@ -791,7 +791,7 @@ abstract final class PipSprites {
           [for (final c in text.split('')) _tiny[c]![row]].join('.'),
       ];
 
-  /// His sword (Round 53 redrawn), 5 x 13, pointing up: a blade with a
+  /// His sword (redrawn), 5 x 13, pointing up: a blade with a
   /// shine down it, a gold guard with a red gem, the grip, a pommel.
   static const sword = [
     '..h..',
@@ -812,7 +812,7 @@ abstract final class PipSprites {
   /// The sword's grip row the hand holds (the middle of the grip).
   static const swordGrip = 10;
 
-  /// Round 149: his hammer (building), 7 x 13 like the sword, held the
+  /// His hammer (building), 7 x 13 like the sword, held the
   /// same way: a steel head on a wooden handle.
   static const hammer = [
     '.hssse.',
@@ -830,7 +830,7 @@ abstract final class PipSprites {
     '...t...',
   ];
 
-  /// Round 147: his shovel (at the beach), 7 x 13 like the sword, held
+  /// His shovel (at the beach), 7 x 13 like the sword, held
   /// the same way: its blade (forward, as he digs), a wooden handle and
   /// grip.
   static const shovel = [
@@ -849,7 +849,7 @@ abstract final class PipSprites {
     '..t.t..',
   ];
 
-  /// Round 146: his axe (in the forest), 7 x 13 like the sword, held the
+  /// His axe (in the forest), 7 x 13 like the sword, held the
   /// same way: a steel blade on one side of the head (forward, as he
   /// swings it), a wooden handle.
   static const axe = [
@@ -868,7 +868,7 @@ abstract final class PipSprites {
     '...t...',
   ];
 
-  /// Round 146: the great tree he fells in the forest, 30 x 48 (half as
+  /// The great tree he fells in the forest, 30 x 48 (half as
   /// tall again as his field's), his trunk's middle at [greatTreeFoot]
   /// from its left; in winter bare, its branches showing.
   static const greatTree = [
@@ -983,7 +983,7 @@ abstract final class PipSprites {
         treeColours[season.index],
       );
 
-  /// Round 141: his pickaxe (at the mine), 9 x 13 like the sword, held
+  /// His pickaxe (at the mine), 9 x 13 like the sword, held
   /// the same way: a steel head curving down to its points, on a wooden
   /// handle.
   static const pickaxe = [
@@ -1035,7 +1035,7 @@ abstract final class PipSprites {
     ['.oo.', 'ooio', 'ooio', '.oo.'],
   ];
 
-  /// [frame] with what's on his screen turned left to right (Round 53):
+  /// [frame] with what's on his screen turned left to right:
   /// drawn mirrored when he faces left, his screen then reads right.
   static List<String> screenTurned(List<String> frame) => [
         for (final (y, row) in frame.indexed)
@@ -1056,7 +1056,7 @@ abstract final class PipSprites {
     ['#.#...#', '#####.#', '#.#...#', '#####..', '#.#...#'],
   ];
 
-  /// His plate (Round 53), 10 x 2.
+  /// His plate, 10 x 2.
   static const plate = ['QqqqqqqqqQ', '.QQQQQQQQ.'];
 
   /// What's on his plate with [left] bites left (3 to 0), 10 wide: a
@@ -1068,8 +1068,8 @@ abstract final class PipSprites {
         _ => const <String>[],
       };
 
-  /// His hats (Round 57), drawn on his head (mirrored with him), their
-  /// bottom row just above his casing ([hatBottom]). Round 58: centred
+  /// His hats, drawn on his head (mirrored with him), their
+  /// bottom row just above his casing ([hatBottom]). Centred
   /// on his head, over his antenna (it's under the hat), each an even
   /// width so it sits in the middle ([hatLeftOf]); the party hat bigger,
   /// striped, with a pompom.
@@ -1121,7 +1121,7 @@ abstract final class PipSprites {
       '.bbbbbbbb.',
       'wbwbwbwbwb',
     ],
-    // Round 67: his ski days'. Round 72 (better): pulled down
+    // His ski days': pulled down
     // over his head ([hatDrop]), a ribbed cuff, a Nordic pattern, a
     // shaded pompom.
     PipHat.skiBeanie: [
@@ -1136,7 +1136,7 @@ abstract final class PipSprites {
       'RwRwRwRwRwRwRwRw',
       'RRRRRRRRRRRRRRRR',
     ],
-    // Round 61: a day of the year's.
+    // A day of the year's.
     PipHat.santa: [
       '.......oo.',
       '......rroo',
@@ -1170,7 +1170,7 @@ abstract final class PipSprites {
       '...rr...',
       'pppppppp',
     ],
-    // Round 128: a sou'wester, for his quest's work in the wet.
+    // A sou'wester, for his quest's work in the wet.
     PipHat.rainHat: [
       '.....yyyy.....',
       '....yyyyyy....',
@@ -1187,7 +1187,7 @@ abstract final class PipSprites {
   /// The row a hat's bottom is on.
   static const hatBottom = 1;
 
-  /// Round 72: rows a hat comes down over his head (its cuff on his
+  /// Rows a hat comes down over his head (its cuff on his
   /// casing's top), below [hatBottom].
   static const hatDrop = {PipHat.skiBeanie: 2};
 
@@ -1236,7 +1236,7 @@ abstract final class PipSprites {
     'v': PipColours.stem,
   };
 
-  /// Round 64: the tavern on his day out, 33 x 26 (Round 74 redrawn):
+  /// The tavern on his day out, 33 x 26 (redrawn):
   /// a shingled roof and a stone chimney, timber-framed plaster walls on
   /// a stone base, an arched plank door with a hanging sign (a mug) and a
   /// lantern, and a lit window with a counter (the plate flies out of
@@ -1271,7 +1271,7 @@ abstract final class PipSprites {
   ];
 
   /// Its table (10 wide, 6 tall: a plank top, sturdy legs) and his bench
-  /// (12 x 3), outside (Round 74 redrawn).
+  /// (12 x 3), outside (redrawn).
   static const table = [
     'wWWhWWWWhW',
     'wwwwwwwwww',
@@ -1301,7 +1301,6 @@ abstract final class PipSprites {
     's': PipColours.windowFrame,
     'S': PipColours.sign,
     'y': PipColours.mug,
-    // Round 74.
     'h': PipColours.woodLight,
     'P': PipColours.plaster,
     'B': PipColours.stone,
@@ -1311,7 +1310,7 @@ abstract final class PipSprites {
     'g': PipColours.leafSummer,
   };
 
-  /// Round 67: his ski days. A snowy pine, 7 x 9.
+  /// His ski days. A snowy pine, 7 x 9.
   static const pine = [
     '...w...',
     '..wGw..',
@@ -1393,7 +1392,7 @@ abstract final class PipSprites {
     'r': PipColours.snowShade,
   };
 
-  /// Round 72: his ski trip's bus, 92 x 36, bigger: yellow, a
+  /// His ski trip's bus, 92 x 36, bigger: yellow, a
   /// red stripe, the windscreen and door at the front (left), three
   /// passenger windows; his own ('.') clear, him in it behind the glass,
   /// seats in the others.
@@ -1453,7 +1452,7 @@ abstract final class PipSprites {
     'h': PipColours.batteryCase,
   };
 
-  /// Round 63: LEVEL UP, in little 3 x 5 letters, 31 x 5.
+  /// LEVEL UP, in little 3 x 5 letters, 31 x 5.
   static const levelUp = [
     'x...xxx.x.x.xxx.x.......x.x.xx.',
     'x...x...x.x.x...x.......x.x.x.x',
@@ -1465,7 +1464,7 @@ abstract final class PipSprites {
   /// A little z rising while he sleeps, 3 x 4.
   static const z = ['zzz', '..z', '.z.', 'zzz'];
 
-  /// His egg (Round 34, picked: spotted), 16 x 19: the shell, a
+  /// His egg (picked: spotted), 16 x 19: the shell, a
   /// shade down its right and bottom edges, spots in his casing colour.
   static const egg = [
     '......WWWW......',
@@ -1525,7 +1524,6 @@ abstract final class PipSprites {
     'W': PipColours.screen,
     'K': PipColours.face,
     'A': PipColours.light,
-    // Round 37.
     'D': PipColours.screenAsleep,
     'X': PipColours.screenOff,
     'x': PipColours.screenGlint,
@@ -1533,18 +1531,18 @@ abstract final class PipSprites {
     'G': PipColours.batteryCharge,
     'h': PipColours.batteryCap,
     'z': PipColours.star,
-    // Round 44: his charging screens.
+    // His charging screens.
     'B': PipColours.batteryCharge,
     'Y': PipColours.stationBolt,
     'n': PipColours.staticLight,
     'd': PipColours.staticDark,
-    // Round 52: his screen's pictures.
+    // His screen's pictures.
     'R': PipColours.heart,
   };
 
-  // Round 70: his field through the year.
+  // His field through the year.
 
-  /// A tree, 30 x 36 (Round 72: bigger and more detailed): its
+  /// A tree, 30 x 36 (bigger and more detailed): its
   /// crown in [treeColours] for the season ('L' leaves, 'H' lit, 'D' in
   /// shade, 'B' blossom or a bright leaf), 'T' and 'U' its trunk, lit and
   /// shaded. The crown is its first [treeCrown] rows (they sway).
@@ -1628,7 +1626,7 @@ abstract final class PipSprites {
     '...........TTTTTUUU...........',
   ];
 
-  /// Round 74: a birch, 24 x 40: a tall oval crown (leaves as the tree's,
+  /// A birch, 24 x 40: a tall oval crown (leaves as the tree's,
   /// by the season) on a white trunk with dark marks ('W', 'w', 'K').
   static const birch = [
     '........HH.L.H..L.......',
@@ -1718,7 +1716,7 @@ abstract final class PipSprites {
     '..........WWww..........',
   ];
 
-  /// Round 74: a big pine for his field, 22 x 38, green all year: five
+  /// A big pine for his field, 22 x 38, green all year: five
   /// tiers ('G', its shade 'g', lit 'h').
   static const fieldPine = [
     '..........hg..........',
@@ -1857,7 +1855,7 @@ abstract final class PipSprites {
     PipColours.lightGreen,
   ];
 
-  /// Round 72: Christmas's badnjak, 16 x 18: oak branches, their dry
+  /// Christmas's badnjak, 16 x 18: oak branches, their dry
   /// leaves on ('o', 'O'), tied with a red ribbon ('r'), standing in
   /// straw ('s', 'S').
   static const badnjak = [
@@ -1890,7 +1888,7 @@ abstract final class PipSprites {
     'S': PipColours.strawDark,
   };
 
-  /// Round 72: Christmas's candle, 3 x 8: its flame ('f', 'F'), which
+  /// Christmas's candle, 3 x 8: its flame ('f', 'F'), which
   /// flickers, its wick ('k'), the wax ('w', 'W').
   static const candle = [
     '.f.',

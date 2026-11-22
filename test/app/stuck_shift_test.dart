@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/app/stuck_shift.dart';
 
-/// A Shift the app wrongly thinks is held (Round 26): taps in a note
+/// A Shift the app wrongly thinks is held: taps in a note
 /// selected everything from the start instead of placing the cursor.
 void main() {
   late TextEditingController text;

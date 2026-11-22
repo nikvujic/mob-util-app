@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_quest.dart';
 
-/// Pip's quests (Round 125, `docs/QUESTS_SPEC.md`): quest hours, the
+/// Pip's quests (`docs/QUESTS_SPEC.md`): quest hours, the
 /// house's script, and where it is after some work minutes.
 void main() {
   DateTime at(int h, [int m = 0, int day = 2]) => DateTime(2026, 11, day, h, m);
@@ -40,7 +40,7 @@ void main() {
 
     test(
         'on the days the clocks change, still 10:00–11:30 and 19:00–20:30 '
-        'on the clock (Round 137)', () {
+        'on the clock', () {
       for (final day in [DateTime(2026, 3, 29), DateTime(2026, 10, 25)]) {
         final spans = PipQuest.windowsBetween(
             day, DateTime(day.year, day.month, day.day + 1));
@@ -67,7 +67,7 @@ void main() {
     final q = Quests.house;
 
     test(
-        'about two months of work (50–65 days of quest hours; Round 146: '
+        'about two months of work (50–65 days of quest hours; '
         'shorter walks, about 54)', () {
       final days = q.totalMinutes / PipQuest.minutesPerDay;
       expect(days, inInclusiveRange(50, 65));
@@ -76,7 +76,7 @@ void main() {
     test(
         'never builds without the materials, never carries more than a load '
         'home, every piece built, its count; each block on what it rests on '
-        '(Round 140: nothing floats, pieces in turn)', () {
+        '(nothing floats, pieces in turn)', () {
       final inv = {for (final i in QuestItem.values) i: 0};
       var load = 0;
       final built = {for (final p in Quests.housePieces) p.id: 0};
@@ -127,7 +127,7 @@ void main() {
     });
 
     test(
-        'pieces in turn (Round 140): stone and wood work mixed from the '
+        'pieces in turn: stone and wood work mixed from the '
         'start; the floor begun before the foundation\'s done', () {
       final firstDay = <String>{};
       var t = 0;
@@ -144,7 +144,7 @@ void main() {
     });
 
     test(
-        'a load at a time (Round 135): never long away from building (it was '
+        'a load at a time: never long away from building (it was '
         'days at the mine before the first block)', () {
       var away = 0, longest = 0, builds = 0;
       for (final s in q.steps) {
@@ -158,7 +158,7 @@ void main() {
         }
       }
       expect(builds, greaterThan(100));
-      // Round 140: at most a couple of small trips (a piece of two
+      // At most a couple of small trips (a piece of two
       // materials), or sand, wood and a few panes smelted (it was 1035
       // minutes, about six days, then two hours).
       expect(longest, lessThanOrEqualTo(200));

@@ -146,8 +146,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
         ),
       );
 
-  /// Puts back [routine] with its [days] (restoring part of a backup,
-  /// Round 28). Nothing happens if it's already there. Throws
+  /// Puts back [routine] with its [days] (restoring part of a backup). Nothing happens if it's already there. Throws
   /// [TaskOverlapException] if it would overlap another routine.
   void restore(Routine routine, Iterable<RoutineDay> days) {
     if (state.routines.any((r) => r.id == routine.id)) return;

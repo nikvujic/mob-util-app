@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 
-/// Keeps the screen from going dark (Round 42: a recipe open while
+/// Keeps the screen from going dark (a recipe open while
 /// cooking, the phone set aside). Android only keeps it on while the app
 /// is in front, so it's off again on its own in the background.
 ///

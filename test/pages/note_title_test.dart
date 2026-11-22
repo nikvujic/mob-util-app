@@ -88,7 +88,7 @@ void main() {
 
   testWidgets(
       'a default title comes selected, to be typed over; a real one '
-      "doesn't (Round 27)", (tester) async {
+      "doesn't", (tester) async {
     container = await pumpApp(tester);
     container.read(notesProvider.notifier)
       ..addNote() // "New Note"

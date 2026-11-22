@@ -17,7 +17,7 @@ import 'package:the_app/widgets/confirm_dialog.dart';
 import 'package:the_app/widgets/discard_scope.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
-/// A date (Round 57): its title, type, day (and year), every year or
+/// A date: its title, type, day (and year), every year or
 /// once, a note and up to three reminders. Saved as it's changed, once
 /// it has a title; a new one left without one is dropped. Delete is at
 /// the end, asked first, with Undo.
@@ -45,7 +45,7 @@ class _DatePageState extends ConsumerState<DatePage> {
       );
 
   /// As it was when the page opened (null: a new one), for Discard
-  /// (Round 91).
+  ///.
   late final DateEntry? _original =
       ref.read(datesProvider).byId(widget.dateId ?? '');
 
@@ -70,7 +70,7 @@ class _DatePageState extends ConsumerState<DatePage> {
   }
 
   Future<void> _pickDate() async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final today = _today;
@@ -94,7 +94,7 @@ class _DatePageState extends ConsumerState<DatePage> {
   }
 
   Future<void> _editReminder(int? index) async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final reminders = [..._draft.reminders];
@@ -113,7 +113,7 @@ class _DatePageState extends ConsumerState<DatePage> {
     _change(_draft.copyWith(reminders: reminders));
   }
 
-  /// The reminders after its kind goes from [from] to [to] (Round 61): a
+  /// The reminders after its kind goes from [from] to [to]: a
   /// kind's own (a wedding's) if they were still the old kind's, so
   /// reminders set by hand stay.
   List<DateReminder> _remindersFor(
@@ -123,7 +123,7 @@ class _DatePageState extends ConsumerState<DatePage> {
     return to?.reminders ?? DateReminder.defaults;
   }
 
-  /// Asked first (Round 58), then gone, with Undo.
+  /// Asked first, then gone, with Undo.
   Future<void> _delete() async {
     final confirmed = await showConfirmDialog(
       context,
@@ -148,11 +148,11 @@ class _DatePageState extends ConsumerState<DatePage> {
       ));
   }
 
-  /// A travel time picked (Round 67): from [minutes], made into the date
+  /// A travel time picked: from [minutes], made into the date
   /// by [apply].
   Future<void> _pickTravelTime(
       int minutes, DateEntry Function(int) apply) async {
-    // Round 81: a field typed in lets go first, or the keyboard comes
+    // A field typed in lets go first, or the keyboard comes
     // back once the picker closes.
     FocusManager.instance.primaryFocus?.unfocus();
     final picked = await showTimePicker(
@@ -188,13 +188,13 @@ class _DatePageState extends ConsumerState<DatePage> {
     final colors = context.colors;
     final today = _today;
     final next = date.nextFrom(today);
-    // Round 108: a person's birthday: its title, day, year and type are
+    // A person's birthday: its title, day, year and type are
     // theirs (edited on the People page), and it goes with them.
     final person = date.personId == null
         ? null
         : ref.watch(peopleProvider).byId(date.personId!);
     final fromPeople = person != null;
-    // Round 91: back asks Save or Discard once it's changed.
+    // Back asks Save or Discard once it's changed.
     final now = ref.watch(datesProvider).byId(_draft.id);
     return DiscardScope(
       changed: now != _original,
@@ -245,7 +245,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                         avatar: Icon(type.icon, size: 18, color: type.colour),
                         label: Text(type.label),
                         selected: date.type == type,
-                        // A type sets every year or once (Round 61: only
+                        // A type sets every year or once (only
                         // Other can change it after); once needs a year.
                         onSelected: (_) => _change(date.copyWith(
                           type: type,
@@ -259,7 +259,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                   ],
                 ),
               ),
-            // Round 61: a holiday's or an event's kind.
+            // A holiday's or an event's kind.
             if (date.type.kinds.isNotEmpty) ...[
               _heading('KIND'),
               Padding(
@@ -296,7 +296,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                 ),
               ),
             ),
-            // Round 59: a holiday or an event can last several days.
+            // A holiday or an event can last several days.
             if (date.type.lasts)
               ListTile(
                 key: const Key('dateLasts'),
@@ -331,7 +331,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                   ],
                 ),
               ),
-            // Round 67: a ski trip's bus there and back (Pip rides it).
+            // A ski trip's bus there and back (Pip rides it).
             if (date.kindNow == DateKind.skiing) ...[
               ListTile(
                 key: const Key('dateTravel'),
@@ -399,7 +399,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                   style: TextStyle(color: colors.textMuted, fontSize: 12),
                 ),
               ),
-            // Round 61: only Other chooses; a birthday or an anniversary is
+            // Only Other chooses; a birthday or an anniversary is
             // every year, a holiday or an event once.
             if (date.type.choosesYearly)
               SwitchListTile(
@@ -421,7 +421,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                   _ => 'For how many years',
                 }),
                 value: date.year != null,
-                // Round 109: a birthday from People has its year there.
+                // A birthday from People has its year there.
                 onChanged: fromPeople
                     ? null
                     : (on) => _change(
@@ -468,7 +468,7 @@ class _DatePageState extends ConsumerState<DatePage> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   labelText: 'Note',
-                  // Round 61: a hint for each type.
+                  // A hint for each type.
                   hintText: switch (date.type) {
                     DateType.birthday => 'Gift ideas…',
                     DateType.anniversary => 'Plans, gift ideas…',
@@ -483,7 +483,7 @@ class _DatePageState extends ConsumerState<DatePage> {
             if (saved && !fromPeople)
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
-                // Round 116: a full button, as Delete person.
+                // A full button, as Delete person.
                 child: OutlinedButton.icon(
                   key: const Key('deleteDate'),
                   style: OutlinedButton.styleFrom(

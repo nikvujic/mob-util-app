@@ -6,7 +6,7 @@ import 'package:the_app/providers/session_provider.dart';
 
 import '../helpers.dart';
 
-/// Settings → Hide People notes (Round 109): on freely; off again only
+/// Settings → Hide People notes: on freely; off again only
 /// with the password, when there is one.
 void main() {
   const password = 'master password';

@@ -10,7 +10,7 @@ import 'package:the_app/providers/section_locks_provider.dart';
 /// What an automatic backup attempt did.
 enum AutoBackupResult { off, notDue, locked, written, failed }
 
-/// Automatic backup (Round 39): once a day, when the app is opened (or
+/// Automatic backup: once a day, when the app is opened (or
 /// comes back), a backup into the folder picked, as *Export all data*
 /// writes it; the newest [keep] are kept there. Not while a section is
 /// locked (it needs the app unlocked): then the next time it is.

@@ -10,11 +10,11 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 /// The medicine reminders (O13) due after [now] for the next [days] days:
 /// one at each dose time not yet marked, and for a medicine with a
-/// follow-up (Round 16), another that many minutes later. None while off
+/// follow-up, another that many minutes later. None while off
 /// or paused ([Preferences]). With [hideNames] (set private) the
 /// medicine's name is left out.
 ///
-/// Doses due at the same moment come as one notification (Round 23):
+/// Doses due at the same moment come as one notification:
 /// Android holds back alarms that follow each other closely while the
 /// phone is idle, so a second one could come many minutes late.
 List<Reminder> planMedicineReminders({
@@ -94,17 +94,17 @@ String _body(List<_Due> doses, {required bool hideNames}) {
 }
 
 /// Until when, in minutes past midnight, a late dose of the day before
-/// still counts as due (Round 15): one at 23:30 that's missed still shows
+/// still counts as due: one at 23:30 that's missed still shows
 /// when going to bed.
 const dueOverMidnight = 120;
 
 /// Only the day before's doses from this time on (minutes past midnight,
-/// 22:00 itself included) count after midnight (Round 17: at 00:50, the
+/// 22:00 itself included) count after midnight (at 00:50, the
 /// day's earlier doses had kept the dot).
 const lateDoseFrom = 22 * 60;
 
 /// Whether one of the important medicines' doses due by [now] isn't
-/// marked (O13; Round 24: only important ones): today's whose time has
+/// marked (O13; only important ones): today's whose time has
 /// come, and before [dueOverMidnight] also yesterday's late ones (from
 /// [lateDoseFrom], 22:00).
 bool doseDue(MedicineBook book, DateTime now) {
@@ -128,7 +128,7 @@ bool doseDue(MedicineBook book, DateTime now) {
 }
 
 /// The red dot on the Medicine tile and the Hub tab (O13): an important
-/// medicine's dose due and not marked, unless paused (Round 24: the
+/// medicine's dose due and not marked, unless paused (the
 /// important flag decides; there's no switch for it). The home screen looks
 /// again every half minute and when the app comes back (a dose comes due
 /// with no change to anything here).

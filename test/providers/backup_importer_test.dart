@@ -210,7 +210,7 @@ void main() {
     });
   });
 
-  test('the to-do list comes back, and goes back on undo (Round 28)', () async {
+  test('the to-do list comes back, and goes back on undo', () async {
     final container = containerWith(AppStorage.inMemory());
     BackupImporter importer() => container.read(backupImporterProvider);
     container.read(todoProvider.notifier).add('Current');

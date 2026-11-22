@@ -14,7 +14,7 @@ import 'package:the_app/widgets/people_avatar.dart';
 
 import '../helpers.dart';
 
-/// The People page (Round 108, spec `docs/PEOPLE_SPEC.md`).
+/// The People page (spec `docs/PEOPLE_SPEC.md`).
 void main() {
   late ProviderContainer container;
   final now = DateTime(2026, 10, 27, 12);
@@ -156,8 +156,7 @@ void main() {
     expect(find.byKey(const Key('peopleAdd')), findsOneWidget);
   });
 
-  testWidgets('a drag moves only them (Round 114), near or far',
-      (tester) async {
+  testWidgets('a drag moves only them, near or far', (tester) async {
     await openPeople(tester, people: family);
     Offset at(String id) => Offset(byName(id).x, byName(id).y);
     final ivan = at('Ivan'), jelena = at('Jelena'), ana = at('Ana');
@@ -299,7 +298,7 @@ void main() {
         tester.widget<ActionChip>(find.byKey(const Key('dateDay'))).onPressed,
         isNull);
     expect(find.byKey(const Key('deleteDate')), findsNothing);
-    // Round 109: its year known is People's too.
+    // Its year known is People's too.
     expect(
         tester
             .widget<SwitchListTile>(find.byKey(const Key('dateYearKnown')))
@@ -308,7 +307,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 113: Show in Dates off takes the birthday out of '
+      'Show in Dates off takes the birthday out of '
       'Dates, kept here; on again puts it back', (tester) async {
     await openPeople(tester, people: family);
     await tester.tap(find.byKey(const Key('person-i')));
@@ -387,7 +386,7 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  group('Round 109', () {
+  group('board details', () {
     Future<void> select(WidgetTester tester, String id) async {
       await tester.tap(find.byKey(Key('person-$id')));
       await tester.pumpAndSettle();
@@ -445,7 +444,7 @@ void main() {
       expect(book().mainId, 'a');
       await tapKey(tester, 'personDone');
       expect(find.byKey(const Key('mainStar')), findsOneWidget);
-      // Round 111: on the box's corner, not the face's.
+      // On the box's corner, not the face's.
       final star = tester.getRect(find.byKey(const Key('mainStar')));
       final mainBox = tester.getRect(find.byKey(const Key('person-a')));
       expect(star.center.dx, greaterThan(mainBox.right - 12));
@@ -634,8 +633,8 @@ void main() {
       expect(nameSize(), greaterThan(12.5),
           reason: "larger than at 100%, its longest word still fitting");
       expect(tester.takeException(), isNull);
-      // Round 111: the face not dwarfed by the name (most of its 78 board
-      // units); Round 112: a first and last name shown whole.
+      // The face not dwarfed by the name (most of its 78 board
+      // units); a first and last name shown whole.
       final box = tester.getRect(find.byKey(const Key('person-i')));
       final face = tester.getRect(find.descendant(
           of: find.byKey(const Key('person-i')),
@@ -736,7 +735,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 151: drawn over by the phone\'s navigation bar (edge to edge), '
+      'drawn over by the phone\'s navigation bar (edge to edge), '
       'its bottom bar keeps its height, above it', (tester) async {
     tester.view.padding = const FakeViewPadding(bottom: 144); // 48 dp
     tester.view.viewPadding = const FakeViewPadding(bottom: 144);

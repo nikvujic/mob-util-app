@@ -25,14 +25,14 @@ void main() {
       'assets/icons/counters.svg',
       'assets/icons/placard.svg',
       'assets/icons/medicine.svg',
-      'assets/icons/recipes.svg', // Round 42
-      'assets/icons/dates.svg', // Round 57
-      'assets/icons/subscriptions.svg', // Round 79
-      'assets/icons/spotify.svg', // Round 93
-      'assets/icons/packing.svg', // Round 94
-      'assets/icons/people.svg', // Round 108
-      'assets/icons/converter.svg', // Round 118
-      'assets/icons/pip.svg', // hatched (Round 35)
+      'assets/icons/recipes.svg', //
+      'assets/icons/dates.svg', //
+      'assets/icons/subscriptions.svg', //
+      'assets/icons/spotify.svg', //
+      'assets/icons/packing.svg', //
+      'assets/icons/people.svg', //
+      'assets/icons/converter.svg', //
+      'assets/icons/pip.svg', // hatched
     });
     expect(assets.toSet().length, assets.length, reason: 'each its own');
     for (final asset in assets) {
@@ -58,7 +58,7 @@ void main() {
         reason: 'next, leftwards');
   });
 
-  test("the default order (Round 48)", () {
+  test("the default order", () {
     expect(PageLayout.initial.hub, [
       HubTool.counters,
       HubTool.medicine,
@@ -66,11 +66,11 @@ void main() {
       HubTool.pip,
       HubTool.recipes,
       HubTool.dates,
-      HubTool.subscriptions, // Round 79
-      HubTool.spotify, // Round 93
-      HubTool.packing, // Round 94
-      HubTool.people, // Round 108
-      HubTool.converter, // Round 118
+      HubTool.subscriptions, //
+      HubTool.spotify, //
+      HubTool.packing, //
+      HubTool.people, //
+      HubTool.converter, //
     ]);
   });
 
@@ -147,7 +147,7 @@ void main() {
     });
   });
 
-  group("Pip's home (Round 35)", () {
+  group("Pip's home", () {
     testWidgets('only once he has hatched', (tester) async {
       await pumpApp(tester, pipHatched: false);
       await openTab(tester, 'Hub');

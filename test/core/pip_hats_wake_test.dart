@@ -7,7 +7,7 @@ import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/widgets/pip_room.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 57: his hats (a birthday's party hat, those tried on), a slower
+/// His hats (a birthday's party hat, those tried on), a slower
 /// wake with a yawn, and every picture on his screen reading right.
 void main() {
   PipBrain up({int seed = 3}) => PipBrain(
@@ -65,7 +65,7 @@ void main() {
     });
 
     test(
-        'Round 141: off to sleep and waking, it hops between his head and '
+        'off to sleep and waking, it hops between his head and '
         'the ground, never simply there', () {
       final p = up()..birthday = true;
       // Where it is: 1 on his head, 0 on the ground, or in between.
@@ -96,7 +96,7 @@ void main() {
     });
 
     test(
-        'each hat (Round 58): centred on his head, over his antenna, '
+        'each hat: centred on his head, over his antenna, '
         'above his casing', () {
       final frame = PipSprites.frameOf(PipFrame.idle, PipFace.normal);
       final antenna = frame.first.indexOf('A');
@@ -107,7 +107,7 @@ void main() {
         final width = art.first.length;
         expect(art.every((r) => r.length == width), isTrue, reason: hat.name);
         expect(width.isEven, isTrue, reason: '${hat.name}: one middle');
-        // Round 72: the ski beanie as wide as his head; the rest 10.
+        // The ski beanie as wide as his head; the rest 10.
         expect(width, lessThanOrEqualTo(16), reason: hat.name);
         final left = PipSprites.hatLeftOf(art);
         expect(left + width / 2, headMiddle, reason: '${hat.name}: centred');
@@ -126,14 +126,14 @@ void main() {
           }
         }
       }
-      // The party hat, bigger (Round 58).
+      // The party hat, bigger.
       expect(PipSprites.hats[PipHat.party]!.length, greaterThanOrEqualTo(8));
       expect(PipSprites.hats[PipHat.party]!.first.length, 10);
       expect(PipSprites.hats.keys.toSet(), PipHat.values.toSet());
     });
   });
 
-  test("his cross words (Round 58): clear of any hat he's in, either way", () {
+  test("his cross words: clear of any hat he's in, either way", () {
     for (final right in [true, false]) {
       for (final hat in PipHat.values) {
         final p = up()

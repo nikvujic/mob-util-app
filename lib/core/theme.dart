@@ -301,7 +301,7 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       extensions: [palette],
       scaffoldBackgroundColor: palette.background,
-      // No tooltip pops up on a long press (Round 15: seen holding − in
+      // No tooltip pops up on a long press (seen holding − in
       // the shop). The message still names the button for screen readers.
       tooltipTheme: const TooltipThemeData(
         triggerMode: TooltipTriggerMode.manual,
@@ -361,8 +361,7 @@ abstract final class AppTheme {
       ),
       // Chips (e.g. the planner's quick times and repeat days): the app's
       // own colours, so every theme keeps readable labels.
-      // Round 81 (the tick was hard to see, on a coloured dot
-      // worst): no tick; the one picked is plainly marked instead, filled
+      // No tick (hard to see, on a coloured dot worst); the one picked is plainly marked instead, filled
       // with a wash of the accent and edged in it (checked in every
       // theme).
       chipTheme: ChipThemeData(
@@ -411,7 +410,7 @@ abstract final class AppTheme {
   static ThemeData get dark => of(AppPalette.clay);
 }
 
-/// How a dose went, in the same colours whatever the theme (Round 18):
+/// How a dose went, in the same colours whatever the theme:
 /// green taken, red missed, amber not sure. Bright enough to read as text
 /// on every (dark) theme, and dark text reads on them.
 abstract final class DoseColours {
@@ -420,7 +419,7 @@ abstract final class DoseColours {
   static const unsure = Color(0xFFFFB300);
 }
 
-/// Each kind of date's colour (Round 57), whatever the theme: its dots on
+/// Each kind of date's colour, whatever the theme: its dots on
 /// the calendar and its icon's circle.
 abstract final class DateColours {
   static const birthday = Color(0xFFEC6FA0);
@@ -432,7 +431,7 @@ abstract final class DateColours {
   static const seen = Color(0xFF4CAF50); // the green dot (a birthday)
 }
 
-/// Subscriptions' states (Round 79), whatever the theme: a card's tint
+/// Subscriptions' states, whatever the theme: a card's tint
 /// and edge.
 abstract final class SubscriptionColours {
   static const active = Color(0xFF4CAF7A);
@@ -441,7 +440,7 @@ abstract final class SubscriptionColours {
   static const inactive = Color(0xFF9A8F86);
 }
 
-/// Pip's own colours (Round 25), the launcher icon's, whatever the theme.
+/// Pip's own colours, the launcher icon's, whatever the theme.
 abstract final class PipColours {
   static const casing = Color(0xFFD97757); // head casing, antenna
   static const body = Color(0xFFC96442); // body, feet
@@ -449,9 +448,9 @@ abstract final class PipColours {
   static const face = Color(0xFF141413); // eyes, mouth
   static const shade = Color(0xFFA84F33); // under the body, feet
   static const light = Color(0xFFF2C07A); // the antenna's light
-  static const eggShade = Color(0xFFD8D0C2); // his egg's shade (Round 34)
+  static const eggShade = Color(0xFFD8D0C2); // his egg's shade
 
-  // His sky (Round 35), top and bottom of each part of the day; Round 52:
+  // His sky, top and bottom of each part of the day, with
   // more hues between them (the stops, top to bottom).
   static const nightTop = Color(0xFF0B1022);
   static const nightBottom = Color(0xFF3A3F72);
@@ -493,7 +492,7 @@ abstract final class PipColours {
     Color(0xFFEE8452),
     duskBottom,
   ];
-  // Round 52: clouds with light and shade (tinted at dawn and dusk), the
+  // Clouds with light and shade (tinted at dawn and dusk), the
   // sun's glow and highlight, the moon's halo and craters, coloured stars.
   static const cloudLight = Color(0xFFFFFFFF);
   static const cloudShade = Color(0xFFC9D7E8);
@@ -505,17 +504,17 @@ abstract final class PipColours {
   static const starWarm = Color(0xFFFFE2A8);
   static const starCool = Color(0xFFA8C8FF);
   static const star = Color(0xFFF5F0E8);
-  static const starDim = Color(0xFF7D88AA); // most stars (Round 38)
+  static const starDim = Color(0xFF7D88AA); // most stars
   static const moon = Color(0xFFE4E4DC); // pale grey, not the sun's yellow
   static const moonShade = Color(0xFFB9BAB3); // its seas
   static const sun = Color(0xFFFFD36E);
   static const cloud = Color(0xFFF2F4F8);
 
-  // His room (Round 26): grass on dirt.
-  // Round 64: the tavern on his day out.
+  // His room: grass on dirt.
+  // The tavern on his day out.
   static const roof = Color(0xFFA2463A);
   static const roofDark = Color(0xFF7A3129);
-  // Round 74: the tavern's plaster walls, stone base, lighter planks.
+  // The tavern's plaster walls, stone base, lighter planks.
   static const plaster = Color(0xFFEADFC4);
   static const stone = Color(0xFF9C948A);
   static const stoneDark = Color(0xFF6F6860);
@@ -530,14 +529,14 @@ abstract final class PipColours {
   static const chimneyTop = Color(0xFF5A5A58);
   static const sign = Color(0xFFE8C48A);
   static const mug = Color(0xFFE8963A);
-  // Round 67: his ski days.
+  // His ski days.
   static const snow = Color(0xFFF2F5FA);
   static const snowShade = Color(0xFFCBD6E6);
   static const snowDark = Color(0xFFA9B8CF);
   static const flake = Color(0xFFFFFFFF);
   static const pine = Color(0xFF2E6040);
   static const pineDark = Color(0xFF1F4430);
-  // Round 75: his tent, his umbrella, rain's puddles, a snowman's
+  // His tent, his umbrella, rain's puddles, a snowman's
   // carrot and coal.
   static const tent = Color(0xFFE07B39);
   static const tentDark = Color(0xFFB4562A);
@@ -550,7 +549,7 @@ abstract final class PipColours {
   static const puddleLight = Color(0xFFA9C4E2);
   static const carrot = Color(0xFFF08A2C);
   static const coal = Color(0xFF2B2826);
-  // Round 74: a pine's lit side; a birch's white bark and its marks.
+  // A pine's lit side; a birch's white bark and its marks.
   static const pineLight = Color(0xFF4A8A5A);
   static const birch = Color(0xFFEDE8DC);
   static const birchShade = Color(0xFFC9C2B2);
@@ -565,7 +564,7 @@ abstract final class PipColours {
   static const busYellow = Color(0xFFF2B632);
   static const busShade = Color(0xFFC88A1E);
   static const busGlass = Color(0xFF9CC7E0);
-  // Round 72: the bigger bus's seats, trim and inside.
+  // The bigger bus's seats, trim and inside.
   static const busSeat = Color(0xFF4F6E8C);
   static const busTrim = Color(0xFF3A3632);
   static const busStripeShade = Color(0xFFA8382F);
@@ -573,7 +572,7 @@ abstract final class PipColours {
   static const road = Color(0xFF5A5A5E);
   static const roadDark = Color(0xFF45454A);
   static const roadLine = Color(0xFFF5F0E8);
-  // Round 63: LEVEL UP, over him.
+  // LEVEL UP, over him.
   static const levelUp = Color(0xFFFFD36E);
   static const levelUpShade = Color(0xFFB0702A);
   static const grass = Color(0xFF5E8C3A);
@@ -581,7 +580,7 @@ abstract final class PipColours {
   static const dirt = Color(0xFF6B4423);
   static const dirtDark = Color(0xFF4E301A);
 
-  // Round 37: his screen asleep and off; batteries and energy.
+  // His screen asleep and off; batteries and energy.
   static const screenAsleep = Color(0xFFD9D2C4);
   static const screenOff = Color(0xFF2E2C2A);
   static const screenGlint = Color(0xFF45423F);
@@ -591,10 +590,10 @@ abstract final class PipColours {
   static const energyHalf = Color(0xFFE8963A); // orange
   static const energyLow = Color(0xFFE0503E); // red
   static const energyEmpty = Color(0xFF4A4744);
-  // Round 42: a battery's charge is blue (his energy stays green to red).
+  // A battery's charge is blue (his energy stays green to red).
   static const batteryCharge = Color(0xFF4A9BE8);
 
-  // Round 44: his charging station, its cable and plug.
+  // His charging station, its cable and plug.
   static const stationEdge = Color(0xFF3A3B40);
   static const stationBody = Color(0xFF9A9CA0);
   static const stationLight = Color(0xFFB8BBC0);
@@ -607,11 +606,11 @@ abstract final class PipColours {
   static const staticLight = Color(0xFFC8C4BC);
   static const staticDark = Color(0xFF9A958C);
 
-  // Round 52: things in his field, and his sword.
+  // Things in his field, and his sword.
   static const bug = Color(0xFF6CC24A); // a computer bug: green
   static const bugDark = Color(0xFF3E7A2C);
   static const bugEye = Color(0xFFE0503E);
-  // Round 73: a beetle's blue shell, a spider's purple.
+  // A beetle's blue shell, a spider's purple.
   static const beetle = Color(0xFF5B8FD6);
   static const beetleDark = Color(0xFF35609E);
   static const beetleBelly = Color(0xFF243F6B);
@@ -633,7 +632,7 @@ abstract final class PipColours {
   static const cross = Color(0xFFE0503E); // his cross words (#!)
   static const heart = Color(0xFFE0503E);
   static const puff = Color(0xFFF2F4F8);
-  // Round 57: his hats.
+  // His hats.
   static const hatPink = Color(0xFFF07AA8);
   static const hatYellow = Color(0xFFFFD36E);
   static const hatGold = Color(0xFFE8B23A);
@@ -645,23 +644,23 @@ abstract final class PipColours {
   static const hatPurple = Color(0xFF6A4FB5);
   static const hatGreen = Color(0xFF3F9E6A);
   static const hatWhite = Color(0xFFF5F2EA);
-  // Round 53: his plate and meal.
+  // His plate and meal.
   static const plate = Color(0xFFF5F2EA);
   static const plateShade = Color(0xFFB9B4AA);
   static const meal = Color(0xFFD98A3A);
   static const mealDark = Color(0xFFA8642A);
 
-  // Pip Home's card (Round 35): a game's panel, whatever the theme.
+  // Pip Home's card: a game's panel, whatever the theme.
   static const panel = Color(0xFF231F1D);
   static const panelEdge = Color(0xFF4A3F38);
   static const key = Color(0xFF36302C);
   static const dim = Color(0xFF9A8F86); // quieter words on the panel
 
-  // Round 72: the mountains at the ski slope's horizon.
+  // The mountains at the ski slope's horizon.
   static const mountain = Color(0xFF8FA4C2);
   static const mountainShade = Color(0xFF7489AA);
 
-  // Round 70: the seasons, occasions and weather in his field.
+  // The seasons, occasions and weather in his field.
   static const leafSpring = Color(0xFF8CC65A);
   static const leafSpringDark = Color(0xFF5E9A3C);
   static const leafSpringLight = Color(0xFFB6E07E);
@@ -689,7 +688,7 @@ abstract final class PipColours {
   static const lightGreen = Color(0xFF7FE07A);
   static const starGold = Color(0xFFFFE07A);
 
-  // Round 72: Christmas's badnjak (dry oak leaves), straw and candle.
+  // Christmas's badnjak (dry oak leaves), straw and candle.
   static const oakLeaf = Color(0xFFA8642A);
   static const oakLeafDark = Color(0xFF7A4520);
   static const straw = Color(0xFFE8C468);
@@ -711,7 +710,7 @@ abstract final class PipColours {
   static const cloudNightLight = Color(0xFF4A5262);
 }
 
-/// People's avatars and boxes (Round 108), whatever the theme: the
+/// People's avatars and boxes, whatever the theme: the
 /// drafts' colours (`docs/people_avatar_drafts.png`).
 abstract final class PeopleColours {
   static const male = Color(0xFF3F7BC8); // a highlighted box's border
@@ -746,13 +745,13 @@ abstract final class PeopleColours {
   static const auburnLight = Color(0xFFBE6E46);
 }
 
-/// Round 109: the main person's family, highlighted on the People board.
+/// The main person's family, highlighted on the People board.
 abstract final class PeopleFamilyColours {
   static const ring = Color(0xFFE2A93B);
   static const starShadow = Color(0x55000000);
 }
 
-/// Round 126: Pip's house (his quest, `docs/QUESTS_SPEC.md`) and the
+/// Pip's house (his quest, `docs/QUESTS_SPEC.md`) and the
 /// places he gathers in: the forest, the mine, the beach.
 abstract final class PipHouseColours {
   // Stone: four shades, mortar, a lit edge.
@@ -796,7 +795,7 @@ abstract final class PipHouseColours {
   static const glass = Color(0xFFA0D2EC);
   static const glassLight = Color(0xFFE8F8FF);
   static const glassDark = Color(0xFF78B0D2);
-  // Round 128: the night through them.
+  // The night through them.
   static const nightGlass = Color(0xFF2C3C62);
   static const nightGlassLight = Color(0xFF52648E);
   static const nightGlassDark = Color(0xFF1E2A48);
@@ -863,7 +862,7 @@ abstract final class PipHouseColours {
   // The forest's haze over far trees.
   static const haze = Color(0xFFC4D6E2);
 
-  /// Round 146: the far trees' fade at night: into the dark.
+  /// The far trees' fade at night: into the dark.
   static const nightHaze = Color(0xFF151C33);
   static const mushroom = Color(0xFFC83C32);
   static const mushroomStalk = Color(0xFFE6E0D2);

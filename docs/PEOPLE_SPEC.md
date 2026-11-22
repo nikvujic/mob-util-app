@@ -1,6 +1,6 @@
-# People — spec (Round 107)
+# People — spec
 
-Built in Round 108 (1.43.0); written in Round 107 (v2 item 4): the people you know as **floating
+Built in 1.43.0 (v2 item 4): the people you know as **floating
 boxes on a zoomable board**, with **relations** that make a **family
 tree**, laid out like Pip Home (the picture on top, the controls below).
 **Required** marks a requirement, **Decided** an answer to a
@@ -107,11 +107,11 @@ section 9.
   kind:
   - **Parent** / **Child** (one relation, seen from either side);
   - **Partner** (married or not; **proposed:** with "former" as an option,
-    drawn dashed);
+  drawn dashed);
   - **Sibling** (only needed when no parents are entered; siblings who
-    share a parent are worked out from that);
+  share a parent are worked out from that);
   - **Other** (friend, colleague...: a thin plain line with an optional
-    word on it, e.g. "Godfather").
+  word on it, e.g. "Godfather").
 - **Proposed:** a relation that makes no sense is refused with a reason
   (someone their own parent, more than two parents, a loop of parents).
 
@@ -160,10 +160,10 @@ section 9.
 - **Required:** when **creating** a person, a button lets you **pick a birthday
   from the Dates page**: the person takes it over, so the original date
   isn't left as a separate entry ("we kill the original").
-  **Changed (Round 113):** the pages stay separate: picking one only copies
+  **Changed:** the pages stay separate: picking one only copies
   its day, month and year; the original stays in Dates, and the person's
   birthday is projected as its own date.
-- **Required (Round 113):** a per-person switch, **Show in Dates**, on by
+- **Required:** a per-person switch, **Show in Dates**, on by
   default: off, the birthday stays in People only (no date, no reminders).
 - **Required:** a birthday typed in **by hand is added to Dates** as a birthday.
 - **Required:** in Dates, **those dates show a small People icon**, and
@@ -198,7 +198,7 @@ section 9.
 
 ## 9. Decided, and still open
 
-Decided (Round 107): sticking together is elastic (5.3); Tidy, with a
+Decided: sticking together is elastic (5.3); Tidy, with a
 warning first (5.4); linked birthdays edited in Dates for reminders and
 note only (6); a date of death (2); gender male or female (2); pixel-art
 avatars with drafts first (4.2); the page is called **People**.
@@ -206,4 +206,4 @@ avatars with drafts first (4.2); the page is called **People**.
 Relation kinds (5.1) decided as proposed: Parent / Child, Partner (with
 "former", dashed), Sibling (only when no parents are entered) and Other
 (a thin line with an optional word). Nothing is open but the avatars: drafts in
-`docs/people_avatar_drafts.png` (Round 108).
+`docs/people_avatar_drafts.png`.

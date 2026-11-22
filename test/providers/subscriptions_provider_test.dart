@@ -21,7 +21,7 @@ import 'package:the_app/providers/subscriptions_provider.dart';
 
 import '../helpers.dart';
 
-/// Subscriptions' store (Round 79).
+/// Subscriptions' store.
 void main() {
   Subscription claude({String name = 'Claude'}) => Subscription(
         id: 's1',

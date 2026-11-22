@@ -149,8 +149,7 @@ void main() {
       expect(find.text('No notes'), findsOneWidget);
     });
 
-    testWidgets('its Discard changes is there, greyed out (Round 20)',
-        (tester) async {
+    testWidgets('its Discard changes is there, greyed out', (tester) async {
       await openNewNote(tester);
       await tester.enterText(contentField, 'milk');
       await tester.pump();
@@ -167,7 +166,7 @@ void main() {
     final discardButton = find.byTooltip('Discard changes');
 
     testWidgets(
-        'always there, greyed out until something changed (Round 20), '
+        'always there, greyed out until something changed, '
         'at the bottom, not as ↶', (tester) async {
       await openExistingNote(tester);
       VoidCallback? pressed() => tester

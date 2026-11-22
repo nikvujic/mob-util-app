@@ -9,7 +9,7 @@ import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/session_provider.dart';
 
-/// The to-do note's lock (Round 45): just a password, as a Hub page's.
+/// The to-do note's lock: just a password, as a Hub page's.
 void main() {
   const password = 'master password';
 

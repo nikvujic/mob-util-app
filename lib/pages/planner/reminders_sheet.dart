@@ -7,7 +7,7 @@ import 'package:the_app/models/planner_pin.dart';
 /// ticked to delete.
 typedef RemindersChoice = ({bool add, List<PlannerPin> delete});
 
-/// [pins] in the list's order (Round 70): those still to come, the next
+/// [pins] in the list's order: those still to come, the next
 /// first; then those gone by unticked, the latest first.
 ({List<PlannerPin> coming, List<PlannerPin> past}) sortPins(
   List<PlannerPin> pins,
@@ -26,7 +26,7 @@ typedef RemindersChoice = ({bool add, List<PlannerPin> delete});
   return (coming: coming, past: past);
 }
 
-/// The planner's reminders (Round 70), from its bell button: every one,
+/// The planner's reminders, from its bell button: every one,
 /// the next first, with its day and time; a box on each to delete several
 /// at once, and a button to add one. Null if closed.
 Future<RemindersChoice?> showRemindersSheet(

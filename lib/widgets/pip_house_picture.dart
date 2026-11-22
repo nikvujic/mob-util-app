@@ -4,7 +4,7 @@ import 'package:the_app/core/pip_scene.dart' show Season;
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/pip_house_art.dart';
 
-/// A finished quest's picture (Round 126, spec 1: drawn, in a little
+/// A finished quest's picture (spec 1: drawn, in a little
 /// frame): the house as he built it, by day, its tree in summer.
 class PipHousePicture extends StatelessWidget {
   /// How big one of his pixels is.
@@ -68,7 +68,7 @@ class _PicturePainter extends CustomPainter {
   bool shouldRepaint(_PicturePainter old) => old.pixel != pixel;
 }
 
-/// One of what he carries (Round 126), as his inventory card shows it:
+/// One of what he carries, as his inventory card shows it:
 /// its icon, [pixel] big.
 class PipItemIcon extends StatelessWidget {
   final String kind;

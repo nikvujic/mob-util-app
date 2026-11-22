@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 61: a blink keeps his mouth (tired, he doesn't smile for it).
+/// A blink keeps his mouth (tired, he doesn't smile for it).
 void main() {
   /// His screen's rows below the eyes: his mouth.
   List<String> mouth(PipFrame frame, PipFace face) =>

@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 /// A scroll controller whose jumps (a text field's `showOnScreen`,
 /// revealing the caret) go at most [step] at a time while [gentle] says
-/// so (Round 61: dragging a selection's handle past the note's top or
+/// so (dragging a selection's handle past the note's top or
 /// bottom made it race a screen at a time, so it overshot and jumped
 /// about; now it creeps along with the finger). Scrolling by hand isn't
 /// a jump: it's left alone.
@@ -53,7 +53,7 @@ class _GentlePosition extends ScrollPositionWithSingleContext {
 }
 
 /// Scrolls a text field's scroll view on while a finger holds a
-/// selection's handle beyond its top or bottom (Round 61, as Android
+/// selection's handle beyond its top or bottom (as Android
 /// does): steadily, faster the further out, the selection's end on that
 /// side following along. (A handle only moves the selection as the
 /// finger moves; held still past the edge, nothing happened.)

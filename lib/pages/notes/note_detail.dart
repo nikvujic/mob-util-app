@@ -80,13 +80,13 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     _titleFocusNode.unfocus();
   }
 
-  /// Round 61: a selection's handle dragged past the top or bottom
+  /// A selection's handle dragged past the top or bottom
   /// scrolls the text gently (it raced, and jumped about).
   late final _contentScroll = GentleRevealController(
     gentle: () => !_contentController.selection.isCollapsed,
   );
 
-  /// Round 61: a handle held past the text's top or bottom scrolls on.
+  /// A handle held past the text's top or bottom scrolls on.
   late final _edgeScroll = HandleEdgeScroll(
     scroll: _contentScroll,
     text: _contentController,
@@ -120,13 +120,12 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// The format bar (N17) is open.
   bool _formatOpen = false;
 
-  /// While it is, the cursor's handle isn't shown (Round 29).
+  /// While it is, the cursor's handle isn't shown.
   final _formatShown = ValueNotifier(false);
   late final _selectionControls =
       FormatBarSelectionControls(_formatShown, offScreen: _offScreen);
 
-  /// The selection's handles whose end is scrolled out of view (Round
-  /// 45): not drawn, else they'd show over the app bar.
+  /// The selection's handles whose end is scrolled out of view: not drawn, else they'd show over the app bar.
   final _offScreen = ValueNotifier<Set<TextSelectionHandleType>>(const {});
 
   /// Works out [_offScreen] after this frame's layout.
@@ -191,7 +190,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       ),
       SelectionChangedCause.toolbar,
     );
-    // Round 132: kept so for a moment (see [_keepAll]).
+    // Kept so for a moment (see [_keepAll]).
     if (field.widget.controller == _contentController) {
       _allOf = value.text;
       _allTimer?.cancel();
@@ -199,7 +198,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     }
   }
 
-  /// Round 132: Select all just pressed, the text it was for. A hold that
+  /// Select all just pressed, the text it was for. A hold that
   /// first started editing also connects the keyboard, which can send
   /// back its own selection (the word held) a moment later; for
   /// [_keepAllFor], with the text unchanged, all of it is selected again
@@ -332,7 +331,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
     );
   }
 
-  /// The format bar's buttons (N17, Round 27), most used first.
+  /// The format bar's buttons (N17), most used first.
   late final List<FormatButton> _formatButtons = [
     FormatButton(Icons.checklist, 'Checkbox',
         () => _format((t, s, e) => toggleLines(t, s, e, MdLine.checkbox))),
@@ -345,7 +344,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
         () => _format((t, s, e) => toggleWrap(t, s, e, '**'))),
     FormatButton(Icons.format_italic, 'Italic',
         () => _format((t, s, e) => toggleWrap(t, s, e, '*'))),
-    // Round 39: multi-line code blocks up front, in view without scrolling
+    // Multi-line code blocks up front, in view without scrolling
     // the bar; Strikethrough's button went to make room (unused; ~~ still
     // shows struck through).
     FormatButton(
@@ -506,7 +505,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// The title changes as it's typed, and may be left empty (saved as
   /// "Untitled" on leaving, like clearing it at the top).
   /// A default title ("New Note", "Untitled") comes selected, so typing
-  /// replaces it (Round 27).
+  /// replaces it.
   Future<void> _editTitle() {
     final title = _titleController.text;
     final placeholder =
@@ -642,10 +641,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 onPressed: _editTitle,
               ),
               // Only while typing the text, keyboard up: opens the format
-              // bar (N17; it took the Checkbox button's place, Round 27).
+              // bar (N17; it took the Checkbox button's place).
               if (_contentFocusNode.hasFocus)
                 BottomAction(
-                  // "Tt" (Round 29: not the underlined A).
+                  // "Tt" (not the underlined A).
                   icon: _formatOpen
                       ? Icons.keyboard_hide_outlined
                       : Icons.text_fields,
@@ -672,7 +671,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                       onPressed: _lock,
                     ),
               // Always there, greyed out until there's something to
-              // discard, so the buttons don't shift (Round 20).
+              // discard, so the buttons don't shift.
               BottomAction(
                 // Not ↶: that's undo.
                 icon: Icons.settings_backup_restore,
@@ -724,7 +723,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             Divider(height: 1, color: context.colors.divider),
             Expanded(
               child: Padding(
-                // Round 41: [codeInset] of this is inside the scroll below,
+                // [codeInset] of this is inside the scroll below,
                 // so code blocks' panels show whole (it clips).
                 padding: EdgeInsets.fromLTRB(
                   lineNumbers ? 0 : 16 - codeInset,
@@ -745,10 +744,10 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                     Expanded(
                       // The text scrolls with room below it, so its end can
                       // rise above the buttons; nothing covers it, and taps
-                      // between the buttons reach it (Round 15: padding
+                      // between the buttons reach it (padding
                       // inside the field hid the lines under it).
                       child: KeyedSubtree(
-                        // What the scroll shows (Round 45: handles out
+                        // What the scroll shows (handles out
                         // of it aren't drawn).
                         key: _scrollKey,
                         child: LayoutBuilder(
@@ -784,7 +783,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                                       textCapitalization:
                                           TextCapitalization.sentences,
                                       maxLines: null,
-                                      // No magnifier while selecting (Round 15).
+                                      // No magnifier while selecting.
                                       magnifierConfiguration:
                                           TextMagnifierConfiguration.disabled,
                                       // The line typed on stays above the

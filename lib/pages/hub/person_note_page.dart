@@ -8,7 +8,7 @@ import 'package:the_app/widgets/discard_scope.dart';
 import 'package:the_app/widgets/format_bar.dart';
 import 'package:the_app/widgets/markdown_text.dart';
 
-/// A person's note, written on its own page (Round 109), as a recipe's
+/// A person's note, written on its own page, as a recipe's
 /// method is: Markdown, with the format bar; saved as it's typed. Done
 /// keeps it; back asks, and Discard puts the note back as it was.
 class PersonNotePage extends ConsumerStatefulWidget {

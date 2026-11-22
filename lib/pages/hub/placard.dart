@@ -22,8 +22,7 @@ class PlacardPage extends ConsumerStatefulWidget {
   const PlacardPage({super.key});
 
   /// How long a hold takes to count.
-  /// About 3 seconds, the inflating sound's length (longer in
-  /// Round 16; Round 20's 4 seconds went back in Round 24).
+  /// About 3 seconds, the inflating sound's length.
   static const holdTime = Duration(milliseconds: 3200);
 
   /// The corner that, tapped [cornerTaps] times, opens the settings.
@@ -88,7 +87,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   )..addStatusListener(_held);
 
   /// The pop after a count: from fully inflated, a burst, then a spring
-  /// back to its size (Round 17: it used to snap back first, then swell
+  /// back to its size (it used to snap back first, then swell
   /// again, which looked odd).
   late final AnimationController _pop = AnimationController(
     vsync: this,
@@ -112,7 +111,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   @override
   void dispose() {
     _leaveTimer?.cancel();
-    // Round 151: back to the app's own (it was edge to edge, under the
+    // Back to the app's own (it was edge to edge, under the
     // navigation bar: other pages' bottoms got squashed).
     AppSystemUi.restore();
     _hold.dispose();

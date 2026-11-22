@@ -6,7 +6,7 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/weather.dart';
 
-/// His field through the year (Round 70): the seasons, the days it
+/// His field through the year: the seasons, the days it
 /// dresses up for, and the weather (Internet Access's, or tried on in
 /// Pip Home).
 void main() {
@@ -27,7 +27,7 @@ void main() {
   });
 
   test(
-      'its days: Halloween, New Year\'s Eve, Christmas (Round 72: the '
+      'its days: Halloween, New Year\'s Eve, Christmas (the '
       'Orthodox one alone), Easter', () {
     PipOccasion? on(int y, int m, int d, [int h = 12]) =>
         PipOccasion.at(DateTime(y, m, d, h));
@@ -81,7 +81,7 @@ void main() {
         reason: 'bats after dark');
     expect(propsAt(DateTime(2026, 12, 24, 12)),
         isNot(contains(PipProp.festiveTree)),
-        reason: 'Round 72: no Christmas weeks');
+        reason: 'no Christmas weeks');
     final christmas = propsAt(DateTime(2027, 1, 7, 12));
     expect(christmas, contains(PipProp.badnjak));
     expect(christmas, isNot(contains(PipProp.trees)),

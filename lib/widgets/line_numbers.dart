@@ -171,8 +171,7 @@ class RenderLineNumbers extends RenderBox {
   }
 
   /// Whether the line from [start] to [end] (-1: the text's end) is drawn
-  /// as nothing: a code block's fence off the line being edited (Round
-  /// 29). It keeps its number; the number isn't shown.
+  /// as nothing: a code block's fence off the line being edited. It keeps its number; the number isn't shown.
   bool _hidden(RenderEditable editable, int start, int end) {
     final stop = end == -1 ? _controller.text.length : end;
     if (stop <= start) return false; // an empty line shows its number

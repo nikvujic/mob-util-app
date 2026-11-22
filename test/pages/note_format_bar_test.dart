@@ -10,7 +10,7 @@ import 'package:the_app/widgets/markdown_text.dart';
 
 import '../helpers.dart';
 
-/// The format bar (N17, Round 27): a row of buttons above the keyboard,
+/// The format bar (N17): a row of buttons above the keyboard,
 /// applying formats without leaving the text.
 void main() {
   late ProviderContainer container;
@@ -41,7 +41,7 @@ void main() {
 
   testWidgets(
       'while it\'s open, no cursor handle to cover it; the Tt icon '
-      '(Round 29)', (tester) async {
+      '', (tester) async {
     container = await pumpApp(tester);
     container
         .read(notesProvider.notifier)
@@ -73,7 +73,7 @@ void main() {
 
   testWidgets(
       'scrolled down, Select all: the handle at its start (out of view) '
-      'isn\'t drawn over the app bar (Round 45)', (tester) async {
+      'isn\'t drawn over the app bar', (tester) async {
     container = await pumpApp(tester);
     final text = [for (var i = 1; i <= 80; i++) 'Line number $i'].join('\n');
     container
@@ -132,7 +132,7 @@ void main() {
 
   testWidgets(
       'held without editing first, Select all, then Cut: all of it, even '
-      'if the keyboard sends back the word held (Round 132)', (tester) async {
+      'if the keyboard sends back the word held', (tester) async {
     String? clipboard;
     tester.binding.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -209,7 +209,7 @@ void main() {
       expect(find.byTooltip(tooltip, skipOffstage: false), findsOneWidget,
           reason: tooltip);
     }
-    // Round 39: Strikethrough went, to make room for code blocks.
+    // Strikethrough went, to make room for code blocks.
     expect(find.byTooltip('Strikethrough', skipOffstage: false), findsNothing);
     await tester.tap(find.byTooltip('Close formatting'));
     await tester.pump();
@@ -295,7 +295,7 @@ void main() {
 
   testWidgets(
       'a code panel shows whole, with room round the code; the '
-      'bundled font (Round 41)', (tester) async {
+      'bundled font', (tester) async {
     await openBar(tester, '```\nx = 1\n```\nend');
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
@@ -332,7 +332,7 @@ void main() {
 
   testWidgets(
       'a ``` never closed draws no panel; code is a little smaller '
-      '(Round 29)', (tester) async {
+      '', (tester) async {
     await openBar(tester, 'text `code`\n```\nnot closed');
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
@@ -385,8 +385,7 @@ void main() {
     return styles;
   }
 
-  testWidgets('a code panel has the same room above and below (Round 42)',
-      (tester) async {
+  testWidgets('a code panel has the same room above and below', (tester) async {
     await openBar(tester, 'before\n```\nx = 1\ny = 2\n```\nend');
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
@@ -403,7 +402,7 @@ void main() {
 
   testWidgets(
       'editing in a code block shows its ``` (faint), so an empty one '
-      'can be found (Round 42)', (tester) async {
+      'can be found', (tester) async {
     await openBar(tester, 'before\n```\n```\nafter');
     // The cursor outside the block: the fences hidden.
     select(tester, 2, 2);

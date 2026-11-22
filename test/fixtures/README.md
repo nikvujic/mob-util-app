@@ -71,98 +71,97 @@ app still reads every version, so an update can never lose existing data.
   2): Coffee ☕ from 1 Jul, taken 1 Jul (filled in, no time), missed 2
   Jul, not sure 3 Jul, taken 12 Oct at 07:55.
 - `v12/backup-plain.json` — backup (version 12) with that.
-- `v13/storage/medicine.json` — remind again per medicine (Round 16,
-  medicine.json version 3): Iron 🩸 twice a day (08:00, 20:00) from 1
+- `v13/storage/medicine.json` — remind again per medicine
+  (medicine.json version 3): Iron 🩸 twice a day (08:00, 20:00) from 1
   Oct, reminding again 4 h later (`followUp` 240); Vitamin C at 09:00
   with none; Iron's morning dose taken 12 Oct at 08:02.
 - `v13/backup-plain.json` — backup (version 13) with that.
 - `v13/storage/settings.json` — locks (settings.json still version 2;
-  `pageLocks` added in Round 21, after 0.26.0): the Shop section locked,
+  `pageLocks` added, after 0.26.0): the Shop section locked,
   and the Hub's Placard and Medicine pages (O7). Not in backups.
-- `v14/storage/medicine.json` — important medicines (Round 24,
-  medicine.json version 4): Heart pills ❤️ twice a day (08:00, 20:00)
+- `v14/storage/medicine.json` — important medicines
+  (medicine.json version 4): Heart pills ❤️ twice a day (08:00, 20:00)
   from 1 Oct, **important**; Vitamin C at 09:00, not; the Heart pills'
   morning dose taken 12 Oct at 08:01.
 - `v14/backup-plain.json` — backup (version 14) with that.
-- `v15/storage/todo.json` — the to-do note's list (Round 28, todo.json
+- `v15/storage/todo.json` — the to-do note's list (todo.json
   version 1): "Call the dentist 🦷", "Pay the bills, šta god", "Water
   the plants", in that order (ids t1–t3).
 - `v15/backup-plain.json` — backup (version 15) with that.
-- `v16/storage/todo.json` — done to-dos (Round 30, todo.json version 2):
+- `v16/storage/todo.json` — done to-dos (todo.json version 2):
   as v15, "Pay the bills, šta god" done.
 - `v16/backup-plain.json` — backup (version 16) with that.
-- `v17/storage/pip.json` — Pip, the pet (Round 34, pip.json version 1):
+- `v17/storage/pip.json` — Pip, the pet (pip.json version 1):
   hatched 13 Oct 2026 20:30 UTC, named "Bip 2".
 - `v17/backup-plain.json` — backup (version 17) with him.
-- `v18/storage/pip.json` — Pip with his energy (Round 37, pip.json
+- `v18/storage/pip.json` — Pip with his energy (pip.json
   version 2): "Bip 3", hatched 13 Oct 2026 20:30 UTC, energy 1.5 at 14
   Oct 06:00 UTC, 2 batteries held, the next at 09:15 UTC; seen falling
   asleep the night of 13 Oct; not seen off, nor waking.
 - `v18/backup-plain.json` — backup (version 18) with him.
-- `v19/storage/medicine.json` — a medicine on some weekdays only (Round
-  40, medicine.json version 5): Vitamin D 💊 at 08:00 on Mon, Wed, Fri
+- `v19/storage/medicine.json` — a medicine on some weekdays only (medicine.json version 5): Vitamin D 💊 at 08:00 on Mon, Wed, Fri
   (taken Mon 12 Oct 06:30 UTC), and Iron at 20:00 every day.
 - `v19/backup-plain.json` — backup (version 19) with them.
-- `v20/storage/recipes.json` — recipes (Round 42, recipes.json version
+- `v20/storage/recipes.json` — recipes (recipes.json version
   1): "Palačinke 🥞", 25 min, breakfast, with Flour 200 g, Milk 300 ml,
   Eggs 🥚 2 (each from the list: i1, i3, i4) and Salt "a pinch" (not
   from the list), a Markdown method; then "Tea", with nothing set.
-- `v20/storage/ingredients.json` — the ingredients list (Round 42,
-  ingredients.json version 1): Baking (Flour, Sugar), Dairy (Milk, Eggs
+- `v20/storage/ingredients.json` — the ingredients list
+  (ingredients.json version 1): Baking (Flour, Sugar), Dairy (Milk, Eggs
   🥚).
 - `v20/backup-plain.json` — backup (version 20) with both.
-- `v21/storage/todo.json` — waiting to-dos (Round 45, todo.json version
+- `v21/storage/todo.json` — waiting to-dos (todo.json version
   3): "Call the dentist 🦷", "Pay the bills, šta god" (done), "Parcel
   from Ana 📦" (**waiting**), "Water the plants" (ids t1–t4).
-- `v21/storage/settings.json` — the to-do note locked (Round 45,
-  `todoLocked`; settings.json still version 2), no other locks. Not in
+- `v21/storage/settings.json` — the to-do note locked
+  (`todoLocked`; settings.json still version 2), no other locks. Not in
   backups.
 - `v21/backup-plain.json` — backup (version 21) with the to-dos.
-- `v22/storage/food.json` — (Round 145: the food tracker's gone; kept
-  to check the file's deleted on opening) the food tracker (Round 46, food.json
+- `v22/storage/food.json` — (the food tracker's gone; kept
+  to check the file's deleted on opening) the food tracker (food.json
   version 1): foods "Burek 🥟" (gluten, fried), "Jogurt" (dairy), "Kafa"
   (caffeine); breakfast 14 Oct 06:30 UTC with Burek and Jogurt, rated
   **bad**, bloating and heartburn, note "Previše, šta god"; a snack at
   11:00 UTC with Kafa and "Keks" (not from the list), not rated.
 - `v22/backup-plain.json` — backup (version 22) with it.
-- `v23/storage/dates.json` — birthdays & dates (Round 57, dates.json
+- `v23/storage/dates.json` — birthdays & dates (dates.json
   version 1): "Ana 🎂", a birthday 24 Oct 1995, every year, note
   "Knjiga, čokolada", reminders 1 day before at 09:00 and 7 days before
   at 20:00; "Mama i tata", an anniversary on 29 Feb, no year, no
   reminders; "Ispit", an event 3 Nov 2026, once, note "Sala 4", a
   reminder on the day at 07:00.
 - `v23/backup-plain.json` — backup (version 23) with them (no food).
-- `v24/storage/dates.json` — dates that last (Round 59, dates.json
+- `v24/storage/dates.json` — dates that last (dates.json
   version 2, `days`): "Ljetovanje 🏖", a holiday from 1 Aug, every year,
   **10 days**, note "Ponesi kremu", a reminder 7 days before at 18:00;
   "Sajam", an event from 30 Dec 2026, once, **4 days** (into 2027), note
   "Hala 1", no reminders; "Ana 🎂", a birthday 24 Oct 1995 (a day: no
   `days`), the standard reminder.
 - `v24/backup-plain.json` — backup (version 24) with them.
-- `v25/storage/dates.json` — dates of a kind (Round 61, dates.json
+- `v25/storage/dates.json` — dates of a kind (dates.json
   version 3, `kind`): "Jahorina ⛷", a holiday, **skiing**, from 20 Jan
   2027, once, 5 days, note "Ski pass", a reminder 7 days before at
   09:00; "Venčanje Ane i Marka", an event, **wedding**, 12 Jun 2027, its
   reminders a week and a month before; "Ana 🎂", a birthday 24 Oct 1995,
   the usual reminders (a day and a week before).
 - `v25/backup-plain.json` — backup (version 25) with them.
-- `v26/storage/pip.json` — Pip as an adventurer (Round 63, pip.json
+- `v26/storage/pip.json` — Pip as an adventurer (pip.json
   version 3, `adventure`): "Bip 4", registered 17 Oct 11:30 UTC, 390 XP
   banked, out since 18 Oct 10:00 UTC, his break from 12:10 UTC.
 - `v26/backup-plain.json` — backup (version 26) with him.
-- `v27/storage/dates.json` — a ski trip's travel (Round 67, dates.json
+- `v27/storage/dates.json` — a ski trip's travel (dates.json
   version 4, `travel`): v25's dates, "Jahorina ⛷" with 5 hours each way,
   leaving at 07:00 on its first day and 10:00 the day after its last.
 - `v27/backup-plain.json` — backup (version 27) with them (and v26's
   Pip).
-- `v28/storage/shop.json` — typed amounts (Round 70, shop.json version
+- `v28/storage/shop.json` — typed amounts (shop.json version
   4, `text`): "Jaja 🥚" typed "1-2 kutije"; "Peršun" typed "a bunch" (a
   count of 3 kept); Milk ×2 with "1 l" kept from before; Bread (bought,
   no amount shown, "pola" kept).
 - `v28/backup-plain.json` — backup (version 28) with those items (and
   v27's dates and Pip).
-- `v29/storage/subscriptions.json` — subscriptions (Round 79,
-  subscriptions.json version 1, a real list): Claude 20€ active
+- `v29/storage/subscriptions.json` — subscriptions
+  (subscriptions.json version 1, a real list): Claude 20€ active
   renewing 3 Nov 2026 (card "Revolut 4421"), Claude 2 20€ active 12 Nov
   (no card), ChatGPT 23€ **cancelled** till 13 Nov (note "Cancelled"),
   Grok 16€ **to cancel** by 17 Nov (note "real ~30€", no card, a
@@ -171,7 +170,7 @@ app still reads every version, so an update can never lose existing data.
   failed").
 - `v29/backup-plain.json` — backup (version 29) with them (and v28's
   data).
-- `v30/storage/packing.json` — packing lists (Round 94, packing.json
+- `v30/storage/packing.json` — packing lists (packing.json
   version 1): the usual sections with "Ski gear" added after Clothes;
   "Jahorina ⛷" (Pasoš packed, Lična karta, Čarape ×5, Naočare packed in
   Ski gear, Punjač, and Kišobran in a section that's gone, so shown
@@ -179,13 +178,13 @@ app still reads every version, so an update can never lose existing data.
 - `v30/backup-plain.json` — backup (version 30) with them (and v29's
   data).
 - `v31/storage/packing.json` — each packing list with its own sections
-  (Round 95, packing.json version 2; `sections` at the top are the
+  (packing.json version 2; `sections` at the top are the
   defaults: Documents, Clothes, Toiletries, Other). "Jahorina ⛷" with
   Dokumenta (Pasoš packed), Ski oprema (Naočare, Kaciga packed) and Odeća
   (Čarape ×5); "Beach" with one empty section, "Beach stuff".
 - `v31/backup-plain.json` — backup (version 31) with them (and v30's
   other data).
-- `v32/storage/people.json` — People (Round 108, people.json version 1):
+- `v32/storage/people.json` — People (people.json version 1):
   Marko (highlighted) and Jelena partners, their daughter Ana (her
   birthday tied to the date d3, a note), Ana's son Luka, Jelena's mother
   Mila (deceased 2015), Ivan ("Kum", no birthday, an Other relation to
@@ -195,7 +194,6 @@ app still reads every version, so an update can never lose existing data.
   (`person`: p3, renamed after her).
 - `v32/backup-plain.json` — backup (version 32) with them (and v31's
   other data).
-- `v16/storage/notifications.json` — the notifications' history (Round
-  31, notifications.json version 1; this phone only, not in backups):
+- `v16/storage/notifications.json` — the notifications' history (notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
   Oct 11:00, `planner|2026-10-13|660`) on 13 Oct 08:50 UTC; cleared 12 Oct 19:00 UTC.

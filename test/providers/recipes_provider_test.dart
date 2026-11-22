@@ -18,7 +18,7 @@ import 'package:the_app/providers/shop_provider.dart';
 
 import '../helpers.dart';
 
-/// Recipes and the ingredients list (Round 42).
+/// Recipes and the ingredients list.
 void main() {
   late ProviderContainer container;
   var now = DateTime(2026, 10, 14, 12);
@@ -94,7 +94,7 @@ void main() {
   });
 
   group('ingredients', () {
-    test('Round 92: no two of the same (case and spaces aside)', () {
+    test('no two of the same (case and spaces aside)', () {
       final flour = ingredients().add('Flour')!;
       ingredients().add('Olive oil');
       expect(ingredients().add('flour'), isNull);
@@ -120,7 +120,7 @@ void main() {
 
     test(
         'the first section stays on top; new ones go under it '
-        '(Round 43)', () {
+        '', () {
       ingredients().add('Flour');
       final dairy = ingredients().addSection('Dairy')!;
       ingredients().addSection('Fruit');
@@ -182,7 +182,7 @@ void main() {
       // (All three went to the first section: it's where + adds.)
       expect(book().sections.first.items.map((i) => i.name),
           ['Apple', 'Milk', 'Flour']);
-      // The first one stays (Round 43).
+      // The first one stays.
       expect(ingredients().deleteSection(book().sections.first.id), isNull);
       ingredients().replaceAll(before!);
       expect(book().sections, hasLength(3));
@@ -206,7 +206,7 @@ void main() {
     });
   });
 
-  group('quantities (Round 43)', () {
+  group('quantities', () {
     test('written as picked, read back', () {
       for (final (amount, text) in [
         ((kind: AmountKind.none, value: 0.0), ''),
@@ -233,14 +233,14 @@ void main() {
       expect(amountDown((kind: AmountKind.count, value: 1)), isNull);
       expect(amountUp((kind: AmountKind.tablespoon, value: 1)), 1.5);
       expect(amountDown((kind: AmountKind.teaspoon, value: 0.5)), isNull);
-      // Spoons aren't a Shop amount: typed there (Round 70).
+      // Spoons aren't a Shop amount: typed there.
       expect(shopQuantityOf('2 tbsp').quantity, Quantity.text);
       expect(shopQuantityOf('2 tbsp').text, '2 tbsp');
       expect(shopQuantityOf('1.5 kg').quantity, Quantity.weight);
     });
   });
 
-  group('To Shop (Round 41)', () {
+  group('To Shop', () {
     test('quantities as Shop reads them', () {
       ({Quantity? q, Object n}) read(String text) {
         final r = shopQuantityOf(text);
@@ -289,7 +289,7 @@ void main() {
             toBuy: false,
             quantity: Quantity.count,
             count: 6),
-        // Already to buy, the same typed amount (any case, Round 70):
+        // Already to buy, the same typed amount (any case):
         // left as it is.
         ShopItem(
             id: 'c', name: 'Salt', quantity: Quantity.text, text: 'A pinch'),

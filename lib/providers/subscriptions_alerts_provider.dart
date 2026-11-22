@@ -46,8 +46,8 @@ String cardLabel(Subscription s, DateTime today) {
 }
 
 /// When [s]'s card expires, as on cards: "expires 11/26", "expired
-/// 10/26"; null for no expiry (Round 84: its own part, coloured on the
-/// card; Round 85: a month, no day).
+/// 10/26"; null for no expiry (its own part, coloured on the
+/// card; a month, no day).
 String? cardExpiryLabel(Subscription s, DateTime today) {
   final expires = s.cardExpires;
   if (expires == null) return null;
@@ -61,7 +61,7 @@ String? remindLabel(Subscription s) => switch (s.remindBefore) {
       final days => '${beforeLabel(days)} before',
     };
 
-/// The subscriptions' reminders (Round 79) due after [now] for the next
+/// The subscriptions' reminders due after [now] for the next
 /// [days] days: on each one's day at 09:00, and its reminder before (if
 /// set) at 09:00: renewing (active), to cancel, ending (cancelled). None
 /// for an inactive or ended one, nor while off or paused. With

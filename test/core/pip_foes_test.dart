@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_run.dart';
 
-/// What he fights on his day out (Round 73): bugs, bigger ones that take
+/// What he fights on his day out: bugs, bigger ones that take
 /// more strikes, a boss once a day out; what he strikes down counted for
 /// his XP while he's watched, the XP gained rising over it.
 void main() {

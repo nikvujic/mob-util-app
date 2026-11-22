@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Pip, the app's mascot (Round 25), standing still: his room's idle
-/// frame (Round 27: the same 20-wide grid as the room and the launcher
+/// Pip, the app's mascot, standing still: his room's idle
+/// frame (the same 20-wide grid as the room and the launcher
 /// icon, `tool/make_icon.py`). Each grid pixel is a whole number of the
 /// screen's pixels, so the edges stay crisp. In his own colours, whatever
 /// the theme.

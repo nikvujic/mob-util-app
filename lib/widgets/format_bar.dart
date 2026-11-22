@@ -4,10 +4,10 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/widgets/low_handles.dart';
 
 /// The text field's usual selection handles, but no cursor handle (the
-/// pointer under the caret) while [hideCursor] is true (Round 29): with
+/// pointer under the caret) while [hideCursor] is true: with
 /// the format bar open it sat over the bar. Selection handles stay.
 ///
-/// Round 45: also no handle whose end of the selection is out of view
+/// Also no handle whose end of the selection is out of view
 /// ([offScreen]): a note's text scrolls inside a bigger scroll, so
 /// Flutter would draw it anyway, over the app bar.
 class FormatBarSelectionControls extends LowHandleSelectionControls {
@@ -54,7 +54,7 @@ class FormatButton {
   const FormatButton(this.icon, this.tooltip, this.onPressed);
 }
 
-/// A row of formatting buttons above the keyboard (N17, Round 27): it
+/// A row of formatting buttons above the keyboard (N17): it
 /// scrolls sideways when they don't fit. Tapping one leaves the text
 /// field focused and the keyboard up (the bar counts as part of the
 /// field, so a tap there isn't a tap outside it).

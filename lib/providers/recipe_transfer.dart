@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:the_app/models/recipe.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 
-/// Recipes as text, to copy and paste (Round 104; Round 131: several at
+/// Recipes as text, to copy and paste (several at
 /// once): **export** (recipes someone else imports), **agent
 /// instructions** (the rules and a general example, so an AI agent writes
 /// recipes to import) and **import** (pasted text: new recipes, the
 /// ingredients they name that aren't there yet added to their sections).
 
-/// What the text says it is, and its shape's version (Round 131: 2, a
+/// What the text says it is, and its shape's version (2, a
 /// list; 1, one recipe, still read).
 const recipesFormat = 'the-app/recipes';
 const recipeFormat = 'the-app/recipe';
@@ -129,7 +129,7 @@ final exampleRecipe = Recipe(
   createdAt: DateTime(2026),
 );
 
-/// Round 131: the rules for an AI agent (ChatGPT, Claude, ...) to write
+/// The rules for an AI agent (ChatGPT, Claude, ...) to write
 /// recipes to import: the JSON's shape, the ingredients already in
 /// [book] by section, how a method is written, and a general example
 /// (no recipe of the user's picked). The user adds what they want.
@@ -215,8 +215,8 @@ class RecipeImport {
   });
 }
 
-/// Reads the recipes in pasted [text]: as exported (a list; Round 104's
-/// one recipe too), a list on its own, or a recipe on its own, even with
+/// Reads the recipes in pasted [text]: as exported (a list; a single
+/// recipe too), a list on its own, or a recipe on its own, even with
 /// words or a code fence around it (as an agent writes it). Ones with no
 /// name are left out. Throws a [FormatException] saying what's wrong.
 List<RecipeImport> parseRecipes(String text) {

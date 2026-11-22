@@ -26,7 +26,7 @@ void openRecipe(BuildContext context, String id, {bool isNew = false}) {
   );
 }
 
-/// Recipes (Round 42): cards with the name and "prep time · type", in
+/// Recipes: cards with the name and "prep time · type", in
 /// the user's order (the handle moves them). A tap opens one; holding one
 /// selects it (to delete several, asked first). + makes a new one, opened
 /// in edit mode; the Ingredients button opens the ingredients list.
@@ -80,8 +80,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
               : AppBar(
                   title: Text(HubTool.recipes.label),
                   actions: [
-                    // Round 104: recipes as text, copied and pasted (Round
-                    // 131: up here, the same on every page that has it).
+                    // Recipes as text, copied and pasted (up here, the same on every page that has it).
                     IconButton(
                       icon: const Icon(Icons.sync_alt),
                       tooltip: 'Import / export',
@@ -208,7 +207,7 @@ class _RecipeCard extends StatelessWidget {
                   color: untitled ? colors.textSecondary : colors.textPrimary,
                 ),
               ),
-              // Its time and type as chips (Round 44).
+              // Its time and type as chips.
               if (recipe.prepMinutes != null || recipe.type != null) ...[
                 const SizedBox(height: 6),
                 Wrap(

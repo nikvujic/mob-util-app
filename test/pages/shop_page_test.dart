@@ -27,7 +27,7 @@ void main() {
     await tester.tap(find.text('Add'));
     await tester.pump();
 
-    // The newest on top (S5, Round 141).
+    // The newest on top (S5).
     expect(container.read(shopProvider).map((i) => i.name), ['Bread', 'Milk']);
     expect(find.byType(TextField), findsOneWidget, reason: 'sheet stays open');
   });
@@ -59,7 +59,7 @@ void main() {
     await tester.tap(find.byKey(const Key('shopState')).last);
     await tester.pump();
     expect(find.text('TO BUY  ·  2'), findsOneWidget);
-    // Back on top of "To buy" (S5, Round 141).
+    // Back on top of "To buy" (S5).
     expect(container.read(shopProvider).map((i) => i.name), ['Milk', 'Bread']);
     expect(
       tester.getTopLeft(find.text('Bread')).dy,
@@ -210,7 +210,7 @@ void main() {
       final before = tester.getTopLeft(find.text('Milk'));
 
       await addFromSheet(tester, 'Bread');
-      // Round 141: on top, where Milk was; the list not scrolled.
+      // On top, where Milk was; the list not scrolled.
       expect(tester.getTopLeft(find.text('Bread')), before);
       expectInView(tester, 'Bread');
     });
@@ -273,7 +273,7 @@ void main() {
     expect(find.byTooltip('Select all items'), findsOneWidget);
   });
 
-  group('Round 58', () {
+  group('duplicates, rename, suggestions', () {
     testWidgets(
         'the add sheet offers bought items as you type; a tap puts one '
         'back, not a copy', (tester) async {

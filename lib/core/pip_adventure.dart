@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-/// Pip's adventures (Round 63, `docs/ADVENTURES_SPEC.md`): plain rules,
+/// Pip's adventures (`docs/ADVENTURES_SPEC.md`): plain rules,
 /// worked out from the clock, as his energy is. Once registered, he goes
 /// out every day from [startHour] to [endHour], gaining [xpPerMinute] XP
 /// a minute.
@@ -17,8 +17,8 @@ abstract final class PipAdventure {
   /// Powered down at 12:00, a battery until 17:00 sends him out.
   static const lastStartHour = 17;
 
-  /// His break (Round 64): half an hour, starting when he's looked at
-  /// between 14:00 and 16:00. Round 66: if he was seen setting off (just
+  /// His break: half an hour, starting when he's looked at
+  /// between 14:00 and 16:00. If he was seen setting off (just
   /// registered, or back on with a battery), not till he's gone unseen at
   /// least [unseenFor] (so he doesn't set off and stop at once).
   static const breakFromHour = 14;
@@ -26,14 +26,14 @@ abstract final class PipAdventure {
   static const breakLength = Duration(minutes: 30);
   static const unseenFor = Duration(minutes: 5);
 
-  /// Round 73: ten XP a minute out (an XP every six seconds), so a bug
+  /// Ten XP a minute out (an XP every six seconds), so a bug
   /// struck while he's watched brings one or two (they come every few
   /// seconds); a full day is 3600. His time out is kept in minutes.
   static const xpPerMinute = 10;
   static const minutesPerDay = (endHour - startHour) * 60;
   static const xpPerDay = minutesPerDay * xpPerMinute;
 
-  /// Round 73: a boss beaten (once a day out, if he's watched then) is
+  /// A boss beaten (once a day out, if he's watched then) is
   /// worth five minutes out: 50 XP.
   static const bossMinutes = 5;
 
@@ -125,10 +125,10 @@ abstract final class PipAdventure {
       titles[math.min(titles.length - 1, math.max(0, level) ~/ 10)];
 }
 
-/// Which way his ski trip's bus is going (Round 67).
+/// Which way his ski trip's bus is going.
 enum TripLeg { there, back }
 
-/// His ski trip at a moment (Round 67; worked out from Dates in
+/// His ski trip at a moment (worked out from Dates in
 /// `providers/pip_trip.dart`): on the bus (which way, how far, 0 to 1)
 /// or not; the snowy look; and whether today his adventure is skiing.
 typedef PipTripNow = ({

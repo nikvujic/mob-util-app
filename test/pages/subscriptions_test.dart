@@ -11,7 +11,7 @@ import 'package:the_app/widgets/selection.dart';
 
 import '../helpers.dart';
 
-/// Hub → Subscriptions (Round 79, `docs/SUBSCRIPTIONS_SPEC.md`).
+/// Hub → Subscriptions (`docs/SUBSCRIPTIONS_SPEC.md`).
 void main() {
   late ProviderContainer container;
   // Monday 19 October 2026, 12:00.
@@ -80,7 +80,7 @@ void main() {
     await open(tester, start: sample);
     expect(find.text('~61€ a month'), findsOneWidget,
         reason: 'Claude, Claude 2, Grok, AWS: running ones that cost');
-    // Round 89: in his order (as added; moved by dragging), not by state.
+    // In his order (as added; moved by dragging), not by state.
     final order = ['claude', 'claude2', 'gpt', 'grok', 'aws', 'spotify'];
     final at = [for (final id in order) tester.getTopLeft(card(id))];
     for (var i = 0; i < at.length; i += 2) {
@@ -193,7 +193,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 80: the card\'s expiry set on its page, shown on its card; '
+      'the card\'s expiry set on its page, shown on its card; '
       'before it renews, a warning; cleared', (tester) async {
     await open(tester, start: SubscriptionBook([sample.byId('claude')!]));
     await tester.tap(card('claude'));
@@ -204,7 +204,7 @@ void main() {
     expect(find.text('Not set'), findsOneWidget);
     await tester.tap(expires);
     await tester.pumpAndSettle();
-    // Round 85: a month and year (cards have no day): this year first,
+    // A month and year (cards have no day): this year first,
     // the next one picked, then March.
     expect(find.text('Card expires'), findsNWidgets(2));
     expect(find.byKey(const Key('monthPickerYear')), findsOneWidget);
@@ -239,7 +239,7 @@ void main() {
   });
 
   testWidgets(
-      'Round 81: typing its name, then its day: the name lets go, so the '
+      'typing its name, then its day: the name lets go, so the '
       'keyboard doesn\'t come back once the picker closes', (tester) async {
     await open(tester, start: SubscriptionBook([sample.byId('claude')!]));
     await tester.tap(card('claude'));

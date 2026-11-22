@@ -2211,8 +2211,8 @@ in Dates and notes; and the **Converter**.
   Themes, Settings): pull down at the top to bring the first items
   within reach.
 - **Swipe right along the bottom bar** to open the menu.
-- **Clay** looks more like the Claude app: near-black background and
-  Claude's deeper orange.
+- **Clay**: a near-black background and
+  a deeper orange.
 - **Planner day strip previews live**: while you swipe, the day in the
   middle (now framed) is shown at once, not only when you let go.
 - **Reach mode replaces the pull-down space**: pull a list down when it's

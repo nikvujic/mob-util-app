@@ -21,7 +21,7 @@ import 'package:the_app/providers/pip_provider.dart';
 
 import '../helpers.dart';
 
-/// Pip's room at the bottom of the menu (Round 26).
+/// Pip's room at the bottom of the menu.
 void main() {
   final room = find.byKey(const Key('pipRoom'));
 
@@ -40,8 +40,7 @@ void main() {
     expect(container.read(pipBrainProvider).spawned, isTrue);
   });
 
-  testWidgets('his name line sits a pixel clear of his room (Round 41)',
-      (tester) async {
+  testWidgets('his name line sits a pixel clear of his room', (tester) async {
     await pumpApp(tester);
     await openMenu(tester);
     final line = tester.getBottomLeft(find.byKey(const Key('pipNameAge'))).dy;
@@ -55,22 +54,22 @@ void main() {
     expect(room - text, greaterThanOrEqualTo(2));
   });
 
-  testWidgets('his sky follows the clock (Round 35)', (tester) async {
+  testWidgets('his sky follows the clock', (tester) async {
     await pumpApp(tester, clock: () => DateTime(2026, 10, 13, 23));
     await openMenu(tester);
     final scene = tester.widget<PipRoom>(find.byType(PipRoom)).scene!;
     expect(scene.place, PipPlace.room);
     expect(scene.part, DayPart.night);
-    // Round 70: his autumn tree and leaves too; no weather (it's off).
+    // His autumn tree and leaves too; no weather (it's off).
     expect(scene.props,
         {PipProp.stars, PipProp.moon, PipProp.trees, PipProp.leaves});
     expect(scene.weather, isNull);
-    // Twice the first strip's 32 rows (Round 36): about 160 dp.
+    // Twice the first strip's 32 rows: about 160 dp.
     expect(tester.getSize(find.byType(PipRoom)).height, greaterThan(140));
   });
 
   testWidgets(
-      'the weather (Round 70): on with a fresh report, his sky shows it; '
+      'the weather: on with a fresh report, his sky shows it; '
       'an old one, or off, not', (tester) async {
     final now = DateTime(2026, 10, 13, 12);
     const place = WeatherPlace(
@@ -123,7 +122,7 @@ void main() {
       expect(pip().activity, PipActivity.spawning, reason: 'not yet seen');
 
       await openMenuMoving(tester);
-      // Round 52: out of the ground, from the sky, or thrown in.
+      // Out of the ground, from the sky, or thrown in.
       const entrances = {
         PipActivity.spawning,
         PipActivity.falling,
@@ -150,7 +149,7 @@ void main() {
     });
 
     testWidgets(
-        'his ways in (Round 52): all three in the menu, a random one; back '
+        'his ways in: all three in the menu, a random one; back '
         'after a while he comes in again, not after a short while',
         (tester) async {
       final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);
@@ -188,8 +187,7 @@ void main() {
       expect(entrances, contains(pip().activity));
     });
 
-    testWidgets('a notification comes: his screen shows one (Round 52)',
-        (tester) async {
+    testWidgets('a notification comes: his screen shows one', (tester) async {
       final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);
       container =
           await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
@@ -208,7 +206,7 @@ void main() {
       expect(pip().screenShow?.$1.notification, isTrue);
     });
 
-    testWidgets('a medicine due: he reminds of it (Round 53)', (tester) async {
+    testWidgets('a medicine due: he reminds of it', (tester) async {
       final link = FakePipLink()
         ..at = DateTime(2026, 10, 15, 12)
         ..medicineDue = true;
@@ -227,7 +225,7 @@ void main() {
 
     testWidgets(
         'a recipe read within the hour: he eats, once for it; longer ago, '
-        'not (Round 53)', (tester) async {
+        'not', (tester) async {
       final link = FakePipLink()
         ..at = DateTime(2026, 10, 15, 12)
         ..recipeReadAt = DateTime(2026, 10, 15, 11, 10);
@@ -253,8 +251,7 @@ void main() {
       }
     });
 
-    testWidgets('a ball kicked: the phone buzzes with it (Round 53)',
-        (tester) async {
+    testWidgets('a ball kicked: the phone buzzes with it', (tester) async {
       final link = FakePipLink()..at = DateTime(2026, 10, 15, 12);
       container =
           await pumpApp(tester, pipMoves: true, pipLink: link, overrides: [
@@ -277,7 +274,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
       expect(pip().activity, isNot(PipActivity.ball));
-      // The kick; Round 98: then its bounces.
+      // The kick; then its bounces.
       expect(buzzes.first, contains('medium'));
       expect(buzzes.skip(1), isNotEmpty);
       expect(buzzes.skip(1), everyElement(contains('light')));
@@ -295,7 +292,7 @@ void main() {
     });
 
     testWidgets(
-        'out on his adventure (Round 63): opened, simply running; no '
+        'out on his adventure: opened, simply running; no '
         'station; a tap gives a battery he catches running; a level up seen '
         'flashes; at 18:00 he '
         'stops', (tester) async {
@@ -315,7 +312,7 @@ void main() {
       expect(pip().run!.phase, RunPhase.running, reason: 'no setting off');
       expect(pip().station, isNull, reason: 'out, he doesn\'t charge');
       await tester.tap(find.byKey(const Key('pipRoom')));
-      // Round 65: a battery, flying to him; he runs on.
+      // A battery, flying to him; he runs on.
       expect(link.batteries, 2);
       expect(pip().battery, isNotNull);
       expect(pip().run!.phase, RunPhase.running);
@@ -338,7 +335,7 @@ void main() {
     });
 
     testWidgets(
-        'out and watched (Round 73): fighting; each bug struck down counted '
+        'out and watched: fighting; each bug struck down counted '
         'for his XP, what it brought rising over it; a boss may come if his '
         'life says', (tester) async {
       final link = FakePipLink(batteries: 3)
@@ -357,7 +354,7 @@ void main() {
       expect(pip().run!.phase, RunPhase.running);
       expect(link.fightingNow, isTrue);
       expect(pip().bossDue, isTrue);
-      // Round 74: his time out, from his life, for his field's trees.
+      // His time out, from his life, for his field's trees.
       expect(pip().outRun, isNull, reason: 'none known yet');
       link.running = 1200;
       for (var i = 0; i < 70; i++) {
@@ -382,7 +379,7 @@ void main() {
     });
   });
 
-  group('his egg (Round 34)', () {
+  group('his egg', () {
     testWidgets(
         'an egg until hatched; 7 taps, and he\'s out: his birthday, '
         'his page', (tester) async {
@@ -421,7 +418,7 @@ void main() {
     });
   });
 
-  group('his station charges him, watched (Round 58)', () {
+  group('his station charges him, watched', () {
     late ProviderContainer container;
     PipBrain pip() => container.read(pipBrainProvider);
 
@@ -440,8 +437,7 @@ void main() {
       await frames(tester, 1);
     }
 
-    testWidgets('at it: a segment every 8 seconds (Round 91), up to full',
-        (tester) async {
+    testWidgets('at it: a segment every 8 seconds, up to full', (tester) async {
       expect(PipBrain.chargeEvery, 8);
       final link = FakePipLink(segments: 1)
         ..at = DateTime(2026, 10, 15, 12)
@@ -466,7 +462,7 @@ void main() {
       await frames(tester, 2);
       expect(link.charges, 1);
       expect(pip().segments, 2, reason: 'his icon at once');
-      // Round 98: a buzz for the segment.
+      // A buzz for the segment.
       expect(buzzes, [contains('light')]);
       await frames(tester, PipBrain.chargeEvery);
       expect(link.charges, 2);
@@ -501,7 +497,7 @@ void main() {
     });
   });
 
-  testWidgets("today's hat from his life (Round 61)", (tester) async {
+  testWidgets("today's hat from his life", (tester) async {
     final link = FakePipLink()
       ..at = DateTime(2026, 10, 31, 12)
       ..hatToday = PipHat.witch;
@@ -513,7 +509,7 @@ void main() {
 
   testWidgets(
       'plugged in last time, not now: opened, his station never shows '
-      '(Round 64: it flashed up and sank)', (tester) async {
+      '(it flashed up and sank)', (tester) async {
     final container = await pumpApp(tester,
         pipMoves: true,
         realPipLink: true,
@@ -538,7 +534,7 @@ void main() {
   });
 
   testWidgets(
-      'his ski trip (Round 67): on the bus, no station; a ski day snowy, '
+      'his ski trip: on the bus, no station; a ski day snowy, '
       'skiing out', (tester) async {
     final link = FakePipLink()
       ..at = DateTime(2027, 1, 20, 9)
@@ -570,7 +566,7 @@ void main() {
 
   testWidgets(
       'out on his adventure, the menu shows his level, not his age '
-      '(Round 63)', (tester) async {
+      '', (tester) async {
     final out = PipLife(
       born: DateTime(2026, 10, 1),
       energyAt: DateTime(2026, 10, 15, 11),

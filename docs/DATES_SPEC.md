@@ -1,19 +1,19 @@
-# Birthdays & dates — spec (Round 57)
+# Birthdays & dates — spec
 
-Built in Round 57 (v1.18.0).
+Built in v1.18.0.
 
-From the notes (ROADMAP, Round 57): a calendar of important dates,
+From the notes (ROADMAP): a calendar of important dates,
 each with a title, a note, a type and up to three reminders; Pip in a
 party hat on a birthday. Built from the app's usual patterns. The user's
-answers are in (Round 57); **Decided** marks them.
+answers are in; **Decided** marks them.
 
 ## 1. The page (a Hub page, "Dates")
 
 - Its name in the Hub: **Dates** (decided).
-- **A month calendar** on top, the food tracker's kind (gone since Round 145) (weeks as rows,
+- **A month calendar** on top, the food tracker's kind (since removed) (weeks as rows,
   Monday first, swipe or ‹ › for other months; this month first). A day
   with a date on it shows a **small dot in its type's colour** (two or
-  more: up to three dots); today is ringed. Round 60: instead, the day's
+  more: up to three dots); today is ringed. Instead, the day's
   circle is in its dates' colours (as Food's rated days): one kind
   filled, several kinds in slices, two or more of one kind with a
   border; the picked day ringed. Unlike Food it goes forward
@@ -42,7 +42,7 @@ Opened from a card or **+**; saved as you go, like a meal or a recipe
   (more can be added later).
 - **Date**: day and month, and the **year** if known (a birthday
   without a year still works; it just doesn't say the age).
-- **Lasts** (Round 59, a Holiday or an Event): how many days, − / +
+- **Lasts** (a Holiday or an Event): how many days, − / +
   (1 to 31). It shows on each of them in the calendar and on its card as
   its days ("Sat, 1 Aug – Mon, 10 Aug"), "on now" while it's on;
   reminders come before its first day.
@@ -113,7 +113,7 @@ Tests check the hat sits on his head's top row in every frame kind
 new animation that moves the head without the frame grid would fail
 and be caught.
 
-### Hats on Pip Home (decided, Round 57)
+### Hats on Pip Home (decided)
 
 - Pip Home's settings card gets **Hats** (beside Rename, Animations,
   Backgrounds): a list of hats to try on him: **party hat**, **crown**,
@@ -142,12 +142,12 @@ and be caught.
 1. Data: the model, storage, backup v23, fixtures.
 2. The page: the calendar, upcoming, the date's page, the type picker.
 3. Reminders: planning, the Notifications page entry, tapping a
-   notification to open it; the green dot.
+  notification to open it; the green dot.
 4. Pip's hats: the party hat on birthdays (and his own), beside him
-   asleep; the Hats list on Pip Home.
+  asleep; the Hats list on Pip Home.
 5. Introduction, docs, full suite, release.
 
-## 7. Round 61: per type, kinds, cards (1.23.0)
+## 7. Per type, kinds, cards (1.23.0)
 
 - **Birthday**, **Anniversary**: every year, no switch; *Year known*
   ("for the age" / "for which anniversary"). **Holiday**, **Event**: a

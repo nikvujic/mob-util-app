@@ -3,11 +3,11 @@ import 'package:the_app/core/pip_brain.dart';
 import 'package:the_app/core/pip_scene.dart';
 import 'package:the_app/core/theme.dart';
 
-/// One system for what shows around Pip and what he may do (Round 35).
+/// One system for what shows around Pip and what he may do.
 void main() {
   DateTime at(int h, int m) => DateTime(2026, 10, 13, h, m);
 
-  test('the parts of the day (Round 59: by the sun, with the seasons)', () {
+  test('the parts of the day (by the sun, with the seasons)', () {
     final (rise, set) = sunTimesOn(at(12, 0));
     DayPart partAt(double minutes) =>
         dayPartAt(at(minutes ~/ 60, (minutes % 60).floor()));
@@ -75,10 +75,10 @@ void main() {
   test('what shows where, and when', () {
     final room = PipScene.at(PipPlace.room, at(12, 0));
     expect(room.part, DayPart.day);
-    // Round 70: and in October his field's autumn tree and leaves.
+    // And in October his field's autumn tree and leaves.
     const autumn = {PipProp.trees, PipProp.leaves};
     expect(room.props, {PipProp.sun, PipProp.clouds, ...autumn},
-        reason: 'clouds since the room grew (Round 36)');
+        reason: 'clouds since the room grew');
     expect(PipScene.at(PipPlace.home, at(12, 0)).props,
         {PipProp.sun, PipProp.clouds, ...autumn});
     expect(PipScene.at(PipPlace.room, at(23, 0)).props,
@@ -110,7 +110,7 @@ void main() {
     }
   });
 
-  group('the moon (Round 38)', () {
+  group('the moon', () {
     test('its real phase: known new and full moons', () {
       // New 11 January 2024 11:57 UTC, full 25 January 17:54 UTC.
       expect(moonAgeAt(DateTime.utc(2024, 1, 11, 11, 57)), closeTo(0, 0.01));
@@ -173,7 +173,7 @@ void main() {
         PipActivity.poweringOff,
         PipActivity.poweringOn,
         PipActivity.fetching,
-        // Round 44: at his station, or on his way.
+        // At his station, or on his way.
         PipActivity.toStation,
         PipActivity.plugging,
         PipActivity.charging,
@@ -197,7 +197,7 @@ void main() {
     });
 
     test(
-        'asleep: only waking (Round 77: woken at night too) or running out; '
+        'asleep: only waking (woken at night too) or running out; '
         'off: only back on; stirring: nothing', () {
       for (final a in PipAnimation.values) {
         expect(
@@ -227,10 +227,9 @@ void main() {
         'turn',
         'fallAsleep',
         'powerOff',
-        'nightWake', // Round 77
-        'fetch', // Round 54
+        'nightWake', //
+        'fetch', //
         'charge',
-        // Round 52.
         'fromSky',
         'fromSide',
         'bugs',
@@ -240,10 +239,9 @@ void main() {
         'ball',
         'shootingStar',
         'dance',
-        // Round 53.
         'medicine',
         'eat',
-        // Round 75: the weather's.
+        // The weather's.
         'puddle',
         'twirl',
         'handOut',

@@ -49,7 +49,7 @@ class AppDrawer extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // A fixed header with the special actions (doesn't scroll),
-            // always the same height, Lock now or not (Round 25), with Pip.
+            // always the same height, Lock now or not, with Pip.
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
               child: SizedBox(
@@ -61,7 +61,7 @@ class AppDrawer extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       // A little lower than centred, level with Pip's head
-                      // and feet rather than his antenna (Round 27).
+                      // and feet rather than his antenna.
                       child: Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
@@ -79,7 +79,7 @@ class AppDrawer extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.lock_outline),
                         tooltip: 'Lock now',
-                        // Quietly (Round 24): the menu stays open, so the
+                        // Quietly: the menu stays open, so the
                         // page behind it isn't shown; the button going
                         // away says it's done.
                         onPressed: ref.read(sessionProvider.notifier).lock,
@@ -127,7 +127,7 @@ class AppDrawer extends ConsumerWidget {
                     title: const Text('Notifications'),
                     onTap: () => _open(context, const NotificationsPage()),
                   ),
-                  // Second to last (Round 70).
+                  // Second to last.
                   ListTile(
                     leading: const Icon(Icons.public),
                     title: const Text('Internet Access'),
@@ -141,12 +141,12 @@ class AppDrawer extends ConsumerWidget {
                 ],
               ),
             ),
-            // His name and age (Round 34), once he's hatched; on the right
-            // his energy and the batteries held (Round 37).
+            // His name and age, once he's hatched; on the right
+            // his energy and the batteries held.
             if (ref.watch(pipLifeProvider) case final pip when pip.hatched)
               Padding(
                 key: const Key('pipNameAge'),
-                // One of his pixels clear of his room below (Round 41).
+                // One of his pixels clear of his room below.
                 padding: const EdgeInsets.fromLTRB(
                   12,
                   8,
@@ -155,7 +155,7 @@ class AppDrawer extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    // Round 63: out on his adventure, his level instead.
+                    // Out on his adventure, his level instead.
                     if (_adventureLevel(ref) case final level?)
                       PixelText(
                         [
@@ -187,27 +187,27 @@ class AppDrawer extends ConsumerWidget {
                   ],
                 ),
               ),
-            // Pip's room (Round 26).
+            // Pip's room.
             PipRoom(
               brain: ref.watch(pipBrainProvider),
               animate: ref.watch(pipAnimatesProvider),
-              // His energy, sleep and batteries (Round 37).
+              // His energy, sleep and batteries.
               link: ref.watch(pipLinkProvider),
-              // His sky follows the time of day (Round 35).
+              // His sky follows the time of day.
               scene: PipScene.at(
                 PipPlace.room,
                 ref.watch(clockProvider)(),
-                // Round 70: the weather, if it's on in Internet Access.
+                // The weather, if it's on in Internet Access.
                 weatherCode: ref.watch(skyWeatherProvider),
                 windSpeed: ref.watch(skyWindProvider),
               ),
-              // Round 52: in the menu he may be thrown in by its swing.
+              // In the menu he may be thrown in by its swing.
               entrances: const {
                 PipEntrance.ground,
                 PipEntrance.sky,
                 PipEntrance.side,
               },
-              // Out of his egg: that's his birthday (Round 34).
+              // Out of his egg: that's his birthday.
               onHatched: () => ref
                   .read(pipLifeProvider.notifier)
                   .hatch(ref.read(clockProvider)()),
@@ -229,7 +229,7 @@ class AppDrawer extends ConsumerWidget {
   }
 }
 
-/// His level while he's out on his adventure (Round 63), or null.
+/// His level while he's out on his adventure, or null.
 int? _adventureLevel(WidgetRef ref) {
   final life = ref.read(pipLifeProvider.notifier);
   final now = ref.watch(clockProvider)();

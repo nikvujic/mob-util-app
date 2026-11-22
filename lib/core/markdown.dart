@@ -107,7 +107,7 @@ List<MdRun> markdownRuns(String text) {
   final runs = <MdRun>[];
   var lineStart = 0;
   // Inside a ``` code block (N17): its lines are code, nothing else. A
-  // block needs its closing fence (Round 29): a lone ``` is just text,
+  // block needs its closing fence: a lone ``` is just text,
   // so typing one, or quoting one, doesn't turn the rest into code.
   var inBlock = false;
   var fencesLeft = text.split('\n').where(isFence).length;
@@ -134,7 +134,7 @@ List<MdRun> markdownRuns(String text) {
       _line(line, lineStart, runs);
     }
     if (newline == -1) break;
-    // A fence's own line break goes with its symbols (Round 29).
+    // A fence's own line break goes with its symbols.
     _add(
         runs,
         MdRun(newline, newline + 1,
@@ -402,7 +402,7 @@ List<(int, int)> _markPairs(String text, int from, int to, String mark) {
 /// [mark] (`**`, `*`, `~~`, `==`, `` ` ``), or unwraps it if it already
 /// is (the marks inside the selection or just around it). With nothing
 /// selected: in (or just after) something already wrapped in [mark], it
-/// takes the marks off (Round 32: pressing again had stacked more);
+/// takes the marks off (pressing again had stacked more);
 /// else puts a pair at the cursor and the cursor between them.
 MdEdit toggleWrap(String text, int start, int end, String mark) {
   final n = mark.length;

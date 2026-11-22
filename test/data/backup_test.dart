@@ -115,7 +115,7 @@ void main() {
       expect(errorFor(json), 'This backup is damaged.');
     });
 
-    test('rejects duplicate date ids (Round 57)', () {
+    test('rejects duplicate date ids', () {
       final json = validJson();
       final date = {'id': 'd1', 'title': 'Ana', 'day': 24, 'month': 10};
       (json['data'] as Map<String, dynamic>)['dates'] = [date, date];

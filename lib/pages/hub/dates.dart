@@ -15,7 +15,7 @@ import 'package:the_app/widgets/bottom_actions.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 
-/// A kind of date's colour and icon (Round 57).
+/// A kind of date's colour and icon.
 extension DateTypeLook on DateType {
   Color get colour => switch (this) {
         DateType.birthday => DateColours.birthday,
@@ -34,7 +34,7 @@ extension DateTypeLook on DateType {
       };
 }
 
-/// How a holiday's or an event's kind looks (Round 61).
+/// How a holiday's or an event's kind looks.
 extension DateKindLook on DateKind {
   IconData get icon => switch (this) {
         DateKind.skiing => Icons.downhill_skiing,
@@ -53,7 +53,7 @@ void openDatesPage(BuildContext context, Widget page) {
   );
 }
 
-/// Birthdays & dates (Round 57): a month calendar (dots on the days with
+/// Birthdays & dates: a month calendar (dots on the days with
 /// dates), then what's coming; a tap on a day shows its dates instead
 /// (again: back to what's coming). + adds a date (on the day picked).
 class DatesPage extends ConsumerStatefulWidget {
@@ -69,7 +69,7 @@ class _DatesPageState extends ConsumerState<DatesPage> {
   @override
   void initState() {
     super.initState();
-    // Opened: today's green dot (a birthday) is seen (Round 57).
+    // Opened: today's green dot (a birthday) is seen.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(preferencesProvider.notifier).sawDates(_today);
     });
@@ -83,7 +83,7 @@ class _DatesPageState extends ConsumerState<DatesPage> {
     final today = _today;
     final colors = context.colors;
     final picked = _picked;
-    // Round 72: what's on today, what's coming, and one-off dates gone
+    // What's on today, what's coming, and one-off dates gone
     // by; a day picked on the calendar, only its dates.
     final now = picked == null ? book.today(today) : const <DateOn>[];
     final onNow = {for (final d in now) d.date.id};
@@ -92,7 +92,7 @@ class _DatesPageState extends ConsumerState<DatesPage> {
             for (final d in book.upcoming(today))
               if (!onNow.contains(d.date.id)) d,
           ]
-        // Round 59: each from its first day (it may last several).
+        // Each from its first day (it may last several).
         : [
             for (final d in book.on(picked))
               (date: d, on: d.startCovering(picked) ?? picked),
@@ -179,7 +179,7 @@ class _DatesPageState extends ConsumerState<DatesPage> {
           ],
         ],
       ),
-      // Round 59: always on the right (as Medicine): opened from the Hub,
+      // Always on the right (as Medicine): opened from the Hub,
       // the tile's side isn't the hand's.
       floatingActionButton: BottomActions(
         side: HandSide.right,
@@ -231,7 +231,7 @@ class DateCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: date.type.colour,
               ),
-              // Round 61: its kind's icon (skis, a heart...), if it has one.
+              // Its kind's icon (skis, a heart...), if it has one.
               child: Icon(
                 date.kindNow?.icon ?? date.type.icon,
                 size: 20,
@@ -253,7 +253,7 @@ class DateCard extends StatelessWidget {
                               color: colors.textPrimary, fontSize: 15),
                         ),
                       ),
-                      // Round 108: a person's birthday, from People.
+                      // A person's birthday, from People.
                       if (date.personId != null) ...[
                         const SizedBox(width: 6),
                         Icon(Icons.people_outline,
@@ -269,7 +269,7 @@ class DateCard extends StatelessWidget {
                     whenLabel(date, on, today),
                     style: TextStyle(color: colors.textSecondary, fontSize: 12),
                   ),
-                  // Round 61: all there is to know about it; Round 72: its
+                  // All there is to know about it; its
                   // reminders on a line of their own, with a bell.
                   if (dateDetails(date, reminders: false) case final details
                       when details.isNotEmpty)

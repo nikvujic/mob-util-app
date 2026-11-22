@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
-/// A "back to top" button over a long [PullDownList] in [child] (Round 20):
+/// A "back to top" button over a long [PullDownList] in [child]:
 /// shown only once it's scrolled far (more than [screens] screens down),
-/// at the bottom right (Round 24: always there); a tap scrolls up
+/// at the bottom right (always there); a tap scrolls up
 /// smoothly. The list leaves [room] at its end, so the button never covers
 /// the last entries.
 class BackToTop extends StatefulWidget {

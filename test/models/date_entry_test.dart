@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/date_entry.dart';
 
-/// Birthdays & dates (Round 57): when a date falls, what's coming, how
+/// Birthdays & dates: when a date falls, what's coming, how
 /// many years, 29 February, and the JSON.
 void main() {
   DateEntry date(
@@ -122,7 +122,7 @@ void main() {
         DateType.other);
   });
 
-  group('lasting days (Round 59)', () {
+  group('lasting days', () {
     const holiday = DateEntry(
       id: 'h',
       title: 'Ljetovanje',
@@ -197,7 +197,7 @@ void main() {
     });
   });
 
-  group('kinds (Round 61)', () {
+  group('kinds', () {
     test('a holiday or an event has kinds; others none', () {
       expect(DateType.holiday.kinds,
           [DateKind.skiing, DateKind.beach, DateKind.trip]);
@@ -241,7 +241,7 @@ void main() {
     });
   });
 
-  group('a ski trip\'s travel (Round 67)', () {
+  group('a ski trip\'s travel', () {
     const ski = DateEntry(
       id: 'ski',
       title: 'Jahorina',

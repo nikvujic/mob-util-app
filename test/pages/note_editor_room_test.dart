@@ -6,7 +6,7 @@ import 'package:the_app/providers/notes_provider.dart';
 
 import '../helpers.dart';
 
-/// The note editor's text around the buttons at the bottom (Round 15):
+/// The note editor's text around the buttons at the bottom:
 /// nothing hides it, taps beside the buttons reach it, and its end can
 /// scroll clear of them.
 void main() {

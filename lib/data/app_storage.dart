@@ -95,58 +95,56 @@ class AppStorage {
 
   /// Version of `medicine.json` (O6). History: 1 = first format; 2 =
   /// doses can be missed or not sure, and taken ones may have no time
-  /// (O13); 3 = a medicine may remind again after its doses (`followUp`,
-  /// Round 16); 4 = a medicine may be important (`important`, Round 24);
-  /// 5 = a medicine may be taken on some weekdays only (`weekdays`, Round
-  /// 40).
+  /// (O13); 3 = a medicine may remind again after its doses (`followUp`);
+  /// 4 = a medicine may be important (`important`);
+  /// 5 = a medicine may be taken on some weekdays only (`weekdays`).
   static const medicineFormatVersion = 5;
 
   /// Version of `shop.json`, which moves on its own from here. History:
   /// 1–2 = as [formatVersion]; 3 = items may have a quantity (S7); 4 =
-  /// or a typed one (`text`, Round 70).
+  /// or a typed one (`text`).
   static const shopFormatVersion = 4;
 
-  /// Version of `todo.json` (Round 28). History: 1 = first format; 2 =
-  /// things may be done (`done`, Round 30); 3 = or waiting (`waiting`,
-  /// Round 45).
+  /// Version of `todo.json`. History: 1 = first format; 2 =
+  /// things may be done (`done`); 3 = or waiting (`waiting`).
   static const todoFormatVersion = 3;
 
-  /// Version of `notifications.json` (Round 31): what was scheduled, for
+  /// Version of `notifications.json`: what was scheduled, for
   /// the history. This phone only, not in backups. History: 1 = first
   /// format.
   static const notificationsFormatVersion = 1;
 
-  /// Version of `pip.json` (Round 34): Pip, the pet. History: 1 = first
-  /// format; 2 = his energy, batteries and what was shown (Round 37);
-  /// 3 = his adventures (`adventure`, Round 63). Round 77 added an
+  /// Version of `pip.json`: Pip, the pet. History: 1 = first
+  /// format; 2 = his energy, batteries and what was shown;
+  /// 3 = his adventures (`adventure`), later with an
   /// optional `wokenAt` within 3 (without it he simply wasn't woken);
-  /// 4 = his quests (`quest`, `questsDone`, Round 125).
+  /// 4 = his quests (`quest`, `questsDone`).
   static const pipFormatVersion = 4;
 
-  /// Version of `recipes.json` (Round 42). History: 1 = first format.
+  /// Version of `recipes.json`. History: 1 = first format.
   static const recipesFormatVersion = 1;
 
-  /// Version of `ingredients.json` (Round 42), the list recipes pick
+  /// Version of `ingredients.json`, the list recipes pick
   /// from. History: 1 = first format.
   static const ingredientsFormatVersion = 1;
 
-  /// Version of `dates.json` (Round 57), birthdays & dates. History: 1 =
+  /// Version of `dates.json`, birthdays & dates. History: 1 =
   /// first format; 2 = a holiday or an event may last several days
-  /// (`days`, Round 59); 3 = a holiday or an event may be of a kind
-  /// (`kind`: skiing, beach, trip, wedding; Round 61); 4 = a ski trip's
-  /// travel (`travel`: hours, leave, back; Round 67).
+  /// (`days`); 3 = a holiday or an event may be of a kind
+  /// (`kind`: skiing, beach, trip, wedding); 4 = a ski trip's
+  /// travel (`travel`: hours, leave, back).
   static const datesFormatVersion = 4;
 
-  /// Version of `subscriptions.json` (Round 79). History: 1 = first
+  /// Version of `subscriptions.json`. History: 1 = first
   /// format.
   static const subscriptionsFormatVersion = 1;
 
-  /// Version of `packing.json` (Round 94). History: 1 = first format;
+  /// Version of `packing.json`. History: 1 = first format;
   /// 2 = each list has its own sections, `sections` being the defaults
-  /// (Round 95).
+  ///.
   static const packingFormatVersion = 2;
 
-  /// Version of `people.json` (Round 108). History: 1 = first format.
+  /// Version of `people.json`. History: 1 = first format.
   static const peopleFormatVersion = 1;
 
   final JsonFileStore? _notesStore;
@@ -201,7 +199,7 @@ class AppStorage {
   /// The Hub's pages locked behind the master password (O7).
   final Set<HubTool> initialPageLocks;
 
-  /// The to-do note locked behind the master password (Round 45).
+  /// The to-do note locked behind the master password.
   final bool initialTodoLocked;
 
   /// The locks last saved: settings.json holds every kind.
@@ -331,7 +329,7 @@ class AppStorage {
     final recipesStore = JsonFileStore(File('${dir.path}/recipes.json'));
     final ingredientsStore =
         JsonFileStore(File('${dir.path}/ingredients.json'));
-    // Round 145: the food tracker's gone: its file too.
+    // The food tracker's gone: its file too.
     try {
       final food = File('${dir.path}/food.json');
       if (food.existsSync()) food.deleteSync();

@@ -8,7 +8,7 @@ import 'package:the_app/providers/planner_provider.dart';
 
 import '../helpers.dart';
 
-/// The add / edit sheet (Round 9): it follows reach mode, only closes with
+/// The add / edit sheet: it follows reach mode, only closes with
 /// its Close button or back, and asks before dropping changes.
 void main() {
   late ProviderContainer container;
@@ -63,7 +63,7 @@ void main() {
     expect(sheet, findsOneWidget);
   });
 
-  testWidgets('no ✕: back closes it (Round 12)', (tester) async {
+  testWidgets('no ✕: back closes it', (tester) async {
     await openAddSheet(tester);
     expect(find.byIcon(Icons.close), findsNothing);
     expect(find.byTooltip('Close'), findsNothing);

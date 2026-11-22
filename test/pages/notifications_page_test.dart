@@ -8,7 +8,7 @@ import 'package:the_app/providers/preferences_provider.dart';
 
 import '../helpers.dart';
 
-/// The Notifications page (Round 31): the latest notifications, the whole
+/// The Notifications page: the latest notifications, the whole
 /// history, and each page's settings.
 void main() {
   /// Thursday 8 October 2026, 12:00.
@@ -116,7 +116,7 @@ void main() {
         DateTime(2026, 10, 8));
 
     await tap('notifySound-medicine');
-    // More sounds than the screen holds (Round 39): it scrolls.
+    // More sounds than the screen holds: it scrolls.
     await tester.scrollUntilVisible(find.text('Alert'), 100,
         scrollable: find.descendant(
             of: find.byKey(const Key('notifySounds')),
@@ -132,7 +132,7 @@ void main() {
         ),
         findsOneWidget);
 
-    // How loud (Round 41): for the app's sounds.
+    // How loud: for the app's sounds.
     await tester
         .ensureVisible(find.byKey(const Key('notifyVolume-medicine-quiet')));
     await tester.tap(find.byKey(const Key('notifyVolume-medicine-quiet')));

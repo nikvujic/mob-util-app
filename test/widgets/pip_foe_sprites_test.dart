@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_run.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 73: what he fights, drawn.
+/// What he fights, drawn.
 void main() {
   test('each foe as wide as it is, its legs stepping, every colour drawn', () {
     for (final foe in PipFoe.values) {
@@ -20,7 +20,7 @@ void main() {
         }
       }
       expect(up, isNot(down), reason: '${foe.name}: its legs step');
-      // Its eyes: red, or coal (Round 75: a snowman's).
+      // Its eyes: red, or coal (a snowman's).
       expect(up.join().contains(foe == PipFoe.snowman ? 'c' : 'r'), isTrue,
           reason: '${foe.name}: eyes');
     }

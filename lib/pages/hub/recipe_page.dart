@@ -24,7 +24,7 @@ import 'package:the_app/widgets/pull_down_list.dart';
 import 'package:the_app/widgets/selection.dart';
 import 'package:the_app/widgets/text_input_sheet.dart';
 
-/// One recipe (Round 42). It opens in **view mode**, which keeps the
+/// One recipe. It opens in **view mode**, which keeps the
 /// screen on (cooking with the phone set aside): its prep time and type,
 /// its ingredients with their quantities, the method as a note shows it;
 /// **To Shop** puts the ingredients on Shop's list, **Edit** makes it all
@@ -73,7 +73,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
   final _nameFocus = FocusNode();
 
-  /// Ingredients selected (Round 43: holding one), by position, to remove
+  /// Ingredients selected (holding one), by position, to remove
   /// several at once.
   final _selected = <int>{};
 
@@ -114,9 +114,9 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       if (mounted) setState(() {});
     });
     _lifecycle = AppLifecycleListener(onHide: _saveNow);
-    // Cooking with the phone set aside: the screen stays on (Round 40).
+    // Cooking with the phone set aside: the screen stays on.
     KeepScreenOn.hold();
-    // Round 53: open a while, it's been read (Pip eats, seen soon after);
+    // Open a while, it's been read (Pip eats, seen soon after);
     // marked again each minute it stays open.
     _reading = Timer.periodic(const Duration(minutes: 1), (timer) {
       if (timer.tick < recipeReadAfter.inMinutes) return;
@@ -185,7 +185,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     _saveNow();
   }
 
-  /// Round 102: switching between view and edit keeps the
+  /// Switching between view and edit keeps the
   /// scroll: the view list's controller, and a context inside the edit
   /// list to ask how far down it is.
   ScrollController _viewScroll = ScrollController();
@@ -337,7 +337,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       ));
   }
 
-  /// View mode's other actions (Round 43: at the bottom, in reach, not in
+  /// View mode's other actions (at the bottom, in reach, not in
   /// the top bar).
   Future<void> _more() async {
     final choice = await showChoicesSheet(context, null, const [
@@ -361,8 +361,8 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 
   // Edit mode's fields.
 
-  /// Out of the text fields before a sheet or page opens over this one
-  /// (Round 43): else closing it gives the field its focus back, and the
+  /// Out of the text fields before a sheet or page opens over this one:
+  /// else closing it gives the field its focus back, and the
   /// page jumps to where its cursor was.
   void _leaveFields() => FocusManager.instance.primaryFocus?.unfocus();
 
@@ -434,7 +434,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     ]));
   }
 
-  /// A tap on an ingredient (Round 43): its options, Quantity then
+  /// A tap on an ingredient: its options, Quantity then
   /// Delete.
   Future<void> _ingredientOptions(int index) async {
     _leaveFields();
@@ -452,7 +452,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
     }
   }
 
-  /// The quantity picker (Round 43), like Shop's; the recipe changes once,
+  /// The quantity picker, like Shop's; the recipe changes once,
   /// when it closes.
   Future<void> _editQuantity(int index) async {
     final ingredient = _recipe.ingredients[index];
@@ -570,7 +570,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
       }
     }
     // The keyboard closed (its back key) while typing: typing ends, the
-    // cursor goes, as in notes (Round 43).
+    // cursor goes, as in notes.
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     if (keyboard == 0 && _keyboard > 0 && _editing) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -815,7 +815,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
               key: const Key('recipeName'),
               controller: _name,
               focusNode: _nameFocus,
-              // Round 64: no room asked for above it (at the list's top,
+              // No room asked for above it (at the list's top,
               // that pulled into the reach space at every key, which then
               // snapped back: the page bounced).
               scrollPadding: EdgeInsets.fromLTRB(20, 0, 20, clearance + 20),
@@ -933,7 +933,7 @@ class _RecipePageState extends ConsumerState<RecipePage> {
 }
 
 /// An ingredient in edit mode: plain, no background: its name, its
-/// quantity if it has one (quiet, not a button: Round 43), the handle. A
+/// quantity if it has one (quiet, not a button), the handle. A
 /// tap gives its options; holding selects it.
 class _IngredientRow extends StatelessWidget {
   final int index;
@@ -1004,9 +1004,9 @@ class _IngredientRow extends StatelessWidget {
   }
 }
 
-/// The quantity picker (Round 43): Shop's kinds (a count, a weight)
+/// The quantity picker: Shop's kinds (a count, a weight)
 /// and spoons, small and big; big − / + at the bottom, a weight typed
-/// exactly at a tap; or free text ("1-2", Round 70). Resolves to the
+/// exactly at a tap; or free text ("1-2"). Resolves to the
 /// quantity as text when closed.
 Future<String?> showAmountSheet(
   BuildContext context, {
@@ -1170,7 +1170,7 @@ class _AmountSheet extends StatelessWidget {
   }
 }
 
-/// The quantity typed as text (Round 70), into [typed].
+/// The quantity typed as text, into [typed].
 class _TypedAmount extends StatefulWidget {
   final ValueNotifier<String> typed;
 
@@ -1207,7 +1207,7 @@ class _TypedAmountState extends State<_TypedAmount> {
       );
 }
 
-/// The prep time picker (Round 41): − / + by 5 minutes, or a common time
+/// The prep time picker: − / + by 5 minutes, or a common time
 /// at a tap; Clear for none. Null if dismissed.
 Future<({int? minutes})?> showPrepTimeSheet(
   BuildContext context,

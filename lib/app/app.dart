@@ -60,8 +60,8 @@ class MyApp extends ConsumerWidget {
       // for a moment (the user saw the old theme flash on the next page).
       themeAnimationDuration: Duration.zero,
       // Tracks which side the user touches, for G11 bottom actions; the
-      // curtain hides what's unlocked as the app leaves. Round 88
-      //: a tap on nothing (not a field, button or the like) lets
+      // curtain hides what's unlocked as the app leaves; and
+      // a tap on nothing (not a field, button or the like) lets
       // a field being typed in go, on every page, sheet and dialog.
       builder: (context, child) => PrivacyCurtain(
         child: HandTracker(
@@ -154,17 +154,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(retrySavesProvider)();
       // Reminders are planned two weeks ahead: top them up (P10).
       ref.read(reminderPlannerProvider).refresh();
-      // Pip's battery, if one came while away (Round 37).
+      // Pip's battery, if one came while away.
       _collectBattery();
-      // A past day's ticked-off blocks, gone (Round 78).
+      // A past day's ticked-off blocks, gone.
       _dropDoneBlocks();
-      // A day's automatic backup, if due (Round 39).
+      // A day's automatic backup, if due.
       ref.read(autoBackupProvider).run();
     },
   );
 
-  /// Ticked-off planner blocks on days before today are deleted (Round
-  /// 78), when the app opens or comes back.
+  /// Ticked-off planner blocks on days before today are deleted, when the app opens or comes back.
   void _dropDoneBlocks() => ref
       .read(plannerProvider.notifier)
       .dropDoneBefore(dayOf(ref.read(clockProvider)()));
@@ -280,7 +279,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() => _selectedIndex = index);
     if (left != index) _sectionShown[left].fire();
     _sectionShown[index].fire();
-    // Round 61: the Planner opened, its shown notifications go.
+    // The Planner opened, its shown notifications go.
     if (section == AppSection.planner) {
       ref.read(clearShownProvider)(NotifyPage.planner);
     }
@@ -316,7 +315,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
 
-    // The to-do note locking (Round 45) closes it and what's over it
+    // The to-do note locking closes it and what's over it
     // (its options, an edit), while on Notes.
     ref.listen(todoClosedProvider, (wasClosed, closed) {
       if (closed &&
@@ -345,23 +344,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(fingerprintProvider, (_, __) {});
     // Kept running, so reminders follow every planner change (P10).
     ref.listen(reminderPlannerProvider, (_, __) {});
-    // Kept running: the weather fetched while it's on (Round 70).
+    // Kept running: the weather fetched while it's on.
     ref.listen(weatherProvider, (_, __) {});
-    // Kept running: Spotify's morning alarm follows its page (Round 93).
+    // Kept running: Spotify's morning alarm follows its page.
     ref.listen(morningMusicSyncProvider, (_, __) {});
     // A notification tapped: to its section, on top of everything (its
-    // page takes it from there once unlocked, Round 19).
+    // page takes it from there once unlocked).
     ref.listen(notificationOpenerProvider, (_, __) {});
     ref.listen(pendingTargetProvider, (_, target) {
       if (target == null) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
-      // From the notifications' history (Round 31): the menu closes too.
+      // From the notifications' history: the menu closes too.
       final scaffold = _scaffold.currentState;
       if (scaffold != null && scaffold.isDrawerOpen) scaffold.closeDrawer();
       switch (target) {
         case PlannerTarget():
           _show(AppSection.planner);
-        // Round 72: a block that's on (the opener passes on where it is).
+        // A block that's on (the opener passes on where it is).
         case PlannerNowTarget():
           ref.read(pendingTargetProvider.notifier).state = target.at;
         case MedicineTarget() || DatesTarget() || SubscriptionsTarget():
@@ -432,8 +431,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           hubDot: ref.watch(hubDotProvider),
           hubNews: ref.watch(hubNewsProvider),
           onItemTapped: (index) {
-            // Going elsewhere drops a tapped notification's "go to"
-            // (Round 21): it was for where the app took you.
+            // Going elsewhere drops a tapped notification's "go to":
+            // it was for where the app took you.
             if (index != _selectedIndex) {
               ref.read(pendingTargetProvider.notifier).state = null;
             }

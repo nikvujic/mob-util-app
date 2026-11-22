@@ -22,7 +22,7 @@ class TextInputSheet extends StatefulWidget {
   /// E.g. numbers for an amount; text by default.
   final TextInputType? keyboardType;
 
-  /// What's already there that matches the typed text (Round 58: Shop's
+  /// What's already there that matches the typed text (Shop's
   /// items not on the list), offered above the field as you type; a tap
   /// submits it. Asked again on each change, so it's always current.
   final List<String> Function(String typed)? suggestions;
@@ -30,7 +30,7 @@ class TextInputSheet extends StatefulWidget {
   /// How many suggestions show at most.
   static const mostSuggestions = 6;
 
-  /// Why the text can't be taken (Round 92: an ingredient already
+  /// Why the text can't be taken (an ingredient already
   /// there), or null when it can: said over the field, the sheet kept.
   final String? Function(String text)? check;
 

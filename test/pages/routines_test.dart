@@ -287,7 +287,7 @@ void main() {
             epsilon: 1));
   });
 
-  testWidgets('a routine has nothing to tick off (Round 78)', (tester) async {
+  testWidgets('a routine has nothing to tick off', (tester) async {
     await openPlanner(tester);
     addGym();
     await tester.pump();
@@ -407,8 +407,7 @@ void main() {
     });
   });
 
-  testWidgets('Routines screen: reach mode, as on the planner (Round 17)',
-      (tester) async {
+  testWidgets('Routines screen: reach mode, as on the planner', (tester) async {
     await openPlanner(tester);
     await tester.tap(find.byTooltip('Routines'));
     await tester.pumpAndSettle();
@@ -429,7 +428,7 @@ void main() {
     expect(tester.getTopLeft(midnight).dy, moreOrLessEquals(atTop));
   });
 
-  group('Round 16', () {
+  group('placing routines', () {
     testWidgets('Routines screen: a routine starts where free time is tapped',
         (tester) async {
       await openPlanner(tester);

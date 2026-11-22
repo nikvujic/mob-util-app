@@ -8,7 +8,7 @@ import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 import 'package:the_app/widgets/pip_sprites.dart';
 
-/// Round 77: waking him by three taps: at night once, for 15 minutes,
+/// Waking him by three taps: at night once, for 15 minutes,
 /// drowsy, one eye open first; from 07:00 for the day.
 void main() {
   DateTime at(int day, int hour, [int minute = 0]) =>

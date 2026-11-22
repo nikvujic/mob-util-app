@@ -6,9 +6,9 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
 
-/// The unit converter (Round 118): a list of unit pairs, two boxes each;
+/// The unit converter: a list of unit pairs, two boxes each;
 /// typing in one fills in the other. Nothing is kept once the page is
-/// left. Round 153: each group a card with
+/// left. Each group a card with
 /// its icon; each unit a tile, its name over a big number and its symbol;
 /// the one being typed in lifts in the accent.
 class ConverterPage extends StatefulWidget {
@@ -267,7 +267,7 @@ class _UnitTileState extends State<_UnitTile> {
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
                           RegExp(widget.signed ? r'[-0-9.,]' : r'[0-9.,]')),
-                      // Round 154: two decimals at most.
+                      // Two decimals at most.
                       TextInputFormatter.withFunction((old, typed) =>
                           withinDecimals(typed.text) ? typed : old),
                     ],

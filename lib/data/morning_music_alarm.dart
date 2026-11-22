@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/models/morning_music.dart';
 
-/// Spotify in the morning (Round 93) on the phone: the alarm that, at the
+/// Spotify in the morning on the phone: the alarm that, at the
 /// set time, sets the music volume and presses play. Android keeps it
 /// (and sets the next one each time it plays, and after a restart), so it
 /// plays with the app closed.

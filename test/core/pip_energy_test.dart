@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/pip_energy.dart';
 
-/// Pip's energy and sleep (Round 37), worked out from the clock.
+/// Pip's energy and sleep, worked out from the clock.
 void main() {
   DateTime at(int day, int h, [int m = 0]) => DateTime(2026, 10, day, h, m);
 
@@ -16,11 +16,11 @@ void main() {
   });
 
   group('energy used', () {
-    test('awake: a segment every 4 hours (Round 58)', () {
+    test('awake: a segment every 4 hours', () {
       expect(PipEnergy.usedBetween(at(14, 9), at(14, 13)), closeTo(1, 1e-9));
     });
 
-    test('asleep: much slower, a segment every 18 hours (Round 58)', () {
+    test('asleep: much slower, a segment every 18 hours', () {
       expect(
           PipEnergy.usedBetween(at(14, 23), at(15, 8)), closeTo(9 / 18, 1e-9));
     });
@@ -32,7 +32,7 @@ void main() {
     });
 
     test(
-        'a day (Round 58): about 4.25 segments, a little less than the '
+        'a day: about 4.25 segments, a little less than the '
         'batteries bring', () {
       final day = PipEnergy.usedBetween(at(14, 9), at(15, 9));
       expect(day, closeTo(15 / 4 + 9 / 18, 1e-9));
@@ -72,7 +72,7 @@ void main() {
   });
 
   test(
-      'batteries on the clock (Round 45): every 5 hours, piling up while '
+      'batteries on the clock: every 5 hours, piling up while '
       'away, at most 3', () {
     final next = at(14, 12);
     expect(PipEnergy.nextBattery(at(14, 7)), next);

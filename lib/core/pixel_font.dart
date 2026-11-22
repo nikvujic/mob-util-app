@@ -1,4 +1,4 @@
-/// The app's own pixel letters (Round 34): 3 x 5, drawn on Pip's pixel
+/// The app's own pixel letters: 3 x 5, drawn on Pip's pixel
 /// grid so they stay crisp (a font file blurs at this size). A to Z (small
 /// ones shown as capitals), 0 to 9 and a few signs; anything else shows as
 /// a question mark. A letter is 3 pixels wide with 1 between letters.

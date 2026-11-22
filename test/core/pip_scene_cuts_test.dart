@@ -11,7 +11,7 @@ import 'package:the_app/widgets/pip_room.dart';
 
 import '../helpers.dart';
 
-/// Round 134: no cuts between his places while he's watched: run out at
+/// No cuts between his places while he's watched: run out at
 /// his work he falls there and gets up there; his work over, he walks
 /// back onto his field; into and out of his house through its door.
 void main() {
@@ -64,7 +64,7 @@ void main() {
     expect(brain.questView!.place, QuestScenePlace.mine);
   });
 
-  /// Round 141: his work over, seen, at [place]: he walks off it (its
+  /// His work over, seen, at [place]: he walks off it (its
   /// left edge, the way home) first, still there, never cut away.
   void walksOff(PipBrain brain, QuestScenePlace place) {
     expect(brain.activity, PipActivity.questing, reason: 'still there');
@@ -111,7 +111,7 @@ void main() {
 
   test(
       'his work over with his house next (20:30, it built), seen: in at '
-      'its door, not onto his field and round again (Round 136)', () {
+      'its door, not onto his field and round again', () {
     final brain = up();
     final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
     brain.quest((at: q.at(q.startOf(mine) + 1), seconds: 100));
@@ -178,7 +178,7 @@ void main() {
   });
 
   test(
-      'Round 141: off at the mine, a battery, his work over by then: he '
+      'off at the mine, a battery, his work over by then: he '
       'gets up there and walks off it, not cut to his field', () {
     final brain = up();
     final mine = q.steps.indexWhere((s) => s.action == QuestAction.gather);
@@ -196,8 +196,7 @@ void main() {
             'edge');
   });
 
-  test('Round 141: his work over at the house area, seen: down, and off it',
-      () {
+  test('his work over at the house area, seen: down, and off it', () {
     final brain = up();
     final high = q.steps.indexWhere((s) => s.piece?.id == 'rafters');
     brain.quest((at: q.at(q.startOf(high) + 2), seconds: 150.0));

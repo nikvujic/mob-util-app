@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:the_app/models/internet.dart';
 
-/// Why the weather couldn't be had (Round 70): no connection, or an
+/// Why the weather couldn't be had: no connection, or an
 /// answer that made no sense.
 class WeatherFailure implements Exception {
   final String message;
@@ -15,7 +15,7 @@ class WeatherFailure implements Exception {
   String toString() => message;
 }
 
-/// The weather service (Round 70): Open-Meteo, free and with no key or
+/// The weather service: Open-Meteo, free and with no key or
 /// account. Only used once the weather is turned on in Internet Access.
 abstract class WeatherApi {
   /// Places called [name] (a city, a town), the likeliest first; none if
@@ -30,7 +30,7 @@ abstract class WeatherApi {
 class OpenMeteoApi implements WeatherApi {
   static const timeout = Duration(seconds: 12);
 
-  /// What's asked for now: the sky, the temperature, and (Round 79) the
+  /// What's asked for now: the sky, the temperature, and the
   /// wind, which [parseReport] reads.
   static const currentFields = 'weather_code,temperature_2m,wind_speed_10m';
 
@@ -88,7 +88,7 @@ Future<Map<String, dynamic>> getJson(
   }
 }
 
-/// Round 106: the rain radar, with his own key: whether it's
+/// The rain radar, with his own key: whether it's
 /// raining or snowing now, which a forecast model (Open-Meteo's) can
 /// miss. Optional; without a key the weather is Open-Meteo's alone.
 abstract class RadarApi {
@@ -186,7 +186,7 @@ WeatherReport parseReport(
   if (code is! num || temperature is! num) {
     throw const WeatherFailure('The weather service made no sense');
   }
-  // Round 79: the wind (km/h), if it came; it isn't needed.
+  // The wind (km/h), if it came; it isn't needed.
   final wind = current['wind_speed_10m'];
   return WeatherReport(
     placeId: place.id,

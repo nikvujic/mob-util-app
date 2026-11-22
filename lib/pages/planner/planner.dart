@@ -43,7 +43,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   /// The day shown; null means today (also after midnight passes).
   DateTime? _day;
 
-  /// A notification tapped (Round 19): the minute to scroll to, and a
+  /// A notification tapped: the minute to scroll to, and a
   /// count that makes the timeline open there afresh each time.
   int? _goTo;
   int _jumps = 0;
@@ -125,7 +125,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   }
 
   /// Adds a task in free [slot] on [day]: near [at] (the minute tapped,
-  /// down to :00 or :30, Round 14), else as below.
+  /// down to :00 or :30), else as below.
   Future<void> _addIn(DateTime day, FreeSlot slot, {int? at}) async {
     // Today, in free time that's going on now: start at the next full hour
     // rather than at the (past) start of the free time.
@@ -281,7 +281,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     }
   }
 
-  /// Round 83: moves [task] to a picked day (the next one first:
+  /// Moves [task] to a picked day (the next one first:
   /// tomorrow for a missed one), at its time if that's free there, else
   /// the nearest free time as long, after saying so. Undo moves it back.
   Future<void> _move(PlannerTask task) async {
@@ -343,7 +343,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   static String _span(TimeSpan span) =>
       '${formatMinutes(span.start)}–${formatMinutes(span.end)}';
 
-  /// A block ticked off (or back). Round 78: ticked off on a past day,
+  /// A block ticked off (or back). Ticked off on a past day,
   /// it's deleted at once, as the past's done blocks are (Undo puts it
   /// back, not done).
   void _tick(PlannerTask task) {
@@ -547,7 +547,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
   /// Adds a reminder (P14) on [day]: today from the next full hour,
   /// other days from 09:00.
   /// Adds a reminder on [day]: at [at] (tapped on the timeline's edge,
-  /// down to 15 minutes, Round 14), else today from the next full hour,
+  /// down to 15 minutes), else today from the next full hour,
   /// other days from 09:00.
   Future<void> _addPin(DateTime day, {int? at}) async {
     final now = _now;
@@ -582,7 +582,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     done ? _pinDone(pin) : await _editPin(pin);
   }
 
-  /// The bell button (Round 70): every reminder, the next first, to look
+  /// The bell button: every reminder, the next first, to look
   /// over, delete several, or add one ([day]'s); with none yet, straight
   /// to adding one.
   Future<void> _reminders(DateTime day) async {
@@ -670,7 +670,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final tasks = all.where((t) => isSameDay(t.day, day)).toList();
     final timed = tasks.where((t) => t.hasTime).toList();
     final untimed = tasks.where((t) => !t.hasTime).toList();
-    // P8; Round 78: not on past days (they're just there, nothing to
+    // P8; not on past days (they're just there, nothing to
     // tick off).
     final routines = day.isBefore(today)
         ? const <RoutineOccurrence>[]
@@ -708,7 +708,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
           color: BlockColor.fromName(o.routine.color),
           reminds: o.routine.remind != null,
           description: o.routine.description,
-          // Round 78: no box to tick (they're just there).
+          // No box to tick (they're just there).
           onTap: selecting ? () {} : () => _routineTapped(o),
         ),
     ];
@@ -736,7 +736,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                   selection: _selection,
                 ),
               Expanded(
-                // Reach mode too (Round 14): pulled down at 00:00, the
+                // Reach mode too: pulled down at 00:00, the
                 // first hours come into thumb reach, and snap back.
                 child: PullDownList(
                   key: ValueKey(_jumps),
@@ -791,7 +791,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
                 )
               // No + button: free time on the timeline is where tasks are
               // added. Routines have their own screen; reminders (P14) are
-              // listed and added here, outermost (Round 70).
+              // listed and added here, outermost.
               : BottomActions(
                   actions: [
                     BottomAction(

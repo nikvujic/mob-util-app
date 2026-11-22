@@ -25,10 +25,10 @@ void _open(BuildContext context, Widget page) {
   );
 }
 
-/// Packing (Round 94): the lists, as cards with their name and
+/// Packing: the lists, as cards with their name and
 /// how much is packed, in the user's order (the handle moves them). A tap
 /// opens one; holding one selects it (to delete several, asked first).
-/// + makes a new one (Round 95: "New list", back here when done); Default
+/// + makes a new one ("New list", back here when done); Default
 /// sections opens what a new list starts with.
 class PackingPage extends ConsumerStatefulWidget {
   const PackingPage({super.key});

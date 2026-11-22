@@ -12,7 +12,7 @@ import 'package:the_app/widgets/pip_room.dart';
 
 import '../helpers.dart';
 
-/// Round 152: the app brought back (or opened) at 12:38 on him out on his
+/// The app brought back (or opened) at 12:38 on him out on his
 /// adventure since 12:00, the rain learned a moment later (the weather's
 /// fetched once the app's open): he's simply out running, from the first
 /// look; no umbrella going up and down, no looking up, his field's trees
@@ -162,7 +162,7 @@ void main() {
 
   for (final resumed in [true, false]) {
     testWidgets(
-        'Round 155: ${resumed ? 'brought back' : 'opened'} at 12:44 on him '
+        '${resumed ? 'brought back' : 'opened'} at 12:44 on him '
         'asleep since the night, out on his adventure by now, a medicine '
         'due: simply out running, not seen waking or setting off',
         (tester) async {
@@ -237,7 +237,7 @@ void main() {
     });
   }
 
-  // Round 155: whatever his life says when his room's opened (or the
+  // Whatever his life says when his room's opened (or the
   // app's brought back), the first look finds him settled in it: none of
   // the in-betweens (waking, falling asleep, running out, setting off)
   // shown as if they were happening.
@@ -249,7 +249,7 @@ void main() {
         for (final doing in ['nothing', 'out', 'work']) {
           if (now != PipShow.awake && doing != 'nothing') continue;
           testWidgets(
-              'Round 155: ${resumed ? 'brought back' : 'opened'}, '
+              '${resumed ? 'brought back' : 'opened'}, '
               '${was.name} before, ${now.name} now, $doing: settled',
               (tester) async {
             final link = FakePipLink(show: was)

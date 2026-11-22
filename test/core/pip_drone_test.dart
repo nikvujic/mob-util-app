@@ -7,7 +7,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/providers/pip_life_provider.dart';
 
-/// Round 58: off with the phone plugged in, the station's drone charges
+/// Off with the phone plugged in, the station's drone charges
 /// him a segment; his station's segments reach his life.
 void main() {
   PipBrain up({int seed = 3}) => PipBrain(
@@ -136,7 +136,7 @@ void main() {
     });
   });
 
-  group('his life (Round 58)', () {
+  group('his life', () {
     final now = DateTime(2026, 10, 15, 12);
     PipLifeNotifier start(PipLife pip) => PipLifeNotifier(
           AppStorage.inMemory(initialPip: pip),
@@ -198,7 +198,7 @@ void main() {
   });
 
   test(
-      'Round 59: full while charging, he unplugs and goes about; the '
+      'full while charging, he unplugs and goes about; the '
       'station stays; a segment down, he goes back', () {
     final p = up()..segments = 2;
     p.setPlugged(true, animate: false);

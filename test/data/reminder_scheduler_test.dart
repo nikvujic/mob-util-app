@@ -22,7 +22,7 @@ void main() {
         sound: sound,
       );
 
-  test('its kind\'s channel, with its tint (Round 31)', () {
+  test('its kind\'s channel, with its tint', () {
     final plain = NotificationReminderScheduler.detailsFor(
         reminder(ReminderKind.medicine));
     expect(plain.channelId, 'medicine-reminders');
@@ -36,7 +36,7 @@ void main() {
     expect(tinted.importance, plain.importance, reason: 'the rest as before');
   });
 
-  test('each sound its own channel; silent plays none (Round 31)', () {
+  test('each sound its own channel; silent plays none', () {
     final phone = NotificationReminderScheduler.detailsFor(
         reminder(ReminderKind.planner));
     expect(phone.channelId, 'planner-reminders', reason: 'as before');
@@ -50,7 +50,7 @@ void main() {
         'notify_coin');
     expect(chime.playSound, isTrue);
 
-    // Round 41: quieter, its own copy of the sound and its own channel.
+    // Quieter, its own copy of the sound and its own channel.
     final quiet = NotificationReminderScheduler.detailsFor(
         reminder(ReminderKind.planner, sound: NotifySound.coin)
             .styled(sound: NotifySound.coin, volume: NotifyVolume.quiet));
@@ -86,7 +86,7 @@ void main() {
     }
   });
 
-  test('every kind has its channel (Round 61: Dates had none)', () {
+  test('every kind has its channel (Dates had none)', () {
     final ids = {
       for (final kind in ReminderKind.values)
         NotificationReminderScheduler.detailsFor(reminder(kind)).channelId,
@@ -99,7 +99,7 @@ void main() {
   });
 
   test(
-      'ids from what each reminder is (Round 61): the same plan, the same '
+      'ids from what each reminder is: the same plan, the same '
       'ids; unique within a plan', () {
     Reminder r(String title, int hour) =>
         Reminder(at: DateTime(2026, 10, 13, hour), title: title, body: 'B');

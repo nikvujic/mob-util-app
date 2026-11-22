@@ -10,7 +10,7 @@ Future<String?> showChoicesSheet(
 ) =>
     showModalBottomSheet<String>(
       context: context,
-      // Round 108: as tall as its choices (six relation kinds overflowed
+      // As tall as its choices (six relation kinds overflowed
       // the default nine-sixteenths on a short screen).
       isScrollControlled: true,
       builder: (context) => SafeArea(

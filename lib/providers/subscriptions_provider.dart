@@ -3,8 +3,8 @@ import 'package:the_app/core/clock.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/subscription.dart';
 
-/// Subscriptions (Round 79), saved to `subscriptions.json`. One is saved
-/// as it's edited (upserted); a new one goes last. Round 89: their order
+/// Subscriptions, saved to `subscriptions.json`. One is saved
+/// as it's edited (upserted); a new one goes last. Their order
 /// is the user's, set by dragging their cards.
 class SubscriptionsNotifier extends StateNotifier<SubscriptionBook> {
   SubscriptionsNotifier(AppStorage storage)
@@ -32,7 +32,7 @@ class SubscriptionsNotifier extends StateNotifier<SubscriptionBook> {
     return before;
   }
 
-  /// Round 89: [id] moved to [to]'s place (held and dragged
+  /// [id] moved to [to]'s place (held and dragged
   /// over it), the others shifting; the page shows them in this order.
   void moveTo(String id, int to) {
     final list = [...state.subscriptions];
@@ -50,7 +50,7 @@ final subscriptionsProvider =
   (ref) => SubscriptionsNotifier(ref.watch(appStorageProvider)),
 );
 
-/// The red dot on Subscriptions' tile (Round 79): one to cancel whose day
+/// The red dot on Subscriptions' tile: one to cancel whose day
 /// is within its reminder before.
 final subscriptionsDotProvider = Provider<bool>((ref) {
   final now = ref.watch(clockProvider)();

@@ -13,7 +13,7 @@ import 'package:the_app/providers/session_provider.dart';
 
 import '../helpers.dart';
 
-/// Tapping a notification opens what it's about (Round 19).
+/// Tapping a notification opens what it's about.
 void main() {
   late ProviderContainer container;
   late FakeReminderScheduler scheduler;
@@ -83,7 +83,7 @@ void main() {
   testWidgets('from another page on top, back to the planner', (tester) async {
     await start(tester);
     await openMenu(tester);
-    // Round 70: below Internet Access, scrolled to on a short screen.
+    // Below Internet Access, scrolled to on a short screen.
     await scrollMenuTo(tester, 'Settings');
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
@@ -143,7 +143,7 @@ void main() {
   });
 
   testWidgets(
-      'going elsewhere drops it (Round 21): Hub locked, a medicine '
+      'going elsewhere drops it: Hub locked, a medicine '
       'notification, then Planner and back, unlocked: no Medicine',
       (tester) async {
     await start(tester);

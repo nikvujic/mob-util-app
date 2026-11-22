@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:the_app/core/pip_brain.dart';
 
-/// Where his ski trip's bus is (Round 67).
+/// Where his ski trip's bus is.
 enum BusPhase {
   /// The bus drives in and stops (he's waiting beside where it stops).
   pullingIn,
@@ -29,7 +29,7 @@ enum BusPhase {
   done,
 }
 
-/// His ski trip's bus ride as it's drawn (Round 67, the spec's 8.6): the
+/// His ski trip's bus ride as it's drawn (the spec's 8.6): the
 /// bus in the middle of his room and him in a window while the road and
 /// what's beside it move past; setting off and arriving, seen.
 class PipBus {
@@ -47,7 +47,7 @@ class PipBus {
   double busX = 0;
   double _pipX;
 
-  // Round 72: bigger, him a passenger behind a window.
+  // Bigger, him a passenger behind a window.
   static const width = 92;
   static const height = 36;
   static const roadSpeed = 30.0;

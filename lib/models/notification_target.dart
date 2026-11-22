@@ -1,4 +1,4 @@
-/// Where a notification leads when it's tapped (Round 19): the planner at
+/// Where a notification leads when it's tapped: the planner at
 /// a day and a time (a block, a routine or a reminder), the medicine
 /// page, or Backup. Carried in the notification as a short text ([payload]).
 sealed class NotificationTarget {
@@ -101,7 +101,7 @@ class BackupTarget extends NotificationTarget {
   String toString() => 'BackupTarget()';
 }
 
-/// The Subscriptions page (Round 79: a subscription's reminder).
+/// The Subscriptions page (a subscription's reminder).
 class SubscriptionsTarget extends NotificationTarget {
   const SubscriptionsTarget();
 
@@ -112,7 +112,7 @@ class SubscriptionsTarget extends NotificationTarget {
   String toString() => 'SubscriptionsTarget()';
 }
 
-/// The Dates page (Round 57: a date's reminder).
+/// The Dates page (a date's reminder).
 class DatesTarget extends NotificationTarget {
   const DatesTarget();
 
@@ -123,7 +123,7 @@ class DatesTarget extends NotificationTarget {
   String toString() => 'DatesTarget()';
 }
 
-/// A block or routine that's on now (Round 72): tapped, the planner at
+/// A block or routine that's on now: tapped, the planner at
 /// it; its Done button ([done]) ticks it off too.
 class PlannerNowTarget extends NotificationTarget {
   /// A routine (ticked on [day]), else a block (a planner task).

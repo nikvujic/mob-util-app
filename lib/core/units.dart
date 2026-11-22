@@ -1,10 +1,10 @@
-/// The unit converter (Round 118): pairs of units, each way, in groups.
+/// The unit converter: pairs of units, each way, in groups.
 /// Nothing is stored; the page only shows them.
 class UnitPair {
   final String left;
   final String right;
 
-  /// Their names, for those who don't know "lb" (Round 119).
+  /// Their names, for those who don't know "lb".
   final String leftName;
   final String rightName;
 
@@ -35,7 +35,7 @@ class UnitGroup {
   const UnitGroup(this.title, this.pairs);
 }
 
-/// The converter's units (Round 119's order: temperature, length,
+/// The converter's units (in order: temperature, length,
 /// weight, volume, speed, then cooking). US cups, spoons and gallons.
 final unitGroups = [
   UnitGroup('Temperature', [
@@ -83,7 +83,7 @@ double? parseAmount(String text) {
   return double.tryParse(t);
 }
 
-/// Round 154: at most two decimals, typed or converted.
+/// At most two decimals, typed or converted.
 const maxDecimals = 2;
 
 /// A converted number, shown short: up to [maxDecimals] decimals, no

@@ -16,7 +16,7 @@ import 'package:the_app/providers/session_provider.dart';
 
 import '../helpers.dart';
 
-/// Automatic backup (Round 39): once a day into a folder picked once.
+/// Automatic backup: once a day into a folder picked once.
 void main() {
   late ProviderContainer container;
   late FakeBackupFolder folder;

@@ -14,8 +14,8 @@ import 'package:the_app/providers/packing_provider.dart';
 
 import '../helpers.dart';
 
-/// Round 94: packing lists, things under sections, a count,
-/// ticks. Round 95: each list has its own sections (at least one; Other
+/// Packing lists, things under sections, a count,
+/// ticks. Each list has its own sections (at least one; Other
 /// is like any other), the defaults are what a new one starts with.
 void main() {
   const documents = PackingSection(id: 'documents', name: 'Documents');
@@ -69,7 +69,7 @@ void main() {
       expect(PackingItem.fromJson(const {'id': 'x', 'count': 500}).count, 99);
     });
 
-    test("Round 94's lists (no sections of their own) get the shared ones", () {
+    test("older lists (no sections of their own) get the shared ones", () {
       final book = PackingBook.fromJson({
         'sections': [for (final s in sections) s.toJson()],
         'lists': [
