@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.10.1] - 2026-11-23
+
+### Changed
+- **People**: back with someone open closes them first, back to the
+  board; back again leaves the page. While editing, it asks Save or
+  Discard as before.
+
 ## [2.10.0] - 2026-11-23
 
 ### Added

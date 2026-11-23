@@ -476,10 +476,17 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
         ],
       ),
     );
+    // Back closes the person first (to the board), then leaves the
+    // page; while editing, as on other pages (Save or Discard).
     return PopScope(
-      canPop: !_editing,
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _back();
+        if (didPop) return;
+        if (_editing) {
+          _back();
+        } else {
+          widget.onClose();
+        }
       },
       child: Column(
         children: [

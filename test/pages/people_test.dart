@@ -281,6 +281,8 @@ void main() {
 
     // In Dates: the People mark, the fields locked, no Delete.
     await tapKey(tester, 'personDone');
+    await tester.pageBack(); // Ivan closed, the board
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Dates'));
@@ -747,5 +749,20 @@ void main() {
     expect(add.height, greaterThanOrEqualTo(36), reason: 'not squashed');
     expect(add.bottom, lessThanOrEqualTo(screen.height - 48),
         reason: 'above the navigation bar');
+  });
+
+  testWidgets(
+      'back with someone open closes them (the board again), then leaves '
+      'the page', (tester) async {
+    await openPeople(tester, people: family);
+    await tester.tap(find.byKey(const Key('person-a')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('personHeader')), findsOneWidget);
+    await pressBack(tester);
+    expect(find.byKey(const Key('personHeader')), findsNothing,
+        reason: 'closed');
+    expect(appBarTitle('People'), findsOneWidget, reason: 'still on People');
+    await pressBack(tester);
+    expect(appBarTitle('People'), findsNothing, reason: 'out of People');
   });
 }
