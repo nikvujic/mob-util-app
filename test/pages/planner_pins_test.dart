@@ -397,6 +397,14 @@ void main() {
       expect(find.bySemanticsLabel('Reminder: Alone at 14:00'), findsOneWidget);
 
       final strip = find.byKey(Key('pinStrip-${idOf('Alone')}'));
+      // Centred on its time, where its mark is.
+      expect(
+          tester.getCenter(strip).dy,
+          moreOrLessEquals(
+              tester
+                  .getCenter(find.bySemanticsLabel('Reminder: Alone at 14:00'))
+                  .dy,
+              epsilon: 1));
       await tester.ensureVisible(strip);
       await tester.pumpAndSettle();
       await tester.tap(strip);

@@ -18,7 +18,9 @@ void main() {
       final not = side.resolve({})!;
       expect(picked.color, palette.accentForeground ?? palette.accent,
           reason: choice.name);
-      expect(picked.width, greaterThan(not.width));
+      // As wide as an unpicked one's: picking one never makes it wider
+      // (at the end of a row, it moved onto the next).
+      expect(picked.width, not.width);
       expect(not.color, palette.divider);
     }
   });

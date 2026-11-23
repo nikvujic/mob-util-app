@@ -660,6 +660,7 @@ class _ShowBarcodePageState extends ConsumerState<ShowBarcodePage> {
                                     picture: DocPicture(item.barcode!),
                                     cacheWidth: 2000,
                                     fit: BoxFit.contain,
+                                    background: ViewerColours.paper,
                                   ),
                           ),
                         ),

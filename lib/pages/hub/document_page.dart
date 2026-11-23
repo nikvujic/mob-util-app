@@ -634,6 +634,7 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
                                   picture: DocPicture(code),
                                   cacheWidth: 800,
                                   fit: BoxFit.contain,
+                                  background: ViewerColours.paper,
                                 ),
                         ),
                       ),

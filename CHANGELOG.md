@@ -6,6 +6,22 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.11.1] - 2026-11-23
+
+### Fixed
+- **Chips** (everywhere): picking one no longer makes it wider, so it no
+  longer jumps onto the next row (its border was thicker when picked).
+- **Routines**: opened late in the day, the timeline starts at its end
+  at once, instead of opening past it and sliding back.
+- **Barcode shown**: switching between drawn and photo no longer
+  flashes a black box (the photo's placeholder took the dark theme's
+  background).
+
+### Changed
+- **A reminder's short block** on the timeline is centred on its time,
+  where its bell is, and has the same straight stripe down its left as a
+  block. Whether there's room for it is measured around its time too.
+
 ## [2.11.0] - 2026-11-23
 
 ### Added

@@ -297,15 +297,16 @@ class PlannerTimeline extends StatelessWidget {
     final shown = <int>{};
     for (final (i, group) in groups.indexed) {
       if (group.length != 1) continue;
-      final top = _y(group.single.time);
+      // Centred on its time, as its mark is.
+      final top = _y(group.single.time) - _PinStrip.height / 2;
       final bottom = top + _PinStrip.height;
       final blocked =
           blocks.any((b) => _y(b.start) < bottom + 2 && _y(b.end) > top - 2);
       // Another reminder near it, before or after: marks only, both.
       final crowded = groups.indexed.any((g) =>
           g.$1 != i &&
-          (_y(g.$2.first.time) - top).abs() <
-              _PinStrip.height + _PinMark.apart / 2);
+          (_y(g.$2.first.time) - _y(group.single.time)).abs() <
+              _PinStrip.height / 2 + _PinMark.apart);
       if (!blocked && !crowded) shown.add(i);
     }
     return shown;
@@ -383,7 +384,7 @@ class PlannerTimeline extends StatelessWidget {
           for (final (i, group) in groups.indexed)
             if (stripped.contains(i))
               Positioned(
-                top: _y(group.single.time),
+                top: _y(group.single.time) - _PinStrip.height / 2,
                 height: _PinStrip.height,
                 left: _labelWidth,
                 right: 8,
@@ -794,8 +795,8 @@ class _Block extends StatelessWidget {
   }
 }
 
-/// A reminder (P14) where nothing else is: a short see-through block at
-/// its time (its top edge), with a bell, its title and time. Tapped, its
+/// A reminder (P14) where nothing else is: a short see-through block
+/// centred on its time, with a bell, its title and time. Tapped, its
 /// mark's menu.
 class _PinStrip extends StatelessWidget {
   static const height = 32.0;
@@ -814,36 +815,37 @@ class _PinStrip extends StatelessWidget {
         key: Key('pinStrip-${pin.id}'),
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
+        // As a block: rounded, its stripe straight down its left edge.
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
             color: colors.accent.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(6),
-            border: Border(
-              left: BorderSide(color: colors.accent, width: 3),
+            padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+            foregroundDecoration: BoxDecoration(
+              border: Border(left: BorderSide(color: colors.accent, width: 4)),
             ),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.notifications_none, size: 16, color: colors.accent),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  pin.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+            child: Row(
+              children: [
+                Icon(Icons.notifications_none, size: 16, color: colors.accent),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    pin.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                formatMinutes(pin.time),
-                style: TextStyle(color: colors.textSecondary, fontSize: 12),
-              ),
-            ],
+                Text(
+                  formatMinutes(pin.time),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
           ),
         ),
       ),

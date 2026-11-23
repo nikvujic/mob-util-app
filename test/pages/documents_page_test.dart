@@ -1,3 +1,4 @@
+import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/core/picture_crop.dart';
 import 'package:barcode/barcode.dart' as bc;
@@ -793,6 +794,13 @@ void main() {
       expect(find.byKey(const Key('drawnCode-ean13')), findsOneWidget);
       expect(find.byKey(const Key('drawnCodeText')), findsOneWidget);
       await tester.tap(find.byKey(const Key('barcodeToggle')));
+      await tester.pump();
+      // Its photo while it's read: white, as the page (not the theme's
+      // background, which flashed black in the dark theme).
+      for (final box in tester.widgetList<ColoredBox>(
+          find.byKey(const Key('docThumbPlaceholder')))) {
+        expect(box.color, ViewerColours.paper);
+      }
       await tester.pumpAndSettle();
       expect(saved().showPhoto, isTrue);
       expect(find.byKey(const Key('drawnCode-ean13')), findsNothing);

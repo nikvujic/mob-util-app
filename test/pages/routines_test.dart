@@ -480,4 +480,29 @@ void main() {
       expect(find.byKey(const Key('timeClash')), findsOneWidget);
     });
   });
+
+  testWidgets(
+      'opened late in the day: the timeline starts at its end, never past '
+      'it (it opened past it, then scrolled back in sight)', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.reset);
+    container =
+        await pumpApp(tester, clock: () => DateTime(2026, 10, 8, 23, 30));
+    await openTab(tester, 'Planner');
+    await tester.tap(find.byTooltip('Routines'));
+    final routines = find.byWidgetPredicate(
+        (w) => w is PlannerTimeline && w.adds == 'a routine');
+    var frames = 0;
+    for (var f = 0; f < 40; f++) {
+      await tester.pump(const Duration(milliseconds: 25));
+      final s = find.ancestor(of: routines, matching: find.byType(Scrollable));
+      if (s.evaluate().isEmpty) continue;
+      final p = tester.state<ScrollableState>(s.first).position;
+      expect(p.pixels, lessThanOrEqualTo(p.maxScrollExtent + 0.5),
+          reason: 'frame $f');
+      frames++;
+    }
+    expect(frames, greaterThan(10));
+  });
 }

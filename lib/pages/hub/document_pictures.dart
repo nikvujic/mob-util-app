@@ -13,11 +13,17 @@ class DocThumb extends ConsumerWidget {
   final int cacheWidth;
   final BoxFit fit;
 
+  /// The placeholder's colour while it's read, or null for the theme's
+  /// background with an icon. On a barcode's white page, white (the
+  /// theme's dark background flashed black there).
+  final Color? background;
+
   const DocThumb({
     super.key,
     required this.picture,
     this.cacheWidth = 240,
     this.fit = BoxFit.cover,
+    this.background,
   });
 
   @override
@@ -25,8 +31,10 @@ class DocThumb extends ConsumerWidget {
     final colors = context.colors;
     final placeholder = ColoredBox(
       key: const Key('docThumbPlaceholder'),
-      color: colors.background,
-      child: Center(child: Icon(Icons.image_outlined, color: colors.textHint)),
+      color: background ?? colors.background,
+      child: background != null
+          ? const SizedBox.expand()
+          : Center(child: Icon(Icons.image_outlined, color: colors.textHint)),
     );
     final bytes = ref.watch(documentPictureProvider(picture.id)).valueOrNull;
     if (bytes == null) return placeholder;

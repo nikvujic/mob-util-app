@@ -213,7 +213,7 @@ class _PullDownListState extends State<PullDownList> {
       builder: (context, box) {
         final top =
             _top ??= (box.maxHeight * widget.reachShare).floorToDouble();
-        final controller = _controller ??= ScrollController(
+        final controller = _controller ??= _OpeningController(
           initialScrollOffset: top + widget.initialOffset,
         );
         return NotificationListener<ScrollNotification>(
@@ -256,6 +256,50 @@ class _PullDownListState extends State<PullDownList> {
         );
       },
     );
+  }
+}
+
+/// A list's controller whose start ([initialScrollOffset]) is kept to
+/// the list: asked to open further down than it goes (the timeline late
+/// in the day), it opens at its end, rather than past it and then
+/// scrolling back there in sight.
+class _OpeningController extends ScrollController {
+  _OpeningController({super.initialScrollOffset});
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) =>
+      _OpeningPosition(
+        physics: physics,
+        context: context,
+        initialPixels: initialScrollOffset,
+        oldPosition: oldPosition,
+        debugLabel: debugLabel,
+      );
+}
+
+class _OpeningPosition extends ScrollPositionWithSingleContext {
+  _OpeningPosition({
+    required super.physics,
+    required super.context,
+    super.initialPixels,
+    super.oldPosition,
+    super.debugLabel,
+  });
+
+  bool _placed = false;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // Once, on its first layout: within the list from the start.
+    if (!_placed) {
+      _placed = true;
+      if (pixels > maxScrollExtent) correctPixels(maxScrollExtent);
+    }
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
   }
 }
 

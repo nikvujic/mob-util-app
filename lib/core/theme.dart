@@ -374,7 +374,9 @@ abstract final class AppTheme {
           (states) => states.contains(WidgetState.selected)
               ? BorderSide(
                   color: palette.accentForeground ?? palette.accent, width: 1.5)
-              : BorderSide(color: palette.divider),
+              // As wide as a picked one's: picking one doesn't make it
+              // wider (it moved onto the next row at the end of one).
+              : BorderSide(color: palette.divider, width: 1.5),
         ),
         labelStyle: TextStyle(color: palette.textPrimary),
         secondaryLabelStyle: TextStyle(color: palette.textPrimary),

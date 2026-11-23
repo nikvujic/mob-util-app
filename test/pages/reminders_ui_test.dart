@@ -103,9 +103,16 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
+    // Picked, a chip keeps its width (with a tick it grew, and moved
+    // onto the next row).
     await chip('remind-0'); // At start off
     await chip('remind-1440');
+    await tester.ensureVisible(find.byKey(const Key('remind-120')));
+    await tester.pumpAndSettle();
+    final before = tester.getRect(find.byKey(const Key('remind-120')));
     await chip('remind-120');
+    final after = tester.getRect(find.byKey(const Key('remind-120')));
+    expect((after.left, after.width), (before.left, before.width));
     await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
     expect(container.read(plannerProvider).single.reminds, [120, 1440]);
