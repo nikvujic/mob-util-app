@@ -179,6 +179,16 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
   void setSubscriptionsReminders(bool on) =>
       state = state.copyWith(subscriptionsReminders: on);
 
+  /// Documents' notifications on or off.
+  void setDocumentsReminders(bool on) =>
+      state = state.copyWith(documentsReminders: on);
+
+  /// Pauses the documents' notifications through [day]; null resumes.
+  void pauseDocumentsUntil(DateTime? day) => state = state.copyWith(
+        documentsPausedUntil: () =>
+            day == null ? null : DateTime(day.year, day.month, day.day),
+      );
+
   /// Pauses the subscriptions' notifications through [day]; null resumes.
   void pauseSubscriptionsUntil(DateTime? day) => state = state.copyWith(
         subscriptionsPausedUntil: () =>

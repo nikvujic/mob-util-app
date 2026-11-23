@@ -6,6 +6,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/notification_target.dart';
+import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/notify_settings.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
@@ -14,6 +15,8 @@ import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/backup_reminder_provider.dart';
 import 'package:the_app/providers/dates_alerts_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
+import 'package:the_app/providers/document_alerts_provider.dart';
+import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/providers/medicine_alerts_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
 import 'package:the_app/providers/notification_log_provider.dart';
@@ -21,6 +24,7 @@ import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/subscriptions_alerts_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
 
@@ -159,6 +163,8 @@ class ReminderPlanner {
     _ref.listen(medicineProvider, (_, __) => _soon());
     _ref.listen(datesProvider, (_, __) => _soon());
     _ref.listen(subscriptionsProvider, (_, __) => _soon());
+    _ref.listen(documentsProvider, (_, __) => _soon());
+    _ref.listen(pageLocksProvider, (_, __) => _soon());
     // Whether notifications are allowed, known for the history.
     _ref.listen(notificationsAllowedProvider, (_, __) {});
     _ref.listen(preferencesProvider, (before, after) {
@@ -172,6 +178,8 @@ class ReminderPlanner {
           before.datesPausedUntil != after.datesPausedUntil ||
           before.subscriptionsReminders != after.subscriptionsReminders ||
           before.subscriptionsPausedUntil != after.subscriptionsPausedUntil ||
+          before.documentsReminders != after.documentsReminders ||
+          before.documentsPausedUntil != after.documentsPausedUntil ||
           !_sameStyles(before.notifyStyles, after.notifyStyles) ||
           before.backupDueAt != after.backupDueAt ||
           before.lastBackupAt != after.lastBackupAt) {
@@ -266,6 +274,15 @@ class ReminderPlanner {
         days: reminderDays,
         hideNames: private(NotifyPage.subscriptions),
       ),
+      ...planDocumentReminders(
+        now: now,
+        book: _ref.read(documentsProvider),
+        preferences: preferences,
+        days: reminderDays,
+        // Locked, its names stay inside it.
+        hideNames: private(NotifyPage.documents) ||
+            _ref.read(pageLocksProvider).contains(HubTool.documents),
+      ),
       ...planBackupReminders(
         now: now,
         preferences: preferences,
@@ -300,6 +317,7 @@ final clearShownProvider = Provider<Future<void> Function(NotifyPage?)>(
           NotifyPage.backup => ReminderKind.backup,
           NotifyPage.dates => ReminderKind.dates,
           NotifyPage.subscriptions => ReminderKind.subscriptions,
+          NotifyPage.documents => ReminderKind.documents,
         },
       ),
 );
@@ -311,6 +329,7 @@ NotifyPage? pageOf(ReminderKind kind) => switch (kind) {
       ReminderKind.backup => NotifyPage.backup,
       ReminderKind.dates => NotifyPage.dates,
       ReminderKind.subscriptions => NotifyPage.subscriptions,
+      ReminderKind.documents => NotifyPage.documents,
       ReminderKind.notice => null,
     };
 

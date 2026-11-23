@@ -47,6 +47,10 @@ class Preferences {
   final bool subscriptionsReminders;
   final DateTime? subscriptionsPausedUntil;
 
+  /// Documents' notifications: on, and paused through a day.
+  final bool documentsReminders;
+  final DateTime? documentsPausedUntil;
+
   /// Spotify in the morning.
   final MorningMusic morningMusic;
 
@@ -148,6 +152,8 @@ class Preferences {
     this.datesSeenOn,
     this.subscriptionsReminders = true,
     this.subscriptionsPausedUntil,
+    this.documentsReminders = true,
+    this.documentsPausedUntil,
     this.morningMusic = MorningMusic.initial,
     this.notifyStyles = const {},
     this.introDeleted = false,
@@ -230,6 +236,9 @@ class Preferences {
   bool subscriptionsPausedOn(DateTime day) =>
       _pausedOn(subscriptionsPausedUntil, day);
 
+  /// Whether the documents' notifications are paused on [day].
+  bool documentsPausedOn(DateTime day) => _pausedOn(documentsPausedUntil, day);
+
   static bool _pausedOn(DateTime? until, DateTime day) =>
       until != null && !DateTime(day.year, day.month, day.day).isAfter(until);
 
@@ -252,6 +261,8 @@ class Preferences {
     DateTime? Function()? datesSeenOn,
     bool? subscriptionsReminders,
     DateTime? Function()? subscriptionsPausedUntil,
+    bool? documentsReminders,
+    DateTime? Function()? documentsPausedUntil,
     MorningMusic? morningMusic,
     Map<NotifyPage, NotifyStyle>? notifyStyles,
     bool? introDeleted,
@@ -302,6 +313,10 @@ class Preferences {
         subscriptionsPausedUntil: subscriptionsPausedUntil == null
             ? this.subscriptionsPausedUntil
             : subscriptionsPausedUntil(),
+        documentsReminders: documentsReminders ?? this.documentsReminders,
+        documentsPausedUntil: documentsPausedUntil == null
+            ? this.documentsPausedUntil
+            : documentsPausedUntil(),
         morningMusic: morningMusic ?? this.morningMusic,
         notifyStyles: notifyStyles ?? this.notifyStyles,
         introDeleted: introDeleted ?? this.introDeleted,
@@ -354,6 +369,9 @@ class Preferences {
           'datesPausedUntil': PlannerTask.dayToJson(datesPausedUntil!),
         if (datesSeenOn != null)
           'datesSeenOn': PlannerTask.dayToJson(datesSeenOn!),
+        if (!documentsReminders) 'documentsReminders': false,
+        if (documentsPausedUntil != null)
+          'documentsPausedUntil': PlannerTask.dayToJson(documentsPausedUntil!),
         if (!subscriptionsReminders) 'subscriptionsReminders': false,
         if (subscriptionsPausedUntil != null)
           'subscriptionsPausedUntil':
@@ -417,6 +435,10 @@ class Preferences {
         datesSeenOn: json['datesSeenOn'] == null
             ? null
             : PlannerTask.dayFromJson(json['datesSeenOn']),
+        documentsReminders: json['documentsReminders'] as bool? ?? true,
+        documentsPausedUntil: json['documentsPausedUntil'] == null
+            ? null
+            : PlannerTask.dayFromJson(json['documentsPausedUntil']),
         subscriptionsReminders: json['subscriptionsReminders'] as bool? ?? true,
         subscriptionsPausedUntil: json['subscriptionsPausedUntil'] == null
             ? null

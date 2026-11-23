@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/document_item.dart';
 import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/pages/hub/documents.dart';
 import 'package:the_app/providers/documents_provider.dart';
+import 'package:the_app/providers/section_locks_provider.dart';
+import 'package:the_app/providers/security_provider.dart';
 import 'package:the_app/providers/section_data_provider.dart';
 
 import '../helpers.dart';
@@ -17,15 +21,18 @@ void main() {
   late ProviderContainer container;
   late FakeDocumentCamera camera;
   late FakePhotoGallery gallery;
+  late FakeReminderScheduler scheduler;
 
   Future<void> start(WidgetTester tester,
       {List<DocItem> items = const []}) async {
     camera = FakeDocumentCamera();
     gallery = FakePhotoGallery();
+    scheduler = FakeReminderScheduler();
     container = await pumpApp(tester,
         clock: () => DateTime(2026, 11, 23, 12),
         camera: camera,
-        gallery: gallery);
+        gallery: gallery,
+        reminders: scheduler);
     for (final d in items.reversed) {
       container.read(documentsProvider.notifier).save(d);
     }
@@ -352,5 +359,165 @@ void main() {
       await add(tester, DocKind.document);
       expect(find.byKey(const Key('documentSetBarcode')), findsNothing);
     });
+  });
+
+  group('dates and reminders', () {
+    List<String> ours() => [
+          for (final r in scheduler.scheduled)
+            if (r.kind == ReminderKind.documents)
+              '${r.at.month}/${r.at.day} ${r.title}: ${r.body}',
+        ];
+
+    testWidgets(
+        "a receipt's warranty: from today, until a year or two on by the "
+        'quick buttons; a reminder before it ends', (tester) async {
+      await start(tester);
+      await add(tester, DocKind.receipt);
+      await tester.enterText(find.byKey(const Key('documentName')), 'Washer');
+      await tester.pump();
+      await reveal(tester, find.byKey(const Key('documentWarranty')));
+      await tester.tap(find.byKey(const Key('documentWarranty')));
+      await tester.pumpAndSettle();
+      expect(find.text('From today'), findsOneWidget);
+      await reveal(tester, find.byKey(const Key('documentWarrantyYears-2')));
+      await tester.tap(find.byKey(const Key('documentWarrantyYears-2')));
+      await tester.pumpAndSettle();
+      final saved = book().items.single;
+      expect((saved.warranty, saved.warrantyFrom, saved.warrantyTo),
+          (true, DateTime(2026, 11, 23), DateTime(2028, 11, 23)));
+      await tester.tap(find.byKey(const Key('documentWarrantyYears-1')));
+      await tester.pumpAndSettle();
+      expect(book().items.single.warrantyTo, DateTime(2027, 11, 23));
+
+      await reveal(tester, find.byKey(const Key('documentRemind-month')));
+      await tester.tap(find.byKey(const Key('documentRemind-month')));
+      await tester.pumpAndSettle();
+      expect(book().items.single.remind, DocRemind.month);
+      await leaveSaved(tester);
+      expect(find.text('Warranty until 23 Nov 2027'), findsOneWidget);
+    });
+
+    testWidgets(
+        "an expiry's reminder comes before it, at 09:00; private or the "
+        'page locked, without its name', (tester) async {
+      await start(tester, items: [
+        DocItem(
+          id: 'p',
+          kind: DocKind.document,
+          name: 'Passport',
+          expires: DateTime(2026, 12, 1),
+          remind: DocRemind.week,
+          createdAt: DateTime(2026, 11, 1),
+        ),
+      ]);
+      await tester.pumpAndSettle();
+      expect(ours(), ['11/24 Passport: Expires in 7 days · 1 Dec 2026']);
+      expect(tester.widget<Text>(find.byKey(const Key('documentDate-p'))).data,
+          'Expires 1 Dec 2026');
+
+      await tester.runAsync(() => container
+          .read(securityProvider.notifier)
+          .setPassword('master password'));
+      container.read(pageLocksProvider.notifier).lock(HubTool.documents);
+      await tester.pumpAndSettle();
+      expect(ours(), ['11/24 Documents: A document expires in 7 days']);
+    });
+
+    testWidgets("a ticket's day: reminded on it unless turned off",
+        (tester) async {
+      await start(tester);
+      await add(tester, DocKind.ticket);
+      await reveal(tester, find.byKey(const Key('documentDate')));
+      await tester.tap(find.byKey(const Key('documentDate')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('28'));
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(book().items.single.date, DateTime(2026, 11, 28));
+      expect(book().items.single.remind, DocRemind.onTheDay);
+      await tester.pumpAndSettle();
+      expect(ours(), ['11/28 Ticket: Your ticket is for today']);
+      await reveal(tester, find.byKey(const Key('documentTicketRemind')));
+      await tester.tap(find.byKey(const Key('documentTicketRemind')));
+      await tester.pumpAndSettle();
+      expect(ours(), isEmpty);
+    });
+
+    testWidgets('its own settings on the Notifications page', (tester) async {
+      await start(tester, items: [
+        DocItem(
+          id: 'p',
+          kind: DocKind.document,
+          name: 'Passport',
+          expires: DateTime(2026, 12, 1),
+          remind: DocRemind.week,
+          createdAt: DateTime(2026, 11, 1),
+        ),
+      ]);
+      await pressBack(tester);
+      await openMenu(tester);
+      await tester.tap(find.text('Notifications'));
+      await tester.pumpAndSettle();
+      final private = find.byKey(const Key('notifyPrivate-documents'));
+      await reveal(tester, private);
+      await tester.tap(private);
+      await tester.pumpAndSettle();
+      expect(ours(), ['11/24 Documents: A document expires in 7 days']);
+      final on = find.byKey(const Key('notifyOn-documents'));
+      await reveal(tester, on);
+      await tester.tap(on);
+      await tester.pumpAndSettle();
+      expect(ours(), isEmpty);
+    });
+  });
+
+  test('the date line: its words and colour on a day', () {
+    final today = DateTime(2026, 11, 23);
+    DocItem d(DocKind kind,
+            {DateTime? expires,
+            DateTime? to,
+            DateTime? date,
+            DocRemind remind = DocRemind.none}) =>
+        DocItem(
+            id: 'x',
+            kind: kind,
+            expires: expires,
+            warranty: to != null,
+            warrantyTo: to,
+            date: date,
+            remind: remind,
+            createdAt: today);
+    String line(DocItem item) {
+      final l = documentDateLine(item, today);
+      return l == null ? '-' : '${l.text} (${l.tone.name})';
+    }
+
+    expect(line(d(DocKind.document, expires: DateTime(2031, 3, 3))),
+        'Expires 3 Mar 2031 (plain)');
+    // Within its reminder (or a month, with none): orange.
+    expect(
+        line(d(DocKind.document,
+            expires: DateTime(2026, 12, 1), remind: DocRemind.week)),
+        'Expires 1 Dec 2026 (plain)');
+    expect(
+        line(d(DocKind.document,
+            expires: DateTime(2026, 11, 30), remind: DocRemind.week)),
+        'Expires 30 Nov 2026 (soon)');
+    expect(line(d(DocKind.document, expires: DateTime(2026, 12, 20))),
+        'Expires 20 Dec 2026 (soon)');
+    expect(line(d(DocKind.document, expires: DateTime(2026, 11, 1))),
+        'Expired 1 Nov 2026 (gone)');
+    expect(line(d(DocKind.receipt, to: DateTime(2028, 11, 12))),
+        'Warranty until 12 Nov 2028 (plain)');
+    expect(line(d(DocKind.receipt, to: DateTime(2026, 1, 1))),
+        'Warranty ended (past)');
+    expect(line(d(DocKind.ticket, date: DateTime(2026, 11, 24))),
+        'Tomorrow (soon)');
+    expect(
+        line(d(DocKind.ticket, date: DateTime(2026, 11, 23))), 'Today (soon)');
+    expect(line(d(DocKind.ticket, date: DateTime(2026, 11, 2))),
+        '2 Nov 2026 (past)');
+    expect(line(d(DocKind.barcode)), '-');
+    expect(line(d(DocKind.document)), '-');
   });
 }

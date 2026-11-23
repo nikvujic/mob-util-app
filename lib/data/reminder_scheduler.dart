@@ -21,6 +21,9 @@ enum ReminderKind {
 
   /// A subscription renewing, to cancel, ending.
   subscriptions,
+
+  /// A document expiring, a warranty ending, a ticket's day.
+  documents,
 }
 
 /// A reminder (P10, O13): a notification at [at].
@@ -154,6 +157,16 @@ class NotificationReminderScheduler implements ReminderScheduler {
       'subscriptions-reminders',
       'Subscriptions reminders',
       channelDescription: 'Subscriptions renewing, to cancel, or ending',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    ),
+    // Documents' own.
+    ReminderKind.documents: AndroidNotificationDetails(
+      'documents-reminders',
+      'Documents reminders',
+      channelDescription:
+          'Documents expiring, warranties ending, tickets on their day',
       importance: Importance.high,
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,

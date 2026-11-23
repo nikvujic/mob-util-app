@@ -21,9 +21,11 @@ enum DocKind {
       values.where((k) => k.name == id).firstOrNull ?? document;
 }
 
-/// How long before a date its reminder comes.
+/// How long before a date its reminder comes (a ticket's: [onTheDay] or
+/// none).
 enum DocRemind {
   none('None', 0),
+  onTheDay('On the day', 0),
   week('A week before', 7),
   month('A month before', 30),
   threeMonths('Three months before', 91),
@@ -33,6 +35,9 @@ enum DocRemind {
 
   final String label;
   final int days;
+
+  /// A document's or a warranty's choices (a ticket's is on its day).
+  static const before = [none, week, month, threeMonths, sixMonths];
 
   static DocRemind fromId(String? id) =>
       values.where((r) => r.name == id).firstOrNull ?? none;
@@ -123,7 +128,10 @@ class DocItem {
       note.trim().isEmpty &&
       pictures.isEmpty &&
       shop.trim().isEmpty &&
-      price.trim().isEmpty;
+      price.trim().isEmpty &&
+      expires == null &&
+      date == null &&
+      !warranty;
 
   /// The date its reminder and colour go by: expiry, warranty end, the
   /// ticket's day; null if none.

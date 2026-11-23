@@ -10,7 +10,9 @@ Status: **being built.** Steps 1–3 are done (2.6.0): the plugin check,
 the storage, the zip backups and Android's backup exclusion. Steps 4–5
 (2.7.0): the page, its kinds and form, pictures, the barcode crop and
 Show barcode. Pictures are moved with *Move earlier / later* on holding
-one, rather than a handle on each thumbnail.
+one, rather than a handle on each thumbnail. Step 6 (2.8.0): the dates
+and reminders. Until locking encrypts (step 7), reminders are planned
+from the list itself.
 
 ## Types
 

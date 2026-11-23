@@ -50,6 +50,7 @@ extension HubToolPage on HubTool {
         HubTool.packing => const PackingPage(),
         HubTool.people => const PeoplePage(),
         HubTool.converter => const ConverterPage(),
-        HubTool.documents => const DocumentsPage(),
+        HubTool.documents =>
+          const ClearsShown(page: NotifyPage.documents, child: DocumentsPage()),
       };
 }

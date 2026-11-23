@@ -9,7 +9,10 @@ enum NotifyPage {
   dates('Dates'),
 
   /// Subscriptions: renewing, to cancel, ending.
-  subscriptions('Subscriptions');
+  subscriptions('Subscriptions'),
+
+  /// Documents: expiring, warranties ending, tickets' days.
+  documents('Documents');
 
   final String label;
 

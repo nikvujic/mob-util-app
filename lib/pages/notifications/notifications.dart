@@ -288,6 +288,11 @@ class _PageSettings extends ConsumerWidget {
           'On a subscription\'s day at 09:00 (renewing, to cancel, '
               'ending), and before it if one is set to.',
         ),
+      NotifyPage.documents => (
+          preferences.documentsReminders,
+          'At 09:00 before a document expires or a warranty ends, as each '
+              'is set to remind; a ticket on its day.',
+        ),
     };
     final pausedUntil = switch (page) {
       NotifyPage.planner => preferences.plannerPausedUntil,
@@ -295,6 +300,7 @@ class _PageSettings extends ConsumerWidget {
       NotifyPage.backup => null,
       NotifyPage.dates => preferences.datesPausedUntil,
       NotifyPage.subscriptions => preferences.subscriptionsPausedUntil,
+      NotifyPage.documents => preferences.documentsPausedUntil,
     };
     final paused = pausedUntil != null && !today.isAfter(pausedUntil);
 
@@ -332,6 +338,8 @@ class _PageSettings extends ConsumerWidget {
                 notifier.setDatesReminders(on);
               case NotifyPage.subscriptions:
                 notifier.setSubscriptionsReminders(on);
+              case NotifyPage.documents:
+                notifier.setDocumentsReminders(on);
             }
             if (on) allowNotifications(context, ref);
           },
@@ -379,6 +387,8 @@ class _PageSettings extends ConsumerWidget {
                     notifier.pauseDatesUntil(until);
                   case NotifyPage.subscriptions:
                     notifier.pauseSubscriptionsUntil(until);
+                  case NotifyPage.documents:
+                    notifier.pauseDocumentsUntil(until);
                   case NotifyPage.backup:
                 }
               },
@@ -395,6 +405,8 @@ class _PageSettings extends ConsumerWidget {
                   NotifyPage.dates => 'Without names: "A birthday tomorrow"',
                   NotifyPage.subscriptions =>
                     'Without names: "A subscription renews today"',
+                  NotifyPage.documents =>
+                    'Without names: "A warranty ends in a week"',
                   _ => 'Without names: "A dose is due at 08:00"',
                 },
                 style: muted(),

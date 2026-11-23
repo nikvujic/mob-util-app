@@ -6,6 +6,22 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-11-23
+
+### Added
+- **Documents' dates and reminders**:
+  - A document's **expiry**, a receipt's **warranty** (from today, or a
+    day picked, until a day, or 1 or 2 years on with a tap) and a
+    ticket's **day**.
+  - A reminder at 09:00 a week, a month, three or six months before an
+    expiry or a warranty's end; a ticket on its day (on unless turned
+    off).
+  - Their dates on the cards: orange within the reminder (or a month),
+    red once expired, grey for a warranty ended or a ticket gone by.
+  - Documents' own notifications on the Notifications page (on, pause,
+    private, colour, sound). Private, or the page locked, they say only
+    *A warranty ends in 7 days*.
+
 ## [2.7.0] - 2026-11-23
 
 ### Added

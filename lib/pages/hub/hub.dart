@@ -33,6 +33,7 @@ class HubPage extends ConsumerWidget {
       MedicineTarget() => HubTool.medicine,
       DatesTarget() => HubTool.dates,
       SubscriptionsTarget() => HubTool.subscriptions,
+      DocumentsTarget() => HubTool.documents,
       _ => null,
     };
     if (target != null) {
@@ -42,6 +43,7 @@ class HubPage extends ConsumerWidget {
           MedicineTarget() => HubTool.medicine,
           DatesTarget() => HubTool.dates,
           SubscriptionsTarget() => HubTool.subscriptions,
+          DocumentsTarget() => HubTool.documents,
           _ => null,
         };
         if (!context.mounted || still != target) return;

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/core/format.dart';
 import 'package:the_app/core/id.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/document_item.dart';
@@ -13,6 +14,7 @@ import 'package:the_app/providers/document_pictures_provider.dart';
 import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/widgets/choices_sheet.dart';
 import 'package:the_app/widgets/confirm_dialog.dart';
+import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/widgets/discard_scope.dart';
 import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/pull_down_list.dart';
@@ -40,6 +42,10 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
           DocItem(
             id: generateId(),
             kind: widget.newKind ?? DocKind.document,
+            // A ticket reminds on its day unless turned off.
+            remind: widget.newKind == DocKind.ticket
+                ? DocRemind.onTheDay
+                : DocRemind.none,
             createdAt: ref.read(clockProvider)(),
           );
 
@@ -261,6 +267,210 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
       ));
   }
 
+  DateTime get _today => dayOf(ref.read(clockProvider)());
+
+  /// A day picked (null if cancelled), opening on [value] or today.
+  Future<DateTime?> _pickDay(DateTime? value, {String? help}) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final today = _today;
+    return pickDate(
+      context,
+      today: today,
+      value: value,
+      helpText: help,
+      first: DateTime(today.year - 30),
+      last: DateTime(today.year + 30, 12, 31),
+    );
+  }
+
+  /// [day] moved on by [years] (29 Feb to 28 Feb).
+  static DateTime _yearsOn(DateTime day, int years) {
+    final last = DateTime(day.year + years, day.month + 1, 0).day;
+    return DateTime(
+        day.year + years, day.month, day.day > last ? last : day.day);
+  }
+
+  /// A day's tile: [label], the day (or *Not set*), cleared by its ×.
+  Widget _dayTile({
+    required Key key,
+    required IconData icon,
+    required String label,
+    required DateTime? day,
+    required VoidCallback onTap,
+    VoidCallback? onClear,
+  }) {
+    final colors = context.colors;
+    return ListTile(
+      key: key,
+      leading: Icon(icon),
+      title: Text(label),
+      trailing: day == null
+          ? Text('Not set', style: TextStyle(color: colors.textMuted))
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(formatShortDate(day)),
+                if (onClear != null)
+                  IconButton(
+                    key: Key('${(key as ValueKey<String>).value}Clear'),
+                    tooltip: 'Not set',
+                    icon: const Icon(Icons.close),
+                    onPressed: onClear,
+                  ),
+              ],
+            ),
+      onTap: onTap,
+    );
+  }
+
+  /// How long before its date a reminder comes.
+  Widget _remindChoices() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final r in DocRemind.before)
+              ChoiceChip(
+                key: Key('documentRemind-${r.name}'),
+                label: Text(r.label),
+                selected: _draft.remind == r,
+                onSelected: (_) => _change(_draft.copyWith(remind: r)),
+              ),
+          ],
+        ),
+      );
+
+  Widget _remindNote(String text) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+        child: Text(
+          text,
+          style: TextStyle(color: context.colors.textMuted, fontSize: 12),
+        ),
+      );
+
+  /// The fields of its kind with a date: a document's expiry, a
+  /// receipt's warranty, a ticket's day; and their reminders.
+  List<Widget> _dates(DocItem d) {
+    switch (d.kind) {
+      case DocKind.document:
+        return [
+          _heading('EXPIRY'),
+          _dayTile(
+            key: const ValueKey('documentExpires'),
+            icon: Icons.event_busy_outlined,
+            label: 'Expires',
+            day: d.expires,
+            onTap: () async {
+              final day = await _pickDay(d.expires, help: 'Expires');
+              if (day != null && mounted) {
+                _change(_draft.copyWith(expires: () => day));
+              }
+            },
+            onClear: () => _change(_draft.copyWith(expires: () => null)),
+          ),
+          if (d.expires != null) ...[
+            _heading('REMINDER BEFORE'),
+            _remindChoices(),
+            _remindNote('At 09:00.'),
+          ],
+        ];
+      case DocKind.receipt:
+        final from = d.warrantyFrom ?? _today;
+        return [
+          SwitchListTile(
+            key: const Key('documentWarranty'),
+            secondary: const Icon(Icons.verified_user_outlined),
+            title: const Text('Warranty'),
+            value: d.warranty,
+            onChanged: (on) => _change(_draft.copyWith(
+              warranty: on,
+              // From today unless a day's set.
+              warrantyFrom: () => on ? from : _draft.warrantyFrom,
+            )),
+          ),
+          if (d.warranty) ...[
+            _dayTile(
+              key: const ValueKey('documentWarrantyFrom'),
+              icon: Icons.play_arrow_outlined,
+              label: dayOf(from) == _today ? 'From today' : 'From',
+              day: from,
+              onTap: () async {
+                final day = await _pickDay(from, help: 'Warranty from');
+                if (day != null && mounted) {
+                  _change(_draft.copyWith(warrantyFrom: () => day));
+                }
+              },
+            ),
+            _dayTile(
+              key: const ValueKey('documentWarrantyTo'),
+              icon: Icons.stop_outlined,
+              label: 'Until',
+              day: d.warrantyTo,
+              onTap: () async {
+                final day = await _pickDay(d.warrantyTo ?? _yearsOn(from, 2),
+                    help: 'Warranty until');
+                if (day != null && mounted) {
+                  _change(_draft.copyWith(warrantyTo: () => day));
+                }
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  for (final years in [1, 2])
+                    ActionChip(
+                      key: Key('documentWarrantyYears-$years'),
+                      label: Text(years == 1 ? '1 year' : '$years years'),
+                      onPressed: () => _change(_draft.copyWith(
+                        warrantyFrom: () => from,
+                        warrantyTo: () => _yearsOn(from, years),
+                      )),
+                    ),
+                ],
+              ),
+            ),
+            if (d.warrantyTo != null) ...[
+              _heading('REMINDER BEFORE IT ENDS'),
+              _remindChoices(),
+              _remindNote('At 09:00.'),
+            ],
+          ],
+        ];
+      case DocKind.ticket:
+        return [
+          _heading('DATE'),
+          _dayTile(
+            key: const ValueKey('documentDate'),
+            icon: Icons.event_outlined,
+            label: 'On',
+            day: d.date,
+            onTap: () async {
+              final day = await _pickDay(d.date, help: 'Ticket for');
+              if (day != null && mounted) {
+                _change(_draft.copyWith(date: () => day));
+              }
+            },
+            onClear: () => _change(_draft.copyWith(date: () => null)),
+          ),
+          if (d.date != null)
+            SwitchListTile(
+              key: const Key('documentTicketRemind'),
+              secondary: const Icon(Icons.notifications_none),
+              title: const Text('Remind me on the day'),
+              subtitle: const Text('At 09:00'),
+              value: d.remind != DocRemind.none,
+              onChanged: (on) => _change(_draft.copyWith(
+                  remind: on ? DocRemind.onTheDay : DocRemind.none)),
+            ),
+        ];
+      case DocKind.barcode:
+        return const [];
+    }
+  }
+
   Widget _heading(String text) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
         child: Text(
@@ -460,6 +670,7 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
                 ),
               ),
             ],
+            ..._dates(d),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               child: TextField(

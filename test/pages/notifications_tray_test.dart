@@ -32,6 +32,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(scheduler.cleared.last, ReminderKind.subscriptions);
     await pressBack(tester);
+    await tester.tap(find.byTooltip('Documents'));
+    await tester.pumpAndSettle();
+    expect(scheduler.cleared.last, ReminderKind.documents);
+    await pressBack(tester);
 
     await openMenu(tester);
     await tester.tap(find.text('Backup'));

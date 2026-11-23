@@ -25,6 +25,8 @@ sealed class NotificationTarget {
         return const DatesTarget();
       case ['subscriptions']:
         return const SubscriptionsTarget();
+      case ['documents']:
+        return const DocumentsTarget();
       case [
             'now',
             final kind,
@@ -99,6 +101,17 @@ class BackupTarget extends NotificationTarget {
 
   @override
   String toString() => 'BackupTarget()';
+}
+
+/// The Documents page (a document's reminder).
+class DocumentsTarget extends NotificationTarget {
+  const DocumentsTarget();
+
+  @override
+  String get payload => 'documents';
+
+  @override
+  String toString() => 'DocumentsTarget()';
 }
 
 /// The Subscriptions page (a subscription's reminder).

@@ -189,6 +189,9 @@ channel), faked in tests by `FakeDocumentCamera` / `FakePhotoGallery`.
 A crop is cut by `core/picture_crop.dart` with `dart:ui` (decode, draw
 turned, encode PNG). Show barcode holds `KeepScreenOn` and
 `FullBrightness` (`core/screen.dart`, the window's brightness).
+Reminders: `planDocumentReminders` in `providers/document_alerts_provider.dart`,
+planned with the others by `ReminderPlanner` (which also listens to the
+page locks: locked, the names are left out).
 
 ## Restoring part of a backup (D10)
 
