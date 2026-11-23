@@ -92,14 +92,20 @@ class DiskDocumentFiles extends DocumentFiles {
 
   @override
   Future<Uint8List?> read(String id) async {
-    final file = _file(id);
-    return await file.exists() ? await file.readAsBytes() : null;
+    try {
+      return await _file(id).readAsBytes();
+    } on PathNotFoundException {
+      return null; // none (or deleted meanwhile)
+    }
   }
 
   @override
   Future<void> delete(String id) async {
-    final file = _file(id);
-    if (await file.exists()) await file.delete();
+    try {
+      await _file(id).delete();
+    } on PathNotFoundException {
+      // Already gone.
+    }
   }
 
   @override
@@ -123,7 +129,11 @@ class DiskDocumentFiles extends DocumentFiles {
   Future<int> totalBytes() async {
     var total = 0;
     for (final id in await ids()) {
-      total += await _file(id).length();
+      try {
+        total += await _file(id).length();
+      } on PathNotFoundException {
+        // Deleted meanwhile.
+      }
     }
     return total;
   }

@@ -6,6 +6,28 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-11-23
+
+### Added
+- **Locking Documents encrypts them.** Its page lock (Security, page
+  locks) seals the list (names, fields, notes) and every picture with
+  the master password's key, the one locked notes use (fingerprint
+  unlock opens it too). Unlocking the app opens them; locking it, or five
+  minutes in the background, drops them from memory. Turning the lock on
+  or off encrypts or decrypts everything once, with a progress bar if it
+  takes more than a second; cut short, it finishes the next time the
+  app is unlocked.
+- Locked, reminders still come (from a small index of dates, without
+  names) and say only *A document expires in 7 days*.
+- **Backups** of locked Documents keep them sealed, with the master
+  password record. Restoring opens them with this app's key, the
+  encrypted file's password, or asks for the password the backup was
+  made with; they're sealed again under this app's key if its
+  Documents are locked. Restoring part of a backup lists them once
+  opened.
+- Removing the master password decrypts Documents first, as it does
+  locked notes.
+
 ## [2.8.0] - 2026-11-23
 
 ### Added

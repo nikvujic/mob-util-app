@@ -46,8 +46,8 @@ class BackupFormatException implements Exception {
 ///                 "masterPassword": {...} }
 ///     }
 ///
-/// `masterPassword` (since version 2) is only there if some notes are
-/// locked: it's the master password record (as in `security.json`), which
+/// `masterPassword` (since version 2) is only there if some notes (or,
+/// since 34, the Documents page: `documentsSealed`) are locked: it's the master password record (as in `security.json`), which
 /// holds the key of the locked notes, itself encrypted with the password.
 /// Locked notes stay encrypted in every backup, plain or not.
 ///
@@ -167,6 +167,11 @@ class Backup {
   /// leaves the page as it is).
   final DocumentBook? documents;
 
+  /// The Documents page while locked: the list sealed with the master
+  /// password's data key (the record in [masterPassword]); its pictures
+  /// are sealed too. Null when not locked ([documents] then).
+  final SealedBox? documentsSealed;
+
   /// The Documents page's pictures, by id, as stored. Not in the JSON
   /// document: beside it in the zip.
   final Map<String, Uint8List> pictures;
@@ -194,9 +199,38 @@ class Backup {
     PackingBook? packing,
     this.people,
     this.documents,
+    this.documentsSealed,
     this.pictures = const {},
     this.masterPassword,
   }) : _packing = packing;
+
+  /// [backup] with the Documents page sealed ([documentsSealed]) instead
+  /// of open.
+  factory Backup.fromParts(Backup backup,
+          {required SealedBox documentsSealed}) =>
+      Backup(
+        createdAt: backup.createdAt,
+        appVersion: backup.appVersion,
+        notes: backup.notes,
+        shopItems: backup.shopItems,
+        plannerTasks: backup.plannerTasks,
+        routines: backup.routines,
+        plannerPins: backup.plannerPins,
+        counters: backup.counters,
+        placard: backup.placard,
+        medicine: backup.medicine,
+        todo: backup.todo,
+        pip: backup.pip,
+        recipes: backup.recipes,
+        ingredients: backup.ingredients,
+        dates: backup.dates,
+        subscriptions: backup.subscriptions,
+        packing: backup._packing,
+        people: backup.people,
+        documentsSealed: documentsSealed,
+        pictures: backup.pictures,
+        masterPassword: backup.masterPassword,
+      );
 
   /// This backup with [pictures] beside it.
   Backup withPictures(Map<String, Uint8List> pictures) => Backup(
@@ -219,6 +253,7 @@ class Backup {
         packing: _packing,
         people: people,
         documents: documents,
+        documentsSealed: documentsSealed,
         pictures: pictures,
         masterPassword: masterPassword,
       );
@@ -261,6 +296,8 @@ class Backup {
           'packing': packing.toJson(),
           if (people != null) 'people': people!.toJson(),
           if (documents != null) 'documents': documents!.toJson()['documents'],
+          if (documentsSealed != null)
+            'documentsSealed': documentsSealed!.toJson(),
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -402,6 +439,10 @@ class Backup {
         documents: data['documents'] == null
             ? null
             : DocumentBook.fromJson({'documents': data['documents']}),
+        documentsSealed: data['documentsSealed'] == null
+            ? null
+            : SealedBox.fromJson(
+                data['documentsSealed'] as Map<String, dynamic>),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(

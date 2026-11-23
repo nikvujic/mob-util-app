@@ -352,6 +352,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     final importer = ref.read(backupImporterProvider);
     final backup = await _pickBackup();
     if (backup == null || !mounted) return;
+    // Locked documents in it: opened first, to list them.
+    if (backup.documentsLocked) {
+      try {
+        await importer.openDocuments(backup, backupKey: _askBackupKey);
+      } on ImportException catch (e) {
+        _showMessage(e.message);
+      }
+      if (!mounted) return;
+    }
     final picked = await pickBackupParts(context, backup);
     if (picked == null || !mounted) return;
 

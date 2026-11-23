@@ -9,6 +9,7 @@ import 'package:the_app/pages/hub/documents.dart';
 import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/providers/section_locks_provider.dart';
 import 'package:the_app/providers/security_provider.dart';
+import 'package:the_app/providers/session_provider.dart';
 import 'package:the_app/providers/section_data_provider.dart';
 
 import '../helpers.dart';
@@ -519,5 +520,46 @@ void main() {
         '2 Nov 2026 (past)');
     expect(line(d(DocKind.barcode)), '-');
     expect(line(d(DocKind.document)), '-');
+  });
+
+  testWidgets(
+      "the Documents lock on Security: says it encrypts; on, it's encrypted; "
+      'off, opened again', (tester) async {
+    await start(tester, items: [
+      DocItem(
+          id: 'p',
+          kind: DocKind.document,
+          name: 'Passport',
+          createdAt: DateTime(2026, 11, 1)),
+    ]);
+    await tester.runAsync(() async {
+      await container
+          .read(securityProvider.notifier)
+          .setPassword('master password');
+      await container.read(sessionProvider.notifier).unlock('master password');
+    });
+    await pressBack(tester);
+    await openMenu(tester);
+    await tester.tap(find.text('Security'));
+    await tester.pumpAndSettle();
+    final lock = find.byKey(const Key('pageLock-documents'));
+    await reveal(tester, lock);
+    expect(find.textContaining("they can't be recovered"), findsOneWidget);
+    await tester.tap(lock);
+    await settleBusy(tester);
+    await tester
+        .runAsync(() => container.read(documentsProvider.notifier).reconcile());
+    await tester.pumpAndSettle();
+    final docs = container.read(documentsProvider.notifier);
+    expect(container.read(pageLocksProvider), contains(HubTool.documents));
+    expect(docs.encrypted, isTrue);
+    expect(book().items.single.name, 'Passport', reason: 'open while unlocked');
+
+    await tester.tap(lock);
+    await settleBusy(tester);
+    await tester.runAsync(() => docs.reconcile());
+    await tester.pumpAndSettle();
+    expect(docs.encrypted, isFalse);
+    expect(book().items.single.name, 'Passport');
   });
 }

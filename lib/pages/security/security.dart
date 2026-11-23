@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/core/storage_error.dart';
@@ -107,7 +110,9 @@ class SecurityPage extends ConsumerWidget {
     required bool lock,
   }) async {
     final locks = ref.read(pageLocksProvider.notifier);
-    if (lock) {
+    // Documents are encrypted or opened with the data key: unlocked first.
+    final encrypts = page == HubTool.documents;
+    if (lock && !encrypts) {
       locks.lock(page);
       return;
     }
@@ -115,7 +120,64 @@ class SecurityPage extends ConsumerWidget {
       await _unlock(context, ref);
       if (ref.read(sessionProvider) == null) return; // cancelled
     }
-    locks.unlock(page);
+    if (lock) {
+      locks.lock(page);
+    } else {
+      locks.unlock(page);
+    }
+    if (encrypts && context.mounted) await _sealing(context, ref, lock: lock);
+  }
+
+  /// Waits while Documents are encrypted or opened; a progress dialog
+  /// only if it takes longer than a second.
+  Future<void> _sealing(BuildContext context, WidgetRef ref,
+      {required bool lock}) async {
+    final documents = ref.read(documentsProvider.notifier);
+    final done = documents.reconcile();
+    var finished = false;
+    final waited = Completer<void>();
+    final timer = Timer(const Duration(seconds: 1), waited.complete);
+    unawaited(done.whenComplete(() {
+      finished = true;
+      timer.cancel();
+      if (!waited.isCompleted) waited.complete();
+    }));
+    await waited.future;
+    if (finished || !context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        done.whenComplete(() {
+          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+        });
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Text(lock ? 'Encrypting documents' : 'Decrypting documents'),
+            content: Consumer(
+              builder: (context, ref, _) {
+                final p = ref.watch(documentsProgressProvider);
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    LinearProgressIndicator(
+                      key: const Key('documentsSealing'),
+                      value: p == null || p.all == 0 ? null : p.done / p.all,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(p == null
+                        ? 'The list…'
+                        : '${p.done} of ${p.all} pictures'),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -241,6 +303,14 @@ class SecurityPage extends ConsumerWidget {
                       : Icons.lock_open_outlined,
                 ),
                 title: Text(page.label),
+                // Documents' lock encrypts: say what that means.
+                subtitle: page == HubTool.documents
+                    ? Text(
+                        'Encrypted with your master password; if it\'s '
+                        'forgotten, they can\'t be recovered',
+                        style: TextStyle(color: context.colors.textSecondary),
+                      )
+                    : null,
                 value: pageLocks.contains(page),
                 onChanged: (lock) =>
                     _setPageLock(context, ref, page, lock: lock),

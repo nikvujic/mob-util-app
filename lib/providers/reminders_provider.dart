@@ -276,7 +276,8 @@ class ReminderPlanner {
       ),
       ...planDocumentReminders(
         now: now,
-        book: _ref.read(documentsProvider),
+        // Locked, from its index (dates, no names).
+        book: _ref.read(documentsProvider.notifier).forReminders,
         preferences: preferences,
         days: reminderDays,
         // Locked, its names stay inside it.

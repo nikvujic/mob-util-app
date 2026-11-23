@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:the_app/core/id.dart';
 import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
+import 'package:the_app/data/document_files.dart';
 import 'package:the_app/models/counter.dart';
 import 'package:the_app/models/document_item.dart';
 import 'package:the_app/models/medicine.dart';
@@ -56,9 +58,11 @@ class BackupExporter {
       : _now = now ?? DateTime.now;
 
   /// A snapshot of everything the app holds right now. Includes the master
-  /// password record if some notes are locked: it holds their key.
+  /// password record if some notes are locked: it holds their key. The
+  /// Documents page only while it's open (else null: left as it is).
   Backup snapshot() {
     final notes = _ref.read(notesProvider);
+    final documents = _ref.read(documentsProvider.notifier);
     return Backup(
       createdAt: _now(),
       appVersion: _ref.read(appVersionProvider),
@@ -78,21 +82,31 @@ class BackupExporter {
       subscriptions: _ref.read(subscriptionsProvider),
       packing: _ref.read(packingProvider),
       people: _ref.read(peopleProvider),
-      documents: _ref.read(documentsProvider),
-      masterPassword:
-          notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
+      documents: documents.isOpen ? _ref.read(documentsProvider) : null,
+      masterPassword: notes.any((n) => n.isLocked) || documents.encrypted
+          ? _ref.read(securityProvider)
+          : null,
     );
   }
 
   /// [snapshot] with the Documents page's pictures read, as a backup file
   /// holds them.
+  /// Locked (encrypted), the list goes in sealed and the pictures as
+  /// stored, sealed: as locked notes, they open with the master password
+  /// the backup was made under.
   Future<Backup> full() async {
-    final backup = snapshot();
+    var backup = snapshot();
     final documents = _ref.read(documentsProvider.notifier);
+    final sealed = await documents.sealedForBackup();
     final pictures = <String, Uint8List>{};
     for (final id in backup.documents?.fileIds ?? const <String>{}) {
-      final bytes = await documents.readPicture(id);
+      final bytes = sealed == null
+          ? await documents.readPicture(id)
+          : await documents.storedPicture(id);
       if (bytes != null) pictures[id] = bytes;
+    }
+    if (sealed != null) {
+      backup = Backup.fromParts(backup, documentsSealed: sealed);
     }
     return backup.withPictures(pictures);
   }
@@ -145,6 +159,17 @@ class RestorableBackup {
 
   RestorableBackup._(this._backup, [this._fileKey]);
 
+  /// Its Documents page, opened (a locked one, once its key was found):
+  /// the list, and the pictures as they are (unsealed).
+  ({DocumentBook book, Map<String, Uint8List> pictures})? _openDocuments;
+
+  /// Whether it holds a locked Documents page not opened yet (its
+  /// documents aren't listed until then).
+  bool get documentsLocked =>
+      _backup.documentsSealed != null && _openDocuments == null;
+
+  DocumentBook? get _documents => _openDocuments?.book ?? _backup.documents;
+
   DateTime get createdAt => _backup.createdAt;
   int get noteCount => _backup.notes.length;
   int get lockedNoteCount => _backup.notes.where((n) => n.isLocked).length;
@@ -171,7 +196,7 @@ class RestorableBackup {
   List<Subscription> get subscriptions => _backup.subscriptions.subscriptions;
   List<PackingList> get packingLists => _backup.packing.lists;
   List<Person> get people => _backup.people?.people ?? const [];
-  List<DocItem> get documents => _backup.documents?.items ?? const [];
+  List<DocItem> get documents => _documents?.items ?? const [];
 }
 
 /// The kinds of things in a backup, to restore some of them.
@@ -338,6 +363,64 @@ class BackupImporter {
     }
   }
 
+  /// Opens [backup]'s locked Documents page (if it has one): with this
+  /// app's key (a backup from this phone), the encrypted file's password,
+  /// or else, if [backupKey] is given, the password it was made under.
+  /// False if it stays locked (a prompt cancelled, or none). Throws
+  /// [ImportException] if it doesn't open with that password's key.
+  Future<bool> openDocuments(
+    RestorableBackup backup, {
+    AskBackupKey? backupKey,
+  }) async {
+    if (!backup.documentsLocked) return true;
+    final source = backup._backup;
+    final sealed = source.documentsSealed!;
+    final record = source.masterPassword;
+    Future<List<int>?> tryKey(DataKey? key) async {
+      if (key == null) return null;
+      try {
+        return await open(sealed, key, context: DocumentsNotifier.sealContext);
+      } on DecryptionException {
+        return null;
+      }
+    }
+
+    var key = _ref.read(sessionProvider)?.dataKey;
+    var plain = await tryKey(key);
+    if (plain == null && record != null && backup._fileKey != null) {
+      key = await record.unwrapDataKey(backup._fileKey);
+      plain = await tryKey(key);
+    }
+    if (plain == null && record != null && backupKey != null) {
+      key = await backupKey(record);
+      if (key == null) return false;
+      plain = await tryKey(key);
+      if (plain == null) throw _documentsDontOpen;
+    }
+    if (plain == null || key == null) return false;
+    final pictures = <String, Uint8List>{};
+    try {
+      for (final MapEntry(key: id, value: bytes) in source.pictures.entries) {
+        pictures[id] = DocumentFiles.isSealed(bytes)
+            ? await DocumentFiles.openBytes(bytes, key)
+            : bytes;
+      }
+    } on DecryptionException {
+      throw _documentsDontOpen;
+    }
+    backup._openDocuments = (
+      book: DocumentBook.fromJson(
+          jsonDecode(utf8.decode(plain)) as Map<String, dynamic>),
+      pictures: pictures,
+    );
+    return true;
+  }
+
+  static const _documentsDontOpen = ImportException(
+    "This backup's locked documents can't be opened with its master "
+    'password.',
+  );
+
   /// Replaces all notes and shop items with [backup]'s, and waits until
   /// they're saved. Returns what it replaced, for [undo]; null if the user
   /// cancelled a password prompt (nothing changed then).
@@ -360,6 +443,7 @@ class BackupImporter {
     final previousMasterPassword = _ref.read(securityProvider);
     final previous = _ref.read(backupExporterProvider).snapshot();
     final source = backup._backup;
+    if (!await openDocuments(backup, backupKey: backupKey)) return null;
     var notes = source.notes;
     var adopt = false;
 
@@ -386,8 +470,9 @@ class BackupImporter {
       security.restore(source.masterPassword);
       await _ref.read(appStorageProvider).flush();
     }
-    if (source.documents != null) {
-      await _writePictures(source, source.documents!.fileIds);
+    final documents = backup._documents;
+    if (documents != null) {
+      await _writePictures(backup, documents.fileIds);
     }
     await _apply(
       notes,
@@ -406,7 +491,7 @@ class BackupImporter {
       source.subscriptions,
       source.packing,
       source.people,
-      source.documents,
+      documents,
     );
     return RestoreUndo._(
       previous,
@@ -429,6 +514,10 @@ class BackupImporter {
     AskBackupKey backupKey = _cancelledFor,
   }) async {
     final source = backup._backup;
+    if ((picked[BackupPart.documents]?.isNotEmpty ?? false) &&
+        !await openDocuments(backup, backupKey: backupKey)) {
+      return null;
+    }
     bool chosen(BackupPart part, String id) =>
         picked[part]?.contains(id) ?? false;
     final previousMasterPassword = _ref.read(securityProvider);
@@ -760,12 +849,12 @@ class BackupImporter {
     // Documents, each with its pictures; one still here comes as a copy
     // (sharing its pictures, which never change).
     final pickedDocuments = [
-      for (final d in source.documents?.items ?? const <DocItem>[])
+      for (final d in backup._documents?.items ?? const <DocItem>[])
         if (chosen(BackupPart.documents, d.id)) d,
     ];
     if (pickedDocuments.isNotEmpty) {
       await _writePictures(
-          source, {for (final d in pickedDocuments) ...d.fileIds});
+          backup, {for (final d in pickedDocuments) ...d.fileIds});
       final now = _ref.read(documentsProvider);
       final back = <DocItem>[];
       for (final d in pickedDocuments) {
@@ -931,13 +1020,15 @@ class BackupImporter {
   /// is never changed once stored (an id is never reused), so one already
   /// here is the same; the pictures there before stay (for Undo) until
   /// nothing refers to them.
-  Future<void> _writePictures(Backup backup, Set<String> ids) async {
-    final files = _ref.read(documentsProvider.notifier).files;
-    final here = await files.ids();
+  /// Sealed again with this app's key if its page is locked.
+  Future<void> _writePictures(RestorableBackup backup, Set<String> ids) async {
+    final documents = _ref.read(documentsProvider.notifier);
+    final pictures = backup._openDocuments?.pictures ?? backup._backup.pictures;
+    final here = await documents.files.ids();
     for (final id in ids) {
-      final bytes = backup.pictures[id];
+      final bytes = pictures[id];
       if (bytes == null || here.contains(id)) continue;
-      await files.write(id, bytes);
+      await documents.storePicture(id, bytes);
     }
   }
 }

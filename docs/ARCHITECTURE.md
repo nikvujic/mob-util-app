@@ -193,6 +193,24 @@ Reminders: `planDocumentReminders` in `providers/document_alerts_provider.dart`,
 planned with the others by `ReminderPlanner` (which also listens to the
 page locks: locked, the names are left out).
 
+## Documents' encryption
+
+`DocumentsNotifier` follows the Documents page lock and the session's
+data key (`follow`, from `documentsProvider`'s listeners). Encrypted,
+`documents.json` is `{sealed, index}`: the list sealed with the data key
+(saved one after another, each with the key it was made under), and an
+index without names for counts and reminders while it's closed. Closed
+(the app locked), the state is empty and nothing is saved, replaced or
+cleaned up. `reconcile` seals or opens the list and the pictures until
+they match the lock (each picture replaced whole via `.tmp` and rename;
+`DocumentFiles.isSealed` tells each file apart, so a run cut short reads
+fine and is finished on the next unlock). Backups of a locked page carry
+`documentsSealed`, the pictures as stored and the master password
+record; `BackupImporter.openDocuments` opens them (this app's key, the
+encrypted file's, or the backup's password asked), and
+`DocumentsNotifier.storePicture` seals them again if this app's page is
+locked. Removing the master password calls `openAll` first.
+
 ## Restoring part of a backup (D10)
 
 `BackupImporter.restorePart` takes the ids picked, by kind

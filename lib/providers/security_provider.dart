@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/crypto.dart';
 import 'package:the_app/data/app_storage.dart';
+import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/providers/notes_provider.dart';
 
 /// Rules for choosing a master password.
@@ -134,16 +135,21 @@ final securityProvider =
     storage,
     beforeRemove: (dataKey) async {
       final notes = ref.read(notesProvider.notifier);
+      final documents = ref.read(documentsProvider.notifier);
       if (dataKey != null) {
         try {
           await notes.unlockAll(dataKey);
+          // Documents opened too: the lock goes with the password.
+          await documents.openAll(dataKey);
         } on DecryptionException {
           throw const LockedDataException();
         }
       }
-      if (ref.read(notesProvider).any((n) => n.isLocked)) {
+      if (ref.read(notesProvider).any((n) => n.isLocked) ||
+          documents.encrypted) {
         throw const LockedDataException();
       }
+      await documents.saved;
       await storage.flush();
     },
   );

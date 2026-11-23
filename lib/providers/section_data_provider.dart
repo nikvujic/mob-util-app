@@ -67,7 +67,8 @@ class SectionData {
         HubTool.packing => _ref.read(packingProvider).lists.length,
         // Everyone on the board.
         HubTool.people => _ref.read(peopleProvider).people.length,
-        HubTool.documents => _ref.read(documentsProvider).size,
+        // Counted while locked too (its index).
+        HubTool.documents => _ref.read(documentsProvider.notifier).count,
       };
 
   /// Empties one of the Hub's pages (saved with the next flush).

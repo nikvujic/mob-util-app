@@ -6,13 +6,14 @@ tickets. Each item holds one or more pictures, a few fields and a note.
 Pictures only for now; other files (PDFs and the like) later, on the same
 storage and backup format.
 
-Status: **being built.** Steps 1–3 are done (2.6.0): the plugin check,
+Status: **built** (2.6.0–2.9.0). Steps 1–3 (2.6.0): the plugin check,
 the storage, the zip backups and Android's backup exclusion. Steps 4–5
 (2.7.0): the page, its kinds and form, pictures, the barcode crop and
 Show barcode. Pictures are moved with *Move earlier / later* on holding
 one, rather than a handle on each thumbnail. Step 6 (2.8.0): the dates
-and reminders. Until locking encrypts (step 7), reminders are planned
-from the list itself.
+and reminders. Step 7 (2.9.0): locking encrypts. An interrupted lock is
+finished the next time the app is unlocked (the key is needed), not at
+the very start.
 
 ## Types
 
