@@ -40,6 +40,9 @@ abstract final class FullBrightness {
   static Future<void> on() => _set(1.0);
   static Future<void> off() => _set(null);
 
+  /// The screen at [level] (0–1) of its brightness.
+  static Future<void> set(double level) => _set(level.clamp(0.0, 1.0));
+
   static Future<void> _set(double? level) async {
     try {
       await KeepScreenOn.channel.invokeMethod<void>('brightness', level);

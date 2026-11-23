@@ -24,6 +24,7 @@ extension DocKindLook on DocKind {
         DocKind.document => Icons.badge_outlined,
         DocKind.receipt => Icons.receipt_long_outlined,
         DocKind.barcode => Icons.credit_card,
+        DocKind.qr => Icons.qr_code_2,
         DocKind.ticket => Icons.confirmation_number_outlined,
       };
 
@@ -32,6 +33,7 @@ extension DocKindLook on DocKind {
         DocKind.document => 'Passport, ID, licence',
         DocKind.receipt => 'A purchase, its warranty',
         DocKind.barcode => 'A loyalty or membership card',
+        DocKind.qr => 'A pass, a card or a booking with a QR code',
         DocKind.ticket => 'A boarding pass, an event, a train',
       };
 }
@@ -61,7 +63,8 @@ bool documentMatches(DocItem d, String query) {
   if (q.isEmpty) return true;
   return d.name.toLowerCase().contains(q) ||
       d.shop.toLowerCase().contains(q) ||
-      d.note.toLowerCase().contains(q);
+      d.note.toLowerCase().contains(q) ||
+      (d.scanned?.text.toLowerCase().contains(q) ?? false);
 }
 
 /// Documents (`docs/DOCUMENTS_SPEC.md`): a card for each, in the user's
@@ -225,8 +228,7 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage> {
                               ? null
                               : () => openDocumentPage(
                                     context,
-                                    ShowBarcodePage(
-                                        barcodeId: d.barcode!, title: d.name),
+                                    ShowBarcodePage(documentId: d.id),
                                   ),
                         ),
                       );
@@ -415,6 +417,6 @@ abstract final class DocumentColours {
         1 => (text: 'Tomorrow', tone: DateTone.soon),
         _ => (text: formatShortDate(due), tone: DateTone.plain),
       },
-    DocKind.barcode => null,
+    DocKind.barcode || DocKind.qr => null,
   };
 }

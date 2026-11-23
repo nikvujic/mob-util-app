@@ -61,6 +61,31 @@ void main() {
     expect(card.dueDate, isNull);
   });
 
+  test("a code's reading, how it's shown and where it was left survive", () {
+    final qr = DocItem(
+      id: 'q',
+      kind: DocKind.qr,
+      name: 'Gym',
+      barcode: 'f9',
+      scanned: const DocCode('https://gym.example/m/1', 'qr'),
+      showPhoto: true,
+      codeView: const CodeView(dx: 4, dy: -120, scale: 1.5),
+      createdAt: DateTime(2026, 11, 23),
+    );
+    final again = DocItem.fromJson(qr.toJson());
+    expect(again.kind, DocKind.qr);
+    expect(again.scanned, qr.scanned);
+    expect(again.showPhoto, isTrue);
+    expect(again.codeView, qr.codeView);
+    // A kind of code from a newer app is kept as it is (shown as its
+    // photo here).
+    final newer = DocItem.fromJson({
+      ...qr.toJson(),
+      'scanned': {'text': 'x', 'format': 'aztec'},
+    });
+    expect(newer.scanned, const DocCode('x', 'aztec'));
+  });
+
   test('a new document with nothing in it is empty (discarded)', () {
     final blank = DocItem(
         id: 'n', kind: DocKind.receipt, createdAt: DateTime(2026, 11, 23));

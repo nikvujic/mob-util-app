@@ -5,6 +5,9 @@ enum DocKind {
   document('Document'),
   receipt('Receipt'),
   barcode('Barcode'),
+
+  /// A QR code (a card's, a pass's): framed square, read as QR only.
+  qr('QR code'),
   ticket('Ticket');
 
   const DocKind(this.label);
@@ -15,7 +18,10 @@ enum DocKind {
   bool get startsWithCamera => this != document;
 
   /// Whether it has a barcode of its own (a crop of one of its pictures).
-  bool get hasBarcode => this == barcode || this == ticket;
+  bool get hasBarcode => this == barcode || this == qr || this == ticket;
+
+  /// Its crop frame is square (a QR code).
+  bool get squareCrop => this == qr;
 
   static DocKind fromId(String? id) =>
       values.where((k) => k.name == id).firstOrNull ?? document;
@@ -71,6 +77,58 @@ class DocPicture {
   int get hashCode => Object.hash(id, turns);
 }
 
+/// What a document's barcode says, once read: its text and its kind of
+/// code (as the reader names it: `ean13`, `code128`, `qr`, …).
+class DocCode {
+  final String text;
+  final String format;
+
+  const DocCode(this.text, this.format);
+
+  @override
+  bool operator ==(Object other) =>
+      other is DocCode && other.text == text && other.format == format;
+
+  @override
+  int get hashCode => Object.hash(text, format);
+}
+
+/// Where a shown barcode was left: moved by [dx], [dy] (logical pixels
+/// from the middle) and zoomed by [scale]. Shown so again next time.
+class CodeView {
+  final double dx;
+  final double dy;
+  final double scale;
+
+  const CodeView({this.dx = 0, this.dy = 0, this.scale = 1});
+
+  static const centred = CodeView();
+
+  bool get isCentred => dx == 0 && dy == 0 && scale == 1;
+
+  Map<String, dynamic> toJson() => {
+        if (dx != 0) 'dx': dx,
+        if (dy != 0) 'dy': dy,
+        if (scale != 1) 'scale': scale,
+      };
+
+  factory CodeView.fromJson(Map<String, dynamic> json) => CodeView(
+        dx: (json['dx'] as num?)?.toDouble() ?? 0,
+        dy: (json['dy'] as num?)?.toDouble() ?? 0,
+        scale: ((json['scale'] as num?)?.toDouble() ?? 1).clamp(0.2, 10),
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is CodeView &&
+      other.dx == dx &&
+      other.dy == dy &&
+      other.scale == scale;
+
+  @override
+  int get hashCode => Object.hash(dx, dy, scale);
+}
+
 /// A document: a passport, a receipt (and its warranty), a card's
 /// barcode, a ticket. Fields a kind doesn't use stay empty.
 class DocItem {
@@ -80,8 +138,18 @@ class DocItem {
   final String note;
   final List<DocPicture> pictures;
 
-  /// The barcode (a Barcode or a Ticket): the id of its cropped picture.
+  /// The barcode (a Barcode, a QR code or a Ticket): the id of its
+  /// cropped picture.
   final String? barcode;
+
+  /// What its barcode says, once read ([scanned]): drawn sharp from it.
+  final DocCode? scanned;
+
+  /// Shown as its photo (the crop) rather than drawn from [scanned].
+  final bool showPhoto;
+
+  /// Where its barcode was last left when shown.
+  final CodeView codeView;
 
   /// A Document's expiry.
   final DateTime? expires;
@@ -111,6 +179,9 @@ class DocItem {
     this.note = '',
     this.pictures = const [],
     this.barcode,
+    this.scanned,
+    this.showPhoto = false,
+    this.codeView = CodeView.centred,
     this.expires,
     this.shop = '',
     this.price = '',
@@ -139,7 +210,7 @@ class DocItem {
         DocKind.document => expires,
         DocKind.receipt => warranty ? warrantyTo : null,
         DocKind.ticket => date,
-        DocKind.barcode => null,
+        DocKind.barcode || DocKind.qr => null,
       };
 
   /// Every file it refers to.
@@ -154,6 +225,9 @@ class DocItem {
     String? note,
     List<DocPicture>? pictures,
     String? Function()? barcode,
+    DocCode? Function()? scanned,
+    bool? showPhoto,
+    CodeView? codeView,
     DateTime? Function()? expires,
     String? shop,
     String? price,
@@ -170,6 +244,9 @@ class DocItem {
         note: note ?? this.note,
         pictures: pictures ?? this.pictures,
         barcode: barcode == null ? this.barcode : barcode(),
+        scanned: scanned == null ? this.scanned : scanned(),
+        showPhoto: showPhoto ?? this.showPhoto,
+        codeView: codeView ?? this.codeView,
         expires: expires == null ? this.expires : expires(),
         shop: shop ?? this.shop,
         price: price ?? this.price,
@@ -189,6 +266,10 @@ class DocItem {
         if (pictures.isNotEmpty)
           'pictures': [for (final p in pictures) p.toJson()],
         if (barcode != null) 'barcode': barcode,
+        if (scanned != null)
+          'scanned': {'text': scanned!.text, 'format': scanned!.format},
+        if (showPhoto) 'showPhoto': true,
+        if (!codeView.isCentred) 'codeView': codeView.toJson(),
         if (expires != null) 'expires': PlannerTask.dayToJson(expires!),
         if (shop.isNotEmpty) 'shop': shop,
         if (price.isNotEmpty) 'price': price,
@@ -215,6 +296,15 @@ class DocItem {
           DocPicture.fromJson(p as Map<String, dynamic>),
       ],
       barcode: json['barcode'] as String?,
+      scanned: switch (json['scanned']) {
+        {'text': final String text, 'format': final String format} =>
+          DocCode(text, format),
+        _ => null,
+      },
+      showPhoto: json['showPhoto'] as bool? ?? false,
+      codeView: json['codeView'] is Map<String, dynamic>
+          ? CodeView.fromJson(json['codeView'] as Map<String, dynamic>)
+          : CodeView.centred,
       expires: day('expires'),
       shop: json['shop'] as String? ?? '',
       price: json['price'] as String? ?? '',

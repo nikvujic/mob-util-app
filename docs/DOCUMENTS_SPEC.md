@@ -24,6 +24,7 @@ New items start by choosing a type.
 | **Document** (passport, ID, licence) | The form opens. | Name, pictures, note, **expiry date** (optional) with a reminder before it. |
 | **Receipt** | The camera opens (camera permission asked the first time). The photo becomes the first picture; the form follows. | Name, pictures, note, **shop** and **price** (optional), **warranty** (a checkbox): start (*Today*, ticked by default, or a date), end, with quick buttons (**1 year**, **2 years**) and a reminder before the end. |
 | **Barcode** (loyalty or membership card) | The camera opens; after the photo, the **crop step** frames the barcode. | Name, pictures, note, **one barcode** (a crop of one of its pictures). Several codes on one card: the other sides as pictures. |
+| **QR code** (a pass, a card, a booking) | As Barcode, the frame square. | As Barcode; read as QR only. |
 | **Ticket** (boarding pass, event, train) | As Barcode. | Name, pictures, note, **date** (no time), the barcode as for Barcode (optional), a reminder on the day. |
 
 Closing the camera without a photo leaves the form open, empty, the type
@@ -146,10 +147,26 @@ its pictures (**Set barcode**: pick a picture, crop).
   1.8.22, AGP 8.1). If the needed versions don't, upgrading Flutter and the
   toolchain comes first, as its own change.
 
+## Reading and showing codes (2.10.0)
+
+- The crop step offers *Use this* (the crop as it is) and *Scan this*:
+  the code in the frame is read (else in the whole picture), then drawn
+  sharp with its number under it. None found: a toast, and the step
+  stays. Read on the phone in pure Dart (EAN-13, EAN-8, UPC-A, Code 128,
+  QR); nothing is sent anywhere.
+- **QR code** is a kind of its own, between Barcode and Ticket: framed
+  square, read as QR only.
+- Show barcode: moved up and down by a drag anywhere, sideways only when
+  zoomed wider than the screen (never past its edges); pinch, or tap
+  twice and drag, to zoom; where it's left is shown next time, reset at
+  the bottom right; brightness at the bottom left (75% at first, then as
+  last set); a toggle between the drawn code and its photo (reading one
+  never read first).
+
 ## Later
 
-- Reading a barcode from its picture (a pure-Dart scanner) and drawing it
-  sharp, its number shown for checking.
+- Reading the stacked and square codes of boarding passes (PDF417,
+  Aztec) and Data Matrix.
 - Files other than pictures (PDFs).
 
 ## Build order

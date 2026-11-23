@@ -115,6 +115,9 @@ class Preferences {
   final DateTime? lastAutoBackupAt;
   final bool autoBackupFailed;
 
+  /// How bright a shown barcode makes the screen (0–1), as last set.
+  final double barcodeBrightness;
+
   /// How many automatic backups the folder keeps (1–7).
   final int autoBackupKeep;
 
@@ -173,6 +176,7 @@ class Preferences {
     this.lastAutoBackupAt,
     this.autoBackupFailed = false,
     this.autoBackupKeep = 7,
+    this.barcodeBrightness = 0.75,
     this.autoBackupPictures = const {},
     this.pipPlugged = false,
     this.shopSorted = false,
@@ -282,6 +286,7 @@ class Preferences {
     DateTime? Function()? lastAutoBackupAt,
     bool? autoBackupFailed,
     int? autoBackupKeep,
+    double? barcodeBrightness,
     Map<String, int>? autoBackupPictures,
     bool? pipPlugged,
     bool? shopSorted,
@@ -345,6 +350,7 @@ class Preferences {
             : lastAutoBackupAt(),
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
         autoBackupKeep: autoBackupKeep ?? this.autoBackupKeep,
+        barcodeBrightness: barcodeBrightness ?? this.barcodeBrightness,
         autoBackupPictures: autoBackupPictures ?? this.autoBackupPictures,
         pipPlugged: pipPlugged ?? this.pipPlugged,
         shopSorted: shopSorted ?? this.shopSorted,
@@ -405,6 +411,7 @@ class Preferences {
           'lastAutoBackupAt': lastAutoBackupAt!.toUtc().toIso8601String(),
         'autoBackupFailed': autoBackupFailed,
         if (autoBackupKeep != 7) 'autoBackupKeep': autoBackupKeep,
+        if (barcodeBrightness != 0.75) 'barcodeBrightness': barcodeBrightness,
         if (autoBackupPictures.isNotEmpty)
           'autoBackupPictures': autoBackupPictures,
         if (pipPlugged) 'pipPlugged': true,
@@ -479,6 +486,9 @@ class Preferences {
             ? null
             : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
+        barcodeBrightness:
+            ((json['barcodeBrightness'] as num?)?.toDouble() ?? 0.75)
+                .clamp(0.05, 1.0),
         autoBackupKeep:
             ((json['autoBackupKeep'] as num?)?.toInt() ?? 7).clamp(1, 7),
         autoBackupPictures: {

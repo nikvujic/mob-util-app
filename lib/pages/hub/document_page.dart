@@ -92,9 +92,14 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
     }
   }
 
-  static bool _same(DocItem? a, DocItem? b) => a == null || b == null
-      ? a == b
-      : jsonEncode(a.toJson()) == jsonEncode(b.toJson());
+  /// Whether [a] and [b] hold the same, how its barcode is shown aside
+  /// (moving it, or switching to its photo, isn't an edit to save).
+  static bool _same(DocItem? a, DocItem? b) {
+    if (a == null || b == null) return a == b;
+    String content(DocItem d) => jsonEncode(
+        d.copyWith(codeView: CodeView.centred, showPhoto: false).toJson());
+    return content(a) == content(b);
+  }
 
   void _message(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
@@ -139,14 +144,25 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
 
   /// The crop step on [picture]: its crop, a picture of its own, the
   /// barcode.
+  /// Read by *Scan this*, it's drawn from what it says; else its photo.
   Future<void> _cropFrom(DocPicture picture) async {
-    final crop = await Navigator.of(context).push<Uint8List>(
-      MaterialPageRoute(builder: (_) => BarcodeCropPage(picture: picture)),
+    final result = await Navigator.of(context).push<BarcodeCrop>(
+      MaterialPageRoute(
+        builder: (_) => BarcodeCropPage(picture: picture, kind: _draft.kind),
+      ),
     );
-    if (crop == null || !mounted) return;
-    final id = await _notifier.addPicture(crop);
+    if (result == null || !mounted) return;
+    final id = await _notifier.addPicture(result.crop);
     if (!mounted) return;
-    _change(_draft.copyWith(barcode: () => id));
+    _change(_draft.copyWith(
+      barcode: () => id,
+      scanned: () => switch (result.scanned) {
+        null => null,
+        final code => docCodeOf(code),
+      },
+      showPhoto: false,
+      codeView: CodeView.centred,
+    ));
   }
 
   /// *Set barcode*: from its only picture, or the one picked.
@@ -165,14 +181,20 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
     await _cropFrom(picture);
   }
 
-  void _showBarcode() => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ShowBarcodePage(
-            barcodeId: _draft.barcode!,
-            title: _draft.name,
-          ),
-        ),
-      );
+  /// Shown full screen; what it changes there (where it's left, drawn or
+  /// photo, read) is taken back into the draft.
+  Future<void> _showBarcode() async {
+    if (!ref.read(documentsProvider).items.any((d) => d.id == _draft.id)) {
+      _notifier.save(_draft);
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ShowBarcodePage(documentId: _draft.id),
+      ),
+    );
+    final now = ref.read(documentsProvider).byId(_draft.id);
+    if (now != null && mounted) setState(() => _draft = now);
+  }
 
   Future<void> _pickFromGallery() =>
       _pick(ref.read(documentPicturesProvider).pickFromGallery);
@@ -467,6 +489,7 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
             ),
         ];
       case DocKind.barcode:
+      case DocKind.qr:
         return const [];
     }
   }
@@ -495,7 +518,10 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
       isNew: _original == null,
       what: 'document',
       onDiscard: () => switch (_original) {
-        final o? => _notifier.save(o),
+        // As it was, but the barcode shown as it's left.
+        final o? => _notifier.save(o.copyWith(
+            codeView: now?.codeView ?? o.codeView,
+            showPhoto: now?.showPhoto ?? o.showPhoto)),
         null => _notifier.delete(_draft.id),
       },
       child: Scaffold(
@@ -592,11 +618,22 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
                         width: double.infinity,
                         child: ColoredBox(
                           color: ViewerColours.paper,
-                          child: DocThumb(
-                            picture: DocPicture(code),
-                            cacheWidth: 800,
-                            fit: BoxFit.contain,
-                          ),
+                          child: scannedOf(d.scanned) != null && !d.showPhoto
+                              ? Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: FittedBox(
+                                    child: SizedBox(
+                                      width: 260,
+                                      child: DrawnCode(
+                                          code: scannedOf(d.scanned)!),
+                                    ),
+                                  ),
+                                )
+                              : DocThumb(
+                                  picture: DocPicture(code),
+                                  cacheWidth: 800,
+                                  fit: BoxFit.contain,
+                                ),
                         ),
                       ),
                     ),

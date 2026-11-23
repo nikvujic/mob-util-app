@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:barcode/barcode.dart' as bc;
 import 'package:archive/archive.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -277,6 +280,39 @@ Uint8List testPng({int shade = 128, List<List<int>>? pixels}) {
 }
 
 List<int> _u32(int v) => [v >> 24 & 255, v >> 16 & 255, v >> 8 & 255, v & 255];
+
+/// A real PNG of [code] saying [data] on a light card ([module] pixels a
+/// unit, a margin around): a photo of a card, for tests.
+Uint8List codePng(bc.Barcode code, String data, {int module = 3}) {
+  final probe = code.make(data, width: 1000, height: 1000).toList();
+  final bars = [
+    for (final e in probe)
+      if (e is bc.BarcodeBar && e.black) e
+  ];
+  final unit = bars.map((b) => b.width).reduce(math.min);
+  final right = bars.map((b) => b.right).reduce(math.max);
+  final square = code.name == bc.Barcode.qrCode().name;
+  final w = (right / unit).round() * module.toDouble();
+  final h = square ? w : 50.0 * module;
+  final margin = 20 * module;
+  final width = (w + 2 * margin).round(), height = (h + 2 * margin).round();
+  final rows = [
+    for (var y = 0; y < height; y++) List.filled(width, 0xEEEEEE),
+  ];
+  for (final e in code.make(data, width: w, height: h)) {
+    if (e is! bc.BarcodeBar || !e.black) continue;
+    for (var y = (margin + e.top).round();
+        y < (margin + e.bottom).round();
+        y++) {
+      for (var x = (margin + e.left).round();
+          x < (margin + e.right).round();
+          x++) {
+        rows[y][x] = 0x111111;
+      }
+    }
+  }
+  return testPng(pixels: rows);
+}
 
 /// The backup document (`backup.json`) inside a backup file's zip.
 String backupText(List<int> zip) => utf8.decode(

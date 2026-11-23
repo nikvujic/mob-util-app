@@ -116,6 +116,10 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
               },
       );
 
+  /// A shown barcode's brightness, as last set (0–1).
+  void setBarcodeBrightness(double level) => state =
+      state.copyWith(barcodeBrightness: level.clamp(0.05, 1.0).toDouble());
+
   /// How many automatic backups to keep (1–7).
   void setAutoBackupKeep(int keep) =>
       state = state.copyWith(autoBackupKeep: keep.clamp(1, 7));

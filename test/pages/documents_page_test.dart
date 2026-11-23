@@ -1,3 +1,6 @@
+import 'package:the_app/providers/preferences_provider.dart';
+import 'package:the_app/core/picture_crop.dart';
+import 'package:barcode/barcode.dart' as bc;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -305,7 +308,7 @@ void main() {
       await add(tester, DocKind.barcode);
       await settle(tester);
       expect(find.text('Frame the barcode'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('barcodeCropDone')));
+      await tester.tap(find.byKey(const Key('barcodeCropUse')));
       await settle(tester);
       expect(find.text('Frame the barcode'), findsNothing);
 
@@ -321,11 +324,15 @@ void main() {
       await tester.tap(find.byKey(const Key('documentShowBarcode')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('shownBarcode')), findsOneWidget);
-      expect(calls, ['keepOn true', 'brightness 1.0']);
-      await tester.tap(find.byKey(const Key('shownBarcode')));
+      expect(calls, ['keepOn true', 'brightness 0.75']);
+      await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(calls,
-          ['keepOn true', 'brightness 1.0', 'brightness null', 'keepOn false']);
+      expect(calls, [
+        'keepOn true',
+        'brightness 0.75',
+        'brightness null',
+        'keepOn false'
+      ]);
     });
 
     testWidgets(
@@ -346,7 +353,7 @@ void main() {
       // The frame dragged down a little: still a crop.
       await tester.drag(
           find.byKey(const Key('barcodeCropArea')), const Offset(0, 20));
-      await tester.tap(find.byKey(const Key('barcodeCropDone')));
+      await tester.tap(find.byKey(const Key('barcodeCropUse')));
       await settle(tester);
       expect(book().items.single.barcode, isNotNull);
 
@@ -614,5 +621,220 @@ void main() {
     final icon = tester.getCenter(find.byIcon(Icons.search));
     final field = tester.getCenter(find.byKey(const Key('documentsSearch')));
     expect(icon.dy, moreOrLessEquals(field.dy, epsilon: 1));
+  });
+
+  group('scanning and the barcode shown', () {
+    final ean = codePng(bc.Barcode.ean13(), '4006381333931');
+
+    /// A card with [photo] as its picture and its crop, on the list.
+    Future<DocItem> card(WidgetTester tester, Uint8List photo,
+        {DocCode? scanned, DocKind kind = DocKind.barcode}) async {
+      final notifier = container.read(documentsProvider.notifier);
+      final id = await tester.runAsync(() => notifier.addPicture(photo));
+      final item = DocItem(
+        id: 'c',
+        kind: kind,
+        name: 'Library',
+        pictures: [DocPicture(id!)],
+        barcode: id,
+        scanned: scanned,
+        createdAt: DateTime(2026, 11, 1),
+      );
+      notifier.save(item);
+      await tester.pumpAndSettle();
+      return item;
+    }
+
+    DocItem saved() => book().items.single;
+
+    testWidgets(
+        'Scan this: read (from the whole picture, the frame being off it), '
+        'the code drawn from it, its number under it', (tester) async {
+      await start(tester);
+      camera.photos.add(ean);
+      await add(tester, DocKind.barcode);
+      await settleBusy(tester);
+      // The frame dragged off the code: read from the whole picture.
+      await tester.tap(find.byKey(const Key('barcodeCropScan')));
+      await settleBusy(tester);
+      expect(find.text('Frame the barcode'), findsNothing);
+      expect(saved().scanned, const DocCode('4006381333931', 'ean13'));
+      expect(find.byKey(const Key('drawnCode-ean13')), findsOneWidget);
+      expect(find.text('4006381333931'), findsOneWidget);
+    });
+
+    testWidgets('no code in the picture: says so, the crop step stays',
+        (tester) async {
+      await start(tester);
+      camera.photos.add(ean); // a shop barcode…
+      await add(tester, DocKind.qr);
+      await settleBusy(tester);
+      expect(find.text('Frame the QR code'), findsOneWidget);
+      // …but a QR code is asked for.
+      await tester.tap(find.byKey(const Key('barcodeCropScan')));
+      await settleBusy(tester);
+      expect(find.textContaining('No code found'), findsOneWidget);
+      expect(find.text('Frame the QR code'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('barcodeCropUse')));
+      await settleBusy(tester);
+      expect(saved().barcode, isNotNull);
+      expect(saved().scanned, isNull, reason: 'its photo, as it is');
+    });
+
+    testWidgets("a QR code: framed square, read as QR", (tester) async {
+      final qr =
+          codePng(bc.Barcode.qrCode(), 'https://example.com/pass/9', module: 6);
+      await start(tester);
+      camera.photos.add(qr);
+      await add(tester, DocKind.qr);
+      await settleBusy(tester);
+      await tester.tap(find.byKey(const Key('barcodeCropScan')));
+      await settleBusy(tester);
+      expect(saved().kind, DocKind.qr);
+      expect(
+          saved().scanned, const DocCode('https://example.com/pass/9', 'qr'));
+      // The crop is square.
+      final crop = await tester.runAsync(() => container
+          .read(documentsProvider.notifier)
+          .readPicture(saved().barcode!));
+      final size = await tester.runAsync(() => pictureSize(crop!));
+      expect(size!.width, moreOrLessEquals(size.height, epsilon: 2));
+    });
+
+    testWidgets(
+        'shown: a drag moves it up and down anywhere, not sideways '
+        'unless zoomed past the sides; tap twice and drag zooms; where '
+        "it's left is kept; reset", (tester) async {
+      await start(tester);
+      await card(tester, ean, scanned: const DocCode('4006381333931', 'ean13'));
+      await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+      await tester.pumpAndSettle();
+      final area = find.byKey(const Key('shownBarcode'));
+      Offset centre() =>
+          tester.getCenter(find.byKey(const Key('shownBarcodeCode')));
+      final start0 = centre();
+
+      // Up, from near the edge (not on the code).
+      final edge = tester.getTopLeft(area) + const Offset(20, 300);
+      await tester.dragFrom(edge, const Offset(60, -150));
+      await tester.pumpAndSettle();
+      expect(centre().dy, moreOrLessEquals(start0.dy - 150, epsilon: 2));
+      expect(centre().dx, moreOrLessEquals(start0.dx, epsilon: 1),
+          reason: 'not sideways: it fits');
+      expect(saved().codeView.dy, moreOrLessEquals(-150, epsilon: 2));
+
+      // Tap, then tap and drag down: zoomed in.
+      final at = tester.getCenter(area);
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 100));
+      final zoom = await tester.startGesture(at);
+      for (var k = 0; k < 10; k++) {
+        await zoom.moveBy(const Offset(0, 15));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await zoom.up();
+      await tester.pumpAndSettle();
+      expect(saved().codeView.scale, greaterThan(2));
+      // Zoomed past the sides: sideways now too.
+      await tester.dragFrom(at, const Offset(80, 0));
+      await tester.pumpAndSettle();
+      expect(saved().codeView.dx, greaterThan(40));
+
+      // Shown again: as it was left.
+      final kept = saved().codeView;
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+      await tester.pumpAndSettle();
+      expect(saved().codeView, kept);
+      await tester.tap(find.byKey(const Key('barcodeReset')));
+      await tester.pumpAndSettle();
+      expect(saved().codeView, CodeView.centred);
+      expect(centre(), start0);
+    });
+
+    testWidgets(
+        'the brightness slider: the screen follows, and the last one set '
+        'comes back next time', (tester) async {
+      final calls = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('the_app/screen'), (call) async {
+        if (call.method == 'brightness') calls.add('${call.arguments}');
+        return null;
+      });
+      await start(tester);
+      await card(tester, ean);
+      await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+      await tester.pumpAndSettle();
+      final slider = find.byKey(const Key('barcodeBrightness'));
+      await tester.tapAt(tester.getTopRight(slider) - const Offset(30, -20));
+      await tester.pumpAndSettle();
+      final set = container.read(preferencesProvider).barcodeBrightness;
+      expect(set, greaterThan(0.9));
+      expect(double.parse(calls.last), closeTo(set, 0.001));
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+      await tester.pumpAndSettle();
+      expect(double.parse(calls.last), closeTo(set, 0.001));
+    });
+
+    testWidgets(
+        'the toggle: drawn or its photo; one never read is read first '
+        '(or says so)', (tester) async {
+      await start(tester);
+      await card(tester, ean);
+      await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('drawnCode-ean13')), findsNothing);
+      await tester.tap(find.byKey(const Key('barcodeToggle')));
+      await settleBusy(tester);
+      expect(saved().scanned, const DocCode('4006381333931', 'ean13'));
+      expect(find.byKey(const Key('drawnCode-ean13')), findsOneWidget);
+      expect(find.byKey(const Key('drawnCodeText')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('barcodeToggle')));
+      await tester.pumpAndSettle();
+      expect(saved().showPhoto, isTrue);
+      expect(find.byKey(const Key('drawnCode-ean13')), findsNothing);
+    });
+
+    testWidgets('a photo with no code: the toggle says so', (tester) async {
+      await start(tester);
+      await card(tester, testPng(shade: 180));
+      await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('barcodeToggle')));
+      await settleBusy(tester);
+      expect(find.textContaining('No code found in it'), findsOneWidget);
+      expect(saved().scanned, isNull);
+    });
+
+    testWidgets('QR code sits between Barcode and Ticket', (tester) async {
+      await start(tester, items: [
+        DocItem(
+            id: 'p',
+            kind: DocKind.document,
+            name: 'Passport',
+            createdAt: DateTime(2026, 11, 1)),
+      ]);
+      double x(DocKind k) =>
+          tester.getTopLeft(find.byKey(Key('documentsFilter-${k.name}'))).dx;
+      double y(DocKind k) =>
+          tester.getTopLeft(find.byKey(Key('documentsFilter-${k.name}'))).dy;
+      expect(DocKind.values.indexOf(DocKind.qr),
+          DocKind.values.indexOf(DocKind.barcode) + 1);
+      expect(DocKind.values.last, DocKind.ticket);
+      expect(
+          y(DocKind.qr) > y(DocKind.barcode) ||
+              x(DocKind.qr) > x(DocKind.barcode),
+          isTrue);
+      await tester.tap(find.byTooltip('Add a document'));
+      await tester.pumpAndSettle();
+      final top = [
+        for (final k in DocKind.values)
+          tester.getTopLeft(find.byKey(Key('choice-${k.name}'))).dy,
+      ];
+      expect([...top]..sort(), top, reason: 'in that order');
+    });
   });
 }

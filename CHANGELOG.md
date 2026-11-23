@@ -6,6 +6,29 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.10.0] - 2026-11-23
+
+### Added
+- **Scanning codes** (Documents): the crop step has *Scan this* beside
+  *Use this*. It reads the code in the frame, or in the whole picture if
+  the frame missed it, then draws it sharp with its number under it. If
+  there's no code, it says so and you can frame again. The reader is
+  pure Dart, on the phone: nothing is sent anywhere. It reads EAN-13,
+  EAN-8, UPC-A, Code 128 and QR codes.
+- **QR code**, a new kind between Barcode and Ticket: framed square,
+  read as QR.
+- **The barcode shown** can be moved and zoomed:
+  - A drag anywhere moves it up or down; zoomed in past the sides, also
+    left and right (never past its edges).
+  - Pinch, or tap twice and drag (down zooms in, up out), to zoom.
+  - Where it's left is shown again next time; the button at the bottom
+    right puts it back in the middle.
+  - A brightness slider at the bottom left: 75% at first, then as last
+    set.
+  - A toggle between the drawn code and its photo. One that was never
+    scanned is read when you first switch to it.
+- Search finds a document by its scanned number too.
+
 ## [2.9.2] - 2026-11-23
 
 ### Changed
