@@ -24,7 +24,7 @@ class AutoBackup {
   /// How often; how many are kept in the folder by default, and at most.
   static const every = Duration(days: 1);
   static const keep = 7;
-  static const maxKeep = 14;
+  static const maxKeep = 7;
 
   /// Its files' names start so (the folder may hold other files).
   static const prefix = 'the-app-auto-';

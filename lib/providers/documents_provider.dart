@@ -166,6 +166,7 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
 
   /// The app locked: the list (and its key) dropped from memory.
   void _close() {
+    _cache.clear();
     if (!_encrypted || _key == null) return;
     _index = DocumentIndex.of(state);
     _key = null;
@@ -341,7 +342,27 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
 
   /// A picture's bytes, ready to show; null if it's missing, or sealed
   /// while the list isn't open.
+  ///
+  /// The last few read are kept ([_cacheSize]): the page opened again
+  /// shows them at once (the same bytes, so their decoded images are
+  /// reused too). Dropped when the app locks.
   Future<Uint8List?> readPicture(String id) async {
+    final cached = _cache.remove(id);
+    if (cached != null) return _cache[id] = cached;
+    final bytes = await _readPicture(id);
+    if (bytes != null) {
+      _cache[id] = bytes;
+      while (_cache.length > _cacheSize) {
+        _cache.remove(_cache.keys.first);
+      }
+    }
+    return bytes;
+  }
+
+  static const _cacheSize = 30;
+  final _cache = <String, Uint8List>{};
+
+  Future<Uint8List?> _readPicture(String id) async {
     final bytes = await files.read(id);
     if (bytes == null || !DocumentFiles.isSealed(bytes)) return bytes;
     final key = _key ?? _sessionKey;
@@ -368,6 +389,7 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
   /// Deletes every document and picture (Clear data, a password reset):
   /// not encrypted, and empty, after.
   Future<void> clearAll() async {
+    _cache.clear();
     _encrypted = false;
     _key = null;
     _sealed = null;

@@ -523,8 +523,8 @@ void main() {
   });
 
   testWidgets(
-      "the Documents lock on Security: says it encrypts; on, it's encrypted; "
-      'off, opened again', (tester) async {
+      "the Documents lock on Security: on, it's encrypted; off, opened "
+      'again', (tester) async {
     await start(tester, items: [
       DocItem(
           id: 'p',
@@ -544,7 +544,6 @@ void main() {
     await tester.pumpAndSettle();
     final lock = find.byKey(const Key('pageLock-documents'));
     await reveal(tester, lock);
-    expect(find.textContaining("they can't be recovered"), findsOneWidget);
     await tester.tap(lock);
     await settleBusy(tester);
     await tester
@@ -561,5 +560,59 @@ void main() {
     await tester.pumpAndSettle();
     expect(docs.encrypted, isFalse);
     expect(book().items.single.name, 'Passport');
+  });
+
+  testWidgets(
+      "a card with a barcode: its card's button shows it at once; the "
+      'others have none', (tester) async {
+    await start(tester);
+    final notifier = container.read(documentsProvider.notifier);
+    final code = await tester.runAsync(() => notifier.addPicture(testPng()));
+    notifier.save(DocItem(
+        id: 'c',
+        kind: DocKind.barcode,
+        name: 'Library',
+        barcode: code,
+        createdAt: DateTime(2026, 11, 1)));
+    notifier.save(DocItem(
+        id: 'p',
+        kind: DocKind.document,
+        name: 'Passport',
+        createdAt: DateTime(2026, 11, 1)));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('documentQuickBarcode-p')), findsNothing);
+    await tester.tap(find.byKey(const Key('documentQuickBarcode-c')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('shownBarcode')), findsOneWidget);
+  });
+
+  testWidgets(
+      'the kind chips: a row apart as much as side by side; the search '
+      "icon on its text's line", (tester) async {
+    tester.view.physicalSize = const Size(700, 1600);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    await start(tester, items: [
+      DocItem(
+          id: 'p',
+          kind: DocKind.document,
+          name: 'Passport',
+          createdAt: DateTime(2026, 11, 1)),
+    ]);
+    final chips = [
+      for (final k in DocKind.values)
+        tester.getRect(find.byKey(Key('documentsFilter-${k.name}'))),
+    ];
+    final rows = <double>{for (final c in chips) c.top}.toList()..sort();
+    expect(rows.length, greaterThan(1), reason: 'narrow: two rows');
+    final first = chips.where((c) => c.top == rows[0]).toList()
+      ..sort((a, b) => a.left.compareTo(b.left));
+    final across = first[1].left - first[0].right;
+    final down = rows[1] - first[0].bottom;
+    expect(down, moreOrLessEquals(across, epsilon: 0.5));
+
+    final icon = tester.getCenter(find.byIcon(Icons.search));
+    final field = tester.getCenter(find.byKey(const Key('documentsSearch')));
+    expect(icon.dy, moreOrLessEquals(field.dy, epsilon: 1));
   });
 }

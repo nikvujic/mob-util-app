@@ -116,9 +116,9 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
               },
       );
 
-  /// How many automatic backups to keep (1–14).
+  /// How many automatic backups to keep (1–7).
   void setAutoBackupKeep(int keep) =>
-      state = state.copyWith(autoBackupKeep: keep.clamp(1, 14));
+      state = state.copyWith(autoBackupKeep: keep.clamp(1, 7));
   void autoBackupFailed() => state = state.copyWith(autoBackupFailed: true);
 
   /// Whether the phone was plugged in when last seen.

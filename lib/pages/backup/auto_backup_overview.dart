@@ -23,7 +23,7 @@ class AutoBackupChip extends ConsumerWidget {
             formatBytes(state.bytes),
           ].join(' · ');
     return Padding(
-      padding: const EdgeInsets.fromLTRB(72, 0, 16, 8),
+      padding: const EdgeInsets.fromLTRB(56, 0, 16, 8),
       child: Align(
         alignment: Alignment.centerLeft,
         child: ActionChip(
@@ -120,6 +120,15 @@ class _AutoBackupOverview extends ConsumerWidget {
               ),
             ],
           ),
+          // Fewer than are there: the oldest go at once.
+          if ((state.valueOrNull?.backups.length ?? 0) >= keep)
+            Text(
+              key: const Key('autoBackupKeepNote'),
+              keep <= 1
+                  ? 'Only the newest is kept.'
+                  : 'Fewer deletes the oldest backups in the folder at once.',
+              style: muted.copyWith(fontSize: 12),
+            ),
         ],
       ),
       actions: [

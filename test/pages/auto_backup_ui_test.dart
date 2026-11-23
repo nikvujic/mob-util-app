@@ -99,9 +99,17 @@ void main() {
     expect(find.descendant(of: chip, matching: find.textContaining('KB')),
         findsOneWidget);
 
+    // Its left edge with the text of the folder's line above.
+    final title = tester.getTopLeft(find.descendant(
+        of: find.byKey(const Key('autoBackupFolder')),
+        matching: find.text('Backups')));
+    expect(tester.getTopLeft(chip).dx, moreOrLessEquals(title.dx, epsilon: 1));
+
     await tester.tap(chip);
     await tester.pumpAndSettle();
     expect(find.text('Automatic backups'), findsOneWidget);
+    expect(find.byKey(const Key('autoBackupKeepNote')), findsNothing,
+        reason: 'one backup, keeping 7');
     expect(find.textContaining('KB'), findsWidgets);
     expect(
         tester.widget<Text>(find.byKey(const Key('autoBackupKeep'))).data, '7');

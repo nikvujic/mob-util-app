@@ -598,32 +598,50 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
                     ),
                   ),
                 ),
+              // Full width: Show on its own, Set / Change beside Remove.
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                child: Wrap(
-                  spacing: 8,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (d.barcode != null)
+                    if (d.barcode != null) ...[
                       FilledButton.icon(
                         key: const Key('documentShowBarcode'),
+                        style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44)),
                         icon: const Icon(Icons.qr_code_scanner),
                         label: const Text('Show barcode'),
                         onPressed: _showBarcode,
                       ),
-                    OutlinedButton.icon(
-                      key: const Key('documentSetBarcode'),
-                      icon: const Icon(Icons.crop),
-                      label: Text(
-                          d.barcode == null ? 'Set barcode' : 'Change barcode'),
-                      onPressed: d.pictures.isEmpty ? null : _setBarcode,
+                      const SizedBox(height: 8),
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            key: const Key('documentSetBarcode'),
+                            style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(44)),
+                            icon: const Icon(Icons.crop),
+                            label: Text(d.barcode == null
+                                ? 'Set barcode'
+                                : 'Change barcode'),
+                            onPressed: d.pictures.isEmpty ? null : _setBarcode,
+                          ),
+                        ),
+                        if (d.barcode != null) ...[
+                          const SizedBox(width: 8),
+                          OutlinedButton(
+                            key: const Key('documentRemoveBarcode'),
+                            style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(0, 44)),
+                            onPressed: () =>
+                                _change(_draft.copyWith(barcode: () => null)),
+                            child: const Text('Remove'),
+                          ),
+                        ],
+                      ],
                     ),
-                    if (d.barcode != null)
-                      TextButton(
-                        key: const Key('documentRemoveBarcode'),
-                        onPressed: () =>
-                            _change(_draft.copyWith(barcode: () => null)),
-                        child: const Text('Remove'),
-                      ),
                   ],
                 ),
               ),
@@ -686,16 +704,18 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
             ),
             if (saved)
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    key: const Key('deleteDocument'),
-                    style: TextButton.styleFrom(foregroundColor: colors.danger),
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text('Delete document'),
-                    onPressed: _delete,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                // A full button, as Delete person.
+                child: OutlinedButton.icon(
+                  key: const Key('deleteDocument'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.danger,
+                    side: BorderSide(color: colors.danger),
+                    minimumSize: const Size.fromHeight(44),
                   ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Delete document'),
+                  onPressed: _delete,
                 ),
               ),
           ],

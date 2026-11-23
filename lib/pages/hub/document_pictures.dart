@@ -23,13 +23,13 @@ class DocThumb extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
+    final placeholder = ColoredBox(
+      key: const Key('docThumbPlaceholder'),
+      color: colors.background,
+      child: Center(child: Icon(Icons.image_outlined, color: colors.textHint)),
+    );
     final bytes = ref.watch(documentPictureProvider(picture.id)).valueOrNull;
-    if (bytes == null) {
-      return ColoredBox(
-        color: colors.background,
-        child: Icon(Icons.image_outlined, color: colors.textHint),
-      );
-    }
+    if (bytes == null) return placeholder;
     return RotatedBox(
       quarterTurns: picture.turns,
       child: Image.memory(
@@ -37,6 +37,22 @@ class DocThumb extends ConsumerWidget {
         cacheWidth: cacheWidth,
         fit: fit,
         gaplessPlayback: true,
+        // Read but not yet decoded: the placeholder still, then the
+        // picture fades in (no empty gap between them).
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded) return child;
+          return Stack(
+            fit: StackFit.passthrough,
+            children: [
+              if (frame == null) Positioned.fill(child: placeholder),
+              AnimatedOpacity(
+                opacity: frame == null ? 0 : 1,
+                duration: const Duration(milliseconds: 150),
+                child: child,
+              ),
+            ],
+          );
+        },
         errorBuilder: (_, __, ___) => ColoredBox(
           color: colors.background,
           child: Icon(Icons.broken_image_outlined, color: colors.textHint),

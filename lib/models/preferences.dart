@@ -115,7 +115,7 @@ class Preferences {
   final DateTime? lastAutoBackupAt;
   final bool autoBackupFailed;
 
-  /// How many automatic backups the folder keeps (1–14).
+  /// How many automatic backups the folder keeps (1–7).
   final int autoBackupKeep;
 
   /// How many pictures each automatic backup holds, by file name (for the
@@ -480,7 +480,7 @@ class Preferences {
             : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
         autoBackupKeep:
-            ((json['autoBackupKeep'] as num?)?.toInt() ?? 7).clamp(1, 14),
+            ((json['autoBackupKeep'] as num?)?.toInt() ?? 7).clamp(1, 7),
         autoBackupPictures: {
           for (final MapEntry(:key, :value)
               in (json['autoBackupPictures'] as Map<String, dynamic>? ??

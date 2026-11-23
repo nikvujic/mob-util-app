@@ -89,7 +89,7 @@ its pictures (**Set barcode**: pick a picture, crop).
   swapped in when complete; an interrupted run resumes on the next start.
 - Changing the master password re-wraps the data key only (nothing is
   re-encrypted). A forgotten password makes a locked page unrecoverable,
-  as locked notes; the lock switch says so.
+  as locked notes and every other lock (a reset deletes what they hold).
 - Removing the master password follows what locked notes do: the page is
   decrypted first (or the removal refused until it's unlocked), whichever
   the existing flow does.
@@ -122,7 +122,7 @@ its pictures (**Set barcode**: pick a picture, crop).
 - **Automatic backups** (to a folder, daily):
   - On the Backup page, a chip: *5 backups · 23 pictures · 120 MB*.
   - A tap opens an overview: each backup with its date and size, and how
-    many to keep (1–14, 7 by default).
+    many to keep (1–7, 7 by default; fewer deletes the oldest at once).
   - Written under a temporary name and renamed when complete; the last
     backup's time is updated only then. A backup interrupted by the app
     closing is cleaned up on the next start and simply runs again.

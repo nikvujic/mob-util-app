@@ -5,6 +5,7 @@ import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/document_item.dart';
 import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/pages/hub/barcode_pages.dart';
 import 'package:the_app/pages/hub/document_page.dart';
 import 'package:the_app/pages/hub/document_pictures.dart';
 import 'package:the_app/pages/hub/page_gate.dart';
@@ -110,39 +111,68 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                    child: TextField(
-                      key: const Key('documentsSearch'),
-                      selectionControls: lowHandles,
-                      controller: _search,
-                      decoration: InputDecoration(
-                        hintText: 'Search name, shop, note',
-                        prefixIcon: const Icon(Icons.search),
-                        isDense: true,
-                        suffixIcon: _query.isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: 'Clear',
-                                icon: const Icon(Icons.close),
-                                onPressed: () => setState(() {
-                                  _search.clear();
-                                  _query = '';
-                                }),
-                              ),
+                    // The icon beside the field, both centred on one line
+                    // (as the field's own prefix it sat off its text).
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colors.card,
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      onChanged: (text) => setState(() => _query = text),
+                      padding: const EdgeInsets.only(left: 14),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, color: colors.textSecondary),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              key: const Key('documentsSearch'),
+                              selectionControls: lowHandles,
+                              controller: _search,
+                              textInputAction: TextInputAction.search,
+                              decoration: const InputDecoration(
+                                hintText: 'Search name, shop, note',
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                filled: false,
+                                isDense: true,
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              onChanged: (text) =>
+                                  setState(() => _query = text),
+                            ),
+                          ),
+                          if (_query.isEmpty)
+                            const SizedBox(width: 14)
+                          else
+                            IconButton(
+                              tooltip: 'Clear',
+                              icon: const Icon(Icons.close),
+                              onPressed: () => setState(() {
+                                _search.clear();
+                                _query = '';
+                              }),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+                    // As far apart down as across: a chip on a new row
+                    // stays one of the group.
                     child: Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
                         for (final kind in DocKind.values)
                           FilterChip(
                             key: Key('documentsFilter-${kind.name}'),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                             avatar: Icon(kind.icon, size: 16),
                             label: Text(kind.label),
                             selected: _kind == kind,
@@ -191,6 +221,13 @@ class _DocumentsPageState extends ConsumerState<DocumentsPage> {
                           reorderable: reorderable,
                           onTap: () => openDocumentPage(
                               context, DocumentPage(documentId: d.id)),
+                          onShowBarcode: d.barcode == null
+                              ? null
+                              : () => openDocumentPage(
+                                    context,
+                                    ShowBarcodePage(
+                                        barcodeId: d.barcode!, title: d.name),
+                                  ),
                         ),
                       );
                     },
@@ -221,6 +258,9 @@ class DocumentCard extends StatelessWidget {
   final bool reorderable;
   final VoidCallback onTap;
 
+  /// Its barcode shown at once (a card or a ticket with one); null: none.
+  final VoidCallback? onShowBarcode;
+
   const DocumentCard({
     super.key,
     required this.document,
@@ -228,6 +268,7 @@ class DocumentCard extends StatelessWidget {
     required this.today,
     required this.reorderable,
     required this.onTap,
+    this.onShowBarcode,
   });
 
   @override
@@ -315,6 +356,15 @@ class DocumentCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // Straight to its barcode, at the till.
+              if (onShowBarcode != null)
+                IconButton(
+                  key: Key('documentQuickBarcode-${d.id}'),
+                  tooltip: 'Show barcode',
+                  icon: const Icon(Icons.qr_code_scanner),
+                  color: colors.accent,
+                  onPressed: onShowBarcode,
+                ),
             ],
           ),
         ),

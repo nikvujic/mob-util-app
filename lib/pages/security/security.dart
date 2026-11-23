@@ -303,14 +303,6 @@ class SecurityPage extends ConsumerWidget {
                       : Icons.lock_open_outlined,
                 ),
                 title: Text(page.label),
-                // Documents' lock encrypts: say what that means.
-                subtitle: page == HubTool.documents
-                    ? Text(
-                        'Encrypted with your master password; if it\'s '
-                        'forgotten, they can\'t be recovered',
-                        style: TextStyle(color: context.colors.textSecondary),
-                      )
-                    : null,
                 value: pageLocks.contains(page),
                 onChanged: (lock) =>
                     _setPageLock(context, ref, page, lock: lock),

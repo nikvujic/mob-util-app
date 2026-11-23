@@ -231,7 +231,7 @@ void main() {
       expect(state.bytes, folder.files.values.fold(0, (a, b) => a + b.length));
     });
 
-    test('how many to keep: 1 to 14, fewer deletes the oldest', () async {
+    test('how many to keep: 1 to 7, fewer deletes the oldest', () async {
       final c = phone();
       final auto = c.read(autoBackupProvider);
       await auto.pickFolder();
@@ -251,10 +251,10 @@ void main() {
       await auto.setKeep(0);
       expect(c.read(preferencesProvider).autoBackupKeep, 1);
       await auto.setKeep(40);
-      expect(c.read(preferencesProvider).autoBackupKeep, 14);
+      expect(c.read(preferencesProvider).autoBackupKeep, 7);
       now = now.add(const Duration(days: 1));
       await auto.run();
-      expect(folder.written.last.keep, 14);
+      expect(folder.written.last.keep, 7);
     });
 
     test("a backup that couldn't be written doesn't move the last time",

@@ -6,6 +6,29 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.9.1] - 2026-11-23
+
+### Added
+- **Documents**: a card with a barcode has a button that shows it
+  straight away, without opening the card.
+
+### Changed
+- **Documents**:
+  - *Show barcode* and *Set / Change barcode* take the full width
+    (*Remove* beside Change).
+  - *Delete document* is a full red outlined button, as on People.
+  - The search field's icon and text sit on one line.
+  - The kind chips are as far apart down as across, so one on a new row
+    stays part of the group.
+  - A picture shows its placeholder until it's ready, then fades in (it
+    could leave an empty gap). The last ones shown are kept, so the page
+    opened again shows them at once; they're dropped when the app locks.
+- **Security**: the Documents lock no longer warns that a forgotten
+  password loses them; that's so for everything locked.
+- **Automatic backups**: keep at most 7. The chip lines up with the
+  text above it. The overview says that keeping fewer deletes the oldest
+  at once.
+
 ## [2.9.0] - 2026-11-23
 
 ### Added
