@@ -197,3 +197,11 @@ app still reads every version, so an update can never lose existing data.
 - `v16/storage/notifications.json` — the notifications' history (notifications.json version 1; this phone only, not in backups):
   Iron 🩸 (medicine) on 12 Oct 18:00 UTC, "Zubar, čet" (planner, to 13
   Oct 11:00, `planner|2026-10-13|660`) on 13 Oct 08:50 UTC; cleared 12 Oct 19:00 UTC.
+- `v34/storage/documents.json`, `v34/storage/documents/` — the Documents
+  page (documents.json version 1): a passport (expiry 3 Mar 2031, a
+  reminder six months before, its second picture turned once), a receipt
+  with a warranty (Tehnika, 449 €, until 23 Nov 2028) and a library card
+  with its barcode crop; five small pictures, one file each.
+- `v34/backup-plain.zip`, `v34/backup-encrypted.zip` — backups (version
+  34, a zip: `backup.json` and `pictures/<id>`) with them and a note
+  (password: `fixture password`).

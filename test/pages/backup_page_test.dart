@@ -69,7 +69,7 @@ void main() {
     await tapExport(tester);
 
     expect(find.text('Backup saved'), findsOneWidget);
-    final backup = Backup.decode(utf8.decode(files.saved.single.bytes));
+    final backup = Backup.decode(backupText(files.saved.single.bytes));
     expect(backup.notes.single.title, 'Groceries');
   });
 
@@ -149,8 +149,8 @@ void main() {
       expect(find.text('Encrypted backup saved'), findsOneWidget);
 
       final file = files.saved.single;
-      expect(file.fileName, endsWith('-encrypted.json'));
-      final source = utf8.decode(file.bytes);
+      expect(file.fileName, endsWith('-encrypted.zip'));
+      final source = backupText(file.bytes);
       expect(source, isNot(contains('Groceries')));
 
       final parsed = BackupFile.parse(source) as EncryptedBackupFile;

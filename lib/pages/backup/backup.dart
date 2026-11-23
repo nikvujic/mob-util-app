@@ -6,6 +6,7 @@ import 'package:the_app/core/crypto.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/core/clock.dart';
+import 'package:the_app/pages/backup/auto_backup_overview.dart';
 import 'package:the_app/pages/backup/restore_part.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/providers/auto_backup_provider.dart';
@@ -119,7 +120,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     final name = preferences.autoBackupFolderName ?? 'the folder';
     if (preferences.autoBackupFolder == null) {
       return 'Once a day when the app is opened, into a folder you pick '
-          '(the last 7 are kept there)';
+          '(the last ${preferences.autoBackupKeep} are kept there)';
     }
     if (preferences.autoBackupFailed) {
       return "Couldn't write to $name: pick it again";
@@ -490,6 +491,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
               ),
               onTap: _busy ? null : _pickAutoFolder,
             ),
+          if (preferences.autoBackupFolder != null) const AutoBackupChip(),
           SwitchListTile(
             key: const Key('backupReminder'),
             secondary: const Icon(Icons.notifications_outlined),
@@ -507,7 +509,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             child: Text(
               'Keep a backup somewhere other than this phone, such as Google '
               'Drive, so you can restore your data on a new phone or after '
-              'reinstalling the app.',
+              "reinstalling the app. Android's own backup to your Google "
+              'account leaves Documents out: they move to a new phone only '
+              'with a backup file.',
               style: TextStyle(color: context.colors.textMuted),
             ),
           ),
@@ -537,7 +541,7 @@ class _ExportKindDialog extends StatelessWidget {
             leading: const Icon(Icons.description_outlined),
             title: const Text('Plain file'),
             subtitle: Text(
-              'Readable in any text editor — by anyone who has the file',
+              'Readable by anyone who has the file',
               style: TextStyle(color: context.colors.textSecondary),
             ),
             onTap: () => choose(_ExportKind.plain),

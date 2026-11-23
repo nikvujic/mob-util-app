@@ -149,6 +149,31 @@ an end in minutes from midnight; `freeSlots` gives the gaps of a day, and
 format version (`AppStorage.plannerFormatVersion`), so an older app sets a
 newer planner file aside instead of dropping the times.
 
+## Backup files
+
+`data/backup.dart`: since version 34 a backup is a zip (`Backup.zip`):
+the JSON document (`Backup.encode`, or `encodeEncrypted` with the
+master password's key) as `backup.json`, and the Documents page's
+pictures as `pictures/<id>`, stored uncompressed (they're JPEGs), each
+sealed with the same key in an encrypted backup
+(`DocumentFiles.sealBytes`). `BackupFile.read(bytes)` tells the formats
+apart by the first bytes (`PK\x03\x04`: a zip; else the JSON document
+alone, as every version before 34 wrote it) and only takes picture
+entries whose names are plain ids. `BackupExporter.snapshot` is the
+data as it is now, without pictures (Undo needs no more: restoring never
+deletes a picture); `full` adds the pictures for writing a file.
+
+## Documents' storage
+
+`documents.json` (version 1) holds the list; `data/document_files.dart`
+the pictures, one file each in `documents/`, written to `<id>.tmp` and
+renamed (a `.tmp` left by a crash is deleted when listing). A picture is
+never changed once stored (turning it is a field of the document), so
+ids can be shared (a restored copy) and a restore writes only the ids
+missing. `DocumentsNotifier.cleanUp`, on every start, deletes the files
+no document refers to, unless `documents.json` couldn't be read (then
+its pictures are kept for it).
+
 ## Restoring part of a backup (D10)
 
 `BackupImporter.restorePart` takes the ids picked, by kind
@@ -165,7 +190,11 @@ it was before. The page picking them is `pages/backup/restore_part.dart`.
 
 ## Android's own backup
 
-The app keeps Android's Auto Backup on (the default):
+The app keeps Android's Auto Backup on (the default), except for the
+Documents page (`documents.json` and `documents/`, excluded by
+`res/xml/backup_rules.xml` and `data_extraction_rules.xml`): its
+pictures would soon pass Auto Backup's 25 MB limit, over which nothing
+at all is backed up. Otherwise:
 if Google backup is on in the phone's settings, Android copies the app's
 files to a hidden area of the Google account, end-to-end encrypted with
 the phone's screen lock (Android 9+), and puts them back when the app is
@@ -303,14 +332,20 @@ and the app closes the page when it locks while on Notes.
 ## Automatic backup
 
 `providers/auto_backup_provider.dart` (`AutoBackup.run`) writes a plain
-snapshot (`BackupExporter.snapshot`) once a day into the folder picked,
+backup (`BackupExporter.full`, zipped) once a day into the folder picked,
 when `HomeScreen` starts or comes back; not while a section is closed.
 The folder is Android's: `data/backup_folder.dart` talks to
 `MainActivity` over `the_app/backup_folder` (`pick`: the folder picker,
-with a persisted permission; `write`: a new document, then the oldest of
-its own files beyond 7 deleted, off the main thread). The folder, its
-name, the last time and a failure flag are in `Preferences` (this phone
-only). Tests use `FakeBackupFolder`.
+with a persisted permission; `write`: a new document named
+`<name>.partial`, renamed to `<name>` once written, then leftovers and
+the oldest beyond `keep` deleted; `list`: the finished backups with
+their sizes and times; `prune`: the oldest beyond `keep` deleted; all
+off the main thread). The folder, its name, the last time (moved only
+when a write succeeds), a failure flag, how many to keep (1–14) and each
+backup's picture count are in `Preferences` (this phone only).
+`autoBackupFolderProvider` reads the folder for the Backup page's chip
+and overview. Tests use `FakeBackupFolder`, which keeps its files as the
+real folder does.
 
 ## Recipes
 

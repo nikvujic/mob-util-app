@@ -6,6 +6,23 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-11-23
+
+### Changed
+- **Backups are one zip file** (`.zip`), ready for the Documents page's
+  pictures: the backup itself inside, as before, and the pictures beside
+  it. Every older backup (`.json`, plain or encrypted) still restores.
+- **Automatic backups** are written under a temporary name and renamed
+  once complete, so one cut short by the app closing never counts; it's
+  deleted and simply runs again.
+
+### Added
+- **Automatic backups overview**: a chip under the folder (*5 backups ·
+  23 pictures · 120 MB*) opens each backup with its date and size, and
+  how many to keep (1 to 14, 7 by default).
+- The Backup page notes that Android's own backup to the Google account
+  leaves Documents out: they move to a new phone only with a backup file.
+
 ## [2.5.4] - 2026-11-22
 
 ### Fixed

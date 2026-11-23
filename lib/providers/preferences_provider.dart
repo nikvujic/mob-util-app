@@ -94,12 +94,31 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
         autoBackupFailed: false,
       );
 
-  /// An automatic backup written at [at], or failed.
-  void autoBackedUp(DateTime at) => state = state.copyWith(
+  /// An automatic backup written at [at] (named [name], holding
+  /// [pictures] pictures; [kept] are the folder's backups now), or failed.
+  void autoBackedUp(
+    DateTime at, {
+    String? name,
+    int pictures = 0,
+    Iterable<String>? kept,
+  }) =>
+      state = state.copyWith(
         lastAutoBackupAt: () => at,
         lastBackupAt: () => at,
         autoBackupFailed: false,
+        autoBackupPictures: name == null
+            ? null
+            : {
+                for (final MapEntry(:key, :value)
+                    in state.autoBackupPictures.entries)
+                  if (kept == null || kept.contains(key)) key: value,
+                name: pictures,
+              },
       );
+
+  /// How many automatic backups to keep (1–14).
+  void setAutoBackupKeep(int keep) =>
+      state = state.copyWith(autoBackupKeep: keep.clamp(1, 14));
   void autoBackupFailed() => state = state.copyWith(autoBackupFailed: true);
 
   /// Whether the phone was plugged in when last seen.

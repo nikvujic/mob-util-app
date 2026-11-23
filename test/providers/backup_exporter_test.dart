@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/app_info.dart';
@@ -46,9 +44,9 @@ void main() {
     expect(await exporter().export(), ExportResult.saved);
 
     final file = files.saved.single;
-    expect(file.fileName, 'the-app-backup-2026-10-08-0905.json');
+    expect(file.fileName, 'the-app-backup-2026-10-08-0905.zip');
 
-    final backup = Backup.decode(utf8.decode(file.bytes));
+    final backup = Backup.decode(backupText(file.bytes));
     expect(backup.appVersion, '0.7.0 (8)');
     expect(backup.createdAt.isAtSameMomentAs(now), isTrue);
     expect(backup.notes.map((n) => n.toJson()),
@@ -89,9 +87,9 @@ void main() {
     expect(await exporter().exportEncrypted(key), ExportResult.saved);
 
     final file = files.saved.single;
-    expect(file.fileName, 'the-app-backup-2026-10-08-0905-encrypted.json');
+    expect(file.fileName, 'the-app-backup-2026-10-08-0905-encrypted.zip');
     final parsed =
-        BackupFile.parse(utf8.decode(file.bytes)) as EncryptedBackupFile;
+        BackupFile.parse(backupText(file.bytes)) as EncryptedBackupFile;
     final backup = await parsed.open('master password');
     expect(backup!.notes.map((n) => n.title), ['Second', 'First']);
     expect(await parsed.open('wrong'), isNull);

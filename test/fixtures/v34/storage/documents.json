@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "id": "d1",
+      "kind": "document",
+      "name": "Pasoš 🛂",
+      "note": "Obnoviti lično",
+      "pictures": [
+        {
+          "id": "1764000000000000-0"
+        },
+        {
+          "id": "1764000000000001-0",
+          "turns": 1
+        }
+      ],
+      "expires": "2031-03-03",
+      "remind": "sixMonths",
+      "createdAt": "2026-11-23T09:00:00.000Z"
+    },
+    {
+      "id": "d2",
+      "kind": "receipt",
+      "name": "Veš mašina",
+      "pictures": [
+        {
+          "id": "1764000000000002-0"
+        }
+      ],
+      "shop": "Tehnika",
+      "price": "449 €",
+      "warranty": true,
+      "warrantyFrom": "2026-11-23",
+      "warrantyTo": "2028-11-23",
+      "remind": "month",
+      "createdAt": "2026-11-23T10:00:00.000Z"
+    },
+    {
+      "id": "d3",
+      "kind": "barcode",
+      "name": "Library card",
+      "pictures": [
+        {
+          "id": "1764000000000003-0"
+        }
+      ],
+      "barcode": "1764000000000004-0",
+      "createdAt": "2026-11-23T11:00:00.000Z"
+    }
+  ]
+}

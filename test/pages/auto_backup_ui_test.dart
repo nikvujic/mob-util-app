@@ -81,4 +81,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(folder.written, isEmpty);
   });
+
+  testWidgets(
+      'the chip counts the backups in the folder; its overview lists them '
+      'and sets how many to keep', (tester) async {
+    final folder =
+        FakeBackupFolder(picks: (uri: 'content://tree/x', name: 'Backups'));
+    final container =
+        await pumpApp(tester, clock: () => now, backupFolder: folder);
+    await openBackup(tester);
+    await tester.tap(find.byKey(const Key('autoBackup')));
+    await tester.pumpAndSettle();
+    final chip = find.byKey(const Key('autoBackupChip'));
+    await tester.scrollUntilVisible(chip, 100);
+    expect(find.descendant(of: chip, matching: find.textContaining('1 backup')),
+        findsOneWidget);
+    expect(find.descendant(of: chip, matching: find.textContaining('KB')),
+        findsOneWidget);
+
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    expect(find.text('Automatic backups'), findsOneWidget);
+    expect(find.textContaining('KB'), findsWidgets);
+    expect(
+        tester.widget<Text>(find.byKey(const Key('autoBackupKeep'))).data, '7');
+    await tester.tap(find.byKey(const Key('autoBackupKeepLess')));
+    await tester.pumpAndSettle();
+    expect(
+        tester.widget<Text>(find.byKey(const Key('autoBackupKeep'))).data, '6');
+    expect(container.read(preferencesProvider).autoBackupKeep, 6);
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(text(tester), contains('Backups'));
+  });
 }

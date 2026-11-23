@@ -111,6 +111,13 @@ class Preferences {
   final DateTime? lastAutoBackupAt;
   final bool autoBackupFailed;
 
+  /// How many automatic backups the folder keeps (1–14).
+  final int autoBackupKeep;
+
+  /// How many pictures each automatic backup holds, by file name (for the
+  /// Backup page's count).
+  final Map<String, int> autoBackupPictures;
+
   /// The phone was plugged in when last seen (Pip's charging
   /// station); so after a restart, time away plugged in still counts as
   /// charging. This phone only.
@@ -159,6 +166,8 @@ class Preferences {
     this.autoBackupFolderName,
     this.lastAutoBackupAt,
     this.autoBackupFailed = false,
+    this.autoBackupKeep = 7,
+    this.autoBackupPictures = const {},
     this.pipPlugged = false,
     this.shopSorted = false,
     this.hidePeopleNotes = false,
@@ -261,6 +270,8 @@ class Preferences {
     String? Function()? autoBackupFolderName,
     DateTime? Function()? lastAutoBackupAt,
     bool? autoBackupFailed,
+    int? autoBackupKeep,
+    Map<String, int>? autoBackupPictures,
     bool? pipPlugged,
     bool? shopSorted,
     bool? hidePeopleNotes,
@@ -318,6 +329,8 @@ class Preferences {
             ? this.lastAutoBackupAt
             : lastAutoBackupAt(),
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
+        autoBackupKeep: autoBackupKeep ?? this.autoBackupKeep,
+        autoBackupPictures: autoBackupPictures ?? this.autoBackupPictures,
         pipPlugged: pipPlugged ?? this.pipPlugged,
         shopSorted: shopSorted ?? this.shopSorted,
         hidePeopleNotes: hidePeopleNotes ?? this.hidePeopleNotes,
@@ -373,6 +386,9 @@ class Preferences {
         if (lastAutoBackupAt != null)
           'lastAutoBackupAt': lastAutoBackupAt!.toUtc().toIso8601String(),
         'autoBackupFailed': autoBackupFailed,
+        if (autoBackupKeep != 7) 'autoBackupKeep': autoBackupKeep,
+        if (autoBackupPictures.isNotEmpty)
+          'autoBackupPictures': autoBackupPictures,
         if (pipPlugged) 'pipPlugged': true,
         if (shopSorted) 'shopSorted': true,
         if (hidePeopleNotes) 'hidePeopleNotes': true,
@@ -441,6 +457,15 @@ class Preferences {
             ? null
             : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
+        autoBackupKeep:
+            ((json['autoBackupKeep'] as num?)?.toInt() ?? 7).clamp(1, 14),
+        autoBackupPictures: {
+          for (final MapEntry(:key, :value)
+              in (json['autoBackupPictures'] as Map<String, dynamic>? ??
+                      const {})
+                  .entries)
+            if (value is num) key: value.toInt(),
+        },
         pipPlugged: json['pipPlugged'] as bool? ?? false,
         shopSorted: json['shopSorted'] as bool? ?? false,
         hidePeopleNotes: json['hidePeopleNotes'] as bool? ?? false,

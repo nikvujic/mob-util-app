@@ -7,14 +7,16 @@
     <uses-permission
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32"/>
-    <!-- Round 70: only for what's turned on in Internet Access (for now
+    <!-- Only for what's turned on in Internet Access (for now
          the weather, from Open-Meteo); nothing is fetched otherwise. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="The App"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-        <!-- No empty taskAffinity (Round 32): with one, a launch from
+        android:icon="@mipmap/ic_launcher"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules">
+        <!-- No empty taskAffinity: with one, a launch from
              outside the home screen (the installer's Open after an
              update, a notification) started a second task, so the app
              showed twice in the recent apps. -->
@@ -54,7 +56,7 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
-        <!-- Spotify in the morning (Round 93): its alarm, set again after
+        <!-- Spotify in the morning : its alarm, set again after
              a restart or an update (MorningMusic.kt). -->
         <receiver
             android:exported="false"

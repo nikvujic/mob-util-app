@@ -103,6 +103,8 @@ final _plainScroll = RegExp(
   r'(\.\w+)?\(',
 );
 const plainScrollAllowed = {
+  // The automatic backups' overview: a short list in a centred dialog.
+  'pages/backup/auto_backup_overview.dart',
   // People's panel and pickers: the lower half of the
   // screen and bottom sheets, already in thumb reach.
   'pages/hub/people_panel.dart',

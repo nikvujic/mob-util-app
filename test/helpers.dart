@@ -1,3 +1,4 @@
+import 'package:archive/archive.dart';
 import 'dart:convert';
 import 'dart:async';
 
@@ -25,6 +26,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/models/pip_life.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/preferences.dart';
+import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_folder.dart';
 import 'package:the_app/data/power.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
@@ -197,6 +199,10 @@ Future<void> leaveNote(WidgetTester tester, {bool? save}) async {
     await tester.pumpAndSettle();
   }
 }
+
+/// The backup document (`backup.json`) inside a backup file's zip.
+String backupText(List<int> zip) => utf8.decode(
+    ZipDecoder().decodeBytes(zip).findFile(Backup.documentEntry)!.content);
 
 /// Stands in for the system file dialogs. Saving: by default the user
 /// "saves"; set [cancel] to simulate closing the dialog, [error] to make
@@ -524,13 +530,18 @@ class FakePower implements PowerSource {
 }
 
 /// A folder for automatic backups in tests: [picks] what
-/// [pick] returns, [works] whether writing does; records what's written.
+/// [pick] returns, [works] whether writing does; records what's written
+/// ([text]: the backup document inside the zip) and keeps [files] as the
+/// real folder does (the newest `keep`).
 class FakeBackupFolder implements BackupFolder {
   PickedFolder? picks;
   bool works;
   final List<
           ({String folder, String name, String text, String prefix, int keep})>
       written = [];
+
+  /// The folder's files, by name.
+  final Map<String, Uint8List> files = {};
 
   FakeBackupFolder({this.picks, this.works = true});
 
@@ -546,13 +557,43 @@ class FakeBackupFolder implements BackupFolder {
     required int keep,
   }) async {
     if (!works) return false;
+    final archive = ZipDecoder().decodeBytes(bytes);
     written.add((
       folder: folder,
       name: name,
-      text: utf8.decode(bytes),
+      text: utf8.decode(archive.findFile(Backup.documentEntry)!.content),
       prefix: prefix,
       keep: keep,
     ));
+    files[name] = bytes;
+    await prune(folder: folder, prefix: prefix, keep: keep);
+    return true;
+  }
+
+  @override
+  Future<List<FolderBackup>?> list({
+    required String folder,
+    required String prefix,
+  }) async {
+    if (!works) return null;
+    final names = files.keys.where((n) => n.startsWith(prefix)).toList()
+      ..sort((a, b) => b.compareTo(a));
+    return [
+      for (final n in names)
+        (name: n, bytes: files[n]!.length, modified: DateTime(2026, 11, 23)),
+    ];
+  }
+
+  @override
+  Future<bool> prune({
+    required String folder,
+    required String prefix,
+    required int keep,
+  }) async {
+    final all = await list(folder: folder, prefix: prefix) ?? const [];
+    for (final b in all.skip(keep)) {
+      files.remove(b.name);
+    }
     return true;
   }
 }

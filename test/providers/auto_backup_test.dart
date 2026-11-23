@@ -49,7 +49,7 @@ void main() {
     expect(preferences().autoBackupFolderName, 'Backups');
     final file = folder.written.single;
     expect(file.folder, 'content://tree/Backups');
-    expect(file.name, 'the-app-auto-2026-10-14-0905.json');
+    expect(file.name, 'the-app-auto-2026-10-14-0905.zip');
     expect(file.prefix, AutoBackup.prefix);
     expect(file.keep, 7);
     final backup = (BackupFile.parse(file.text) as PlainBackupFile).backup;

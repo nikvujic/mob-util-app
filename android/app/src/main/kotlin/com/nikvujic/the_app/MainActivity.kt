@@ -28,36 +28,38 @@ class MainActivity: FlutterFragmentActivity() {
     private var fill = 0
     private var fanfare = 0
 
-    /// The notification sounds (Round 31), heard when picking one.
+    /// The notification sounds, heard when picking one.
     private val notifySounds = mutableMapOf<String, Int>()
 
-    /// The hold-to-take sound playing (Round 24), to stop on letting go.
+    /// The hold-to-take sound playing, to stop on letting go.
     private var filling = 0
 
     /// The Placard's inflating sound while it plays (0: none), to stop it.
     private var inflating = 0
 
-    /// Automatic backup (Round 39): the folder picker's answer goes here.
+    /// Automatic backup: the folder picker's answer goes here.
     private var folderPicked: MethodChannel.Result? = null
     private val pickFolder = registerForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri -> folderChosen(uri) }
 
     companion object {
+        /// The ending of a backup still being written.
+        private const val PARTIAL = ".partial"
+
         private const val CLICK_VOLUME = 0.35f
-        /// The medicine's gulp and Placard's sounds at full volume
-        /// (Round 24: louder; the files are louder too).
+        /// The medicine's gulp and Placard's sounds at full volume (the
+        /// files are loud too).
         private const val DONE_VOLUME = 1f
         private const val PLACARD_VOLUME = 1f
 
-        /// The pop stays as quiet as before (Round 25: only the inflating
-        /// got louder).
+        /// The pop stays quiet; only the inflating is loud.
         private const val POP_VOLUME = 0.3f
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        // Pip's charging station (Round 44): whether the phone is plugged
+        // Pip's charging station: whether the phone is plugged
         // in (no permission needed), now and as it changes while the app
         // is open.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/power")
@@ -93,7 +95,7 @@ class MainActivity: FlutterFragmentActivity() {
                     receiver = null
                 }
             })
-        // Spotify in the morning (Round 93): the page's settings, kept for
+        // Spotify in the morning: the page's settings, kept for
         // the alarm (MorningMusic.kt), which is set again from them.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/morning_music")
             .setMethodCallHandler { call, result ->
@@ -111,7 +113,7 @@ class MainActivity: FlutterFragmentActivity() {
                 MorningMusic.schedule(this)
                 result.success(null)
             }
-        // A recipe open (Round 42): the screen stays on while the app is in
+        // A recipe open: the screen stays on while the app is in
         // front (Android lets it go dark again in the background).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/screen")
             .setMethodCallHandler { call, result ->
@@ -126,7 +128,7 @@ class MainActivity: FlutterFragmentActivity() {
                 }
                 result.success(null)
             }
-        // Automatic backup to a folder picked once (Round 39).
+        // Automatic backup to a folder picked once.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/backup_folder")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -155,13 +157,54 @@ class MainActivity: FlutterFragmentActivity() {
                             }.start()
                         }
                     }
+                    "list" -> {
+                        val folder = call.argument<String>("folder")
+                        val prefix = call.argument<String>("prefix") ?: ""
+                        if (folder == null) {
+                            result.success(null)
+                        } else {
+                            Thread {
+                                val found = try {
+                                    val uri = Uri.parse(folder)
+                                    dropPartials(uri, prefix)
+                                    backupsIn(uri, prefix).map {
+                                        mapOf(
+                                            "name" to it.name,
+                                            "bytes" to it.bytes,
+                                            "modified" to it.modified
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    null
+                                }
+                                runOnUiThread { result.success(found) }
+                            }.start()
+                        }
+                    }
+                    "prune" -> {
+                        val folder = call.argument<String>("folder")
+                        val prefix = call.argument<String>("prefix") ?: ""
+                        val keep = call.argument<Int>("keep") ?: 7
+                        if (folder == null) {
+                            result.success(false)
+                        } else {
+                            Thread {
+                                val ok = try {
+                                    prune(Uri.parse(folder), prefix, keep)
+                                    true
+                                } catch (e: Exception) {
+                                    false
+                                }
+                                runOnUiThread { result.success(ok) }
+                            }.start()
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }
         // The counters' click (U6): our own short sound, so it plays even
         // with the phone's "touch sounds" off. Played as game audio, so it
-        // follows the media volume (Round 16: it had followed the system
-        // volume, too loud).
+        // follows the media volume rather than the louder system volume.
         val pool = SoundPool.Builder()
             .setMaxStreams(4)
             .setAudioAttributes(
@@ -172,19 +215,18 @@ class MainActivity: FlutterFragmentActivity() {
             )
             .build()
         click = pool.load(this, R.raw.click, 1)
-        // A dose ticked off (medicine): a soft gulp (Round 16).
+        // A dose ticked off (medicine): a soft gulp.
         done = pool.load(this, R.raw.done, 1)
-        // The Placard (Round 17): rising while held, then a pop.
+        // The Placard: rising while held, then a pop.
         inflate = pool.load(this, R.raw.inflate, 1)
         pop = pool.load(this, R.raw.pop, 1)
-        // An important medicine's hold-to-take (Round 24): a glass filling.
+        // An important medicine's hold-to-take: a glass filling.
         fill = pool.load(this, R.raw.fill, 1)
-        // Pip registered as an adventurer (Round 63): his fanfare, his
+        // Pip registered as an adventurer: his fanfare, his
         // only sound; on the media volume, like the rest.
         fanfare = pool.load(this, R.raw.fanfare, 1)
-        // The notification sounds to pick from (Round 31); notifications
+        // The notification sounds to pick from (8-bit ones); notifications
         // play them themselves, this is for hearing one when picking.
-        // Round 39: 8-bit ones.
         notifySounds["notify_coin"] = pool.load(this, R.raw.notify_coin, 1)
         notifySounds["notify_powerup"] = pool.load(this, R.raw.notify_powerup, 1)
         notifySounds["notify_blip"] = pool.load(this, R.raw.notify_blip, 1)
@@ -200,7 +242,7 @@ class MainActivity: FlutterFragmentActivity() {
                     "click" -> pool?.play(click, CLICK_VOLUME, CLICK_VOLUME, 1, 0, 1f)
                     "done" -> pool?.play(done, DONE_VOLUME, DONE_VOLUME, 1, 0, 1f)
                     // Silent: wakes the audio path, so the first real
-                    // click isn't late against its buzz (Round 18).
+                    // click isn't late against its buzz.
                     "warm" -> pool?.play(click, 0f, 0f, 0, 0, 1f)
                     "inflate" -> {
                         if (inflating != 0) pool?.stop(inflating)
@@ -224,7 +266,7 @@ class MainActivity: FlutterFragmentActivity() {
                         filling = 0
                     }
                     "fanfare" -> pool?.play(fanfare, 1f, 1f, 2, 0, 1f)
-                    // Round 41: at the volume picked (0 to 1).
+                    // At the volume picked (0 to 1).
                     "notify" -> {
                         val args = call.arguments as? Map<*, *>
                         val name = args?.get("sound") as? String ?: call.arguments as? String
@@ -277,42 +319,97 @@ class MainActivity: FlutterFragmentActivity() {
         return uri.lastPathSegment ?: "Folder"
     }
 
-    /// Writes [bytes] as a new [name] file in the folder [uri], then
-    /// deletes the oldest files starting with [prefix] beyond [keep].
-    private fun writeToFolder(
-        uri: Uri, name: String, bytes: ByteArray, prefix: String, keep: Int
-    ): Boolean {
-        val file = DocumentsContract.createDocument(
-            contentResolver, folderDocument(uri), "application/json", name
-        ) ?: return false
-        contentResolver.openOutputStream(file, "w")?.use { it.write(bytes) }
-            ?: return false
-        // Older ones, by name (a name holds its date and time).
+    /// A backup in the folder: its document id, name, size and when it
+    /// was last changed (milliseconds since 1970).
+    private data class FolderBackup(
+        val id: String, val name: String, val bytes: Long, val modified: Long
+    )
+
+    /// The files in the folder [uri] whose names start with [prefix].
+    private fun filesIn(uri: Uri, prefix: String): List<FolderBackup> {
         val children = DocumentsContract.buildChildDocumentsUriUsingTree(
             uri, DocumentsContract.getTreeDocumentId(uri)
         )
-        val ours = mutableListOf<Pair<String, String>>()
+        val found = mutableListOf<FolderBackup>()
         contentResolver.query(
             children,
             arrayOf(
                 DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_SIZE,
+                DocumentsContract.Document.COLUMN_LAST_MODIFIED
             ),
             null, null, null
         )?.use {
             while (it.moveToNext()) {
                 val shown = it.getString(1) ?: continue
-                if (shown.startsWith(prefix)) ours.add(it.getString(0) to shown)
+                if (!shown.startsWith(prefix)) continue
+                found.add(
+                    FolderBackup(
+                        it.getString(0),
+                        shown,
+                        if (it.isNull(2)) 0L else it.getLong(2),
+                        if (it.isNull(3)) 0L else it.getLong(3)
+                    )
+                )
             }
         }
-        for ((id, _) in ours.sortedByDescending { it.second }.drop(keep)) {
+        return found
+    }
+
+    /// The finished backups in the folder, newest first (a name holds
+    /// its date and time).
+    private fun backupsIn(uri: Uri, prefix: String): List<FolderBackup> =
+        filesIn(uri, prefix)
+            .filter { !it.name.endsWith(PARTIAL) }
+            .sortedByDescending { it.name }
+
+    private fun deleteIn(uri: Uri, id: String) {
+        try {
+            DocumentsContract.deleteDocument(
+                contentResolver, DocumentsContract.buildDocumentUriUsingTree(uri, id)
+            )
+        } catch (_: Exception) {
+        }
+    }
+
+    /// Deletes backups left half-written (the app closed while writing).
+    private fun dropPartials(uri: Uri, prefix: String) {
+        for (file in filesIn(uri, prefix)) {
+            if (file.name.endsWith(PARTIAL)) deleteIn(uri, file.id)
+        }
+    }
+
+    /// Deletes the oldest backups beyond [keep].
+    private fun prune(uri: Uri, prefix: String, keep: Int) {
+        for (file in backupsIn(uri, prefix).drop(keep)) deleteIn(uri, file.id)
+    }
+
+    /// Writes [bytes] as a new [name] file in the folder [uri]: first under
+    /// a temporary name, renamed once complete, so a backup is never
+    /// half-written. Then deletes leftovers and the oldest files starting
+    /// with [prefix] beyond [keep].
+    private fun writeToFolder(
+        uri: Uri, name: String, bytes: ByteArray, prefix: String, keep: Int
+    ): Boolean {
+        dropPartials(uri, prefix)
+        val file = DocumentsContract.createDocument(
+            contentResolver, folderDocument(uri), "application/octet-stream",
+            name + PARTIAL
+        ) ?: return false
+        try {
+            contentResolver.openOutputStream(file, "w")?.use { it.write(bytes) }
+                ?: throw IllegalStateException("no stream")
+            DocumentsContract.renameDocument(contentResolver, file, name)
+                ?: throw IllegalStateException("not renamed")
+        } catch (e: Exception) {
             try {
-                DocumentsContract.deleteDocument(
-                    contentResolver, DocumentsContract.buildDocumentUriUsingTree(uri, id)
-                )
+                DocumentsContract.deleteDocument(contentResolver, file)
             } catch (_: Exception) {
             }
+            return false
         }
+        prune(uri, prefix, keep)
         return true
     }
 

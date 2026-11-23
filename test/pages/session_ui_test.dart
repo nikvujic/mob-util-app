@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -221,7 +219,7 @@ void main() {
 
       expect(find.byType(AlertDialog), findsNothing, reason: 'no prompt');
       expect(find.text('Encrypted backup saved'), findsOneWidget);
-      final file = BackupFile.parse(utf8.decode(files.saved.single.bytes));
+      final file = BackupFile.parse(backupText(files.saved.single.bytes));
       expect(file, isA<EncryptedBackupFile>());
     });
 

@@ -6,8 +6,8 @@ tickets. Each item holds one or more pictures, a few fields and a note.
 Pictures only for now; other files (PDFs and the like) later, on the same
 storage and backup format.
 
-Status: **agreed, not built.** Building starts with the plugin check
-(Build order, step 1).
+Status: **being built.** Steps 1–3 are done (2.6.0): the plugin check,
+the storage, the zip backups and Android's backup exclusion.
 
 ## Types
 

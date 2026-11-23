@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/models/notify_settings.dart';
+import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/providers/morning_music_provider.dart';
 import 'package:the_app/providers/weather_provider.dart';
 import 'package:the_app/providers/auto_backup_provider.dart';
@@ -184,6 +185,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // "Open the app to keep reminders": it's open.
       ref.read(clearShownProvider)(null);
       ref.read(autoBackupProvider).run();
+      // Documents' pictures nothing refers to (a crash mid-delete, a
+      // restore's leftovers).
+      ref.read(documentsProvider.notifier).cleanUp();
     });
   }
 

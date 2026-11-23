@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import 'package:the_app/data/app_storage.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/document_item.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/placard.dart';
@@ -29,6 +29,7 @@ import 'package:the_app/providers/notes_provider.dart';
 import 'package:the_app/providers/pins_provider.dart';
 import 'package:the_app/providers/planner_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
+import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/providers/recipes_provider.dart';
 import 'package:the_app/providers/routines_provider.dart';
 import 'package:the_app/providers/subscriptions_provider.dart';
@@ -77,32 +78,46 @@ class BackupExporter {
       subscriptions: _ref.read(subscriptionsProvider),
       packing: _ref.read(packingProvider),
       people: _ref.read(peopleProvider),
+      documents: _ref.read(documentsProvider),
       masterPassword:
           notes.any((n) => n.isLocked) ? _ref.read(securityProvider) : null,
     );
   }
 
-  /// Writes a plain (readable) snapshot to a file the user picks. Errors
+  /// [snapshot] with the Documents page's pictures read, as a backup file
+  /// holds them.
+  Future<Backup> full() async {
+    final backup = snapshot();
+    final documents = _ref.read(documentsProvider.notifier);
+    final pictures = <String, Uint8List>{};
+    for (final id in backup.documents?.fileIds ?? const <String>{}) {
+      final bytes = await documents.readPicture(id);
+      if (bytes != null) pictures[id] = bytes;
+    }
+    return backup.withPictures(pictures);
+  }
+
+  /// Writes a plain (readable) backup to a file the user picks. Errors
   /// (e.g. storage full) are passed on to the caller.
   Future<ExportResult> export() async {
-    final backup = snapshot();
-    return _save(backup.fileName(), backup.encode());
+    final backup = await full();
+    return _save(backup.fileName(), await backup.zip());
   }
 
   /// Like [export], but the file is encrypted with [key] (from the master
   /// password) and can only be restored with that password.
   Future<ExportResult> exportEncrypted(PasswordKey key) async {
-    final backup = snapshot();
+    final backup = await full();
     return _save(
       backup.fileName(encrypted: true),
-      await backup.encodeEncrypted(key),
+      await backup.zip(key: key),
     );
   }
 
-  Future<ExportResult> _save(String fileName, String contents) async {
+  Future<ExportResult> _save(String fileName, Uint8List bytes) async {
     final saved = await _ref.read(backupFilesProvider).save(
           fileName: fileName,
-          bytes: utf8.encode(contents),
+          bytes: bytes,
         );
     return saved ? ExportResult.saved : ExportResult.cancelled;
   }
@@ -140,6 +155,7 @@ class RestorableBackup {
   int get counterCount => _backup.counters.length;
   int get todoCount => _backup.todo.length;
   int get recipeCount => _backup.recipes.length;
+  int get documentCount => documents.length;
 
   // What's in it, to pick from (restoring part of it).
   List<Note> get notes => _backup.notes;
@@ -155,6 +171,7 @@ class RestorableBackup {
   List<Subscription> get subscriptions => _backup.subscriptions.subscriptions;
   List<PackingList> get packingLists => _backup.packing.lists;
   List<Person> get people => _backup.people?.people ?? const [];
+  List<DocItem> get documents => _backup.documents?.items ?? const [];
 }
 
 /// The kinds of things in a backup, to restore some of them.
@@ -179,7 +196,10 @@ enum BackupPart {
   packing,
 
   /// People.
-  people
+  people,
+
+  /// Documents.
+  documents
 }
 
 /// [book] with the ingredients [ids] from [from] it doesn't have yet,
@@ -289,7 +309,7 @@ typedef AskBackupKey = Future<DataKey?> Function(PasswordVerifier record);
 /// Reads backup files and restores them (D2, D2a).
 class BackupImporter {
   /// Larger files can't be backups of this app; refuse before decoding.
-  static const maxFileBytes = 20 * 1024 * 1024;
+  static const maxFileBytes = 1024 * 1024 * 1024;
 
   final Ref _ref;
 
@@ -307,14 +327,8 @@ class BackupImporter {
   PickedBackup read(Uint8List bytes) {
     const notABackup = ImportException('This file is not a backup.');
     if (bytes.length > maxFileBytes) throw notABackup;
-    final String source;
     try {
-      source = utf8.decode(bytes);
-    } on FormatException {
-      throw notABackup;
-    }
-    try {
-      return switch (BackupFile.parse(source)) {
+      return switch (BackupFile.read(bytes)) {
         PlainBackupFile(:final backup) =>
           PlainPick._(RestorableBackup._(backup)),
         final EncryptedBackupFile file => EncryptedPick._(file),
@@ -372,6 +386,9 @@ class BackupImporter {
       security.restore(source.masterPassword);
       await _ref.read(appStorageProvider).flush();
     }
+    if (source.documents != null) {
+      await _writePictures(source, source.documents!.fileIds);
+    }
     await _apply(
       notes,
       source.shopItems,
@@ -389,6 +406,7 @@ class BackupImporter {
       source.subscriptions,
       source.packing,
       source.people,
+      source.documents,
     );
     return RestoreUndo._(
       previous,
@@ -739,6 +757,35 @@ class BackupImporter {
       }
     }
 
+    // Documents, each with its pictures; one still here comes as a copy
+    // (sharing its pictures, which never change).
+    final pickedDocuments = [
+      for (final d in source.documents?.items ?? const <DocItem>[])
+        if (chosen(BackupPart.documents, d.id)) d,
+    ];
+    if (pickedDocuments.isNotEmpty) {
+      await _writePictures(
+          source, {for (final d in pickedDocuments) ...d.fileIds});
+      final now = _ref.read(documentsProvider);
+      final back = <DocItem>[];
+      for (final d in pickedDocuments) {
+        added++;
+        if (now.byId(d.id) == null) {
+          back.add(d);
+          continue;
+        }
+        copies++;
+        back.add(DocItem.fromJson({
+          ...d.toJson(),
+          'id': generateId(),
+          'name': d.name.isEmpty ? '' : copyTitle(d.name),
+        }));
+      }
+      _ref
+          .read(documentsProvider.notifier)
+          .replaceAll(DocumentBook([...back, ...now.items]));
+    }
+
     await _ref.read(appStorageProvider).flush();
     return PartRestore._(
       RestoreUndo._(
@@ -771,6 +818,7 @@ class BackupImporter {
       undo._previous.subscriptions,
       undo._previous.packing,
       undo._previous.people,
+      undo._previous.documents,
     );
     if (undo.adoptedMasterPassword) {
       _ref.read(securityProvider.notifier).restore(
@@ -852,6 +900,7 @@ class BackupImporter {
     SubscriptionBook subscriptions,
     PackingBook packing,
     PeopleBook? people,
+    DocumentBook? documents,
   ) async {
     _ref.read(notesProvider.notifier).replaceAll(notes);
     _ref.read(shopProvider.notifier).replaceAll(shopItems);
@@ -871,7 +920,25 @@ class BackupImporter {
     _ref.read(packingProvider.notifier).replaceAll(packing);
     // From before them: People stay as they are.
     if (people != null) _ref.read(peopleProvider.notifier).replaceAll(people);
+    // From before it: Documents stay as they are.
+    if (documents != null) {
+      _ref.read(documentsProvider.notifier).replaceAll(documents);
+    }
     await _ref.read(appStorageProvider).flush();
+  }
+
+  /// Stores [backup]'s pictures [ids] this app doesn't have yet. A picture
+  /// is never changed once stored (an id is never reused), so one already
+  /// here is the same; the pictures there before stay (for Undo) until
+  /// nothing refers to them.
+  Future<void> _writePictures(Backup backup, Set<String> ids) async {
+    final files = _ref.read(documentsProvider.notifier).files;
+    final here = await files.ids();
+    for (final id in ids) {
+      final bytes = backup.pictures[id];
+      if (bytes == null || here.contains(id)) continue;
+      await files.write(id, bytes);
+    }
   }
 }
 

@@ -12,6 +12,7 @@ import 'package:the_app/data/backup.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/document_item.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/models/recipe.dart';
@@ -1402,6 +1403,79 @@ void main() {
     });
   });
 
+  group('documents.json v1 / v34 backup (Documents, a zip)', () {
+    void expectSample(DocumentBook book) {
+      expect(book.items.map((d) => d.name),
+          ['Pasoš 🛂', 'Veš mašina', 'Library card']);
+      final passport = book.items[0];
+      expect(passport.kind, DocKind.document);
+      expect(passport.expires, DateTime(2031, 3, 3));
+      expect(passport.remind, DocRemind.sixMonths);
+      expect(passport.pictures[1].turns, 1);
+      final receipt = book.items[1];
+      expect((receipt.shop, receipt.price, receipt.warranty),
+          ('Tehnika', '449 €', true));
+      expect(receipt.warrantyTo, DateTime(2028, 11, 23));
+      expect(book.items[2].barcode, '1764000000000004-0');
+      expect(book.fileIds, hasLength(5));
+    }
+
+    Future<void> expectPictures(Map<String, List<int>> pictures) async {
+      for (var i = 0; i < 5; i++) {
+        expect(pictures['176400000000000$i-0']?.length, 47 + i);
+        expect(pictures['176400000000000$i-0']?[4], i);
+      }
+    }
+
+    test('loads, with its pictures', () async {
+      final dir = copyOf('test/fixtures/v34/storage');
+      final pictures = Directory('${dir.path}/documents')..createSync();
+      for (final f in Directory('test/fixtures/v34/storage/documents')
+          .listSync()
+          .whereType<File>()) {
+        f.copySync('${pictures.path}/${f.uri.pathSegments.last}');
+      }
+      final storage = await AppStorage.open(directory: dir);
+      expect(storage.unreadable, isEmpty);
+      expectSample(DocumentBook.fromJson(storage.initialDocuments!));
+      await expectPictures({
+        for (final id in await storage.documentFiles.ids())
+          id: (await storage.documentFiles.read(id))!,
+      });
+    });
+
+    test('v34 backup (a zip) restores them and their pictures', () async {
+      final file = BackupFile.read(
+              File('test/fixtures/v34/backup-plain.zip').readAsBytesSync())
+          as PlainBackupFile;
+      expectSample(file.backup.documents!);
+      await expectPictures(file.backup.pictures);
+      expect(file.backup.notes.single.title, 'Groceries');
+    });
+
+    test('v34 encrypted backup opens with its password', () async {
+      final file = BackupFile.read(
+              File('test/fixtures/v34/backup-encrypted.zip').readAsBytesSync())
+          as EncryptedBackupFile;
+      expect(await file.open('wrong password'), isNull);
+      final backup = (await file.open('fixture password'))!;
+      expectSample(backup.documents!);
+      await expectPictures(backup.pictures);
+    });
+
+    test('older backups, read as bytes, still restore (no Documents)', () {
+      for (final v in [1, 2, 3, 20, 33]) {
+        final file = BackupFile.read(
+            File('test/fixtures/v$v/backup-plain.json').readAsBytesSync());
+        expect(file, isA<PlainBackupFile>(), reason: 'v$v');
+        expect((file as PlainBackupFile).backup.documents, isNull);
+      }
+      final encrypted = BackupFile.read(
+          File('test/fixtures/v2/backup-encrypted.json').readAsBytesSync());
+      expect(encrypted, isA<EncryptedBackupFile>());
+    });
+  });
+
   group('pip.json v4 / v33 backup (his quests)', () {
     void expectSample(PipLife? pip) {
       expect(pip!.name, 'Bip 5');
@@ -1748,6 +1822,22 @@ void main() {
           '1216f57cb8b6c82704e8ccc2021fff07cedab537d89192d09e5cc0d21c3ed56a',
       'test/fixtures/v33/backup-plain.json':
           '2bc6e63f3c454bec436e28e395eb301e75f431b5be8a1954c881e2c0a6a9e389',
+      'test/fixtures/v34/backup-encrypted.zip':
+          '4b3a021394e6fbc3fb342e3ec0018ff4f0e4ea44d9cd937af77778af9620fe8c',
+      'test/fixtures/v34/backup-plain.zip':
+          '5b2c48a218330089ceda53d04e82a0f81b6a502264d9505380e7422c2c195791',
+      'test/fixtures/v34/storage/documents.json':
+          '1f4dc7e1ecef4669db90d0841ce818c237b8691fecf99b5c1b34ff8a757b48c0',
+      'test/fixtures/v34/storage/documents/1764000000000000-0':
+          '05a02ee88b72aecc8828d521783ea716663dcb2a128ac8b60b71e8db44393b45',
+      'test/fixtures/v34/storage/documents/1764000000000001-0':
+          '10ec411c6491cee9d9ad3fc34eb1d8736581201dc7f2abf1b464fe53484b853a',
+      'test/fixtures/v34/storage/documents/1764000000000002-0':
+          'f95a23fda3f170c38ba4b68c6b0663e80d784e3762609afe0e53cb66c5deee1b',
+      'test/fixtures/v34/storage/documents/1764000000000003-0':
+          '9f2513ae5cd7858a328a7e8fb69900d3c8a0a63c47b808d53973d3aa8303f326',
+      'test/fixtures/v34/storage/documents/1764000000000004-0':
+          '9352f461c43393a0b2085266e9b4475dea3bdab8c17a07ce37faa21363036274',
       'test/fixtures/v13/storage/settings.json':
           '1e242bfd16f75d65ac0703ef0d59a66ab08de645eb59e67e0fb378df5cf8b717',
       'test/fixtures/v8/storage/layout.json':

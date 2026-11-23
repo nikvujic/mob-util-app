@@ -16,6 +16,7 @@ import 'package:the_app/models/placard.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
 import 'package:the_app/models/preferences.dart';
+import 'package:the_app/data/document_files.dart';
 import 'package:the_app/models/date_entry.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
@@ -46,6 +47,9 @@ import 'package:the_app/models/todo_item.dart';
 ///     <app documents>/data/ingredients.json
 ///         {"version": 1, "sections": [...]}
 ///     <app documents>/data/dates.json {"version": 3, "dates": [...]}
+///     <app documents>/data/documents.json
+///         {"version": 1, "documents": [...]} (or "sealed": {...} while
+///         its page is locked), its pictures in documents/
 ///     <app documents>/data/subscriptions.json
 ///         {"version": 1, "subscriptions": [...]}
 ///     <app documents>/data/packing.json
@@ -139,6 +143,10 @@ class AppStorage {
   /// format.
   static const subscriptionsFormatVersion = 1;
 
+  /// Version of `documents.json`, the Documents page. History: 1 = first
+  /// format.
+  static const documentsFormatVersion = 1;
+
   /// Version of `packing.json`. History: 1 = first format;
   /// 2 = each list has its own sections, `sections` being the defaults
   ///.
@@ -166,6 +174,7 @@ class AppStorage {
   final JsonFileStore? _ingredientsStore;
   final JsonFileStore? _datesStore;
   final JsonFileStore? _subscriptionsStore;
+  final JsonFileStore? _documentsStore;
   final JsonFileStore? _packingStore;
   final JsonFileStore? _peopleStore;
 
@@ -187,6 +196,13 @@ class AppStorage {
   final IngredientBook initialIngredients;
   final DateBook initialDates;
   final SubscriptionBook initialSubscriptions;
+
+  /// The Documents page as saved: plain (`documents`) or sealed
+  /// (`sealed`, while its page is locked); null: none yet.
+  final Map<String, dynamic>? initialDocuments;
+
+  /// The Documents page's pictures.
+  final DocumentFiles documentFiles;
   final PackingBook initialPacking;
   final PeopleBook initialPeople;
 
@@ -228,7 +244,8 @@ class AppStorage {
     this._datesStore,
     this._subscriptionsStore,
     this._packingStore,
-    this._peopleStore, {
+    this._peopleStore,
+    this._documentsStore, {
     required this.initialNotes,
     required this.initialShopItems,
     required this.initialPlannerTasks,
@@ -246,6 +263,8 @@ class AppStorage {
     required this.initialIngredients,
     required this.initialDates,
     required this.initialSubscriptions,
+    required this.initialDocuments,
+    required this.documentFiles,
     required this.initialPacking,
     required this.initialPeople,
     required this.initialMasterPassword,
@@ -273,6 +292,8 @@ class AppStorage {
     this.initialIngredients = IngredientBook.empty,
     this.initialDates = DateBook.empty,
     this.initialSubscriptions = SubscriptionBook.empty,
+    this.initialDocuments,
+    DocumentFiles? documentFiles,
     PackingBook? initialPacking,
     this.initialPeople = PeopleBook.empty,
     this.initialMasterPassword,
@@ -300,6 +321,8 @@ class AppStorage {
         _subscriptionsStore = null,
         _packingStore = null,
         _peopleStore = null,
+        _documentsStore = null,
+        documentFiles = documentFiles ?? MemoryDocumentFiles(),
         initialPacking = initialPacking ?? PackingBook.initial,
         initialNotificationLog =
             initialNotificationLog ?? NotificationLog.empty,
@@ -341,6 +364,7 @@ class AppStorage {
         JsonFileStore(File('${dir.path}/subscriptions.json'));
     final packingStore = JsonFileStore(File('${dir.path}/packing.json'));
     final peopleStore = JsonFileStore(File('${dir.path}/people.json'));
+    final documentsStore = JsonFileStore(File('${dir.path}/documents.json'));
     // Unknown sections and pages (from a newer app) are skipped, not fatal.
     final locks = await _load(
         settingsStore, (<AppSection>{}, <HubTool>{}, false), (json) {
@@ -378,6 +402,7 @@ class AppStorage {
       subscriptionsStore,
       packingStore,
       peopleStore,
+      documentsStore,
       initialNotes: await _load(
         notesStore,
         [],
@@ -517,6 +542,13 @@ class AppStorage {
         maxVersion: peopleFormatVersion,
         PeopleBook.fromJson,
       ),
+      initialDocuments: await _load<Map<String, dynamic>?>(
+        documentsStore,
+        null,
+        maxVersion: documentsFormatVersion,
+        (json) => json,
+      ),
+      documentFiles: DiskDocumentFiles(Directory('${dir.path}/documents')),
       initialSectionLocks: locks.$1,
       initialPageLocks: locks.$2,
       initialTodoLocked: locks.$3,
@@ -660,6 +692,15 @@ class AppStorage {
     });
   }
 
+  /// Saves the Documents page as [json] (`documents`, or `sealed` while
+  /// locked).
+  Future<void> saveDocuments(Map<String, dynamic> json) async {
+    await _documentsStore?.write({
+      'version': documentsFormatVersion,
+      ...json,
+    });
+  }
+
   Future<void> saveSubscriptions(SubscriptionBook book) async {
     await _subscriptionsStore?.write({
       'version': subscriptionsFormatVersion,
@@ -725,6 +766,10 @@ class AppStorage {
     });
   }
 
+  /// Whether `documents.json` was read at startup (or there was none):
+  /// only then may pictures nothing refers to be deleted.
+  bool get documentsReadable => !(_documentsStore?.unreadable ?? false);
+
   /// The files that couldn't be read at startup and were set aside (the
   /// app started without their data), e.g. `notes.json`.
   List<String> get unreadable => [
@@ -748,6 +793,7 @@ class AppStorage {
           _ingredientsStore,
           _datesStore,
           _subscriptionsStore,
+          _documentsStore,
           _packingStore,
           _peopleStore,
         ])
@@ -780,6 +826,7 @@ class AppStorage {
           _ingredientsStore,
           _datesStore,
           _subscriptionsStore,
+          _documentsStore,
           _packingStore,
           _peopleStore,
         ])
@@ -824,6 +871,7 @@ class AppStorage {
     await _ingredientsStore?.flush();
     await _datesStore?.flush();
     await _subscriptionsStore?.flush();
+    await _documentsStore?.flush();
     await _packingStore?.flush();
     await _peopleStore?.flush();
   }

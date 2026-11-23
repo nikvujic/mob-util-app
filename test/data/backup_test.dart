@@ -55,10 +55,10 @@ void main() {
     });
 
     test('suggests a dated file name', () {
-      expect(backup.fileName(), 'the-app-backup-2026-10-08-0905.json');
+      expect(backup.fileName(), 'the-app-backup-2026-10-08-0905.zip');
       expect(
         backup.fileName(encrypted: true),
-        'the-app-backup-2026-10-08-0905-encrypted.json',
+        'the-app-backup-2026-10-08-0905-encrypted.zip',
       );
     });
   });

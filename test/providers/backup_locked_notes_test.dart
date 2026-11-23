@@ -90,7 +90,7 @@ void main() {
     test('keeps locked notes encrypted and carries their key', () async {
       final old = await oldPhone();
       await old.read(backupExporterProvider).export();
-      final file = utf8.decode(files.saved.single.bytes);
+      final file = backupText(files.saved.single.bytes);
 
       expect(file, isNot(contains('PIN 4711')));
       expect(file, contains('"lockedContent"'));
@@ -104,7 +104,7 @@ void main() {
       await container.read(backupExporterProvider).export();
 
       expect(
-        utf8.decode(files.saved.single.bytes),
+        backupText(files.saved.single.bytes),
         isNot(contains('masterPassword')),
       );
     });
@@ -298,7 +298,7 @@ void main() {
     final old = await oldPhone();
     final backup = await exported(old);
     // The same backup with its key removed, as a damaged file might be.
-    final json = jsonDecode(utf8.decode(files.saved.single.bytes))
+    final json = jsonDecode(backupText(files.saved.single.bytes))
         as Map<String, dynamic>;
     (json['data'] as Map<String, dynamic>).remove('masterPassword');
     final keyless = (old

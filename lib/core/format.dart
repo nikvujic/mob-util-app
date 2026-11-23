@@ -106,3 +106,13 @@ String formatDayMonth(int day, int month, [int? year]) =>
 /// `October 2026` (a month's title, e.g. on a calendar).
 String formatMonth(DateTime month) =>
     '${_monthsLong[month.month - 1]} ${month.year}';
+
+/// A file size for people: "820 KB", "12.4 MB", "1.2 GB".
+String formatBytes(int bytes) {
+  const kb = 1024, mb = 1024 * 1024, gb = 1024 * 1024 * 1024;
+  if (bytes < mb) return '${(bytes / kb).ceil()} KB';
+  String one(double v) =>
+      v >= 100 ? v.round().toString() : v.toStringAsFixed(1);
+  if (bytes < gb) return '${one(bytes / mb)} MB';
+  return '${one(bytes / gb)} GB';
+}

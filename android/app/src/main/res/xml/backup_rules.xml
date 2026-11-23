@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android's automatic backup (Android 11 and older): everything but the
+     Documents page, whose pictures would soon pass the 25 MB limit (over
+     it, nothing at all is backed up). Documents move with a backup file. -->
+<full-backup-content>
+    <exclude domain="root" path="app_flutter/data/documents.json" />
+    <exclude domain="root" path="app_flutter/data/documents/" />
+</full-backup-content>

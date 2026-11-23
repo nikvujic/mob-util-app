@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:the_app/core/crypto.dart' hide open;
 import 'package:the_app/core/crypto.dart' as crypto show open;
+import 'package:the_app/data/document_files.dart';
 import 'package:the_app/models/counter.dart';
+import 'package:the_app/models/document_item.dart';
 import 'package:the_app/models/medicine.dart';
 import 'package:the_app/models/note.dart';
 import 'package:the_app/models/pip_life.dart';
@@ -56,6 +60,13 @@ class BackupFormatException implements Exception {
 ///       "kdf": {Argon2id parameters}, "sealed": {AES-256-GCM box}
 ///     }
 ///
+/// Since version 34 the file is a zip ([zip]): that document as
+/// `backup.json`, and the Documents page's pictures as `pictures/<id>`
+/// (stored, not compressed: they're JPEGs). In an encrypted backup each
+/// picture is sealed with the same key as the document. Older backups are
+/// the document alone, and still read ([BackupFile.read] tells them apart
+/// by their first bytes).
+///
 /// [version] goes up whenever the layout changes; [BackupFile.parse] must
 /// keep reading every older version.
 class Backup {
@@ -95,8 +106,16 @@ class Backup {
   /// (`people`, as in `people.json`), and a date's person (in
   /// `dates`); 33 = Pip's quests (in `pip`). The
   /// food tracker's gone: `food` isn't written, and is ignored in older
-  /// backups (the format's otherwise the same, so still 33).
-  static const version = 33;
+  /// backups (the format's otherwise the same, so still 33);
+  /// 34 = a zip, with the Documents page (`documents`, as in
+  /// `documents.json`, and its pictures beside the document).
+  static const version = 34;
+
+  /// The document's name in the zip.
+  static const documentEntry = 'backup.json';
+
+  /// The pictures' folder in the zip.
+  static const picturesFolder = 'pictures/';
 
   final DateTime createdAt;
   final String appVersion;
@@ -144,6 +163,14 @@ class Backup {
   /// leaves the People page as it is).
   final PeopleBook? people;
 
+  /// The Documents page; null in backups from before it (restoring one
+  /// leaves the page as it is).
+  final DocumentBook? documents;
+
+  /// The Documents page's pictures, by id, as stored. Not in the JSON
+  /// document: beside it in the zip.
+  final Map<String, Uint8List> pictures;
+
   /// The master password record the locked notes need, if any are locked.
   final PasswordVerifier? masterPassword;
 
@@ -166,16 +193,43 @@ class Backup {
     this.subscriptions = SubscriptionBook.empty,
     PackingBook? packing,
     this.people,
+    this.documents,
+    this.pictures = const {},
     this.masterPassword,
   }) : _packing = packing;
 
-  /// Suggested file name, e.g. `the-app-backup-2026-10-08-0930.json` or
-  /// `…-0930-encrypted.json` (local time, so it matches what the user sees).
+  /// This backup with [pictures] beside it.
+  Backup withPictures(Map<String, Uint8List> pictures) => Backup(
+        createdAt: createdAt,
+        appVersion: appVersion,
+        notes: notes,
+        shopItems: shopItems,
+        plannerTasks: plannerTasks,
+        routines: routines,
+        plannerPins: plannerPins,
+        counters: counters,
+        placard: placard,
+        medicine: medicine,
+        todo: todo,
+        pip: pip,
+        recipes: recipes,
+        ingredients: ingredients,
+        dates: dates,
+        subscriptions: subscriptions,
+        packing: _packing,
+        people: people,
+        documents: documents,
+        pictures: pictures,
+        masterPassword: masterPassword,
+      );
+
+  /// Suggested file name, e.g. `the-app-backup-2026-10-08-0930.zip` or
+  /// `…-0930-encrypted.zip` (local time, so it matches what the user sees).
   String fileName({bool encrypted = false}) {
     final t = createdAt.toLocal();
     String two(int n) => n.toString().padLeft(2, '0');
     return 'the-app-backup-${t.year}-${two(t.month)}-${two(t.day)}'
-        '-${two(t.hour)}${two(t.minute)}${encrypted ? '-encrypted' : ''}.json';
+        '-${two(t.hour)}${two(t.minute)}${encrypted ? '-encrypted' : ''}.zip';
   }
 
   Map<String, dynamic> _header() => {
@@ -206,6 +260,7 @@ class Backup {
           ],
           'packing': packing.toJson(),
           if (people != null) 'people': people!.toJson(),
+          if (documents != null) 'documents': documents!.toJson()['documents'],
           if (masterPassword != null)
             'masterPassword': masterPassword!.toJson(),
         },
@@ -230,6 +285,24 @@ class Backup {
       'kdf': key.params.toJson(),
       'sealed': sealed.toJson(),
     });
+  }
+
+  /// The backup file: a zip of the document ([encode], or
+  /// [encodeEncrypted] with [key]) and the pictures (sealed with [key] if
+  /// given).
+  Future<Uint8List> zip({PasswordKey? key}) async {
+    final archive = Archive()
+      ..add(ArchiveFile.string(
+        documentEntry,
+        key == null ? encode() : await encodeEncrypted(key),
+      ));
+    for (final MapEntry(key: id, value: bytes) in pictures.entries) {
+      final stored =
+          key == null ? bytes : await DocumentFiles.sealBytes(bytes, key);
+      archive.add(ArchiveFile.bytes('$picturesFolder$id', stored)
+        ..compression = CompressionType.none);
+    }
+    return ZipEncoder().encodeBytes(archive);
   }
 
   /// Reads a plain backup. Throws [BackupFormatException] if [source] is not
@@ -326,6 +399,9 @@ class Backup {
         people: data['people'] == null
             ? null
             : PeopleBook.fromJson(data['people'] as Map<String, dynamic>),
+        documents: data['documents'] == null
+            ? null
+            : DocumentBook.fromJson({'documents': data['documents']}),
         masterPassword: data['masterPassword'] == null
             ? null
             : PasswordVerifier.fromJson(
@@ -352,7 +428,8 @@ class Backup {
         !unique(backup.subscriptions.subscriptions.map((s) => s.id)) ||
         !unique(backup.packing.lists.map((l) => l.id)) ||
         !unique(backup.packing.sections.map((s) => s.id)) ||
-        !unique((backup.people?.people ?? const []).map((p) => p.id))) {
+        !unique((backup.people?.people ?? const []).map((p) => p.id)) ||
+        !unique((backup.documents?.items ?? const []).map((d) => d.id))) {
       throw const BackupFormatException('This backup is damaged.');
     }
     return backup;
@@ -365,18 +442,81 @@ sealed class BackupFile {
   /// When the backup was made (readable even if encrypted).
   DateTime get createdAt;
 
-  /// Reads [source]. Throws [BackupFormatException] if it isn't a backup
-  /// this app can read.
-  static BackupFile parse(String source) {
+  /// Larger documents can't be backups of this app; refused unread.
+  static const maxDocumentBytes = 20 * 1024 * 1024;
+
+  /// Whether [bytes] start as a zip does.
+  static bool isZip(List<int> bytes) =>
+      bytes.length >= 4 &&
+      bytes[0] == 0x50 &&
+      bytes[1] == 0x4b &&
+      bytes[2] == 0x03 &&
+      bytes[3] == 0x04;
+
+  /// Reads a backup file's [bytes]: a zip (version 34 on) or the JSON
+  /// document alone (older ones). Throws [BackupFormatException] if it
+  /// isn't a backup this app can read.
+  static BackupFile read(List<int> bytes) {
+    const notABackup = BackupFormatException('This file is not a backup.');
+    if (!isZip(bytes)) {
+      if (bytes.length > maxDocumentBytes) throw notABackup;
+      final String source;
+      try {
+        source = utf8.decode(bytes);
+      } on FormatException {
+        throw notABackup;
+      }
+      return parse(source);
+    }
+    final Archive archive;
+    try {
+      archive = ZipDecoder().decodeBytes(bytes);
+    } on Object {
+      throw notABackup;
+    }
+    final document = archive.findFile(Backup.documentEntry);
+    if (document == null || document.size > maxDocumentBytes) {
+      throw notABackup;
+    }
+    final pictures = <String, Uint8List>{};
+    final String source;
+    try {
+      source = utf8.decode(document.content);
+      for (final file in archive.files) {
+        if (!file.isFile || !file.name.startsWith(Backup.picturesFolder)) {
+          continue;
+        }
+        final id = file.name.substring(Backup.picturesFolder.length);
+        if (!_safeId(id)) continue;
+        pictures[id] = file.content;
+      }
+    } on Object {
+      throw notABackup;
+    }
+    return parse(source, pictures: pictures);
+  }
+
+  /// A picture's id as a file name: no folders, nothing hidden.
+  static bool _safeId(String id) =>
+      id.isNotEmpty && RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(id);
+
+  /// Reads the JSON document [source], with the [pictures] beside it
+  /// (sealed with the backup's key if it's encrypted). Throws
+  /// [BackupFormatException] if it isn't a backup this app can read.
+  static BackupFile parse(
+    String source, {
+    Map<String, Uint8List> pictures = const {},
+  }) {
     final json = Backup._parseHeader(source);
     if (json['encrypted'] != true) {
-      return PlainBackupFile(Backup._fromJson(json));
+      return PlainBackupFile(Backup._fromJson(json).withPictures(pictures));
     }
     try {
       return EncryptedBackupFile._(
         createdAt: DateTime.parse(json['createdAt'] as String),
         kdf: KdfParams.fromJson(json['kdf'] as Map<String, dynamic>),
         sealed: SealedBox.fromJson(json['sealed'] as Map<String, dynamic>),
+        pictures: pictures,
       );
     } on Object {
       throw const BackupFormatException('This backup is damaged.');
@@ -399,12 +539,17 @@ class EncryptedBackupFile extends BackupFile {
   final KdfParams _kdf;
   final SealedBox _sealed;
 
+  /// The pictures, each sealed with the backup's key.
+  final Map<String, Uint8List> _pictures;
+
   EncryptedBackupFile._({
     required this.createdAt,
     required KdfParams kdf,
     required SealedBox sealed,
+    required Map<String, Uint8List> pictures,
   })  : _kdf = kdf,
-        _sealed = sealed;
+        _sealed = sealed,
+        _pictures = pictures;
 
   /// The backup inside, or null if [password] is wrong. Throws
   /// [BackupFormatException] if the decrypted contents are damaged.
@@ -425,6 +570,14 @@ class EncryptedBackupFile extends BackupFile {
       return null;
     }
     final backup = Backup.decode(utf8.decode(plain, allowMalformed: true));
-    return (backup: backup, key: key);
+    final pictures = <String, Uint8List>{};
+    try {
+      for (final MapEntry(key: id, value: sealed) in _pictures.entries) {
+        pictures[id] = await DocumentFiles.openBytes(sealed, key);
+      }
+    } on DecryptionException {
+      throw const BackupFormatException('This backup is damaged.');
+    }
+    return (backup: backup.withPictures(pictures), key: key);
   }
 }
