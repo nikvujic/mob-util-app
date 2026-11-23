@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.9.2] - 2026-11-23
+
+### Changed
+- **Documents**: holding a picture gives a small buzz as its options
+  open.
+- **Documents**: *Gallery* opens Android's photo picker: you choose the
+  pictures, and the app is given only those (it can't look through the
+  gallery, so Android asks no permission).
+- **Automatic backups**: keeping fewer than the folder holds asks first
+  (*Delete the oldest backup?*); cancelled, nothing is deleted.
+
 ## [2.9.1] - 2026-11-23
 
 ### Added

@@ -122,7 +122,8 @@ its pictures (**Set barcode**: pick a picture, crop).
 - **Automatic backups** (to a folder, daily):
   - On the Backup page, a chip: *5 backups · 23 pictures · 120 MB*.
   - A tap opens an overview: each backup with its date and size, and how
-    many to keep (1–7, 7 by default; fewer deletes the oldest at once).
+    many to keep (1–7, 7 by default; fewer than the folder holds asks first,
+    then deletes the oldest).
   - Written under a temporary name and renamed when complete; the last
     backup's time is updated only then. A backup interrupted by the app
     closing is cleaned up on the next start and simply runs again.
@@ -134,8 +135,11 @@ its pictures (**Set barcode**: pick a picture, crop).
 
 ## Permissions and dependencies
 
-- Camera: asked the first time a camera opens; refused, the gallery and
-  the form still work, and the camera button explains how to allow it.
+- Camera: the phone's camera app takes the photo and hands it back, so
+  the app needs no camera permission and Android asks nothing; if it
+  can't open, the gallery and the form still work, and the app says so.
+- Gallery: Android's photo picker; the app is given only the pictures
+  picked, with no permission to read the gallery.
 - Gallery saving (Download): as Android requires for the version.
 - New plugins (camera/gallery picking, cropping, screen brightness, saving
   to the gallery) must build with the app's Android toolchain (Kotlin

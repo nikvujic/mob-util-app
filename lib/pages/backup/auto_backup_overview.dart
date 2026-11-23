@@ -5,6 +5,7 @@ import 'package:the_app/core/theme.dart';
 import 'package:the_app/providers/auto_backup_provider.dart';
 import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/widgets/app_dialog.dart';
+import 'package:the_app/widgets/confirm_dialog.dart';
 
 /// The automatic backups in the folder: "5 backups · 23 pictures ·
 /// 120 MB"; a tap opens their overview.
@@ -43,6 +44,27 @@ class AutoBackupChip extends ConsumerWidget {
 /// Each automatic backup with its date and size, and how many to keep.
 class _AutoBackupOverview extends ConsumerWidget {
   const _AutoBackupOverview();
+
+  /// Keeps [keep]; if the folder holds more than that ([there]), the
+  /// oldest would be deleted at once: asked first.
+  static Future<void> _keepFewer(
+      BuildContext context, WidgetRef ref, int keep, int there) async {
+    final gone = there - keep;
+    if (gone > 0) {
+      final confirmed = await showConfirmDialog(
+        context,
+        title: gone == 1
+            ? 'Delete the oldest backup?'
+            : 'Delete the $gone oldest backups?',
+        message: 'Keeping $keep deletes ${gone == 1 ? 'it' : 'them'} from '
+            'the folder now.',
+        confirmLabel: 'Delete',
+        destructive: true,
+      );
+      if (!confirmed) return;
+    }
+    await ref.read(autoBackupProvider).setKeep(keep);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -103,7 +125,8 @@ class _AutoBackupOverview extends ConsumerWidget {
                 icon: const Icon(Icons.remove),
                 onPressed: keep <= 1
                     ? null
-                    : () => ref.read(autoBackupProvider).setKeep(keep - 1),
+                    : () => _keepFewer(context, ref, keep - 1,
+                        state.valueOrNull?.backups.length ?? 0),
               ),
               SizedBox(
                 width: 28,
@@ -120,15 +143,6 @@ class _AutoBackupOverview extends ConsumerWidget {
               ),
             ],
           ),
-          // Fewer than are there: the oldest go at once.
-          if ((state.valueOrNull?.backups.length ?? 0) >= keep)
-            Text(
-              key: const Key('autoBackupKeepNote'),
-              keep <= 1
-                  ? 'Only the newest is kept.'
-                  : 'Fewer deletes the oldest backups in the folder at once.',
-              style: muted.copyWith(fontSize: 12),
-            ),
         ],
       ),
       actions: [

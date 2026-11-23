@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/models/preferences.dart';
@@ -108,8 +110,7 @@ void main() {
     await tester.tap(chip);
     await tester.pumpAndSettle();
     expect(find.text('Automatic backups'), findsOneWidget);
-    expect(find.byKey(const Key('autoBackupKeepNote')), findsNothing,
-        reason: 'one backup, keeping 7');
+
     expect(find.textContaining('KB'), findsWidgets);
     expect(
         tester.widget<Text>(find.byKey(const Key('autoBackupKeep'))).data, '7');
@@ -121,5 +122,53 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
     expect(text(tester), contains('Backups'));
+  });
+
+  testWidgets(
+      'keeping fewer than the folder holds asks first; cancelled, nothing '
+      'goes', (tester) async {
+    final folder =
+        FakeBackupFolder(picks: (uri: 'content://tree/x', name: 'Backups'));
+    for (final day in [10, 11, 12]) {
+      folder.files['the-app-auto-2026-10-$day-0905.zip'] = Uint8List(10);
+    }
+    final container = await pumpApp(tester,
+        clock: () => now,
+        backupFolder: folder,
+        preferences: const Preferences(
+          autoBackupFolder: 'content://tree/x',
+          autoBackupFolderName: 'Backups',
+        ));
+    await openBackup(tester);
+    await tester.pumpAndSettle();
+    expect(folder.files, hasLength(4), reason: "today's written on opening");
+    final chip = find.byKey(const Key('autoBackupChip'));
+    await tester.scrollUntilVisible(chip, 100);
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    final less = find.byKey(const Key('autoBackupKeepLess'));
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(less); // 7 → 4: none to delete
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Delete the oldest backup?'), findsNothing);
+    expect(container.read(preferencesProvider).autoBackupKeep, 4);
+
+    await tester.tap(less);
+    await tester.pumpAndSettle();
+    expect(find.text('Delete the oldest backup?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(container.read(preferencesProvider).autoBackupKeep, 4);
+    expect(folder.files, hasLength(4));
+
+    await tester.tap(less);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.pumpAndSettle();
+    expect(container.read(preferencesProvider).autoBackupKeep, 3);
+    expect(folder.files, hasLength(3));
+    expect(
+        folder.files.keys, isNot(contains('the-app-auto-2026-10-10-0905.zip')));
   });
 }

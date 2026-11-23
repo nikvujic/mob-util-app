@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -531,7 +531,11 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
                       label: 'Picture ${i + 1}',
                       child: GestureDetector(
                         onTap: () => _openViewer(i),
-                        onLongPress: () => _pictureMenu(i),
+                        onLongPress: () {
+                          // A small buzz: held, its options open.
+                          HapticFeedback.selectionClick();
+                          _pictureMenu(i);
+                        },
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: SizedBox.square(

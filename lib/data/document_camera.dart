@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 /// What taking a photo came to.
 sealed class PhotoResult {
@@ -42,12 +44,21 @@ abstract interface class DocumentCamera {
   Future<List<Uint8List>> pickFromGallery();
 }
 
-/// [DocumentCamera] through image_picker (Android's camera app and photo
-/// picker: no permission of the app's own needed).
+/// [DocumentCamera] through image_picker: the phone's camera app takes
+/// the photo and hands it back, and Android's photo picker lets the user
+/// pick pictures, of which the app is given only those. Neither needs a
+/// permission of the app's own (it can't use the camera itself or look
+/// through the gallery), so Android asks nothing.
 class SystemDocumentCamera implements DocumentCamera {
   const SystemDocumentCamera();
 
-  static final _picker = ImagePicker();
+  static final _picker = () {
+    // Android's photo picker (Android 11 and later with Google Play's
+    // updates), not the older file chooser.
+    final platform = ImagePickerPlatform.instance;
+    if (platform is ImagePickerAndroid) platform.useAndroidPhotoPicker = true;
+    return ImagePicker();
+  }();
 
   /// [file]'s bytes; its staging copy deleted.
   static Future<Uint8List> _take(XFile file) async {
