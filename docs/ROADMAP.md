@@ -38,9 +38,9 @@ Candidates for new Hub pages, each to be specified before it is built:
 - **Lent and borrowed**: what is lent to or borrowed from whom, linked to
   People, with an optional reminder.
 - **Plants**: watering intervals, a "watered" action and reminders.
-- **Warranties**: purchases with their warranty end and a reminder before
-  it. Receipt photos would come in a second step, together with a backup
-  format that carries files (one archive: the data and the photos).
+- **Documents** (agreed, [DOCUMENTS_SPEC.md](DOCUMENTS_SPEC.md)):
+  identity documents, receipts with warranties, barcodes and tickets, with
+  pictures; optionally encrypted by its page lock; backups as one zip.
 - **Parking**: where the car is, with a timer for the meter.
 
 ### Pip
