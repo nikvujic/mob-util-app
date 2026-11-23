@@ -28,6 +28,7 @@ import 'package:the_app/data/backup_files.dart';
 import 'package:the_app/models/preferences.dart';
 import 'package:the_app/data/backup.dart';
 import 'package:the_app/data/backup_folder.dart';
+import 'package:the_app/data/document_camera.dart';
 import 'package:the_app/data/power.dart';
 import 'package:the_app/data/fingerprint_vault.dart';
 import 'package:the_app/data/reminder_scheduler.dart';
@@ -79,6 +80,8 @@ Future<ProviderContainer> pumpApp(
   SubscriptionBook subscriptions = SubscriptionBook.empty,
   PackingBook? packing,
   PeopleBook? people,
+  FakeDocumentCamera? camera,
+  FakePhotoGallery? gallery,
   List<Override> overrides = const [],
 }) async {
   final container = ProviderContainer(
@@ -94,6 +97,9 @@ Future<ProviderContainer> pumpApp(
         initialPacking: packing,
         initialPeople: people ?? PeopleBook.empty,
       )),
+      // The camera, the gallery: fakes.
+      documentCameraProvider.overrideWithValue(camera ?? FakeDocumentCamera()),
+      photoGalleryProvider.overrideWithValue(gallery ?? FakePhotoGallery()),
       // Automatic backup's folder: a fake, never Android's.
       backupFolderProvider
           .overrideWithValue(backupFolder ?? FakeBackupFolder()),
@@ -199,6 +205,78 @@ Future<void> leaveNote(WidgetTester tester, {bool? save}) async {
     await tester.pumpAndSettle();
   }
 }
+
+/// The camera and gallery in tests: [photos] are what the camera takes
+/// in turn (null: closed without one); [unavailable], it doesn't open;
+/// [picks] what the gallery gives.
+class FakeDocumentCamera implements DocumentCamera {
+  final List<Uint8List?> photos;
+  bool unavailable;
+  List<Uint8List> picks;
+  int opened = 0;
+
+  FakeDocumentCamera({
+    List<Uint8List?>? photos,
+    this.unavailable = false,
+    this.picks = const [],
+  }) : photos = photos ?? [];
+
+  @override
+  Future<PhotoResult> takePhoto() async {
+    opened++;
+    if (unavailable) return const PhotoUnavailable();
+    if (photos.isEmpty) return const PhotoCancelled();
+    final photo = photos.removeAt(0);
+    return photo == null ? const PhotoCancelled() : PhotoTaken(photo);
+  }
+
+  @override
+  Future<List<Uint8List>> pickFromGallery() async => picks;
+}
+
+/// The phone's gallery in tests: keeps what's saved, by name.
+class FakePhotoGallery implements PhotoGallery {
+  final Map<String, Uint8List> saved = {};
+  bool works = true;
+
+  @override
+  Future<bool> save(Uint8List bytes, String name) async {
+    if (!works) return false;
+    saved[name] = bytes;
+    return true;
+  }
+}
+
+/// A real 1×1 PNG, grey [shade] (0–255): pictures for tests. With
+/// [pixels] (rows of RGB colours), that picture instead.
+Uint8List testPng({int shade = 128, List<List<int>>? pixels}) {
+  final rows = pixels ??
+      [
+        [shade << 16 | shade << 8 | shade]
+      ];
+  final w = rows.first.length, h = rows.length;
+  // Each row: filter 0, then RGB; deflated, in the PNG's chunks.
+  final raw = <int>[
+    for (final row in rows) ...[
+      0,
+      for (final c in row) ...[c >> 16 & 255, c >> 8 & 255, c & 255],
+    ],
+  ];
+  final data = ZLibEncoder().encodeBytes(raw);
+  List<int> chunk(String type, List<int> data) {
+    final body = [...ascii.encode(type), ...data];
+    return [..._u32(data.length), ...body, ..._u32(getCrc32(body))];
+  }
+
+  return Uint8List.fromList([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, //
+    ...chunk('IHDR', [..._u32(w), ..._u32(h), 8, 2, 0, 0, 0]),
+    ...chunk('IDAT', data),
+    ...chunk('IEND', const []),
+  ]);
+}
+
+List<int> _u32(int v) => [v >> 24 & 255, v >> 16 & 255, v >> 8 & 255, v & 255];
 
 /// The backup document (`backup.json`) inside a backup file's zip.
 String backupText(List<int> zip) => utf8.decode(

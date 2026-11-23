@@ -174,6 +174,22 @@ missing. `DocumentsNotifier.cleanUp`, on every start, deletes the files
 no document refers to, unless `documents.json` couldn't be read (then
 its pictures are kept for it).
 
+## The Documents page
+
+`pages/hub/documents.dart` (the list, its search and filter, the kind
+chooser), `document_page.dart` (the form: a draft saved through
+`DocumentsNotifier.save` once it isn't empty, `DiscardScope` comparing
+its JSON with how it opened), `document_pictures.dart` (`DocThumb`,
+reading a picture through `documentPictureProvider`, decoded small;
+`DocumentViewer`), `barcode_pages.dart` (the crop step and Show barcode).
+The camera, gallery and Download go through
+`providers/document_pictures_provider.dart` (pictures stored as soon as
+they're taken) to `data/document_camera.dart` (image_picker; the gallery
+channel), faked in tests by `FakeDocumentCamera` / `FakePhotoGallery`.
+A crop is cut by `core/picture_crop.dart` with `dart:ui` (decode, draw
+turned, encode PNG). Show barcode holds `KeepScreenOn` and
+`FullBrightness` (`core/screen.dart`, the window's brightness).
+
 ## Restoring part of a backup (D10)
 
 `BackupImporter.restorePart` takes the ids picked, by kind

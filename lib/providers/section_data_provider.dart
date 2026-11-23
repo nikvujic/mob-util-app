@@ -10,6 +10,7 @@ import 'package:the_app/models/routine.dart';
 import 'package:the_app/models/subscription.dart';
 import 'package:the_app/models/packing.dart';
 import 'package:the_app/models/people.dart';
+import 'package:the_app/providers/documents_provider.dart';
 import 'package:the_app/providers/counters_provider.dart';
 import 'package:the_app/providers/dates_provider.dart';
 import 'package:the_app/providers/medicine_provider.dart';
@@ -66,6 +67,7 @@ class SectionData {
         HubTool.packing => _ref.read(packingProvider).lists.length,
         // Everyone on the board.
         HubTool.people => _ref.read(peopleProvider).people.length,
+        HubTool.documents => _ref.read(documentsProvider).size,
       };
 
   /// Empties one of the Hub's pages (saved with the next flush).
@@ -98,6 +100,9 @@ class SectionData {
           if (d.personId != null) dates.delete(d.id);
         }
         _ref.read(peopleProvider.notifier).replaceAll(PeopleBook.empty);
+      case HubTool.documents:
+        // Their pictures too.
+        _ref.read(documentsProvider.notifier).clearAll();
       case HubTool.pip:
       case HubTool.spotify:
       case HubTool.converter:

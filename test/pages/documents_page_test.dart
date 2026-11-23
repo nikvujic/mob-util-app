@@ -1,0 +1,356 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:the_app/models/document_item.dart';
+import 'package:the_app/models/hub_tool.dart';
+import 'package:the_app/providers/documents_provider.dart';
+import 'package:the_app/providers/section_data_provider.dart';
+
+import '../helpers.dart';
+
+/// The Documents page (spec `docs/DOCUMENTS_SPEC.md`): its kinds, the
+/// camera first for some, the form's editing rules, pictures (camera,
+/// gallery, rotate, move, download, delete with Undo), the list's search,
+/// filter and order, Clear data.
+void main() {
+  late ProviderContainer container;
+  late FakeDocumentCamera camera;
+  late FakePhotoGallery gallery;
+
+  Future<void> start(WidgetTester tester,
+      {List<DocItem> items = const []}) async {
+    camera = FakeDocumentCamera();
+    gallery = FakePhotoGallery();
+    container = await pumpApp(tester,
+        clock: () => DateTime(2026, 11, 23, 12),
+        camera: camera,
+        gallery: gallery);
+    for (final d in items.reversed) {
+      container.read(documentsProvider.notifier).save(d);
+    }
+    await openTab(tester, 'Hub');
+    await tester.tap(find.byTooltip('Documents'));
+    await tester.pumpAndSettle();
+  }
+
+  DocumentBook book() => container.read(documentsProvider);
+
+  Future<void> add(WidgetTester tester, DocKind kind) async {
+    await tester.tap(find.byTooltip('Add a document'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('choice-${kind.name}')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('empty at first; a document opens the form, no camera',
+      (tester) async {
+    await start(tester);
+    expect(find.text('No documents'), findsOneWidget);
+    await add(tester, DocKind.document);
+    expect(camera.opened, 0);
+    expect(appBarTitle('New document'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('documentName')), 'Passport');
+    await tester.pump();
+    expect(book().items.single.name, 'Passport', reason: 'saved as typed');
+    await leaveSaved(tester);
+    expect(find.text('Passport'), findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byKey(Key('document-${book().items.single.id}')),
+            matching: find.text('Document')),
+        findsOneWidget,
+        reason: 'its kind');
+  });
+
+  testWidgets(
+      'a receipt opens the camera first: its photo the first picture; '
+      'shop and price', (tester) async {
+    await start(tester);
+    camera.photos.add(testPng(shade: 10));
+    await add(tester, DocKind.receipt);
+    expect(camera.opened, 1);
+    final saved = book().items.single;
+    expect(saved.kind, DocKind.receipt);
+    expect(saved.pictures, hasLength(1));
+    expect(
+        await container
+            .read(documentsProvider.notifier)
+            .readPicture(saved.pictures.single.id),
+        testPng(shade: 10));
+    await tester.enterText(find.byKey(const Key('documentShop')), 'Tehnika');
+    await tester.enterText(find.byKey(const Key('documentPrice')), '449 €');
+    await tester.pump();
+    expect((book().items.single.shop, book().items.single.price),
+        ('Tehnika', '449 €'));
+  });
+
+  testWidgets(
+      'the camera closed without a photo: the form stays, empty, its kind '
+      'kept; left empty, nothing is kept', (tester) async {
+    await start(tester);
+    await add(tester, DocKind.ticket);
+    expect(camera.opened, 1);
+    expect(appBarTitle('New ticket'), findsOneWidget);
+    expect(book().items, isEmpty);
+    await pressBack(tester);
+    expect(find.byType(AlertDialog), findsNothing, reason: 'nothing to ask');
+    expect(book().items, isEmpty);
+    expect(find.text('No documents'), findsOneWidget);
+  });
+
+  testWidgets("the camera can't open: says so; the gallery still adds",
+      (tester) async {
+    await start(tester);
+    camera.unavailable = true;
+    await add(tester, DocKind.barcode);
+    expect(find.textContaining("The camera didn't open"), findsOneWidget);
+    camera.picks = [testPng(shade: 1), testPng(shade: 2)];
+    await tester.tap(find.byKey(const Key('documentGallery')));
+    await tester.pumpAndSettle();
+    expect(book().items.single.pictures, hasLength(2));
+    // Cancelled: nothing more.
+    camera.picks = [];
+    await tester.tap(find.byKey(const Key('documentGallery')));
+    await tester.pumpAndSettle();
+    expect(book().items.single.pictures, hasLength(2));
+  });
+
+  testWidgets(
+      'a picture held: rotate, move, download, delete with Undo; a tap '
+      'opens it full screen', (tester) async {
+    final a = testPng(shade: 1), b = testPng(shade: 2);
+    await start(tester);
+    final notifier = container.read(documentsProvider.notifier);
+    final ida = await tester.runAsync(() => notifier.addPicture(a));
+    final idb = await tester.runAsync(() => notifier.addPicture(b));
+    notifier.save(DocItem(
+      id: 'd',
+      kind: DocKind.document,
+      name: 'ID',
+      pictures: [DocPicture(ida!), DocPicture(idb!)],
+      createdAt: DateTime(2026, 11, 23),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ID'));
+    await tester.pumpAndSettle();
+
+    Future<void> menu(int i, String choice) async {
+      await tester.longPress(find.byKey(Key('documentPicture-$i')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('choice-$choice')));
+      await tester.pumpAndSettle();
+    }
+
+    await menu(0, 'rotate');
+    expect(book().items.single.pictures.first.turns, 1);
+    await menu(0, 'later');
+    expect(book().items.single.pictures.map((p) => p.id), [idb, ida]);
+    await menu(1, 'download');
+    expect(gallery.saved.keys, ['ID 2']);
+    expect(gallery.saved['ID 2'], a);
+    expect(find.text('Saved to the gallery'), findsOneWidget);
+
+    await menu(0, 'delete');
+    expect(book().items.single.pictures.map((p) => p.id), [ida]);
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(book().items.single.pictures.map((p) => p.id), [idb, ida]);
+
+    await tester.tap(find.byKey(const Key('documentPicture-1')));
+    await tester.pumpAndSettle();
+    expect(find.text('2 of 2'), findsOneWidget);
+    // A finger's swipe, a bit at a time (the page takes it before the
+    // picture's pinch).
+    final swipe =
+        await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    for (var i = 0; i < 30; i++) {
+      await swipe.moveBy(const Offset(20, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await swipe.up();
+    await tester.pumpAndSettle();
+    expect(find.text('1 of 2'), findsOneWidget);
+  });
+
+  testWidgets(
+      'back after changes asks Save or Discard; Discard puts it back as '
+      'it was', (tester) async {
+    await start(tester, items: [
+      DocItem(
+          id: 'p',
+          kind: DocKind.document,
+          name: 'Passport',
+          createdAt: DateTime(2026, 11, 1)),
+    ]);
+    await tester.tap(find.text('Passport'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('documentName')), 'Pasoš');
+    await tester.pump();
+    expect(book().items.single.name, 'Pasoš');
+    await pressBack(tester);
+    expect(find.text('Save changes?'), findsOneWidget);
+    await tester.tap(find.text('Discard'));
+    await tester.pumpAndSettle();
+    expect(book().items.single.name, 'Passport');
+  });
+
+  testWidgets('deleted, asked first, with Undo', (tester) async {
+    await start(tester, items: [
+      DocItem(
+          id: 'p',
+          kind: DocKind.document,
+          name: 'Passport',
+          createdAt: DateTime(2026, 11, 1)),
+    ]);
+    await tester.tap(find.text('Passport'));
+    await tester.pumpAndSettle();
+    await reveal(tester, find.byKey(const Key('deleteDocument')));
+    await tester.tap(find.byKey(const Key('deleteDocument')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.pumpAndSettle();
+    expect(book().items, isEmpty);
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(book().items.single.name, 'Passport');
+  });
+
+  testWidgets(
+      'search by name, shop and note; filter by kind; narrowed, no '
+      'handles', (tester) async {
+    DocItem item(String id, DocKind kind, String name,
+            {String shop = '', String note = ''}) =>
+        DocItem(
+            id: id,
+            kind: kind,
+            name: name,
+            shop: shop,
+            note: note,
+            createdAt: DateTime(2026, 11, 1));
+    await start(tester, items: [
+      item('a', DocKind.document, 'Passport', note: 'renew in March'),
+      item('b', DocKind.receipt, 'Washing machine', shop: 'Tehnika'),
+      item('c', DocKind.barcode, 'Library card'),
+    ]);
+    expect(find.byIcon(Icons.drag_handle), findsNWidgets(3));
+    await tester.enterText(find.byKey(const Key('documentsSearch')), 'tehn');
+    await tester.pumpAndSettle();
+    expect(find.text('Washing machine'), findsOneWidget);
+    expect(find.text('Passport'), findsNothing);
+    expect(find.byIcon(Icons.drag_handle), findsNothing);
+    await tester.enterText(find.byKey(const Key('documentsSearch')), 'MARCH');
+    await tester.pumpAndSettle();
+    expect(find.text('Passport'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('documentsSearch')), '');
+    await tester.tap(find.byKey(const Key('documentsFilter-barcode')));
+    await tester.pumpAndSettle();
+    expect(find.text('Library card'), findsOneWidget);
+    expect(find.text('Passport'), findsNothing);
+    await tester.tap(find.byKey(const Key('documentsFilter-barcode')));
+    await tester.pumpAndSettle();
+    expect(find.text('Passport'), findsOneWidget);
+  });
+
+  testWidgets('Clear data empties it, its pictures too', (tester) async {
+    await start(tester);
+    final notifier = container.read(documentsProvider.notifier);
+    final id = await tester.runAsync(() => notifier.addPicture([1, 2]));
+    notifier.save(DocItem(
+        id: 'p',
+        kind: DocKind.document,
+        name: 'Passport',
+        pictures: [DocPicture(id!)],
+        createdAt: DateTime(2026, 11, 1)));
+    final data = container.read(sectionDataProvider);
+    expect(data.countOf(HubTool.documents), 1);
+    expect(HubTool.documents.lockable, isTrue);
+    expect(HubTool.documents.clearable, isTrue);
+    data.clearOf(HubTool.documents);
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    expect(book().items, isEmpty);
+    expect(await tester.runAsync(() => notifier.files.ids()), isEmpty);
+  });
+
+  group('barcode', () {
+    /// A wide picture: a black band (the barcode) across a white card.
+    final card = testPng(pixels: [
+      for (var y = 0; y < 10; y++)
+        [for (var x = 0; x < 20; x++) y >= 4 && y < 6 ? 0 : 0xFFFFFF],
+    ]);
+
+    /// Lets the crop step read and cut the picture (real work).
+    Future<void> settle(WidgetTester tester) => settleBusy(tester);
+
+    testWidgets(
+        'a new card: the camera, then the crop step; its crop the barcode, '
+        'shown full screen at full brightness, given back on closing',
+        (tester) async {
+      final calls = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('the_app/screen'), (call) async {
+        calls.add('${call.method} ${call.arguments}');
+        return null;
+      });
+      await start(tester);
+      camera.photos.add(card);
+      await add(tester, DocKind.barcode);
+      await settle(tester);
+      expect(find.text('Frame the barcode'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('barcodeCropDone')));
+      await settle(tester);
+      expect(find.text('Frame the barcode'), findsNothing);
+
+      final saved = book().items.single;
+      expect(saved.pictures, hasLength(1));
+      expect(saved.barcode, isNotNull);
+      expect(saved.fileIds, hasLength(2), reason: 'the crop is its own');
+      final crop = await tester.runAsync(() => container
+          .read(documentsProvider.notifier)
+          .readPicture(saved.barcode!));
+      expect(crop!.sublist(1, 4), 'PNG'.codeUnits);
+
+      await tester.tap(find.byKey(const Key('documentShowBarcode')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('shownBarcode')), findsOneWidget);
+      expect(calls, ['keepOn true', 'brightness 1.0']);
+      await tester.tap(find.byKey(const Key('shownBarcode')));
+      await tester.pumpAndSettle();
+      expect(calls,
+          ['keepOn true', 'brightness 1.0', 'brightness null', 'keepOn false']);
+    });
+
+    testWidgets(
+        'the crop cancelled: the picture stays, no barcode; Set barcode '
+        'later crops it, Remove takes it off', (tester) async {
+      await start(tester);
+      camera.photos.add(card);
+      await add(tester, DocKind.ticket);
+      await settle(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(book().items.single.pictures, hasLength(1));
+      expect(book().items.single.barcode, isNull);
+      expect(find.byKey(const Key('documentShowBarcode')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('documentSetBarcode')));
+      await settle(tester);
+      // The frame dragged down a little: still a crop.
+      await tester.drag(
+          find.byKey(const Key('barcodeCropArea')), const Offset(0, 20));
+      await tester.tap(find.byKey(const Key('barcodeCropDone')));
+      await settle(tester);
+      expect(book().items.single.barcode, isNotNull);
+
+      await tester.tap(find.byKey(const Key('documentRemoveBarcode')));
+      await tester.pumpAndSettle();
+      expect(book().items.single.barcode, isNull);
+    });
+
+    testWidgets('a document and a receipt have no barcode', (tester) async {
+      await start(tester);
+      await add(tester, DocKind.document);
+      expect(find.byKey(const Key('documentSetBarcode')), findsNothing);
+    });
+  });
+}

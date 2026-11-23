@@ -6,6 +6,29 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-11-23
+
+### Added
+- **Documents** (a new Hub page): identity documents, receipts, cards'
+  barcodes and tickets, each with its pictures, a name and a note (a
+  receipt also its shop and price).
+  - **+** asks the kind first. A receipt, a card or a ticket opens the
+    camera at once; its photo becomes the first picture. Closing the
+    camera leaves the form open.
+  - Pictures from the **camera** or the **gallery** at any time. A tap
+    opens one full screen (pinch to zoom, swipe between them); holding
+    one offers *Rotate*, *Move earlier / later*, *Download to the
+    gallery* and *Delete* (with Undo).
+  - A card or a ticket's **barcode**: framed on one of its pictures (the
+    crop step follows a new card's photo; *Set barcode* any time), then
+    **Show barcode** puts it full screen on white, the screen at full
+    brightness and kept on, both given back when it closes.
+  - Saved as it's edited, *Save / Discard* on back after changes, a new
+    one left empty is dropped; *Delete* asks, with Undo.
+  - The list: in your order (the handle moves them), with a search (name,
+    shop, note) and a filter by kind. Clear data empties it, pictures
+    too.
+
 ## [2.6.0] - 2026-11-23
 
 ### Changed

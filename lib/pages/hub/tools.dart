@@ -5,6 +5,7 @@ import 'package:the_app/models/hub_tool.dart';
 import 'package:the_app/pages/hub/converter.dart';
 import 'package:the_app/pages/hub/counters.dart';
 import 'package:the_app/pages/hub/dates.dart';
+import 'package:the_app/pages/hub/documents.dart';
 import 'package:the_app/pages/hub/medicine.dart';
 import 'package:the_app/pages/hub/packing.dart';
 import 'package:the_app/pages/hub/people.dart';
@@ -30,6 +31,7 @@ extension HubToolPage on HubTool {
         HubTool.packing => 'assets/icons/packing.svg',
         HubTool.people => 'assets/icons/people.svg',
         HubTool.converter => 'assets/icons/converter.svg',
+        HubTool.documents => 'assets/icons/documents.svg',
       };
 
   Widget page() => switch (this) {
@@ -48,5 +50,6 @@ extension HubToolPage on HubTool {
         HubTool.packing => const PackingPage(),
         HubTool.people => const PeoplePage(),
         HubTool.converter => const ConverterPage(),
+        HubTool.documents => const DocumentsPage(),
       };
 }

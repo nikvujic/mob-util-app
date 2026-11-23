@@ -1,16 +1,22 @@
 package com.nikvujic.the_app
 
+import android.Manifest
 import android.content.BroadcastReceiver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.BatteryManager
+import android.os.Build
+import android.provider.MediaStore
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -117,6 +123,17 @@ class MainActivity: FlutterFragmentActivity() {
         // front (Android lets it go dark again in the background).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/screen")
             .setMethodCallHandler { call, result ->
+                // A barcode shown: the screen at full brightness (only this
+                // window, only while it's in front); null gives it back.
+                if (call.method == "brightness") {
+                    val level = (call.arguments as? Number)?.toFloat()
+                    val attributes = window.attributes
+                    attributes.screenBrightness = level
+                        ?: WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                    window.attributes = attributes
+                    result.success(null)
+                    return@setMethodCallHandler
+                }
                 if (call.method != "keepOn") {
                     result.notImplemented()
                     return@setMethodCallHandler
@@ -127,6 +144,38 @@ class MainActivity: FlutterFragmentActivity() {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
                 result.success(null)
+            }
+        // Documents' Download: a copy of a picture into the phone's gallery.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/gallery")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "save") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                val bytes = call.argument<ByteArray>("bytes")
+                val name = call.argument<String>("name") ?: "Document"
+                if (bytes == null) {
+                    result.success(false)
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+                    ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Older Android asks first; the next try saves.
+                    ActivityCompat.requestPermissions(
+                        this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 41
+                    )
+                    result.success(false)
+                } else {
+                    Thread {
+                        val ok = try {
+                            saveToGallery(bytes, name)
+                        } catch (e: Exception) {
+                            false
+                        }
+                        runOnUiThread { result.success(ok) }
+                    }.start()
+                }
             }
         // Automatic backup to a folder picked once.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "the_app/backup_folder")
@@ -410,6 +459,35 @@ class MainActivity: FlutterFragmentActivity() {
             return false
         }
         prune(uri, prefix, keep)
+        return true
+    }
+
+    /// Saves [bytes] (a JPEG or PNG) into Pictures/The App as [name].
+    private fun saveToGallery(bytes: ByteArray, name: String): Boolean {
+        val png = bytes.size > 4 && bytes[0] == 0x89.toByte() && bytes[1] == 0x50.toByte()
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, name + if (png) ".png" else ".jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, if (png) "image/png" else "image/jpeg")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/The App")
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+        val uri = contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
+        ) ?: return false
+        try {
+            contentResolver.openOutputStream(uri, "w")?.use { it.write(bytes) }
+                ?: throw IllegalStateException("no stream")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear()
+                values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                contentResolver.update(uri, values, null, null)
+            }
+        } catch (e: Exception) {
+            contentResolver.delete(uri, null, null)
+            return false
+        }
         return true
     }
 

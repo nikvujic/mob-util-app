@@ -116,3 +116,7 @@ String formatBytes(int bytes) {
   if (bytes < gb) return '${one(bytes / mb)} MB';
   return '${one(bytes / gb)} GB';
 }
+
+/// `3 Mar 2031`.
+String formatShortDate(DateTime day) =>
+    '${day.day} ${_months[day.month - 1]} ${day.year}';

@@ -56,6 +56,16 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
     state = DocumentBook(list);
   }
 
+  /// The handle's move, as the list reports it ([newIndex] counted
+  /// before the row leaves its place).
+  void reorder(int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) newIndex--;
+    if (oldIndex == newIndex) return;
+    final list = [...state.items];
+    list.insert(newIndex, list.removeAt(oldIndex));
+    state = DocumentBook(list);
+  }
+
   void replaceAll(DocumentBook book) => state = book;
 
   /// Stores a picture's [bytes] and returns its id.
@@ -82,6 +92,12 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
     await files.clear();
   }
 }
+
+/// A picture's bytes, read once while shown; null if it's missing.
+final documentPictureProvider =
+    FutureProvider.autoDispose.family<Uint8List?, String>(
+  (ref, id) => ref.watch(documentsProvider.notifier).readPicture(id),
+);
 
 final documentsProvider =
     StateNotifierProvider<DocumentsNotifier, DocumentBook>(

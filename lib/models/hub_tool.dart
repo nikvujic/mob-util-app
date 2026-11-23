@@ -39,7 +39,11 @@ enum HubTool {
 
   /// A unit converter: nothing kept, so nothing to lock or
   /// clear.
-  converter('Converter');
+  converter('Converter'),
+
+  /// Documents: identity documents, receipts and their warranties,
+  /// cards' barcodes and tickets, with their pictures.
+  documents('Documents');
 
   const HubTool(this.label);
 

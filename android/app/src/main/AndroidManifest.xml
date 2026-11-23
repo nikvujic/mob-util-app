@@ -10,6 +10,11 @@
     <!-- Only for what's turned on in Internet Access (for now
          the weather, from Open-Meteo); nothing is fetched otherwise. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Documents' Download into the gallery: Android 9 and older need it
+         (later ones don't). -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
     <application
         android:label="The App"
         android:name="${applicationName}"

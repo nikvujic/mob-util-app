@@ -433,6 +433,17 @@ abstract final class DateColours {
 
 /// Subscriptions' states, whatever the theme: a card's tint
 /// and edge.
+/// A picture shown full screen (Documents): on black, whatever the theme,
+/// with white controls.
+abstract final class ViewerColours {
+  static const background = Color(0xFF000000);
+  static const foreground = Color(0xFFFFFFFF);
+
+  /// A barcode shown to be scanned: on white, whatever the theme.
+  static const paper = Color(0xFFFFFFFF);
+  static const ink = Color(0xFF000000);
+}
+
 abstract final class SubscriptionColours {
   static const active = Color(0xFF4CAF7A);
   static const toCancel = Color(0xFFE8913A);

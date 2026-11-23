@@ -32,3 +32,21 @@ abstract final class KeepScreenOn {
     }
   }
 }
+
+/// The screen at full brightness (a barcode shown, to be scanned), and
+/// back to the phone's own when it closes. Android applies it to the
+/// app's window only, so leaving the app gives the phone's back too.
+abstract final class FullBrightness {
+  static Future<void> on() => _set(1.0);
+  static Future<void> off() => _set(null);
+
+  static Future<void> _set(double? level) async {
+    try {
+      await KeepScreenOn.channel.invokeMethod<void>('brightness', level);
+    } on MissingPluginException {
+      // Not on a phone.
+    } on PlatformException {
+      // Brightness is no reason for an error.
+    }
+  }
+}
