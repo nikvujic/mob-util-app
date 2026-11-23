@@ -32,9 +32,9 @@ void main() {
     addTearDown(container.dispose);
     // A task with a reminder today and tomorrow; a medicine at 20:00.
     container.read(plannerProvider.notifier)
-      ..addTask(today, 'Dentist', start: 15 * 60, end: 16 * 60, remind: 10)
+      ..addTask(today, 'Dentist', start: 15 * 60, end: 16 * 60, reminds: [10])
       ..addTask(DateTime(2026, 10, 14), 'Gym',
-          start: 18 * 60, end: 19 * 60, remind: 0);
+          start: 18 * 60, end: 19 * 60, reminds: [0]);
     container
         .read(medicineProvider.notifier)
         .add('Iron', times: [20 * 60], from: today, until: today);

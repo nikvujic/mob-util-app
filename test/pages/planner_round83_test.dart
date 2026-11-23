@@ -36,9 +36,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  bool chosen(WidgetTester tester, String label) => tester
-      .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, label))
-      .selected;
+  // Off is a ChoiceChip; the reminders, picked as many as wanted, are
+  // FilterChips.
+  bool chosen(WidgetTester tester, String label) {
+    final choice = find.widgetWithText(ChoiceChip, label);
+    if (choice.evaluate().isNotEmpty) {
+      return tester.widget<ChoiceChip>(choice).selected;
+    }
+    return tester
+        .widget<FilterChip>(find.widgetWithText(FilterChip, label))
+        .selected;
+  }
 
   group('fitTime', () {
     test('its own time if free; else the nearest as long; null if none', () {

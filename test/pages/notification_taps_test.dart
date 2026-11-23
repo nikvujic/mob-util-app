@@ -55,7 +55,7 @@ void main() {
             day: tomorrow,
             start: 15 * 60,
             end: 16 * 60,
-            remind: 10,
+            reminds: [10],
           ),
         ],
         routines: RoutineBook.empty,
@@ -67,9 +67,8 @@ void main() {
   testWidgets('a block: the planner, on its day, scrolled to it',
       (tester) async {
     await start(tester);
-    container
-        .read(plannerProvider.notifier)
-        .addTask(tomorrow, 'Dentist', start: 22 * 60, end: 23 * 60, remind: 10);
+    container.read(plannerProvider.notifier).addTask(tomorrow, 'Dentist',
+        start: 22 * 60, end: 23 * 60, reminds: [10]);
     await tester.pump();
     expect(find.text('Notes'), findsWidgets, reason: 'on Notes');
 

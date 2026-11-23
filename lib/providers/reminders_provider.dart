@@ -35,10 +35,14 @@ const reminderDays = 14;
 /// At most this many are scheduled (Android allows about 500 alarms).
 const maxReminders = 400;
 
+/// The most days before a block one of its reminders can be.
+const maxRemindDays = 2;
+
 /// The reminders due after [now] for the next [reminderDays] days: tasks
 /// and routines with a reminder, not ticked off (nor skipped), and the
 /// planner's own reminders ([pins], P14) at their time. With [hideTitles]
-/// (set private), titles are left out.
+/// (set private), titles are left out. A block may have several
+/// reminders, up to [maxRemindDays] before it.
 List<Reminder> planReminders({
   required DateTime now,
   required List<PlannerTask> tasks,
@@ -75,18 +79,25 @@ List<Reminder> planReminders({
     ));
   }
 
+  // Blocks a little further on too: a reminder days before one comes
+  // within the days planned.
+  final planUntil = addDays(today, reminderDays + 1);
+
   void add(DateTime day, String title, int start, int end, int remind) {
-    // Minutes beyond 0–59 roll over, also into the day before.
+    // Minutes beyond 0–59 roll over, also into the days before.
     final at = DateTime(day.year, day.month, day.day, 0, start - remind);
-    if (!at.isAfter(now)) return;
+    if (!at.isAfter(now) || !at.isBefore(planUntil)) return;
     // Tapped: the planner on that day, at the block.
     final target = PlannerTarget(day, start).payload;
     final time = '${formatMinutes(start)}–${formatMinutes(end)}';
-    final when = remind == 0
-        ? 'Now'
-        : remind < 60
-            ? 'In $remind min'
-            : 'In ${remind ~/ 60} h${remind % 60 == 0 ? '' : ' ${remind % 60} min'}';
+    final when = switch (remind) {
+      0 => 'Now',
+      < 60 => 'In $remind min',
+      1440 => 'Tomorrow',
+      >= 1440 when remind % 1440 == 0 => 'In ${remind ~/ 1440} days',
+      _ => 'In ${remind ~/ 60} h'
+          '${remind % 60 == 0 ? '' : ' ${remind % 60} min'}',
+    };
     reminders.add(
       hideTitles
           ? Reminder(
@@ -104,20 +115,25 @@ List<Reminder> planReminders({
     );
   }
 
-  for (var i = 0; i <= reminderDays; i++) {
+  for (var i = 0; i <= reminderDays + maxRemindDays; i++) {
     final day = addDays(today, i);
+    final planned = i <= reminderDays;
     for (final t in tasks) {
-      if (isSameDay(t.day, day) && t.hasTime && !t.done && t.remind != null) {
-        add(day, t.title, t.start!, t.end!, t.remind!);
+      if (isSameDay(t.day, day) && t.hasTime && !t.done) {
+        for (final remind in t.reminds) {
+          add(day, t.title, t.start!, t.end!, remind);
+        }
       }
-      if (onNow && isSameDay(t.day, day) && t.hasTime && !t.done) {
+      if (planned && onNow && isSameDay(t.day, day) && t.hasTime && !t.done) {
         addNow(day, t.title, t.start!, t.end!, t.id, false);
       }
     }
     for (final o in routinesOn(day, routines)) {
       final r = o.routine;
-      if (r.remind != null) add(day, r.title, r.start, r.end, r.remind!);
-      if (onNow) addNow(day, r.title, r.start, r.end, r.id, true);
+      for (final remind in r.reminds) {
+        add(day, r.title, r.start, r.end, remind);
+      }
+      if (planned && onNow) addNow(day, r.title, r.start, r.end, r.id, true);
     }
   }
   final last = addDays(today, reminderDays + 1);

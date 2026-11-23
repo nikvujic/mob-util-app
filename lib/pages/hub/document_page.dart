@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/danger_button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
@@ -747,15 +748,9 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 // A full button, as Delete person.
-                child: OutlinedButton.icon(
+                child: DangerButton(
                   key: const Key('deleteDocument'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colors.danger,
-                    side: BorderSide(color: colors.danger),
-                    minimumSize: const Size.fromHeight(44),
-                  ),
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete document'),
+                  label: 'Delete document',
                   onPressed: _delete,
                 ),
               ),

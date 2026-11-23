@@ -60,7 +60,7 @@ void main() {
     // Changes while it's still scheduling.
     container.read(plannerProvider.notifier).addTask(
         DateTime(2026, 10, 8), 'Dentist',
-        start: 600, end: 660, remind: 0);
+        start: 600, end: 660, reminds: [0]);
     final again = planner.refresh(); // e.g. the app came back
     await Future<void>.delayed(Duration.zero);
     expect(scheduler.running, 1, reason: 'waits for the one running');

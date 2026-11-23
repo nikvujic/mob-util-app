@@ -421,7 +421,7 @@ void main() {
       (tester) async {
     await openPlanner(tester);
     planner().addTask(today, 'Dentist',
-        start: 12 * 60, end: 13 * 60, color: 'teal', remind: 10);
+        start: 12 * 60, end: 13 * 60, color: 'teal', reminds: [10]);
     await tester.pump();
 
     await tester.tap(find.text('Dentist'));

@@ -20,9 +20,9 @@ import 'package:the_app/widgets/pull_down_list.dart';
 Future<void> allowReminders(
   BuildContext context,
   WidgetRef ref,
-  int? remind,
+  List<int> reminds,
 ) async {
-  if (remind == null) return;
+  if (reminds.isEmpty) return;
   final messenger = ScaffoldMessenger.of(context);
   if (await ref.read(reminderPlannerProvider).requestPermission()) return;
   messenger
@@ -84,10 +84,10 @@ Future<void> editRoutine(
       weekdays: changed.weekdays ?? routine.weekdays,
       until: changed.until,
       color: changed.color,
-      remind: changed.remind,
+      reminds: changed.reminds,
       description: changed.description,
     );
-    if (context.mounted) await allowReminders(context, ref, changed.remind);
+    if (context.mounted) await allowReminders(context, ref, changed.reminds);
   } on TaskOverlapException {
     messenger
       ..hideCurrentSnackBar()
@@ -174,10 +174,10 @@ class _RoutinesPageState extends ConsumerState<RoutinesPage> {
             from: today,
             until: added.until,
             color: added.color,
-            remind: added.remind,
+            reminds: added.reminds,
             description: added.description,
           );
-      await allowReminders(context, ref, added.remind);
+      await allowReminders(context, ref, added.reminds);
     } on TaskOverlapException {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

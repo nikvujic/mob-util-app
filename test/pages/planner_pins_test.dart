@@ -20,6 +20,11 @@ void main() {
   final today = DateTime(2026, 10, 8);
   int at(num hours) => (hours * 60).round();
 
+  /// [text] in the open sheet (a reminder alone also shows its title on
+  /// the timeline).
+  Finder inSheet(String text) =>
+      find.descendant(of: find.byType(BottomSheet), matching: find.text(text));
+
   Future<void> openPlanner(WidgetTester tester) async {
     scheduler = FakeReminderScheduler();
     container = await pumpApp(
@@ -135,7 +140,7 @@ void main() {
     await tester.pump();
 
     await openMark(tester, 'Call mum');
-    await tester.tap(find.text('Call mum'));
+    await tester.tap(inSheet('Call mum'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('taskTitle')), 'Call dad');
     await tester.pump();
@@ -144,7 +149,7 @@ void main() {
     expect(container.read(pinsProvider).single.title, 'Call dad');
 
     await openMark(tester, 'Call dad');
-    await tester.tap(find.text('Call dad'));
+    await tester.tap(inSheet('Call dad'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
@@ -253,8 +258,8 @@ void main() {
     }
 
     String subtitleOf(WidgetTester tester, String title) {
-      final tile = tester.widget<CheckboxListTile>(find.ancestor(
-          of: find.text(title), matching: find.byType(CheckboxListTile)));
+      final tile = tester.widget<ListTile>(
+          find.ancestor(of: find.text(title), matching: find.byType(ListTile)));
       return (tile.subtitle! as Text).data!;
     }
 
@@ -271,7 +276,9 @@ void main() {
       await openList(tester);
       expect(list, findsOneWidget);
       final titles = tester
-          .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+          .widgetList<ListTile>(find.byWidgetPredicate((w) =>
+              w is ListTile &&
+              '${(w.key as ValueKey?)?.value}'.startsWith('reminder-')))
           .map((t) => (t.title as Text).data)
           .toList();
       expect(titles, ['Tea', 'Call mum', 'Bins', 'Dentist', 'Missed', 'Old']);
@@ -293,14 +300,14 @@ void main() {
         ..add(today, 'Bins', time: at(20));
       await openList(tester);
       expect(find.byKey(const Key('remindersDelete')), findsNothing);
-      await tester.tap(find.text('Tea'));
-      await tester.tap(find.text('Bins'));
+      await tester.tap(inSheet('Tea'));
+      await tester.tap(inSheet('Bins'));
       await tester.pump();
       expect(find.text('Delete 2'), findsOneWidget);
-      await tester.tap(find.text('Bins'));
+      await tester.tap(inSheet('Bins'));
       await tester.pump();
       expect(find.text('Delete 1'), findsOneWidget);
-      await tester.tap(find.text('Bins'));
+      await tester.tap(inSheet('Bins'));
       await tester.pump();
       await tester.tap(find.byKey(const Key('remindersDelete')));
       await tester.pumpAndSettle();
@@ -313,11 +320,34 @@ void main() {
           unorderedEquals(['Tea', 'Call mum', 'Bins']));
     });
 
+    testWidgets("each one's arrow goes to its day, at its time",
+        (tester) async {
+      await openPlanner(tester);
+      pins()
+        ..add(today, 'Tea', time: at(11))
+        ..add(today.add(const Duration(days: 3)), 'Dentist', time: at(16));
+      await openList(tester);
+      final dentist =
+          container.read(pinsProvider).firstWhere((p) => p.title == 'Dentist');
+      await tester.tap(find.byKey(Key('reminderGoTo-${dentist.id}')));
+      await tester.pumpAndSettle();
+      expect(list, findsNothing);
+      // Its day shown, its mark on screen, scrolled to it.
+      expect(
+          find.bySemanticsLabel('Reminder: Dentist at 16:00'), findsOneWidget);
+      final mark =
+          tester.getCenter(find.bySemanticsLabel('Reminder: Dentist at 16:00'));
+      final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+      expect(mark.dy, inInclusiveRange(0, screen.height));
+      expect(find.bySemanticsLabel('Reminder: Tea at 11:00'), findsNothing,
+          reason: 'another day');
+    });
+
     testWidgets('one deleted: its name in the toast', (tester) async {
       await openPlanner(tester);
       pins().add(today, 'Tea', time: at(11));
       await openList(tester);
-      await tester.tap(find.text('Tea'));
+      await tester.tap(inSheet('Tea'));
       await tester.pump();
       await tester.tap(find.byKey(const Key('remindersDelete')));
       await tester.pumpAndSettle();
@@ -340,6 +370,39 @@ void main() {
       await tester.pumpAndSettle();
       expect(list, findsNothing);
       expect(find.text('At'), findsOneWidget);
+    });
+  });
+
+  group('a reminder on the timeline', () {
+    testWidgets(
+        'alone with room: a short block at its time too (tapped, its menu); '
+        'beside a block or another reminder: the mark only', (tester) async {
+      await openPlanner(tester);
+      pins()
+        ..add(today, 'Alone', time: at(14))
+        ..add(today, 'In a block', time: at(10.5))
+        ..add(today, 'Close 1', time: at(19))
+        ..add(today, 'Close 2', time: at(19.25));
+      container
+          .read(plannerProvider.notifier)
+          .addTask(today, 'Work', start: at(10), end: at(12));
+      await tester.pumpAndSettle();
+      String idOf(String title) =>
+          container.read(pinsProvider).firstWhere((p) => p.title == title).id;
+      expect(find.byKey(Key('pinStrip-${idOf('Alone')}')), findsOneWidget);
+      expect(find.byKey(Key('pinStrip-${idOf('In a block')}')), findsNothing);
+      expect(find.byKey(Key('pinStrip-${idOf('Close 1')}')), findsNothing);
+      expect(find.byKey(Key('pinStrip-${idOf('Close 2')}')), findsNothing);
+      // Its mark stays as well.
+      expect(find.bySemanticsLabel('Reminder: Alone at 14:00'), findsOneWidget);
+
+      final strip = find.byKey(Key('pinStrip-${idOf('Alone')}'));
+      await tester.ensureVisible(strip);
+      await tester.pumpAndSettle();
+      await tester.tap(strip);
+      await tester.pumpAndSettle();
+      expect(find.text('Reminder at 14:00'), findsOneWidget,
+          reason: "its mark's menu");
     });
   });
 }

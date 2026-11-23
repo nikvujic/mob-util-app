@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/danger_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/format.dart';
@@ -810,15 +811,9 @@ class _PersonPanelState extends ConsumerState<PersonPanel> {
         ),
         if (kept) ...[
           const SizedBox(height: 16),
-          OutlinedButton.icon(
+          DangerButton(
             key: const Key('deletePerson'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: colors.danger,
-              side: BorderSide(color: colors.danger),
-              minimumSize: const Size.fromHeight(44),
-            ),
-            icon: const Icon(Icons.delete_outline),
-            label: const Text('Delete person'),
+            label: 'Delete person',
             onPressed: _delete,
           ),
         ],

@@ -6,6 +6,25 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.11.0] - 2026-11-23
+
+### Added
+- **Planner: several reminders for a block**, picked as many as wanted,
+  and longer ones: 2, 3, 5, 8 and 10 hours, 1 and 2 days before (as well
+  as at the start and 5 minutes to 1 hour before). *Off* clears them.
+  Older blocks keep their one reminder.
+- **Planner reminders on the timeline**: a reminder with nothing else
+  near it also shows as a short block at its time (tapped, its menu).
+  Next to a block or another reminder, it stays a mark on the left as
+  before.
+- **The reminders list**: an arrow on each one opens its day, scrolled
+  to its time.
+
+### Changed
+- **Delete buttons** are red outlined buttons everywhere, as on People:
+  the planner's block sheet, the reminders list, Subscriptions, the
+  to-do note's *Delete all*, and the pages that had them already.
+
 ## [2.10.1] - 2026-11-23
 
 ### Changed

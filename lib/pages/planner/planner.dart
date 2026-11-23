@@ -177,7 +177,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               from: day,
               until: task.until,
               color: task.color,
-              remind: task.remind,
+              reminds: task.reminds,
               description: task.description,
             );
       } else {
@@ -187,11 +187,11 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               start: task.start,
               end: task.end,
               color: task.color,
-              remind: task.remind,
+              reminds: task.reminds,
               description: task.description,
             );
       }
-      await allowReminders(context, ref, task.remind);
+      await allowReminders(context, ref, task.reminds);
     } on TaskOverlapException {
       _taken(
         task.weekdays == null
@@ -215,7 +215,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               start: task.start!,
               end: task.end!,
               color: BlockColor.fromName(task.color),
-              remind: task.remind,
+              reminds: task.reminds,
               description: task.description,
             ),
             for (final choice in _TaskChoice.values)
@@ -272,10 +272,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         start: changed.start,
         end: changed.end,
         color: changed.color,
-        remind: changed.remind,
+        reminds: changed.reminds,
         description: changed.description,
       );
-      await allowReminders(context, ref, changed.remind);
+      await allowReminders(context, ref, changed.reminds);
     } on TaskOverlapException {
       _taken();
     }
@@ -381,7 +381,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
               start: routine.start,
               end: routine.end,
               color: BlockColor.fromName(routine.color),
-              remind: routine.remind,
+              reminds: routine.reminds,
               description: routine.description,
               routine: true,
             ),
@@ -490,7 +490,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
         end: beside.end,
         note: beside.note,
         color: routine.color,
-        remind: routine.remind,
+        reminds: routine.reminds,
         description: routine.description,
         submitLabel: 'Save',
       ),
@@ -505,10 +505,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             start: changed.start,
             end: changed.end,
             color: changed.color,
-            remind: changed.remind,
+            reminds: changed.reminds,
             description: changed.description,
           );
-      await allowReminders(context, ref, changed.remind);
+      await allowReminders(context, ref, changed.reminds);
     } on TaskOverlapException {
       routines.setSkipped(routine.id, day, skipped: false);
       _taken();
@@ -535,10 +535,10 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
             start: task.start,
             end: task.end,
             color: task.color,
-            remind: task.remind,
+            reminds: task.reminds,
             description: task.description,
           );
-      await allowReminders(context, ref, task.remind);
+      await allowReminders(context, ref, task.reminds);
     } on TaskOverlapException {
       _taken();
     }
@@ -559,7 +559,7 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final pin = await showAddPinSheet(context, time: time);
     if (pin == null || !mounted) return;
     ref.read(pinsProvider.notifier).add(day, pin.title, time: pin.start);
-    await allowReminders(context, ref, 0);
+    await allowReminders(context, ref, const [0]);
   }
 
   Future<void> _editPin(PlannerPin pin) async {
@@ -591,6 +591,16 @@ class _PlannerPageState extends ConsumerState<PlannerPage> {
     final choice = await showRemindersSheet(context, pins: all, now: _now);
     if (choice == null || !mounted) return;
     if (choice.add) return _addPin(day);
+    // Its day, scrolled to its time.
+    if (choice.goTo case final pin?) {
+      _selection.clear();
+      setState(() {
+        _day = pin.day;
+        _goTo = pin.time;
+        _jumps++;
+      });
+      return;
+    }
     final pins = ref.read(pinsProvider.notifier);
     final removed = [for (final pin in choice.delete) pins.remove(pin.id)];
     final count = removed.length;
@@ -902,7 +912,7 @@ class _BlockHeader extends StatelessWidget {
   final int start;
   final int end;
   final BlockColor? color;
-  final int? remind;
+  final List<int> reminds;
   final String? description;
   final bool routine;
 
@@ -911,7 +921,7 @@ class _BlockHeader extends StatelessWidget {
     required this.start,
     required this.end,
     required this.color,
-    required this.remind,
+    required this.reminds,
     required this.description,
     this.routine = false,
   });
@@ -941,8 +951,8 @@ class _BlockHeader extends StatelessWidget {
             [
               '${formatMinutes(start)}–${formatMinutes(end)}',
               if (routine) 'a routine',
-              if (remind != null)
-                'reminds ${remindLabel(remind).toLowerCase()}',
+              if (reminds.isNotEmpty)
+                'reminds ${remindsLabel(reminds).toLowerCase()}',
             ].join(' · '),
             style: TextStyle(color: colors.textSecondary),
           ),

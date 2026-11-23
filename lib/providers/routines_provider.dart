@@ -45,7 +45,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     required DateTime from,
     DateTime? until,
     String? color,
-    int? remind,
+    List<int> reminds = const [],
     String? description,
   }) {
     final trimmed = title.trim();
@@ -60,7 +60,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
       from: from,
       until: until,
       color: color,
-      remind: remind,
+      reminds: reminds,
       description: _described(description),
     );
     _checkFree(routine);
@@ -82,7 +82,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
     required Set<int> weekdays,
     required DateTime? until,
     String? color,
-    int? remind,
+    List<int> reminds = const [],
     String? description,
   }) {
     final old = _find(id);
@@ -97,7 +97,7 @@ class RoutinesNotifier extends StateNotifier<RoutineBook> {
       weekdays: weekdays,
       until: () => until,
       color: () => color,
-      remind: () => remind,
+      reminds: reminds,
       description: () => _described(description),
     );
     _checkFree(routine);

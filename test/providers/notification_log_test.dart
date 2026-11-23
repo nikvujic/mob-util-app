@@ -82,7 +82,7 @@ void main() {
     test('shown once its time has come; stays when its task goes', () async {
       container.read(plannerProvider.notifier).addTask(
           DateTime(2026, 10, 13), 'Dentist',
-          start: 11 * 60, end: 12 * 60, remind: 0);
+          start: 11 * 60, end: 12 * 60, reminds: [0]);
       await container.read(reminderPlannerProvider).refresh();
       expect(history(), isEmpty, reason: 'not yet');
 
@@ -99,7 +99,7 @@ void main() {
       await container.read(notificationsAllowedProvider.future);
       container.read(plannerProvider.notifier).addTask(
           DateTime(2026, 10, 13), 'Dentist',
-          start: 11 * 60, end: 12 * 60, remind: 0);
+          start: 11 * 60, end: 12 * 60, reminds: [0]);
       await container.read(reminderPlannerProvider).refresh();
       now = DateTime(2026, 10, 13, 11, 30);
       expect(history(), isEmpty);

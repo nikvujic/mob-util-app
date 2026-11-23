@@ -43,7 +43,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     required int start,
     required int end,
     String? color,
-    int? remind,
+    List<int> reminds = const [],
     String? description,
   }) {
     final trimmed = title.trim();
@@ -56,7 +56,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       start: start,
       end: end,
       color: color,
-      remind: remind,
+      reminds: reminds,
       description: _described(description),
     );
     final free = _free(_on(day));
@@ -74,7 +74,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
     required int start,
     required int end,
     String? color,
-    int? remind,
+    List<int> reminds = const [],
     String? description,
   }) {
     final task = state.firstWhere((t) => t.id == id);
@@ -90,7 +90,7 @@ class PlannerNotifier extends StateNotifier<List<PlannerTask>> {
       end: end,
       done: task.done,
       color: color,
-      remind: remind,
+      reminds: reminds,
       description: _described(description),
     );
     final free = _free(_on(task.day).where((t) => t.id != id));

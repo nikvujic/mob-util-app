@@ -23,8 +23,12 @@ class Routine {
   /// Its colour (P9): a [BlockColor] name, or null for the default.
   final String? color;
 
-  /// Minutes before its start to remind (P10; 0: at the start), or null.
-  final int? remind;
+  /// Its reminders (P10), as a task's: minutes before its start, the
+  /// nearest first; none, no reminder.
+  final List<int> reminds;
+
+  /// The reminder nearest its start, or null for none.
+  int? get remind => reminds.isEmpty ? null : reminds.first;
 
   /// More about it (P20), or null.
   final String? description;
@@ -38,9 +42,10 @@ class Routine {
     required DateTime from,
     DateTime? until,
     this.color,
-    this.remind,
+    List<int> reminds = const [],
     this.description,
   })  : weekdays = Set.unmodifiable(weekdays),
+        reminds = PlannerTask.sortedReminds(reminds),
         from = DateTime(from.year, from.month, from.day),
         until = until == null
             ? null
@@ -54,8 +59,8 @@ class Routine {
     if (this.until != null && this.until!.isBefore(this.from)) {
       throw ArgumentError('Ends before it starts');
     }
-    if (remind != null && remind! < 0) {
-      throw ArgumentError('Invalid reminder: $remind');
+    if (this.reminds.any((m) => m < 0)) {
+      throw ArgumentError('Invalid reminder: $reminds');
     }
   }
 
@@ -84,7 +89,7 @@ class Routine {
     DateTime? from,
     DateTime? Function()? until,
     String? Function()? color,
-    int? Function()? remind,
+    List<int>? reminds,
     String? Function()? description,
   }) =>
       Routine(
@@ -96,7 +101,7 @@ class Routine {
         from: from ?? this.from,
         until: until == null ? this.until : until(),
         color: color == null ? this.color : color(),
-        remind: remind == null ? this.remind : remind(),
+        reminds: reminds ?? this.reminds,
         description: description == null ? this.description : description(),
       );
 
@@ -109,7 +114,7 @@ class Routine {
         'from': PlannerTask.dayToJson(from),
         if (until != null) 'until': PlannerTask.dayToJson(until!),
         if (color != null) 'color': color,
-        if (remind != null) 'remind': remind,
+        ...PlannerTask.remindsToJson(reminds),
         if (description != null) 'description': description,
       };
 
@@ -124,7 +129,7 @@ class Routine {
             ? null
             : PlannerTask.dayFromJson(json['until']),
         color: json['color'] as String?,
-        remind: json['remind'] as int?,
+        reminds: PlannerTask.remindsFromJson(json),
         description: json['description'] as String?,
       );
 }

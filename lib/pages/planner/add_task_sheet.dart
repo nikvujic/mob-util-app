@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/danger_button.dart';
 import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
 import 'package:the_app/core/format.dart';
@@ -21,7 +22,7 @@ typedef NewTask = ({
   Set<int>? weekdays,
   DateTime? until,
   String? color,
-  int? remind,
+  List<int> reminds,
   String? description,
 });
 
@@ -80,7 +81,7 @@ Future<NewTask?> showAddTaskSheet(
       note: note,
       color: BlockColor.taskDefault.name,
       // A new one reminds at its start, unless set otherwise.
-      remind: 0,
+      reminds: const [0],
     ),
   );
 }
@@ -111,7 +112,7 @@ Future<NewTask?> showAddRoutineSheet(
       from: from,
       color: BlockColor.routineDefault.name,
       // A new one reminds at its start, unless set otherwise.
-      remind: 0,
+      reminds: const [0],
     ),
   );
 }
@@ -141,7 +142,7 @@ Future<NewTask?> showEditRoutineSheet(
       from: routine.from,
       until: routine.until,
       color: routine.color,
-      remind: routine.remind,
+      reminds: routine.reminds,
       description: routine.description,
       submitLabel: 'Save',
       onDelete: onDelete,
@@ -167,7 +168,7 @@ Future<NewTask?> showEditTaskSheet(
       start: task.start,
       end: task.end,
       color: task.color,
-      remind: task.remind,
+      reminds: task.reminds,
       description: task.description,
       submitLabel: 'Save',
     ),
@@ -178,9 +179,15 @@ Future<NewTask?> showEditTaskSheet(
 String remindLabel(int? minutes) => switch (minutes) {
       null => 'Off',
       0 => 'At start',
-      60 => '1 h before',
+      1440 => '1 day before',
+      final m when m % 1440 == 0 => '${m ~/ 1440} days before',
+      final m when m % 60 == 0 => '${m ~/ 60} h before',
       final m => '$m min before',
     };
+
+/// [minutes] in words, several at once: "At start, 1 h before".
+String remindsLabel(List<int> minutes) =>
+    minutes.isEmpty ? 'Off' : minutes.map(remindLabel).join(', ');
 
 /// The whole day: a reminder can go at any time (P14).
 const FreeSlot _wholeDay = (start: 0, end: PlannerTask.dayMinutes);
@@ -263,8 +270,8 @@ class TaskSheet extends StatefulWidget {
   /// Its colour (P9): a [BlockColor] name, or null.
   final String? color;
 
-  /// Minutes before its start to remind (P10), or null for none.
-  final int? remind;
+  /// Its reminders (P10): minutes before its start; none for none.
+  final List<int> reminds;
 
   /// More about it (P20); not asked for a reminder.
   final String? description;
@@ -285,7 +292,7 @@ class TaskSheet extends StatefulWidget {
     this.onDelete,
     this.point = false,
     this.color,
-    this.remind,
+    this.reminds = const [],
     this.description,
   });
 
@@ -310,10 +317,14 @@ class _TaskSheetState extends State<TaskSheet> {
   /// Set once a colour is picked: until then, a new block's colour
   /// follows whether it repeats (P19).
   bool _colourPicked = false;
-  late int? _remind = widget.remind;
 
-  /// Reminder choices (P10): minutes before the start; null: off.
-  static const _reminders = <int?>[null, 0, 5, 10, 15, 30, 60];
+  /// Its reminders (several can be picked; none: off).
+  late final Set<int> _reminds = {...widget.reminds};
+
+  /// Reminder choices (P10): minutes before the start, up to two days.
+  static const _reminders = <int>[
+    0, 5, 10, 15, 30, 60, 120, 180, 300, 480, 600, 1440, 2880, //
+  ];
 
   static String _remindLabel(int? minutes) => remindLabel(minutes);
 
@@ -478,7 +489,7 @@ class _TaskSheetState extends State<TaskSheet> {
       !_sameDays(_weekdays, widget.weekdays ?? const {}) ||
       _until != widget.until ||
       _color?.name != widget.color ||
-      _remind != widget.remind;
+      !_sameDays(_reminds, widget.reminds.toSet());
 
   /// The times it opened with.
   late final int _initialStart;
@@ -535,7 +546,7 @@ class _TaskSheetState extends State<TaskSheet> {
       weekdays: _repeats ? _weekdays : null,
       until: _repeats ? _until : null,
       color: _color?.name,
-      remind: _remind,
+      reminds: PlannerTask.sortedReminds(_reminds),
       description: widget.point ? null : _description.text,
     ));
   }
@@ -832,12 +843,22 @@ class _TaskSheetState extends State<TaskSheet> {
                                   style: TextStyle(
                                       color: context.colors.textSecondary),
                                 ),
+                                // Off clears them; the others are picked
+                                // as many as wanted.
+                                ChoiceChip(
+                                  key: const Key('remind-off'),
+                                  label: Text(_remindLabel(null)),
+                                  selected: _reminds.isEmpty,
+                                  onSelected: (_) => setState(_reminds.clear),
+                                ),
                                 for (final minutes in _reminders)
-                                  ChoiceChip(
+                                  FilterChip(
+                                    key: Key('remind-$minutes'),
                                     label: Text(_remindLabel(minutes)),
-                                    selected: _remind == minutes,
-                                    onSelected: (_) =>
-                                        setState(() => _remind = minutes),
+                                    selected: _reminds.contains(minutes),
+                                    onSelected: (on) => setState(() => on
+                                        ? _reminds.add(minutes)
+                                        : _reminds.remove(minutes)),
                                   ),
                               ],
                             ),
@@ -862,12 +883,10 @@ class _TaskSheetState extends State<TaskSheet> {
                       // Not Flexible: that kept half the free space for
                       // it, so Save stopped short of the edge.
                       if (widget.onDelete != null)
-                        TextButton.icon(
-                          icon: const Icon(Icons.delete_outline),
-                          label: const Text('Delete'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: context.colors.danger,
-                          ),
+                        DangerButton(
+                          key: const Key('taskDelete'),
+                          label: 'Delete',
+                          wide: false,
                           onPressed: () {
                             Navigator.of(context).pop();
                             widget.onDelete!();

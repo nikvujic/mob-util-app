@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/models/planner_pin.dart';
 import 'package:the_app/models/planner_task.dart';
+import 'package:the_app/data/reminder_scheduler.dart';
 import 'package:the_app/models/routine.dart';
 import 'package:the_app/providers/reminders_provider.dart';
 
@@ -17,7 +18,7 @@ void main() {
     DateTime? day,
     required num from,
     num? to,
-    int? remind,
+    List<int> reminds = const [],
     bool done = false,
   }) =>
       PlannerTask(
@@ -26,7 +27,7 @@ void main() {
         day: day ?? today,
         start: at(from),
         end: at(to ?? from + 1),
-        remind: remind,
+        reminds: reminds,
         done: done,
       );
 
@@ -34,11 +35,11 @@ void main() {
     final reminders = planReminders(
       now: now,
       tasks: [
-        task('Dentist', from: 15, remind: 10),
-        task('Lunch', from: 13, remind: 0),
+        task('Dentist', from: 15, reminds: [10]),
+        task('Lunch', from: 13, reminds: [0]),
         task('No reminder', from: 16),
-        task('Done', from: 17, remind: 5, done: true),
-        task('Too late', from: 12.25, remind: 30), // was due at 11:45
+        task('Done', from: 17, reminds: [5], done: true),
+        task('Too late', from: 12.25, reminds: [30]), // was due at 11:45
       ],
       routines: RoutineBook.empty,
     );
@@ -90,7 +91,7 @@ void main() {
           'Early',
           day: DateTime(2026, 10, 9),
           from: 0.25,
-          remind: 60,
+          reminds: [60],
         ),
       ],
       routines: RoutineBook.empty,
@@ -109,7 +110,7 @@ void main() {
       end: at(19),
       weekdays: {DateTime.monday, DateTime.thursday},
       from: DateTime(2026, 10, 1),
-      remind: 15,
+      reminds: [15],
     );
     final skipped = RoutineDay(
       routineId: 'gym',
@@ -148,11 +149,13 @@ void main() {
       weekdays: {DateTime.thursday},
       from: today,
       until: today,
-      remind: 0,
+      reminds: [0],
     );
     final reminders = planReminders(
       now: now,
-      tasks: [task('Call mum', from: 18, to: 20, remind: 10)],
+      tasks: [
+        task('Call mum', from: 18, to: 20, reminds: [10])
+      ],
       routines: RoutineBook(routines: [gym]),
     );
     expect([for (final r in reminders) r.title], ['Call mum', 'Gym']);
@@ -161,7 +164,9 @@ void main() {
   test('with the Planner locked, titles are left out', () {
     final reminders = planReminders(
       now: now,
-      tasks: [task('Therapy', from: 15, remind: 10)],
+      tasks: [
+        task('Therapy', from: 15, reminds: [10])
+      ],
       routines: RoutineBook.empty,
       hideTitles: true,
     );
@@ -181,7 +186,7 @@ void main() {
             day: DateTime(2026, 10, 8 + d),
             start: i * 30,
             end: i * 30 + 30,
-            remind: 0,
+            reminds: [0],
           ),
     ];
     final reminders =
@@ -193,5 +198,75 @@ void main() {
     expect(dropped, 160);
     expect(latest.isBefore(DateTime(2026, 10, 19)), isTrue,
         reason: 'the latest ones are dropped');
+  });
+
+  test(
+      'several reminders for one block, up to two days before; one due '
+      'in the days planned even for a block past them', () {
+    final reminders = planReminders(
+      now: now,
+      tasks: [
+        task('Trip',
+            from: 10, day: addDays(today, 3), reminds: [0, 60, 1440, 2880]),
+        // Past the 14 days planned; its 2-day reminder falls inside them.
+        task('Far', from: 10, day: addDays(today, 15), reminds: [2880, 1440]),
+      ],
+      routines: RoutineBook.empty,
+    );
+    String when(Reminder r) =>
+        '${daysBetween(today, DateTime(r.at.year, r.at.month, r.at.day))}d '
+        '${r.at.hour}:${r.at.minute.toString().padLeft(2, '0')} '
+        '${r.title} ${r.body.split(' · ').first}';
+    expect([
+      for (final r in reminders) when(r)
+    ], [
+      '1d 10:00 Trip In 2 days',
+      '2d 10:00 Trip Tomorrow',
+      '3d 9:00 Trip In 1 h',
+      '3d 10:00 Trip Now',
+      '13d 10:00 Far In 2 days',
+      '14d 10:00 Far Tomorrow',
+    ]);
+  });
+
+  test('a routine with several reminders reminds of each', () {
+    final yoga = Routine(
+      id: 'y',
+      title: 'Yoga',
+      start: 18 * 60,
+      end: 19 * 60,
+      weekdays: {for (var d = 1; d <= 7; d++) d},
+      from: today,
+      until: today,
+      reminds: [0, 30],
+    );
+    final reminders = planReminders(
+      now: now,
+      tasks: const [],
+      routines: RoutineBook(routines: [yoga]),
+    );
+    expect([for (final r in reminders) '${r.at.hour}:${r.at.minute}'],
+        ['17:30', '18:0']);
+  });
+
+  test("older files' single reminder reads as one; several written both ways",
+      () {
+    final old = PlannerTask.fromJson({
+      'id': 'a',
+      'title': 'A',
+      'day': '2026-10-09',
+      'start': 600,
+      'end': 660,
+      'done': false,
+      'remind': 15,
+    });
+    expect(old.reminds, [15]);
+    final several = task('B', from: 10, reminds: [60, 0, 60, 1440]);
+    expect(several.reminds, [0, 60, 1440], reason: 'each once, nearest first');
+    final json = several.toJson();
+    expect(json['remind'], 0, reason: 'what older versions read');
+    expect(json['reminds'], [0, 60, 1440]);
+    expect(PlannerTask.fromJson(json).reminds, [0, 60, 1440]);
+    expect(task('C', from: 10).toJson().containsKey('remind'), isFalse);
   });
 }

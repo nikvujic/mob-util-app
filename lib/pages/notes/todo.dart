@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/danger_button.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/core/theme.dart';
@@ -250,12 +251,14 @@ class _TodoPageState extends ConsumerState<TodoPage> {
                   _SectionHeader(
                     title: 'Completed',
                     count: done.length,
-                    // Quietly beside its list (a red round
+                    // A small one beside its list (a red round
                     // button looked out of place).
-                    action: TextButton(
+                    action: DangerButton(
                       key: const Key('deleteCompleted'),
+                      label: 'Delete all',
+                      wide: false,
+                      compact: true,
                       onPressed: () => _deleteCompleted(done.length),
-                      child: const Text('Delete all'),
                     ),
                   ),
                   _section(done, done: true),

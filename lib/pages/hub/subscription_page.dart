@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/danger_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/widgets/date_pick.dart';
@@ -400,16 +401,11 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             ),
             if (saved)
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 16, 24),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    key: const Key('deleteSubscription'),
-                    style: TextButton.styleFrom(foregroundColor: colors.danger),
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text('Delete subscription'),
-                    onPressed: _delete,
-                  ),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                child: DangerButton(
+                  key: const Key('deleteSubscription'),
+                  label: 'Delete subscription',
+                  onPressed: _delete,
                 ),
               ),
           ],

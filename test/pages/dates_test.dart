@@ -357,8 +357,11 @@ void main() {
     expect(find.text('Sat, 24 Oct  ·  in 9 days  ·  turns 31'), findsOneWidget);
     await tap(tester, find.byKey(const Key('deleteDate')));
     // A full button, as Delete person.
-    expect(tester.widget(find.byKey(const Key('deleteDate'))),
-        isA<OutlinedButton>());
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('deleteDate')),
+            matching: find.byWidgetPredicate((w) => w is OutlinedButton)),
+        findsOneWidget);
     expect(find.text('Delete Ana?'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();

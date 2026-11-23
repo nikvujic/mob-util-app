@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:the_app/widgets/danger_button.dart';
 import 'package:the_app/core/format.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/planner_pin.dart';
 
-/// What the reminders list asked for: a new reminder, or the reminders
-/// ticked to delete.
-typedef RemindersChoice = ({bool add, List<PlannerPin> delete});
+/// What the reminders list asked for: a new reminder, the reminders
+/// ticked to delete, or one to go to (its day, at its time).
+typedef RemindersChoice = ({
+  bool add,
+  List<PlannerPin> delete,
+  PlannerPin? goTo,
+});
 
 /// [pins] in the list's order: those still to come, the next
 /// first; then those gone by unticked, the latest first.
@@ -27,8 +32,9 @@ typedef RemindersChoice = ({bool add, List<PlannerPin> delete});
 }
 
 /// The planner's reminders, from its bell button: every one,
-/// the next first, with its day and time; a box on each to delete several
-/// at once, and a button to add one. Null if closed.
+/// the next first, with its day and time; a button on each that goes to
+/// it, a box on each to delete several at once, and a button to add one.
+/// Null if closed.
 Future<RemindersChoice?> showRemindersSheet(
   BuildContext context, {
   required List<PlannerPin> pins,
@@ -72,13 +78,30 @@ class _RemindersSheetState extends State<_RemindersSheet> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final (:coming, :past) = sortPins(widget.pins, widget.now);
-    Widget tile(PlannerPin pin, {bool next = false}) => CheckboxListTile(
+    Widget tile(PlannerPin pin, {bool next = false}) => ListTile(
           key: Key('reminder-${pin.id}'),
-          value: _ticked.contains(pin.id),
-          onChanged: (_) => _toggle(pin),
-          secondary: Icon(
+          onTap: () => _toggle(pin),
+          // Orange: the next one to come.
+          leading: Icon(
             Icons.notifications_none,
             color: next ? colors.accent : colors.textSecondary,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                key: Key('reminderGoTo-${pin.id}'),
+                tooltip: 'Go to it',
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () => Navigator.of(context)
+                    .pop((add: false, delete: const <PlannerPin>[], goTo: pin)),
+              ),
+              Checkbox(
+                value: _ticked.contains(pin.id),
+                semanticLabel: 'Pick ${pin.title}',
+                onChanged: (_) => _toggle(pin),
+              ),
+            ],
           ),
           title: Text(
             pin.title,
@@ -144,21 +167,18 @@ class _RemindersSheetState extends State<_RemindersSheet> {
             child: Row(
               children: [
                 if (ticked.isNotEmpty)
-                  TextButton.icon(
+                  DangerButton(
                     key: const Key('remindersDelete'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: colors.danger,
-                    ),
-                    onPressed: () =>
-                        Navigator.of(context).pop((add: false, delete: ticked)),
-                    icon: const Icon(Icons.delete_outline),
-                    label: Text('Delete ${ticked.length}'),
+                    label: 'Delete ${ticked.length}',
+                    wide: false,
+                    onPressed: () => Navigator.of(context)
+                        .pop((add: false, delete: ticked, goTo: null)),
                   ),
                 const Spacer(),
                 FilledButton.icon(
                   key: const Key('remindersAdd'),
-                  onPressed: () => Navigator.of(context)
-                      .pop((add: true, delete: const <PlannerPin>[])),
+                  onPressed: () => Navigator.of(context).pop(
+                      (add: true, delete: const <PlannerPin>[], goTo: null)),
                   icon: const Icon(Icons.add_alert_outlined),
                   label: const Text('Add reminder'),
                 ),

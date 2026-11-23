@@ -33,9 +33,32 @@ class PlannerTask {
   /// Its colour (P9): a [BlockColor] name, or null for the default.
   final String? color;
 
-  /// Minutes before its start to remind (P10; 0: at the start), or null
-  /// for no reminder.
-  final int? remind;
+  /// Its reminders (P10): each so many minutes before its start (0: at
+  /// the start), soonest-before first; none, no reminder.
+  final List<int> reminds;
+
+  /// The reminder nearest its start, or null for none.
+  int? get remind => reminds.isEmpty ? null : reminds.first;
+
+  /// [minutes] as kept: each once, the nearest the start first.
+  static List<int> sortedReminds(Iterable<int> minutes) =>
+      List.unmodifiable({...minutes}.toList()..sort());
+
+  /// A reminder list as stored: `reminds` (since several), else the one
+  /// `remind` before them.
+  static List<int> remindsFromJson(Map<String, dynamic> json) {
+    final list = json['reminds'];
+    if (list is List) return sortedReminds([for (final m in list) m as int]);
+    final one = json['remind'] as int?;
+    return one == null ? const [] : [one];
+  }
+
+  /// [reminds] as stored: the list, and the nearest one alone (as older
+  /// versions read it).
+  static Map<String, dynamic> remindsToJson(List<int> reminds) => {
+        if (reminds.isNotEmpty) 'remind': reminds.first,
+        if (reminds.length > 1) 'reminds': reminds,
+      };
 
   /// More about it (P20), or null.
   final String? description;
@@ -48,11 +71,12 @@ class PlannerTask {
     this.end,
     this.done = false,
     this.color,
-    this.remind,
+    List<int> reminds = const [],
     this.description,
-  }) : day = DateTime(day.year, day.month, day.day) {
-    if (remind != null && remind! < 0) {
-      throw ArgumentError('Invalid reminder: $remind');
+  })  : day = DateTime(day.year, day.month, day.day),
+        reminds = sortedReminds(reminds) {
+    if (this.reminds.any((m) => m < 0)) {
+      throw ArgumentError('Invalid reminder: $reminds');
     }
     if ((start == null) != (end == null) ||
         (start != null &&
@@ -73,7 +97,7 @@ class PlannerTask {
         end: end ?? this.end,
         done: done ?? this.done,
         color: color,
-        remind: remind,
+        reminds: reminds,
         description: description,
       );
 
@@ -99,7 +123,7 @@ class PlannerTask {
         if (end != null) 'end': end,
         'done': done,
         if (color != null) 'color': color,
-        if (remind != null) 'remind': remind,
+        ...remindsToJson(reminds),
         if (description != null) 'description': description,
       };
 
@@ -111,7 +135,7 @@ class PlannerTask {
         end: json['end'] as int?,
         done: json['done'] as bool,
         color: json['color'] as String?,
-        remind: json['remind'] as int?,
+        reminds: remindsFromJson(json),
         description: json['description'] as String?,
       );
 }

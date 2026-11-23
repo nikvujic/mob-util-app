@@ -42,10 +42,11 @@ void main() {
   testWidgets('a reminder set in the sheet is scheduled; permission asked',
       (tester) async {
     await openPlanner(tester);
+    // A new block reminds at its start; this adds one more.
     await addWithReminder(tester, '10 min before');
 
     final task = container.read(plannerProvider).single;
-    expect(task.remind, 10);
+    expect(task.reminds, [0, 10]);
     expect(reminders.asked, 1);
     // It starts at 00:00 (the free time's start), already past today:
     // nothing to schedule.
@@ -55,12 +56,12 @@ void main() {
   testWidgets('scheduled when ahead; follows changes', (tester) async {
     await openPlanner(tester);
     container.read(plannerProvider.notifier).addTask(
-          DateTime(2026, 10, 8),
-          'Dentist',
-          start: 15 * 60,
-          end: 16 * 60,
-          remind: 10,
-        );
+      DateTime(2026, 10, 8),
+      'Dentist',
+      start: 15 * 60,
+      end: 16 * 60,
+      reminds: [10],
+    );
     await tester.pump();
     expect(reminders.scheduledReminders.single.title, 'Dentist');
     expect(
@@ -75,6 +76,41 @@ void main() {
     expect(reminders.scheduledReminders, isEmpty, reason: 'ticked off');
   });
 
+  testWidgets(
+      'several reminders picked, the longer ones too; At start taken off; '
+      'Off clears them', (tester) async {
+    await openPlanner(tester);
+    final free = find.text('Free · 00:00–24:00');
+    await tester.ensureVisible(free);
+    await tester.pumpAndSettle();
+    await tester.tap(free);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('taskTitle')), 'Trip');
+    Future<void> chip(String key) async {
+      await tester.ensureVisible(find.byKey(Key(key)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key(key)));
+      await tester.pump();
+    }
+
+    for (final label in [
+      '1 day before',
+      '2 days before',
+      '3 h before',
+      '5 h before',
+      '8 h before',
+      '10 h before'
+    ]) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+    await chip('remind-0'); // At start off
+    await chip('remind-1440');
+    await chip('remind-120');
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.pumpAndSettle();
+    expect(container.read(plannerProvider).single.reminds, [120, 1440]);
+  });
+
   testWidgets('no reminder: no permission asked', (tester) async {
     await openPlanner(tester);
     await addWithReminder(tester, 'Off');
@@ -84,7 +120,7 @@ void main() {
   testWidgets('notifications refused: it says so', (tester) async {
     await openPlanner(tester);
     reminders.allowed = false;
-    await addWithReminder(tester, 'At start');
+    await addWithReminder(tester, '2 h before');
     expect(find.textContaining('reminders won\'t show'), findsOneWidget);
   });
 
@@ -96,12 +132,12 @@ void main() {
       () => container.read(securityProvider.notifier).setPassword('password1'),
     );
     container.read(plannerProvider.notifier).addTask(
-          DateTime(2026, 10, 8),
-          'Therapy',
-          start: 15 * 60,
-          end: 16 * 60,
-          remind: 0,
-        );
+      DateTime(2026, 10, 8),
+      'Therapy',
+      start: 15 * 60,
+      end: 16 * 60,
+      reminds: [0],
+    );
     container.read(sectionLocksProvider.notifier).lock(AppSection.planner);
     await tester.pump();
     expect(reminders.scheduledReminders.single.title, 'Therapy',

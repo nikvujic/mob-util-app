@@ -291,10 +291,31 @@ class PlannerTimeline extends StatelessWidget {
 
   double _y(int minutes) => offsetOf(minutes, _scale);
 
+  /// The marks that also get a short block at their time: one reminder
+  /// alone, with no block and no other mark where the block would be.
+  Set<int> _stripped(List<List<TimelinePin>> groups) {
+    final shown = <int>{};
+    for (final (i, group) in groups.indexed) {
+      if (group.length != 1) continue;
+      final top = _y(group.single.time);
+      final bottom = top + _PinStrip.height;
+      final blocked =
+          blocks.any((b) => _y(b.start) < bottom + 2 && _y(b.end) > top - 2);
+      // Another reminder near it, before or after: marks only, both.
+      final crowded = groups.indexed.any((g) =>
+          g.$1 != i &&
+          (_y(g.$2.first.time) - top).abs() <
+              _PinStrip.height + _PinMark.apart / 2);
+      if (!blocked && !crowded) shown.add(i);
+    }
+    return shown;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final groups = _pinGroups();
+    final stripped = _stripped(groups);
     return SizedBox(
       // Room below 24:00 so the last hours can scroll clear of buttons.
       height: _y(PlannerTask.dayMinutes) + BottomActions.contentClearance,
@@ -358,6 +379,19 @@ class PlannerTimeline extends StatelessWidget {
                 y: (minutes) => _scale.y(minutes) - _scale.y(block.start),
               ),
             ),
+          // A reminder alone, with room: a short block at its time too.
+          for (final (i, group) in groups.indexed)
+            if (stripped.contains(i))
+              Positioned(
+                top: _y(group.single.time),
+                height: _PinStrip.height,
+                left: _labelWidth,
+                right: 8,
+                child: _PinStrip(
+                  group.single,
+                  onTap: onPins == null ? null : () => onPins!(group),
+                ),
+              ),
           if (now != null)
             Positioned.fill(
               child: IgnorePointer(
@@ -760,8 +794,63 @@ class _Block extends StatelessWidget {
   }
 }
 
-/// A reminder (P14): a short see-through block with a dashed outline, a
-/// bell, its title and time, and a checkbox that ticks it off.
+/// A reminder (P14) where nothing else is: a short see-through block at
+/// its time (its top edge), with a bell, its title and time. Tapped, its
+/// mark's menu.
+class _PinStrip extends StatelessWidget {
+  static const height = 32.0;
+
+  final TimelinePin pin;
+  final VoidCallback? onTap;
+
+  const _PinStrip(this.pin, {required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    // Screen readers have its mark (the same reminder) already.
+    return ExcludeSemantics(
+      child: GestureDetector(
+        key: Key('pinStrip-${pin.id}'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: colors.accent.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(6),
+            border: Border(
+              left: BorderSide(color: colors.accent, width: 3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.notifications_none, size: 16, color: colors.accent),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  pin.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                formatMinutes(pin.time),
+                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A reminder mark (P14): a bell at the timeline's left edge, or the
 /// number of reminders it stands for. A touch target of its own.
 class _PinMark extends StatelessWidget {
