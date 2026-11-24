@@ -109,99 +109,25 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Color(0xFF2E2D2A),
   );
 
-  /// Deep blue, with a sky-blue accent.
-  static const ocean = AppPalette(
-    background: Color(0xFF0B141D),
-    surface: Color(0xFF101C28),
-    card: Color(0xFF172736),
-    cardSelected: Color(0xFF16384A),
-    menu: Color(0xFF1E3245),
-    accent: Color(0xFF4FC3F7),
-    onAccent: Color(0xFF0B141D),
-    accentText: Color(0xFF0B141D),
-    danger: Color(0xFFF28B82),
-    textPrimary: Color(0xFFEAF2F8),
-    textSecondary: Color(0xFFAFC2D2),
-    textMuted: Color(0xFF8DA3B5),
-    textHint: Color(0xFF6E8598),
-    inactive: Color(0xFF8DA3B5),
-    divider: Color(0xFF223446),
-  );
-
-  /// Cool grey-blue, like a frosty night (after the Nord colours).
-  static const frost = AppPalette(
-    background: Color(0xFF242933),
-    surface: Color(0xFF2E3440),
-    card: Color(0xFF3B4252),
-    cardSelected: Color(0xFF3A5160),
-    menu: Color(0xFF434C5E),
-    accent: Color(0xFF88C0D0),
-    onAccent: Color(0xFF242933),
-    accentText: Color(0xFF242933),
-    danger: Color(0xFFF2A0A6),
-    textPrimary: Color(0xFFECEFF4),
-    textSecondary: Color(0xFFD0D6E0),
-    textMuted: Color(0xFFB4BCCA),
-    textHint: Color(0xFF8D96A6),
-    inactive: Color(0xFFB4BCCA),
-    divider: Color(0xFF3F4757),
-  );
-
-  /// Dark violet, with a lavender accent.
-  static const grape = AppPalette(
-    background: Color(0xFF14111B),
-    surface: Color(0xFF1B1724),
-    card: Color(0xFF251F31),
-    cardSelected: Color(0xFF392A52),
-    menu: Color(0xFF2D263B),
-    accent: Color(0xFFB39DDB),
-    onAccent: Color(0xFF14111B),
-    accentText: Color(0xFF14111B),
-    danger: Color(0xFFF28B82),
-    textPrimary: Color(0xFFF1ECF8),
-    textSecondary: Color(0xFFC3B8D4),
-    textMuted: Color(0xFF9F93B3),
-    textHint: Color(0xFF7F7394),
-    inactive: Color(0xFF9F93B3),
-    divider: Color(0xFF2E273B),
-  );
-
-  /// Warm dark with a pink accent.
-  static const rose = AppPalette(
-    background: Color(0xFF181013),
-    surface: Color(0xFF20161A),
-    card: Color(0xFF2B1E24),
-    cardSelected: Color(0xFF4A2433),
-    menu: Color(0xFF34252C),
-    accent: Color(0xFFF48FB1),
-    onAccent: Color(0xFF181013),
-    accentText: Color(0xFF181013),
-    danger: Color(0xFFFFAB91),
-    textPrimary: Color(0xFFF8EEF1),
-    textSecondary: Color(0xFFD3BCC4),
-    textMuted: Color(0xFFAF98A1),
-    textHint: Color(0xFF8C7680),
-    inactive: Color(0xFFAF98A1),
-    divider: Color(0xFF33242A),
-  );
-
-  /// Greys only, with white as the accent.
+  /// Black and white: black behind, white as the accent, greys stepped
+  /// far enough apart to tell (nothing was quite black or white before,
+  /// and it read faded).
   static const mono = AppPalette(
-    background: Color(0xFF101010),
-    surface: Color(0xFF181818),
-    card: Color(0xFF232323),
-    cardSelected: Color(0xFF3A3A3A),
-    menu: Color(0xFF2C2C2C),
-    accent: Color(0xFFE6E6E6),
-    onAccent: Color(0xFF101010),
-    accentText: Color(0xFF101010),
+    background: Color(0xFF000000),
+    surface: Color(0xFF000000),
+    card: Color(0xFF151515),
+    cardSelected: Color(0xFF333333),
+    menu: Color(0xFF1C1C1C),
+    accent: Color(0xFFFFFFFF),
+    onAccent: Color(0xFF000000),
+    accentText: Color(0xFF000000),
     danger: Color(0xFFF28B82),
-    textPrimary: Color(0xFFF5F5F5),
-    textSecondary: Color(0xFFBDBDBD),
-    textMuted: Color(0xFF9E9E9E),
-    textHint: Color(0xFF7A7A7A),
-    inactive: Color(0xFF9E9E9E),
-    divider: Color(0xFF2A2A2A),
+    textPrimary: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFFD0D0D0),
+    textMuted: Color(0xFFA6A6A6),
+    textHint: Color(0xFF858585),
+    inactive: Color(0xFFA6A6A6),
+    divider: Color(0xFF383838),
   );
 
   @override
@@ -217,10 +143,6 @@ enum AppThemeChoice {
   clay('Clay', AppPalette.clay),
   green('Green', AppPalette.green),
   black('Black', AppPalette.black),
-  ocean('Ocean', AppPalette.ocean),
-  frost('Frost', AppPalette.frost),
-  grape('Grape', AppPalette.grape),
-  rose('Rose', AppPalette.rose),
   mono('Mono', AppPalette.mono);
 
   const AppThemeChoice(this.label, this.palette);
@@ -228,9 +150,15 @@ enum AppThemeChoice {
   final String label;
   final AppPalette palette;
 
-  /// The theme stored as [id]; the default one if unknown.
+  /// The theme stored as [id]. Ones since removed become the nearest one
+  /// kept (Ocean and Frost: Mono; Grape and Rose: Clay); unknown, the
+  /// default.
   static AppThemeChoice fromId(String id) =>
-      values.where((t) => t.name == id).firstOrNull ?? values.first;
+      values.where((t) => t.name == id).firstOrNull ??
+      switch (id) {
+        'ocean' || 'frost' => mono,
+        _ => values.first,
+      };
 }
 
 /// The active palette: `context.colors.accent`. Outside the app's theme

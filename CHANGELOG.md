@@ -6,6 +6,15 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.0] - 2026-11-24
+
+### Changed
+- **Themes**: four kept, Clay, Green, Black and Mono. Ocean, Frost,
+  Grape and Rose are gone; a phone on one of them moves to the nearest
+  kept (Ocean and Frost to Mono, Grape and Rose to Clay).
+- **Mono** is truly black and white: a black background, white as the
+  accent and for text, and greys further apart (it read faded).
+
 ## [2.11.1] - 2026-11-23
 
 ### Fixed
