@@ -6,6 +6,14 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.2] - 2026-11-24
+
+### Changed
+- **Notes**: the to-do note is as far from the notes under it as they
+  are from each other (it had a little more room under it).
+- **People**: the zoom handle's percentage sits a pixel to the right, so
+  it looks centred (centred exactly, the % made it look off).
+
 ## [2.12.1] - 2026-11-24
 
 ### Added

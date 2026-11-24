@@ -76,6 +76,28 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const Key('todoCount'))).data, '2');
   });
 
+  testWidgets(
+      'as far from the notes under it as they are from each other, and '
+      'from the Introduction', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.reset);
+    await start(tester, todo: const [TodoItem(id: 't1', text: 'Pay rent')]);
+    final notes = container.read(notesProvider.notifier);
+    notes.addNote(title: 'Second');
+    notes.addNote(title: 'First');
+    await tester.pumpAndSettle();
+    Rect card(Finder f) => tester.getRect(
+        find.ancestor(of: f, matching: find.byType(SelectableCard)).first);
+    final intro = tester.getRect(find.byKey(const Key('introductionTile')));
+    final todo = tester.getRect(tile);
+    final first = card(find.text('First'));
+    final second = card(find.text('Second'));
+    final betweenNotes = second.top - first.bottom;
+    expect(first.top - todo.bottom, betweenNotes);
+    expect(todo.top - intro.bottom, betweenNotes);
+  });
+
   testWidgets('empty: says so', (tester) async {
     await start(tester);
     expect(tester.widget<Text>(find.byKey(const Key('todoSummary'))).data,

@@ -481,9 +481,15 @@ class PeopleBoardState extends State<PeopleBoard>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.expand_less, size: 18, color: colors.textSecondary),
-              Text('${(_zoom * 100).round()}%',
-                  key: const Key('peopleZoomLevel'),
-                  style: TextStyle(fontSize: 11, color: colors.textSecondary)),
+              // A pixel right: centred, it looked off, the % light on its
+              // right side.
+              Transform.translate(
+                offset: const Offset(1, 0),
+                child: Text('${(_zoom * 100).round()}%',
+                    key: const Key('peopleZoomLevel'),
+                    style:
+                        TextStyle(fontSize: 11, color: colors.textSecondary)),
+              ),
               Icon(Icons.expand_more, size: 18, color: colors.textSecondary),
             ],
           ),

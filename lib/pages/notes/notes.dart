@@ -235,8 +235,11 @@ class _NotesPageState extends ConsumerState<NotesPage> {
                             ),
                           ),
                         ),
+                      // Under the to-do note (or the Introduction): as far
+                      // from it as the notes are from each other.
                       SliverPadding(
-                        padding: const EdgeInsets.only(top: 4),
+                        padding:
+                            EdgeInsets.only(top: introduction || todo ? 0 : 4),
                         sliver: SmoothSliverReorderableList(
                           itemCount: notes.length,
                           // onReorderItem only exists on newer Flutter than
