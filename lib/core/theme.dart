@@ -23,6 +23,13 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// itself is too dark to read there.
   final Color? accentForeground;
   final Color danger;
+
+  /// Delete buttons' colour, if not [danger] (Mono's are white: a red
+  /// button was the one colour in it). Errors and warnings stay [danger].
+  final Color? deleteColor;
+
+  /// What delete buttons are drawn in.
+  Color get delete => deleteColor ?? danger;
   final Color textPrimary;
   final Color textSecondary;
   final Color textMuted;
@@ -43,6 +50,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     this.accentText,
     this.accentForeground,
     required this.danger,
+    this.deleteColor,
     required this.textPrimary,
     required this.textSecondary,
     required this.textMuted,
@@ -109,6 +117,27 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Color(0xFF2E2D2A),
   );
 
+  /// Clay's orange on black, as Green Black is to Green: black behind,
+  /// near-black cards, Clay's warm text.
+  static const clayBlack = AppPalette(
+    background: Color(0xFF000000),
+    surface: Color(0xFF000000),
+    card: Color(0xFF161616),
+    cardSelected: Color(0xFF3B2A22),
+    menu: Color(0xFF1E1E1E),
+    accent: Color(0xFFC96442),
+    onAccent: Colors.white,
+    accentText: Color(0xFF141413),
+    accentForeground: Color(0xFFD97757),
+    danger: Color(0xFFF28B82),
+    textPrimary: Color(0xFFFAF9F5),
+    textSecondary: Color(0xFFB0AEA5),
+    textMuted: Color(0xFF8E8C84),
+    textHint: Color(0xFF75736C),
+    inactive: Color(0xFF8E8C84),
+    divider: Color(0x24FFFFFF),
+  );
+
   /// Black and white: black behind, white as the accent, greys stepped
   /// far enough apart to tell (nothing was quite black or white before,
   /// and it read faded).
@@ -122,6 +151,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     onAccent: Color(0xFF000000),
     accentText: Color(0xFF000000),
     danger: Color(0xFFF28B82),
+    deleteColor: Color(0xFFFFFFFF),
     textPrimary: Color(0xFFFFFFFF),
     textSecondary: Color(0xFFD0D0D0),
     textMuted: Color(0xFFA6A6A6),
@@ -141,8 +171,10 @@ class AppPalette extends ThemeExtension<AppPalette> {
 /// stored; the first is the default (Clay, picked).
 enum AppThemeChoice {
   clay('Clay', AppPalette.clay),
+  clayBlack('Clay Black', AppPalette.clayBlack),
   green('Green', AppPalette.green),
-  black('Black', AppPalette.black),
+  // Stored as `black` (its name before Clay Black came).
+  black('Green Black', AppPalette.black),
   mono('Mono', AppPalette.mono);
 
   const AppThemeChoice(this.label, this.palette);

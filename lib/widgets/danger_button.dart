@@ -22,7 +22,7 @@ class DangerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final danger = context.colors.danger;
+    final danger = context.colors.delete;
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
         foregroundColor: danger,

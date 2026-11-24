@@ -86,7 +86,7 @@ class DialogButton extends StatelessWidget {
         style: danger
             ? FilledButton.styleFrom(
                 shape: AppShapes.button,
-                backgroundColor: context.colors.danger,
+                backgroundColor: context.colors.delete,
                 foregroundColor: context.colors.background,
               )
             : FilledButton.styleFrom(shape: AppShapes.button),
@@ -98,9 +98,9 @@ class DialogButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         shape: AppShapes.button,
         foregroundColor:
-            danger ? context.colors.danger : context.colors.textPrimary,
+            danger ? context.colors.delete : context.colors.textPrimary,
         side: BorderSide(
-          color: danger ? context.colors.danger : context.colors.textHint,
+          color: danger ? context.colors.delete : context.colors.textHint,
         ),
       ),
       child: content,

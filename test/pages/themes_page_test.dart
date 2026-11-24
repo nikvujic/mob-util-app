@@ -26,7 +26,7 @@ void main() {
     await tester.pumpAndSettle();
     // Clay first, then the rest.
     final names = [for (final t in AppThemeChoice.values) t.label];
-    expect(names, ['Clay', 'Green', 'Black', 'Mono']);
+    expect(names, ['Clay', 'Clay Black', 'Green', 'Green Black', 'Mono']);
     for (final name in names) {
       await tester.scrollUntilVisible(find.text(name), 50,
           scrollable: find.byType(Scrollable).last);
@@ -74,6 +74,26 @@ void main() {
     final mono = tester.widget<ListTile>(
         find.ancestor(of: find.text('Mono'), matching: find.byType(ListTile)));
     expect(mono.selected, isTrue);
+  });
+
+  test(
+      "delete buttons in each theme's own: red, but white in Mono (the one "
+      'colour in it); errors stay red', () {
+    for (final t in AppThemeChoice.values) {
+      final p = t.palette;
+      expect(p.delete, t == AppThemeChoice.mono ? p.textPrimary : p.danger,
+          reason: t.name);
+    }
+    expect(AppPalette.mono.danger, isNot(AppPalette.mono.delete));
+  });
+
+  test('Clay Black: Clay on black, as Green Black is Green on black', () {
+    const p = AppPalette.clayBlack;
+    expect(p.background, const Color(0xFF000000));
+    expect(p.accent, AppPalette.clay.accent);
+    expect(AppThemeChoice.fromId('clayBlack'), AppThemeChoice.clayBlack);
+    expect(AppThemeChoice.fromId('black').label, 'Green Black',
+        reason: 'stored as before, named for its green');
   });
 
   test('Mono is black and white', () {

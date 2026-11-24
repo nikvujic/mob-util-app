@@ -6,6 +6,17 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.1] - 2026-11-24
+
+### Added
+- **Clay Black**, a theme: Clay's orange on black, as Green Black is
+  Green on black. *Black* is now called **Green Black** (the same theme).
+
+### Changed
+- **Mono**: delete buttons (and Delete in the dialogs that ask) are
+  white, not red, the one colour that stood out in it. Errors and
+  warnings stay red.
+
 ## [2.12.0] - 2026-11-24
 
 ### Changed
