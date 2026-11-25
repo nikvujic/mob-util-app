@@ -116,6 +116,13 @@ class PreferencesNotifier extends StateNotifier<Preferences> {
               },
       );
 
+  /// Placard's settings were opened from its corner: no hint there now.
+  void foundPlacardCorner() {
+    if (!state.placardCornerFound) {
+      state = state.copyWith(placardCornerFound: true);
+    }
+  }
+
   /// A shown barcode's brightness, as last set (0–1).
   void setBarcodeBrightness(double level) => state =
       state.copyWith(barcodeBrightness: level.clamp(0.05, 1.0).toDouble());

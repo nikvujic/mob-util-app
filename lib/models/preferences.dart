@@ -115,6 +115,10 @@ class Preferences {
   final DateTime? lastAutoBackupAt;
   final bool autoBackupFailed;
 
+  /// Placard's settings found (its corner tapped five times): its hint
+  /// there goes.
+  final bool placardCornerFound;
+
   /// How bright a shown barcode makes the screen (0–1), as last set.
   final double barcodeBrightness;
 
@@ -177,6 +181,7 @@ class Preferences {
     this.autoBackupFailed = false,
     this.autoBackupKeep = 7,
     this.barcodeBrightness = 0.75,
+    this.placardCornerFound = false,
     this.autoBackupPictures = const {},
     this.pipPlugged = false,
     this.shopSorted = false,
@@ -287,6 +292,7 @@ class Preferences {
     bool? autoBackupFailed,
     int? autoBackupKeep,
     double? barcodeBrightness,
+    bool? placardCornerFound,
     Map<String, int>? autoBackupPictures,
     bool? pipPlugged,
     bool? shopSorted,
@@ -351,6 +357,7 @@ class Preferences {
         autoBackupFailed: autoBackupFailed ?? this.autoBackupFailed,
         autoBackupKeep: autoBackupKeep ?? this.autoBackupKeep,
         barcodeBrightness: barcodeBrightness ?? this.barcodeBrightness,
+        placardCornerFound: placardCornerFound ?? this.placardCornerFound,
         autoBackupPictures: autoBackupPictures ?? this.autoBackupPictures,
         pipPlugged: pipPlugged ?? this.pipPlugged,
         shopSorted: shopSorted ?? this.shopSorted,
@@ -412,6 +419,7 @@ class Preferences {
         'autoBackupFailed': autoBackupFailed,
         if (autoBackupKeep != 7) 'autoBackupKeep': autoBackupKeep,
         if (barcodeBrightness != 0.75) 'barcodeBrightness': barcodeBrightness,
+        if (placardCornerFound) 'placardCornerFound': true,
         if (autoBackupPictures.isNotEmpty)
           'autoBackupPictures': autoBackupPictures,
         if (pipPlugged) 'pipPlugged': true,
@@ -486,6 +494,7 @@ class Preferences {
             ? null
             : DateTime.parse(json['lastAutoBackupAt'] as String).toLocal(),
         autoBackupFailed: json['autoBackupFailed'] as bool? ?? false,
+        placardCornerFound: json['placardCornerFound'] as bool? ?? false,
         barcodeBrightness:
             ((json['barcodeBrightness'] as num?)?.toDouble() ?? 0.75)
                 .clamp(0.05, 1.0),

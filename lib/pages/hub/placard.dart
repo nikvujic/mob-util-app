@@ -8,6 +8,7 @@ import 'package:the_app/widgets/low_handles.dart';
 import 'package:the_app/core/system_ui.dart';
 import 'package:the_app/core/clock.dart';
 import 'package:the_app/core/sound.dart';
+import 'package:the_app/providers/preferences_provider.dart';
 import 'package:the_app/core/theme.dart';
 import 'package:the_app/models/placard.dart';
 import 'package:the_app/providers/placard_provider.dart';
@@ -97,6 +98,19 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   /// False after a count until the finger lifts: one count per hold.
   bool _armed = true;
 
+  /// The inflating sound starts a moment after the finger's down, so a
+  /// touch the phone takes back at once (a swipe from the edge for its
+  /// buttons) makes none (it made a click).
+  static const _soundAfter = Duration(milliseconds: 150);
+  Timer? _soundTimer;
+  bool _sounding = false;
+
+  void _stopSound() {
+    _soundTimer?.cancel();
+    if (_sounding) AppSound.stopInflate();
+    _sounding = false;
+  }
+
   /// Turning upright before closing (back).
   bool _leaving = false;
   Timer? _leaveTimer;
@@ -111,6 +125,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   @override
   void dispose() {
     _leaveTimer?.cancel();
+    _soundTimer?.cancel();
     // Back to the app's own (it was edge to edge, under the
     // navigation bar: other pages' bottoms got squashed).
     AppSystemUi.restore();
@@ -119,14 +134,32 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
     super.dispose();
   }
 
-  void _down() {
-    if (!_armed) return;
+  void _down(PointerDownEvent event) {
+    if (!_armed || _inGestureArea(event.position)) return;
     _hold.forward();
-    AppSound.inflate();
+    _soundTimer?.cancel();
+    _soundTimer = Timer(_soundAfter, () {
+      if (!mounted || !_armed || _hold.status != AnimationStatus.forward) {
+        return;
+      }
+      _sounding = true;
+      AppSound.inflate();
+    });
+  }
+
+  /// Where the phone's own swipes start (its edges): a touch there isn't
+  /// a hold.
+  bool _inGestureArea(Offset at) {
+    final size = MediaQuery.sizeOf(context);
+    final edges = MediaQuery.systemGestureInsetsOf(context);
+    return at.dx < edges.left ||
+        at.dx > size.width - edges.right ||
+        at.dy < edges.top ||
+        at.dy > size.height - edges.bottom;
   }
 
   void _up() {
-    if (_armed) AppSound.stopInflate();
+    _stopSound();
     _armed = true;
     // Also when it hasn't moved yet (a quick tap): else it would go on
     // filling up and count with no finger on it.
@@ -142,7 +175,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
     _armed = false;
     ref.read(placardProvider.notifier).count();
     HapticFeedback.heavyImpact();
-    AppSound.stopInflate();
+    _stopSound();
     AppSound.pop();
     // Deflate after the controller is done reporting (resetting it from
     // its own status call made it report "done" again: a double count).
@@ -166,6 +199,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
   }
 
   Future<void> _openSettings() async {
+    ref.read(preferencesProvider.notifier).foundPlacardCorner();
     final set = await showDialog<Placard>(
       context: context,
       builder: (_) => _SettingsDialog(ref.read(placardProvider)),
@@ -223,8 +257,23 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
                     key: const Key('placardCorner'),
                     behavior: HitTestBehavior.opaque,
                     onTap: _cornerTapped,
-                    child: const SizedBox.square(
+                    child: SizedBox.square(
                       dimension: PlacardPage.cornerSize,
+                      // Until its settings are first found: where to tap.
+                      child: ref.watch(preferencesProvider
+                              .select((p) => p.placardCornerFound))
+                          ? null
+                          : Center(
+                              child: Text(
+                                'Tap here\n5 times',
+                                key: const Key('placardCornerHint'),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: context.colors.textMuted,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -249,7 +298,7 @@ class _PlacardPageState extends ConsumerState<PlacardPage>
       child: Listener(
         key: const Key('placardSign'),
         behavior: HitTestBehavior.opaque,
-        onPointerDown: (_) => _down(),
+        onPointerDown: _down,
         onPointerUp: (_) => _up(),
         onPointerCancel: (_) => _up(),
         child: Center(

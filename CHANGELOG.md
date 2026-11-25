@@ -6,6 +6,18 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.4] - 2026-11-25
+
+### Fixed
+- **Placard**: no more click when swiping up from the bottom (for the
+  phone's buttons). A touch where the phone's own swipes start is left
+  alone, and the inflating sound starts a moment after the finger's
+  down, so a touch taken back at once makes none.
+
+### Added
+- **Placard**: *Tap here 5 times* in the corner that opens its settings,
+  until they're first opened.
+
 ## [2.12.3] - 2026-11-25
 
 ### Fixed

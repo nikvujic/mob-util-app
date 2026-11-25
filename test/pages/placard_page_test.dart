@@ -6,6 +6,8 @@ import 'package:the_app/models/placard.dart';
 import 'package:the_app/pages/hub/placard.dart';
 import 'package:the_app/providers/placard_provider.dart';
 
+import 'package:the_app/providers/preferences_provider.dart';
+
 import '../helpers.dart';
 
 /// Placard (O4): sideways, no bars; hold to inflate, shake and pop a count;
@@ -234,6 +236,77 @@ void main() {
           reason: 'no snap back before the burst');
       await finger.up();
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('sounds and the corner', () {
+    List<String> recordSounds(WidgetTester tester) {
+      final sounds = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('the_app/sound'), (call) async {
+        sounds.add(call.method);
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+              const MethodChannel('the_app/sound'), null));
+      return sounds;
+    }
+
+    testWidgets(
+        'a touch taken back at once (a swipe for the phone\'s buttons) '
+        'makes no sound; held, the sound starts a moment after',
+        (tester) async {
+      await openPlacard(tester);
+      final sounds = recordSounds(tester);
+      final quick = await tester.startGesture(tester.getCenter(sign));
+      await tester.pump(const Duration(milliseconds: 40));
+      await quick.cancel();
+      await tester.pumpAndSettle();
+      expect(sounds, isEmpty);
+
+      final finger = await tester.startGesture(tester.getCenter(sign));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(sounds, isEmpty);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(sounds, ['inflate']);
+      await finger.up();
+      await tester.pumpAndSettle();
+      expect(sounds, ['inflate', 'stopInflate']);
+    });
+
+    testWidgets("a touch where the phone's own swipes start: nothing",
+        (tester) async {
+      tester.view.systemGestureInsets =
+          const FakeViewPadding(bottom: 60, left: 30, right: 30);
+      addTearDown(tester.view.resetSystemGestureInsets);
+      await openPlacard(tester);
+      final sounds = recordSounds(tester);
+      final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+      final edge =
+          await tester.startGesture(Offset(size.width / 2, size.height - 5));
+      await tester.pump(PlacardPage.holdTime + const Duration(seconds: 1));
+      await edge.up();
+      await tester.pumpAndSettle();
+      expect(sounds, isEmpty);
+      expect(container.read(placardProvider).count, 1, reason: 'no count');
+    });
+
+    testWidgets(
+        '"Tap here 5 times" in the corner until its settings are first '
+        'opened', (tester) async {
+      await openPlacard(tester);
+      expect(find.text('Tap here\n5 times'), findsOneWidget);
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.byKey(const Key('placardCorner')));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tap here\n5 times'), findsNothing);
+      expect(container.read(preferencesProvider).placardCornerFound, isTrue);
     });
   });
 }
