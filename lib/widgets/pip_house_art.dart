@@ -89,6 +89,12 @@ class PipHouseArt {
   static const _px0 = PipHouse.porchLeft, _px1 = PipHouse.porchRight;
   static const _fp0 = PipHouse.fireplaceLeft, _fp1 = PipHouse.fireplaceRight;
   static const _fl0 = PipHouse.flueLeft, _fl1 = PipHouse.flueRight;
+
+  /// The chimney's stones go up from just over the mantle to [_flueTop],
+  /// in rows of 3; the cap lies on the last row.
+  static const _flueBottom = 105, _flueUp = 62;
+  static const _flueTop =
+      _flueBottom - 2 - (_flueBottom - 2 - _flueUp) ~/ 3 * 3;
   static const _eave0 = PipHouse.eaveLeft, _eave1 = PipHouse.eaveRight;
   static const _apex = PipHouse.apex;
 
@@ -142,8 +148,8 @@ class PipHouseArt {
     faint(s('beam'), _beam);
     final flue = s('flue');
     if (flue > 0) {
-      final top = (105 - flue * (105 - 62)).round();
-      stones(_fl0, top, _fl1, 105, seed: 12);
+      final top = (_flueBottom - flue * (_flueBottom - _flueUp)).round();
+      stones(_fl0, top, _fl1, _flueBottom, seed: 12);
     }
     if (house.scaffoldUp) {
       faint(house.has('scaffold') ? 1 - s('scaffoldDown') : s('scaffold'),
@@ -314,8 +320,9 @@ class PipHouseArt {
 
   void _door() {
     const x0 = _hx1 - 3, x1 = _hx1;
-    rect(x0 - 1, 107, x1 + 1, 109, PipHouseColours.stone[2]);
-    rect(x0 - 1, 107, x1 + 1, 107, PipHouseColours.stoneLight);
+    // The lintel, flush with the wall's outer face.
+    rect(x0 - 1, 107, x1, 109, PipHouseColours.stone[2]);
+    rect(x0 - 1, 107, x1, 107, PipHouseColours.stoneLight);
     for (var y = 110; y < _fl; y++) {
       for (var x = x0; x <= x1; x++) {
         put(
@@ -393,9 +400,12 @@ class PipHouseArt {
     rect(_hx0 - 2, _cb1, _hx1 + 2, _cb1, PipHouseColours.beamDark);
   }
 
+  /// The cap, on the chimney's top row of stones (it floated two pixels
+  /// above it).
   void _flueCap() {
-    rect(_fl0 - 2, 60, _fl1 + 2, 61, PipHouseColours.stone[2]);
-    rect(_fl0 - 2, 60, _fl1 + 2, 60, PipHouseColours.stoneLight);
+    const y = _flueTop - 2;
+    rect(_fl0 - 2, y, _fl1 + 2, y + 1, PipHouseColours.stone[2]);
+    rect(_fl0 - 2, y, _fl1 + 2, y, PipHouseColours.stoneLight);
   }
 
   void _scaffold() {
@@ -549,7 +559,7 @@ class PipHouseArt {
     for (var i = 0; i < 4; i++) {
       final p = (t * 0.25 + i / 4) % 1;
       final cx = (_fl0 + _fl1) / 2 + p * 10;
-      final cy = 56 - p * 26;
+      final cy = _flueTop - 6 - p * 26;
       final r = 1 + p * 3;
       for (var y = (cy - r).floor(); y <= cy + r; y++) {
         for (var x = (cx - r).floor(); x <= cx + r; x++) {

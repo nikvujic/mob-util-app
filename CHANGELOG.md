@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.3] - 2026-11-25
+
+### Fixed
+- **Pip's house**: the chimney's cap sits on the chimney (it floated two
+  pixels above its last row of stones), its smoke rising just over it.
+  The stone over the door ends flush with the wall.
+
 ## [2.12.2] - 2026-11-24
 
 ### Changed

@@ -59,4 +59,42 @@ void main() {
     expect(onFoundation.every((p) => p.$1 > floorEnd), isTrue,
         reason: 'the foundation\'s snow only past the floor');
   });
+
+  test(
+      'no stone floats: every one rests on something, at every point of the '
+      "build (the chimney's cap hung two pixels over its last row)", () {
+    final stone = {
+      ...PipHouseColours.stone.map((c) => c.toARGB32()),
+      PipHouseColours.stoneLight.toARGB32(),
+      PipHouseColours.mortar.toARGB32(),
+    };
+    for (var i = 0; i < q.steps.length; i++) {
+      for (final f in [0.1, 0.5, 0.9]) {
+        final house =
+            PipHouse.of(q.at(q.startOf(i) + (q.steps[i].minutes * f).floor()));
+        final grid = <(int, int), int>{};
+        PipHouseArt((x, y, c, [double w = 1, double h = 1]) {
+          for (var dx = 0; dx < w; dx++) {
+            for (var dy = 0; dy < h; dy++) {
+              grid[(x.toInt() + dx, y.toInt() + dy)] = c.toARGB32();
+            }
+          }
+        }).house(house);
+        for (final MapEntry(key: (x, y), value: c) in grid.entries) {
+          if (!stone.contains(c) || y >= PipHouse.ground - 1) continue;
+          // The cap's ends overhang the chimney, as a cap's do; its middle
+          // rests on it.
+          final capEnd = grid[(PipHouse.flueLeft, y + 1)] != null &&
+              (x < PipHouse.flueLeft || x > PipHouse.flueRight) &&
+              x >= PipHouse.flueLeft - 2 &&
+              x <= PipHouse.flueRight + 2 &&
+              y < 70;
+          if (capEnd) continue;
+          expect(grid[(x, y + 1)], isNotNull,
+              reason: 'step $i (${q.steps[i].piece?.id}): stone at ($x, $y) '
+                  'over nothing');
+        }
+      }
+    }
+  });
 }
