@@ -171,13 +171,36 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   /// menu is placed again once the note has moved, so it's in view.
   Widget _contextMenu(BuildContext context, EditableTextState field) {
     return AdaptiveTextSelectionToolbar.buttonItems(
-      anchors: field.contextMenuAnchors,
+      anchors: field.widget.controller == _contentController
+          ? _inView(field.contextMenuAnchors)
+          : field.contextMenuAnchors,
       buttonItems: [
         for (final item in field.contextMenuButtonItems)
           item.type == ContextMenuButtonType.selectAll
               ? item.copyWith(onPressed: () => _selectAll(field))
               : item,
       ],
+    );
+  }
+
+  /// [anchors] kept within the text's view. Flutter anchors the menu at
+  /// the selection's ends in the whole text, which here is taller than the
+  /// view: a long selection put it off the screen, or behind the keyboard
+  /// (Cut couldn't be tapped).
+  TextSelectionToolbarAnchors _inView(TextSelectionToolbarAnchors anchors) {
+    final box = _scrollKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return anchors;
+    final view = box.localToGlobal(Offset.zero) & box.size;
+    // Room for the menu itself, above its anchor or below.
+    const menu = 64.0;
+    if (view.height < 2 * menu) return anchors;
+    Offset clamp(Offset at, double min, double max) =>
+        Offset(at.dx, at.dy.clamp(min, max).toDouble());
+    final below = anchors.secondaryAnchor;
+    return TextSelectionToolbarAnchors(
+      primaryAnchor: clamp(anchors.primaryAnchor, view.top + menu, view.bottom),
+      secondaryAnchor:
+          below == null ? null : clamp(below, view.top, view.bottom - menu),
     );
   }
 

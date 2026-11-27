@@ -404,8 +404,12 @@ class PipLifeNotifier extends StateNotifier<PipLife> {
     // On his ski trip's bus, nothing.
     if (PipTrip.at(_dates(), now).leg != null) return PipRefusal.travelling;
     // Plugged in (at his station), not now.
-    // Not while he's out (he isn't at his station then).
-    if (_charging && show != PipShow.off && !outAt(now)) {
+    // Not while he's out, nor at his quest's work (he isn't at his
+    // station then: it flies to him).
+    if (_charging &&
+        show != PipShow.off &&
+        !outAt(now) &&
+        !questWorkingAt(now)) {
       return PipRefusal.charging;
     }
     return null;

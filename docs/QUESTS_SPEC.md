@@ -303,7 +303,8 @@ from use):
   meanwhile). Opened while he's off, he's lying there too.
 - **Batteries at work**: given in quest hours, one flies to
   him wherever he works (the floor, the scaffold, out gathering), as
-  into his tent in a storm.
+  into his tent in a storm; plugged in too (not refused for charging:
+  he isn't at his station).
 - **Medicine:** the pill shows on his screen while he keeps working
   (he doesn't stop); the minutes don't pause.
 - **Charging in quest hours:** he isn't sent to his station, and it

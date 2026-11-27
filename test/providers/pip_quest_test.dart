@@ -144,6 +144,19 @@ void main() {
     expect(pip.questWorkingAt(at(2, 19, 10)), isFalse, reason: 'off');
   });
 
+  test(
+      'plugged in, at his quest\'s work: he can have a battery (it flies '
+      'to him); its hours over, he\'s at his station again: not now', () {
+    final pip = hatched();
+    pip.startQuest(at(2, 19));
+    pip.replace(pip.state.copyWith(energy: 1, energyAt: () => at(2, 19)));
+    pip.setCharging(true, at(2, 19));
+    expect(pip.questWorkingAt(at(2, 19, 10)), isTrue);
+    expect(pip.refusalAt(at(2, 19, 10)), isNull);
+    expect(pip.giveBattery(at(2, 19, 10)), isTrue);
+    expect(pip.refusalAt(at(2, 21)), PipRefusal.charging);
+  });
+
   test('saved and read back with his quest', () {
     final pip = hatched();
     pip.startQuest(at(2, 10));

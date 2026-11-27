@@ -6,6 +6,16 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.5] - 2026-11-27
+
+### Fixed
+- **Notes**: the text menu (Cut, Copy...) stays on the screen for a
+  selection taller than the view. A long paragraph selected put it off
+  the screen or behind the keyboard, so Cut couldn't be tapped.
+- **Pip**: with the phone plugged in, a battery can be given while he's
+  at his quest's work (it flies to him). It was refused as if he were at
+  his charging station.
+
 ## [2.12.4] - 2026-11-25
 
 ### Fixed
