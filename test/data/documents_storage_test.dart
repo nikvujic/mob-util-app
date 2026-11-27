@@ -107,12 +107,22 @@ void main() {
       expect(await files.ids(), {'b'});
     });
 
-    test('a write the app didn\'t finish is dropped, never read', () async {
+    test(
+        'a write the app didn\'t finish is never listed, and dropped at a '
+        'cleanup; one being written is kept', () async {
       final dir = Directory('${temp().path}/documents')..createSync();
       File('${dir.path}/half.tmp').writeAsBytesSync([9, 9]);
+      File('${dir.path}/new.tmp').writeAsBytesSync([7]);
       final files = DiskDocumentFiles(dir);
       expect(await files.ids(), isEmpty);
+      await files.write('new2', [8]);
+      await files.keepOnly(const {}, writing: {'new', 'new2'});
       expect(File('${dir.path}/half.tmp').existsSync(), isFalse);
+      expect(File('${dir.path}/new.tmp').existsSync(), isTrue,
+          reason: 'still being written');
+      expect(await files.ids(), {'new2'});
+      await files.clear();
+      expect(dir.listSync(), isEmpty);
     });
 
     test('files nothing refers to are cleaned up; Clear data empties',

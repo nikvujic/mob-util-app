@@ -23,10 +23,12 @@ abstract class DocumentFiles {
   Future<int> totalBytes();
 
   /// Deletes every file but [keep] (left by a crash mid-delete, or a
-  /// document deleted while its Undo was open).
-  Future<void> keepOnly(Set<String> keep) async {
+  /// document deleted while its Undo was open), and any write left
+  /// unfinished; [writing] are kept too, written or being written.
+  Future<void> keepOnly(Set<String> keep,
+      {Set<String> writing = const {}}) async {
     for (final id in await ids()) {
-      if (!keep.contains(id)) await delete(id);
+      if (!keep.contains(id) && !writing.contains(id)) await delete(id);
     }
   }
 
@@ -115,14 +117,30 @@ class DiskDocumentFiles extends DocumentFiles {
     await for (final entity in dir.list()) {
       if (entity is! File) continue;
       final name = entity.uri.pathSegments.last;
-      if (name.endsWith('.tmp')) {
-        // A write the app didn't finish: nothing refers to it.
-        await entity.delete();
-        continue;
-      }
+      // A write under way, or one the app didn't finish.
+      if (name.endsWith('.tmp')) continue;
       found.add(name);
     }
     return found;
+  }
+
+  @override
+  Future<void> keepOnly(Set<String> keep,
+      {Set<String> writing = const {}}) async {
+    await super.keepOnly(keep, writing: writing);
+    if (!await dir.exists()) return;
+    await for (final entity in dir.list()) {
+      if (entity is! File) continue;
+      final name = entity.uri.pathSegments.last;
+      if (!name.endsWith('.tmp')) continue;
+      // Unfinished: nothing refers to it (but one being written).
+      if (writing.contains(name.substring(0, name.length - 4))) continue;
+      try {
+        await entity.delete();
+      } on PathNotFoundException {
+        // Renamed meanwhile.
+      }
+    }
   }
 
   @override

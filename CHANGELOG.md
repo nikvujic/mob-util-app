@@ -15,6 +15,9 @@ Release with the installable APK.
 - **Pip**: with the phone plugged in, a battery can be given while he's
   at his quest's work (it flies to him). It was refused as if he were at
   his charging station.
+- **Documents**: a picture just added is never deleted by the clean-up
+  of pictures no document refers to (run on opening the list), while
+  it's written or its document not yet saved.
 
 ## [2.12.4] - 2026-11-25
 

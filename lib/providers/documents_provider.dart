@@ -277,6 +277,8 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
 
   /// [item] as it is now: added (first) if new, else replaced.
   void save(DocItem item) {
+    // Its pictures are referred to now: no longer kept for it.
+    _fresh.removeAll(item.fileIds);
     final known = state.byId(item.id) != null;
     state = DocumentBook([
       if (!known) item,
@@ -325,9 +327,15 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
   /// Stores a picture's [bytes] and returns its id.
   Future<String> addPicture(List<int> bytes) async {
     final id = generateId();
+    _fresh.add(id);
     await storePicture(id, bytes);
     return id;
   }
+
+  /// Pictures added and not yet saved with a document: kept by
+  /// [cleanUp] (a form still open), also while they're written (a
+  /// cleanup then deleted the file mid-way).
+  final _fresh = <String>{};
 
   /// Stores [bytes] as picture [id]: sealed while encrypted.
   Future<void> storePicture(String id, List<int> bytes) async {
@@ -383,13 +391,14 @@ class DocumentsNotifier extends StateNotifier<DocumentBook> {
   /// their pictures are kept for them.
   Future<void> cleanUp() async {
     if (!_storage.documentsReadable || !isOpen) return;
-    await files.keepOnly(state.fileIds);
+    await files.keepOnly(state.fileIds, writing: _fresh);
   }
 
   /// Deletes every document and picture (Clear data, a password reset):
   /// not encrypted, and empty, after.
   Future<void> clearAll() async {
     _cache.clear();
+    _fresh.clear();
     _encrypted = false;
     _key = null;
     _sealed = null;

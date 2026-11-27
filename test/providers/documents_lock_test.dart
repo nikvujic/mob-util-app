@@ -209,6 +209,34 @@ void main() {
     expect(await docs(c).readPicture(id), photo);
   });
 
+  test(
+      'a picture stored, its document not saved yet: kept by a cleanup '
+      '(once opened, a cleanup ran while one was written)', () async {
+    final dir = temp();
+    final c = await phone(dir, password: 'master one');
+    await settle(c);
+    final id = await docs(c).addPicture(photo);
+    await docs(c).cleanUp();
+    expect(File('${dir.path}/documents/$id').existsSync(), isTrue);
+    // Saved, then taken out: no longer kept.
+    docs(c).save(DocItem(
+      id: 'p',
+      kind: DocKind.document,
+      name: 'Card',
+      pictures: [DocPicture(id)],
+      createdAt: DateTime(2026, 11, 27),
+    ));
+    await docs(c).cleanUp();
+    docs(c).save(DocItem(
+      id: 'p',
+      kind: DocKind.document,
+      name: 'Card',
+      createdAt: DateTime(2026, 11, 27),
+    ));
+    await docs(c).cleanUp();
+    expect(File('${dir.path}/documents/$id').existsSync(), isFalse);
+  });
+
   group('backups', () {
     Future<Uint8List> lockedBackup({bool encrypted = false}) async {
       final c = await phone(temp(), password: 'old phone');

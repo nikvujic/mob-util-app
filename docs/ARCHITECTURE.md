@@ -167,12 +167,15 @@ deletes a picture); `full` adds the pictures for writing a file.
 
 `documents.json` (version 1) holds the list; `data/document_files.dart`
 the pictures, one file each in `documents/`, written to `<id>.tmp` and
-renamed (a `.tmp` left by a crash is deleted when listing). A picture is
+renamed (a `.tmp` is never listed; one left by a crash is deleted at a
+clean-up). A picture is
 never changed once stored (turning it is a field of the document), so
 ids can be shared (a restored copy) and a restore writes only the ids
 missing. `DocumentsNotifier.cleanUp`, on every start, deletes the files
 no document refers to, unless `documents.json` couldn't be read (then
-its pictures are kept for it).
+its pictures are kept for it). Pictures added this run and not yet
+saved with a document (a form still open) are kept, with their `.tmp`
+while being written.
 
 ## The Documents page
 
