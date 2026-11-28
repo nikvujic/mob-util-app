@@ -90,9 +90,13 @@ class PipHouseArt {
   static const _fp0 = PipHouse.fireplaceLeft, _fp1 = PipHouse.fireplaceRight;
   static const _fl0 = PipHouse.flueLeft, _fl1 = PipHouse.flueRight;
 
+  /// The fireplace's stones, laid in rows of 3 up from the floor to
+  /// row 108 at most: the top of the last whole row, the mantle on it.
+  static const _mantleTop = _fl - 3 - (_fl - 3 - 108) ~/ 3 * 3 - 2;
+
   /// The chimney's stones go up from just over the mantle to [_flueTop],
   /// in rows of 3; the cap lies on the last row.
-  static const _flueBottom = 105, _flueUp = 62;
+  static const _flueBottom = _mantleTop - 1, _flueUp = 62;
   static const _flueTop =
       _flueBottom - 2 - (_flueBottom - 2 - _flueUp) ~/ 3 * 3;
   static const _eave0 = PipHouse.eaveLeft, _eave1 = PipHouse.eaveRight;
@@ -239,8 +243,11 @@ class PipHouseArt {
       }
       rect(_fp0 + 7, _fl - 2, _fp1 - 7, _fl - 1, PipHouseColours.ember);
     }
-    rect(_fp0 - 2, 106, _fp1 + 2, 107, PipHouseColours.beam);
-    rect(_fp0 - 2, 106, _fp1 + 2, 106, PipHouseColours.beamLight);
+    // The mantle, on the top row of stones (they're laid in rows of 3
+    // from the floor up).
+    const mantle = _mantleTop;
+    rect(_fp0 - 2, mantle, _fp1 + 2, mantle + 1, PipHouseColours.beam);
+    rect(_fp0 - 2, mantle, _fp1 + 2, mantle, PipHouseColours.beamLight);
   }
 
   void _posts(double count) {

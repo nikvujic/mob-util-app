@@ -97,4 +97,34 @@ void main() {
       }
     }
   });
+
+  test(
+      'the mantle rests on the fireplace, the chimney on the mantle: no '
+      'gap under either, before the walls hide it (two rows were open '
+      'under the mantle)', () {
+    final i = q.steps.indexWhere((s) => s.piece?.id == 'walls');
+    final house = PipHouse.of(q.at(q.startOf(i)));
+    expect(house.has('hearth'), isTrue);
+    expect(house.share('walls'), 0);
+    final grid = <(int, int)>{};
+    PipHouseArt((x, y, c, [double w = 1, double h = 1]) {
+      for (var dx = 0; dx < w; dx++) {
+        for (var dy = 0; dy < h; dy++) {
+          grid.add((x.toInt() + dx, y.toInt() + dy));
+        }
+      }
+    }).house(house);
+    for (final x in [
+      for (var x = PipHouse.fireplaceLeft; x <= PipHouse.fireplaceRight; x++) x
+    ]) {
+      final top = [
+        for (var y = 0; y < PipHouse.floorTop; y++)
+          if (grid.contains((x, y))) y
+      ].first;
+      for (var y = top; y < PipHouse.floorTop; y++) {
+        expect(grid.contains((x, y)), isTrue,
+            reason: 'column $x open at row $y (its top at $top)');
+      }
+    }
+  });
 }

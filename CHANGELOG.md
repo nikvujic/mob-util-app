@@ -6,6 +6,13 @@ Release with the installable APK.
 
 ## [Unreleased]
 
+## [2.12.6] - 2026-11-28
+
+### Fixed
+- **Pip's house**: the fireplace's mantle sits on its stones (two rows
+  of sky showed under it while the house was going up), the chimney
+  on the mantle.
+
 ## [2.12.5] - 2026-11-27
 
 ### Fixed
